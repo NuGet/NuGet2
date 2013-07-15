@@ -11,6 +11,8 @@ namespace NuGet.Test
         [InlineData(new object[] { "http://nuget.org/api/v2/", "http://nuget.org/api/v2" })]
         [InlineData(new object[] { "http://nuget.org:80/api/v2/", "http://nuget.org/api/v2" })]
         [InlineData(new object[] { "http://nuget.org/api/v2", "http://nuget.org/api/v2?test" })]
+        [InlineData(new object[] { "http://www.nuget.org/api/v2", "http://www.nuget.org/api/v2" })]
+        [InlineData(new object[] { "http://www.nuget.org/api/v2/", "http://www.nuget.org/api/v2" })]
         public void EqualsReturnsTrueForMatchingUris(string uriString1, string uriString2)
         {
             // Arrange
@@ -30,6 +32,8 @@ namespace NuGet.Test
         [InlineData(new object[] { "http://nuget.org/api/v2/", "http://nuget.org/api/v2/Packages()" })]
         [InlineData(new object[] { "http://nuget.org:8080/api/v2/", "http://nuget.org/api/v2" })]
         [InlineData(new object[] { "http://preview.nuget.org:80/api/v2", "http://nuget.org/api/v2?test" })]
+        [InlineData(new object[] { "http://www.nuget.org/api/v1", "http://www.nuget.org/api/v2" })]
+        [InlineData(new object[] { "https://www.nuget.org/api/v2", "http://www.nuget.org/api/v2" })]
         public void EqualsReturnsFalseForNonMatchingUris(string uriString1, string uriString2)
         {
             // Arrange

@@ -73,7 +73,7 @@ namespace NuGet.Test
 <configuration>
     <packageSources>
         <add key='Contoso Package Source' value='http://contoso.com/packages/' />
-        <add key='NuGet Official Feed' value='http://nuget.org/api/v2/' />
+        <add key='NuGet Official Feed' value='http://www.nuget.org/api/v2/' />
     </packageSources>
     <disabledPackageSources>
         <add key='NuGet Official Feed' value='true' />

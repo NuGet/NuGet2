@@ -51,7 +51,7 @@ function Test-GetPackageCollapsesPackageVersionsForListAvailable
 
 function Test-GetPackageAcceptsSourceName {
     # Act
-    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'NuGet official package source')
+    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'nuget.org')
 
     # Assert
     Assert-True (1 -le $p.Count)
@@ -62,9 +62,9 @@ function Test-GetPackageWithUpdatesAcceptsSourceName {
     $p = New-WebApplication
     
     # Act
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
-    Install-Package jQuery -Version 1.4.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
-    $packages = Get-Package -Updates -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET.ORG'
+    Install-Package jQuery -Version 1.4.1 -Project $p.Name -Source 'NUGET.ORG'
+    $packages = Get-Package -Updates -Source 'NUGET.ORG'
     
     # Assert
     Assert-AreEqual 2 $packages.Count

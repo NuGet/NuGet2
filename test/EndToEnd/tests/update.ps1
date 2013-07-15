@@ -348,12 +348,12 @@ function Test-UpdatePackageWithOlderVersionOfSharedDependencyInUse {
 function Test-UpdatePackageAcceptsSourceName {
     # Arrange
     $p = New-ConsoleApplication
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET.ORG'
 
     Assert-Package $p Antlr 3.1.1
 
     # Act
-    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'NuGet official Package Source'
+    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'nuget.org'
 
     # Assert
     Assert-Package $p Antlr 3.1.3.42154
@@ -980,7 +980,7 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://nuget.org/api/v2/"
+    $nugetsource = "https://www.nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository
