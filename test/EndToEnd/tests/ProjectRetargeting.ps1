@@ -19,7 +19,7 @@ function Test-ProjectRetargeting-ShowErrorUponRetargeting {
 
     Assert-AreEqual 1 $errorlist.Count
 
-    $error = $errorlist.Item($errorlist.Count-1)
+    $error = $errorlist[$errorlist.Count-1]
 
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $error.Description
 }
@@ -150,7 +150,7 @@ function Test-ProjectRetargeting-ConvertBuildErrorToBuildWarningUponBuild {
 
     Assert-AreEqual 1 $warnings.Count
 
-    $warning = $warnings.Item($warnings.Count - 1)
+    $warning = $warnings[$warnings.Count - 1]
 
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $warning.Description
 }
@@ -184,7 +184,7 @@ function Test-ProjectRetargeting-ShowWarningOnCleanBuild
 
     Assert-AreEqual 1 $warnings.Count
 
-    $warning = $warnings.Item($warnings.Count - 1)
+    $warning = $warnings[$warnings.Count - 1]
 
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $warning.Description
 }
@@ -217,7 +217,7 @@ function Test-ProjectRetargeting-ClearWarningUponCleanProject
 
     Assert-AreEqual 1 $warnings.Count
 
-    $warning = $warnings.Item($warnings.Count - 1)
+    $warning = $warnings[$warnings.Count - 1]
 
     Clean-Project
 
@@ -258,7 +258,7 @@ function Test-ProjectRetargeting-ClearWarningUponCloseSolution
 
     Assert-AreEqual 1 $warnings.Count
 
-    $warning = $warnings.Item($warnings.Count - 1)
+    $warning = $warnings[$warnings.Count - 1]
 
     Close-Solution
 
@@ -300,7 +300,7 @@ function Test-ProjectRetargeting-ClearWarningUponPackageReinstallationAndBuild
 
     Assert-AreEqual 1 $warnings.Count
 
-    $warning = $warnings.Item($warnings.Count - 1)
+    $warning = $warnings[$warnings.Count - 1]
 
     Update-Package -Reinstall -Project $projectName -Source $context.RepositoryPath
     Build-Solution
