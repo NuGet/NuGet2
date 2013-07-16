@@ -1078,7 +1078,7 @@ function Test-PackageInstallAcceptsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source' -Version 1.8.0
+    Install-Package FakeItEasy -Project $project.Name -Source 'nuget.org' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1480,7 +1480,7 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://nuget.org/api/v2/"
+    $nugetsource = "https://www.nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository

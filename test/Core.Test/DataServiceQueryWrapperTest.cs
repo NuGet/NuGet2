@@ -8,6 +8,9 @@ namespace NuGet.Test
 {
     public class DataServiceQueryWrapperTest
     {
+        private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
+        private const string NuGetOfficialFeedPackagesUrl = NuGetOfficialFeedUrl + "Packages()?$skip=";
+
         [Fact]
         public void RequiresBatchReturnsFalseIfQueryLengthIsSmallerThanMaxQueryLength()
         {
@@ -16,7 +19,7 @@ namespace NuGet.Test
             var query = CreateQuery();
 
             var queryWrapper = new Mock<DataServiceQueryWrapper<DataServicePackage>>(context, query) { CallBase = true };
-            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri("https://nuget.org/api/v2/Packages()?$skip=".PadRight(2047, 'a')));
+            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri(NuGetOfficialFeedPackagesUrl.PadRight(2047, 'a')));
 
             // Act
             bool requiresBatch = queryWrapper.Object.RequiresBatch(Expression.Constant(1));
@@ -33,7 +36,7 @@ namespace NuGet.Test
             var query = CreateQuery();
 
             var queryWrapper = new Mock<DataServiceQueryWrapper<DataServicePackage>>(context, query) { CallBase = true };
-            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri("https://nuget.org/api/v2/Packages()?$skip=".PadRight(2048, 'a')));
+            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri(NuGetOfficialFeedPackagesUrl.PadRight(2048, 'a')));
 
             // Act
             bool requiresBatch = queryWrapper.Object.RequiresBatch(Expression.Constant(1));
@@ -50,7 +53,7 @@ namespace NuGet.Test
             var query = CreateQuery();
 
             var queryWrapper = new Mock<DataServiceQueryWrapper<DataServicePackage>>(context, query) { CallBase = true };
-            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri("https://nuget.org/api/v2/Packages()?$skip=".PadRight(4048, 'a')));
+            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri(NuGetOfficialFeedPackagesUrl.PadRight(4048, 'a')));
 
             // Act
             bool requiresBatch = queryWrapper.Object.RequiresBatch(Expression.Constant(1));
@@ -68,7 +71,7 @@ namespace NuGet.Test
 
             var queryWrapper = new Mock<DataServiceQueryWrapper<DataServicePackage>>(context, query) { CallBase = true };
             // Spaces will use about 3 times as many characters since they'll be encoded as %2C
-            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri("https://nuget.org/api/v2/Packages()?$skip=".PadRight(800, '|')));
+            queryWrapper.Setup(s => s.GetRequestUri(It.IsAny<Expression>())).Returns(new Uri(NuGetOfficialFeedPackagesUrl.PadRight(800, '|')));
 
             // Act
             bool requiresBatch = queryWrapper.Object.RequiresBatch(Expression.Constant(1));
@@ -79,7 +82,7 @@ namespace NuGet.Test
 
         private static DataServiceQuery<DataServicePackage> CreateQuery()
         {
-            var dataServiceContext = new DataServiceContext(new Uri("https://nuget.org/api/v2"));
+            var dataServiceContext = new DataServiceContext(new Uri(NuGetOfficialFeedUrl));
             var query = dataServiceContext.CreateQuery<DataServicePackage>("Package");
             return query;
         }

@@ -199,7 +199,7 @@
     <value>All</value>
   </data>
   <data name="NuGetOfficialSourceName" xml:space="preserve">
-    <value>NuGet official package source</value>
+    <value>nuget.org</value>
   </data>
   <data name="FailedToAddGacReference" xml:space="preserve">
     <value>Failed to add reference to '{0}'. Please make sure that it is in the Global Assembly Cache.</value>
@@ -364,5 +364,8 @@ Packages installed into Website projects will not be restored during build. Cons
   </data>
   <data name="Error_FailedToCreateParentFolder" xml:space="preserve">
     <value>Failed to create parent folder for file '{0}' in project {1}.</value>
+  </data>
+  <data name="NuGetLegacyOfficialSourceName" xml:space="preserve">
+    <value>NuGet official package source</value>
   </data>
 </root>
