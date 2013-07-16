@@ -8,7 +8,7 @@ namespace NuGet
 {
     public class ConfigurationDefaults
     {
-        private static ISettings _settingsManager = NullSettings.Instance;
+        private ISettings _settingsManager = NullSettings.Instance;
         private const string ConfigurationDefaultsFile = "NuGetDefaults.config";
         private static readonly ConfigurationDefaults _instance = InitializeInstance();
 
@@ -87,6 +87,14 @@ namespace NuGet
                     _defaultPushSource = _settingsManager.GetConfigValue("DefaultPushSource");
                 }
                 return _defaultPushSource;
+            }
+        }
+
+        public string DefaultPackageRestoreConsent
+        {
+            get
+            {
+                return _settingsManager.GetValue("packageRestore", "enabled");
             }
         }
     }
