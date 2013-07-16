@@ -313,6 +313,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The provided version string is not a valid semantic version..
+        /// </summary>
+        public static string InvalidSemanticVersionString {
+            get {
+                return ResourceManager.GetString("InvalidSemanticVersionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already installed..
         /// </summary>
         public static string Log_PackageAlreadyInstalled {
