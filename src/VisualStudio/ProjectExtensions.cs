@@ -61,7 +61,6 @@ namespace NuGet.VisualStudio
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
-
         /// <summary>
         /// Determines if NuGet is used in the project. Currently, it is determined by checking if packages.config is part of the project
         /// </summary>
@@ -297,7 +296,6 @@ namespace NuGet.VisualStudio
             const string xnaPropertyValue = "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel";
             return project != null && 
                    "Windows Phone OS 7.1".Equals(project.GetPropertyValue<string>(xnaPropertyValue), StringComparison.OrdinalIgnoreCase);
-
         }
 
         public static bool IsNativeProject(this Project project)
@@ -697,7 +695,7 @@ namespace NuGet.VisualStudio
             References references;
             try
             {
-                references = project.Object.References;
+                references = project.GetReferences();
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
@@ -738,7 +736,7 @@ namespace NuGet.VisualStudio
         private static IList<Project> GetWebsiteReferencedProjects(Project project)
         {
             var projects = new List<Project>();
-            AssemblyReferences references = project.Object.References;
+            AssemblyReferences references = project.GetAssemblyReferences();
             foreach (AssemblyReference reference in references)
             {
                 if (reference.ReferencedProject != null)
@@ -760,7 +758,7 @@ namespace NuGet.VisualStudio
             References references;
             try
             {
-                references = project.Object.References;
+                references = project.GetReferences();
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
@@ -786,7 +784,7 @@ namespace NuGet.VisualStudio
         private static HashSet<string> GetWebsiteLocalAssemblies(Project project, IFileSystemProvider projectFileSystemProvider)
         {
             var assemblies = new HashSet<string>(PathComparer.Default);
-            AssemblyReferences references = project.Object.References;
+            AssemblyReferences references = project.GetAssemblyReferences();
             foreach (AssemblyReference reference in references)
             {
                 // For websites only include bin assemblies
@@ -931,6 +929,22 @@ namespace NuGet.VisualStudio
 
             Project parentProject = project.ParentProjectItem.ContainingProject;
             return parentProject.IsExplicitlyUnsupported();
+        }
+
+        public static References GetReferences(this Project project)
+        {
+            dynamic projectObj = project.Object;
+            var references = (References)projectObj.References;
+            projectObj = null;
+            return references;
+        }
+
+        public static AssemblyReferences GetAssemblyReferences(this Project project)
+        {
+            dynamic projectObj = project.Object;
+            var references = (AssemblyReferences)projectObj.References;
+            projectObj = null;
+            return references;
         }
 
         public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)

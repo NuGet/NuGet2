@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio
 
         public static string GetName(this Solution solution)
         {
-            return solution.Properties.Item("Name").Value;
+            return (string)solution.Properties.Item("Name").Value;
         }
 
         public static Project GetSolutionFolder(this Solution solution, string solutionFolderName)

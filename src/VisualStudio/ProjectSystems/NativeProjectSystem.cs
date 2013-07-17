@@ -147,14 +147,14 @@ namespace NuGet.VisualStudio
         [MethodImpl(MethodImplOptions.NoInlining)]
         private string[] GetFilesFromProjectForVS2010(string folderPath)
         {
-            return VisualStudio10.VCProjectHelper.GetFiles(Project.Object, folderPath);
+            return VisualStudio10.VCProjectHelper.GetFiles(Project.Object, folderPath).ToArray();
         }
 
         // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
         [MethodImpl(MethodImplOptions.NoInlining)]
         private string[] GetFiltersFromProjectForVS2010(string folderPath)
         {
-            return VisualStudio10.VCProjectHelper.GetFilters(Project.Object, folderPath);
+            return VisualStudio10.VCProjectHelper.GetFilters(Project.Object, folderPath).ToArray();
         }
     }
 }

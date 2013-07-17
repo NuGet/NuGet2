@@ -181,7 +181,7 @@ namespace NuGet.VisualStudio
                 // When using a temporary solution, (such as by saying File -> New File), querying this value throws.
                 // Since we wouldn't be able to do manage any packages at this point, we return null. Consumers of this property typically 
                 // use a String.IsNullOrEmpty check either way, so it's alright.
-                solutionFilePath = property.Value;
+                solutionFilePath = (string)property.Value;
             }
             catch (COMException)
             {
@@ -425,7 +425,7 @@ namespace NuGet.VisualStudio
             var solutionBuild = (SolutionBuild2)_dte.Solution.SolutionBuild;
             if (solutionBuild.StartupProjects != null)
             {
-                IEnumerable<object> startupProjects = solutionBuild.StartupProjects;
+                IEnumerable<object> startupProjects = (IEnumerable<object>)solutionBuild.StartupProjects;
                 string startupProjectName = startupProjects.Cast<string>().FirstOrDefault();
                 if (!String.IsNullOrEmpty(startupProjectName))
                 {
