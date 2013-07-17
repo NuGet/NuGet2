@@ -532,6 +532,11 @@ function Get-ErrorTasks {
     if(!$errorList) {
         throw "Unable to locate the error list"
     }
+
+    # Forcefully show all the error items so that they can be retrieved when they are present
+    $errorList.Object.ShowErrors = $True
+    $errorList.Object.ShowWarnings = $True
+    $errorList.Object.ShowMessages = $True
     
     # Get the list of errors from the error list window which contains errors, warnings and info
     $allItemsInErrorListWindow = $errorList.Object.ErrorItems
@@ -552,12 +557,18 @@ function Get-ErrorTasks {
 
 function Get-Errors {
     $vsBuildErrorLevelHigh = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelHigh
-    return Get-ErrorTasks $vsBuildErrorLevelHigh
+    $errors = Get-ErrorTasks $vsBuildErrorLevelHigh
+
+    # Force return array. Arrays are zero-based
+    return ,$errors
 }
 
 function Get-Warnings {
     $vsBuildErrorLevelMedium = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelMedium
-    return Get-ErrorTasks $vsBuildErrorLevelMedium
+    $warnings = Get-ErrorTasks $vsBuildErrorLevelMedium
+
+    # Force return array. Arrays are zero-based
+    return ,$warnings
 }
 
 function Get-ProjectItemPath {
