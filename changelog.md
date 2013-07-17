@@ -13,6 +13,7 @@ Change Log / Release Notes
 * [#2565](https://nuget.codeplex.com/workitem/2565) Handling of Project Retargeting and Project Upgrading Events
 * [#3463](https://nuget.codeplex.com/workitem/3463) Show package restore bar by default, even if package restore mode is not enabled.
 * [#3502](https://nuget.codeplex.com/workitem/3463) Add two method overloads for IsPackageInstalledEx() and GetInstalledPackages() to IVsPackageInstallerServices
+* Package Restore user consent is now default to Yes.
 
 ## NuGet 2.6
 
