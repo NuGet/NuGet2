@@ -119,7 +119,7 @@ namespace NuGet.VisualStudio.Test
             return null;
         }
 
-        [Fact]
+        [Fact(Skip="EnvDTE is not available.")]
         public void FSharpProjectSystemRemoveReference()
         {
             var project = new Mock<Project>();
@@ -153,7 +153,7 @@ namespace NuGet.VisualStudio.Test
             logger.Verify(l => l.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, "aBc", "Project"));
         }
 
-        [Fact]
+        [Fact(Skip = "EnvDTE is not available.")]
         public void FSharpProjectSystemRemoveReferenceFailedToFindMatch()
         {
             var project = new Mock<Project>();
@@ -186,7 +186,7 @@ namespace NuGet.VisualStudio.Test
             logger.Verify(l => l.Log(MessageLevel.Warning, VsResources.Warning_FailedToFindMatchForRemoveReference, "aBcD"));
         }
 
-        [Fact]
+        [Fact(Skip = "EnvDTE is not available.")]
         public void FSharpProjectSystemRemoveReferenceFailsMultipleMatches()
         {
             var project = new Mock<Project>();
