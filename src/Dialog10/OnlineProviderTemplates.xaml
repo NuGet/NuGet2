@@ -207,6 +207,37 @@
                     <self:TextBlockControl  AutomationProperties.AutomationId="DownloadCount" Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
+                <!-- License header -->
+                <self:TextBlockControl Margin="0,5,0,0" AutomationProperties.AutomationId="LicenseHeader" Text="{x:Static resources:Resources.License_Header}" Style="{StaticResource DetailMetadataLabelStyle}">
+                    <self:TextBlockControl.Visibility>
+                        <MultiBinding Converter="{StaticResource multiNullToVisibilityConverter}">
+                            <Binding Path="LicenseUrl" Converter="{StaticResource urlConverter}" />
+                            <Binding Path="PackageIdentity.LicenseNames" />
+                            <Binding Path="PackageIdentity.LicenseReportUrl" Converter="{StaticResource urlConverter}" />
+                        </MultiBinding>
+                    </self:TextBlockControl.Visibility>
+                </self:TextBlockControl>
+
+                <!-- View License Url -->
+                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="LicenseLinkContainer" ToolTip="{Binding LicenseUrl, Mode=OneTime}" Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
+                    <Hyperlink AutomationProperties.AutomationId="LicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <!-- License Friendly names -->
+                <ItemsControl
+                    Margin="25,5,0,0"
+                    Visibility="{Binding PackageIdentity.LicenseNames, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}"
+                    ItemsSource="{Binding PackageIdentity.LicenseNameCollection}" />
+
+                <!-- Component report link -->
+                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="ComponentLicenseLinkContainer" Visibility="{Binding PackageIdentity.LicenseReportUrl, Converter={StaticResource urlConverter}, FallbackValue=Collapsed}">
+                    <Hyperlink AutomationProperties.AutomationId="ComponentLicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.LicenseReportUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="{x:Static resources:Resources.License_ViewLicenseReport}" />
+                    </Hyperlink>
+                </TextBlock>
+
                 <!-- Project Url -->
                 <TextBlock AutomationProperties.AutomationId="ProjectInfoLinkContainer" ToolTip="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource urlConverter}}">
                     <Hyperlink AutomationProperties.AutomationId="ProjectInfoLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
@@ -264,37 +295,6 @@
                     Text="{x:Static resources:Resources.Dialog_PackageDisclaimer}"
                     TextWrapping="Wrap">
                 </self:TextBlockControl>
-                
-                <!-- License header -->
-                <self:TextBlockControl Margin="0,5,0,0" AutomationProperties.AutomationId="LicenseHeader" Text="{x:Static resources:Resources.License_Header}" Style="{StaticResource DetailMetadataLabelStyle}">
-                    <self:TextBlockControl.Visibility>
-                        <MultiBinding Converter="{StaticResource multiNullToVisibilityConverter}">
-                            <Binding Path="LicenseUrl" Converter="{StaticResource urlConverter}" />
-                            <Binding Path="PackageIdentity.LicenseNames" />
-                            <Binding Path="PackageIdentity.LicenseReportUrl" Converter="{StaticResource urlConverter}" />
-                        </MultiBinding>
-                    </self:TextBlockControl.Visibility>
-                </self:TextBlockControl>
-
-                <!-- View License Url -->
-                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="LicenseLinkContainer" ToolTip="{Binding LicenseUrl, Mode=OneTime}" Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
-                    <Hyperlink AutomationProperties.AutomationId="LicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
-                        <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
-                    </Hyperlink>
-                </TextBlock>
-                
-                <!-- License Friendly names -->
-                <ItemsControl
-                    Margin="25,5,0,0"
-                    Visibility="{Binding PackageIdentity.LicenseNames, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}"
-                    ItemsSource="{Binding PackageIdentity.LicenseNameCollection}" />
-                
-                <!-- Component report link -->
-                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="ComponentLicenseLinkContainer" Visibility="{Binding PackageIdentity.LicenseReportUrl, Converter={StaticResource urlConverter}, FallbackValue=Collapsed}">
-                    <Hyperlink AutomationProperties.AutomationId="ComponentLicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.LicenseReportUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
-                        <Run Text="{x:Static resources:Resources.License_ViewLicenseReport}" />
-                    </Hyperlink>
-                </TextBlock>
 
                 <!-- Installed Project list -->
                 <self:TextBlockControl 
