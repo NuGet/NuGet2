@@ -18,6 +18,7 @@
     <self:CountToVisibilityConverter x:Key="countConverter" />
     <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
     <self:ProjectToDisplayNameConverter x:Key="ProjectToNameConverter" />
+    <self:MultiNullToVisibilityConverter x:Key="multiNullToVisibilityConverter" />
     <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
     
     <DataTemplate DataType="{x:Type core:PackageDependency}">
@@ -263,9 +264,20 @@
                     Text="{x:Static resources:Resources.Dialog_PackageDisclaimer}"
                     TextWrapping="Wrap">
                 </self:TextBlockControl>
+                
+                <!-- License header -->
+                <self:TextBlockControl Margin="0,5,0,0" AutomationProperties.AutomationId="LicenseHeader" Text="{x:Static resources:Resources.License_Header}" Style="{StaticResource DetailMetadataLabelStyle}">
+                    <self:TextBlockControl.Visibility>
+                        <MultiBinding Converter="{StaticResource multiNullToVisibilityConverter}">
+                            <Binding Path="LicenseUrl" Converter="{StaticResource urlConverter}" />
+                            <Binding Path="PackageIdentity.LicenseNames" />
+                            <Binding Path="PackageIdentity.LicenseReportUrl" Converter="{StaticResource urlConverter}" />
+                        </MultiBinding>
+                    </self:TextBlockControl.Visibility>
+                </self:TextBlockControl>
 
                 <!-- View License Url -->
-                <TextBlock Margin="0,5,0,0" AutomationProperties.AutomationId="LicenseLinkContainer" ToolTip="{Binding LicenseUrl, Mode=OneTime}" Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
+                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="LicenseLinkContainer" ToolTip="{Binding LicenseUrl, Mode=OneTime}" Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
                     <Hyperlink AutomationProperties.AutomationId="LicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
@@ -278,7 +290,7 @@
                     ItemsSource="{Binding PackageIdentity.LicenseNameCollection}" />
                 
                 <!-- Component report link -->
-                <TextBlock Margin="25,0,0,0" AutomationProperties.AutomationId="ComponentLicenseLinkContainer" ToolTip="{Binding PackageIdentity.LicenseReportUrl, Mode=OneTime}" Visibility="{Binding PackageIdentity.LicenseReportUrl, Converter={StaticResource urlConverter}, FallbackValue=Collapsed}">
+                <TextBlock Margin="25,5,0,0" AutomationProperties.AutomationId="ComponentLicenseLinkContainer" Visibility="{Binding PackageIdentity.LicenseReportUrl, Converter={StaticResource urlConverter}, FallbackValue=Collapsed}">
                     <Hyperlink AutomationProperties.AutomationId="ComponentLicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.LicenseReportUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.License_ViewLicenseReport}" />
                     </Hyperlink>
