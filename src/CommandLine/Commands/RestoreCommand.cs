@@ -28,6 +28,9 @@ namespace NuGet.Commands
         private string _solutionFileFullPath;
         private string _packagesConfigFileFullPath;
 
+        // A flag indicating if the opt-out message should be displayed.
+        private bool _outputOptOutMessage;
+
         [Option(typeof(NuGetCommand), "RestoreCommandSourceDescription")]
         public ICollection<string> Source
         {
@@ -90,6 +93,7 @@ namespace NuGet.Commands
         protected internal RestoreCommand(IPackageRepository cacheRepository)
         {
             _cacheRepository = cacheRepository;
+            _outputOptOutMessage = true;
         }
 
         internal void DetermineRestoreMode()
@@ -270,6 +274,12 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
+            if (_outputOptOutMessage)
+            {
+                Console.WriteLine(NuGetResources.RestoreCommandPackageRestoreOptOutMessage);
+                _outputOptOutMessage = false;
+            }
+
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);

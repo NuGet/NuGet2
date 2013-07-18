@@ -556,4 +556,8 @@
   <data name="RestoreCommandProjectNotFound" xml:space="preserve">
     <value>Project file {0} cannot be found.</value>
   </data>
+  <data name="RestoreCommandPackageRestoreOptOutMessage" xml:space="preserve">
+    <value>Restoring NuGet packages...
+To prevent NuGet from restoring packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck 'Allow NuGet to download missing packages during build.'</value>
+  </data>
 </root>
