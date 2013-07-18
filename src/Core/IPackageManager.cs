@@ -32,6 +32,7 @@ namespace NuGet
         event EventHandler<PackageOperationEventArgs> PackageUninstalling;
 
         void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions);
+        void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions, bool ignoreWalkInfo);
         void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions);
         void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions);
         void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions);

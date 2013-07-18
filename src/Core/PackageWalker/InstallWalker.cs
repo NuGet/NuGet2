@@ -76,6 +76,20 @@ namespace NuGet
             _allowPrereleaseVersions = allowPrereleaseVersions;
         }
 
+        internal bool DisableWalkInfo
+        { 
+            get; 
+            set; 
+        }
+
+        protected override bool IgnoreWalkInfo
+        {
+            get
+            {
+                return DisableWalkInfo ? true : base.IgnoreWalkInfo;
+            }
+        }
+
         protected ILogger Logger
         {
             get;
