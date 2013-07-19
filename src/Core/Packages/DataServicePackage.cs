@@ -19,6 +19,7 @@ namespace NuGet
     {
         private IHashProvider _hashProvider;
         private bool _usingMachineCache;
+        private string _licenseNames;
         internal IPackage _package;
 
         public string Id
@@ -80,6 +81,21 @@ namespace NuGet
             get;
             set;
         }
+
+        public string LicenseNames 
+        {
+            get { return _licenseNames; }
+            set
+            {
+                _licenseNames = value;
+                LicenseNameCollection = 
+                    String.IsNullOrEmpty(value) ? new string[0] : value.Split(';').ToArray();
+            }
+        }
+
+        public ICollection<string> LicenseNameCollection { get; private set; }
+
+        public Uri LicenseReportUrl { get; set; }
 
         public Uri DownloadUrl
         {

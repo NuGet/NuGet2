@@ -23,8 +23,21 @@ namespace NuGet.VisualStudio
             var packageManager = _packageManagerFactory.CreatePackageManager();
 
             return from package in packageManager.LocalRepository.GetPackages()
-                   select new VsPackageMetadata(package,
-                                                packageManager.PathResolver.GetInstallPath(package));
+                   select new VsPackageMetadata(package, packageManager.PathResolver.GetInstallPath(package));
+        }
+
+        public IEnumerable<IVsPackageMetadata> GetInstalledPackages(Project project)
+        {
+            if (project == null)
+            {
+                throw new ArgumentNullException("project");
+            }
+
+            var packageManager = _packageManagerFactory.CreatePackageManager();
+            IProjectManager projectManager = packageManager.GetProjectManager(project);
+
+            return from package in projectManager.LocalRepository.GetPackages()
+                   select new VsPackageMetadata(package, packageManager.PathResolver.GetInstallPath(package));
         }
 
         public bool IsPackageInstalled(Project project, string packageId)
@@ -32,11 +45,26 @@ namespace NuGet.VisualStudio
             return IsPackageInstalled(project, packageId, version: null);
         }
 
+        public bool IsPackageInstalledEx(Project project, string packageId, string versionString)
+        {
+            SemanticVersion version;
+            if (versionString == null)
+            {
+                version = null;
+            }
+            else if (!SemanticVersion.TryParse(versionString, out version))
+            {
+                throw new ArgumentException(VsResources.InvalidSemanticVersionString, "versionString");
+            }
+
+            return IsPackageInstalled(project, packageId, version);
+        }
+
         public bool IsPackageInstalled(Project project, string packageId, SemanticVersion version)
         {
             if (project == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("project");
             }
 
             if (String.IsNullOrEmpty(packageId))

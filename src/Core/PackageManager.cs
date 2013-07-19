@@ -109,14 +109,25 @@ namespace NuGet
             InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        protected void InstallPackage(IPackage package, FrameworkName targetFramework, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions, bool ignoreWalkInfo)
         {
-            Execute(package, new InstallWalker(LocalRepository,
-                                               SourceRepository,
-                                               targetFramework,
-                                               Logger,
-                                               ignoreDependencies,
-                                               allowPrereleaseVersions));
+            InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions, ignoreWalkInfo: ignoreWalkInfo);
+        }
+
+        protected void InstallPackage(
+            IPackage package,
+            FrameworkName targetFramework,
+            bool ignoreDependencies,
+            bool allowPrereleaseVersions,
+            bool ignoreWalkInfo = false)
+        {
+            var installerWalker = new InstallWalker(
+                    LocalRepository, SourceRepository, targetFramework, Logger, ignoreDependencies, allowPrereleaseVersions)
+                {
+                    DisableWalkInfo = ignoreWalkInfo
+                };
+            
+            Execute(package, installerWalker);
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver)
@@ -287,7 +298,7 @@ namespace NuGet
             }
 
             OnRemoveFiles(args);
-            
+
             LocalRepository.RemovePackage(package);
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyUninstalledPackage, packageFullName);
