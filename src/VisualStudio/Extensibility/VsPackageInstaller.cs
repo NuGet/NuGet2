@@ -141,7 +141,8 @@ namespace NuGet.VisualStudio
                 {
                     projectManager.PackageReferenceAdded += addedHandler;
                     packageManager.PackageInstalled += installedHandler;
-                    packageManager.BindingRedirectEnabled = false;
+                    // if skipping assembly references, disable binding redirects too.
+                    packageManager.BindingRedirectEnabled = !skipAssemblyReferences;
                     packageManager.InstallPackage(
                         projectManager,
                         packageId,
