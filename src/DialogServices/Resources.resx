@@ -226,7 +226,7 @@
     <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
   </data>
   <data name="License_ViewLicense" xml:space="preserve">
-    <value>View License Terms</value>
+    <value>View License</value>
   </data>
   <data name="Dialog_OperationFailed" xml:space="preserve">
     <value>Operation failed.</value>
@@ -362,5 +362,11 @@
   </data>
   <data name="YesLabel" xml:space="preserve">
     <value>_Yes</value>
+  </data>
+  <data name="License_ViewLicenseReport" xml:space="preserve">
+    <value>Component report</value>
+  </data>
+  <data name="License_Header" xml:space="preserve">
+    <value>License</value>
   </data>
 </root>
