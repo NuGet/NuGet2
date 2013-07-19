@@ -67,7 +67,7 @@ namespace NuGet
             var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var settingsValue = new List<SettingValue>();            
             IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);
-            var machineWideStartIndex = 0;
+            var machineWideSourcesCount = 0;
             
             if (!values.IsEmpty())
             {
@@ -95,7 +95,7 @@ namespace NuGet
 
                 // Reverse the the list to be backward compatible
                 settingsValue.Reverse();
-                machineWideStartIndex = settingsValue.Count;
+                machineWideSourcesCount = machineWideSources.Count;
 
                 // Add machine wide sources at the end
                 settingsValue.AddRange(machineWideSources);
@@ -132,7 +132,7 @@ namespace NuGet
                 }
             }
 
-            SetDefaultPackageSources(loadedPackageSources, machineWideStartIndex);
+            SetDefaultPackageSources(loadedPackageSources, machineWideSourcesCount);
 
             return loadedPackageSources;
         }
@@ -165,6 +165,8 @@ namespace NuGet
         private void MigrateSources(List<PackageSource> loadedPackageSources)
         {
             bool hasChanges = false;
+            List<PackageSource> packageSourcesToBeRemoved = new List<PackageSource>();
+
             // doing migration
             for (int i = 0; i < loadedPackageSources.Count; i++)
             {
@@ -172,11 +174,23 @@ namespace NuGet
                 PackageSource targetPackageSource;
                 if (_migratePackageSources.TryGetValue(ps, out targetPackageSource))
                 {
-                    loadedPackageSources[i] = targetPackageSource;
-                    // make sure we preserve the IsEnabled property when migrating package sources
-                    loadedPackageSources[i].IsEnabled = ps.IsEnabled;
+                    if (loadedPackageSources.Any(p => p.Equals(targetPackageSource)))
+                    {
+                        packageSourcesToBeRemoved.Add(loadedPackageSources[i]);
+                    }
+                    else
+                    {
+                        loadedPackageSources[i] = targetPackageSource;
+                        // make sure we preserve the IsEnabled property when migrating package sources
+                        loadedPackageSources[i].IsEnabled = ps.IsEnabled;
+                    }
                     hasChanges = true;
                 }
+            }
+
+            foreach (PackageSource packageSource in packageSourcesToBeRemoved)
+            {
+                loadedPackageSources.Remove(packageSource);
             }
 
             if (hasChanges)
@@ -185,7 +199,7 @@ namespace NuGet
             }
         }
 
-        private void SetDefaultPackageSources(List<PackageSource> loadedPackageSources, int machineWideStartIndex)
+        private void SetDefaultPackageSources(List<PackageSource> loadedPackageSources, int machineWideSourcesCount)
         {
             // There are 4 different cases to consider for default package sources
             // Case 1. Default Package Source is already present matching both feed source and the feed name
@@ -233,7 +247,7 @@ namespace NuGet
                     }
                 }
             }
-            loadedPackageSources.InsertRange(machineWideStartIndex, defaultPackageSourcesToBeAdded);
+            loadedPackageSources.InsertRange(loadedPackageSources.Count - machineWideSourcesCount, defaultPackageSourcesToBeAdded);
         }
 
         private void UpdateProviderDefaultSources(List<PackageSource> loadedSources)
