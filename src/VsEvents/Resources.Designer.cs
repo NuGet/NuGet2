@@ -70,6 +70,15 @@ namespace NuGet.VsEvents {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All packages are already installed and there is nothing to restore..
+        /// </summary>
+        internal static string NothingToRestore {
+            get {
+                return ResourceManager.GetString("NothingToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to One or more NuGet packages need to be restored but couldn&apos;t be because consent has not been granted. To give consent, open the Visual Studio Options dialog, click on the Package Manager node and check &apos;Allow NuGet to download missing packages during build.&apos; You can also give consent by setting the environment variable &apos;EnableNuGetPackageRestore&apos; to &apos;true&apos;. 
         ///
         ///Missing packages: {0}.

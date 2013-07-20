@@ -34,6 +34,11 @@ namespace NuGet.VisualStudio
             VsConstants.NomadForVisualStudioProjectTypeGuid 
         };
 
+        /// <summary>
+        /// Returns the full path of the project directory.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns>The full path of the project directory.</returns>
         public static string GetFullPath(Project project)
         {
             Debug.Assert(project != null);
@@ -154,11 +159,7 @@ namespace NuGet.VisualStudio
         /// <param name="project">Project under whose directory packages.config is searched for</param>
         public static bool PackagesConfigExists(Project project)
         {
-            Debug.Assert(project != null);
-            var projectFullPath = GetFullPath(project);
-            var packageReferenceFileName = Path.Combine(
-                Path.GetDirectoryName(projectFullPath) ?? String.Empty,
-                PackageReferenceFile);
+            var packageReferenceFileName = GetPackageReferenceFileFullPath(project);
 
             // Here we just check if the packages.config file exists instead of checking
             // calling IsNuGetInUse because that will cause NuGet.VisualStudio.dll to get loaded.
@@ -167,6 +168,22 @@ namespace NuGet.VisualStudio
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Returns the full path of the packages config file associated with the project.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns>The full path of the packages config file.</returns>
+        public static string GetPackageReferenceFileFullPath(Project project)
+        {
+            Debug.Assert(project != null);
+            var projectDirectory = GetFullPath(project);
+            var packageReferenceFileName = Path.Combine(
+                projectDirectory ?? String.Empty,
+                PackageReferenceFile);
+
+            return packageReferenceFileName;
         }
 
         public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, TaskPriority priority, string errorText, IVsHierarchy hierarchyItem)

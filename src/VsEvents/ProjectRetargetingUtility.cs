@@ -146,8 +146,7 @@ namespace NuGet.VsEvents
         private static PackageReferenceFile GetPackageReferenceFile(Project project)
         {
             Debug.Assert(project != null);
-            var projectFullPath = VsUtility.GetFullPath(project);
-            var packageReferenceFile = Path.Combine(Path.GetDirectoryName(projectFullPath), VsUtility.PackageReferenceFile);
+            var packageReferenceFile = VsUtility.GetPackageReferenceFileFullPath(project);
             if (File.Exists(packageReferenceFile))
             {
                 return new PackageReferenceFile(packageReferenceFile);

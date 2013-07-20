@@ -22,6 +22,9 @@ namespace NuGet.VsEvents
         private OutputWindowPane _outputPane;
         private bool _outputOptOutMessage;
 
+        // Indicates if there are missing packages.
+        private bool _hasMissingPackages;
+
         // The value of the "MSBuild project build output verbosity" setting 
         // of VS. From 0 (quiet) to 4 (Diagnostic).
         private int _msBuildOutputVerbosity;
@@ -86,6 +89,7 @@ namespace NuGet.VsEvents
                 }
 
                 _outputOptOutMessage = true;
+                _hasMissingPackages = false;
                 RestorePackagesOrCheckForMissingPackages();
             }
             catch (Exception ex)
@@ -158,6 +162,10 @@ namespace NuGet.VsEvents
             }
             else
             {
+                if (!_hasMissingPackages)
+                {
+                    WriteLine(VerbosityLevel.Minimal, Resources.NothingToRestore);
+                }
                 WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinished);
             }
         }
@@ -299,9 +307,7 @@ namespace NuGet.VsEvents
 
             try
             {
-                var packageReferenceFileFullPath = Path.Combine(
-                    Path.GetDirectoryName(projectFullPath),
-                    VsUtility.PackageReferenceFile);
+                var packageReferenceFileFullPath = VsUtility.GetPackageReferenceFileFullPath(project);
                 RestorePackages(packageReferenceFileFullPath, fileSystem, waitDialog);
             }
             catch (Exception ex)
@@ -331,6 +337,7 @@ namespace NuGet.VsEvents
                 return;
             }
 
+            _hasMissingPackages = true;
             if (_outputOptOutMessage)
             {
                 WriteLine(VerbosityLevel.Quiet, Resources.PackageRestoreOptOutMessage);

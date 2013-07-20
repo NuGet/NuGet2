@@ -174,4 +174,7 @@ Missing packages: {0}</value>
     <value>Restoring NuGet packages...
 To prevent NuGet from restoring packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck 'Allow NuGet to download missing packages during build.'</value>
   </data>
+  <data name="NothingToRestore" xml:space="preserve">
+    <value>All packages are already installed and there is nothing to restore.</value>
+  </data>
 </root>
