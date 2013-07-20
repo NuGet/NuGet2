@@ -397,11 +397,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 if (activePackageSource.IsAggregate())
                 {
                     // Starting from 2.7, we will not show the All option if there's only one package source.
-                    // Hence, if All is the active package source in that case, we set the sole package source as active.
-                    var packageSources = GetPackageSources();
+                    // Hence, if All is the active package source in that case, we set the sole package source as active,
+                    // and save it to settings
+                    PackageSource[] packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().ToArray();
                     if (packageSources.Length == 1)
                     {
-                        return packageSources[0];
+                        _packageSourceProvider.ActivePackageSource = packageSources[0];
+                        return packageSources[0].Name;
                     }
                 }
 
