@@ -275,7 +275,7 @@ function Test-ZipPackageLoadsReleaseNotesAttribute {
 
 function Test-GetPackagesWithUpdatesReturnPackagesWithIsUpdateSet {
     # Arrange
-    $p = New-WebApplication
+    $p = New-ClassLibrary
     
     # Act
     Install-Package Antlr -Version 3.1.1 -Project $p.Name
