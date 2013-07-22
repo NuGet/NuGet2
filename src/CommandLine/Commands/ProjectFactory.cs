@@ -970,6 +970,16 @@ namespace NuGet.Commands
                 _repository = new ReadOnlyPackageRepository(packages.ToList());
             }
 
+            protected override bool SkipDependencyResolveError
+            {
+                get
+                {
+                    // For the pack command, when don't need to throw if a dependency is missing 
+                    // from a nuspec file.
+                    return true;
+                }
+            }
+
             protected override IPackage ResolveDependency(PackageDependency dependency)
             {
                 return _repository.ResolveDependency(dependency, allowPrereleaseVersions: false, preferListedPackages: false);
