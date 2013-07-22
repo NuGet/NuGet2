@@ -29,7 +29,8 @@ namespace NuGet.VisualStudio
             if (String.IsNullOrEmpty(project.FullName))
             {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, project.Name));
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.DTE_ProjectUnsupported, project.GetName()));
             }
 
             // Try to get a factory for the project type guid            

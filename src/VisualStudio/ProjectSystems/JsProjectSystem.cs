@@ -17,6 +17,14 @@ namespace NuGet.VisualStudio
         {
         }
 
+        public override string ProjectName
+        {
+            get
+            {
+                return Project.GetName();
+            }
+        }
+
         public override void AddFile(string path, Stream stream)
         {
             // ensure the parent folder is created before adding file to the project            
