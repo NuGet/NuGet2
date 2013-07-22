@@ -168,7 +168,7 @@ namespace NuGet.VisualStudio
 
         protected virtual void AddGacReference(string name)
         {
-            Project.Object.References.Add(name);
+            Project.GetReferences().Add(name);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
@@ -196,7 +196,7 @@ namespace NuGet.VisualStudio
                 }
 
                 // Add a reference to the project
-                dynamic reference = Project.Object.References.Add(assemblyPath);
+                dynamic reference = Project.GetReferences().Add(assemblyPath);
 
                 // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
                 if (usedTempFile)
@@ -267,7 +267,7 @@ namespace NuGet.VisualStudio
                 //        almost all the assemblies since Assembly Name is the same as the assembly file name
                 //        In case of F#, the input parameter is case-sensitive as well
                 //        Hence, an override to THIS function is added to take care of that
-                var reference = Project.Object.References.Item(referenceName);
+                var reference = Project.GetReferences().Item(referenceName);
                 if (reference != null)
                 {
                     reference.Remove();
@@ -356,7 +356,7 @@ namespace NuGet.VisualStudio
                     referenceName = Path.GetFileNameWithoutExtension(name);
                 }
 
-                return Project.Object.References.Item(referenceName) != null;
+                return Project.GetReferences().Item(referenceName) != null;
             }
             catch
             {
