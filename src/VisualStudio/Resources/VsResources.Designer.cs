@@ -376,6 +376,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package Manager.
+        /// </summary>
+        public static string OutputConsolePaneName {
+            get {
+                return ResourceManager.GetString("OutputConsolePaneName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; cannot be removed because it in use by &apos;{1}&apos;.
         /// </summary>
         public static string PackageCannotBeRemovedBecauseItIsInUse {

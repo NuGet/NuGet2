@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 
 namespace NuGet.VisualStudio
@@ -14,7 +15,6 @@ namespace NuGet.VisualStudio
     {
         // guid for our Output window pane
         private static Guid _outputWindowPaneGuid = new Guid("CEC55EC8-CC51-40E7-9243-57B87A6F6BEB");
-        private const string _outputWindowPaneName = "Package Manager";
 
         private readonly IVsOutputWindow _outputWindow;
         private IVsOutputWindowPane _outputWindowPane;
@@ -136,7 +136,7 @@ namespace NuGet.VisualStudio
             if (_outputWindowPane == null)
             {
                 // create the Package Manager pane within the Output window
-                int result = _outputWindow.CreatePane(ref _outputWindowPaneGuid, _outputWindowPaneName, fInitVisible: 1, fClearWithSolution: 0);
+                int result = _outputWindow.CreatePane(ref _outputWindowPaneGuid, VsResources.OutputConsolePaneName, fInitVisible: 1, fClearWithSolution: 0);
                 if (result == VSConstants.S_OK)
                 {
                     result = _outputWindow.GetPane(ref _outputWindowPaneGuid, out _outputWindowPane);
