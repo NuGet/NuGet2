@@ -201,7 +201,7 @@ namespace NuGet.VisualStudio
 
             Task task = Task.Factory.StartNew(() =>
             {
-                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
                 IPackageRepository localRepository = packageManager.LocalRepository;
                 var projectReferences = GetAllPackageReferences(packageManager);
                 foreach (var reference in projectReferences)
@@ -245,7 +245,7 @@ namespace NuGet.VisualStudio
         {
             EnsureNuGetBuild(fromActivation);
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
             foreach (Project project in _solutionManager.GetProjects())
             {
                 EnablePackageRestore(project, packageManager);

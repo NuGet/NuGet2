@@ -254,6 +254,7 @@ namespace NuGet.PowerShell.Commands.Test
                 fileSystemProvider.Object, 
                 repositorySettings.Object, 
                 new Mock<VsPackageInstallerEvents>().Object,
+                new Mock<IPackageRepository>().Object,
                 /* multiFrameworkTargeting */ null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 

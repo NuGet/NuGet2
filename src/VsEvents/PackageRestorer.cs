@@ -345,7 +345,7 @@ namespace NuGet.VsEvents
             }
 
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            var packageManager = packageManagerFactory.CreatePackageManager();
+            var packageManager = packageManagerFactory.CreatePackageManagerWithAllPackageSources();
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
             {
                 var resolvedPackage = PackageHelper.ResolvePackage(

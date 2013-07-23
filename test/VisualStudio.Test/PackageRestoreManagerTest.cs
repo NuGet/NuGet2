@@ -491,7 +491,7 @@ namespace NuGet.VisualStudio.Test
             packageManager.Setup(p => p.LocalRepository).Returns(localRepository);
 
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(p => p.CreatePackageManager()).Returns(packageManager.Object);
+            packageManagerFactory.Setup(p => p.CreatePackageManagerWithAllPackageSources()).Returns(packageManager.Object);
 
             var packageRestore = CreateInstance(
                 fileSystemProvider: fileSystemProvider.Object,

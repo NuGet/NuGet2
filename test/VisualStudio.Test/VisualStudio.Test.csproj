@@ -66,6 +66,7 @@
     <Compile Include="Mocks\MockSolutionManager.cs" />
     <Compile Include="PackageExtensionsTest.cs" />
     <Compile Include="PackageRestoreManagerTest.cs" />
+    <Compile Include="PackageRestoreRepositoryTest.cs" />
     <Compile Include="PathHelperTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
