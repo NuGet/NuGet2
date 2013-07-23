@@ -2294,7 +2294,7 @@ function Test-InstallLatestVersionWorksCorrectly
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters
+    Install-Package XamlConverters -ProjectName $p.Name
 
     # Assert
     Assert-Package $p XamlConverters 0.5
@@ -2306,7 +2306,7 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters -IncludePrerelease
+    Install-Package XamlConverters -IncludePrerelease -ProjectName $p.Name
 
     # Assert
     Assert-Package $p XamlConverters 0.6-alpha
@@ -2331,6 +2331,7 @@ function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
     # Assert
     Assert-Package $p MarkedUp
 }
+
 function Test-PackageWithConfigTransformInstallToWinJsProject
 {
     param($context)
