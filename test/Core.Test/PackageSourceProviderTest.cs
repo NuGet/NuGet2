@@ -70,6 +70,45 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void LoadPackageSourcesWhereAMigratedSourceIsAlsoADefaultSource()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("AOld", "urlA", false), new SettingValue("userDefinedSource", "userDefinedSourceUrl", false) });
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            
+            var defaultPackageSourceA = new PackageSource("urlA", "ANew");
+            var defaultPackageSourceB = new PackageSource("urlB", "B");
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: new[] { defaultPackageSourceA, defaultPackageSourceB }, 
+                migratePackageSources: new Dictionary<PackageSource, PackageSource>
+                                        {
+                                            { new PackageSource("urlA", "AOld"), defaultPackageSourceA },
+                                        });
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            // Package Source AOld will be migrated to ANew. B will simply get added
+            // Since default source B got added when there are other package sources it will be disabled
+            // However, package source ANew must stay enabled
+            // PackageSource userDefinedSource is a user package source and is untouched
+            Assert.Equal(3, values.Count);
+            Assert.Equal("urlA", values[0].Source);
+            Assert.Equal("ANew", values[0].Name);
+            Assert.True(values[0].IsEnabled);
+            Assert.Equal("userDefinedSourceUrl", values[1].Source);
+            Assert.Equal("userDefinedSource", values[1].Name);
+            Assert.True(values[1].IsEnabled);
+            Assert.Equal("urlB", values[2].Source);
+            Assert.Equal("B", values[2].Name);
+            Assert.False(values[2].IsEnabled);
+        }
+
+        [Fact]
         public void LoadPackageSourcesPerformMigrationIfSpecified()
         {
             // Arrange

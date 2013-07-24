@@ -169,7 +169,7 @@ namespace NuGet.VisualStudio.Test
 
             // disable the official source
             userSettings.Setup(s => s.GetValues("disabledPackageSources"))
-                        .Returns(new[] { new KeyValuePair<string, string>(NuGetOfficialFeedName, "true") });
+                        .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "true") });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
@@ -179,6 +179,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal(1, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
+            Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
             Assert.False(sources[0].IsEnabled);
         }
 

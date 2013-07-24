@@ -180,7 +180,7 @@ namespace NuGet
                     }
                     else
                     {
-                        loadedPackageSources[i] = targetPackageSource;
+                        loadedPackageSources[i] = targetPackageSource.Clone();
                         // make sure we preserve the IsEnabled property when migrating package sources
                         loadedPackageSources[i].IsEnabled = ps.IsEnabled;
                     }
