@@ -44,9 +44,9 @@ namespace NuGetConsole.Implementation.Console
 
         private readonly object _lockObj = new object();
 
-        public event EventHandler StartCompleted;
+        public event EventHandler StartCompleted = delegate { };
 
-        public event EventHandler StartWaitingKey;
+        public event EventHandler StartWaitingKey = delegate { };
 
         public ConsoleDispatcher(IPrivateWpfConsole wpfConsole)
         {
@@ -133,10 +133,7 @@ namespace NuGetConsole.Implementation.Console
 
         private void RaiseEventSafe(EventHandler handler)
         {
-            if (handler != null)
-            {
-                Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => handler(this, EventArgs.Empty));
-            }
+            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => handler(this, EventArgs.Empty));
         }
 
         public bool IsStartCompleted { get; private set; }
