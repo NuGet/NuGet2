@@ -1720,6 +1720,24 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
+        public void PackageBuilderThrowsIfDependencyIdInvalid()
+        {
+          // Arrange
+          var builder = new PackageBuilder
+          {
+            Id = "a.b",
+            Version = new SemanticVersion("1.0"),
+            Description = "Description"
+          };
+          builder.Authors.Add("Me");
+
+          builder.DependencySets.Add(new PackageDependencySet(null, new [] {new PackageDependency("brainf%2ack") }));
+
+          // Act & Assert            
+          ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID 'brainf%2ack' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
+        }
+
+        [Fact]
         public void ReadingPackageWithUnknownSchemaThrows()
         {
             // Arrange
