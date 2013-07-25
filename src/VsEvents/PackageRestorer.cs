@@ -37,6 +37,8 @@ namespace NuGet.VsEvents
                 
         private ErrorListProvider _errorListProvider;
 
+        IVsThreadedWaitDialog2 _waitDialog;
+
         enum VerbosityLevel
         {
             Quiet = 0,
@@ -103,60 +105,71 @@ namespace NuGet.VsEvents
         private void RestorePackagesOrCheckForMissingPackages()
         {
             var waitDialogFactory = ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>();
-            IVsThreadedWaitDialog2 waitDialog;
-            waitDialogFactory.CreateInstance(out waitDialog);
-
-            waitDialog.StartWaitDialog(
-                VsResources.DialogTitle,
-                Resources.RestoringPackages,
-                String.Empty,
-                varStatusBmpAnim: null,
-                szStatusBarText: null,
-                iDelayToShowDialog: 0,
-                fIsCancelable: true,
-                fShowMarqueeProgress: true);
+            waitDialogFactory.CreateInstance(out _waitDialog);
 
             try
             {
                 _errorListProvider.Tasks.Clear();
                 if (IsConsentGranted())
                 {
-                    RestorePackages(waitDialog);
+                    RestorePackages();
                 }
                 else
                 {
-                    CheckForMissingPackages(waitDialog);
+                    _waitDialog.StartWaitDialog(
+                        VsResources.DialogTitle,
+                        Resources.RestoringPackages,
+                        String.Empty,
+                        varStatusBmpAnim: null,
+                        szStatusBarText: null,
+                        iDelayToShowDialog: 0,
+                        fIsCancelable: true,
+                        fShowMarqueeProgress: true);
+                    CheckForMissingPackages();
                 }
             }
             finally
             {
                 int canceled;
-                waitDialog.EndWaitDialog(out canceled);
+                _waitDialog.EndWaitDialog(out canceled);
+                _waitDialog = null;
             }
         }
 
-        private void RestorePackages(IVsThreadedWaitDialog2 waitDialog)
+        private bool HasCanceled()
         {
-            bool canceled;            
+            if (_waitDialog != null)
+            {
+                bool canceled;
+                _waitDialog.HasCanceled(out canceled);
+
+                return canceled;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void RestorePackages()
+        {
             _msBuildOutputVerbosity = GetMSBuildOutputVerbositySetting(_dte);
             WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreStarted);
-            PackageRestore(_dte.Solution, waitDialog);
+            PackageRestore(_dte.Solution);
             foreach (Project project in _dte.Solution.Projects)
             {
-                waitDialog.HasCanceled(out canceled);
-                if (canceled)
+                if (HasCanceled())
                 {
                     break;
                 }
 
                 if (project.IsUnloaded() || project.IsNuGetInUse())
                 {
-                    PackageRestore(project, waitDialog);
+                    PackageRestore(project);
                 }
             }
-
-            waitDialog.HasCanceled(out canceled);
-            if (canceled)
+            
+            if (HasCanceled())
             {
                 WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreCanceled);
             }
@@ -174,8 +187,7 @@ namespace NuGet.VsEvents
         /// Checks if there are missing packages that should be restored. If so, a warning will 
         /// be added to the error list.
         /// </summary>
-        /// <param name="waitDialog">The wait dialog.</param>
-        private void CheckForMissingPackages(IVsThreadedWaitDialog2 waitDialog)
+        private void CheckForMissingPackages()
         {
             var missingPackages = new List<PackageReference>();
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
@@ -184,9 +196,7 @@ namespace NuGet.VsEvents
             missingPackages.AddRange(GetMissingPackages(_dte.Solution, fileSystem));
             foreach (Project project in _dte.Solution.Projects)
             {
-                bool canceled;
-                waitDialog.HasCanceled(out canceled);
-                if (canceled)
+                if (HasCanceled())
                 {
                     return;
                 }
@@ -288,13 +298,10 @@ namespace NuGet.VsEvents
         /// Restores NuGet packages for the given project.
         /// </summary>
         /// <param name="project">The project whose packages will be restored.</param>
-        /// <param name="waitDialog">The wait dialog.</param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
-        private void PackageRestore(Project project, IVsThreadedWaitDialog2 waitDialog)
+        private void PackageRestore(Project project)
         {
-            bool canceled;
-            waitDialog.HasCanceled(out canceled);
-            if (canceled)
+            if (HasCanceled())
             {
                 return;
             }
@@ -308,7 +315,7 @@ namespace NuGet.VsEvents
             try
             {
                 var packageReferenceFileFullPath = VsUtility.GetPackageReferenceFileFullPath(project);
-                RestorePackages(packageReferenceFileFullPath, fileSystem, waitDialog);
+                RestorePackages(packageReferenceFileFullPath, fileSystem);
             }
             catch (Exception ex)
             {
@@ -326,24 +333,10 @@ namespace NuGet.VsEvents
         /// Restores the given package into the packages folder represented by 'fileSystem'.
         /// </summary>
         /// <param name="package">The package to be restored.</param>
-        /// <param name="fileSystem">The file system representing the packages folder.</param>
-        private void RestorePackage(PackageReference package, IFileSystem fileSystem)
+        private void RestorePackage(PackageReference package)
         {
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackage, package);
             
-            if (IsPackageInstalled(fileSystem, package.Id, package.Version))
-            {
-                WriteLine(VerbosityLevel.Normal, Resources.SkippingInstalledPackage, package);
-                return;
-            }
-
-            _hasMissingPackages = true;
-            if (_outputOptOutMessage)
-            {
-                WriteLine(VerbosityLevel.Quiet, Resources.PackageRestoreOptOutMessage);
-                _outputOptOutMessage = false;
-            }
-
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var packageManager = packageManagerFactory.CreatePackageManagerWithAllPackageSources();
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
@@ -381,8 +374,7 @@ namespace NuGet.VsEvents
         /// </summary>
         /// <param name="packageReferenceFileFullPath">The package reference file full path.</param>
         /// <param name="fileSystem">The file system that represents the packages folder.</param>
-        /// <param name="waitDialog">The wait dialog.</param>
-        private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem, IVsThreadedWaitDialog2 waitDialog)
+        private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
         {
             var packageReferenceFile = new PackageReferenceFile(packageReferenceFileFullPath);
             var packages = packageReferenceFile.GetPackageReferences().ToList();
@@ -390,8 +382,31 @@ namespace NuGet.VsEvents
             int totalCount = packages.Count;
             foreach (var package in packages)
             {
+                if (IsPackageInstalled(fileSystem, package.Id, package.Version))
+                {
+                    WriteLine(VerbosityLevel.Normal, Resources.SkippingInstalledPackage, package);
+                    continue;
+                }
+
+                _hasMissingPackages = true;
+                if (_outputOptOutMessage)
+                {
+                    _waitDialog.StartWaitDialog(
+                            VsResources.DialogTitle,
+                            Resources.RestoringPackages,
+                            String.Empty,
+                            varStatusBmpAnim: null,
+                            szStatusBarText: null,
+                            iDelayToShowDialog: 0,
+                            fIsCancelable: true,
+                            fShowMarqueeProgress: true);
+
+                    WriteLine(VerbosityLevel.Quiet, Resources.PackageRestoreOptOutMessage);
+                    _outputOptOutMessage = false;
+                }            
+
                 bool canceled;
-                waitDialog.UpdateProgress(
+                _waitDialog.UpdateProgress(
                     String.Format(CultureInfo.CurrentCulture, Resources.RestoringPackagesListedInFile, packageReferenceFileFullPath),
                     String.Format(CultureInfo.CurrentCulture, Resources.RestoringPackage, package.ToString()),
                     szStatusBarText: null,
@@ -404,7 +419,7 @@ namespace NuGet.VsEvents
                     return;
                 }
 
-                RestorePackage(package, fileSystem);
+                RestorePackage(package);
                 ++currentCount;
             }
         }
@@ -413,9 +428,8 @@ namespace NuGet.VsEvents
         /// Restores NuGet packages for the given solution.
         /// </summary>
         /// <param name="solution">The solution.</param>
-        /// <param name="waitDialog">The wait dialog.</param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")] 
-        private void PackageRestore(Solution solution, IVsThreadedWaitDialog2 waitDialog)
+        private void PackageRestore(Solution solution)
         {
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForSolution, solution.FullName);            
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
@@ -426,7 +440,7 @@ namespace NuGet.VsEvents
                 var packageReferenceFileFullPath = Path.Combine(
                     VsUtility.GetNuGetSolutionFolder(solution),
                     VsUtility.PackageReferenceFile);
-                RestorePackages(packageReferenceFileFullPath, fileSystem, waitDialog);
+                RestorePackages(packageReferenceFileFullPath, fileSystem);
             }
             catch (Exception ex)
             {
