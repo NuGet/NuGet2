@@ -126,8 +126,12 @@ function New-Project {
     # Set the focus back on the shell
     $window.SetFocus()
 
-    # Return the project
+	if ($TemplateName -eq 'JScriptVisualBasicLightSwitchProjectTemplate')
+	{
+		return
+	}
 
+    # Return the project if it is NOT a LightSwitch project
     for ($counter = 0; $counter -lt 20; $counter++)
     {
         if ($SolutionFolder) {
@@ -193,6 +197,16 @@ function New-ClassLibrary {
     )
 
     $SolutionFolder | New-Project ClassLibrary $ProjectName
+}
+
+function New-LightSwitchApplication 
+{
+	param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    New-Project JScriptVisualBasicLightSwitchProjectTemplate $ProjectName $SolutionFolder
 }
 
 function New-PortableLibrary 

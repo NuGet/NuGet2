@@ -2352,3 +2352,32 @@ function Test-PackageWithConfigTransformInstallToWinJsProject
     Assert-NotNull (Get-ProjectItem $p 'root\a.config')
     Assert-NotNull (Get-ProjectItem $p 'b.config')
 }
+
+function Test-InstallPackageIntoLightSwitchApplication 
+{
+	param($context)
+
+	# this test is only applicable to VS 2013 because it has the latest LightSwitch template
+	if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+	{
+		return
+	}
+
+	# Arrange
+
+	New-LightSwitchApplication LsApp
+
+	# Sleep for 10 seconds for the two sub-projects to be created
+	[System.Threading.Thread]::Sleep(10000)
+
+	$clientProject = Get-Project LsApp.HTMLClient
+	$serverProject = Get-Project LsApp.Server
+
+	# Act
+	Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot -ProjectName $clientProject.Name
+	Install-Package NonStrongNameA -Source $context.RepositoryRoot -ProjectName $serverProject.Name
+	
+	# Assert
+	Assert-Package $clientProject PackageWithPPVBSourceFiles
+	Assert-Package $serverProject NonStrongNameA
+}
