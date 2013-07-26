@@ -44,7 +44,11 @@ namespace NuGet.VisualStudio
             Debug.Assert(project != null);
             if (project.IsUnloaded())
             {
-                return Path.Combine(Path.GetDirectoryName(project.DTE.Solution.FullName), project.UniqueName);
+                // To get the directory of an unloaded project, we use the UniqueName property,
+                // which is the path of the project file relative to the solution directory.
+                var solutionDirectory = Path.GetDirectoryName(project.DTE.Solution.FullName);
+                var projectFileFullPath = Path.Combine(solutionDirectory, project.UniqueName);
+                return Path.GetDirectoryName(projectFileFullPath);
             }
 
             string fullPath = GetPropertyValue<string>(project, "FullPath");
@@ -161,9 +165,10 @@ namespace NuGet.VisualStudio
         {
             var packageReferenceFileName = GetPackageReferenceFileFullPath(project);
 
-            // Here we just check if the packages.config file exists instead of checking
+            // Here we just check if the packages.config file exists instead of 
             // calling IsNuGetInUse because that will cause NuGet.VisualStudio.dll to get loaded.
-            if (IsSupported(project) && File.Exists(packageReferenceFileName))
+            bool isUnloaded = VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            if ((isUnloaded || IsSupported(project)) && File.Exists(packageReferenceFileName))
             {
                 return true;
             }
@@ -179,6 +184,7 @@ namespace NuGet.VisualStudio
         {
             Debug.Assert(project != null);
             var projectDirectory = GetFullPath(project);
+
             var packageReferenceFileName = Path.Combine(
                 projectDirectory ?? String.Empty,
                 PackageReferenceFile);

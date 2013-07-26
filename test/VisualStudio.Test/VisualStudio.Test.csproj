@@ -89,6 +89,7 @@
     <Compile Include="VsSourceControlTrackerTest.cs" />
     <Compile Include="VsTemplateWizardTest.cs" />
     <Compile Include="VsUninstallerTest.cs" />
+    <Compile Include="VsUtilityTest.cs" />
     <Compile Include="WebProjectSystemTest.cs" />
     <Compile Include="WindowsStoreProjectSystemTest.cs" />
   </ItemGroup>

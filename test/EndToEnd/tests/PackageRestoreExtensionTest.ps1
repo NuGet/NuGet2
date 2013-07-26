@@ -65,6 +65,38 @@ function Test-PackageRestore-JavaScriptMetroProject {
 	Assert-Package $p JQuery
 }
 
+# Tests that package restore works for unloaded projects, as long as
+# there is at least one loaded project.
+function Test-PackageRestore-UnloadedProjects{
+    param($context)
+
+	# Arrange
+	$p1 = New-ClassLibrary	
+	$p1 | Install-Package Microsoft.Bcl.Build -version 1.0.8
+	
+	$p2 = New-ClassLibrary
+
+	$solutionDir = $dte.Solution.FullName
+	$packagesDir = Get-PackagesDir
+	$dte.Solution.SaveAs($solutionDir)
+    Close-Solution
+
+	# delete the packages folder
+	Remove-Item -Recurse -Force $packagesDir
+	Assert-False (Test-Path $packagesDir)
+
+	# reopen the solution. Now the project that references Microsoft.Bcl.Build
+	# will not be loaded because of missing targets file
+	Open-Solution $solutionDir
+
+	# Act
+	Build-Solution
+
+	# Assert
+	$dir = Join-Path $packagesDir "Microsoft.Bcl.Build.1.0.8"
+	Assert-PathExists $dir
+}
+
 # Tests that an error will be generated if package restore fails
 function Test-PackageRestore-ErrorMessage {
     param($context)

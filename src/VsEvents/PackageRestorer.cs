@@ -215,14 +215,8 @@ namespace NuGet.VsEvents
 
                 if (project.IsUnloaded())
                 {
-                    var projectFullPath = project.GetFullPath();
-                    if (File.Exists(projectFullPath))
-                    {
-                        var packageReferenceFileFullPath = Path.Combine(
-                            Path.GetDirectoryName(projectFullPath),
-                            VsUtility.PackageReferenceFile);
-                        missingPackages.AddRange(GetMissingPackages(packageReferenceFileFullPath, fileSystem));
-                    }
+                    var packageReferenceFileFullPath = VsUtility.GetPackageReferenceFileFullPath(project);
+                    missingPackages.AddRange(GetMissingPackages(packageReferenceFileFullPath, fileSystem));      
                 }
                 else
                 {
