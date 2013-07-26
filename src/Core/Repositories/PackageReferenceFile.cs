@@ -172,7 +172,6 @@ namespace NuGet
         {
             Debug.Assert(id != null);
             Debug.Assert(version != null);
-            Debug.Assert(targetFramework != null);
 
             XDocument document = GetDocument();
             if (document != null)
