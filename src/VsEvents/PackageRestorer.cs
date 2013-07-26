@@ -39,6 +39,9 @@ namespace NuGet.VsEvents
 
         IVsThreadedWaitDialog2 _waitDialog;
 
+        // indicates whether there are errors during package restore.
+        private bool _hasError;
+
         enum VerbosityLevel
         {
             Quiet = 0,
@@ -92,6 +95,7 @@ namespace NuGet.VsEvents
 
                 _outputOptOutMessage = true;
                 _hasMissingPackages = false;
+                _hasError = false;
                 RestorePackagesOrCheckForMissingPackages();
             }
             catch (Exception ex)
@@ -179,7 +183,15 @@ namespace NuGet.VsEvents
                 {
                     WriteLine(VerbosityLevel.Minimal, Resources.NothingToRestore);
                 }
-                WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinished);
+
+                if (_hasError)
+                {
+                    WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinishedWithError);
+                }
+                else
+                {
+                    WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinished);
+                }
             }
         }
 
@@ -308,9 +320,9 @@ namespace NuGet.VsEvents
 
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
-            var projectFullPath = VsUtility.GetFullPath(project);
+            var projectName = project.GetName();
             
-            WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectFullPath);
+            WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectName);
 
             try
             {
@@ -319,13 +331,16 @@ namespace NuGet.VsEvents
             }
             catch (Exception ex)
             {
-                var message = String.Format(CultureInfo.CurrentCulture, Resources.PackageRestoreFailedForProject, projectFullPath, ex.Message);
+                var message = String.Format(CultureInfo.CurrentCulture, Resources.PackageRestoreFailedForProject, projectName, ex.Message);
                 WriteLine(VerbosityLevel.Quiet, message);
                 ActivityLog.LogError(LogEntrySource, message);
+                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, 
+                    TaskPriority.High, message, hierarchyItem: null);
+                _hasError = true;
             }
             finally
             {
-                WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinishedForProject, projectFullPath);
+                WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinishedForProject, projectName);
             }
         }
 

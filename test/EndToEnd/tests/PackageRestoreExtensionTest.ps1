@@ -64,3 +64,42 @@ function Test-PackageRestore-JavaScriptMetroProject {
 	Assert-True (Test-Path $packagesDir)
 	Assert-Package $p JQuery
 }
+
+# Tests that an error will be generated if package restore fails
+function Test-PackageRestore-ErrorMessage {
+    param($context)
+
+	# Arrange
+	$p = New-ClassLibrary	
+	Install-Package -Source $context.RepositoryRoot -Project $p.Name NonStrongNameB
+	
+	# delete the packages folder
+	$packagesDir = Get-PackagesDir
+	Remove-Item -Recurse -Force $packagesDir
+	Assert-False (Test-Path $packagesDir)
+
+	# Act
+    # package restore will fail because the source $context.RepositoryRoot is not
+    # listed in the settings.
+	Build-Solution
+
+	# Assert
+    $errorlist = Get-Errors
+    Assert-AreEqual 1 $errorlist.Count
+
+    $error = $errorlist[$errorlist.Count-1]
+    Assert-True ($error.Description.Contains('NuGet Package restore failed for project'))
+
+    $output = GetBuildOutput
+    Assert-True ($output.Contains('NuGet package restore failed.'))
+}
+
+function GetBuildOutput { 
+    $dte2 = Get-Interface $dte ([EnvDTE80.DTE2])
+    $buildPane = $dte2.ToolWindows.OutputWindow.OutputWindowPanes.Item("Build")
+    $doc = $buildPane.TextDocument
+    $sel = $doc.Selection
+    $sel.StartOfDocument($FALSE)
+    $sel.EndOfDocument($TRUE)
+    $sel.Text
+}

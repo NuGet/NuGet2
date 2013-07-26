@@ -153,6 +153,15 @@ namespace NuGet.VsEvents {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NuGet package restore failed..
+        /// </summary>
+        internal static string PackageRestoreFinishedWithError {
+            get {
+                return ResourceManager.GetString("PackageRestoreFinishedWithError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Restoring NuGet packages...
         ///To prevent NuGet from restoring packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck &apos;Allow NuGet to download missing packages during build.&apos;.
         /// </summary>

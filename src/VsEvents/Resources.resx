@@ -177,4 +177,7 @@ To prevent NuGet from restoring packages during build, open the Visual Studio Op
   <data name="NothingToRestore" xml:space="preserve">
     <value>All packages are already installed and there is nothing to restore.</value>
   </data>
+  <data name="PackageRestoreFinishedWithError" xml:space="preserve">
+    <value>NuGet package restore failed.</value>
+  </data>
 </root>
