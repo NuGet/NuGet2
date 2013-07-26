@@ -6,6 +6,8 @@ namespace NuGet
     [DataContract]
     public class PackageSource : IEquatable<PackageSource>
     {
+        private readonly int _hashCode;
+
         [DataMember]
         public string Name { get; private set; }
 
@@ -27,7 +29,7 @@ namespace NuGet
         public string Password { get; set; }
 
         public bool IsPasswordClearText { get; set; }
-         
+
         public PackageSource(string source) :
             this(source, source, isEnabled: true)
         {
@@ -59,6 +61,7 @@ namespace NuGet
             Source = source;
             IsEnabled = isEnabled;
             IsOfficial = isOfficial;
+            _hashCode = Name.ToUpperInvariant().GetHashCode() * 3137 + Source.ToUpperInvariant().GetHashCode();
         }
 
         public bool Equals(PackageSource other)
@@ -89,7 +92,7 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() * 3137 + Source.GetHashCode();
+            return _hashCode;
         }
 
         public PackageSource Clone()

@@ -34,8 +34,8 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources"))
-                    .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669") });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
@@ -52,8 +52,8 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources"))
-                        .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=230477") });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=230477", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
@@ -70,8 +70,27 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources"))
-                        .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "https://nuget.org/api/v2") });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://nuget.org/api/v2/", false) });
+            var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(1, sources.Count);
+            Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
+            Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
+        }
+
+        [Fact]
+        public void CtorMigratesEvenCaseDoesNotMatch()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { new SettingValue("NuGET oFFIcial PACKAGE souRCe", "HTTPS://nUGet.org/ApI/V2/", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
@@ -110,7 +129,7 @@ namespace NuGet.VisualStudio.Test
 
             Assert.Equal(NuGetOfficialFeedUrl, sources[1].Source);
             Assert.False(sources[1].IsEnabled);
-            
+
             Assert.Equal("https://test1", sources[2].Source);
         }
 
@@ -188,11 +207,12 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources")).Returns(
-                new[] {
-                    new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669"),
-                    new KeyValuePair<string, string>("one", "onesource"),
-                });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true)).Returns(new[]
+            {
+                new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false),
+                new SettingValue("one", "onesource", false),
+            });
+
             userSettings.Setup(s => s.GetValues("activePackageSource"))
                         .Returns(new[] { new KeyValuePair<string, string>("one", "onesource") });
 
@@ -290,9 +310,9 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>(MockBehavior.Strict);
-            userSettings.Setup(_ => _.GetValues("packageSources")).Returns(new List<KeyValuePair<string, string>>
+            userSettings.Setup(_ => _.GetSettingValues("packageSources", true)).Returns(new[]
             {
-                new KeyValuePair<string, string>(NuGetOfficialFeedName, NuGetOfficialFeedUrl)
+                new SettingValue(NuGetOfficialFeedName, NuGetOfficialFeedUrl, false)
             });
             userSettings.Setup(_ => _.GetValues("activePackageSource")).Returns(new List<KeyValuePair<string, string>>
             {
@@ -435,7 +455,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act & Assert
             ExceptionAssert.ThrowsArgumentException(
-                () => provider.ActivePackageSource = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl, "Windows 8 packages"), 
+                () => provider.ActivePackageSource = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl, "Windows 8 packages"),
                 "value",
                 "The package source does not belong to the collection of available sources.");
         }
