@@ -2303,7 +2303,7 @@ function Test-InstallLatestVersionWorksCorrectly
 function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
 {
     # Arrange
-    $p = New-WebApplication
+    $p = New-ConsoleApplication
 
     # Act
     Install-Package XamlConverters -IncludePrerelease -ProjectName $p.Name

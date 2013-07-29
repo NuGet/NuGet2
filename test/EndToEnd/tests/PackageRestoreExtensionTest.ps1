@@ -48,6 +48,10 @@ function Test-PackageRestore-Website {
 function Test-PackageRestore-JavaScriptMetroProject {
     param($context)
 
+    if ($dte.Version -eq '10.0') {
+        return
+    }
+
 	# Arrange
 	$p = New-JavaScriptApplication	
 	Install-Package JQuery -projectName $p.Name
