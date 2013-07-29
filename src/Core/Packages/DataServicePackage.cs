@@ -285,7 +285,7 @@ namespace NuGet
             }
         }
 
-        SemanticVersion IPackageMetadata.Version
+        SemanticVersion IPackageName.Version
         {
             get
             {

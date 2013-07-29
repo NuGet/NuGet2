@@ -15,7 +15,7 @@ namespace NuGet
         private const string TagsProperty = "Tags";
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", TagsProperty };
 
-        public static bool IsReleaseVersion(this IPackageMetadata packageMetadata)
+        public static bool IsReleaseVersion(this IPackageName packageMetadata)
         {
             return String.IsNullOrEmpty(packageMetadata.Version.SpecialVersion);
         }
@@ -179,7 +179,7 @@ namespace NuGet
             return compatibleDependencySets.SelectMany(d => d.Dependencies);
         }
 
-        public static string GetFullName(this IPackageMetadata package)
+        public static string GetFullName(this IPackageName package)
         {
             return package.Id + " " + package.Version;
         }
@@ -266,16 +266,21 @@ namespace NuGet
         {
             Debug.Assert(searchTerms != null);
             var parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
+
             // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
             Expression condition = (from term in searchTerms
                                     from property in propertiesToSearch
                                     select BuildExpressionForTerm(parameterExpression, term, property)).Aggregate(Expression.OrElse);
+
             return Expression.Lambda<Func<T, bool>>(condition, parameterExpression);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",
             Justification = "The expression is remoted using Odata which does not support the culture parameter")]
-        private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName)
+        private static Expression BuildExpressionForTerm(
+            ParameterExpression packageParameterExpression,
+            string term,
+            string propertyName)
         {
             // For tags we want to prepend and append spaces to do an exact match
             if (propertyName.Equals(TagsProperty, StringComparison.OrdinalIgnoreCase))
@@ -287,14 +292,25 @@ namespace NuGet
             MethodInfo stringToLower = typeof(String).GetMethod("ToLower", Type.EmptyTypes);
 
             // package.Id / package.Description
-            var propertyExpression = Expression.Property(packageParameterExpression, propertyName);
+
+            MemberExpression propertyExpression;
+
+            if (propertyName.Equals("Id", StringComparison.OrdinalIgnoreCase)) 
+            {
+                var cast = Expression.TypeAs(packageParameterExpression, typeof(IPackageName));
+                propertyExpression = Expression.Property(cast, propertyName);
+            }
+            else 
+            {
+                propertyExpression = Expression.Property(packageParameterExpression, propertyName);
+            }
+
             // .ToLower()
             var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
 
             // Handle potentially null properties
             // package.{propertyName} != null && package.{propertyName}.ToLower().Contains(term.ToLower())
-            return Expression.AndAlso(Expression.NotEqual(propertyExpression,
-                                                      Expression.Constant(null)),
+            return Expression.AndAlso(Expression.NotEqual(propertyExpression, Expression.Constant(null)),
                                       Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower())));
         }
     }

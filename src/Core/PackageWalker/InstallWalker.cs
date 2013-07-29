@@ -384,7 +384,7 @@ namespace NuGet
             IEnumerable<IPackage> packages = _operations.GetPackages(PackageAction.Uninstall);
 
             return conflict.DependentsResolver.GetDependents(conflict.Package)
-                                              .Except(packages, PackageEqualityComparer.IdAndVersion);
+                                              .Except<IPackage>(packages, PackageEqualityComparer.IdAndVersion);
         }
 
         private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents)

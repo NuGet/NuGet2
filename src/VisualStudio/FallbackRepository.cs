@@ -75,7 +75,7 @@ namespace NuGet.VisualStudio
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,

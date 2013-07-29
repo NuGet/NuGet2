@@ -184,7 +184,7 @@ namespace NuGet.Server.Infrastructure
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFramework,

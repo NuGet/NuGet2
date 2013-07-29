@@ -232,7 +232,7 @@ namespace NuGet
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,

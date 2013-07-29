@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet
 {
-    public sealed class PackageEqualityComparer : IEqualityComparer<IPackage>
+    public sealed class PackageEqualityComparer : IEqualityComparer<IPackageName>
     {
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "This type isn't mutable")]
         public static readonly PackageEqualityComparer IdAndVersion = new PackageEqualityComparer((x, y) => x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase) &&
@@ -15,21 +15,21 @@ namespace NuGet
         public static readonly PackageEqualityComparer Id = new PackageEqualityComparer((x, y) => x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase),
                                                                                          x => x.Id.GetHashCode());
 
-        private readonly Func<IPackage, IPackage, bool> _equals;
-        private readonly Func<IPackage, int> _getHashCode;
+        private readonly Func<IPackageName, IPackageName, bool> _equals;
+        private readonly Func<IPackageName, int> _getHashCode;
 
-        private PackageEqualityComparer(Func<IPackage, IPackage, bool> equals, Func<IPackage, int> getHashCode)
+        private PackageEqualityComparer(Func<IPackageName, IPackageName, bool> equals, Func<IPackageName, int> getHashCode)
         {
             _equals = equals;
             _getHashCode = getHashCode;
         }
 
-        public bool Equals(IPackage x, IPackage y)
+        public bool Equals(IPackageName x, IPackageName y)
         {
             return _equals(x, y);
         }
 
-        public int GetHashCode(IPackage obj)
+        public int GetHashCode(IPackageName obj)
         {
             return _getHashCode(obj);
         }

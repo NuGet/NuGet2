@@ -77,7 +77,7 @@ namespace NuGet.Dialog.Providers
             if (packagesList.Count > 0)
             {
                 packagesList.Sort(PackageComparer.Version);
-                packagesList = packagesList.Distinct(PackageEqualityComparer.Id).ToList();
+                packagesList = packagesList.Distinct<IPackage>(PackageEqualityComparer.Id).ToList();
             }
 
             IQueryable<IPackage> updatePackages;

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace NuGet.Common
 {
@@ -41,18 +42,17 @@ namespace NuGet.Common
             // Get the nuget command line package from the specified repository
             IPackageRepository packageRepository = _repositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
 
-            IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
-
-            // We didn't find it so complain
-            if (package == null)
-            {
-                throw new CommandLineException(NuGetResources.UpdateCommandUnableToFindPackage, NuGetCommandLinePackageId);
-            }
+            IPackage package = packageRepository.GetUpdates(
+                new [] { new PackageName(NuGetCommandLinePackageId, version) },
+                includePrerelease: true, 
+                includeAllVersions: false, 
+                targetFrameworks: new FrameworkName[] { null },
+                versionConstraints: new VersionSpec[] { null }).FirstOrDefault();
 
             Console.WriteLine(NuGetResources.UpdateCommandCurrentlyRunningNuGetExe, version);
 
             // Check to see if an update is needed
-            if (version >= package.Version)
+            if (package == null || version >= package.Version)
             {
                 Console.WriteLine(NuGetResources.UpdateCommandNuGetUpToDate);
             }

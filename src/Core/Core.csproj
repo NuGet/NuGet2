@@ -116,6 +116,7 @@
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
     <Compile Include="Repositories\IPackageCacheRepository.cs" />
+    <Compile Include="Repositories\IPackageName.cs" />
     <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IOperationAwareRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />

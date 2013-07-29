@@ -305,7 +305,7 @@ namespace NuGet
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,

@@ -59,7 +59,7 @@ namespace NuGet.Dialog.Providers
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> 
+            IEnumerable<IPackageName> 
             packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
