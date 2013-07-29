@@ -50,7 +50,7 @@ function Test-PackageRestore-JavaScriptMetroProject {
 
 	# Arrange
 	$p = New-JavaScriptApplication	
-	$p | Install-Package JQuery
+	Install-Package JQuery -projectName $p.Name
 	
 	# delete the packages folder
 	$packagesDir = Get-PackagesDir
