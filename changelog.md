@@ -15,6 +15,7 @@ Change Log / Release Notes
 * [#3502](https://nuget.codeplex.com/workitem/3463) Add two method overloads for IsPackageInstalledEx() and GetInstalledPackages() to IVsPackageInstallerServices
 * Package Restore user consent is now default to Yes.
 * Show License friendly names in the dialog.
+* Sign assembly in NuGet.Server package.
 
 ## NuGet 2.6
 
