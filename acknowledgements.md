@@ -31,6 +31,8 @@ NuGet Hall of Fame
     - [#2990](http://nuget.codeplex.com/workitem/2990) - Add Version property to NetPortableProfile class.
 1. [David Simmer](https://www.codeplex.com/site/users/view/DavidSimner)
     - [#3460](https://nuget.codeplex.com/workitem/3460) - Fix bug NullReferenceException if requireApiKey = true, but the header X-NUGET-APIKEY isn't pres.ent
+1. [friism](https://www.codeplex.com/site/users/view/friism)
+    - [#3278](https://nuget.codeplex.com/workitem/3278) - Fixes NuGet.Build targets file to so that it works correctly on MonoDevelop
 
 ## NuGet 2.5
 
