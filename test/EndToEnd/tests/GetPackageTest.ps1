@@ -273,19 +273,6 @@ function Test-ZipPackageLoadsReleaseNotesAttribute {
     Assert-AreEqual "This is a release note." $p.ReleaseNotes
 }
 
-function Test-GetPackagesWithUpdatesReturnPackagesWithIsUpdateSet {
-    # Arrange
-    $p = New-ClassLibrary
-    
-    # Act
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name
-    $packages = @(Get-Package -Updates)
-    
-    # Assert
-    Assert-AreEqual 1 $packages.Count
-    Assert-True $packages[0].IsUpdate
-}
-
 function Test-GetPackagesWithNoUpdatesReturnPackagesWithIsUpdateNotSet {    
     # Arrange & Act
     $package = Get-Package -ListAvailable -First 1
