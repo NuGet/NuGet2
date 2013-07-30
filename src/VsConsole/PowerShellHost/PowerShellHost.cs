@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet;
 using NuGet.VisualStudio;
@@ -182,7 +183,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                             {
                                 UpdateWorkingDirectory();
                                 ExecuteInitScripts();
-                            });
+                            }, 
+                            CancellationToken.None,
+                            TaskCreationOptions.None,
+                            TaskScheduler.Default);
                     };
                     _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
                 }
