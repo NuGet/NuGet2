@@ -32,7 +32,7 @@ namespace NuGet.VsEvents
         /// <returns>The list of packages to be reinstalled. If packages.config does not exist in the project or is not part of the project, empty list is returned</returns>
         internal static IList<IPackage> GetPackagesToBeReinstalled(Project project)
         {
-            return GetPackagesToBeReinstalled(project, GetLocalRepository());
+            return GetPackagesToBeReinstalled(project, GetLocalRepository(ServiceLocator.GetInstance<IVsPackageManagerFactory>()));
         }
 
         /// <summary>
@@ -44,11 +44,10 @@ namespace NuGet.VsEvents
         internal static IList<IPackage> GetPackagesToBeReinstalled(Project project, IPackageRepository localRepository)
         {
             Debug.Assert(project != null);
-            Debug.Assert(localRepository != null);
 
             // First call to VsUtility.PackageConfigExists(project) checks if there is a packages.config file under the project folder, Otherwise, return emtpy list
             // If present, then call VsUtility.IsNuGetInUse to see if NuGet is used in the project. The second call might result in loading of NuGet.VisualStudio.dll
-            if (VsUtility.PackagesConfigExists(project) && project.IsNuGetInUse())
+            if (localRepository != null && VsUtility.PackagesConfigExists(project) && project.IsNuGetInUse())
             {
                 return GetPackagesToBeReinstalled(project.GetTargetFrameworkName(), GetPackageReferences(project), localRepository);
             }
@@ -136,11 +135,27 @@ namespace NuGet.VsEvents
             return new List<PackageReference>();
         }
 
-        private static IPackageRepository GetLocalRepository()
+        internal static IPackageRepository GetLocalRepository(IVsPackageManagerFactory packageManagerFactory)
         {
-            IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            var packageManager = packageManagerFactory.CreatePackageManager();
-            return packageManager.LocalRepository;
+            if (packageManagerFactory == null)
+            {
+                throw new ArgumentNullException("packageManagerFactory");
+            }
+
+            IPackageRepository localRepository = null;
+            try
+            {
+                var packageManager = packageManagerFactory.CreatePackageManager();
+                if (packageManager != null)
+                {
+                    localRepository = packageManager.LocalRepository;
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                localRepository = null;
+            }
+            return localRepository;
         }
 
         private static PackageReferenceFile GetPackageReferenceFile(Project project)

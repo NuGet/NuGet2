@@ -63,6 +63,64 @@ namespace NuGet.VsEvents
         }
 
         [Fact]
+        public static void GetPackagesToBeReinstalledWhenLocalRepositoryIsNull()
+        {
+            // Arrange
+            Mock<Project> mockProject = new Mock<Project>();
+
+            // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
+            mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);
+
+            // Act
+            var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(mockProject.Object, null);
+
+            // Assert
+            Assert.Equal(0, packagesToBeReinstalled.Count);
+        }
+
+        [Fact]
+        public static void GetLocalRepositoryWhenPackageManagerFactoryIsNull()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgNull(() => ProjectRetargetingUtility.GetLocalRepository(null), "packageManagerFactory");
+        }
+
+        [Fact]
+        public static void GetLocalRepositoryWhenCreatePackageManagerReturnsNull()
+        {
+            // Arrange
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(p => p.CreatePackageManager()).Returns((IVsPackageManager)null);
+
+            // Act
+            var localRepository = ProjectRetargetingUtility.GetLocalRepository(packageManagerFactory.Object);
+
+            // Assert
+            Assert.Null(localRepository);
+        }
+
+        [Fact]
+        public static void GetLocalRepositoryWhenSolutionDirectoryIsNotFound()
+        {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            var mockAggregateRepository = new Mock<AggregateRepository>(Enumerable.Empty<IPackageRepository>());
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.SolutionDirectory).Returns(String.Empty);
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystemProvider.Object, new Mock<IVsSourceControlTracker>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object,
+                new Mock<IFileSystemProvider>().Object, repositorySettings, new Mock<VsPackageInstallerEvents>().Object, mockAggregateRepository.Object);
+
+            // Act & Assert
+            // Get RepositoryPath throws InvalidOperationException and GetLocalRepository() handles it to return null
+            // To make a delegate out of property repositorySettings.RepositoryPath, calling String.IsNullOrEmpty
+            ExceptionAssert.Throws<InvalidOperationException>(() => String.IsNullOrEmpty(repositorySettings.RepositoryPath), "Unable to locate the solution directory. Please ensure that the solution has been saved.");
+            Assert.Null(ProjectRetargetingUtility.GetLocalRepository(packageManagerFactory));
+        }
+
+        [Fact]
         public static void GetPackagesToBeReinstalledReturnsPackageTargetingSingleFramework()
         {
             // Create a packageA which has as assembly reference only in net40. Create a package reference corresponding to this package with the project target framework as 'net40'
@@ -294,7 +352,7 @@ namespace NuGet.VsEvents
             // Act
             ProjectRetargetingUtility.MarkPackagesForReinstallation(packageReferenceFile, packagesToBeReinstalled);
             var packageReferences = packageReferenceFile.GetPackageReferences().ToList();
-            
+
             // Assert
             Assert.Equal(3, packageReferences.Count);
             Assert.Equal("A", packageReferences[0].Id);
