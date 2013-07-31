@@ -20,6 +20,12 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageRestoreManager))]
     internal class PackageRestoreManager : IPackageRestoreManager
     {
+#if VS12
+        private static readonly Task _completionTask = Task.FromResult(0);
+#else 
+        private static readonly Task _completionTask = null;
+#endif
+
         private static readonly string NuGetExeFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "NuGet.exe");
         private static readonly string NuGetTargetsFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "NuGet.targets");
         private const string NuGetBuildPackageName = "NuGet.Build";
@@ -107,7 +113,11 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void EnableCurrentSolutionForRestore(bool fromActivation)
+#if VS12
+        public async Task EnableCurrentSolutionForRestore(bool fromActivation)
+#else
+        public Task EnableCurrentSolutionForRestore(bool fromActivation)
+#endif
         {
             if (!_solutionManager.IsSolutionOpen)
             {
@@ -123,7 +133,11 @@ namespace NuGet.VisualStudio
                     showCancelButton: false);
                 if (result != true)
                 {
+#if VS12
                     return;
+#else
+                    return _completionTask;
+#endif
                 }
             }
 
@@ -149,7 +163,17 @@ namespace NuGet.VisualStudio
                     SetPackageRestoreConsent();
                 }
 
-                EnablePackageRestore(fromActivation);
+                EnsureNuGetBuild(fromActivation);
+
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
+                foreach (Project project in _solutionManager.GetProjects())
+                {
+#if VS12
+                    await EnablePackageRestore(project, packageManager);
+#else
+                    EnablePackageRestore(project, packageManager);
+#endif
+                }
             }
             catch (Exception ex)
             {
@@ -182,6 +206,10 @@ namespace NuGet.VisualStudio
                         VsResources.DialogTitle);
                 }
             }
+
+#if !VS12
+            return _completionTask;
+#endif
         }
 
         public event EventHandler<PackagesMissingStatusEventArgs> PackagesMissingStatusChanged = delegate { };
@@ -241,17 +269,6 @@ namespace NuGet.VisualStudio
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
-        private void EnablePackageRestore(bool fromActivation)
-        {
-            EnsureNuGetBuild(fromActivation);
-
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
-            foreach (Project project in _solutionManager.GetProjects())
-            {
-                EnablePackageRestore(project, packageManager);
-            }
-        }
-
         private void SetPackageRestoreConsent()
         {
             var consent = new PackageRestoreConsent(_settings);
@@ -261,7 +278,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void EnablePackageRestore(Project project, IVsPackageManager packageManager)
+        private Task EnablePackageRestore(Project project, IVsPackageManager packageManager)
         {
             var projectManager = packageManager.GetProjectManager(project);
             var projectPackageReferences = GetPackageReferences(projectManager);
@@ -269,18 +286,18 @@ namespace NuGet.VisualStudio
             {
                 // don't enable package restore for the project if it doesn't have at least one 
                 // nuget package installed
-                return;
+                return _completionTask;
             }
 
-            EnablePackageRestore(project);
+            return EnablePackageRestore(project);
         }
 
-        private void EnablePackageRestore(Project project)
+        private Task EnablePackageRestore(Project project)
         {
             if (project.IsWebSite())
             {
                 // Can't do anything with Website
-                return;
+                return _completionTask;
             }
 
             if (!VsVersionHelper.IsVisualStudio2010 && 
@@ -288,31 +305,31 @@ namespace NuGet.VisualStudio
             {
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
-                    EnablePackageRestoreInVs2012(project);
+                    return EnablePackageRestoreInVs2012(project);
                 }
                 else
                 {
-                    EnablePackageRestoreInVs2013(project);
+                    return EnablePackageRestoreInVs2013(project);
                 }
             }
             else
             {
                 MsBuildProject buildProject = project.AsMSBuildProject();
-                EnablePackageRestore(project, buildProject, saveProjectWhenDone: true);
+                return EnablePackageRestore(project, buildProject, saveProjectWhenDone: true);
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnablePackageRestoreInVs2013(Project project)
+        private Task EnablePackageRestoreInVs2013(Project project)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+            return NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
                 project,
                 project.ToVsHierarchy(),
                 buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnablePackageRestoreInVs2012(Project project)
+        private Task EnablePackageRestoreInVs2012(Project project)
         {
             project.DoWorkInWriterLock(
                 buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
@@ -320,9 +337,11 @@ namespace NuGet.VisualStudio
             // When inside the Write lock, calling Project.Save() will cause a deadlock.
             // Thus we will save it after and outside of the Write lock.
             project.Save();
+
+            return _completionTask;
         }
 
-        private void EnablePackageRestore(Project project, MsBuildProject buildProject, bool saveProjectWhenDone)
+        private Task EnablePackageRestore(Project project, MsBuildProject buildProject, bool saveProjectWhenDone)
         {
             AddSolutionDirProperty(buildProject);
             AddNuGetTargets(buildProject);
@@ -331,6 +350,8 @@ namespace NuGet.VisualStudio
             {
                 project.Save();
             }
+
+            return _completionTask;
         }
 
         private void AddNuGetTargets(MsBuildProject buildProject)

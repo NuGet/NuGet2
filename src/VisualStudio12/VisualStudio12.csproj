@@ -11,7 +11,6 @@
     <RootNamespace>NuGet.VisualStudio12</RootNamespace>
     <AssemblyName>NuGet.VisualStudio12</AssemblyName>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-    <DefineConstants Condition=" '$(BuildForDev12)' == 'true' ">$(DefineConstants);VS12</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="$(MSBuildAssembly)" />

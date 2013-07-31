@@ -34,6 +34,8 @@
 
         <MSBuildAssembly>Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</MSBuildAssembly>
         <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
+
+        <DefineConstants>$(DefineConstants);VS12</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" $(BuildForDev12) != 'true' ">

@@ -14,7 +14,7 @@ namespace NuGet.VisualStudio
         /// Configures the current solution for Package Restore mode.
         /// </summary>
         /// <param name="fromActivation">if set to <c>false</c>, the method will not show any error message, and will not set package restore consent.</param>
-        void EnableCurrentSolutionForRestore(bool fromActivation);
+        Task EnableCurrentSolutionForRestore(bool fromActivation);
 
         /// <summary>
         /// Occurs when it is detected that the packages are missing or restored for the current solution.

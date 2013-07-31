@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio12
     public static class ProjectHelper
     {
 #if VS12
-        public static async void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
+        public static async Task DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
             await DoWorkInWriterLock((IVsProject)hierarchy, action);
             project.Save();
@@ -69,8 +69,9 @@ namespace NuGet.VisualStudio12
             return context != null ? context.UnconfiguredProject : null;
         }
 #else
-        public static void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
+        public static Task DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
+            return null;
         }
 #endif
     }

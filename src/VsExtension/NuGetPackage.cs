@@ -400,10 +400,17 @@ namespace NuGet.Tools
             return new ManagePackageDialog(project, parameterString);
         }
 
+#if VS12
+        private async void EnablePackagesRestore(object sender, EventArgs args)
+        {
+            await _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
+        }
+#else 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
             _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
         }
+#endif
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
         {
