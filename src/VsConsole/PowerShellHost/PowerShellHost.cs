@@ -209,7 +209,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 // if there is no solution open, we set the active directory to be user profile folder
                 string targetDir = _solutionManager.IsSolutionOpen ?
                     _solutionManager.SolutionDirectory :
-                    targetDir = Environment.GetEnvironmentVariable("USERPROFILE");
+                    Environment.GetEnvironmentVariable("USERPROFILE");
 
                 Runspace.ChangePSDirectory(targetDir);
             }
