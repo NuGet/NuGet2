@@ -129,6 +129,29 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void SearchNodeIsRemoveWhenDeselected()
+        {
+            // Arrange
+            var parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+            var node = new MockTreeNode(parentTreeNode, provider, 1, true, true);
+            provider.ExtensionsTree.Nodes.Add(node);
+            provider.SelectedNode = node;
+
+            var searchNode = (PackagesTreeNodeBase)provider.Search("hello");
+            Assert.True(searchNode.IsSelected);
+            Assert.True(searchNode.IsSearchResultsNode);
+
+            // Act 
+            searchNode.OnClosed();
+
+            // Arrange
+            Assert.Equal(node, provider.SelectedNode);
+            Assert.True(node.IsSelected);
+        }
+
+        [Fact]
         public void IsExpandedPropertyWhenChangedRaiseEvent()
         {
             // Arrange
@@ -433,7 +456,7 @@ namespace NuGet.Dialog.Test
         {
             if (parentTreeNode == null)
             {
-                parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+                parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
