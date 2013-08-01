@@ -1,6 +1,10 @@
 NuGet Hall of Fame
 ==================
 
+## NuGet 2.8
+1. [leppie](https://www.codeplex.com/site/users/view/leppie)
+    - [#3466](https://nuget.codeplex.com/workitem/3466) - When packing packages, verifying Id of dependency packages.
+
 ## NuGet 2.7
 
 1. [Mike Roth](http://www.codeplex.com/site/users/view/mxrss) ([@mxrss](https://twitter.com/mxrss))
