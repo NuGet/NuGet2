@@ -66,6 +66,7 @@ namespace NuGet.Tools
             _projectRetargetHandler.Dispose();
             _projectUpgradeHandler.Dispose();
             _packageRestorer.Dispose();
+            _packageRestorer = null;
 
             _dteEvents.OnBeginShutdown -= OnBeginShutDown;
             _dteEvents = null;
