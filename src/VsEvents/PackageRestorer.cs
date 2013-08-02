@@ -86,6 +86,8 @@ namespace NuGet.VsEvents
         {
             try
             {
+                _errorListProvider.Tasks.Clear();
+
                 if (UsingOldPackageRestore(_dte.Solution))
                 {
                     return;
@@ -95,10 +97,15 @@ namespace NuGet.VsEvents
                 {
                     return;
                 }
+                
+                if (!IsAutomatic())
+                {
+                    return;
+                }
 
                 _outputOptOutMessage = true;
                 _hasMissingPackages = false;
-                _hasError = false;
+                _hasError = false;                
                 RestorePackagesOrCheckForMissingPackages();
             }
             catch (Exception ex)
@@ -115,8 +122,7 @@ namespace NuGet.VsEvents
             waitDialogFactory.CreateInstance(out _waitDialog);
 
             try
-            {
-                _errorListProvider.Tasks.Clear();
+            {                
                 if (IsConsentGranted())
                 {
                     RestorePackages();
@@ -290,6 +296,17 @@ namespace NuGet.VsEvents
             var settings = ServiceLocator.GetInstance<ISettings>();
             var packageRestoreConsent = new PackageRestoreConsent(settings);
             return packageRestoreConsent.IsGranted;
+        }
+
+        /// <summary>
+        /// Returns true if automatic package restore on build is enabled.
+        /// </summary>
+        /// <returns>True if automatic package restore on build is enabled.</returns>
+        private static bool IsAutomatic()
+        {
+            var settings = ServiceLocator.GetInstance<ISettings>();
+            var packageRestoreConsent = new PackageRestoreConsent(settings);
+            return packageRestoreConsent.IsAutomatic;
         }
 
         /// <summary>

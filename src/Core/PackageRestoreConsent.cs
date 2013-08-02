@@ -8,6 +8,10 @@ namespace NuGet
         private const string EnvironmentVariableName = "EnableNuGetPackageRestore";
         private const string PackageRestoreSection = "packageRestore";
         private const string PackageRestoreConsentKey = "enabled";
+
+        // the key to enable/disable automatic package restore during build.
+        private const string PackageRestoreAutomaticKey = "automatic";
+
         private readonly ISettings _settings;
         private readonly IEnvironmentVariableReader _environmentReader;
         private readonly ConfigurationDefaults _configurationDefaults;
@@ -75,6 +79,24 @@ namespace NuGet
             set
             {
                 _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
+            }
+        }
+
+        public bool IsAutomatic
+        {
+            get
+            {
+                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreAutomaticKey);
+                if (String.IsNullOrWhiteSpace(settingsValue))
+                {
+                    return IsGrantedInSettings;
+                }
+                settingsValue = settingsValue.SafeTrim();
+                return IsSet(settingsValue);
+            }
+            set
+            {
+                _settings.SetValue(PackageRestoreSection, PackageRestoreAutomaticKey, value.ToString());
             }
         }
 
