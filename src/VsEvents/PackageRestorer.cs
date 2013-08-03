@@ -510,6 +510,7 @@ namespace NuGet.VsEvents
         public void Dispose()
         {
             _errorListProvider.Dispose();
+            _outputPane = null;
             _buildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
             _solutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
         }

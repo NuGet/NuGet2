@@ -181,7 +181,7 @@ namespace NuGet.VsEvents {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/workflows/reinstalling-packages.  Packages affected: {0}.
+        ///   Looks up a localized string similar to Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/docs/workflows/reinstalling-packages.  Packages affected: {0}.
         /// </summary>
         internal static string ProjectUpgradeAndRetargetErrorMessage {
             get {

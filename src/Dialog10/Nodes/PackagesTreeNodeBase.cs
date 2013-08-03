@@ -636,10 +636,14 @@ namespace NuGet.Dialog.Providers
         }
 
         /// <summary>
-        /// Called when thid focu switches away from this node
+        /// Called when the focus switches away from this node
         /// </summary>
         internal virtual void OnClosed()
         {
+            if (IsSearchResultsNode)
+            {
+                Provider.RemoveSearchNode();
+            }
         }
     }
 }
