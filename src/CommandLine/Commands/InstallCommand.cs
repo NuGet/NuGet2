@@ -173,6 +173,11 @@ namespace NuGet.Commands
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
         {
+            bool packageRestoreConsent = new PackageRestoreConsent(Settings).IsGranted;
+            if (Console != null && packageRestoreConsent)
+            {
+                Console.WriteLine(NuGetResources.RestoreCommandPackageRestoreOptOutMessage);
+            }
             var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
