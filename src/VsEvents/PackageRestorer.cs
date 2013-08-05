@@ -19,7 +19,6 @@ namespace NuGet.VsEvents
         private const string LogEntrySource = "NuGet PackageRestorer";        
 
         private DTE _dte;
-        private OutputWindowPane _outputPane;
         private bool _outputOptOutMessage;
 
         // Indicates if there are missing packages.
@@ -59,18 +58,22 @@ namespace NuGet.VsEvents
             _buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             _solutionEvents = dte.Events.SolutionEvents;
             _solutionEvents.AfterClosing += SolutionEvents_AfterClosing;            
+        }
 
+        OutputWindowPane GetBuildOutputPane()
+        {
             // get the "Build" output window pane
-            var dte2 = (DTE2)dte;
+            var dte2 = (DTE2)_dte;
             var buildWindowPaneGuid = VSConstants.BuildOutput.ToString("B");
             foreach (OutputWindowPane pane in dte2.ToolWindows.OutputWindow.OutputWindowPanes)
             {
                 if (String.Equals(pane.Guid, buildWindowPaneGuid, StringComparison.OrdinalIgnoreCase))
                 {
-                    _outputPane = pane;
-                    break;
+                    return pane;
                 }
             }
+
+            return null;
         }
 
         private void SolutionEvents_AfterClosing()
@@ -473,7 +476,8 @@ namespace NuGet.VsEvents
         /// <param name="args">An array of objects to write using format. </param>
         private void WriteLine(VerbosityLevel verbosity, string format, params object[] args)
         {
-            if (_outputPane == null)
+            var outputPane = GetBuildOutputPane();
+            if (outputPane == null)
             {
                 return;
             }
@@ -481,8 +485,8 @@ namespace NuGet.VsEvents
             if (_msBuildOutputVerbosity >= (int)verbosity)
             {
                 var msg = string.Format(CultureInfo.CurrentCulture, format, args);
-                _outputPane.OutputString(msg);
-                _outputPane.OutputString(Environment.NewLine);
+                outputPane.OutputString(msg);
+                outputPane.OutputString(Environment.NewLine);
             }
         }
 
@@ -510,7 +514,6 @@ namespace NuGet.VsEvents
         public void Dispose()
         {
             _errorListProvider.Dispose();
-            _outputPane = null;
             _buildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
             _solutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
         }
