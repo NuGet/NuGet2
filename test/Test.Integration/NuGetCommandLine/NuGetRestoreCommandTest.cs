@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -402,7 +403,11 @@ EndProject");
 
                 // Assert
                 Assert.Equal(0, r.Item1);
-                Assert.Contains("To prevent NuGet from restoring packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck 'Allow NuGet to download missing packages during build.'", r.Item2);
+                string optOutMessage = String.Format(
+                    CultureInfo.CurrentCulture,
+                    NuGetResources.RestoreCommandPackageRestoreOptOutMessage,
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Assert.Contains(optOutMessage, r.Item2);
                 var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
                 var packageFileB = Path.Combine(workingPath, @"packages\packageB.2.2.0\packageB.2.2.0.nupkg");
                 Assert.True(File.Exists(packageFileA));

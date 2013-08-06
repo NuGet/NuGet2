@@ -15,7 +15,7 @@ namespace NuGet.Options
         public GeneralOptionControl()
         {
             InitializeComponent();
-            
+
             _productUpdateSettings = ServiceLocator.GetInstance<IProductUpdateSettings>();
             Debug.Assert(_productUpdateSettings != null);
 

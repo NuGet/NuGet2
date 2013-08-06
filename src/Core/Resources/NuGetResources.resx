@@ -427,4 +427,7 @@
   <data name="ReferenceFile_InvalidRequireReinstallationFlag" xml:space="preserve">
     <value>Unable to parse requireReinstallation value '{0}' from '{1}'.</value>
   </data>
+  <data name="PackageRestoreConsentCheckBoxText" xml:space="preserve">
+    <value>&amp;Allow NuGet to download missing packages</value>
+  </data>
 </root>
