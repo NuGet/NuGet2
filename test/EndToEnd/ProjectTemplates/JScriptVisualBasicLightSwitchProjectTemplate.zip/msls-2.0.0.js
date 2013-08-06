@@ -624,6 +624,9 @@ var msls_mark,
         processModelStart: "ProcessModel.Start",
         processModelEnd: "ProcessModel.End",
 
+        loadSharePointStart: "LoadSharePoint.Start",
+        loadSharePointEnd: "LoadSharePoint.End",
+
         queryDataStart: "QueryData.Start",
         queryDataEnd: "QueryData.End",
         queryDataApplyEnd: "QueryData.ApplyEnd",
@@ -2854,6 +2857,9 @@ var msls_Entity_applyNestedChanges,
     }
 
     function setEntityPropertyValue(value) {
+        if (!this._entry.set) {
+            msls_throwInvalidOperationError(msls_getResourceString("errors_setReadOnlyProperty", this._entry.name));
+        }
         this._entry.set.call(this._details.owner, value);
     }
 
@@ -4662,7 +4668,9 @@ var msls_Entity_applyNestedChanges,
                         mixInContent[entryName] = msls_propertyWithDetails(
                             entry, entry.type, _StorageProperty);
                         entry.getValue = getStoragePropertyValue;
-                        entry.setValue = setStoragePropertyValue;
+                        if (!entry.isReadOnly) {
+                            entry.setValue = setStoragePropertyValue;
+                        }
                         break;
                     case "reference":
                     case "virtualReference":
@@ -4889,6 +4897,321 @@ var msls_Entity_applyNestedChanges,
     msls_expose("Entity", _Entity);
     msls_expose("EntityCollection", _EntityCollection);
     msls_expose("_defineEntity", defineEntity);
+
+}());
+
+var msls_parseDateTimeOffset,
+    msls_getDecimalPlaces,
+    msls_ensureDecimalIsNumber,
+    msls_convertToStringForType,
+    msls_convertToString,
+    msls_getEmailAddressExpressions,
+    msls_convertFromString;
+
+(function () {
+    msls_parseDateTimeOffset =
+    function parseDateTimeOffset(stringValue) {
+        if (!!stringValue) {
+            var sections = stringValue.split(" "),
+                result,
+                dateSections,
+                timeSections,
+                timeOffsetSections,
+                year, month, day, hour, minute, second, milliseconds, minuteOffset;
+            if (sections.length > 2) {
+                dateSections = sections[0].split("/");
+                year = parseInt(dateSections[2], 10);
+                month = parseInt(dateSections[0], 10) - 1;
+                day = parseInt(dateSections[1], 10);
+                timeSections = sections[1].split(":");
+                hour = parseInt(timeSections[0], 10);
+                minute = parseInt(timeSections[1], 10);
+                second = Math.floor(parseInt(timeSections[2], 10) * 1000);
+                milliseconds = second % 1000;
+                second = (second - milliseconds) / 1000;
+                result = new Date(Date.UTC(year, month, day, hour, minute, second, milliseconds));
+                timeOffsetSections = sections[2].substr(1).split(":");
+                minuteOffset = parseInt(timeOffsetSections[0], 10) * 60 + parseInt(timeOffsetSections[1], 10);
+                if (!!minuteOffset) {
+                    if (sections[2].charAt(0) === "+") {
+                        result.setMinutes(result.getMinutes() - minuteOffset);
+                    } else {
+                        result.setMinutes(result.getMinutes() + minuteOffset);
+                    }
+                }
+                return result;
+            }
+        }
+        return null;
+    };
+
+    function generalDateLongTimeFormat() {
+
+        var p = Globalize.culture().calendars.standard.patterns;
+        return p.d + " " + p.T;
+    }
+
+    function generalDateShortTimeFormat() {
+
+        var p = Globalize.culture().calendars.standard.patterns;
+        return p.d + " " + p.t;
+    }
+
+    msls_getDecimalPlaces =
+    function getDecimalPlaces(value) {
+
+        var stringValue = (value === null || value === undefined) ? "" : value.toString(),
+            i = stringValue.indexOf(".");
+            return i !== -1 ? (stringValue.length - i - 1) : 0;
+    };
+
+    msls_ensureDecimalIsNumber =
+    function ensureDecimalIsNumber(value) {
+        if (value === "") {
+            return null;
+        } else if (value === null || value === undefined) {
+            return value;
+        } else {
+            return parseFloat(value.toString());
+        }
+    };
+
+    function formatTimeElement(value) {
+        if (value < 10) {
+            return "0" + value.toString();
+        } else {
+            return value.toString();
+        }
+    }
+
+    function getTimeSpanStringValueFromValue(value) {
+        var t = value,
+            sign = "",
+            ms,
+            days,
+            hours,
+            minutes,
+            seconds;
+        ms = t.ms;
+        if (ms < 0) {
+            sign = "-";
+            ms = -ms;
+        }
+        days = Math.floor(ms / 86400000);
+        ms -= 86400000 * days;
+        hours = Math.floor(ms / 3600000);
+        ms -= 3600000 * hours;
+        minutes = Math.floor(ms / 60000);
+        ms -= 60000 * minutes;
+        seconds = Math.floor(ms / 1000);
+        ms -= seconds * 1000;
+        return sign + ((days > 0) ? days.toString() + "." : "") + formatTimeElement(hours) + ":" + formatTimeElement(minutes) +
+                        ":" + formatTimeElement(seconds) + ((ms > 0) ? "." + ms.toString() : "");
+    }
+
+    msls_convertToStringForType =
+    function convertToStringForType(value, typeId) {
+
+        var stringValue = "";
+        switch (typeId) {
+            case ":Date":
+                stringValue = Globalize.format(value, "d");
+                break;
+            case ":DateTime":
+            case ":DateTimeOffset":
+                stringValue = Globalize.format(value, generalDateLongTimeFormat());
+                break;
+            case ":TimeSpan":
+                stringValue = getTimeSpanStringValueFromValue(value);
+                break;
+            case ":Decimal":
+            case ":Double":
+            case ":Single":
+                if (typeId === ":Decimal") {
+                    value = msls_ensureDecimalIsNumber(value);
+                }
+
+                stringValue = Globalize.format(value, "n" + msls_getDecimalPlaces(value).toString());
+                break;
+            default:
+                stringValue = value.toString();
+                break;
+        }
+        return stringValue;
+    };
+
+    msls_convertToString =
+    function convertToString(value, propertyDefinition) {
+
+        var stringValue = "",
+            underlyingTypes,
+            primitiveTypeId,
+            semanticTypeId,
+            decimalPlaces,
+            scale;
+
+        if (value !== undefined && value !== null) {
+
+            underlyingTypes = msls_getUnderlyingTypes(propertyDefinition.propertyType);
+            primitiveTypeId = underlyingTypes.primitiveType.id;
+            semanticTypeId = underlyingTypes.semanticType ? underlyingTypes.semanticType.id : "";
+
+
+            if (semanticTypeId === ":Date") {
+                stringValue = msls_convertToStringForType(value, semanticTypeId);
+            } else {
+                stringValue = msls_convertToStringForType(value, primitiveTypeId);
+            }
+        }
+        return stringValue;
+    };
+
+    msls_getEmailAddressExpressions =
+    function getEmailAddressExpressions() {
+        return [
+            /^\s*\S+.*/,
+            /^\s*\S+.*@\S+\s*$/
+        ];
+    };
+
+    msls_convertFromString =
+    function convertFromString(stringValue, propertyDefinition) {
+
+
+        var stringValue_lc,
+            value,
+            error,
+            propertyType = propertyDefinition.propertyType,
+            underlyingTypes = msls_getUnderlyingTypes(propertyType),
+            primitiveTypeId = underlyingTypes.primitiveType.id,
+            semanticTypeId = underlyingTypes.semanticType ? underlyingTypes.semanticType.id : "",
+            min,
+            max,
+            expression,
+            numberFormat = Globalize.culture().numberFormat;
+
+        if (primitiveTypeId === ":String" &&
+            stringValue === "" &&
+            !!msls_getAttribute(propertyDefinition, ":@Required") &&
+            !!msls_getAttribute(propertyDefinition, ":@AllowEmptyString")) {
+            return { value: "" };
+        }
+
+        if (!stringValue) {
+            return { value: null };
+        }
+
+        stringValue_lc = stringValue.toLowerCase();
+
+        if (primitiveTypeId === ":Byte" || primitiveTypeId === ":Int16" || primitiveTypeId === ":Int32" || primitiveTypeId === ":Int64") {
+            value = Globalize.parseInt(stringValue);
+            if (isNaN(value) || stringValue.indexOf(numberFormat["."]) !== -1) {
+                error = msls_getResourceString("validation_invalidValue_integer");
+            } else {
+                if (primitiveTypeId === ":Byte") {
+                    min = 0;
+                    max = 255;
+                } else if (primitiveTypeId === ":Int16") {
+                    min = -65536;
+                    max = 65535;
+                } else if (primitiveTypeId === ":Int32") {
+                    min = -4294967296;
+                    max = 4294967295;
+                } else if (primitiveTypeId === ":Int64") {
+                    min = -18446744073709551616;
+                    max = 18446744073709551615;
+                }
+
+
+                if (value < min || value > max) {
+                    error = msls_getResourceString("validation_invalidRange_2args", Globalize.format(min, "n"), Globalize.format(max, "n"));
+                }
+            }
+        } else if (primitiveTypeId === ":Decimal" || primitiveTypeId === ":Double" || primitiveTypeId === ":Single") {
+            value = Globalize.parseFloat(stringValue);
+            if (isNaN(value) ||
+                stringValue.indexOf(numberFormat.currency.symbol) !== -1 ||
+                stringValue.indexOf(numberFormat.percent.symbol) !== -1) {
+                error = msls_getResourceString("validation_invalidValue_decimal");
+            }
+        } else if (primitiveTypeId === ":Boolean") {
+            value = stringValue_lc === "true" || stringValue_lc === "1";
+            if (!value) {
+                if (stringValue_lc !== "false" && stringValue_lc !== "0") {
+                    error = msls_getResourceString("validation_invalidValue_boolean");
+                }
+            }
+        } else if (semanticTypeId === ":Date" || primitiveTypeId === ":DateTime" || primitiveTypeId === ":DateTimeOffset") {
+            value = Globalize.parseDate(stringValue, [generalDateLongTimeFormat(), generalDateShortTimeFormat()]);
+            if (!value || isNaN(value.getFullYear())) {
+                value = Globalize.parseDate(stringValue);
+                if (!value || isNaN(value.getFullYear())) {
+                    if (semanticTypeId === ":Date") {
+                        error = msls_getResourceString("validation_invalidValue_date");
+                    } else {
+                        error = msls_getResourceString("validation_invalidValue_dateTime");
+                    }
+                }
+            } else if (semanticTypeId === ":Date") {
+                value.setHours(0, 0, 0, 0);
+            }
+        } else if (primitiveTypeId === ":TimeSpan") {
+            var parts,
+                days,
+                hours,
+                minutes,
+                seconds,
+                milliseconds,
+                ms;
+            expression = /^\s*(\+|-)?((\d+)?\.)?(\d{1,2})?:{0,1}(\d{1,2})?:{0,1}(\d{1,2})?(\.(\d{1,7})?)?\s*$/;
+            parts = expression.exec(stringValue);
+            if (parts === null) {
+                error = msls_getResourceString("validation_invalidValue_timespan");
+            } else {
+                days = parseInt(parts[3] || "0", 10),
+                hours = parseInt(parts[4] || "0", 10),
+                minutes = parseInt(parts[5] || "0", 10),
+                seconds = parseInt(parts[6] || "0", 10);
+                milliseconds = parseInt((parts[8] || "0").slice(0, 3), 10);
+                if (hours > 23 || minutes > 59 || seconds > 59 || milliseconds > 999) {
+                    error = msls_getResourceString("validation_invalidRange_timespan");
+                } else {
+                    ms = days * 86400000 + hours * 3600000 + minutes * 60000 + seconds * 1000 + milliseconds;
+                    if (parts[1] === "-") {
+                        ms = -ms;
+                    }
+                    value = { ms: ms, __edmType: "Edm.Time" };
+                }
+            }
+        } else if (primitiveTypeId === ":Guid") {
+            value = stringValue;
+            expression = /^(\{{0,1}([0-9a-fA-F]){8}(-([0-9a-fA-F]){4}){3}-([0-9a-fA-F]){12}\}{0,1})$/;
+            if (!expression.test(value)) {
+                error = msls_getResourceString("validation_invalidValue_guid");
+            }
+        } else if (semanticTypeId === msls_builtIn_extensionName + ":WebAddress") {
+            expression = /^\s*(http|https):\/\/(.*)$/;
+            if (!expression.test(stringValue)) {
+                value = "http://" + stringValue.replace(/^\s*/, "").replace(/\s*$/, "");
+            } else {
+                value = stringValue;
+            }
+        } else if (semanticTypeId === msls_builtIn_extensionName + ":EmailAddress") {
+            var expressions = msls_getEmailAddressExpressions(),
+                attribute = msls_getAttribute(propertyDefinition, msls_builtIn_extensionName + ":@EmailAddressProperties"),
+                localPart = stringValue.replace(/@.*$/, "");
+            if (!expressions[1].test(stringValue) &&
+                !!attribute && !!attribute.defaultDomain &&
+                expressions[0].test(localPart)) {
+                value = localPart + "@" + attribute.defaultDomain.replace(/^\s*@/, "");
+            } else {
+                value = stringValue;
+            }
+        } else {
+            value = stringValue;
+        }
+        return { value: error ? null : value, error: error };
+    };
 
 }());
 
@@ -5347,7 +5670,7 @@ var msls_relativeDates_now;
         addMilliseconds(date, value * 86400000);
     }
 
-    msls_addToInternalNamespace("relativeDates", {
+    var relativeDatesMembers = {
         now: function now() {
             return msls_relativeDates_now();
         },
@@ -5423,9 +5746,14 @@ var msls_relativeDates_now;
 
             return result;
         },
-    });
+    };
+
+    msls_addToInternalNamespace("relativeDates", relativeDatesMembers);
+    msls_addToInternalNamespace("relativeDateTimeOffsetDates", relativeDatesMembers);
+
 
     msls_expose("relativeDates", msls.relativeDates);
+    msls_expose("relativeDateTimeOffsetDates", msls.relativeDates);
 }());
 
 (function () {
@@ -5466,8 +5794,7 @@ var msls_relativeDates_now;
 }());
 
 var msls_validate,
-    msls_tryGetPhoneNumberFormats,
-    msls_getEmailAddressExpressions;
+    msls_tryGetPhoneNumberFormats;
 
 (function () {
 
@@ -5520,26 +5847,49 @@ var msls_validate,
             attribute = msls_getAttribute(modelItem, ":@Range"),
             minValue,
             maxValue,
-            message;
+            baseDateTimeType = null,
+            message = null;
 
         if (attribute) {
 
-            if (id !== ":Date" && id !== ":DateTime") {
-                if (value !== undefined && value !== null) {
-                    var numericValue = parseFloat(value);
-                    if (numericValue < attribute.minimum || numericValue > attribute.maximum) {
-                        message = msls_getResourceString("validation_invalidRange_2args", attribute.minimum, attribute.maximum);
-                        validationResult = new msls_ValidationResult(property, message);
+            switch (id) {
+                case ":Date":
+                case ":Date?":
+                    baseDateTimeType = ":Date";
+                    minValue = new Date(attribute.minimum);
+                    maxValue = new Date(attribute.maximum);
+                    break;
+                case ":DateTime":
+                case ":DateTime?":
+                    baseDateTimeType = ":DateTime";
+                    minValue = new Date(attribute.minimum);
+                    maxValue = new Date(attribute.maximum);
+                    break;
+                case ":DateTimeOffset":
+                case ":DateTimeOffset?":
+                    baseDateTimeType = ":DateTimeOffset";
+                    minValue = msls_parseDateTimeOffset(attribute.minimum);
+                    maxValue = msls_parseDateTimeOffset(attribute.maximum);
+                    break;
+                default:
+                    if (value !== undefined && value !== null) {
+                        var numericValue = parseFloat(value);
+                        if (numericValue < attribute.minimum || numericValue > attribute.maximum) {
+                            message = msls_getResourceString("validation_invalidRange_2args", attribute.minimum, attribute.maximum);
+                        }
                     }
-                }
-            } else {
-                minValue = new Date(attribute.minimum);
-                maxValue = new Date(attribute.maximum);
+                    break;
+            }
 
-                if (!!value && (value.getTime() < minValue.getTime() || value.getTime() > maxValue.getTime())) {
-                    message = msls_getResourceString("validation_invalidRange_2args", attribute.minimum, attribute.maximum);
-                    validationResult = new msls_ValidationResult(property, message);
+            if (!!baseDateTimeType) {
+                if (!!value && ((!!minValue && value.getTime() < minValue.getTime()) || (!!maxValue && value.getTime() > maxValue.getTime()))) {
+                    message = msls_getResourceString("validation_invalidRange_2args",
+                                    attribute.minimum && msls_convertToStringForType(minValue, baseDateTimeType),
+                                    attribute.maximum && msls_convertToStringForType(maxValue, baseDateTimeType));
                 }
+            }
+            if (!!message) {
+                validationResult = new msls_ValidationResult(property, message);
             }
         }
 
@@ -5650,13 +6000,6 @@ var msls_validate,
 
         return validationResult;
     }
-    msls_getEmailAddressExpressions =
-    function getEmailAddressExpressions() {
-        return [
-            /^\s*\S+.*/,
-            /^\s*\S+.*@\S+\s*$/
-        ];
-    };
 
     function validateEmailAddress(modelItem, property, id, value) {
         var validationResult,
@@ -5935,7 +6278,7 @@ var msls_DataService_cancelNestedChanges,
                     continue;
                 }
                 value = result[property];
-                if (value instanceof Date) {
+                if (value instanceof Date && value.__edmType !== "Edm.DateTimeOffset") {
                     value.setMinutes(value.getMinutes() +
                         value.getTimezoneOffset());
                 } else if (typeof (value) === "object") {
@@ -6432,6 +6775,21 @@ var msls_DataService_cancelNestedChanges,
         msls_setProperty(entitySet, "_loadedEntities", {});
     };
 
+    function getTimeOffsetString(date) {
+        var offset = date.getTimezoneOffset(),
+            result;
+        if (offset === 0) {
+            return "Z";
+        }
+        if (offset < 0) {
+            result = "+";
+            offset = -offset;
+        } else {
+            result = "-";
+        }
+        return result.concat(formatDateElement(Math.floor(offset / 60)), ":",  formatDateElement(offset % 60));
+    }
+
     function toODataJSONFormat(data, type) {
         if (data === undefined || data === null) {
             return data;
@@ -6451,6 +6809,20 @@ var msls_DataService_cancelNestedChanges,
             case ":Int64":
             case ":Int64?":
                 return data.toString();
+            case ":DateTimeOffset":
+            case ":DateTimeOffset?":
+                data.__edmType = "Edm.DateTimeOffset";
+                if (!data.__offset) {
+                    data.__offset = getTimeOffsetString(data);
+                }
+                return data;
+            case ":DateTime":
+            case ":DateTime?":
+            case ":Date":
+            case ":Date?":
+                data = new Date(data.valueOf());
+                data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
+                return data;
             default:
                 return data;
         }
@@ -6481,7 +6853,6 @@ var msls_DataService_cancelNestedChanges,
             dataType;
 
         $.each(entityDetails.properties.all(), function (i, property) {
-            var value;
             if (!(property instanceof _TrackedProperty)) {
                 return;
             }
@@ -6493,12 +6864,7 @@ var msls_DataService_cancelNestedChanges,
                     (entityState === _EntityState.added && entityData.hasOwnProperty(serviceName))) {
                     propDef = property.getModel();
                     dataType = msls_getUnderlyingTypes(propDef.propertyType).primitiveType;
-                    value = requestData[serviceName] = toODataJSONFormat(entityData[serviceName], dataType.id);
-                    if (value instanceof Date) {
-                        value = new Date(value.valueOf());
-                        value.setMinutes(value.getMinutes() - value.getTimezoneOffset());
-                        requestData[serviceName] = value;
-                    }
+                    requestData[serviceName] = toODataJSONFormat(entityData[serviceName], dataType.id);
                 }
             } else if (property._entry.kind === "reference") {
                 if (entityState === _EntityState.added || property.isChanged) {
@@ -7013,6 +7379,53 @@ var msls_DataService_cancelNestedChanges,
         return dataServiceClass;
     }
 
+    function parseOffset(timeOffset) {
+        var sign,
+            offsetSections;
+        if (timeOffset) {
+            switch (timeOffset.charAt(0)) {
+                case "Z":
+                    return 0;
+                case "+":
+                    sign = 1;
+                    break;
+                case "-":
+                    sign = -1;
+                    break;
+                default:
+                    return null;
+            }
+            offsetSections = timeOffset.substr(1).split(":");
+            return sign * (parseInt(offsetSections[0], 10) * 60 + parseInt(offsetSections[1], 10));
+        }
+        return null;
+    }
+
+    function toISO8601String(date) {
+        var dateTimeOffset = date,
+            presetOffset,
+            convertedDate;
+        if (!!dateTimeOffset.__offset && (presetOffset = parseOffset(dateTimeOffset.__offset)) !== null) {
+            convertedDate = new Date(date.valueOf());
+            convertedDate.setUTCMinutes(convertedDate.getMinutes() + presetOffset);
+            return convertedDate.getUTCFullYear().toString() + "-" +
+                formatDateElement(convertedDate.getUTCMonth() + 1) + "-" +
+                formatDateElement(convertedDate.getUTCDate()) + "T" +
+                formatDateElement(convertedDate.getUTCHours()) + ":" +
+                formatDateElement(convertedDate.getUTCMinutes()) + ":" +
+                formatSeconds(convertedDate.getUTCSeconds(), convertedDate.getUTCMilliseconds(), dateTimeOffset.__ns) +
+                dateTimeOffset.__offset;
+        } else {
+            return date.getFullYear().toString() + "-" +
+                formatDateElement(date.getMonth() + 1) + "-" +
+                formatDateElement(date.getDate()) + "T" +
+                formatDateElement(date.getHours()) + ":" +
+                formatDateElement(date.getMinutes()) + ":" +
+                formatSeconds(date.getSeconds(), date.getMilliseconds(), dateTimeOffset.__ns) +
+                getTimeOffsetString(date);
+        }
+    }
+
     msls_toODataString =
     function toODataString(parameter, dataType) {
         if (parameter === undefined || parameter === null) {
@@ -7038,7 +7451,11 @@ var msls_DataService_cancelNestedChanges,
                     formatDateElement(d.getDate()) + "T" +
                     formatDateElement(d.getHours()) + ":" +
                     formatDateElement(d.getMinutes()) + ":" +
-                    formatDateElement(d.getSeconds()) + "'";
+                    formatSeconds(d.getSeconds(), d.getMilliseconds(), 0) + "'";
+            case ":DateTimeOffset":
+            case ":DateTimeOffset?":
+                var df = parameter;
+                return "datetimeoffset'" + toISO8601String(df) + "'";
             case ":Decimal":
             case ":Decimal?":
                 return parameter + "M";
@@ -7104,6 +7521,19 @@ var msls_DataService_cancelNestedChanges,
             return "0" + value.toString();
         } else {
             return value.toString();
+        }
+    }
+
+    function formatSeconds(seconds, milliseconds, ns) {
+        var value;
+        if (!milliseconds && !ns) {
+            return formatDateElement(seconds);
+        } else {
+            if (!ns) {
+                ns = 0;
+            }
+            value = (1000 + milliseconds) * 10000 + ns;
+            return formatDateElement(seconds) + "." + value.toString().substr(1);
         }
     }
 
@@ -7786,11 +8216,6 @@ var msls_createBoundArguments;
 
 }());
 
-var msls_convertToString,
-    msls_convertFromString,
-    msls_ensureDecimalIsNumber,
-    msls_getDecimalPlaces;
-
 (function () {
 
 
@@ -7849,248 +8274,6 @@ var msls_convertToString,
         convertBack: genericConverter_convertBack
     }
     );
-
-
-    function generalDateLongTimeFormat() {
-
-        var p = Globalize.culture().calendars.standard.patterns;
-        return p.d + " " + p.T;
-    }
-
-    function generalDateShortTimeFormat() {
-
-        var p = Globalize.culture().calendars.standard.patterns;
-        return p.d + " " + p.t;
-    }
-
-    msls_getDecimalPlaces =
-    function getDecimalPlaces(value) {
-
-        var stringValue = (value === null || value === undefined) ? "" : value.toString(),
-            i = stringValue.indexOf(".");
-            return i !== -1 ? (stringValue.length - i - 1) : 0;
-    };
-
-    msls_ensureDecimalIsNumber =
-    function ensureDecimalIsNumber(value) {
-        if (value === "") {
-            return null;
-        } else if (value === null || value === undefined) {
-            return value;
-        } else {
-            return parseFloat(value.toString());
-        }
-    };
-
-    function formatTimeElement(value) {
-        if (value < 10) {
-            return "0" + value.toString();
-        } else {
-            return value.toString();
-        }
-    }
-
-    function getTimeSpanStringValueFromValue(value) {
-        var t = value,
-            sign = "",
-            ms,
-            days,
-            hours,
-            minutes,
-            seconds;
-        ms = t.ms;
-        if (ms < 0) {
-            sign = "-";
-            ms = -ms;
-        }
-        days = Math.floor(ms / 86400000);
-        ms -= 86400000 * days;
-        hours = Math.floor(ms / 3600000);
-        ms -= 3600000 * hours;
-        minutes = Math.floor(ms / 60000);
-        ms -= 60000 * minutes;
-        seconds = Math.floor(ms / 1000);
-        ms -= seconds * 1000;
-        return sign + ((days > 0) ? days.toString() + "." : "") + formatTimeElement(hours) + ":" + formatTimeElement(minutes) +
-                        ":" + formatTimeElement(seconds) + ((ms > 0) ? "." + ms.toString() : "");
-    }
-
-    msls_convertToString =
-    function convertToString(value, propertyDefinition) {
-
-        var stringValue = "",
-            underlyingTypes,
-            primitiveTypeId,
-            semanticTypeId,
-            attribute,
-            decimalPlaces,
-            scale;
-
-        if (value !== undefined && value !== null) {
-
-            underlyingTypes = msls_getUnderlyingTypes(propertyDefinition.propertyType);
-            primitiveTypeId = underlyingTypes.primitiveType.id;
-            semanticTypeId = underlyingTypes.semanticType ? underlyingTypes.semanticType.id : "";
-
-
-            if (semanticTypeId === ":Date") {
-                stringValue = Globalize.format(value, "d");
-            } else if (primitiveTypeId === ":DateTime") {
-                stringValue = Globalize.format(value, generalDateLongTimeFormat());
-            } else if (primitiveTypeId === ":TimeSpan?" || primitiveTypeId === ":TimeSpan") {
-                stringValue = getTimeSpanStringValueFromValue(value);
-            } else if (primitiveTypeId === ":Decimal" || primitiveTypeId === ":Double" || primitiveTypeId === ":Single") {
-
-                if (primitiveTypeId === ":Decimal") {
-                    value = msls_ensureDecimalIsNumber(value);
-                }
-
-                stringValue = Globalize.format(value, "n" + msls_getDecimalPlaces(value).toString());
-            } else {
-                stringValue = value.toString();
-            }
-        }
-        return stringValue;
-    };
-
-    msls_convertFromString =
-    function convertFromString(stringValue, propertyDefinition) {
-
-
-        var stringValue_lc,
-            value,
-            error,
-            propertyType = propertyDefinition.propertyType,
-            underlyingTypes = msls_getUnderlyingTypes(propertyType),
-            primitiveTypeId = underlyingTypes.primitiveType.id,
-            semanticTypeId = underlyingTypes.semanticType ? underlyingTypes.semanticType.id : "",
-            min,
-            max,
-            expression,
-            numberFormat = Globalize.culture().numberFormat;
-
-        if (primitiveTypeId === ":String" &&
-            stringValue === "" &&
-            !!msls_getAttribute(propertyDefinition, ":@Required") &&
-            !!msls_getAttribute(propertyDefinition, ":@AllowEmptyString")) {
-            return { value: "" };
-        }
-
-        if (!stringValue) {
-            return { value: null };
-        }
-
-        stringValue_lc = stringValue.toLowerCase();
-
-        if (primitiveTypeId === ":Byte" || primitiveTypeId === ":Int16" || primitiveTypeId === ":Int32" || primitiveTypeId === ":Int64") {
-            value = Globalize.parseInt(stringValue);
-            if (isNaN(value) || stringValue.indexOf(numberFormat["."]) !== -1) {
-                error = msls_getResourceString("validation_invalidValue_integer");
-            } else {
-                if (primitiveTypeId === ":Byte") {
-                    min = 0;
-                    max = 255;
-                } else if (primitiveTypeId === ":Int16") {
-                    min = -65536;
-                    max = 65535;
-                } else if (primitiveTypeId === ":Int32") {
-                    min = -4294967296;
-                    max = 4294967295;
-                } else if (primitiveTypeId === ":Int64") {
-                    min = -18446744073709551616;
-                    max = 18446744073709551615;
-                }
-
-
-                if (value < min || value > max) {
-                    error = msls_getResourceString("validation_invalidRange_2args", Globalize.format(min, "n"), Globalize.format(max, "n"));
-                }
-            }
-        } else if (primitiveTypeId === ":Decimal" || primitiveTypeId === ":Double" || primitiveTypeId === ":Single") {
-            value = Globalize.parseFloat(stringValue);
-            if (isNaN(value) ||
-                stringValue.indexOf(numberFormat.currency.symbol) !== -1 ||
-                stringValue.indexOf(numberFormat.percent.symbol) !== -1) {
-                error = msls_getResourceString("validation_invalidValue_decimal");
-            }
-        } else if (primitiveTypeId === ":Boolean") {
-            value = stringValue_lc === "true" || stringValue_lc === "1";
-            if (!value) {
-                if (stringValue_lc !== "false" && stringValue_lc !== "0") {
-                    error = msls_getResourceString("validation_invalidValue_boolean");
-                }
-            }
-        } else if (semanticTypeId === ":Date" || primitiveTypeId === ":DateTime") {
-            value = Globalize.parseDate(stringValue, [generalDateLongTimeFormat(), generalDateShortTimeFormat()]);
-            if (!value || isNaN(value.getFullYear())) {
-                value = Globalize.parseDate(stringValue);
-                if (!value || isNaN(value.getFullYear())) {
-                    if (semanticTypeId === ":Date") {
-                        error = msls_getResourceString("validation_invalidValue_date");
-                    } else {
-                        error = msls_getResourceString("validation_invalidValue_dateTime");
-                    }
-                }
-            } else if (semanticTypeId === ":Date") {
-                value.setHours(0, 0, 0, 0);
-            }
-        } else if (primitiveTypeId === ":TimeSpan") {
-            var parts,
-                days,
-                hours,
-                minutes,
-                seconds,
-                milliseconds,
-                ms;
-            expression = /^\s*(\+|-)?((\d+)?\.)?(\d{1,2})?:{0,1}(\d{1,2})?:{0,1}(\d{1,2})?(\.(\d{1,7})?)?\s*$/;
-            parts = expression.exec(stringValue);
-            if (parts === null) {
-                error = msls_getResourceString("validation_invalidValue_timespan");
-            } else {
-                days = parseInt(parts[3] || "0", 10),
-                hours = parseInt(parts[4] || "0", 10),
-                minutes = parseInt(parts[5] || "0", 10),
-                seconds = parseInt(parts[6] || "0", 10);
-                milliseconds = parseInt((parts[8] || "0").slice(0, 3), 10);
-                if (hours > 23 || minutes > 59 || seconds > 59 || milliseconds > 999) {
-                    error = msls_getResourceString("validation_invalidRange_timespan");
-                } else {
-                    ms = days * 86400000 + hours * 3600000 + minutes * 60000 + seconds * 1000 + milliseconds;
-                    if (parts[1] === "-") {
-                        ms = -ms;
-                    }
-                    value = { ms: ms, __edmType: "Edm.Time" };
-                }
-            }
-        } else if (primitiveTypeId === ":Guid") {
-            value = stringValue;
-            expression = /^(\{{0,1}([0-9a-fA-F]){8}(-([0-9a-fA-F]){4}){3}-([0-9a-fA-F]){12}\}{0,1})$/;
-            if (!expression.test(value)) {
-                error = msls_getResourceString("validation_invalidValue_guid");
-            }
-        } else if (semanticTypeId === msls_builtIn_extensionName + ":WebAddress") {
-            expression = /^\s*(http|https):\/\/(.*)$/;
-            if (!expression.test(stringValue)) {
-                value = "http://" + stringValue.replace(/^\s*/, "").replace(/\s*$/, "");
-            } else {
-                value = stringValue;
-            }
-        } else if (semanticTypeId === msls_builtIn_extensionName + ":EmailAddress") {
-            var expressions = msls_getEmailAddressExpressions(),
-                attribute = msls_getAttribute(propertyDefinition, msls_builtIn_extensionName + ":@EmailAddressProperties"),
-                localPart = stringValue.replace(/@.*$/, "");
-            if (!expressions[1].test(stringValue) &&
-                !!attribute && !!attribute.defaultDomain &&
-                expressions[0].test(localPart)) {
-                value = localPart + "@" + attribute.defaultDomain.replace(/^\s*@/, "");
-            } else {
-                value = stringValue;
-            }
-        } else {
-            value = stringValue;
-        }
-        return { value: error ? null : value, error: error };
-    };
 
 }());
 
@@ -10483,7 +10666,6 @@ var msls_AttachedLabelPosition,
     msls_expose("HeightSizingMode", msls_HeightSizingMode);
     msls_expose("ContentItemKind", msls_ContentItemKind);
     msls_expose("PageKind", msls_PageKind);
-    msls_expose("ContentItem", msls.ContentItem);
 
 }());
 
@@ -13868,7 +14050,10 @@ var
 
     msls_sharePoint_chrome = "msls-sharepoint-chrome",
     msls_sharePoint_enabled = "msls-sharepoint-enabled",
-    msls_sharePoint_chrome_link = "msls-sharepoint-chrome-link"
+    msls_sharePoint_chrome_link = "msls-sharepoint-chrome-link",
+
+
+    html_tabIndex_Attribute = "tabindex"
 
 
 ;
@@ -14090,38 +14275,38 @@ var msls_templateStrings = {
     '</div>',
 
 "screenSaveDiscardTemplate":
-    '<div class="subControl msls-save-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-save" data-iconpos="notext"' +
+    '<div class="subControl msls-save-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-save" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.saveCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.saveCommand.command}">' +
     '</div>' +
-    '<div class="subControl msls-discard-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-cancel" data-iconpos="notext"' +
+    '<div class="subControl msls-discard-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-cancel" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.discardCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.discardCommand.command}">' +
     '</div>',
 
 "screenOkTemplate":
-    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-ok" data-iconpos="notext"' +
+    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-ok" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.okCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.okCommand.command}">' +
     '</div>',
 
 "screenOkCancelTemplate":
-    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-ok" data-iconpos="notext"' +
+    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-ok" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.okCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.okCommand.command}">' +
     '</div>' +
-    '<div class="subControl msls-cancel-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-cancel"' +
+    '<div class="subControl msls-cancel-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-cancel"' +
        ' data-iconpos="notext" data-role="button" data-ls-content="content:{data.shell.cancelCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.cancelCommand.command}">' +
     '</div>',
 
 "screenLogoutTemplate":
-    '<div class="subControl msls-logout-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-logout" data-iconpos="notext"' +
+    '<div class="subControl msls-logout-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-logout" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.logoutCommand.displayName}"' +
        ' data-ls-isvisible="isVisible:{tap.canExecute}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
@@ -14138,38 +14323,38 @@ var msls_templateStrings = {
     '</div>',
 
 "dialogSaveDiscardTemplate":
-    '<div class="subControl msls-save-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-save" data-iconpos="notext"' +
+    '<div class="subControl msls-save-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-save" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.saveCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.saveCommand.command}">' +
     '</div>' +
-    '<div class="subControl msls-discard-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-discard"' +
+    '<div class="subControl msls-discard-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-discard"' +
        ' data-iconpos="notext" data-role="button" data-ls-content="content:{data.shell.discardCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.discardCommand.command}">' +
     '</div>',
 
 "dialogOkTemplate":
-    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-ok" data-iconpos="notext"' +
+    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-ok" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.okCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.okCommand.command}">' +
     '</div>',
 
 "dialogOkCancelTemplate":
-    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-ok" data-iconpos="notext"' +
+    '<div class="subControl msls-ok-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-ok" data-iconpos="notext"' +
        ' data-role="button" data-ls-content="content:{data.shell.okCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.okCommand.command}">' +
     '</div>' +
-    '<div class="subControl msls-cancel-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-cancel"' +
+    '<div class="subControl msls-cancel-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-cancel"' +
        ' data-iconpos="notext" data-role="button" data-ls-content="content:{data.shell.cancelCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.cancelCommand.command}">' +
     '</div>',
 
 "dialogCloseTemplate":
-    '<div class="subControl msls-close-button msls-large-icon" control="ShellButton" tabindex="0" data-icon="msls-cancel"' +
+    '<div class="subControl msls-close-button msls-large-icon" control="ShellButton" tabindex="-1" data-icon="msls-cancel"' +
        ' data-iconpos="notext" data-role="button" data-ls-content="content:{data.shell.closeCommand.displayName}"' +
        ' data-ls-isenabled="isEnabled:{tap.canExecute}"' +
        ' data-ls-tap="tap:{data.shell.closeCommand.command}">' +
@@ -14258,12 +14443,175 @@ var msls_ui_controls_ScrollHelper;
     }
 }());
 
+var SP,
+    msls_sharepoint;
+
+(function () {
+
+    var hostUrl = msls_getClientParameter("SPHostUrl"),
+        appWebUrl = msls_getClientParameter("SPAppWebUrl"),
+        serverUrl, chromeColors = msls_getClientParameter("SPChromeColors"),
+        chromeBackgroundColor, chromeLinkFontColor,
+        scriptBase, suffix, promise,
+        pendingRequestCallbacks;
+
+    hostUrl = hostUrl ? decodeURIComponent(hostUrl) : null;
+    appWebUrl = appWebUrl ? decodeURIComponent(appWebUrl) : null;
+
+    if (!hostUrl || !appWebUrl) {
+        return;
+    }
+
+    serverUrl = $.mobile.path.parseUrl(hostUrl).domain;
+
+    chromeColors = chromeColors ? decodeURIComponent(chromeColors) : null;
+    if (/^[0-9a-fA-F]{16}$/.test(chromeColors)) {
+        chromeBackgroundColor = chromeColors.substring(2, 8);
+        chromeLinkFontColor = chromeColors.substring(10, 16);
+    }
+
+    function getScript(url) {
+        return $.ajax({
+            url: url,
+            cache: true,
+            dataType: "script"
+        });
+    }
+
+    msls_mark(msls_codeMarkers.loadSharePointStart);
+    scriptBase = appWebUrl + "/_layouts/15/";
+    suffix = ".js";
+    promise = getScript(scriptBase + "SP.RequestExecutor" + suffix)
+        .then(function () {
+            return getScript(scriptBase + "SP.Runtime" + suffix);
+        })
+        .then(function () {
+            return getScript(scriptBase + "SP" + suffix);
+        })
+        .then(function () {
+            var context, factory;
+            if (!(SP = window.SP) ||
+                !SP.ProxyWebRequestExecutorFactory ||
+                !SP.ClientObject || !SP.ClientContext) {
+                return $.Deferred().reject();
+            }
+            context = new SP.ClientContext(appWebUrl);
+            factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
+            context.set_webRequestExecutorFactory(factory);
+            msls_sharepoint.context = context;
+            msls_sharepoint.hostWeb = new SP.AppContextSite(context, hostUrl).get_web();
+            msls_sharepoint.appWeb = new SP.AppContextSite(context, appWebUrl).get_web();
+        })
+        .always(function () {
+            msls_mark(msls_codeMarkers.loadSharePointEnd);
+        });
+
+    var gifIconExtensions = {
+        doc: true,
+        ppt: true,
+        xls: true,
+        eml: true,
+        dot: true,
+        txt: true,
+        htm: true,
+        jpg: true,
+        png: true,
+        gif: true,
+        zip: true,
+        xps: true
+    };
+    var pngIconExtensions = {
+        docx: true,
+        pptx: true,
+        xlsx: true,
+        one: true,
+        dotx: true,
+        pdf: true
+    };
+
+    msls_sharepoint = {
+        hostUrl: hostUrl,
+        appWebUrl: appWebUrl,
+        serverUrl: serverUrl,
+        chromeBackgroundColor: chromeBackgroundColor,
+        chromeLinkFontColor: chromeLinkFontColor,
+        context: null,
+        hostWeb: null,
+        appWeb: null,
+        ready: promise.then,
+        processRequest: function (asyncResult) {
+            var me = this, context = me.context, deferred = $.Deferred();
+            if (!pendingRequestCallbacks) {
+                pendingRequestCallbacks = [];
+                setTimeout(function () {
+                    context.executeQueryAsync(
+                        function () {
+                            var callbacks = pendingRequestCallbacks;
+                            pendingRequestCallbacks = null;
+                            callbacks.forEach(function (callback) {
+                                callback();
+                            });
+                        },
+                        function (error) {
+                            var callbacks = pendingRequestCallbacks;
+                            pendingRequestCallbacks = null;
+                            callbacks.forEach(function (callback) {
+                                callback(error);
+                            });
+                        }
+                    );
+                }, 0);
+            }
+            pendingRequestCallbacks.push(function (error) {
+                if (error) {
+                    deferred.reject(error);
+                } else {
+                    deferred.resolve(asyncResult);
+                }
+            });
+            return deferred.promise();
+        },
+        load: function () {
+            var me = this, context = me.context, deferred = $.Deferred(),
+                args = Array.prototype.slice.call(arguments, 0);
+            args.forEach(function (o) {
+                context.load(o);
+            });
+            context.executeQueryAsync(
+                function success() {
+                    deferred.resolve();
+                },
+                function failure(unused, e) {
+                    deferred.reject(e);
+                }
+            );
+            return deferred.promise();
+        },
+        getIconUrl: function (extension) {
+            var prefix = this.serverUrl + "/_layouts/15/images/ic";
+            if (extension === "html") {
+                extension = "htm";
+            }
+            if (gifIconExtensions[extension]) {
+                return prefix + extension + ".gif";
+            } else if (pngIconExtensions[extension]) {
+                return prefix + extension + ".png";
+            } else {
+                return prefix + "gen.gif";
+            }
+        }
+    };
+
+}());
+
 var msls_addOrRemoveClass,
     msls_removeClasses,
     msls_addClasses,
     msls_createElement,
     msls_setText,
-    msls_handleDialogFocus;
+    msls_handleDialogFocus,
+    msls_handleContainerKeyboardNavigation,
+    msls_updateContainerFocusItem;
 
 (function () {
 
@@ -14378,6 +14726,69 @@ var msls_addOrRemoveClass,
         dialog[0]._keyDownEventHooked = true;
     };
 
+    msls_handleContainerKeyboardNavigation =
+    function handleContainerKeyboardNavigation($container, activeItemsSelector) {
+
+        $(activeItemsSelector, $container).first()
+            .attr(html_tabIndex_Attribute, "0");
+
+        $container.keydown(function (e) {
+            var jQueryMobileKeyCode = $.mobile.keyCode,
+                keyCode = e.which;
+            if (keyCode === jQueryMobileKeyCode.LEFT ||
+                keyCode === jQueryMobileKeyCode.RIGHT) {
+
+                var $activeItems = $(activeItemsSelector, $container),
+                    $focusedItem = $(activeItemsSelector + ":focus", $container),
+                    focusedItemIndex = $activeItems.index($focusedItem),
+                    lastIndex = $activeItems.length - 1;
+
+
+                if (keyCode === jQueryMobileKeyCode.LEFT) {
+                    focusedItemIndex -= 1;
+                } else {
+                    focusedItemIndex += 1;
+                }
+
+                if (focusedItemIndex < 0) {
+                    focusedItemIndex = lastIndex;
+                } else if (focusedItemIndex > lastIndex) {
+                    focusedItemIndex = 0;
+                }
+
+                $focusedItem.attr(html_tabIndex_Attribute, "-1");
+
+                $focusedItem = $($activeItems[focusedItemIndex]);
+                $focusedItem.attr(html_tabIndex_Attribute, "0");
+                $focusedItem.focus();
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        });
+    };
+
+    msls_updateContainerFocusItem =
+    function updateContainerFocusItem($container, activeItemsSelector, $item) {
+
+        var $activeItems = $(activeItemsSelector, $container),
+            itemIsActive = $activeItems.index($item) >= 0,
+            setFirstItemActive;
+
+        if (itemIsActive) {
+            setFirstItemActive = $activeItems.length === 1;
+        } else {
+            if ($item.attr(html_tabIndex_Attribute) === "0") {
+                $item.attr(html_tabIndex_Attribute, "-1");
+                setFirstItemActive = true;
+            }
+        }
+
+        if (setFirstItemActive) {
+            $activeItems.first().attr(html_tabIndex_Attribute, "0");
+        }
+    };
+
 
     function ObservableCssClass(elementOrJquery, trueClassName, falseClassName) {
 
@@ -14408,14 +14819,22 @@ var msls_addOrRemoveClass,
             return null;
 
         }, function value_set(value) {
-            var jQueryElement = $(this._element);
+            var me = this,
+                jQueryElement = $(me._element),
+                trueClassName = me._trueClassName,
+                falseClassName = me._falseClassName,
+                onvaluechange = me.onvaluechange;
 
-            if (this._trueClassName) {
-                msls_addOrRemoveClass(jQueryElement, value, this._trueClassName);
+            if (trueClassName) {
+                msls_addOrRemoveClass(jQueryElement, value, trueClassName);
             }
 
-            if (this._falseClassName) {
-                msls_addOrRemoveClass(jQueryElement, !value, this._falseClassName);
+            if (falseClassName) {
+                msls_addOrRemoveClass(jQueryElement, !value, falseClassName);
+            }
+
+            if ((!!trueClassName || !!falseClassName) && !!onvaluechange) {
+                onvaluechange(jQueryElement);
             }
         })
     });
@@ -15351,7 +15770,10 @@ var
             uiElement.addClass("msls-tap");
 
             uiElement.keypress(function (e) {
-                if (e.keyCode === $.mobile.keyCode.ENTER) {
+                var jQueryMobileKeyCode = $.mobile.keyCode,
+                    keyCode = e.keyCode;
+                if (keyCode === jQueryMobileKeyCode.ENTER ||
+                    keyCode === jQueryMobileKeyCode.SPACE) {
                     $(e.target).trigger("vclick");
                 }
             });
@@ -15595,7 +16017,7 @@ var
                         );
                     }
                 }
-                if (e.originalEvent.type !== "click") {
+                if (!!e.originalEvent && e.originalEvent.type !== "click") {
                     e.preventDefault();
                 }
                 e.stopPropagation();
@@ -15908,13 +16330,33 @@ var msls_setTextBoxMaxLength;
 
     (function () {
 
+        function NegativeTabIndexButton(view) {
+
+            _Button.call(this, view);
+        }
+
+        function _fillTemplate(view, contentItem, templateData) {
+            var element = $('<a tabIndex="-1" class="id-element" data-role="button" data-mini="true" data-theme="' + cssDefaultJqmTheme + '"/>').appendTo(view);
+            templateData.idElement = msls_getTemplateItemPath(view, element);
+        }
+
+        msls_defineClass("ui.controls", "NegativeTabIndexButton", NegativeTabIndexButton, _Button, {
+            controlName: "NegativeTabIndexButton"
+        }, {
+            _fillTemplate: _fillTemplate
+        });
+    }());
+
+
+    (function () {
+
         function CommandBarButton(view) {
 
             _Button.call(this, view);
         }
 
         function _fillTemplate(view, contentItem, templateData) {
-            var $element = $('<div class="id-element msls-large-icon" tabIndex="0" data-iconpos="top" data-role="button" data-theme="' +
+            var $element = $('<div class="id-element msls-large-icon" tabIndex="-1" data-iconpos="top" data-role="button" data-theme="' +
                     cssDefaultJqmTheme + '" data-corners="false" data-mini="true"></div>'),
                 iconName = contentItem.properties[msls_builtIn_iconProperty];
 
@@ -18092,7 +18534,7 @@ var msls_getAttachedLabelPosition,
 
     function _buildDropdownElement(nameAttribute, options) {
 
-        var selectHtml = '<select class="msls-text id-element" name="' + nameAttribute + '" data-icon="false" data-mini="true" style="min-width: 100%; max-width: none;">';
+        var selectHtml = '<select tabindex="-1" class="msls-text id-element" name="' + nameAttribute + '" data-icon="false" data-mini="true" style="min-width: 100%; max-width: none;">';
         if (!!options) {
             selectHtml += options.join("");
         }
@@ -18195,6 +18637,9 @@ var msls_getAttachedLabelPosition,
     function _getFormat(contentItem) {
 
         var format = {},
+            valueModel,
+            propertyType,
+            primitiveTypeId,
             properties = contentItem.properties;
 
         format.culture = Globalize.culture();
@@ -18207,37 +18652,49 @@ var msls_getAttachedLabelPosition,
             format.minuteIncrement = 1;
         }
 
-        format._isNullable = !msls_getAttribute(contentItem.valueModel, ":@Required");
-
-        var dateRange = msls_getAttribute(contentItem.valueModel, ":@Range");
-        if (!!dateRange) {
-
-            if (!!dateRange.minimum) {
-
-                format._minimumDate = new Date(dateRange.minimum);
-                var minYear = format._minimumDate.getFullYear();
-
-                if (format.minimumYear < minYear) {
-                    format.minimumYear = minYear;
-                }
-
-            } else {
-                format._minimumDate = null;
+        valueModel = contentItem.valueModel;
+        if (!!valueModel) {
+            format._isNullable = !msls_getAttribute(valueModel, ":@Required");
+            propertyType = valueModel.propertyType;
+            if (!!propertyType) {
+                primitiveTypeId = msls_getUnderlyingTypes(propertyType).primitiveType.id;
             }
 
-            if (!!dateRange.maximum) {
+            var dateRange = msls_getAttribute(valueModel, ":@Range");
+            if (!!dateRange) {
 
-                format._maximumDate = new Date(dateRange.maximum);
-                var maxYear = format._maximumDate.getFullYear();
+                if (!!dateRange.minimum) {
 
-                if (format.maximumYear > maxYear) {
-                    format.maximumYear = maxYear;
+                    if (primitiveTypeId === ":DateTimeOffset") {
+                        format._minimumDate = msls_parseDateTimeOffset(dateRange.minimum);
+                    } else {
+                        format._minimumDate = new Date(dateRange.minimum);
+                    }
+                    var minYear = format._minimumDate.getFullYear();
+
+                    if (format.minimumYear < minYear) {
+                        format.minimumYear = minYear;
+                    }
+                } else {
+                    format._minimumDate = null;
                 }
 
-            } else {
-                format._maximumDate = null;
-            }
+                if (!!dateRange.maximum) {
 
+                    if (primitiveTypeId === ":DateTimeOffset") {
+                        format._maximumDate = msls_parseDateTimeOffset(dateRange.maximum);
+                    } else {
+                        format._maximumDate = new Date(dateRange.maximum);
+                    }
+                    var maxYear = format._maximumDate.getFullYear();
+
+                    if (format.maximumYear > maxYear) {
+                        format.maximumYear = maxYear;
+                    }
+                } else {
+                    format._maximumDate = null;
+                }
+            }
         }
 
         switch (format.clock) {
@@ -18516,6 +18973,9 @@ var msls_getAttachedLabelPosition,
                 dropDownElement = dropDownElement.nextSibling;
             }
         }
+
+        msls_handleContainerKeyboardNavigation(
+            $(dateTimePickerContainer), "select");
     }
 
     var dateTimePicker = msls_defineClass("ui.controls", "DateTimePicker", DateTimePicker, msls_ui_Control, {
@@ -18589,6 +19049,176 @@ var msls_getAttachedLabelPosition,
             originalValue: "originalDate"
         }
     };
+}());
+
+(function () {
+    var control_attachViewCore = msls.ui.Control.prototype._attachViewCore;
+
+    function DocumentEditor(view) {
+
+        msls.ui.Control.call(this, view);
+    }
+
+    function _fillTemplate(view, contentItem, templateData) {
+        var template = "<div></div>",
+            element = $(template).appendTo(view);
+
+        templateData.idElement = msls_getTemplateItemPath(view, element);
+    }
+
+    function _attachViewCore(templateData) {
+        control_attachViewCore.call(this, templateData);
+        this._docElement = msls_getTemplateItem(this.getView(), templateData.idElement, "[data-role='sharepointdoceditor']");
+        this._refreshView();
+    }
+
+    function _refreshView() {
+    }
+
+    msls_defineClass("ui.controls", "DocumentEditor", DocumentEditor, msls.ui.Control, {
+        controlName: "DocumentEditor",
+
+        _refreshView: _refreshView,
+        _attachViewCore: _attachViewCore,
+
+        docId: msls_controlProperty(
+            function onDocIdChanged(value) {
+                this._refreshView();
+            }, null, true),
+    }, {
+        _fillTemplate: _fillTemplate,
+    });
+
+    msls.ui.controls.DocumentEditor.prototype._propertyMappings = {
+        stringValue: "docId",
+        properties: {
+            documentLibrary: "documentLibrary",
+            folderPath: "subPath"
+        }
+    };
+}());
+
+(function () {
+    var control_attachViewCore = msls.ui.Control.prototype._attachViewCore;
+
+    function DocumentViewer(view) {
+        msls.ui.Control.call(this, view);
+    }
+
+    function _refreshView() {
+        var me = this;
+        if (!!this._isViewCreated && !!msls_sharepoint) {
+            if (!me.docId || !me._documentLibrary || !me._folderPath) {
+                me._refreshUI();
+            } else {
+                msls_sharepoint.ready(function () {
+                    return me._refreshInternal();
+                });
+            }
+        }
+    }
+
+    function _fillTemplate(view, contentItem, templateData) {
+        view.html("<img style='display:none'></img><a class ='ui-link' href='' target='_blank'> </a><div class ='msls-error' style='display: none'></div>");
+        view.addClass("msls-spdoc-link");
+        templateData.imgElement = msls_getTemplateItemPath(view, view.find("img"));
+        templateData.linkElement = msls_getTemplateItemPath(view, view.find("a"));
+        templateData.errorElement = msls_getTemplateItemPath(view, view.find("div"));
+    }
+
+    function _refreshInternal() {
+        var me = this;
+
+        if (!me.docId || !me._documentLibrary || !me._folderPath) {
+            me._refreshUI();
+            return;
+        }
+
+        var docLib = msls_sharepoint.hostWeb.get_lists().getByTitle(me._documentLibrary),
+            docId = parseInt(me.docId, 10),
+            listItem = docLib.getItemById(docId),
+            file = listItem.get_file(),
+            lastModifiedBy = file.get_modifiedBy(),
+            author = file.get_author();
+
+        msls_sharepoint.load(docLib, listItem, file, lastModifiedBy, author).then(function () {
+            me._docInfo = {
+                name: file.get_name(),
+                id: docId,
+                relativeUrl: file.get_serverRelativeUrl(),
+                url: msls_sharepoint.serverUrl + file.get_serverRelativeUrl() + "?Web=1",
+                author: author.get_title(),
+                lastModifiedBy: lastModifiedBy.get_title(),
+                title: file.get_title()
+            };
+            me._refreshUI();
+        }, function (e) {
+            me._error = e;
+            me._refreshUI();
+        });
+    }
+
+    function _refreshUI() {
+        var me = this,
+            docInfo = me._docInfo;
+
+        if (!!docInfo && !!docInfo.url && !!docInfo.name) {
+            var fileName = docInfo.name,
+                lastIndex = fileName.lastIndexOf("."),
+                extension = lastIndex > 0 && lastIndex < (fileName.length - 1) ? fileName.substr(lastIndex + 1) : "generic";
+
+            me._linkElement.attr("href", docInfo.url);
+            me._linkElement.text(docInfo.name);
+            me._imgElement.attr("src", msls_sharepoint.getIconUrl(extension));
+            me._linkElement.css("display", "");
+            me._imgElement.css("display", "");
+            me._errorElement.css("display", "none");
+        } else {
+            me._linkElement.css("display", "none");
+            me._imgElement.css("display", "none");
+            if (me._error) {
+                var error = me._error;
+                me._errorElement.css("display", "");
+                me._errorElement.text(error.get_message());
+            }
+        }
+    }
+
+    function _attachViewCore(templateData) {
+
+        control_attachViewCore.call(this, templateData);
+        this._imgElement = msls_getTemplateItem(this.getView(), templateData.imgElement, "img");
+        this._linkElement = msls_getTemplateItem(this.getView(), templateData.linkElement, "a");
+        this._errorElement = msls_getTemplateItem(this.getView(), templateData.errorElement, "div");
+
+        var contentItem = this.data,
+            valueModel = contentItem.valueModel,
+            docStorageAttribute = valueModel && valueModel["Microsoft.LightSwitch.SharePoint:@DocumentStorage"];
+        this._documentLibrary = docStorageAttribute && docStorageAttribute.documentLibrary;
+        this._folderPath = docStorageAttribute && docStorageAttribute.subPath;
+        this._refreshView();
+    }
+
+    msls_defineClass("ui.controls", "DocumentViewer", DocumentViewer, msls.ui.Control, {
+        controlName: "DocumentViewer",
+
+        _refreshView: _refreshView,
+        _attachViewCore: _attachViewCore,
+        _refreshInternal: _refreshInternal,
+        _refreshUI: _refreshUI,
+
+        docId: msls_controlProperty(
+            function onDocIdChanged(value) {
+                this._refreshView();
+            }, null, true),
+    }, {
+        _fillTemplate: _fillTemplate,
+    });
+
+    msls.ui.controls.DocumentViewer.prototype._propertyMappings = {
+        stringValue: "docId"
+    };
+
 }());
 
 (function () {
@@ -19397,6 +20027,7 @@ var msls_getAttachedLabelPosition,
 (function () {
     var
     msls_builtIn_showHeaderProperty = msls_getControlPropertyId("ShowHeader", "RootCollectionControl"),
+    itemHtmlTag = "li",
     itemHtmlSelector = "li.msls-li",
     itemDataKey = "__entity",
     listViewTemplate =
@@ -19409,7 +20040,13 @@ var msls_getAttachedLabelPosition,
     contentItemService = msls.services.contentItemService,
     _ContentItemPresenter = msls.ui.controls.ContentItemPresenter,
     _VisualCollectionState = msls.VisualCollection.State,
-    instanceCount = 0;
+    instanceCount = 0,
+    listViewChangeFocusAction = {
+        nextItem: 0,
+        previousItem: 1,
+        nextRow: 2,
+        previousRow: 3
+    };
 
     function needReLayout(contentItem) {
 
@@ -19511,12 +20148,6 @@ var msls_getAttachedLabelPosition,
                return $(e.target).closest(itemHtmlSelector).length;
            }
         );
-
-        ulElement.keypress(function (e) {
-            if (e.keyCode === $.mobile.keyCode.ENTER) {
-                $(e.target).trigger("vclick");
-            }
-        });
     }
 
     function endLoading(listView) {
@@ -19623,7 +20254,8 @@ var msls_getAttachedLabelPosition,
         addedElementsContainer,
         listNode = ulElement[0],
         insertPosition,
-        $elements;
+        $elements,
+        $focusableItem;
 
 
         if (!rowTemplateContentItem) {
@@ -19634,12 +20266,12 @@ var msls_getAttachedLabelPosition,
 
             if (!rowTemplate) {
                 rowTemplateData = listView._rowTemplateData = {};
-                rowTemplate = listView._rowTemplate = window.document.createElement("li");
+                rowTemplate = listView._rowTemplate = window.document.createElement(itemHtmlTag);
                 li = $(rowTemplate);
 
                 contentItemPresenterView = $("<div></div>").appendTo(li);
                 $('<div class="msls-clear"></div>').appendTo(li);
-                li.attr("tabIndex", "0");
+                li.attr(html_tabIndex_Attribute, "-1");
                 li.attr("data-icon", "false");
 
                 theme = $.mobile.getInheritedTheme(ulElement, cssDefaultJqmTheme);
@@ -19686,6 +20318,11 @@ var msls_getAttachedLabelPosition,
                 $elements.trigger("create");
             }
             ulElement.listview("refresh");
+            if (!listView._focusableItem && !!addedElements.length) {
+                $focusableItem = listView._focusableItem =
+                    $(addedElements[0]);
+                $focusableItem.attr(html_tabIndex_Attribute, "0");
+            }
 
             msls_notify(itemsAddedNotification, listView);
         }
@@ -19722,6 +20359,14 @@ var msls_getAttachedLabelPosition,
         }
     }
 
+    function changeFocusableItem(listView, $itemToFocus) {
+
+        listView._focusableItem.attr(html_tabIndex_Attribute, "-1");
+
+        listView._focusableItem = $itemToFocus;
+        $itemToFocus.attr(html_tabIndex_Attribute, "0");
+    }
+
     function removeListItems(listView, items) {
 
         if (!items || items.length === 0) {
@@ -19735,7 +20380,9 @@ var msls_getAttachedLabelPosition,
             childIndex,
             removingIndices = [],
             childContentItem,
-            childContentItemView;
+            childContentItemView,
+            $item,
+            $itemToFocus;
 
         for (i = 1, len = childContentItems.length; i < len; i++) {
             childIndex = itemsToSearch.indexOf(
@@ -19756,7 +20403,21 @@ var msls_getAttachedLabelPosition,
             childContentItems.splice(childIndex, 1);
 
             childContentItemView = childContentItem._view;
-            childContentItemView.getView().parents(itemHtmlSelector).remove();
+            $item = childContentItemView.getView().parents(itemHtmlSelector);
+
+            if ($item.attr(html_tabIndex_Attribute) === "0") {
+                $itemToFocus = $item.next(itemHtmlTag);
+                if (!$itemToFocus.length) {
+                    $itemToFocus = $item.prev(itemHtmlTag);
+                }
+                if ($itemToFocus.length) {
+                    changeFocusableItem(listView, $itemToFocus);
+                } else {
+                    listView._focusableItem = null;
+                }
+            }
+
+            $item.remove();
 
             childContentItemView.parent = null;
             msls_dispose(childContentItemView);
@@ -19850,6 +20511,7 @@ var msls_getAttachedLabelPosition,
             if (collectionState === _VisualCollectionState.loading) {
                 listView._ulElement.children(itemHtmlSelector).remove();
                 deleteChildContentItems(listView);
+                listView._focusableItem = null;
             }
             joinVisualCollectionExecution(listView);
         }
@@ -19891,6 +20553,10 @@ var msls_getAttachedLabelPosition,
                 selectingElement.addClass(ui_btn_active);
             }
         }
+
+        if (selectingElement) {
+            changeFocusableItem(listView, selectingElement);
+        }
     }
 
     function updateLoadingIndicator(listView) {
@@ -19910,8 +20576,191 @@ var msls_getAttachedLabelPosition,
         }
     }
 
+    function getListItems(listView) {
+        return listView._ulElement.children(itemHtmlTag);
+    }
+
+    function getNextOrPreviousRowItem(listView, $focusedItem, action) {
+        var $items = getListItems(listView),
+            itemsLen = $items.length,
+            focusedItemIndex = $items.index($focusedItem),
+            itemsPerRow = Math.floor(
+                listView._ulElement.width() / $focusedItem.outerWidth(true));
+        if (action === listViewChangeFocusAction.nextRow) {
+            focusedItemIndex += itemsPerRow;
+        } else {
+            focusedItemIndex -= itemsPerRow;
+        }
+        if (focusedItemIndex < 0) {
+            focusedItemIndex += (itemsLen + itemsPerRow -
+                itemsLen % itemsPerRow);
+            if (focusedItemIndex > itemsLen - 1) {
+                focusedItemIndex -= itemsPerRow;
+            }
+        } else if (focusedItemIndex >= itemsLen) {
+            focusedItemIndex = focusedItemIndex % itemsPerRow;
+        }
+        return $($items[focusedItemIndex]);
+    }
+
+    function ensureFocusedItemInView(listView, $focusedItem) {
+        var $activePage,
+            headerHeight,
+            footerHeight,
+            $window,
+            windowScrollTop,
+            shouldScroll,
+            focusedItemViewTop,
+            focusedItemViewOffset;
+
+        if (!listView.data._isVStretch) {
+            $activePage = $.mobile.activePage;
+            $window = $(window);
+            windowScrollTop = $window.scrollTop();
+            focusedItemViewTop = $focusedItem.offset().top - windowScrollTop;
+
+            headerHeight = $("div[data-role='header']", $activePage)
+                .outerHeight();
+            if (headerHeight) {
+                focusedItemViewOffset = focusedItemViewTop - headerHeight;
+                shouldScroll = focusedItemViewOffset < 0;
+            }
+            if (!shouldScroll) {
+                footerHeight = $("div[data-role='footer']", $activePage)
+                    .outerHeight();
+                if (footerHeight) {
+                    focusedItemViewOffset = $focusedItem.outerHeight() -
+                        ($window.height() - focusedItemViewTop -
+                        footerHeight);
+                    shouldScroll = focusedItemViewOffset > 0;
+                }
+            }
+            if (shouldScroll) {
+                $window.scrollTop(windowScrollTop + focusedItemViewOffset);
+            }
+        }
+    }
+
+    function changeItemFocus(listView, action) {
+        var $focusedItem = listView._focusableItem,
+            $itemToFocus;
+
+        if (!$focusedItem || !$focusedItem.length) {
+            $itemToFocus = getListItems(listView).first();
+        } else {
+            switch (action) {
+                case listViewChangeFocusAction.previousItem:
+                    $itemToFocus = $focusedItem.prev(itemHtmlTag);
+                    if (!$itemToFocus.length) {
+                        $itemToFocus = getListItems(listView).last();
+                    }
+                    break;
+                case listViewChangeFocusAction.nextItem:
+                    $itemToFocus = $focusedItem.next(itemHtmlTag);
+                    if (!$itemToFocus.length) {
+                        $itemToFocus = getListItems(listView).first();
+                    }
+                    break;
+                case listViewChangeFocusAction.nextRow:
+                case listViewChangeFocusAction.previousRow:
+                    $itemToFocus = getNextOrPreviousRowItem(
+                        listView, $focusedItem, action);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (!!$itemToFocus && !!$itemToFocus.length) {
+            changeFocusableItem(listView, $itemToFocus);
+            $itemToFocus.focus();
+            ensureFocusedItemInView(listView, $itemToFocus);
+        }
+    }
+
+    function selectFocusedItem(listView) {
+        var $focusedItem = listView._focusableItem;
+        if ($focusedItem) {
+            $focusedItem.trigger("vclick");
+        }
+    }
+
+    function selectOrDeselectFocusedItem(listView) {
+        var $focusedItem = listView._focusableItem,
+            focusedItemEntity,
+            collection;
+
+        if (!$focusedItem) {
+            return;
+        }
+
+        focusedItemEntity = $focusedItem.data(itemDataKey);
+        collection = listView._collection;
+        if (collection.selectedItem === focusedItemEntity) {
+            collection.selectedItem = null;
+        } else {
+            selectFocusedItem(listView);
+        }
+    }
+
+    function onKeyDown(listView, e) {
+
+        var jQueryMobileKeyCode = $.mobile.keyCode,
+            keyCode = e.which,
+            isTileList = listView._isTileList;
+
+        switch (keyCode) {
+            case jQueryMobileKeyCode.UP:
+                if (isTileList) {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.previousRow);
+                } else {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.previousItem);
+                }
+                break;
+            case jQueryMobileKeyCode.DOWN:
+                if (isTileList) {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.nextRow);
+                } else {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.nextItem);
+                }
+                break;
+            case jQueryMobileKeyCode.LEFT:
+                if (isTileList) {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.previousItem);
+                } else {
+                    return;
+                }
+                break;
+            case jQueryMobileKeyCode.RIGHT:
+                if (isTileList) {
+                    changeItemFocus(
+                        listView, listViewChangeFocusAction.nextItem);
+                } else {
+                    return;
+                }
+                break;
+            case jQueryMobileKeyCode.SPACE:
+                selectOrDeselectFocusedItem(listView);
+                break;
+            case jQueryMobileKeyCode.ENTER:
+                selectFocusedItem(listView);
+                break;
+            default:
+                return;
+        }
+
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
     function onCreated(listView) {
         var collection = listView._collection,
+            ulElement = listView._ulElement,
             scrollHelper,
             isIdle;
 
@@ -19940,13 +20789,17 @@ var msls_getAttachedLabelPosition,
         msls_mark(msls_codeMarkers.listViewLoadStart);
 
         scrollHelper = listView._scrollHelper =
-            new msls.ui.controls.ScrollHelper(listView._ulElement);
+            new msls.ui.controls.ScrollHelper(ulElement);
         scrollHelper.addEventListener("scroll", function () {
             if (msls_shell._currentNavigationOperation) {
                 return;
             }
-            
+
             tryLoadMoreEntities(listView);
+        });
+
+        ulElement.on("keydown", function (e) {
+            onKeyDown(listView, e);
         });
 
         if (collection.state !== _VisualCollectionState.idle) {
@@ -19957,6 +20810,11 @@ var msls_getAttachedLabelPosition,
                 loadMoreEntities(listView);
             }, 1);
         }
+
+        listView._onWindowResize = function () {
+            tryLoadMoreEntities(listView);
+        };
+        $(window).on("resize", listView._onWindowResize);
     }
 
     msls_defineClass("ui.controls", "ListView", function ListView(view) {
@@ -20085,6 +20943,9 @@ var msls_getAttachedLabelPosition,
                 me._ulElement = null;
                 me._collection = null;
                 me._scrollHelper = null;
+
+                $(window).off("resize", me._onWindowResize);
+                me._onWindowResize = null;
 
                 deleteChildContentItems(me);
             }
@@ -21357,7 +22218,8 @@ var msls_tryGetPercentFormattedText;
             task = me.task,
             container,
             visibilityHelper,
-            visibilityBinding;
+            visibilityBinding,
+            visibleButtonsSelector = ".subControl:not('.msls-collapsed')";
         if (!me._isViewCreated) {
             return;
         }
@@ -21368,14 +22230,19 @@ var msls_tryGetPercentFormattedText;
 
         container = msls_control_find(me.getView(), ".msls-tabs-container");
         container.empty();
+        container.off("keydown");
         me._buttons = [];
         me._contentItems = [];
 
+        function onVisibilityChange($button) {
+            msls_updateContainerFocusItem(container, visibleButtonsSelector, $button);
+        }
+
         var pages = task.screen.details.pages;
         $.each(task.tabCommands, function (index, tabViewModel) {
-            var buttonView = $('<div class="subControl" control="Button"/>'),
+            var buttonView = $('<div tabindex="-1" class="subControl" control="Button"/>'),
                 tabView = $("<li class='" + msls_screen_tab + "'></li>").append(buttonView),
-                button = new msls.ui.controls.Button(buttonView),
+                button = new msls.ui.controls.NegativeTabIndexButton(buttonView),
                 tabContentItem = msls_iterate(pages).first(function (page) { return page.name === tabViewModel.name; });
 
             button.render();
@@ -21395,11 +22262,16 @@ var msls_tryGetPercentFormattedText;
                 msls_data_DataBindingMode.oneWayFromSource);
             visibilityBinding.bind();
 
+            visibilityHelper.onvaluechange = onVisibilityChange;
+
             msls_addLifetimeDependency(button, visibilityHelper);
 
             button.parent = me;
             container.append(tabView);
         });
+
+        msls_handleContainerKeyboardNavigation(
+            container, visibleButtonsSelector);
 
         visibilityHelper = new msls.ui.helpers.ObservableVisibility(me.getView());
         visibilityBinding = new msls.data.DataBinding("areButtonsVisible", me, "value", visibilityHelper,
@@ -21490,9 +22362,7 @@ var msls_shellView;
         checkForUnsavedChangesBeforeUnload = true,
         longRunningCount = 0,
 
-        sharePointChecked = false,
         sharePointChromeStylesInitialized = false,
-        sharePointChromeData,
 
         navigationHistoryDepth = 5,
 
@@ -21558,7 +22428,7 @@ var msls_shellView;
                     pos = popupElement._mslsCustomPosition;
                     if (pos) {
                         $popup.popup("reposition", pos);
-                    } else  {
+                    } else {
                         $popup.popup("reposition", { x: window.innerWidth / 2, y: window.innerHeight / 2 });
                     }
                 }
@@ -21618,6 +22488,7 @@ var msls_shellView;
                 }
             }
         });
+
 
         _createOverlays();
     }
@@ -21723,6 +22594,8 @@ var msls_shellView;
             _awaitPageChange(me, pageId)
            .then(function success2() {
                _transitionOpeningScreen(me, $.mobile.activePage, function () {
+                   $(".ui-page-active .ui-header").fixedtoolbar("updatePagePadding");
+                   $.mobile.resetActivePageHeight();
                    complete();
                });
            }, function failure(e) {
@@ -22116,10 +22989,31 @@ var msls_shellView;
         $page.attr("data-url", pageId);
     }
 
+    function _createHeaderControl(navigationUnit, $header, dataTemplate) {
+
+        var headerControl = new msls.ui.controls.ContentControl($header),
+            enabledButtonsSelector = ".msls-large-icon:not('.msls-collapsed')",
+            $buttonsRow,
+            $enabledButtons;
+
+        dataTemplate = _fillInScreenTabHeadersPlaceholder(dataTemplate);
+
+        headerControl.dataTemplate = dataTemplate;
+        headerControl.data = navigationUnit;
+        headerControl.render();
+        navigationUnit.registerPageUiControl(headerControl);
+
+        $buttonsRow = $(".msls-buttons-row", $header);
+        $enabledButtons = $(enabledButtonsSelector, $buttonsRow);
+        if ($enabledButtons.length > 0) {
+            msls_handleContainerKeyboardNavigation(
+                $buttonsRow, enabledButtonsSelector);
+        }
+    }
+
     function _createScreenFrameHeader(me, navigationUnit) {
 
         var $header = $("<div class='msls-header' data-role='header' data-position='fixed' data-update-page-padding='false' data-tap-toggle-blacklist='" + jqmToggleIgnoreList + "'></div>"),
-            headerControl = new msls.ui.controls.ContentControl($header),
             dataTemplate = msls_templateStrings[taskHeaderTemplateId],
             buttonsNeeded = _determineButtonsNeeded(navigationUnit),
             mainButtonsTemplate,
@@ -22141,12 +23035,7 @@ var msls_shellView;
             .replace("LOGO-BACK-PLACEHOLDER", msls_templateStrings[logoBackTemplate] || "")
             .replace("LOGOUT-PLACEHOLDER", msls_templateStrings[logoutTemplate] || "");
 
-        dataTemplate = _fillInScreenTabHeadersPlaceholder(dataTemplate);
-
-        headerControl.dataTemplate = dataTemplate;
-        headerControl.data = navigationUnit;
-        headerControl.render();
-        navigationUnit.registerPageUiControl(headerControl);
+        _createHeaderControl(navigationUnit, $header, dataTemplate);
 
         $("." + msls_logo + " img", $header).on("error", function () {
             $("." + msls_logo).addClass(msls_collapsed);
@@ -22236,20 +23125,8 @@ var msls_shellView;
         _addTabFooterContent(me, $page, navigationUnit, false)
             .addClass(msls_footer_content_active);
 
-        if (!navigationUnit.popup) {
-            if (!sharePointChecked) {
-                sharePointChecked = true;
-                var applicationDefinition = msls_getApplicationDefinition(),
-                    spEnabled = msls_iterate(applicationDefinition.globalItems).first(function (i) { return i[":@SharePointEnabled"]; });
-                if (spEnabled) {
-                    sharePointChromeData = _extractSharePointChromeParameters();
-                }
-            }
-
-
-            if (sharePointChromeData) {
-                _addSharePointChromeInternal($page, navigationUnit, sharePointChromeData);
-            }
+        if (!navigationUnit.popup && !!msls_sharepoint) {
+            _addSharePointChromeInternal($page, navigationUnit);
         }
     }
 
@@ -22310,7 +23187,15 @@ var msls_shellView;
             $tabFooterContent,
             templateData,
             cacheResult,
-            commandItems = navigationUnit.contentItemTree.commandItems || [];
+            commandItems = navigationUnit.contentItemTree.commandItems || [],
+            visibleButtonsSelector =
+                ".msls-ctl-command-bar-button:not('.msls-collapsed')";
+
+        function onUpdateLayout(e) {
+            var $button = $(e.target);
+            msls_updateContainerFocusItem(
+                $tabFooterContent, visibleButtonsSelector, $button);
+        }
 
         $tabFooterContent = $(msls_templateStrings[footerContentTemplateId])
                 .appendTo($footer)
@@ -22318,17 +23203,22 @@ var msls_shellView;
 
         for (var i = 0; i < commandItems.length; i++) {
             var commandItem = commandItems[i],
-                $buttonView = $("<div></div>"),
+                $buttonView = $('<div tabindex="-1"></div>'),
                 buttonPresenter = new msls.ui.controls.ContentItemPresenter($buttonView);
             buttonPresenter.data = commandItem;
             buttonPresenter.render();
             $tabFooterContent.append($buttonView);
             navigationUnit.registerPageUiControl(buttonPresenter);
+
+            $buttonView.on("updatelayout", onUpdateLayout);
         }
 
         if (enhance) {
             $tabFooterContent.trigger("create");
         }
+
+        msls_handleContainerKeyboardNavigation(
+            $tabFooterContent, visibleButtonsSelector);
 
         return $tabFooterContent;
     }
@@ -22396,13 +23286,7 @@ var msls_shellView;
         dataTemplate = msls_templateStrings[dialogHeaderTemplateId]
             .replace("BUTTONS-PLACEHOLDER", msls_templateStrings[dialogButtonsTemplate] || "");
 
-        dataTemplate = _fillInScreenTabHeadersPlaceholder(dataTemplate);
-
-        var headerControl = new msls.ui.controls.ContentControl($header);
-        headerControl.dataTemplate = dataTemplate;
-        headerControl.data = navigationUnit;
-        headerControl.render();
-        navigationUnit.registerPageUiControl(headerControl);
+        _createHeaderControl(navigationUnit, $header, dataTemplate);
     }
 
 
@@ -22671,36 +23555,14 @@ var msls_shellView;
     }
 
 
-    function _extractSharePointChromeParameters() {
-        var hostUrl = msls_getClientParameter("SPHostUrl");
-        hostUrl = decodeURIComponent(hostUrl);
+    function _addSharePointChromeInternal($page, navigationUnit) {
 
-        var siteRegularExp = /^https?:\/\/[a-zA-Z\u00C0-\u1FFF\u2800-\uFFFD0-9\-]+([.\/:][a-zA-Z\u00C0-\u1FFF\u2800-\uFFFD0-9\-]+)*\/?$/;
-        if (!siteRegularExp.test(hostUrl)) {
-            return;
-        }
-
-        var spChromeData = { spHostUrl: hostUrl };
-
-        var chromeColorsParameter = msls_getClientParameter("SPChromeColors");
-        chromeColorsParameter = decodeURIComponent(chromeColorsParameter);
-
-        var colorsParameterRegularExp = /^[0-9a-fA-F]{16}$/;
-        if (colorsParameterRegularExp.test(chromeColorsParameter)) {
-            spChromeData.backgroundColor = chromeColorsParameter.substring(2, 8);
-            spChromeData.linkFontColor = chromeColorsParameter.substring(10, 16);
-        }
-        return spChromeData;
-    }
-
-    function _addSharePointChromeInternal($page, navigationUnit, spChromeData) {
-
-        if (!sharePointChromeStylesInitialized && spChromeData.backgroundColor && spChromeData.linkFontColor) {
+        if (!sharePointChromeStylesInitialized && !!msls_sharepoint.chromeBackgroundColor && !!msls_sharepoint.chromeLinkFontColor) {
             sharePointChromeStylesInitialized = true;
-            var chromeStyles = "<style> .msls-sharepoint-chrome { background-color: #" + spChromeData.backgroundColor + "; }\r\n" +
+            var chromeStyles = "<style> .msls-sharepoint-chrome { background-color: #" + msls_sharepoint.chromeBackgroundColor + "; }\r\n" +
                               " .msls-sharepoint-chrome a.msls-sharepoint-chrome-link, .msls-sharepoint-chrome a.msls-sharepoint-chrome-link:visited," +
                               " .msls-sharepoint-chrome a.msls-sharepoint-chrome-link:hover, .msls-sharepoint-chrome a.msls-sharepoint-chrome-link:active" +
-                              "  { color: #" + spChromeData.linkFontColor + "; } </style>";
+                              "  { color: #" + msls_sharepoint.chromeLinkFontColor + "; } </style>";
             $body.prepend(chromeStyles);
         }
 
@@ -22708,9 +23570,9 @@ var msls_shellView;
 
         var chromeCreationFunction = "createSharePointChrome";
         if (window[chromeCreationFunction] && typeof window[chromeCreationFunction] === "function") {
-            window[chromeCreationFunction]($chrome, spChromeData.spHostUrl);
+            window[chromeCreationFunction]($chrome, msls_sharepoint.hostUrl);
         } else {
-            var $siteLink = $("<a href='" + spChromeData.spHostUrl + "' class='" + msls_sharePoint_chrome_link + "' target='_top'>" +
+            var $siteLink = $("<a href='" + msls_sharepoint.hostUrl + "' class='" + msls_sharePoint_chrome_link + "' target='_top'>" +
                               msls_getResourceString("shell_back_to_sharePoint_home_site") +
                               "</a>");
             $siteLink.appendTo($chrome);
@@ -23201,7 +24063,7 @@ var msls_shellView;
             $activeElement = $(activeElement);
             if ((activeElement.tagName === "INPUT" && !!$activeElement.closest(".msls-ctl-text-box").length) ||
                 (activeElement.tagName === "TEXTAREA" && !!$activeElement.closest(".msls-ctl-text-area").length)) {
-                    $(activeElement).trigger("change");
+                $(activeElement).trigger("change");
             }
         }
     }
@@ -23593,6 +24455,8 @@ var msls_shellView;
     msls_createControlMappings("PhoneNumberEditor", msls.ui.controls.PhoneNumberEditor);
     msls_createControlMappings("EmailAddressEditor", msls.ui.controls.EmailAddressEditor);
     msls_createControlMappings("EmailAddressViewer", msls.ui.controls.EmailAddressViewer);
+    msls_createControlMappings("DocumentEditor", msls.ui.controls.DocumentEditor);
+    msls_createControlMappings("DocumentViewer", msls.ui.controls.DocumentViewer);
     msls_createControlMappings("FlipSwitchControl", msls.ui.controls.FlipSwitchControl);
     msls_createControlMappings("WebAddressEditor", msls.ui.controls.WebAddressEditor);
     msls_createControlMappings("WebAddressViewer", msls.ui.controls.WebAddressViewer);
@@ -23617,8 +24481,8 @@ if (!window.msls) {
 // SIG // MIIQmAYJKoZIhvcNAQcCoIIQiTCCEIUCAQExCzAJBgUr
 // SIG // DgMCGgUAMGcGCisGAQQBgjcCAQSgWTBXMDIGCisGAQQB
 // SIG // gjcCAR4wJAIBAQQQEODJBs441BGiowAQS9NQkAIBAAIB
-// SIG // AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFN9BzBUwiQJx
-// SIG // NX/Tn8Z8zy3p8qUKoIIOWzCCBBMwggNAoAMCAQICEGoL
+// SIG // AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFHWyCGvYIWfg
+// SIG // LU71fCgsG6U9YySKoIIOWzCCBBMwggNAoAMCAQICEGoL
 // SIG // mU/AAEqrEd+K3OHgJ6owCQYFKw4DAh0FADB1MSswKQYD
 // SIG // VQQLEyJDb3B5cmlnaHQgKGMpIDE5OTkgTWljcm9zb2Z0
 // SIG // IENvcnAuMR4wHAYDVQQLExVNaWNyb3NvZnQgQ29ycG9y
@@ -23737,10 +24601,10 @@ if (!window.msls) {
 // SIG // U2lnbiBDQSAyAgoYGtu7AAIAMxdKMAkGBSsOAwIaBQCg
 // SIG // cDAQBgorBgEEAYI3AgEMMQIwADAZBgkqhkiG9w0BCQMx
 // SIG // DAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYK
-// SIG // KwYBBAGCNwIBFTAjBgkqhkiG9w0BCQQxFgQUe9eeGLlv
-// SIG // x+SyegDq+nSSGllSBdkwDQYJKoZIhvcNAQEBBQAEgYAM
-// SIG // 95TXmAtA0DdU2xGwc2Mkcob2V+g32b1ixn085Pi06e0j
-// SIG // RW7TCYHn7UPd6jn02IudCchPN5tSkIG39lTZtIDnNuuz
-// SIG // /1ZBUUlCkyKw/TKjCu3TvxojakeZXrwPCmoXrGpg6yTc
-// SIG // BgaHkGPCv7cOkG+hSxZQl45c0E468rp0V5Wqbg==
+// SIG // KwYBBAGCNwIBFTAjBgkqhkiG9w0BCQQxFgQUpa1vo56R
+// SIG // p06ibCNussFccdE5dAgwDQYJKoZIhvcNAQEBBQAEgYC6
+// SIG // yAAHH3GnFZfowq1Zo6f12bChfb5iKSfB5dl9wDBd0pW5
+// SIG // b6tCFSL1ixnV6lHaUTMGxzRNVm6OxO9nZa8I+SLpCs02
+// SIG // SLnALNtpOvwSr4ydCKQZX7vHPsUdIbwRmunEo4h1tosc
+// SIG // D61TZYyCIxgVWXYappIJmCHLY+gQRZmBzJ5+MA==
 // SIG // End signature block
