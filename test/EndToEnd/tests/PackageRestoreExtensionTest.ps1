@@ -3,7 +3,11 @@ function Test-PackageRestore-SimpleTest {
     param($context)
 
 	# Arrange
-	$p1 = New-ClassLibrary	
+	$p1 = New-ClassLibrary
+	if ($dte.Version -eq '10.0')
+	{
+	    Build-Solution
+	}
 	$p1 | Install-Package FakeItEasy -version 1.8.0
 	
 	$p2 = New-ClassLibrary
@@ -11,7 +15,7 @@ function Test-PackageRestore-SimpleTest {
 
 	# delete the packages folder
 	$packagesDir = Get-PackagesDir
-	Remove-Item -Recurse -Force $packagesDir
+	RemoveDirectory $packagesDir
 	Assert-False (Test-Path $packagesDir)
 
 	# Act
@@ -28,7 +32,11 @@ function Test-PackageRestore-Website {
     param($context)
 
 	# Arrange
-	$p = New-WebSite	
+	$p = New-WebSite
+	if ($dte.Version -eq '10.0')
+	{
+	    Build-Solution
+	}		
 	$p | Install-Package JQuery
 	
 	# delete the packages folder
@@ -76,6 +84,10 @@ function Test-PackageRestore-UnloadedProjects{
 
 	# Arrange
 	$p1 = New-ClassLibrary	
+	if ($dte.Version -eq '10.0')
+	{
+	    Build-Solution
+	}
 	$p1 | Install-Package Microsoft.Bcl.Build -version 1.0.8
 	
 	$p2 = New-ClassLibrary
@@ -107,6 +119,10 @@ function Test-PackageRestore-ErrorMessage {
 
 	# Arrange
 	$p = New-ClassLibrary	
+	if ($dte.Version -eq '10.0')
+	{
+	    Build-Solution
+	}
 	Install-Package -Source $context.RepositoryRoot -Project $p.Name NonStrongNameB
 	
 	# delete the packages folder
@@ -138,4 +154,21 @@ function GetBuildOutput {
     $sel.StartOfDocument($FALSE)
     $sel.EndOfDocument($TRUE)
     $sel.Text
+}
+
+function RemoveDirectory {
+    param($dir)
+
+	$iteration = 0
+	while ($iteration++ -lt 10)
+	{
+	    if (Test-Path $dir)
+		{
+		    Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
+		}
+		else 
+		{
+		    break;
+		}
+	}
 }
