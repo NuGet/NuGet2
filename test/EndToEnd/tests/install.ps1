@@ -2181,8 +2181,8 @@ function Test-InstallMetadataPackageAddPackageToProject
 
 function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
 {
-    # This test requires .NET 4.5 and hence not available to run in VS 2010
-    if ($dte.Version -eq "10.0")
+    # This test uses a particular profile which is available only in VS 2012.
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
     {
         return
     }
