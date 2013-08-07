@@ -37,6 +37,8 @@ namespace NuGet.Options
             {
                 var packageRestoreConsent = new PackageRestoreConsent(_settings);
                 packageRestoreConsentCheckBox.Checked = packageRestoreConsent.IsGrantedInSettings;
+                packageRestoreAutomaticCheckBox.Checked = packageRestoreConsent.IsAutomatic;
+                packageRestoreAutomaticCheckBox.Enabled = packageRestoreConsentCheckBox.Checked;
 
                 checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
             }
@@ -50,6 +52,7 @@ namespace NuGet.Options
 
             var packageRestoreConsent = new PackageRestoreConsent(_settings);
             packageRestoreConsent.IsGrantedInSettings = packageRestoreConsentCheckBox.Checked;
+            packageRestoreConsent.IsAutomatic = packageRestoreAutomaticCheckBox.Checked;
         }
 
         internal void OnClosed()
@@ -68,6 +71,15 @@ namespace NuGet.Options
             if (Directory.Exists(MachineCache.Default.Source))
             {
                 Process.Start(MachineCache.Default.Source);
+            }
+        }
+
+        private void packageRestoreConsentCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            packageRestoreAutomaticCheckBox.Enabled = packageRestoreConsentCheckBox.Checked;
+            if (!packageRestoreConsentCheckBox.Checked)
+            {
+                packageRestoreAutomaticCheckBox.Checked = false;
             }
         }
     }

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Common;
 
@@ -173,6 +172,15 @@ namespace NuGet.Commands
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
         {
+            bool packageRestoreConsent = new PackageRestoreConsent(Settings).IsGranted;
+            if (Console != null && packageRestoreConsent)
+            {
+                string message = String.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("RestoreCommandPackageRestoreOptOutMessage"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Console.WriteLine(message);
+            }
             var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
@@ -336,7 +344,11 @@ namespace NuGet.Commands
         {
             if (RequireConsent && !packageRestoreConsent)
             {
-                throw new InvalidOperationException(LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"));
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                throw new InvalidOperationException(message);
             }
         }
 

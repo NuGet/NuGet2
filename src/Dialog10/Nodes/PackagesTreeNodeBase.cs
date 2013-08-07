@@ -491,18 +491,22 @@ namespace NuGet.Dialog.Providers
                         ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
                     }
                 }
+                else if (task.IsCanceled)
+                {
+                    HideProgressPane();
+                }
                 else
                 {
                     LoadPageResult result = task.Result;
 
                     UpdateNewPackages(result.Packages.ToList());
-                    
+
                     int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
                     TotalPages = Math.Max(1, totalPages);
                     CurrentPage = Math.Max(1, result.PageNumber);
-                }
 
-                HideProgressPane();
+                    HideProgressPane();
+                }
             }
 
             Provider.OnPackageLoadCompleted(this);

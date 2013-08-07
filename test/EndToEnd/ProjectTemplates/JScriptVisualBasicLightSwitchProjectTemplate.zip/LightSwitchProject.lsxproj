@@ -11,7 +11,7 @@
     <AssemblyName>Microsoft.LightSwitch.Server.Host</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <LightSwitchVersion>v4.0</LightSwitchVersion>
-    <LightSwitchProjectVersion>v3.6</LightSwitchProjectVersion>
+    <LightSwitchProjectVersion>v3.8</LightSwitchProjectVersion>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
     <Name>$safeprojectname$</Name>
     <LightSwitchProjectTypeV3>LightSwitch</LightSwitchProjectTypeV3>
@@ -76,21 +76,7 @@
       <PublishType>
       </PublishType>
     </_BuildFile>
-    <_BuildFile Include="$safeprojectname$.Server\web.config">
-      <SubFolder>
-      </SubFolder>
-      <PublishType>
-      </PublishType>
-    </_BuildFile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(AuthenticationType)' == 'Forms'">
-    <_BuildFile Include="$safeprojectname$.Server\LogIn.aspx">
-      <SubFolder>
-      </SubFolder>
-      <PublishType>
-      </PublishType>
-    </_BuildFile>
-    <_BuildFile Include="$safeprojectname$.Server\LogOut.aspx">
+    <_BuildFile Include="$projectname$.Server\web.config">
       <SubFolder>
       </SubFolder>
       <PublishType>

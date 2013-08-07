@@ -19,7 +19,6 @@ namespace NuGet.VsEvents
         private const string LogEntrySource = "NuGet PackageRestorer";        
 
         private DTE _dte;
-        private OutputWindowPane _outputPane;
         private bool _outputOptOutMessage;
 
         // Indicates if there are missing packages.
@@ -59,18 +58,22 @@ namespace NuGet.VsEvents
             _buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             _solutionEvents = dte.Events.SolutionEvents;
             _solutionEvents.AfterClosing += SolutionEvents_AfterClosing;            
+        }
 
+        OutputWindowPane GetBuildOutputPane()
+        {
             // get the "Build" output window pane
-            var dte2 = (DTE2)dte;
+            var dte2 = (DTE2)_dte;
             var buildWindowPaneGuid = VSConstants.BuildOutput.ToString("B");
             foreach (OutputWindowPane pane in dte2.ToolWindows.OutputWindow.OutputWindowPanes)
             {
                 if (String.Equals(pane.Guid, buildWindowPaneGuid, StringComparison.OrdinalIgnoreCase))
                 {
-                    _outputPane = pane;
-                    break;
+                    return pane;
                 }
             }
+
+            return null;
         }
 
         private void SolutionEvents_AfterClosing()
@@ -83,6 +86,8 @@ namespace NuGet.VsEvents
         {
             try
             {
+                _errorListProvider.Tasks.Clear();
+
                 if (UsingOldPackageRestore(_dte.Solution))
                 {
                     return;
@@ -92,10 +97,15 @@ namespace NuGet.VsEvents
                 {
                     return;
                 }
+                
+                if (!IsAutomatic())
+                {
+                    return;
+                }
 
                 _outputOptOutMessage = true;
                 _hasMissingPackages = false;
-                _hasError = false;
+                _hasError = false;                
                 RestorePackagesOrCheckForMissingPackages();
             }
             catch (Exception ex)
@@ -112,8 +122,7 @@ namespace NuGet.VsEvents
             waitDialogFactory.CreateInstance(out _waitDialog);
 
             try
-            {
-                _errorListProvider.Tasks.Clear();
+            {                
                 if (IsConsentGranted())
                 {
                     RestorePackages();
@@ -287,6 +296,17 @@ namespace NuGet.VsEvents
             var settings = ServiceLocator.GetInstance<ISettings>();
             var packageRestoreConsent = new PackageRestoreConsent(settings);
             return packageRestoreConsent.IsGranted;
+        }
+
+        /// <summary>
+        /// Returns true if automatic package restore on build is enabled.
+        /// </summary>
+        /// <returns>True if automatic package restore on build is enabled.</returns>
+        private static bool IsAutomatic()
+        {
+            var settings = ServiceLocator.GetInstance<ISettings>();
+            var packageRestoreConsent = new PackageRestoreConsent(settings);
+            return packageRestoreConsent.IsAutomatic;
         }
 
         /// <summary>
@@ -473,7 +493,8 @@ namespace NuGet.VsEvents
         /// <param name="args">An array of objects to write using format. </param>
         private void WriteLine(VerbosityLevel verbosity, string format, params object[] args)
         {
-            if (_outputPane == null)
+            var outputPane = GetBuildOutputPane();
+            if (outputPane == null)
             {
                 return;
             }
@@ -481,8 +502,8 @@ namespace NuGet.VsEvents
             if (_msBuildOutputVerbosity >= (int)verbosity)
             {
                 var msg = string.Format(CultureInfo.CurrentCulture, format, args);
-                _outputPane.OutputString(msg);
-                _outputPane.OutputString(Environment.NewLine);
+                outputPane.OutputString(msg);
+                outputPane.OutputString(Environment.NewLine);
             }
         }
 
@@ -510,7 +531,6 @@ namespace NuGet.VsEvents
         public void Dispose()
         {
             _errorListProvider.Dispose();
-            _outputPane = null;
             _buildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
             _solutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
         }

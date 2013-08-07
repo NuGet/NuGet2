@@ -385,7 +385,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check &apos;Allow NuGet to download missing packages during build.&apos; You can also give consent by setting the environment variable &apos;EnableNuGetPackageRestore&apos; to &apos;true&apos;..
+        ///   Looks up a localized string similar to Package restore is disabled. To enable it, open the Visual Studio Options dialog, click on Package Manager node and check &apos;{0}&apos;. You can also enable package restore by setting the environment variable &apos;EnableNuGetPackageRestore&apos; to &apos;true&apos;..
         /// </summary>
         internal static string InstallCommandPackageRestoreConsentNotFound {
             get {
@@ -863,7 +863,7 @@ namespace NuGet {
         
         /// <summary>
         ///   Looks up a localized string similar to Restoring NuGet packages...
-        ///To prevent NuGet from restoring packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck &apos;Allow NuGet to download missing packages during build.&apos;.
+        ///To prevent NuGet from downloading packages during build, open the Visual Studio Options dialog, click on the Package Manager node and uncheck &apos;{0}&apos;..
         /// </summary>
         internal static string RestoreCommandPackageRestoreOptOutMessage {
             get {

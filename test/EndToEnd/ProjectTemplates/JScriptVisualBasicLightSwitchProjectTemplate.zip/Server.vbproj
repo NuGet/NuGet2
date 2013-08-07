@@ -222,8 +222,6 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
-    <_ServerFile Include="LogIn.aspx" />
-    <_ServerFile Include="LogOut.aspx" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

@@ -219,5 +219,70 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(packageRestore.IsGrantedInSettings, isGranted);
         }
+
+        [Fact]
+        public void SettingIsAutomaticToFalseSetsTheFlagInConfigFile()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Act
+            packageRestore.IsAutomatic = false;
+
+            // Assert
+            settings.Verify(s => s.SetValue("packageRestore", "automatic", false.ToString()), Times.Once());
+        }
+
+        [Fact]
+        public void SettingIsAutomaticToTrueSetsTheFlagInConfigFile()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Act
+            packageRestore.IsAutomatic = true;
+
+            // Assert
+            settings.Verify(s => s.SetValue("packageRestore", "automatic", true.ToString()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("1", true)]
+        [InlineData("0", false)]
+        [InlineData("false", false)]
+        [InlineData("blah", false)]
+        public void TestIsAutomaticSettings(string valueInUserSettings, bool isAutomatic)
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("packageRestore", "automatic")).Returns(valueInUserSettings);
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Assert
+            Assert.Equal(isAutomatic, packageRestore.IsAutomatic);
+        }
+
+        // Tests that if there is no setting for key "automatic", then property IsAutomatic
+        // returns the value of IsGrantedInSettings.
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("false", false)]
+        public void TestIsAutomaticDefaultToIsGranted(string grantSetting, bool isAutomatic)
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns(grantSetting);
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Assert
+            Assert.Equal(isAutomatic, packageRestore.IsAutomatic);
+        }
     }
 }

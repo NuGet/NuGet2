@@ -256,7 +256,11 @@ namespace NuGet.Commands
         {
             if (RequireConsent && !packageRestoreConsent)
             {
-                throw new InvalidOperationException(LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"));
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                throw new InvalidOperationException(message);
             }
         }
 
@@ -276,7 +280,11 @@ namespace NuGet.Commands
             EnsurePackageRestoreConsent(packageRestoreConsent);
             if (_outputOptOutMessage)
             {
-                Console.WriteLine(NuGetResources.RestoreCommandPackageRestoreOptOutMessage);
+                string message = String.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("RestoreCommandPackageRestoreOptOutMessage"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Console.WriteLine(message);
                 _outputOptOutMessage = false;
             }
 

@@ -905,6 +905,30 @@ namespace NuGet.VisualStudio
             }
         }
 
+        /// <summary>
+        /// DO NOT delete this. This method is only called from PowerShell functional test. 
+        /// </summary>
+        public static void RemoveProject(string projectName)
+        {
+            if (String.IsNullOrEmpty(projectName))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "projectName");
+            }
+
+            var solutionManager = (ISolutionManager)ServiceLocator.GetInstance<ISolutionManager>();
+            if (solutionManager != null)
+            {
+                var project = solutionManager.GetProject(projectName);
+                if (project == null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var dte = ServiceLocator.GetGlobalService<SDTE, DTE>();
+                dte.Solution.Remove(project);
+            }
+        }
+
         // This method should only be called in VS 2012
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void DoWorkInWriterLock(this Project project, Action<MsBuildProject> action)

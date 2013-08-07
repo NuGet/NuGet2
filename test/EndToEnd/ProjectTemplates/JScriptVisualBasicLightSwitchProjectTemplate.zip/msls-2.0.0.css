@@ -421,7 +421,6 @@ a.msls-hauto, a.msls-hstretch {
     top: 0px;
 }
 
-
 .msls-header {
     display: block;
     -webkit-box-sizing: border-box;
@@ -441,6 +440,7 @@ a.msls-hauto, a.msls-hstretch {
 
 .msls-header .titles-bar {
     position: relative;
+    overflow: hidden;
 }
 
 .msls-header .msls-logo-back-area {
@@ -1603,6 +1603,20 @@ ul.msls-tile-list .ui-li.ui-btn {
 
 li.msls-li {
     font-weight: normal;
+}
+
+.msls-spdoc-link img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+    width: 20px;
+}
+.msls-spdoc-link {
+    margin: 0px;
+}
+.msls-spdoc-link a.ui-link {
+    display: inline-block;
+    margin-left: 5px;
 }
 
 

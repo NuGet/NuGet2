@@ -3,7 +3,8 @@
     <Name Package="{e1ca83b9-2035-465f-8a04-737358829f65}" ID="2104" />
     <Description Package="{e1ca83b9-2035-465f-8a04-737358829f65}" ID="2107" />
     <Icon Package="{e1ca83b9-2035-465f-8a04-737358829f65}" ID="3100" />
-    <ProjectType>LightSwitch</ProjectType>
+    <ProjectType>VisualBasic</ProjectType>
+    <ProjectSubType>LightSwitch</ProjectSubType>
     <TemplateID>Microsoft.LightSwitch.BlankLightSwitchApplication</TemplateID>
     <SortOrder>90</SortOrder>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
@@ -84,8 +85,6 @@
       <ProjectItem TargetFileName="$projectname$.Server\Web.config" ReplaceParameters="true">Web.config</ProjectItem>
       <ProjectItem TargetFileName="$projectname$.Server\Web.Debug.config">Web.Debug.config</ProjectItem>
       <ProjectItem TargetFileName="$projectname$.Server\Web.Release.config">Web.Release.config</ProjectItem>
-      <ProjectItem TargetFileName="$projectname$.Server\LogIn.aspx">LogIn.aspx</ProjectItem>
-      <ProjectItem TargetFileName="$projectname$.Server\LogOut.aspx">LogOut.aspx</ProjectItem>
       <ProjectItem TargetFileName="$projectname$.Server\packages.config">Server.packages.config</ProjectItem>
     </Project>
   </TemplateContent>

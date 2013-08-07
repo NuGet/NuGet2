@@ -41,6 +41,7 @@
             this.PackageRestoreHeader = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.packageRestoreConsentCheckBox = new System.Windows.Forms.CheckBox();
+            this.packageRestoreAutomaticCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.updatePanel.SuspendLayout();
             this.SuspendLayout();
@@ -118,6 +119,13 @@
             resources.ApplyResources(this.packageRestoreConsentCheckBox, "packageRestoreConsentCheckBox");
             this.packageRestoreConsentCheckBox.Name = "packageRestoreConsentCheckBox";
             this.packageRestoreConsentCheckBox.UseVisualStyleBackColor = true;
+            this.packageRestoreConsentCheckBox.CheckedChanged += new System.EventHandler(this.packageRestoreConsentCheckBox_CheckedChanged);
+            // 
+            // packageRestoreAutomaticCheckBox
+            // 
+            resources.ApplyResources(this.packageRestoreAutomaticCheckBox, "packageRestoreAutomaticCheckBox");
+            this.packageRestoreAutomaticCheckBox.Name = "packageRestoreAutomaticCheckBox";
+            this.packageRestoreAutomaticCheckBox.UseVisualStyleBackColor = true;
             // 
             // GeneralOptionControl
             // 
@@ -129,6 +137,7 @@
             this.Controls.Add(this.PackageRestoreHeader);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.packageRestoreConsentCheckBox);
+            this.Controls.Add(this.packageRestoreAutomaticCheckBox);
             this.Controls.Add(this.updatePanel);
             this.Name = "GeneralOptionControl";
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -154,5 +163,6 @@
         private System.Windows.Forms.Label PackageRestoreHeader;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox packageRestoreConsentCheckBox;
+        private System.Windows.Forms.CheckBox packageRestoreAutomaticCheckBox;
     }
 }

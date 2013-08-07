@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Moq;
@@ -728,8 +729,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Hence, only check the error message if the language is english.
             var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             if (culture == "en" || culture == "iv") // english or invariant
-                Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
-                    exception.InnerException.Message);
+            {
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    NuGetResources.InstallCommandPackageRestoreConsentNotFound,
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Assert.Equal(message, exception.InnerException.Message);
+            }
         }
 
         [Fact]
