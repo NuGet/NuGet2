@@ -97,8 +97,10 @@ namespace NuGet.VisualStudio
         {
             bool fileExistsInProject = FileExistsInProject(path);
 
-            // If the file exists on disk but not in the project then skip it
-            if (base.FileExists(path) && !fileExistsInProject)
+            // If the file exists on disk but not in the project then skip it.
+            // One exception is the 'packages.config' file, in which case we want to include
+            // it into the project.
+            if (base.FileExists(path) && !fileExistsInProject && !path.Equals(Constants.PackageReferenceFile))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
             }

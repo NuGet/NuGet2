@@ -2355,29 +2355,55 @@ function Test-PackageWithConfigTransformInstallToWinJsProject
 
 function Test-InstallPackageIntoLightSwitchApplication 
 {
-	param($context)
+    param($context)
 
-	# this test is only applicable to VS 2013 because it has the latest LightSwitch template
-	if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
-	{
-		return
-	}
+    # this test is only applicable to VS 2013 because it has the latest LightSwitch template
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    {
+        return
+    }
 
-	# Arrange
+    # Arrange
 
-	New-LightSwitchApplication LsApp
+    New-LightSwitchApplication LsApp
 
-	# Sleep for 10 seconds for the two sub-projects to be created
-	[System.Threading.Thread]::Sleep(10000)
+    # Sleep for 10 seconds for the two sub-projects to be created
+    [System.Threading.Thread]::Sleep(10000)
 
-	$clientProject = Get-Project LsApp.HTMLClient
-	$serverProject = Get-Project LsApp.Server
+    $clientProject = Get-Project LsApp.HTMLClient
+    $serverProject = Get-Project LsApp.Server
 
-	# Act
-	Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot -ProjectName $clientProject.Name
-	Install-Package NonStrongNameA -Source $context.RepositoryRoot -ProjectName $serverProject.Name
-	
-	# Assert
-	Assert-Package $clientProject PackageWithPPVBSourceFiles
-	Assert-Package $serverProject NonStrongNameA
+    # Act
+    Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot -ProjectName $clientProject.Name
+    Install-Package NonStrongNameA -Source $context.RepositoryRoot -ProjectName $serverProject.Name
+    
+    # Assert
+    Assert-Package $clientProject PackageWithPPVBSourceFiles
+    Assert-Package $serverProject NonStrongNameA
+}
+
+function Test-InstallPackageAddPackagesConfigFileToProject
+{
+    param($context)
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    $projectPath = $p.Properties.Item("FullPath").Value
+
+    $packagesConfigPath = Join-Path $projectPath 'packages.config'
+
+    # Write a file to disk, but do not add it to project
+    '<packages><package id="jquery" version="2.0" /></packages>' | out-file $packagesConfigPath
+
+    # Act
+    install-package SkypePackage -projectName $p.Name -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p SkypePackage
+
+    $xmlFile = [xml](Get-Content $packagesConfigPath)
+    Assert-AreEqual 2 $xmlFile.packages.package.Count
+    Assert-AreEqual 'jquery' $xmlFile.packages.package[0].Id
+    Assert-AreEqual 'SkypePackage' $xmlFile.packages.package[1].Id
 }
