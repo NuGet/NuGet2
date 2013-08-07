@@ -678,10 +678,10 @@ function Add-ProjectReference {
 function Remove-Project {
     param (
         [parameter(Mandatory = $true)]
-        $Project   
+        $ProjectName
     )
 
-    $dte.Solution.Remove($Project)
+    [NuGet.VisualStudio.ProjectExtensions]::RemoveProject($ProjectName)
 }
 
 function Get-SolutionPath {
