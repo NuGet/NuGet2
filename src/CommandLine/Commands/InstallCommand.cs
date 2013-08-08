@@ -172,8 +172,8 @@ namespace NuGet.Commands
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
         {
-            bool packageRestoreConsent = new PackageRestoreConsent(Settings).IsGranted;
-            if (Console != null && packageRestoreConsent)
+            // display opt-out message if needed
+            if (Console != null && RequireConsent && new PackageRestoreConsent(Settings).IsGranted)
             {
                 string message = String.Format(
                     CultureInfo.CurrentCulture,
@@ -181,6 +181,7 @@ namespace NuGet.Commands
                     NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
                 Console.WriteLine(message);
             }
+
             var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
