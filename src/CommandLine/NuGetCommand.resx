@@ -123,15 +123,18 @@
   <data name="ConfigCommandExamples" xml:space="preserve">
     <value>nuget config -Set HTTP_PROXY=http://127.0.0.1 -Set HTTP_PROXY.USER=domain\user
 nuget.config HTTP_PROXY</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="ConfigCommandSetDesc" xml:space="preserve">
     <value>One on more key-value pairs to be set in config.</value>
   </data>
   <data name="ConfigCommandAsPathDesc" xml:space="preserve">
     <value>Returns the config value as a path. This option is ignored when -Set is specified.</value>
+    <comment>Pease don't localize "-Set"</comment>
   </data>
   <data name="ConfigCommandSummary" xml:space="preserve">
     <value>&lt;-Set name=value | name&gt;</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="DeleteCommandDescription" xml:space="preserve">
     <value>Deletes a package from the server.</value>
@@ -149,6 +152,7 @@ nuget.config HTTP_PROXY</value>
     <value>nuget delete MyPackage 1.0
     
 nuget delete MyPackage 1.0 -NoPrompt</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="DeleteCommandUsageSummary" xml:space="preserve">
     <value>&lt;package Id&gt; &lt;package version&gt; [API Key] [options]</value>
@@ -173,6 +177,7 @@ nuget help push
 nuget ?
 
 nuget push -?</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="HelpCommandUsageSummary" xml:space="preserve">
     <value>[command]</value>
@@ -191,12 +196,14 @@ nuget push -?</value>
   </data>
   <data name="InstallCommandPrerelease" xml:space="preserve">
     <value>Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config.</value>
+    <comment>Please don't localize "packages.config".</comment>
   </data>
   <data name="InstallCommandSourceDescription" xml:space="preserve">
     <value>A list of packages sources to use for the install.</value>
   </data>
   <data name="InstallCommandUsageDescription" xml:space="preserve">
     <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
+    <comment>Please don't localize "packages.config".</comment>
   </data>
   <data name="InstallCommandUsageExamples" xml:space="preserve">
     <value>nuget install elmah
@@ -204,6 +211,7 @@ nuget push -?</value>
 nuget install packages.config
 
 nuget install ninject -o c:\foo</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="InstallCommandUsageSummary" xml:space="preserve">
     <value>packageId|pathToPackagesConfig [options]</value>
@@ -216,6 +224,7 @@ nuget install ninject -o c:\foo</value>
   </data>
   <data name="ListCommandDescription" xml:space="preserve">
     <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used. If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+    <comment>Please don't localize "%AppData%\NuGet\NuGet.config", "NuGet.config".</comment>
   </data>
   <data name="ListCommandPrerelease" xml:space="preserve">
     <value>Allow prerelease packages to be shown.</value>
@@ -230,6 +239,7 @@ nuget install ninject -o c:\foo</value>
     <value>nuget list
 
 nuget list -verbose -allversions</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="ListCommandUsageSummary" xml:space="preserve">
     <value>[search terms] [options]</value>
@@ -242,6 +252,7 @@ nuget list -verbose -allversions</value>
   </data>
   <data name="Option_Verbosity" xml:space="preserve">
     <value>Display this amount of details in the output: normal, quiet, detailed.</value>
+    <comment>Please don't localize "normal", "quiet", "detailed"</comment>
   </data>
   <data name="PackageCommandBasePathDescription" xml:space="preserve">
     <value>The base path of the files defined in the nuspec file.</value>
@@ -298,12 +309,14 @@ nuget pack foo.csproj
 nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
 
 nuget pack foo.nuspec -Version 2.1.0</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
     <value>Pushes a package to the server and optionally publishes it.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
     <value>Specifies the server URL. If not specified, nuget.org is used unless DefaultPushSource config value is set in the NuGet config file.</value>
+    <comment>Please don't localize "DefaultPushSource"</comment>
   </data>
   <data name="PushCommandTimeoutDescription" xml:space="preserve">
     <value>Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes).</value>
@@ -321,6 +334,7 @@ nuget push foo.nupkg
 nuget push foo.nupkg.symbols
 
 nuget push foo.nupkg -Timeout 360</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="PushCommandUsageSummary" xml:space="preserve">
     <value>&lt;package path&gt; [API key] [options]</value>
@@ -338,12 +352,14 @@ nuget push foo.nupkg -Timeout 360</value>
     <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
 
 nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
     <value>&lt;API key&gt; [options]</value>
   </data>
   <data name="SourcesCommandDescription" xml:space="preserve">
     <value>Provides the ability to manage list of sources located in %AppData%\NuGet\NuGet.config</value>
+    <comment>Please don't localize " %AppData%\NuGet\NuGet.config"</comment>
   </data>
   <data name="SourcesCommandNameDescription" xml:space="preserve">
     <value>Name of the source.</value>
@@ -356,6 +372,7 @@ nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/
   </data>
   <data name="SourcesCommandUsageSummary" xml:space="preserve">
     <value>&lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source]</value>
+    <comment>Only localize "[name]" and "[source]"</comment>
   </data>
   <data name="SourcesCommandUserNameDescription" xml:space="preserve">
     <value>UserName to be used when connecting to an authenticated source.</value>
@@ -375,6 +392,7 @@ nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/
 nuget spec MyPackage
 
 nuget spec -a MyAssembly.dll</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="SpecCommandUsageSummary" xml:space="preserve">
     <value>[package id]</value>
@@ -406,6 +424,7 @@ nuget spec -a MyAssembly.dll</value>
 nuget update -Safe
 
 nuget update -Self</value>
+    <comment>Please don't localize this string</comment>
   </data>
   <data name="UpdateCommandVerboseDescription" xml:space="preserve">
     <value>Show verbose output while updating.</value>
@@ -415,6 +434,7 @@ nuget update -Self</value>
   </data>
   <data name="DefaultConfigDescription" xml:space="preserve">
     <value>NuGet's default configuration is obtained by loading %AppData%\NuGet\NuGet.config, then loading any nuget.config or .nuget\nuget.config starting from root of drive and ending in current directory.</value>
+    <comment>Please don't localize "%AppData%\NuGet\NuGet.config", "nuget.config", ".nuget\nuget.config"</comment>
   </data>
   <data name="InstallCommandRequireConsent" xml:space="preserve">
     <value>Checks if package restore consent is granted before installing a package.</value>
@@ -424,18 +444,21 @@ nuget update -Self</value>
   </data>
   <data name="Option_ConfigFile" xml:space="preserve">
     <value>The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.</value>
+    <comment>Please don't localize "%AppData%\NuGet\NuGet.config".</comment>
   </data>
   <data name="InstallCommandDisableParallel" xml:space="preserve">
     <value>Disable parallel nuget package installs.</value>
   </data>
   <data name="PackageCommandMinClientVersion" xml:space="preserve">
     <value>Set the minClientVersion attribute for the created package.</value>
+    <comment>Please don't localize "minClientVersion"</comment>
   </data>
   <data name="PackageCommandIncludeReferencedProjects" xml:space="preserve">
     <value>Include referenced projects either as dependencies or as part of the package.</value>
   </data>
   <data name="UpdateCommandFileConflictAction" xml:space="preserve">
     <value>Set default action when a file from a package already exists in the target project. Set to Overwrite to always overwrite files. Set to Ignore to skip files. If not specified, it will prompt for each conflicting file.</value>
+    <comment>Please don't localize "Overwrite", "Ignore".</comment>
   </data>
   <data name="SourcesCommandStorePasswordInClearTextDescription" xml:space="preserve">
     <value>Enables storing portable package source credentials by disabling password encryption.</value>
@@ -466,5 +489,6 @@ nuget update -Self</value>
   </data>
   <data name="RestoreCommandUsageSummary" xml:space="preserve">
     <value>[&lt;solution&gt; | &lt;packages.config file&gt;] [options]</value>
+    <comment>Please don't localize "packages.config"</comment>
   </data>
 </root>
