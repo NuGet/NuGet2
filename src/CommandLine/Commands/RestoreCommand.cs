@@ -31,7 +31,7 @@ namespace NuGet.Commands
         private bool _outputOptOutMessage;
 
         // lock used to access _outputOptOutMessage.
-        readonly object _outputOptOutMessageLock = new object();
+        private readonly object _outputOptOutMessageLock = new object();
 
         [Option(typeof(NuGetCommand), "RestoreCommandSourceDescription")]
         public ICollection<string> Source
@@ -280,7 +280,7 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
-            if (RequireConsent)
+            if (RequireConsent && _outputOptOutMessage)
             {
                 lock (_outputOptOutMessageLock)
                 {
