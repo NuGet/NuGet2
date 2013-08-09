@@ -548,7 +548,7 @@
     <value>Restoring NuGet packages listed in file {0}.</value>
   </data>
   <data name="RestoreCommandCannotDeterminePackagesFolder" xml:space="preserve">
-    <value>Cannot determine the packages folder to restore NuGet packages.</value>
+    <value>Cannot determine the packages folder to restore NuGet packages. Please specify either -PackagesDirectory or -SolutionDirectory.</value>
   </data>
   <data name="RestoreCommandFileNotFound" xml:space="preserve">
     <value>Input file does not exist: {0}.</value>

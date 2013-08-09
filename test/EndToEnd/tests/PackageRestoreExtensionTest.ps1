@@ -11,7 +11,7 @@ function Test-PackageRestore-SimpleTest {
 
 	# delete the packages folder
 	$packagesDir = Get-PackagesDir
-	Remove-Item -Recurse -Force $packagesDir
+	RemoveDirectory $packagesDir
 	Assert-False (Test-Path $packagesDir)
 
 	# Act
@@ -138,4 +138,21 @@ function GetBuildOutput {
     $sel.StartOfDocument($FALSE)
     $sel.EndOfDocument($TRUE)
     $sel.Text
+}
+
+function RemoveDirectory {
+    param($dir)
+
+	$iteration = 0
+	while ($iteration++ -lt 10)
+	{
+	    if (Test-Path $dir)
+		{
+		    Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
+		}
+		else 
+		{
+		    break;
+		}
+	}
 }
