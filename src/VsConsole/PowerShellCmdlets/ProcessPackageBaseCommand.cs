@@ -374,7 +374,9 @@ namespace NuGet.PowerShell.Commands
                 new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_FileConflictNoHelp),
             };
 
-            int choice = Host.UI.PromptForChoice("License Acceptance", "Accept licenses?", choices, defaultChoice: 0);
+            int choice = Host.UI.PromptForChoice(
+                "License Acceptance", 
+                "Accept licenses?", choices, defaultChoice: 0);
 
 
             return choice == 0;

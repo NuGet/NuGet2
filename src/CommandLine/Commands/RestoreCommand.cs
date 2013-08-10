@@ -298,7 +298,7 @@ namespace NuGet.Commands
 
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))
             {
-                var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
+                var package = PackageRepositoryHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
                 if (package.IsSatellitePackage())
                 {
                     // Satellite packages would necessarily have to be installed later than the corresponding package. 

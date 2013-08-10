@@ -97,7 +97,6 @@ namespace NuGet.PowerShell.Commands
                     if (AcceptLicenses.IsPresent)
                     {
                         PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
-                        
                     }
                     else
                     {
@@ -122,24 +121,23 @@ namespace NuGet.PowerShell.Commands
 
         public ICollection<IPackage> GetLicensePackages()
         {
-            var package = PackageManager.LocalRepository.FindPackage(Id, Version);
-            if (package == null)
-            {
-                package = PackageManager.SourceRepository.FindPackage(Id, Version);
-            }
+            IPackage package = PackageRepositoryHelper.ResolvePackage(
+                PackageManager.SourceRepository,
+                PackageManager.LocalRepository,
+                Id,
+                Version,
+                IncludePrerelease);
 
-            if (package == null)
-            {
-                throw new PackageNotInstalledException();
-            }
+            // ResolvePackage() would throw if it couldn't find the package.
+            // Hence we don't need to check if package != null;
 
             var walker = new InstallWalker(
                 ProjectManager.LocalRepository,
                 PackageManager.SourceRepository,
                 GetProjectTargetFramework(),
-                this,
-                IgnoreDependencies.IsPresent,
-                IncludePrerelease.IsPresent);
+                logger: this,
+                ignoreDependencies: IgnoreDependencies,
+                allowPrereleaseVersions: IncludePrerelease);
 
             IList<PackageOperation> operations = walker.ResolveOperations(package).ToArray();
 

@@ -169,8 +169,6 @@ namespace NuGet.PowerShell.Commands
             UnsubscribeEvents();
         }
 
-        
-
         protected void SubscribeToProgressEvents()
         {
             if (!IsSyncMode && _httpClientEvents != null)

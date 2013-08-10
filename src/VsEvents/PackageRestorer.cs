@@ -370,7 +370,7 @@ namespace NuGet.VsEvents
             var packageManager = packageManagerFactory.CreatePackageManagerWithAllPackageSources();
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
             {
-                var resolvedPackage = PackageHelper.ResolvePackage(
+                var resolvedPackage = PackageRepositoryHelper.ResolvePackage(
                     packageManager.SourceRepository, package.Id, package.Version);
                 NuGet.Common.PackageExtractor.InstallPackage(packageManager, resolvedPackage);
                 WriteLine(VerbosityLevel.Normal, Resources.PackageRestored, resolvedPackage);

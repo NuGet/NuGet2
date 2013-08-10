@@ -6,6 +6,41 @@ namespace NuGet
 {
     public static class PackageRepositoryHelper
     {
+        /// <summary>
+        /// Finds a package from the source repository that matches the id and version. 
+        /// </summary>
+        /// <param name="repository">The repository to find the package in.</param>
+        /// <param name="packageId">Id of the package to find.</param>
+        /// <param name="version">Version of the package to find.</param>
+        /// <exception cref="System.InvalidOperationException">If the specified package cannot be found in the repository.</exception>
+        public static IPackage ResolvePackage(IPackageRepository repository, string packageId, SemanticVersion version)
+        {
+            if (repository == null)
+            {
+                throw new ArgumentNullException("repository");
+            }
+
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            if (version == null)
+            {
+                throw new ArgumentNullException("version");
+            }
+
+            var package = repository.FindPackage(packageId, version);
+            if (package == null)
+            {
+                throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.UnknownPackageSpecificVersion, packageId, version));
+            }
+
+            return package;
+        }
+
         public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, string packageId, SemanticVersion version, bool allowPrereleaseVersions)
         {
             return ResolvePackage(sourceRepository, localRepository, constraintProvider: NullConstraintProvider.Instance, packageId: packageId, version: version, allowPrereleaseVersions: allowPrereleaseVersions);
@@ -35,9 +70,10 @@ namespace NuGet
 
                 // If we already have this package installed, use the local copy so we don't 
                 // end up using the one from the source repository
-                if (package != null)
+                if (package != null && version == null)
                 {
-                    package = localRepository.FindPackage(package.Id, package.Version, allowPrereleaseVersions, allowUnlisted: true) ?? package;
+                    IPackage localPackage = localRepository.FindPackage(package.Id, package.Version, allowPrereleaseVersions, allowUnlisted: true);
+                    package = localPackage ?? package;
                 }
             }
 
