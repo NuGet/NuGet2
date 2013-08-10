@@ -1,10 +1,13 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
+using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
 using EnvDTE;
@@ -28,8 +31,8 @@ namespace NuGet.PowerShell.Commands
         private IDisposable _expandedNodesDisposable;
 
         protected ProcessPackageBaseCommand(
-            ISolutionManager solutionManager, 
-            IVsPackageManagerFactory packageManagerFactory, 
+            ISolutionManager solutionManager,
+            IVsPackageManagerFactory packageManagerFactory,
             IHttpClientEvents httpClientEvents,
             IVsCommonOperations vsCommonOperations,
             IDeleteOnRestartManager deleteOnRestartManager)
@@ -71,6 +74,17 @@ namespace NuGet.PowerShell.Commands
 
                 return projectManager;
             }
+        }
+
+        protected FrameworkName GetProjectTargetFramework()
+        {
+            Project project;
+            if (_projectManagerToProject.TryGetValue(ProjectManager, out project))
+            {
+                return project.GetTargetFrameworkName();
+            }
+
+            return null;
         }
 
         protected override void BeginProcessing()
@@ -205,7 +219,7 @@ namespace NuGet.PowerShell.Commands
         private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
         {
             // only open the read me file for the first package that initiates this operation.
-            if (e.Package.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot()) 
+            if (e.Package.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot())
             {
                 _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
             }
@@ -213,7 +227,7 @@ namespace NuGet.PowerShell.Commands
 
         private void OpenReadMeFile()
         {
-            if (_readmeFile != null )
+            if (_readmeFile != null)
             {
                 _vsCommonOperations.OpenFile(_readmeFile);
             }
@@ -262,10 +276,10 @@ namespace NuGet.PowerShell.Commands
             try
             {
                 ExecuteScript(
-                    e.InstallPath, 
-                    PowerShellScripts.Uninstall, 
-                    e.Package, 
-                    projectManager.GetTargetFrameworkForPackage(e.Package.Id), 
+                    e.InstallPath,
+                    PowerShellScripts.Uninstall,
+                    e.Package,
+                    projectManager.GetTargetFrameworkForPackage(e.Package.Id),
                     project);
             }
             catch (Exception ex)
@@ -275,9 +289,9 @@ namespace NuGet.PowerShell.Commands
         }
 
         protected void ExecuteScript(
-            string rootPath, 
-            string scriptFileName, 
-            IPackage package, 
+            string rootPath,
+            string scriptFileName,
+            IPackage package,
             FrameworkName targetFramework,
             Project project)
         {
@@ -290,7 +304,7 @@ namespace NuGet.PowerShell.Commands
             {
                 return;
             }
-            
+
             if (File.Exists(fullPath))
             {
                 var psVariable = SessionState.PSVariable;
@@ -350,6 +364,20 @@ namespace NuGet.PowerShell.Commands
             Project project = GetProject(throwIfNotExists: false);
             var projectGuids = project == null ? null : project.GetAllProjectTypeGuid();
             HttpUtility.SetUserAgent(e.Request, DefaultUserAgent, projectGuids);
+        }
+
+        protected bool AskForLicenseAcceptance(ICollection<IPackage> licenseUrls)
+        {
+            var choices = new Collection<ChoiceDescription>
+            {
+                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_FileConflictYesHelp),
+                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_FileConflictNoHelp),
+            };
+
+            int choice = Host.UI.PromptForChoice("License Acceptance", "Accept licenses?", choices, defaultChoice: 0);
+
+
+            return choice == 0;
         }
     }
 }

@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
@@ -60,6 +63,9 @@ namespace NuGet.PowerShell.Commands
         [Parameter]
         public FileConflictAction FileConflictAction { get; set; }
 
+        [Parameter]
+        public SwitchParameter AcceptLicenses { get; set; }
+
         protected override IVsPackageManager CreatePackageManager()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -88,7 +94,23 @@ namespace NuGet.PowerShell.Commands
                 SubscribeToProgressEvents();
                 if (PackageManager != null)
                 {
-                    PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+                    if (AcceptLicenses.IsPresent)
+                    {
+                        PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+                        
+                    }
+                    else
+                    {
+                        ICollection<IPackage> licensePackages = GetLicensePackages();
+                        bool accepted = AskForLicenseAcceptance(licensePackages);
+                        if (!accepted)
+                        {
+                            return;
+                        }
+
+                        //PackageManager.InstallPackage()
+                    }
+
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
                 }
             }
@@ -96,6 +118,38 @@ namespace NuGet.PowerShell.Commands
             {
                 UnsubscribeFromProgressEvents();
             }
+        }
+
+        public ICollection<IPackage> GetLicensePackages()
+        {
+            var package = PackageManager.LocalRepository.FindPackage(Id, Version);
+            if (package == null)
+            {
+                package = PackageManager.SourceRepository.FindPackage(Id, Version);
+            }
+
+            if (package == null)
+            {
+                throw new PackageNotInstalledException();
+            }
+
+            var walker = new InstallWalker(
+                ProjectManager.LocalRepository,
+                PackageManager.SourceRepository,
+                GetProjectTargetFramework(),
+                this,
+                IgnoreDependencies.IsPresent,
+                IncludePrerelease.IsPresent);
+
+            IList<PackageOperation> operations = walker.ResolveOperations(package).ToArray();
+
+            var licensePackages = from o in operations
+                                  where o.Action == PackageAction.Install &&
+                                        o.Package.RequireLicenseAcceptance &&
+                                        !PackageManager.LocalRepository.Exists(o.Package)
+                                  select o.Package;
+
+            return licensePackages.ToArray();
         }
 
         public override FileConflictResolution ResolveFileConflict(string message)
