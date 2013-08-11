@@ -100,14 +100,7 @@ namespace NuGet.PowerShell.Commands
                     }
                     else
                     {
-                        ICollection<IPackage> licensePackages = GetLicensePackages();
-                        bool accepted = AskForLicenseAcceptance(licensePackages);
-                        if (!accepted)
-                        {
-                            return;
-                        }
-
-                        //PackageManager.InstallPackage()
+                        InstallPackageWithLicenseCheck();
                     }
 
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
@@ -119,7 +112,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        public ICollection<IPackage> GetLicensePackages()
+        protected void InstallPackageWithLicenseCheck()
         {
             IPackage package = PackageRepositoryHelper.ResolvePackage(
                 PackageManager.SourceRepository,
@@ -139,15 +132,24 @@ namespace NuGet.PowerShell.Commands
                 ignoreDependencies: IgnoreDependencies,
                 allowPrereleaseVersions: IncludePrerelease);
 
-            IList<PackageOperation> operations = walker.ResolveOperations(package).ToArray();
+            PackageOperation[] operations = walker.ResolveOperations(package).ToArray();
 
-            var licensePackages = from o in operations
-                                  where o.Action == PackageAction.Install &&
-                                        o.Package.RequireLicenseAcceptance &&
-                                        !PackageManager.LocalRepository.Exists(o.Package)
-                                  select o.Package;
+            var licensePackages = (from o in operations
+                                   where o.Action == PackageAction.Install &&
+                                         o.Package.RequireLicenseAcceptance &&
+                                         !PackageManager.LocalRepository.Exists(o.Package)
+                                   select o.Package).ToArray();
 
-            return licensePackages.ToArray();
+            if (licensePackages.Length > 0)
+            {
+                bool accepted = AskForLicenseAcceptance(licensePackages);
+                if (!accepted)
+                {
+                    return;
+                }
+            }
+
+            PackageManager.InstallPackage(ProjectManager, package, operations, IgnoreDependencies, IncludePrerelease, logger: this);
         }
 
         public override FileConflictResolution ResolveFileConflict(string message)

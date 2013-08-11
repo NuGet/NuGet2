@@ -29,8 +29,7 @@ namespace NuGetConsole.Implementation.PowerConsole
         [ImportMany]
         internal IEnumerable<Lazy<IHostProvider, IHostMetadata>> HostProviders { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
-            Justification = "_hostInfo collection is disposed.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "_hostInfo collection is disposed.")]
         Dictionary<string, HostInfo> HostInfos
         {
             get

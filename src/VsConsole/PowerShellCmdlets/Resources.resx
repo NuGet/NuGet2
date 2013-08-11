@@ -201,4 +201,10 @@
   <data name="Cmdlet_FileConflictYesHelp" xml:space="preserve">
     <value>Overwrite this file</value>
   </data>
+  <data name="Cmdlet_AcceptLicenseHelp" xml:space="preserve">
+    <value>Accept licenses and proceed</value>
+  </data>
+  <data name="Cmdlet_DeclineLicenseHelp" xml:space="preserve">
+    <value>Reject licenses and cancel command</value>
+  </data>
 </root>

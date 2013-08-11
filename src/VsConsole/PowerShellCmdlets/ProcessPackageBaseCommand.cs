@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
@@ -366,18 +367,23 @@ namespace NuGet.PowerShell.Commands
             HttpUtility.SetUserAgent(e.Request, DefaultUserAgent, projectGuids);
         }
 
-        protected bool AskForLicenseAcceptance(ICollection<IPackage> licenseUrls)
+        protected bool AskForLicenseAcceptance(IEnumerable<IPackageMetadata> licensePackages)
         {
             var choices = new Collection<ChoiceDescription>
             {
-                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_FileConflictYesHelp),
-                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_FileConflictNoHelp),
+                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_AcceptLicenseHelp),
+                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_DeclineLicenseHelp),
             };
 
-            int choice = Host.UI.PromptForChoice(
-                "License Acceptance", 
-                "Accept licenses?", choices, defaultChoice: 0);
+            string messages = String.Join(
+                Environment.NewLine,
+                licensePackages.Select(p => p.Id + Environment.NewLine + p.LicenseUrl));
 
+            int choice = Host.UI.PromptForChoice(
+                "Some packages requires accepting licenses", 
+                messages, 
+                choices, 
+                defaultChoice: 0);
 
             return choice == 0;
         }
