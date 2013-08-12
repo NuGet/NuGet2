@@ -31,7 +31,7 @@ namespace NuGet.Commands
             string source = ResolveSource(packagePath, ConfigurationDefaults.Instance.DefaultPushSource);
 
             var apiKey = GetApiKey(source);
-            if (String.IsNullOrEmpty(apiKey))
+            if (String.IsNullOrEmpty(apiKey) && !IsFileSource(source))
             {
                 Console.WriteWarning(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
             }
@@ -201,6 +201,24 @@ namespace NuGet.Commands
             }
 
             return apiKey;
+        }
+
+        /// <summary>
+        /// Indicates whether the specified source is a file source, such as: \\a\b, c:\temp, etc.
+        /// </summary>
+        /// <param name="source">The source to test.</param>
+        /// <returns>true if the source is a file source; otherwise, false.</returns>
+        private static bool IsFileSource(string source)
+        {
+            Uri uri;
+            if (Uri.TryCreate(source, UriKind.RelativeOrAbsolute, out uri))
+            {
+                return uri.IsFile;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
