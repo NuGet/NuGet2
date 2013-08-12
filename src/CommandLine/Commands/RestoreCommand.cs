@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -30,6 +29,9 @@ namespace NuGet.Commands
 
         // A flag indicating if the opt-out message should be displayed.
         private bool _outputOptOutMessage;
+
+        // lock used to access _outputOptOutMessage.
+        private readonly object _outputOptOutMessageLock = new object();
 
         [Option(typeof(NuGetCommand), "RestoreCommandSourceDescription")]
         public ICollection<string> Source
@@ -278,14 +280,20 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
-            if (_outputOptOutMessage)
+            if (RequireConsent && _outputOptOutMessage)
             {
-                string message = String.Format(
-                    CultureInfo.CurrentCulture,
-                    LocalizedResourceManager.GetString("RestoreCommandPackageRestoreOptOutMessage"),
-                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
-                Console.WriteLine(message);
-                _outputOptOutMessage = false;
+                lock (_outputOptOutMessageLock)
+                {
+                    if (_outputOptOutMessage)
+                    {
+                        string message = String.Format(
+                            CultureInfo.CurrentCulture,
+                            LocalizedResourceManager.GetString("RestoreCommandPackageRestoreOptOutMessage"),
+                            NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                        Console.WriteLine(message);
+                        _outputOptOutMessage = false;
+                    }
+                }
             }
 
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))

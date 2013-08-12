@@ -835,7 +835,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot determine the packages folder to restore NuGet packages..
+        ///   Looks up a localized string similar to Cannot determine the packages folder to restore NuGet packages. Please specify either -PackagesDirectory or -SolutionDirectory..
         /// </summary>
         internal static string RestoreCommandCannotDeterminePackagesFolder {
             get {

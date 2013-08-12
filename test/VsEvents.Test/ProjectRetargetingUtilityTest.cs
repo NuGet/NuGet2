@@ -110,8 +110,15 @@ namespace NuGet.VsEvents
             solutionManager.Setup(s => s.SolutionDirectory).Returns(String.Empty);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystemProvider.Object, new Mock<IVsSourceControlTracker>().Object, null);
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object,
-                new Mock<IFileSystemProvider>().Object, repositorySettings, new Mock<VsPackageInstallerEvents>().Object, mockAggregateRepository.Object);
+            var packageManagerFactory = new VsPackageManagerFactory(
+                new Mock<ISolutionManager>().Object, 
+                mockRepositoryFactory.Object, 
+                mockSourceProvider.Object,
+                new Mock<IFileSystemProvider>().Object, 
+                repositorySettings, 
+                new Mock<VsPackageInstallerEvents>().Object, 
+                mockAggregateRepository.Object,
+                frameworkMultiTargeting: null);
 
             // Act & Assert
             // Get RepositoryPath throws InvalidOperationException and GetLocalRepository() handles it to return null

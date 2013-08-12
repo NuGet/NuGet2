@@ -15,7 +15,7 @@ namespace NuGet.Test
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
-        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
+        public void CallAddPackageWillAddNupkgFileButNoNuspecFile(string id, string version, string nuspecPath, string nupkgPath)
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -26,7 +26,7 @@ namespace NuGet.Test
             repository.AddPackage(PackageUtility.CreatePackage(id, version));
 
             // Assert
-            Assert.True(fileSystem.FileExists(nuspecPath));
+            Assert.False(fileSystem.FileExists(nuspecPath));
             Assert.True(fileSystem.FileExists(nupkgPath));
         }
 
@@ -37,8 +37,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-
-            // Act
+            
             var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
             var mockedPackage = Mock.Get(package);
             mockedPackage.Setup(m => m.PackageAssemblyReferences).Returns(
@@ -47,46 +46,12 @@ namespace NuGet.Test
                     new PackageReferenceSet(null, new [] { "B.dll" }),
                 });
 
-            repository.AddPackage(package);
-
-            // Assert
-            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
-
-            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
-
-            Assert.Equal(2, manifest.Metadata.ReferenceSets.Count);
-
-            var set1 = manifest.Metadata.ReferenceSets[0];
-            Assert.Equal(".NETFramework4.0", set1.TargetFramework);
-            Assert.Equal(1, set1.References.Count);
-            Assert.Equal("A.dll", set1.References[0].File);
-
-            var set2 = manifest.Metadata.ReferenceSets[1];
-            Assert.Null(set2.TargetFramework);
-            Assert.Equal(1, set2.References.Count);
-            Assert.Equal("B.dll", set2.References[0].File);
-        }
-
-        [Fact]
-        public void AddedNuspecDoesNotAddReferencesSectionIfNotPresent()
-        {
-            // Arrange
-            var fileSystem = new MockFileSystem("x:\\root");
-            var configFileSystem = new MockFileSystem();
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-
             // Act
-            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
             repository.AddPackage(package);
 
             // Assert
-            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
-
-            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
-
-            Assert.Equal(0, manifest.Metadata.ReferenceSets.Count);
+            Assert.False(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nupkg"));
         }
 
         [Theory]

@@ -22,7 +22,11 @@ namespace NuGet.Tools
     // a package.
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideBindingPath]
-    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionBuilding_string)]
+    // The right UIContext to use is VSConstants.UICONTEXT.SolutionBuilding_string, which 
+    // works for Dev 11 and later. Unfortunately, on Dev 10, the OnSolutionBegin event is fired 
+    // BEFORE our package is loaded. Thus, package restore will not work on the first build.
+    // When Dev 10 is no longer supported, we should change this UICONTEXT.
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.ProjectRetargeting_string)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOrProjectUpgrading_string)]
     [Guid(GuidList.guidNuGetVSEventsPackagePkgString)]

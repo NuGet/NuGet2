@@ -153,7 +153,7 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    return path;
+                    return Path.GetFullPath(path);
                 }
             }
             else

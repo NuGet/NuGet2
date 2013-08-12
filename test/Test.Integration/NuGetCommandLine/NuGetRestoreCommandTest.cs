@@ -319,9 +319,112 @@ EndProject");
             }
         }
 
-        // Tests that when package restore is enabled, the opt out message is displayed.
+        // Tests that when package restore is enabled and -RequireConsent is specified, 
+        // the opt out message is displayed.
         [Fact]
         public void RestoreCommand_OptOutMessage()
+        {
+            // Arrange
+            var tempPath = Path.GetTempPath();
+            var workingPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var repositoryPath = Path.Combine(workingPath, Guid.NewGuid().ToString());
+            var proj1Directory = Path.Combine(workingPath, "proj1");
+            var proj2Directory = Path.Combine(workingPath, "proj2");
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+
+            try
+            {
+                Util.CreateDirectory(workingPath);
+                Util.CreateDirectory(repositoryPath);
+                Util.CreateDirectory(proj1Directory);
+                Util.CreateDirectory(proj2Directory);
+
+                Util.CreateTestPackage("packageA", "1.1.0", repositoryPath);
+                Util.CreateTestPackage("packageB", "2.2.0", repositoryPath);
+
+                Util.CreateFile(workingPath, "a.sln",
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""proj1"", ""proj1\proj1.csproj"", ""{A04C59CC-7622-4223-B16B-CDF2ECAD438D}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""proj2"", ""proj2\proj2.csproj"", ""{42641DAE-D6C4-49D4-92EA-749D2573554A}""
+EndProject");
+                Util.CreateFile(workingPath, "my.config",
+                    @"
+<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageRestore>
+    <add key=""enabled"" value=""True"" />
+  </packageRestore>
+</configuration>");
+
+                Util.CreateFile(proj1Directory, "proj1.csproj",
+                    @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <OutputPath>out</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include='packages.config' />
+  </ItemGroup>
+</Project>");
+                Util.CreateFile(proj1Directory, "packages.config",
+@"<packages>
+  <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
+</packages>");
+
+                Util.CreateFile(proj2Directory, "proj2.csproj",
+                    @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <OutputPath>out</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include='packages.config' />
+  </ItemGroup>
+</Project>");
+                Util.CreateFile(proj2Directory, "packages.config",
+@"<packages>
+  <package id=""packageB"" version=""2.2.0"" targetFramework=""net45"" />
+</packages>");
+
+                // Act 
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    workingPath,
+                    "restore -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent",
+                    waitForExit: true);
+
+                // Assert
+                Assert.Equal(0, r.Item1);
+                string optOutMessage = String.Format(
+                    CultureInfo.CurrentCulture,
+                    NuGetResources.RestoreCommandPackageRestoreOptOutMessage,
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Assert.Contains(optOutMessage, r.Item2);
+                var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
+                var packageFileB = Path.Combine(workingPath, @"packages\packageB.2.2.0\packageB.2.2.0.nupkg");
+                Assert.True(File.Exists(packageFileA));
+                Assert.True(File.Exists(packageFileB));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+                Util.DeleteDirectory(workingPath);
+            }
+        }
+
+        // Tests that when package restore is enabled and -RequireConsent is not specified, 
+        // the opt out message is not displayed.
+        [Fact]
+        public void RestoreCommand_NoOptOutMessage()
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -407,7 +510,7 @@ EndProject");
                     CultureInfo.CurrentCulture,
                     NuGetResources.RestoreCommandPackageRestoreOptOutMessage,
                     NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
-                Assert.Contains(optOutMessage, r.Item2);
+                Assert.DoesNotContain(optOutMessage, r.Item2);
                 var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
                 var packageFileB = Path.Combine(workingPath, @"packages\packageB.2.2.0\packageB.2.2.0.nupkg");
                 Assert.True(File.Exists(packageFileA));
