@@ -312,7 +312,7 @@ nuget pack foo.nuspec -Version 2.1.0</value>
     <comment>Please don't localize this string</comment>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
-    <value>Pushes a package to the server and optionally publishes it.</value>
+    <value>Pushes a package to the server and publishes it.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
     <value>Specifies the server URL. If not specified, nuget.org is used unless DefaultPushSource config value is set in the NuGet config file.</value>
