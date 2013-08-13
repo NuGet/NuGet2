@@ -382,7 +382,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     // Starting from 2.7, we will not show the All option if there's only one package source.
                     // Hence, if All is the active package source in that case, we set the sole package source as active,
                     // and save it to settings
-                    PackageSource[] packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().ToArray();
+                    PackageSource[] packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().ToArray();
                     if (packageSources.Length == 1)
                     {
                         _packageSourceProvider.ActivePackageSource = packageSources[0];
@@ -400,14 +400,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 }
 
                 _packageSourceProvider.ActivePackageSource =
-                    _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().FirstOrDefault(
+                    _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().FirstOrDefault(
                         ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public string[] GetPackageSources()
         {
-            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().Select(ps => ps.Name).ToArray();
+            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject

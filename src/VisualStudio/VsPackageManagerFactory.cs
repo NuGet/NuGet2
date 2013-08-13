@@ -128,10 +128,11 @@ namespace NuGet.VisualStudio
         {
             if (IsAggregateRepository(repository))
             {
-               return  CreatePackageManager(repository, false);
+               return CreatePackageManager(repository, false);
             }
 
-            return CreatePackageManager(CreatePackageRestoreRepository(repository), useFallbackForDependencies: false);
+            var priorityRepository = _packageSourceProvider.CreatePriorityPackageRepository(_repositoryFactory, repository);
+            return CreatePackageManager(priorityRepository, useFallbackForDependencies: false);
         }
 
         /// <summary>
@@ -145,35 +146,17 @@ namespace NuGet.VisualStudio
                 return primaryRepository;
             }
 
-            var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
+            var aggregateRepository = _packageSourceProvider.CreateAggregateRepository(_repositoryFactory, ignoreFailingRepositories: true);
             aggregateRepository.ResolveDependenciesVertically = true;
             return new FallbackRepository(primaryRepository, aggregateRepository);
-        }
-
-        internal IPackageRepository CreatePackageRestoreRepository(IPackageRepository primaryRepository)
-        {
-            var nonActivePackageSources = _packageSourceProvider.GetEnabledPackageSources()
-                                          .Where(s => !s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))
-                                          .Select(s => s.Source)
-                                          .ToList();
-
-            if (nonActivePackageSources.IsEmpty())
-            {
-                return primaryRepository;
-            }
-
-            var aggregateRepository = nonActivePackageSources.Count > 1 ?
-                _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true, feeds: nonActivePackageSources)
-                : _repositoryFactory.CreateRepository(nonActivePackageSources[0]);
-
-            return new PackageRestoreRepository(primaryRepository, aggregateRepository);
         }
 
         private static bool IsAggregateRepository(IPackageRepository repository)
         {
             if (repository is AggregateRepository)
             {
-                // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository of all repositories in the package source
+                // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository 
+                // of all repositories in the package source.
                 // Since the repository created here comes from the UI, this holds true.
                 return true;
             }

@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio
         private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
         private readonly IFileSystemProvider _fileSystemProvider;
-        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
@@ -63,7 +63,7 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
-            IPackageSourceProvider packageSourceProvider,
+            IVsPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
@@ -379,8 +379,9 @@ namespace NuGet.VisualStudio
                 !fileSystem.FileExists(NuGetExeFile) ||
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
-                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
-                IPackageRepository repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
+                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder,
+                // using the active package source first and fall back to other enabled package sources.
+                IPackageRepository repository = CreatePackageRestoreRepository(); 
 
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
@@ -405,6 +406,24 @@ namespace NuGet.VisualStudio
                 // now add the .nuget folder to the solution as a solution folder.
                 _dte.Solution.AddFolderToSolution(VsConstants.NuGetSolutionSettingsFolder, nugetFolderPath);
             }
+        }
+
+        private IPackageRepository CreatePackageRestoreRepository()
+        {
+            var activeSource = _packageSourceProvider.ActivePackageSource;
+
+            if (activeSource == null)
+            {
+                return _packageSourceProvider.CreateAggregateRepository(_packageRepositoryFactory, ignoreFailingRepositories: true);
+            }
+
+            IPackageRepository activeRepository = _packageRepositoryFactory.CreateRepository(activeSource.Source);
+            if (AggregatePackageSource.IsAggregate(activeSource))
+            {
+                return activeRepository;
+            }
+
+            return _packageSourceProvider.CreatePriorityPackageRepository(_packageRepositoryFactory, activeRepository);
         }
 
         /// <summary>

@@ -20,11 +20,6 @@ namespace NuGet.VisualStudio
 
         public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate(this IPackageSourceProvider provider)
         {
-            return new[] { Instance }.Concat(provider.GetEnabledPackageSources());
-        }
-
-        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregateSmart(this IPackageSourceProvider provider)
-        {
             var packageSources = provider.GetEnabledPackageSources().ToArray();
 
             // If there's less than 2 package sources, don't add the Aggregate source because it will be exactly the same as the main source.

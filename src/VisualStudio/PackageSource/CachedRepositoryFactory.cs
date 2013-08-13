@@ -54,7 +54,7 @@ namespace NuGet.VisualStudio
             if (AggregatePackageSource.Instance.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase) ||
                 AggregatePackageSource.Instance.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase))
             {
-                return _packageSourceProvider.GetAggregate(this);
+                return _packageSourceProvider.CreateAggregateRepository(this, ignoreFailingRepositories: false);
             }
 
             // try to resolve the name or feed from the source 

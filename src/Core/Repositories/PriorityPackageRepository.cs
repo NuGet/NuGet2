@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet.VisualStudio
+namespace NuGet
 {
-    internal class PackageRestoreRepository : PackageRepositoryBase, IPackageLookup, IOperationAwareRepository
+    public class PriorityPackageRepository : PackageRepositoryBase, IPackageLookup, IOperationAwareRepository
     {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _secondaryRepository;
 
-        public PackageRestoreRepository(IPackageRepository primaryRepository, IPackageRepository secondaryRepository)
+        public PriorityPackageRepository(IPackageRepository primaryRepository, IPackageRepository secondaryRepository)
         {
             if (primaryRepository == null)
             {

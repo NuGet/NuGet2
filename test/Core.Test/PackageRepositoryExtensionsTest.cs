@@ -1,13 +1,13 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Versioning;
 using System.Threading;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System;
 
 namespace NuGet.Test
 {

@@ -909,7 +909,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B") });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false);
 
             // Assert
             Assert.Equal(2, repo.Repositories.Count());
@@ -932,7 +932,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: true);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: true);
 
             // Assert
             Assert.Equal(2, repo.Repositories.Count());
@@ -955,7 +955,7 @@ namespace NuGet.Test
                 new PackageSource("A"), new PackageSource("B", "B", isEnabled: false), new PackageSource("C", "C", isEnabled: false) });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false);
 
             // Assert
             Assert.Equal(1, repo.Repositories.Count());
@@ -975,7 +975,7 @@ namespace NuGet.Test
             });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory, ignoreFailingRepositories: true);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory, ignoreFailingRepositories: true);
 
             // Assert
             Assert.False(repo.Repositories.Any());
@@ -992,7 +992,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(Enumerable.Empty<PackageSource>());
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: ignoreRepository);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: ignoreRepository);
 
             // Assert
             Assert.True(repo.IgnoreFailingRepositories);
@@ -1013,7 +1013,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: false));
+            ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false));
         }
 
         [Fact]

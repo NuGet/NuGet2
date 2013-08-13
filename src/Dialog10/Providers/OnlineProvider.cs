@@ -84,7 +84,7 @@ namespace NuGet.Dialog.Providers
             Justification = "We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes()
         {
-            var packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart();
+            var packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregate();
            
             // create one tree node per package source
             foreach (var source in packageSources)
