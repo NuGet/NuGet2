@@ -188,7 +188,7 @@ nuget push -?</value>
   <data name="InstallCommandExcludeVersionDescription" xml:space="preserve">
     <value>If set, the destination folder will contain only the package name, not the version number</value>
   </data>
-  <data name="InstallCommandNoCache" xml:space="preserve">
+  <data name="CommandNoCache" xml:space="preserve">
     <value>Disable using the machine cache as the first package source.</value>
   </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
@@ -198,8 +198,8 @@ nuget push -?</value>
     <value>Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config.</value>
     <comment>Please don't localize "packages.config".</comment>
   </data>
-  <data name="InstallCommandSourceDescription" xml:space="preserve">
-    <value>A list of packages sources to use for the install.</value>
+  <data name="CommandSourceDescription" xml:space="preserve">
+    <value>A list of packages sources to use for this command.</value>
   </data>
   <data name="InstallCommandUsageDescription" xml:space="preserve">
     <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
@@ -446,8 +446,8 @@ nuget update -Self</value>
     <value>The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.</value>
     <comment>Please don't localize "%AppData%\NuGet\NuGet.config".</comment>
   </data>
-  <data name="InstallCommandDisableParallel" xml:space="preserve">
-    <value>Disable parallel nuget package installs.</value>
+  <data name="CommandDisableParallel" xml:space="preserve">
+    <value>Disable parallel processing of packages for this command.</value>
   </data>
   <data name="PackageCommandMinClientVersion" xml:space="preserve">
     <value>Set the minClientVersion attribute for the created package.</value>
@@ -466,12 +466,6 @@ nuget update -Self</value>
   <data name="RestoreCommandDescription" xml:space="preserve">
     <value>Restores NuGet packages.</value>
   </data>
-  <data name="RestoreCommandDisableParallelProcessing" xml:space="preserve">
-    <value>Disable parallel nuget package restores.</value>
-  </data>
-  <data name="RestoreCommandNoCache" xml:space="preserve">
-    <value>Disable using the machine cache as the first package source.</value>
-  </data>
   <data name="RestoreCommandPackagesDirectory" xml:space="preserve">
     <value>Specifies the packages folder.</value>
   </data>
@@ -480,9 +474,6 @@ nuget update -Self</value>
   </data>
   <data name="RestoreCommandSolutionDirectory" xml:space="preserve">
     <value>Specifies the solution directory. Not valid when restoring packages for a solution.</value>
-  </data>
-  <data name="RestoreCommandSourceDescription" xml:space="preserve">
-    <value>A list of packages sources to use.</value>
   </data>
   <data name="RestoreCommandUsageDescription" xml:space="preserve">
     <value>If a solution is specified, this command restores NuGet packages that are installed in the solution and in projects contained in the solution. Otherwise, the command restores packages listed in the specified packages.config file.</value>

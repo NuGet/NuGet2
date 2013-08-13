@@ -15,11 +15,8 @@ namespace NuGet.Commands
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "RestoreCommandUsageSummary",
         UsageDescriptionResourceName = "RestoreCommandUsageDescription",
         UsageExampleResourceName = "RestoreCommandUsageExamples")]
-    public class RestoreCommand : Command
+    public class RestoreCommand : DownloadCommandBase
     {
-        private readonly IPackageRepository _cacheRepository;
-        private readonly List<string> _sources = new List<string>();
-        
         // True means we're restoring for a solution; False means we're restoring packages
         // listed in a packages.config file.
         private bool _restoringForSolution;
@@ -33,34 +30,14 @@ namespace NuGet.Commands
         // lock used to access _outputOptOutMessage.
         private readonly object _outputOptOutMessageLock = new object();
 
-        [Option(typeof(NuGetCommand), "RestoreCommandSourceDescription")]
-        public ICollection<string> Source
-        {
-            get { return _sources; }
-        }
-
-        [Option(typeof(NuGetCommand), "RestoreCommandNoCache")]
-        public bool NoCache { get; set; }
-
         [Option(typeof(NuGetCommand), "RestoreCommandRequireConsent")]
         public bool RequireConsent { get; set; }
-
-        [Option(typeof(NuGetCommand), "RestoreCommandDisableParallelProcessing")]
-        public bool DisableParallelProcessing { get; set; }
 
         [Option(typeof(NuGetCommand), "RestoreCommandPackagesDirectory", AltName="OutputDirectory")]
         public string PackagesDirectory { get; set; }
 
         [Option(typeof(NuGetCommand), "RestoreCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
-
-        /// <remarks>
-        /// Meant for unit testing.
-        /// </remarks>
-        protected IPackageRepository CacheRepository
-        {
-            get { return _cacheRepository; }
-        }
 
         /// <remarks>
         /// Meant for unit testing.
@@ -92,9 +69,9 @@ namespace NuGet.Commands
         {
         }
 
-        protected internal RestoreCommand(IPackageRepository cacheRepository)
+        protected internal RestoreCommand(IPackageRepository cacheRepository) :
+            base(cacheRepository)
         {
-            _cacheRepository = cacheRepository;
             _outputOptOutMessage = true;
         }
 
@@ -228,21 +205,9 @@ namespace NuGet.Commands
             return false;
         }
 
-        private IPackageRepository GetRepository()
-        {
-            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
-            bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
-            if (!NoCache)
-            {
-                repository = new AggregateRepository(new[] { CacheRepository, repository }) { IgnoreFailingRepositories = ignoreFailingRepositories };
-            }
-            repository.Logger = Console;
-            return repository;
-        }
-
         protected virtual IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem)
         {
-            var repository = GetRepository();
+            var repository = CreateRepository();
             var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths: true);
 
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, packagesFolderFileSystem);

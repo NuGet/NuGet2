@@ -15,19 +15,11 @@ namespace NuGet.Commands
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
-    public class InstallCommand : Command
+    public class InstallCommand : DownloadCommandBase
     {
         private static readonly object _satelliteLock = new object();
-        private readonly IPackageRepository _cacheRepository;
-        private readonly List<string> _sources = new List<string>();
 
         private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
-        
-        [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
-        public ICollection<string> Source
-        {
-            get { return _sources; }
-        }
 
         [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
@@ -41,25 +33,11 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandPrerelease")]
         public bool Prerelease { get; set; }
 
-        [Option(typeof(NuGetCommand), "InstallCommandNoCache")]
-        public bool NoCache { get; set; }
-
         [Option(typeof(NuGetCommand), "InstallCommandRequireConsent")]
         public bool RequireConsent { get; set; }
 
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
-
-        [Option(typeof(NuGetCommand), "InstallCommandDisableParallel")]
-        public bool DisableParallel { get; set; }
-
-        /// <remarks>
-        /// Meant for unit testing.
-        /// </remarks>
-        protected IPackageRepository CacheRepository
-        {
-            get { return _cacheRepository; }
-        }
 
         private bool AllowMultipleVersions
         {
@@ -72,14 +50,12 @@ namespace NuGet.Commands
         {
         }
 
-        protected internal InstallCommand(
-            IPackageRepository cacheRepository)
+        protected internal InstallCommand(IPackageRepository cacheRepository) :
+            base(cacheRepository)
         {
-            _cacheRepository = cacheRepository;
-
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
-            DisableParallel = _isMonoRuntime;
+            DisableParallelProcessing = _isMonoRuntime;
         }
 
         public override void ExecuteCommand()
@@ -132,7 +108,7 @@ namespace NuGet.Commands
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
                 currentSettings = NuGet.Settings.LoadDefaultSettings(
-                    fileSystem, 
+                    fileSystem,
                     configFileName: null,
                     machineWideSettings: MachineWideSettings);
 
@@ -156,18 +132,6 @@ namespace NuGet.Commands
 
             // Use the current directory as output.
             return Directory.GetCurrentDirectory();
-        }
-
-        private IPackageRepository GetRepository()
-        {
-            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
-            bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
-            if (!NoCache)
-            {
-                repository = new AggregateRepository(new[] { CacheRepository, repository }) { IgnoreFailingRepositories = ignoreFailingRepositories };
-            }
-            repository.Logger = Console;
-            return repository;
         }
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
@@ -208,9 +172,9 @@ namespace NuGet.Commands
 
             var satellitePackages = new List<IPackage>();
 
-            if (DisableParallel)
+            if (DisableParallelProcessing)
             {
-                foreach(var package in packageReferences)
+                foreach (var package in packageReferences)
                 {
                     RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages);
                 }
@@ -315,7 +279,7 @@ namespace NuGet.Commands
 
         protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem)
         {
-            var repository = GetRepository();
+            var repository = CreateRepository();
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
 
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);

@@ -94,6 +94,7 @@
     <Compile Include="DefaultPackageRules.cs" />
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="CommandLineMachineWideSettings.cs" />
+    <Compile Include="Commands\DownloadCommandBase.cs" />
     <Compile Include="NuGetCommand.cs">
       <DependentUpon>NuGetCommand.resx</DependentUpon>
     </Compile>

@@ -331,15 +331,14 @@ namespace NuGet.Test.ServerExtensions
         {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageRepository _destinationRepository;
-            private readonly IPackageRepository _machineCacheRepository;
 
             public TestMirrorCommand(
                 string packageId,
                 IPackageRepositoryFactory factory = null,
                 IPackageSourceProvider sourceProvider = null,
                 IFileSystem fileSystem = null,
-                IPackageRepository machineCacheRepository = null
-                )
+                IPackageRepository machineCacheRepository = null) : 
+                base(machineCacheRepository ?? new MockPackageRepository())
             {
                 SourceProvider = sourceProvider ?? GetSourceProvider();
                 Settings = CreateSettings();
@@ -350,12 +349,6 @@ namespace NuGet.Test.ServerExtensions
                 Arguments.Add("destinationurlpush");
                 _fileSystem = fileSystem ?? new MockFileSystem();
                 _destinationRepository = new MockPackageRepository("destinationurlpull");
-                _machineCacheRepository = machineCacheRepository ?? new MockPackageRepository();
-            }
-
-            protected override IPackageRepository CacheRepository
-            {
-                get { return _machineCacheRepository; }
             }
 
             private static ISettings CreateSettings()
