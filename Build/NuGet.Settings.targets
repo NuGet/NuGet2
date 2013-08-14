@@ -37,9 +37,6 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" $(BuildForDev12) != 'true' ">
-        <SettingsAssembly>Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</SettingsAssembly>
-        <SettingsAssemblyHintPath>..\..\lib\VS10\Microsoft.VisualStudio.Settings.dll</SettingsAssemblyHintPath>
-
         <ShellAssembly>Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
         <ShellAssemblyHintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</ShellAssemblyHintPath>
     

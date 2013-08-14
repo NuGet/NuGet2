@@ -12,7 +12,6 @@
     <AssemblyName>NuGet.VisualStudio</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DeleteOnRestart\DeleteOnRestartManager.cs" />
@@ -154,10 +153,6 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
       <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.Project.V11Only.dll</HintPath>
-    </Reference>
-    <Reference Include="$(SettingsAssembly)" Condition=" '$(BuildForDev12)' != 'true' ">
-      <HintPath>$(SettingsAssemblyHintPath)</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="$(ShellAssembly)">
       <SpecificVersion>False</SpecificVersion>
