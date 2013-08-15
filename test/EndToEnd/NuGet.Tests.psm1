@@ -181,7 +181,7 @@ function global:Run-Test {
                 }
 
                 try {
-                    & $_ $context
+                    $executionTime = measure-command { & $_ $context }
                 
                     Write-Host -ForegroundColor DarkGreen "Test $name Passed"
                 
@@ -234,6 +234,9 @@ function global:Run-Test {
                         }
                     }
                 }
+
+                $results[$name] | Add-Member NoteProperty -Name Time -Value $executionTime
+                $results[$name] | Add-Member NoteProperty -Name Retried -Value ($counter -eq 1)
 
                 if ($testSucceeded) {
                     break;
@@ -420,6 +423,12 @@ function Write-HtmlResults
                 <th>
                     Error Message
                 </th>
+                <th>
+                    Execution time
+                </th>
+                <th>
+                    Retried
+                </th>
             </tr>
             {6}
             </table>
@@ -430,6 +439,8 @@ function Write-HtmlResults
     <td class=`"{0}`">{0}</td>
     <td class=`"{0}`">{1}</td>
     <td class=`"{0}`">{2}</td>
+    <td class=`"{0}`">{3}</td>
+    <td class=`"{0}`">{4}</td>
     </tr>"
     
     $pass = 0
@@ -450,9 +461,12 @@ function Write-HtmlResults
             $pass++
         }
         
-        [String]::Format($testTemplate, $status, 
+        [String]::Format($testTemplate, 
+                         $status, 
                          [System.Net.WebUtility]::HtmlEncode($_.Test), 
-                         [System.Net.WebUtility]::HtmlEncode($_.Error))
+                         [System.Net.WebUtility]::HtmlEncode($_.Error),
+                         $_.Time.TotalSeconds,
+                         $_.Retried)
     }
 
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
