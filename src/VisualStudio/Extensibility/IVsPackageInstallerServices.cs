@@ -4,6 +4,9 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio
 {
+    /// <summary>
+    /// Contains methods to query for installed packages within the current solution.
+    /// </summary>
     [ComImport]
     [Guid("B858E847-4920-4313-9D3B-176BB0D2F5C2")]
     public interface IVsPackageInstallerServices

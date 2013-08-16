@@ -140,7 +140,6 @@ namespace NuGet.VisualStudio
         /// <summary>
         /// Delete all parent, grand parent, etc. of this file if they are empty, after deleting this file.
         /// </summary>
-        /// <param name="file"></param>
         private static void DeleteAllParentFilters(object filter)
         {
             VCFilter currentFilter = filter as VCFilter;

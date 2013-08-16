@@ -1,7 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <NoWarn>1762</NoWarn>
+    <NoWarn>1762, 1591, 1573</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DocumentationFile>bin\Debug\NuGet.VisualStudio.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DocumentationFile>bin\Release\NuGet.VisualStudio.XML</DocumentationFile>
   </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
