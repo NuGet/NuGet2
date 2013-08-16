@@ -3,12 +3,6 @@
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DocumentationFile>bin\Debug\NuGet.VisualStudio.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DocumentationFile>bin\Release\NuGet.VisualStudio.XML</DocumentationFile>
-  </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{6146CA62-CC16-422C-A105-3E81F7452AA6}</ProjectGuid>
