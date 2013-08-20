@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows;
 
 namespace NuGet
@@ -7,6 +8,8 @@ namespace NuGet
     // http://msdn.microsoft.com/en-us/library/aa970850(v=vs.100).aspx
     public class SendingRequestEventManager : WeakEventManager
     {
+        private static readonly object _managerLock = new object();
+
         public static void AddListener(IHttpClientEvents source, IWeakEventListener listener)
         {
             SendingRequestEventManager.CurrentManager.ProtectedAddListener(source, listener);
@@ -22,13 +25,18 @@ namespace NuGet
             get
             {
                 Type managerType = typeof(SendingRequestEventManager);
-                SendingRequestEventManager manager = (SendingRequestEventManager)WeakEventManager.GetCurrentManager(managerType);
-                if (manager == null)
+
+                lock (_managerLock)
                 {
-                    manager = new SendingRequestEventManager();
-                    WeakEventManager.SetCurrentManager(managerType, manager);
+                    SendingRequestEventManager manager = (SendingRequestEventManager)WeakEventManager.GetCurrentManager(managerType);
+                    if (manager == null)
+                    {
+                        manager = new SendingRequestEventManager();
+                        WeakEventManager.SetCurrentManager(managerType, manager);
+                    }
+
+                    return manager;
                 }
-                return manager;
             }
         } 
 
