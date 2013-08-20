@@ -880,6 +880,7 @@ namespace NuGet.VisualStudio
                     buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
                 }
 
+                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(buildProject, targetsPath);
                 buildProject.ReevaluateIfNecessary();
             }
         }
@@ -900,6 +901,7 @@ namespace NuGet.VisualStudio
                 if (importElement != null)
                 {
                     importElement.Parent.RemoveChild(importElement);
+                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(buildProject, targetsPath);
                     buildProject.ReevaluateIfNecessary();
                 }
             }

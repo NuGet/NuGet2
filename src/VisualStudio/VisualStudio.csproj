@@ -20,6 +20,9 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\MsBuildProjectUtility.cs">
+      <Link>Common\MsBuildProjectUtility.cs</Link>
+    </Compile>
     <Compile Include="DeleteOnRestart\DeleteOnRestartManager.cs" />
     <Compile Include="DeleteOnRestart\RestartRequestBar.xaml.cs">
       <DependentUpon>RestartRequestBar.xaml</DependentUpon>
