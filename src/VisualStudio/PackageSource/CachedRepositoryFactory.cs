@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Globalization;
+using System.Windows;
 
 namespace NuGet.VisualStudio
 {
@@ -9,7 +10,11 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageRepositoryFactory))]
     [Export(typeof(IProgressProvider))]
     [Export(typeof(IHttpClientEvents))]
-    public class CachedRepositoryFactory : IPackageRepositoryFactory, IProgressProvider, IHttpClientEvents
+    public class CachedRepositoryFactory : 
+        IPackageRepositoryFactory, 
+        IProgressProvider, 
+        IHttpClientEvents,
+        IWeakEventListener
     {
         private readonly ConcurrentDictionary<string, IPackageRepository> _repositoryCache = new ConcurrentDictionary<string, IPackageRepository>();
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -79,7 +84,7 @@ namespace NuGet.VisualStudio
                 var httpEvents = repository as IHttpClientEvents;
                 if (httpEvents != null)
                 {
-                    httpEvents.SendingRequest += OnSendingRequest;
+                    SendingRequestEventManager.AddListener(httpEvents, this);
                 }
             }
             return repository;
@@ -93,6 +98,19 @@ namespace NuGet.VisualStudio
         private void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
             SendingRequest(this, e);
+        }
+
+        bool IWeakEventListener.ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
+        {
+            if (managerType == typeof(SendingRequestEventManager))
+            {
+                OnSendingRequest(sender, (WebRequestEventArgs)e);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

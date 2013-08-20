@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Windows;
 using NuGet.Resources;
 
 namespace NuGet
@@ -18,7 +19,8 @@ namespace NuGet
         ICultureAwareRepository, 
         IOperationAwareRepository,
         IPackageLookup,
-        ILatestPackageLookup
+        ILatestPackageLookup,
+        IWeakEventListener
     {
         private const string FindPackagesByIdSvcMethod = "FindPackagesById";
         private const string PackageServiceEntitySetName = "Packages";
@@ -57,29 +59,32 @@ namespace NuGet
 
             _packageDownloader = packageDownloader;
 
-            _packageDownloader.SendingRequest += (sender, e) =>
+            // weak event pattern
+            SendingRequestEventManager.AddListener(_packageDownloader, this);
+        }
+
+        private void OnPackageDownloaderSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            if (_currentOperation != null)
             {
-                if (_currentOperation != null)
+                string operation = _currentOperation.Item1;
+                string mainPackageId = _currentOperation.Item2;
+
+                if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
                 {
-                    string operation = _currentOperation.Item1;
-                    string mainPackageId = _currentOperation.Item2;
-
-                    if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
+                    if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
-                        {
-                            operation = operation + "-Dependency";
-                        }
-                    }
-
-                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
-
-                    if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                        operation = operation + "-Dependency";
                     }
                 }
-            };
+
+                e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
+
+                if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                }
+            }
         }
 
         // Just forward calls to the package downloader
@@ -429,6 +434,19 @@ namespace NuGet
         private static string ToLowerCaseString(bool value)
         {
             return value.ToString().ToLowerInvariant();
+        }
+
+        public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
+        {
+            if (managerType == typeof(SendingRequestEventManager))
+            {
+                OnPackageDownloaderSendingRequest(sender, (WebRequestEventArgs)e);
+                return true;
+            }
+            else
+            {
+                return false;
+            } 
         }
     }
 }
