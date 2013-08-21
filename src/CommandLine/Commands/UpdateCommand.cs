@@ -48,46 +48,49 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            // update with self as parameter
             if (Self)
             {
                 var selfUpdater = new SelfUpdater(RepositoryFactory) { Console = Console };
                 selfUpdater.UpdateSelf();
+                return;
             }
-            else
+
+            string inputFile = GetInputFile();
+
+            if (string.IsNullOrEmpty(inputFile))
             {
-                string inputFile = GetInputFile();
+                throw new CommandLineException(NuGetResources.InvalidFile);
+            }
+            
+            // update with packages.config as parameter
+            if (inputFile.EndsWith(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            {
+                UpdatePackages(inputFile);
+                return;
+            }
 
-                if (String.IsNullOrEmpty(inputFile))
-                {
-                    throw new CommandLineException(NuGetResources.InvalidFile);
-                }
-               
-                if (inputFile.EndsWith(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
-                {
-                    UpdatePackages(inputFile);
-                    return;
-                }
-
-                if (ProjectHelper.SupportedProjectExtensions.Contains(Path.GetExtension(inputFile) ?? string.Empty))
-                {
-                    if (!FileSystem.FileExists(inputFile))
-                    {
-                        throw new CommandLineException(NuGetResources.UnableToFindProject, inputFile);
-                    }
-
-                    string packagesConfigPath = GetPackagesConfigPathFromProject(inputFile);
-                    UpdatePackages(packagesConfigPath, GetMSBuildProject(inputFile));
-                    return;
-                }
-                
+            // update with project file as parameter
+            if (ProjectHelper.SupportedProjectExtensions.Contains(Path.GetExtension(inputFile) ?? string.Empty))
+            {
                 if (!FileSystem.FileExists(inputFile))
                 {
-                    throw new CommandLineException(NuGetResources.UnableToFindSolution, inputFile);
+                    throw new CommandLineException(NuGetResources.UnableToFindProject, inputFile);
                 }
-                 
-                string solutionDir = Path.GetDirectoryName(inputFile);
-                UpdateAllPackages(solutionDir);
+
+                UpdatePackages(new MSBuildProjectSystem(inputFile));
+                return;
             }
+                
+            if (!FileSystem.FileExists(inputFile))
+            {
+                throw new CommandLineException(NuGetResources.UnableToFindSolution, inputFile);
+            }
+            
+            // update with solution as parameter
+            string solutionDir = Path.GetDirectoryName(inputFile);
+            UpdateAllPackages(solutionDir);
+            
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -123,7 +126,7 @@ namespace NuGet.Commands
             {
                 try
                 {
-                    UpdatePackages(project.PackagesConfigPath, project.Project, repositoryPath, sourceRepository);
+                    UpdatePackages(project.Project, repositoryPath, sourceRepository);
                     if (Verbose)
                     {
                         Console.WriteLine();
@@ -198,11 +201,14 @@ namespace NuGet.Commands
             return null;
         }
 
-        private void UpdatePackages(string packagesConfigPath, IMSBuildProjectSystem project = null, string repositoryPath = null, IPackageRepository sourceRepository = null)
+        private void UpdatePackages(string packagesConfigPath, string repositoryPath = null, IPackageRepository sourceRepository = null)
         {
-            // Get the msbuild project
-            project = project ?? GetMSBuildProject(packagesConfigPath);
+            var project =  GetMSBuildProject(packagesConfigPath);
+            UpdatePackages(project);
+        }
 
+        private void UpdatePackages(IMSBuildProjectSystem project, string repositoryPath = null, IPackageRepository sourceRepository = null)
+        {
             // Resolve the repository path
             repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
 
