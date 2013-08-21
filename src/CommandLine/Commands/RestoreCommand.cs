@@ -296,7 +296,10 @@ namespace NuGet.Commands
                 }
             }
 
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))
+            using (packageManager.SourceRepository.StartOperation(
+                RepositoryOperationNames.Restore, 
+                packageId, 
+                version == null ? null : version.ToString()))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
                 if (package.IsSatellitePackage())

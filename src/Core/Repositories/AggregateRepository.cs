@@ -275,10 +275,10 @@ namespace NuGet
             return allPackages.CollapseById();
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             return DisposableAction.All(
-                Repositories.Select(r => r.StartOperation(operation, mainPackageId)));
+                Repositories.Select(r => r.StartOperation(operation, mainPackageId, mainPackageVersion)));
         }
     }
 }

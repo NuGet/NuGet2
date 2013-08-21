@@ -290,7 +290,7 @@ namespace NuGet.Commands
             {
                 if (localRepository.Exists(package.Id))
                 {
-                    using (sourceRepository.StartOperation(RepositoryOperationNames.Update, package.Id))
+                    using (sourceRepository.StartOperation(RepositoryOperationNames.Update, package.Id, mainPackageVersion: null))
                     {
                         try
                         {

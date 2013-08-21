@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
-using System;
 
 namespace NuGet.VisualStudio
 {
@@ -118,9 +118,9 @@ namespace NuGet.VisualStudio
             return false;
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            return SourceRepository.StartOperation(operation, mainPackageId);
+            return SourceRepository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

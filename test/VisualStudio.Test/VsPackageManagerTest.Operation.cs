@@ -28,6 +28,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Install", sourceRepository.LastOperation);
             Assert.Equal("foo", sourceRepository.LastMainPackageId);
+            Assert.Equal("1.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -50,6 +51,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Install", sourceRepository.LastOperation);
             Assert.Equal("foo", sourceRepository.LastMainPackageId);
+            Assert.Equal("1.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -84,6 +86,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Install", sourceRepository.LastOperation);
             Assert.Equal("bar", sourceRepository.LastMainPackageId);
+            Assert.Equal("2.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -115,6 +118,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("2.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -148,6 +152,44 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Null(sourceRepository.LastMainPackageId);
+            Assert.Null(sourceRepository.LastMainPackageVersion);
+        }
+
+        [Fact]
+        public void UpdatePackagesSetOperationToUpdate3()
+        {
+            // Arrange
+            var localRepository = new MockSharedPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), projectRepository);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var package = PackageUtility.CreatePackage("phuong", "1.0", new[] { "hello" });
+            localRepository.AddPackage(package);
+            projectRepository.AddPackage(package);
+
+            var package2 = PackageUtility.CreatePackage("phuong", "2.0", new[] { "hello" });
+            sourceRepository.AddPackage(package2);
+
+            var packageB = PackageUtility.CreatePackage("time", "1.0", new[] { "hello" });
+            projectRepository.AddPackage(package);
+
+            // Act
+            packageManager.UpdatePackage(
+                projectManager,
+                "phuong",
+                version: null,
+                updateDependencies: true,
+                allowPrereleaseVersions: true,
+                logger: NullLogger.Instance);
+
+            // Assert
+            Assert.Equal("Update", sourceRepository.LastOperation);
+            Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("2.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -192,6 +234,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("2.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -236,6 +279,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Null(sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -272,7 +316,7 @@ namespace NuGet.VisualStudio.Test
             packageManager.UpdatePackage(
                 projectManager,
                 "phuong",
-                new SemanticVersion("1.0"),
+                new SemanticVersion("2.0"),
                 updateDependencies: true,
                 allowPrereleaseVersions: true,
                 logger: NullLogger.Instance);
@@ -280,6 +324,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("2.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -309,7 +354,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.AddPackage(package);
             projectRepository.AddPackage(package);
 
-            var package2 = PackageUtility.CreatePackage("phuong", "2.0", new[] { "hello" });
+            var package2 = PackageUtility.CreatePackage("phuong", "1.0.0.1", new[] { "hello" });
             sourceRepository.AddPackage(package2);
 
             // Act
@@ -322,6 +367,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("1.0.0.1", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]
@@ -394,7 +440,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.AddPackage(package);
             projectRepository.AddPackage(package);
 
-            var package2 = PackageUtility.CreatePackage("phuong", "2.0", new[] { "hello" });
+            var package2 = PackageUtility.CreatePackage("phuong", "1.0.4.0", new[] { "hello" });
             sourceRepository.AddPackage(package2);
 
             // Act
@@ -408,6 +454,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal("Update", sourceRepository.LastOperation);
             Assert.Equal("phuong", sourceRepository.LastMainPackageId);
+            Assert.Equal("1.0.4.0", sourceRepository.LastMainPackageVersion);
         }
 
         [Fact]

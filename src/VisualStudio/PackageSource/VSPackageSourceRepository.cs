@@ -166,10 +166,10 @@ namespace NuGet.VisualStudio
             return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             var activeRepository = GetActiveRepository();
-            return activeRepository.StartOperation(operation, mainPackageId);
+            return activeRepository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

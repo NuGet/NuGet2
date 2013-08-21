@@ -31,7 +31,7 @@ namespace NuGet
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
-        private Tuple<string, string> _currentOperation;
+        private Tuple<string, string, string> _currentOperation;
 
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
@@ -69,6 +69,7 @@ namespace NuGet
             {
                 string operation = _currentOperation.Item1;
                 string mainPackageId = _currentOperation.Item2;
+                string mainPackageVersion = _currentOperation.Item3;
 
                 if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
                 {
@@ -83,6 +84,10 @@ namespace NuGet
                 if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
                 {
                     e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                    if (!String.IsNullOrEmpty(mainPackageVersion))
+                    {
+                        e.Request.Headers[RepositoryOperationNames.DependentPackageVersionHeaderName] = mainPackageVersion;
+                    }
                 }
             }
         }
@@ -346,10 +351,10 @@ namespace NuGet
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            Tuple<string, string> oldOperation = _currentOperation;
-            _currentOperation = Tuple.Create(operation, mainPackageId);
+            Tuple<string, string, string> oldOperation = _currentOperation;
+            _currentOperation = Tuple.Create(operation, mainPackageId, mainPackageVersion);
             return new DisposableAction(() =>
             {
                 _currentOperation = oldOperation;
