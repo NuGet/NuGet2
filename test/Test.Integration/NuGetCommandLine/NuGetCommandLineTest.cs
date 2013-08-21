@@ -1765,7 +1765,7 @@ public class Runner {
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified. Use the -self switch to update NuGet.exe."));
+            Assert.True(consoleOutput.ToString().Contains("No packages.config, project or solution file specified. Use the -self switch to update NuGet.exe."));
         }
 
         [Fact]
@@ -1779,7 +1779,7 @@ public class Runner {
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
+            Assert.True(consoleOutput.ToString().Contains("No packages.config, project or solution file specified."));
         }
 
         [Fact]
