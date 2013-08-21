@@ -42,9 +42,7 @@ namespace NuGet.Common
 
         public static IEnumerable<string> GetProjectFiles(string directory)
         {
-            var files = Directory.GetFiles(directory);
-
-            return files.Where(file => _supportedProjectExtensions.Contains(Path.GetExtension(file) ?? string.Empty));
+            return _supportedProjectExtensions.SelectMany(x => Directory.GetFiles(directory, "*" + x));
         }
 
 
