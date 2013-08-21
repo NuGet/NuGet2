@@ -100,8 +100,8 @@ namespace NuGet.Commands
 
             // Search recursively for all packages.config files
             var packagesConfigFiles = Directory.GetFiles(solutionDir, Constants.PackageReferenceFile, SearchOption.AllDirectories);
-            var projects = packagesConfigFiles.Select(GetProjectPair)
-                                              .Where(p => p.Project != null)
+            var projects = packagesConfigFiles.Select(GetProject)
+                                              .Where(p => p != null)
                                               .ToList();
 
             if (projects.Count == 0)
@@ -112,11 +112,11 @@ namespace NuGet.Commands
 
             if (projects.Count == 1)
             {
-                Console.WriteLine(NuGetResources.FoundProject, projects.Single().Project.ProjectName);
+                Console.WriteLine(NuGetResources.FoundProject, projects.Single().ProjectName);
             }
             else
             {
-                Console.WriteLine(NuGetResources.FoundProjects, projects.Count, String.Join(", ", projects.Select(p => p.Project.ProjectName)));
+                Console.WriteLine(NuGetResources.FoundProjects, projects.Count, String.Join(", ", projects.Select(p => p.ProjectName)));
             }
 
             string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
@@ -126,7 +126,7 @@ namespace NuGet.Commands
             {
                 try
                 {
-                    UpdatePackages(project.Project, repositoryPath, sourceRepository);
+                    UpdatePackages(project, repositoryPath, sourceRepository);
                     if (Verbose)
                     {
                         Console.WriteLine();
@@ -139,22 +139,18 @@ namespace NuGet.Commands
             }
         }
 
-        private static ProjectPair GetProjectPair(string path)
+        private static IMSBuildProjectSystem GetProject(string path)
         {
-            IMSBuildProjectSystem msBuildProjectSystem = null;
             try
             {
-                msBuildProjectSystem = GetMSBuildProject(path);
+                return GetMSBuildProject(path);
             }
             catch (CommandLineException)
             {
 
             }
-            return new ProjectPair
-            {
-                PackagesConfigPath = path,
-                Project = msBuildProjectSystem
-            };
+
+            return  null;
         }
 
         private string GetInputFile()
@@ -201,7 +197,7 @@ namespace NuGet.Commands
             return null;
         }
 
-        private void UpdatePackages(string packagesConfigPath, string repositoryPath = null, IPackageRepository sourceRepository = null)
+        private void UpdatePackages(string packagesConfigPath)
         {
             var project =  GetMSBuildProject(packagesConfigPath);
             UpdatePackages(project);
