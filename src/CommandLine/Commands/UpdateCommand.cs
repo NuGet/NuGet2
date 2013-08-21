@@ -8,7 +8,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetCommand), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>",
+    [Command(typeof(NuGetCommand), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution|project>",
         UsageExampleResourceName = "UpdateCommandUsageExamples")]
     public class UpdateCommand : Command, ILogger
     {
