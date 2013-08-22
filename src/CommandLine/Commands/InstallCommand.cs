@@ -21,8 +21,6 @@ namespace NuGet.Commands
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
 
-        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
-        
         [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
         {
@@ -79,7 +77,7 @@ namespace NuGet.Commands
 
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
-            DisableParallel = _isMonoRuntime;
+            DisableParallel = EnvironmentUtility.IsMonoRuntime;
         }
 
         public override void ExecuteCommand()

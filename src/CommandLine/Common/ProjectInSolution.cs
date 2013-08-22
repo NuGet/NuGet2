@@ -18,14 +18,14 @@ namespace NuGet.Common
         public string RelativePath { get; private set; }
 
         /// <summary>
-        /// Indicates if the project is a MSBuild project.
+        /// Indicates if the project is a solution folder.
         /// </summary>
-        public bool IsMSBuildProject { get; private set; }        
+        public bool IsSolutionFolder { get; private set; }        
 
         public ProjectInSolution(object solutionProject)
         {
             string projectType = _projectTypeProperty.GetValue(solutionProject, index: null).ToString();
-            IsMSBuildProject = projectType.Equals("KnownToBeMSBuildFormat", StringComparison.OrdinalIgnoreCase);
+            IsSolutionFolder = projectType.Equals("SolutionFolder", StringComparison.OrdinalIgnoreCase);
             RelativePath = (string)_relativePathProperty.GetValue(solutionProject, index: null);
         }
 

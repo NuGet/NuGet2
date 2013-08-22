@@ -76,6 +76,7 @@
     <Compile Include="RestoreCommandTest.cs" />
     <Compile Include="SelfUpdaterTests.cs" />
     <Compile Include="SetApiKeyCommandTest.cs" />
+    <Compile Include="SolutionParserTest.cs" />
     <Compile Include="SourcesCommandTest.cs" />
     <Compile Include="TypeHelperTest.cs" />
     <Compile Include="UpdateCommandTest.cs" />

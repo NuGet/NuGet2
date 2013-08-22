@@ -27,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.XmlTransform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -67,10 +68,12 @@
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
+    <Compile Include="Common\MSBuildSolutionParser.cs" />
     <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\SelfUpdater.cs" />
     <Compile Include="Common\Solution.cs" />
     <Compile Include="Common\ProjectInSolution.cs" />
+    <Compile Include="Common\XBuildSolutionParser.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
     <Compile Include="..\..\Common\NuGetConstants.cs">
@@ -94,6 +97,7 @@
     <Compile Include="DefaultPackageRules.cs" />
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="CommandLineMachineWideSettings.cs" />
+    <Compile Include="ISolutionParser.cs" />
     <Compile Include="NuGetCommand.cs">
       <DependentUpon>NuGetCommand.resx</DependentUpon>
     </Compile>

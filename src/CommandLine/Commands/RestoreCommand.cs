@@ -396,7 +396,15 @@ namespace NuGet.Commands
         private void RestorePackagesForSolution(
             IFileSystem packagesFolderFileSystem, string solutionFileFullPath)
         {
-            var solution = new Solution(solutionFileFullPath);
+            ISolutionParser solutionParser;
+            if (EnvironmentUtility.IsMonoRuntime)
+            {
+                solutionParser = new XBuildSolutionParser();
+            }
+            else 
+            {
+                solutionParser = new MSBuildSolutionParser();
+            }
             var solutionDirectory = Path.GetDirectoryName(solutionFileFullPath);
 
             // restore packages for the solution
@@ -405,47 +413,18 @@ namespace NuGet.Commands
             RestorePackagesFromConfigFile(packageRerenceFileName, packagesFolderFileSystem);
 
             // restore packages for projects
-            foreach (var project in solution.Projects)
+            foreach (var projectFile in solutionParser.GetAllProjectFileNames(FileSystem, solutionFileFullPath))
             {
-                if (!project.IsMSBuildProject)
-                {
-                    continue;
-                }
-
-                var projectFile = Path.Combine(solutionDirectory, project.RelativePath);
                 if (!FileSystem.FileExists(projectFile))
                 {
                     Console.WriteWarning(NuGetResources.RestoreCommandProjectNotFound, projectFile);
                     continue;
                 }
 
-                if (IsPackageRestoreNeeded(projectFile))
-                {
-                    packageRerenceFileName = Path.Combine(
-                        Path.GetDirectoryName(projectFile),
-                        Constants.PackageReferenceFile);
-                    RestorePackagesFromConfigFile(packageRerenceFileName, packagesFolderFileSystem);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Indicates if package restore is needed for the project.
-        /// </summary>
-        /// <param name="projectFile">The project file.</param>
-        /// <returns>True if package restore is needed.</returns>
-        private static bool IsPackageRestoreNeeded(string projectFile)
-        {
-            try
-            {
-                MSBuildProjectSystem proj = new MSBuildProjectSystem(projectFile);
-                return proj.FileExistsInProject(Constants.PackageReferenceFile);
-            }
-            catch (Microsoft.Build.Exceptions.InvalidProjectFileException)
-            {
-                // If the project cannot be loaded, we assume this is because of
-                // missing package.
-                return true;
+                packageRerenceFileName = Path.Combine(
+                    Path.GetDirectoryName(projectFile),
+                    Constants.PackageReferenceFile);
+                RestorePackagesFromConfigFile(packageRerenceFileName, packagesFolderFileSystem);
             }
         }
 

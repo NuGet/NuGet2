@@ -59,8 +59,15 @@ namespace NuGet
 
             _packageDownloader = packageDownloader;
 
-            // weak event pattern
-            SendingRequestEventManager.AddListener(_packageDownloader, this);
+            if (EnvironmentUtility.IsMonoRuntime)
+            {
+                _packageDownloader.SendingRequest += OnPackageDownloaderSendingRequest;
+            }
+            else
+            {
+                // weak event pattern            
+                SendingRequestEventManager.AddListener(_packageDownloader, this);
+            }
         }
 
         private void OnPackageDownloaderSendingRequest(object sender, WebRequestEventArgs e)

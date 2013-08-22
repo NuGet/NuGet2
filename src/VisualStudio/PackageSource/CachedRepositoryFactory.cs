@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio
         private readonly ConcurrentDictionary<string, IPackageRepository> _repositoryCache = new ConcurrentDictionary<string, IPackageRepository>();
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
-
+        
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
@@ -84,7 +84,14 @@ namespace NuGet.VisualStudio
                 var httpEvents = repository as IHttpClientEvents;
                 if (httpEvents != null)
                 {
-                    SendingRequestEventManager.AddListener(httpEvents, this);
+                    if (EnvironmentUtility.IsMonoRuntime)
+                    {
+                        httpEvents.SendingRequest += OnSendingRequest;
+                    }
+                    else
+                    {
+                        SendingRequestEventManager.AddListener(httpEvents, this);
+                    }
                 }
             }
             return repository;
