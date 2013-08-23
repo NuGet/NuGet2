@@ -7,7 +7,7 @@ using NuGet.Server.DataServices;
 using NuGet.Server.Infrastructure;
 using RouteMagic;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof($rootnamespace$.NuGetRoutes), "Start")]
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof($rootnamespace$.NuGetRoutes), "Start")]
 
 namespace $rootnamespace$ {
     public static class NuGetRoutes {
