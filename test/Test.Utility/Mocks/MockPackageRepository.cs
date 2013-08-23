@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace NuGet.Test.Mocks
 {
@@ -11,6 +11,7 @@ namespace NuGet.Test.Mocks
         
         public string LastOperation { get; private set; }
         public string LastMainPackageId { get; private set; }
+        public string LastMainPackageVersion { get; private set; }
 
         public MockPackageRepository()
             : this("")
@@ -179,14 +180,16 @@ namespace NuGet.Test.Mocks
             return false;
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             LastOperation = null;
             LastMainPackageId = null;
+            LastMainPackageVersion = null;
             return new DisposableAction(() => 
             { 
                 LastOperation = operation;
                 LastMainPackageId = mainPackageId;
+                LastMainPackageVersion = mainPackageVersion;
             });
         }
 

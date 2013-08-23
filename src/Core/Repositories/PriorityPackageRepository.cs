@@ -77,10 +77,10 @@ namespace NuGet
             return packages.Distinct();
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            return DisposableAction.All(_primaryRepository.StartOperation(operation, mainPackageId),
-                _secondaryRepository.StartOperation(operation, mainPackageId));
+            return DisposableAction.All(_primaryRepository.StartOperation(operation, mainPackageId, mainPackageVersion),
+                _secondaryRepository.StartOperation(operation, mainPackageId, mainPackageVersion));
         }
     }
 }

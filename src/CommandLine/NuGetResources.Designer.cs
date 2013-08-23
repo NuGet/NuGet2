@@ -223,6 +223,24 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot get the GetAllProjectFileNamesMethod from type  Mono.XBuild.CommandLine.SolutionParser..
+        /// </summary>
+        internal static string Error_CannotGetGetAllProjectFileNamesMethod {
+            get {
+                return ResourceManager.GetString("Error_CannotGetGetAllProjectFileNamesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot get type Mono.XBuild.CommandLine.SolutionParser..
+        /// </summary>
+        internal static string Error_CannotGetXBuildSolutionParser {
+            get {
+                return ResourceManager.GetString("Error_CannotGetXBuildSolutionParser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot load type Microsoft.Build.Construction.ProjectInSolution from Microsoft.Build.dll.
         /// </summary>
         internal static string Error_CannotLoadTypeProjectInSolution {

@@ -93,10 +93,10 @@ namespace NuGet.Dialog.Providers
             return false;
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             // Starting an operation is an action that should materialize the repository
-            return Repository.StartOperation(operation, mainPackageId);
+            return Repository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

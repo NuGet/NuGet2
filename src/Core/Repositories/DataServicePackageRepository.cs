@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Windows;
 using NuGet.Resources;
 
 namespace NuGet
@@ -18,7 +19,8 @@ namespace NuGet
         ICultureAwareRepository, 
         IOperationAwareRepository,
         IPackageLookup,
-        ILatestPackageLookup
+        ILatestPackageLookup,
+        IWeakEventListener
     {
         private const string FindPackagesByIdSvcMethod = "FindPackagesById";
         private const string PackageServiceEntitySetName = "Packages";
@@ -29,7 +31,7 @@ namespace NuGet
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
-        private Tuple<string, string> _currentOperation;
+        private Tuple<string, string, string> _currentOperation;
 
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
@@ -57,29 +59,44 @@ namespace NuGet
 
             _packageDownloader = packageDownloader;
 
-            _packageDownloader.SendingRequest += (sender, e) =>
+            if (EnvironmentUtility.IsMonoRuntime)
             {
-                if (_currentOperation != null)
+                _packageDownloader.SendingRequest += OnPackageDownloaderSendingRequest;
+            }
+            else
+            {
+                // weak event pattern            
+                SendingRequestEventManager.AddListener(_packageDownloader, this);
+            }
+        }
+
+        private void OnPackageDownloaderSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            if (_currentOperation != null)
+            {
+                string operation = _currentOperation.Item1;
+                string mainPackageId = _currentOperation.Item2;
+                string mainPackageVersion = _currentOperation.Item3;
+
+                if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
                 {
-                    string operation = _currentOperation.Item1;
-                    string mainPackageId = _currentOperation.Item2;
-
-                    if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
+                    if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
-                        {
-                            operation = operation + "-Dependency";
-                        }
-                    }
-
-                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
-
-                    if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                        operation = operation + "-Dependency";
                     }
                 }
-            };
+
+                e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
+
+                if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                    if (!String.IsNullOrEmpty(mainPackageVersion))
+                    {
+                        e.Request.Headers[RepositoryOperationNames.DependentPackageVersionHeaderName] = mainPackageVersion;
+                    }
+                }
+            }
         }
 
         // Just forward calls to the package downloader
@@ -341,10 +358,10 @@ namespace NuGet
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            Tuple<string, string> oldOperation = _currentOperation;
-            _currentOperation = Tuple.Create(operation, mainPackageId);
+            Tuple<string, string, string> oldOperation = _currentOperation;
+            _currentOperation = Tuple.Create(operation, mainPackageId, mainPackageVersion);
             return new DisposableAction(() =>
             {
                 _currentOperation = oldOperation;
@@ -429,6 +446,19 @@ namespace NuGet
         private static string ToLowerCaseString(bool value)
         {
             return value.ToString().ToLowerInvariant();
+        }
+
+        public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
+        {
+            if (managerType == typeof(SendingRequestEventManager))
+            {
+                OnPackageDownloaderSendingRequest(sender, (WebRequestEventArgs)e);
+                return true;
+            }
+            else
+            {
+                return false;
+            } 
         }
     }
 }

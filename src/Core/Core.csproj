@@ -96,6 +96,7 @@
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RepositoryOperationNames.cs" />
     <Compile Include="Http\RequestHelper.cs" />
+    <Compile Include="Http\SendingRequestEventManager.cs" />
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="Http\WIFTypeProvider.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="Utility\CustomAttributeProviderExtensions.cs" />
     <Compile Include="Utility\DisposableAction.cs" />
     <Compile Include="Utility\EncryptionUtility.cs" />
+    <Compile Include="Utility\EnvironmentUtility.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\ICredentialProvider.cs" />

@@ -94,7 +94,7 @@ namespace NuGet
 
         public void InstallPackage(string packageId, SemanticVersion version)
         {
-            InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: false);
+            InstallPackage(packageId: packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
         public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)

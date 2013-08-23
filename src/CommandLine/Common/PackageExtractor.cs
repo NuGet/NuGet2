@@ -16,7 +16,7 @@ namespace NuGet.Common
         {
             var uniqueToken = GenerateUniqueToken(packageManager, package.Id, package.Version);
             // Prerelease flag does not matter since we already have the package to install and we ignore dependencies and walk info
-            ExecuteLocked(uniqueToken, () => packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: true, ignoreWalkInfo: true));
+            ExecuteLocked(uniqueToken, () => packageManager.InstallPackage(package: package, ignoreDependencies: true, allowPrereleaseVersions: true, ignoreWalkInfo: true));
         }
 
         /// <summary>

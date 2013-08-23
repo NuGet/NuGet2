@@ -19,8 +19,6 @@ namespace NuGet.Commands
     {
         private static readonly object _satelliteLock = new object();
 
-        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
-
         [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -55,7 +53,7 @@ namespace NuGet.Commands
         {
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
-            DisableParallelProcessing = _isMonoRuntime;
+            DisableParallelProcessing = EnvironmentUtility.IsMonoRuntime;
         }
 
         public override void ExecuteCommand()
@@ -220,7 +218,10 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))
+            using (packageManager.SourceRepository.StartOperation(
+                RepositoryOperationNames.Restore, 
+                packageId, 
+                version == null ? null : version.ToString()))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
                 if (package.IsSatellitePackage())
@@ -270,7 +271,10 @@ namespace NuGet.Commands
                 }
             }
 
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install, packageId))
+            using (packageManager.SourceRepository.StartOperation(
+                RepositoryOperationNames.Install, 
+                packageId, 
+                version == null ? null : version.ToString()))
             {
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
                 return true;

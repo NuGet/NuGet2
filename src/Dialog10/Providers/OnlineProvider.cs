@@ -146,7 +146,7 @@ namespace NuGet.Dialog.Providers
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
-            using (activePackageManager.SourceRepository.StartOperation(OperationName, item.Id))
+            using (activePackageManager.SourceRepository.StartOperation(OperationName, item.Id, item.Version))
             {
                 ShowProgressWindow();
 

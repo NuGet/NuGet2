@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Providers
         protected override bool ExecuteCore(PackageItem item)
         {
             _activePackageManager = GetActivePackageManager();
-            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update, item.Id))
+            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update, item.Id, item.Version))
             {
                 ShowProgressWindow();
                 IList<Project> selectedProjectsList;
@@ -162,7 +162,7 @@ namespace NuGet.Dialog.Providers
             _activePackageManager = GetActivePackageManager();
             Debug.Assert(_activePackageManager != null);
 
-            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null);
+            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
 
             try
             {
