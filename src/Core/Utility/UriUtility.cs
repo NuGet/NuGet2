@@ -35,7 +35,7 @@ namespace NuGet
         // Bug 2379: SettingsCredentialProvider does not work
         private static Uri CreateODataAgnosticUri(string uri)
         {
-            if (uri.EndsWith("$metadata", StringComparison.InvariantCultureIgnoreCase))
+            if (uri.EndsWith("$metadata", StringComparison.OrdinalIgnoreCase))
             {
                 uri = uri.Substring(0, uri.Length - 9).TrimEnd('/');
             }

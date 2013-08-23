@@ -4,6 +4,8 @@ NuGet Hall of Fame
 ## NuGet 2.8
 1. [leppie](https://www.codeplex.com/site/users/view/leppie)
     - [#3466](https://nuget.codeplex.com/workitem/3466) - When packing packages, verifying Id of dependency packages.
+1. [maartenba](https://www.codeplex.com/site/users/view/maartenba) [@
+    - [#2379](https://nuget.codeplex.com/workitem/2379) - Remove the $metadata suffix when persistening feed credentials.
 
 ## NuGet 2.7
 

@@ -151,7 +151,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\NuGet.Bootstrapper.nuspec" />
-    <None Include="Properties\NuGet.CommandLine.nuspec" />
+    <None Include="Properties\NuGet.CommandLine.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Commands\HelpCommandMarkdownTemplate.cshtml">
