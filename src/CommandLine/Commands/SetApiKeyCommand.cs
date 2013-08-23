@@ -16,11 +16,11 @@ namespace NuGet.Commands
         {
             if (SourceProvider == null)
             {
-                throw new InvalidOperationException(NuGetResources.Error_SourceProviderIsNull);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_SourceProviderIsNull"));
             }
             if (Settings == null)
             {
-                throw new InvalidOperationException(NuGetResources.Error_SettingsIsNull);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_SettingsIsNull"));
             }
 
             //Frist argument should be the ApiKey
@@ -49,14 +49,14 @@ namespace NuGet.Commands
             if (setSymbolServerKey)
             {
                 Settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
-                Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
+                Console.WriteLine(LocalizedResourceManager.GetString("SetApiKeyCommandDefaultApiKeysSaved"),
                                   apiKey,
                                   sourceName,
                                   CommandLineUtility.GetSourceDisplayName(NuGetConstants.DefaultSymbolServerUrl));
             }
             else
             {
-                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, sourceName);
+                Console.WriteLine(LocalizedResourceManager.GetString("SetApiKeyCommandApiKeySaved"), apiKey, sourceName);
             }
         }
     }

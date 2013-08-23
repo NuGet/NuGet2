@@ -109,7 +109,7 @@ namespace NuGet.Commands
                     _restoringForSolution = true;
                     if (Verbosity == Verbosity.Detailed)
                     {
-                        Console.WriteLine(NuGetResources.RestoreCommandRestoringPackagesForSolution, _solutionFileFullPath);
+                        Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesForSolution"), _solutionFileFullPath);
                     }
 
                     return;
@@ -122,13 +122,13 @@ namespace NuGet.Commands
                     _packagesConfigFileFullPath = FileSystem.GetFullPath(Constants.PackageReferenceFile);
                     if (Verbosity == NuGet.Verbosity.Detailed)
                     {
-                        Console.WriteLine(NuGetResources.RestoreCommandRestoringPackagesFromPackagesConfigFile);
+                        Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesFromPackagesConfigFile"));
                     }
 
                     return;
                 }
 
-                throw new InvalidOperationException(NuGetResources.Error_NoSolutionFileNorePackagesConfigFile);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_NoSolutionFileNorePackagesConfigFile"));
             }
             else
             {
@@ -144,7 +144,7 @@ namespace NuGet.Commands
                     _solutionFileFullPath = GetSolutionFile(Arguments[0]);
                     if (_solutionFileFullPath == null)
                     {
-                        throw new InvalidOperationException(NuGetResources.Error_CannotLocationSolutionFile);
+                        throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_CannotLocateSolutionFile"));
                     }
                 }
             }
@@ -170,7 +170,7 @@ namespace NuGet.Commands
             var slnFiles = FileSystem.GetFiles(solutionFileOrDirectory, "*.sln").ToArray();
             if (slnFiles.Length > 1)
             {
-                throw new InvalidOperationException(NuGetResources.Error_MultipleSolutions);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_MultipleSolutions"));
             }
 
             if (slnFiles.Length == 1)
@@ -235,7 +235,7 @@ namespace NuGet.Commands
                 return Path.Combine(Path.GetDirectoryName(_solutionFileFullPath), CommandLineConstants.PackagesDirectoryName);
             }
 
-            throw new InvalidOperationException(NuGetResources.RestoreCommandCannotDeterminePackagesFolder);
+            throw new InvalidOperationException(LocalizedResourceManager.GetString("RestoreCommandCannotDeterminePackagesFolder"));
         }
 
         protected PackageReferenceFile GetPackageReferenceFile(string fullPath)
@@ -405,7 +405,7 @@ namespace NuGet.Commands
             bool installedAny = ExecuteInParallel(packagesFolderFileSystem, packageReferences);
             if (!installedAny && packageReferences.Any())
             {
-                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
+                Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandNothingToInstall"), Constants.PackageReferenceFile);
             }
         }
 
@@ -415,7 +415,7 @@ namespace NuGet.Commands
             {
                 if (Console.Verbosity == NuGet.Verbosity.Detailed)
                 {
-                    Console.WriteLine(NuGetResources.RestoreCommandRestoringPackagesListedInFile, packageRerenceFileName);
+                    Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile"), packageRerenceFileName);
                 }
 
                 InstallPackagesFromConfigFile(packagesFolderFileSystem, packageRerenceFileName);
@@ -446,7 +446,7 @@ namespace NuGet.Commands
             {
                 if (!FileSystem.FileExists(projectFile))
                 {
-                    Console.WriteWarning(NuGetResources.RestoreCommandProjectNotFound, projectFile);
+                    Console.WriteWarning(LocalizedResourceManager.GetString("RestoreCommandProjectNotFound"), projectFile);
                     continue;
                 }
 
@@ -463,7 +463,7 @@ namespace NuGet.Commands
             if (_restoringForSolution && !String.IsNullOrEmpty(SolutionDirectory))
             {
                 // option -SolutionDirectory is not valid when we are restoring packages for a solution
-                throw new InvalidOperationException(NuGetResources.RestoreCommandOptionSolutionDirectoryIsInvalid);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("RestoreCommandOptionSolutionDirectoryIsInvalid"));
             }
 
             ReadSettings();
@@ -476,7 +476,7 @@ namespace NuGet.Commands
                 // So we'll need to verify that the file exists.
                 if (!FileSystem.FileExists(_packagesConfigFileFullPath))
                 {
-                    string message = String.Format(CultureInfo.CurrentCulture, NuGetResources.RestoreCommandFileNotFound, _packagesConfigFileFullPath);
+                    string message = String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("RestoreCommandFileNotFound"), _packagesConfigFileFullPath);
                     throw new InvalidOperationException(message);
                 }
 

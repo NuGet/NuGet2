@@ -104,7 +104,7 @@ namespace NuGet.Commands
                 bool result = InstallPackage(fileSystem, packageId, version);
                 if (!result)
                 {
-                    Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
+                    Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandPackageAlreadyExists"), packageId);
                 }
             }
         }
@@ -185,7 +185,7 @@ namespace NuGet.Commands
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
             if (!installedAny && packageReferences.Any())
             {
-                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
+                Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandNothingToInstall"), Constants.PackageReferenceFile);
             }
         }
 

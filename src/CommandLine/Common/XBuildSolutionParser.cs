@@ -14,7 +14,7 @@ namespace NuGet.Common
             var solutionParserType = assembly.GetType("Mono.XBuild.CommandLine.SolutionParser");
             if (solutionParserType == null)
             {
-                throw new CommandLineException(NuGetResources.Error_CannotGetXBuildSolutionParser);
+                throw new CommandLineException(LocalizedResourceManager.GetString("Error_CannotGetXBuildSolutionParser"));
             }
 
             var methodInfo = solutionParserType.GetMethod(
@@ -22,7 +22,7 @@ namespace NuGet.Common
                 new Type[] {typeof(string) });
             if (methodInfo == null)
             {
-                throw new CommandLineException(NuGetResources.Error_CannotGetGetAllProjectFileNamesMethod);
+                throw new CommandLineException(LocalizedResourceManager.GetString("Error_CannotGetGetAllProjectFileNamesMethod"));
             }
 
             return methodInfo;

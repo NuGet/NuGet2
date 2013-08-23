@@ -35,7 +35,7 @@ namespace NuGet.Common
             var projectInSolutionType = assembly.GetType("Microsoft.Build.Construction.ProjectInSolution");
             if (projectInSolutionType == null)
             {
-                throw new CommandLineException(NuGetResources.Error_CannotLoadTypeProjectInSolution);
+                throw new CommandLineException(LocalizedResourceManager.GetString("Error_CannotLoadTypeProjectInSolution"));
             }
 
             return projectInSolutionType;

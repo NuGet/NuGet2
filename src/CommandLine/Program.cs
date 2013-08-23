@@ -33,6 +33,7 @@ namespace NuGet
         {
             DebugHelper.WaitForAttach(ref args);
 
+            System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
 
@@ -65,7 +66,7 @@ namespace NuGet
                     string commandName = command.CommandAttribute.CommandName;
 
                     // Print invalid command then show help
-                    console.WriteLine(NuGetResources.InvalidArguments, commandName);
+                    console.WriteLine(LocalizedResourceManager.GetString("InvalidArguments"), commandName);
 
                     p.HelpCommand.ViewHelpForCommand(commandName);
                 }

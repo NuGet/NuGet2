@@ -64,7 +64,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var r = CommandRunner.Run(
                     nugetexe,
                     proj1Directory,
-                    "install packages.config -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent",
+                    "install packages.config -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent -Verbosity detailed",
                     waitForExit: true);
 
                 // Assert

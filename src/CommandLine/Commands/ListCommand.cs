@@ -72,7 +72,7 @@ namespace NuGet.Commands
         {
             if (Verbose)
             {
-                Console.WriteWarning(NuGetResources.Option_VerboseDeprecated);
+                Console.WriteWarning(LocalizedResourceManager.GetString("Option_VerboseDeprecated"));
                 Verbosity = Verbosity.Detailed;
             }
 
@@ -101,7 +101,7 @@ namespace NuGet.Commands
                         if (p.LicenseUrl != null && !string.IsNullOrEmpty(p.LicenseUrl.OriginalString))
                         {
                             Console.PrintJustified(1, 
-                                String.Format(CultureInfo.InvariantCulture, NuGetResources.ListCommand_LicenseUrl, p.LicenseUrl.OriginalString));
+                                String.Format(CultureInfo.InvariantCulture, LocalizedResourceManager.GetString("ListCommand_LicenseUrl"), p.LicenseUrl.OriginalString));
                         }
                         Console.WriteLine();
                         hasPackages = true;
@@ -123,7 +123,7 @@ namespace NuGet.Commands
 
             if (!hasPackages)
             {
-                Console.WriteLine(NuGetResources.ListCommandNoPackages);
+                Console.WriteLine(LocalizedResourceManager.GetString("ListCommandNoPackages"));
             }
         }
     }

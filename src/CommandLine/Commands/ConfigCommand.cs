@@ -29,7 +29,7 @@ namespace NuGet.Commands
         {
             if (Settings == null)
             {
-                throw new InvalidOperationException(NuGetResources.Error_SettingsIsNull);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_SettingsIsNull"));
             }
 
             string getKey = Arguments.FirstOrDefault();
@@ -54,7 +54,7 @@ namespace NuGet.Commands
                 string value = Settings.GetConfigValue(getKey, isPath: AsPath);
                 if (String.IsNullOrEmpty(value))
                 {
-                    Console.WriteWarning(NuGetResources.ConfigCommandKeyNotFound, getKey);
+                    Console.WriteWarning(LocalizedResourceManager.GetString("ConfigCommandKeyNotFound"), getKey);
                 }
                 else
                 {
