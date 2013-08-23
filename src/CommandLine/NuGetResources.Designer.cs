@@ -259,6 +259,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot locate a solution file..
+        /// </summary>
+        internal static string Error_CannotLocationSolutionFile {
+            get {
+                return ResourceManager.GetString("Error_CannotLocationSolutionFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot prompt for input in non-interactive mode..
         /// </summary>
         internal static string Error_CannotPromptForInput {

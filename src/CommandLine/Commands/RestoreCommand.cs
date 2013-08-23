@@ -103,16 +103,10 @@ namespace NuGet.Commands
             if (Arguments.Count == 0)
             {
                 // look for solution files first
-                var slnFiles = FileSystem.GetFiles("", "*.sln").ToArray();
-                if (slnFiles.Length > 1)
-                {
-                    throw new InvalidOperationException(NuGetResources.Error_MultipleSolutions);
-                }
-
-                if (slnFiles.Length == 1)
+                _solutionFileFullPath = GetSolutionFile("");
+                if (_solutionFileFullPath != null)
                 {
                     _restoringForSolution = true;
-                    _solutionFileFullPath = FileSystem.GetFullPath(slnFiles[0]);
                     if (Verbosity == Verbosity.Detailed)
                     {
                         Console.WriteLine(NuGetResources.RestoreCommandRestoringPackagesForSolution, _solutionFileFullPath);
@@ -147,9 +141,44 @@ namespace NuGet.Commands
                 else
                 {
                     _restoringForSolution = true;
-                    _solutionFileFullPath = FileSystem.GetFullPath(Arguments[0]);
+                    _solutionFileFullPath = GetSolutionFile(Arguments[0]);
+                    if (_solutionFileFullPath == null)
+                    {
+                        throw new InvalidOperationException(NuGetResources.Error_CannotLocationSolutionFile);
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the solution file, in full path format. If <paramref name="solutionFileOrDirectory"/> is a file, 
+        /// that file is returned. Otherwise, searches for a *.sln file in
+        /// directory <paramref name="solutionFileOrDirectory"/>. If exactly one sln file is found, 
+        /// that file is returned. If multiple sln files are found, an exception is thrown. 
+        /// If no sln files are found, returns null.
+        /// </summary>
+        /// <param name="solutionFileOrDirectory">The solution file or directory to search for solution files.</param>
+        /// <returns>The full path of the solution file. Or null if no solution file can be found.</returns>
+        private string GetSolutionFile(string solutionFileOrDirectory)
+        {
+            if (FileSystem.FileExists(solutionFileOrDirectory))
+            {
+                return FileSystem.GetFullPath(solutionFileOrDirectory);
+            }
+            
+            // look for solution files
+            var slnFiles = FileSystem.GetFiles(solutionFileOrDirectory, "*.sln").ToArray();
+            if (slnFiles.Length > 1)
+            {
+                throw new InvalidOperationException(NuGetResources.Error_MultipleSolutions);
+            }
+
+            if (slnFiles.Length == 1)
+            {
+                return FileSystem.GetFullPath(slnFiles[0]);
+            }
+
+            return null;
         }
 
         protected internal virtual IFileSystem CreateFileSystem(string path)

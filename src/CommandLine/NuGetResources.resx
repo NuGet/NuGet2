@@ -566,4 +566,7 @@ To prevent NuGet from downloading packages during build, open the Visual Studio 
   <data name="Error_CannotGetXBuildSolutionParser" xml:space="preserve">
     <value>Cannot get type Mono.XBuild.CommandLine.SolutionParser.</value>
   </data>
+  <data name="Error_CannotLocationSolutionFile" xml:space="preserve">
+    <value>Cannot locate a solution file.</value>
+  </data>
 </root>
