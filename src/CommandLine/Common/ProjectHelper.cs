@@ -13,6 +13,13 @@ namespace NuGet.Common
             ".fsproj",
         };
 
+        public static HashSet<string> SupportedProjectExtensions {
+            get
+            {
+                return _supportedProjectExtensions;
+            }
+        }
+
         public static bool TryGetProjectFile(out string projectFile)
         {
             return TryGetProjectFile(Directory.GetCurrentDirectory(), out projectFile);
@@ -21,10 +28,7 @@ namespace NuGet.Common
         public static bool TryGetProjectFile(string directory, out string projectFile)
         {
             projectFile = null;
-            var files = Directory.GetFiles(directory);
-
-            var candidates = files.Where(file => _supportedProjectExtensions.Contains(Path.GetExtension(file)))
-                                  .ToList();
+            var candidates = GetProjectFiles(directory).ToList();
 
             switch (candidates.Count)
             {
@@ -35,6 +39,12 @@ namespace NuGet.Common
 
             return !String.IsNullOrEmpty(projectFile);
         }
+
+        public static IEnumerable<string> GetProjectFiles(string directory)
+        {
+            return _supportedProjectExtensions.SelectMany(x => Directory.GetFiles(directory, "*" + x));
+        }
+
 
         public static string GetSolutionDir(string projectDirectory)
         {
