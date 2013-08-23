@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -112,7 +110,7 @@ namespace NuGet.Commands
 
             if (projects.Count == 1)
             {
-                Console.WriteLine(NuGetResources.FoundProject, projects.Single().ProjectName);
+                Console.WriteLine(NuGetResources.FoundProject, projects[0].ProjectName);
             }
             else
             {
@@ -171,20 +169,12 @@ namespace NuGet.Commands
                 }
                 
                 if (ProjectHelper.SupportedProjectExtensions.Contains(extension))
-
                 {
                     return Path.GetFullPath(path);
                 }
             }
 
             return null;
-        }
-
-        private static string GetPackagesConfigPathFromProject(string path)
-        {
-            var packagesConfigPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, Constants.PackageReferenceFile);
-            
-            return GetPackagesConfigPath(packagesConfigPath);
         }
 
         private static string GetPackagesConfigPath(string path)
@@ -401,12 +391,6 @@ namespace NuGet.Commands
             }
 
             return FileConflictResolution.Ignore;
-        }
-
-        private class ProjectPair
-        {
-            public string PackagesConfigPath { get; set; }
-            public IMSBuildProjectSystem Project { get; set; }
         }
     }
 }

@@ -13,7 +13,8 @@ namespace NuGet.Common
             ".fsproj",
         };
 
-        public static HashSet<string> SupportedProjectExtensions {
+        public static HashSet<string> SupportedProjectExtensions
+        {
             get
             {
                 return _supportedProjectExtensions;
@@ -28,15 +29,12 @@ namespace NuGet.Common
         public static bool TryGetProjectFile(string directory, out string projectFile)
         {
             projectFile = null;
-            var candidates = GetProjectFiles(directory).ToList();
-
-            switch (candidates.Count)
+            var candidates = GetProjectFiles(directory).ToArray();
+            if (candidates.Length == 1)
             {
-                case 1:
-                    projectFile = candidates.Single();
-                    break;
+                projectFile = candidates[0];
             }
-
+            
             return !String.IsNullOrEmpty(projectFile);
         }
 
@@ -61,7 +59,7 @@ namespace NuGet.Common
                 }
 
                 path = Path.GetDirectoryName(path);
-                
+
                 depth++;
                 //When you get to c:\, the parent path is null.
             } while (depth < maxDepth && path != null);

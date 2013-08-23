@@ -1,6 +1,9 @@
 Change Log / Release Notes
 ==========================
 
+## NuGet 2.8
+* [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
+
 ## NuGet 2.7
 
 * [#3281](http://nuget.codeplex.com/workitem/3281) - Support 'Preinstalled Package' functionality outside of VS templates
