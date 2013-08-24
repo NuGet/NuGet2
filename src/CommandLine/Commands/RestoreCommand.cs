@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Common;
 
@@ -23,7 +24,7 @@ namespace NuGet.Commands
         // True means we're restoring for a solution; False means we're restoring packages
         // listed in a packages.config file.
         private bool _restoringForSolution;
-                
+
         private string _solutionFileFullPath;
         private string _packagesConfigFileFullPath;
 
@@ -48,7 +49,7 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "RestoreCommandDisableParallelProcessing")]
         public bool DisableParallelProcessing { get; set; }
 
-        [Option(typeof(NuGetCommand), "RestoreCommandPackagesDirectory", AltName="OutputDirectory")]
+        [Option(typeof(NuGetCommand), "RestoreCommandPackagesDirectory", AltName = "OutputDirectory")]
         public string PackagesDirectory { get; set; }
 
         [Option(typeof(NuGetCommand), "RestoreCommandSolutionDirectory")]
@@ -197,7 +198,7 @@ namespace NuGet.Commands
 
                 // Read the solution-level settings
                 var solutionSettingsFile = Path.Combine(
-                    solutionDirectory, 
+                    solutionDirectory,
                     NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
@@ -236,11 +237,6 @@ namespace NuGet.Commands
             }
 
             throw new InvalidOperationException(LocalizedResourceManager.GetString("RestoreCommandCannotDeterminePackagesFolder"));
-        }
-
-        protected PackageReferenceFile GetPackageReferenceFile(string fullPath)
-        {
-            return new PackageReferenceFile(FileSystem, fullPath);
         }
 
         // Do a very quick check of whether a package in installed by checking whether the nupkg file exists
@@ -326,8 +322,8 @@ namespace NuGet.Commands
             }
 
             using (packageManager.SourceRepository.StartOperation(
-                RepositoryOperationNames.Restore, 
-                packageId, 
+                RepositoryOperationNames.Restore,
+                packageId,
                 version == null ? null : version.ToString()))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
@@ -362,13 +358,14 @@ namespace NuGet.Commands
             SourceProvider = new CachedPackageSourceProvider(SourceProvider);
 
             var satellitePackages = new ConcurrentQueue<IPackage>();
-
             if (DisableParallelProcessing)
             {
                 foreach (var package in packageReferences)
                 {
                     RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages);
                 }
+
+                InstallSatellitePackages(fileSystem, satellitePackages);
 
                 return true;
             }
@@ -397,13 +394,10 @@ namespace NuGet.Commands
             return true;
         }
 
-        private void InstallPackagesFromConfigFile(IFileSystem packagesFolderFileSystem, string fileName)
+        private void InstallPackages(IFileSystem packagesFolderFileSystem, ICollection<PackageReference> packageReferences)
         {
-            PackageReferenceFile file = GetPackageReferenceFile(fileName);
-            var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
-
             bool installedAny = ExecuteInParallel(packagesFolderFileSystem, packageReferences);
-            if (!installedAny && packageReferences.Any())
+            if (!installedAny && packageReferences.Count > 0)
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandNothingToInstall"), Constants.PackageReferenceFile);
             }
@@ -418,19 +412,18 @@ namespace NuGet.Commands
                     Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile"), packageRerenceFileName);
                 }
 
-                InstallPackagesFromConfigFile(packagesFolderFileSystem, packageRerenceFileName);
+                InstallPackages(packagesFolderFileSystem, GetPackageReferences(packageRerenceFileName));
             }
         }
 
-        private void RestorePackagesForSolution(
-            IFileSystem packagesFolderFileSystem, string solutionFileFullPath)
+        private void RestorePackagesForSolution(IFileSystem packagesFolderFileSystem, string solutionFileFullPath)
         {
             ISolutionParser solutionParser;
             if (EnvironmentUtility.IsMonoRuntime)
             {
                 solutionParser = new XBuildSolutionParser();
             }
-            else 
+            else
             {
                 solutionParser = new MSBuildSolutionParser();
             }
@@ -438,10 +431,11 @@ namespace NuGet.Commands
 
             // restore packages for the solution
             var solutionSettingsFolder = Path.Combine(solutionDirectory, NuGetConstants.NuGetSolutionSettingsFolder);
-            var packageRerenceFileName = Path.Combine(solutionSettingsFolder, Constants.PackageReferenceFile);
-            RestorePackagesFromConfigFile(packageRerenceFileName, packagesFolderFileSystem);
+            var packageReferenceFileName = Path.Combine(solutionSettingsFolder, Constants.PackageReferenceFile);
+            RestorePackagesFromConfigFile(packageReferenceFileName, packagesFolderFileSystem);
 
             // restore packages for projects
+            var packageReferences = new HashSet<PackageReference>();
             foreach (var projectFile in solutionParser.GetAllProjectFileNames(FileSystem, solutionFileFullPath))
             {
                 if (!FileSystem.FileExists(projectFile))
@@ -450,11 +444,20 @@ namespace NuGet.Commands
                     continue;
                 }
 
-                packageRerenceFileName = Path.Combine(
+                packageReferenceFileName = Path.Combine(
                     Path.GetDirectoryName(projectFile),
                     Constants.PackageReferenceFile);
-                RestorePackagesFromConfigFile(packageRerenceFileName, packagesFolderFileSystem);
+
+                packageReferences.AddRange(GetPackageReferences(packageReferenceFileName));
             }
+
+            InstallPackages(packagesFolderFileSystem, packageReferences);
+        }
+
+        private ICollection<PackageReference> GetPackageReferences(string fileName)
+        {
+            PackageReferenceFile file = new PackageReferenceFile(FileSystem, fileName);
+            return CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
         }
 
         public override void ExecuteCommand()
@@ -480,7 +483,7 @@ namespace NuGet.Commands
                     throw new InvalidOperationException(message);
                 }
 
-                InstallPackagesFromConfigFile(packagesFolderFileSystem, _packagesConfigFileFullPath);
+                InstallPackages(packagesFolderFileSystem, GetPackageReferences(_packagesConfigFileFullPath));
             }
             else
             {
