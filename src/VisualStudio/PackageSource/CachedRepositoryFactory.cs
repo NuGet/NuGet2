@@ -84,7 +84,7 @@ namespace NuGet.VisualStudio
                 var httpEvents = repository as IHttpClientEvents;
                 if (httpEvents != null)
                 {
-                    if (EnvironmentUtility.IsMonoRuntime)
+                    if (EnvironmentUtility.RunningFromCommandLine)
                     {
                         httpEvents.SendingRequest += OnSendingRequest;
                     }
