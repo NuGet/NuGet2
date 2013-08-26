@@ -33,6 +33,9 @@ namespace NuGet
         {
             DebugHelper.WaitForAttach(ref args);
 
+            // This is to avoid applying weak event pattern usage, which breaks under Mono or restricted environments, e.g. Windows Azure Web Sites.
+            EnvironmentUtility.SetRunningFromCommandLine();
+
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
