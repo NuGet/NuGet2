@@ -11,8 +11,7 @@ namespace NuGet
     public static class ResourceHelper
     {
         private static Dictionary<Type, ResourceManager> _cachedManagers;
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "the convention is to used lower case letter for language name.")]
+        
         public static string GetLocalizedString(Type resourceType, string resourceNames)
         {
             if (String.IsNullOrEmpty(resourceNames))
@@ -54,7 +53,7 @@ namespace NuGet
             var builder = new StringBuilder();
             foreach (var resource in resourceNames.Split(';'))
             {
-                var culture = Thread.CurrentThread.CurrentUICulture.ThreeLetterWindowsLanguageName.ToLowerInvariant();
+                var culture = LocalizedResourceManager.GetLanguageName();
                 string value = resourceManager.GetString(resource + '_' + culture, CultureInfo.InvariantCulture) ??
                     resourceManager.GetString(resource, CultureInfo.InvariantCulture);
                 if (String.IsNullOrEmpty(value))
