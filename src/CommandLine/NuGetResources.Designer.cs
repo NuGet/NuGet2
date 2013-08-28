@@ -4669,15 +4669,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to De manera predeterminada, restauración de paquetes está deshabilitada. Para dar su consentimiento, abra el cuadro de diálogo Opciones de Visual Studio, haga clic en el nodo Administrador de paquetes y active la opción para permitir que NuGet descargue los paquetes faltantes durante la compilación. También puede dar su consentimiento al establecer la variable de entorno &apos;EnableNuGetPackageRestore&apos; en &apos;true&apos;..
-        /// </summary>
-        internal static string InstallCommandPackageRestoreConsentNotFound_esn {
-            get {
-                return ResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound_esn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Se ha deshabilitado la restauración del paquete. Para habilitarla, abra el cuadro de diálogo Opciones de Visual Studio, haga clic en el nodo del Administrador de paquetes y compruebe &apos;{0}&apos;. Para habilitar la restauración de paquetes, también puede configurar la variable de entorno &apos;EnableNuGetPackageRestore&apos; a &apos;true&apos;..
         /// </summary>
         internal static string InstallCommandPackageRestoreConsentNotFound_esp {
