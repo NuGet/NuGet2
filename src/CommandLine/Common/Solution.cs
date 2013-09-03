@@ -44,7 +44,7 @@ namespace NuGet.Common
 
             if (solutionParserType == null)
             {
-                throw new CommandLineException(NuGetResources.Error_CannotLoadTypeSolutionParser);
+                throw new CommandLineException(LocalizedResourceManager.GetString("Error_CannotLoadTypeSolutionParser"));
             }
 
             return solutionParserType;

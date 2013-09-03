@@ -351,7 +351,7 @@ namespace NuGet.Common
 
             while (true)
             {
-                Write(NuGetResources.FileConflictChoiceText);
+                Write(LocalizedResourceManager.GetString("FileConflictChoiceText"));
                 string answer = ReadLine();                
                 if (!String.IsNullOrEmpty(answer)) 
                 {

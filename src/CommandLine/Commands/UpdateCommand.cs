@@ -94,7 +94,7 @@ namespace NuGet.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void UpdateAllPackages(string solutionDir)
         {
-            Console.WriteLine(NuGetResources.ScanningForProjects);
+            Console.WriteLine(LocalizedResourceManager.GetString("ScanningForProjects"));
 
             // Search recursively for all packages.config files
             var packagesConfigFiles = Directory.GetFiles(solutionDir, Constants.PackageReferenceFile, SearchOption.AllDirectories);
@@ -104,17 +104,17 @@ namespace NuGet.Commands
 
             if (projects.Count == 0)
             {
-                Console.WriteLine(NuGetResources.NoProjectsFound);
+                Console.WriteLine(LocalizedResourceManager.GetString("NoProjectsFound"));
                 return;
             }
 
             if (projects.Count == 1)
             {
-                Console.WriteLine(NuGetResources.FoundProject, projects[0].ProjectName);
+                Console.WriteLine(LocalizedResourceManager.GetString("FoundProject"), projects.Single().ProjectName);
             }
             else
             {
-                Console.WriteLine(NuGetResources.FoundProjects, projects.Count, String.Join(", ", projects.Select(p => p.ProjectName)));
+                Console.WriteLine(LocalizedResourceManager.GetString("FoundProjects"), projects.Count, String.Join(", ", projects.Select(p => p.ProjectName)));
             }
 
             string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
@@ -206,7 +206,7 @@ namespace NuGet.Commands
             var localRepository = new PackageReferenceRepository(project, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
-            Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
+            Console.WriteLine(LocalizedResourceManager.GetString("UpdatingProject"), project.ProjectName);
             UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, localRepository, pathResolver, project);
             project.Save();
         }
@@ -256,12 +256,12 @@ namespace NuGet.Commands
                 {
                     string currentDirectory = Directory.GetCurrentDirectory();
                     string relativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(currentDirectory), packagesDir);
-                    Console.WriteLine(NuGetResources.LookingForInstalledPackages, relativePath);
+                    Console.WriteLine(LocalizedResourceManager.GetString("LookingForInstalledPackages"), relativePath);
                     return packagesDir;
                 }
             }
 
-            throw new CommandLineException(NuGetResources.UnableToLocatePackagesFolder);
+            throw new CommandLineException(LocalizedResourceManager.GetString("UnableToLocatePackagesFolder"));
         }
 
         private static IMSBuildProjectSystem GetMSBuildProject(string packageReferenceFilePath)
@@ -270,17 +270,17 @@ namespace NuGet.Commands
             var directory = Path.GetDirectoryName(packageReferenceFilePath);
             var projectFiles = ProjectHelper.GetProjectFiles(directory).ToList();
          
-            if (!projectFiles.Any())
+            if (projectFiles.Count == 0)
             {
-                throw new CommandLineException(NuGetResources.UnableToLocateProjectFile, packageReferenceFilePath);
+                throw new CommandLineException(LocalizedResourceManager.GetString("UnableToLocateProjectFile"), packageReferenceFilePath);
             }
 
-            if (projectFiles.Count() > 1)
+            if (projectFiles.Count > 1)
             {
-                throw new CommandLineException(NuGetResources.MultipleProjectFilesFound, packageReferenceFilePath);
+                throw new CommandLineException(LocalizedResourceManager.GetString("MultipleProjectFilesFound"), packageReferenceFilePath);
             }
 
-            return new MSBuildProjectSystem(projectFiles.First());
+            return new MSBuildProjectSystem(projectFiles[0]);
         }
 
         internal void UpdatePackages(IPackageRepository localRepository,
@@ -350,7 +350,7 @@ namespace NuGet.Commands
 
                 if (invalid.Any())
                 {
-                    throw new CommandLineException(NuGetResources.UnableToFindPackages, String.Join(", ", invalid));
+                    throw new CommandLineException(LocalizedResourceManager.GetString("UnableToFindPackages"), String.Join(", ", invalid));
                 }
 
                 packages = packages.Where(r => idSet.Contains(r.Id));

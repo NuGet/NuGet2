@@ -100,7 +100,7 @@ namespace NuGet.Commands
             // Skip the creation if the file exists and force wasn't specified
             if (File.Exists(nuspecFile) && !Force)
             {
-                Console.WriteLine(NuGetResources.SpecCommandFileExists, nuspecFile);
+                Console.WriteLine(LocalizedResourceManager.GetString("SpecCommandFileExists"), nuspecFile);
             }
             else
             {
@@ -114,7 +114,7 @@ namespace NuGet.Commands
                         File.WriteAllText(nuspecFile, RemoveSchemaNamespace(content));
                     }
 
-                    Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
+                    Console.WriteLine(LocalizedResourceManager.GetString("SpecCommandCreatedNuSpec"), nuspecFile);
                 }
                 catch
                 {

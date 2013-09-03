@@ -12,9 +12,9 @@ namespace NuGet
         {
             var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
 
-            var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetResources.OfficialPackageSourceName);
-            var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, NuGetResources.OfficialPackageSourceName);
-            var legacyV2PackageSource = new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetResources.OfficialPackageSourceName);
+            var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
+            var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
+            var legacyV2PackageSource = new PackageSource(NuGetConstants.V2LegacyFeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
 
             var packageSourceProvider = new PackageSourceProvider(
                 settings,

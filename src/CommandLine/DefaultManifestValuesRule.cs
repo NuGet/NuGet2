@@ -45,9 +45,9 @@ namespace NuGet
 
         private static PackageIssue CreateIssueFor(string field, string value)
         {
-            return new PackageIssue(NuGetResources.Warning_DefaultSpecValueTitle,
-                String.Format(CultureInfo.CurrentCulture, NuGetResources.Warning_DefaultSpecValue, value, field),
-                NuGetResources.Warning_DefaultSpecValueSolution);
+            return new PackageIssue(LocalizedResourceManager.GetString("Warning_DefaultSpecValueTitle"),
+                String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("Warning_DefaultSpecValue"), value, field),
+                LocalizedResourceManager.GetString("Warning_DefaultSpecValueSolution"));
         }
     }
 }

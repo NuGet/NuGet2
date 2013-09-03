@@ -21,7 +21,7 @@ namespace NuGet
             Uri result;
             if (!Uri.TryCreate(source, UriKind.Absolute, out result))
             {
-                throw new CommandLineException(NuGetResources.InvalidSource, source);
+                throw new CommandLineException(LocalizedResourceManager.GetString("InvalidSource"), source);
             }
         }
 
@@ -29,11 +29,11 @@ namespace NuGet
         {
             if (String.IsNullOrEmpty(source) || source.Equals(NuGetConstants.DefaultGalleryServerUrl, StringComparison.OrdinalIgnoreCase))
             {
-                return NuGetResources.LiveFeed + " (" + NuGetConstants.DefaultGalleryServerUrl + ")";
+                return LocalizedResourceManager.GetString("LiveFeed") + " (" + NuGetConstants.DefaultGalleryServerUrl + ")";
             }
             if (source.Equals(NuGetConstants.DefaultSymbolServerUrl, StringComparison.OrdinalIgnoreCase))
             {
-                return NuGetResources.DefaultSymbolServer + " (" + NuGetConstants.DefaultSymbolServerUrl + ")";
+                return LocalizedResourceManager.GetString("DefaultSymbolServer") + " (" + NuGetConstants.DefaultSymbolServerUrl + ")";
             }
             return "'" + source + "'";
         }
@@ -52,11 +52,11 @@ namespace NuGet
                 // with malformed ids / Versions.
                 if (String.IsNullOrEmpty(package.Id))
                 {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandInvalidPackageReference, fileName));
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandInvalidPackageReference"), fileName));
                 }
                 if (requireVersion && (package.Version == null))
                 {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandPackageReferenceInvalidVersion"), package.Id));
                 }
             }
 

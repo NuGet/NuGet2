@@ -33,7 +33,7 @@ namespace NuGet.Commands
             var apiKey = GetApiKey(source);
             if (String.IsNullOrEmpty(apiKey) && !IsFileSource(source))
             {
-                Console.WriteWarning(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
+                Console.WriteWarning(LocalizedResourceManager.GetString("NoApiKeyFound"), CommandLineUtility.GetSourceDisplayName(source));
             }
 
             var timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
@@ -92,7 +92,7 @@ namespace NuGet.Commands
 
                 if (String.IsNullOrEmpty(apiKey))
                 {
-                    Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
+                    Console.WriteWarning(LocalizedResourceManager.GetString("Warning_SymbolServerNotConfigured"), Path.GetFileName(symbolPackagePath), LocalizedResourceManager.GetString("DefaultSymbolServer"));
                 }
                 PushPackage(symbolPackagePath, source, apiKey, timeout);
             }
@@ -135,10 +135,10 @@ namespace NuGet.Commands
             var package = new OptimizedZipPackage(packageToPush);
 
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
+            Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPushingPackage"), package.GetFullName(), sourceName);
 
             packageServer.PushPackage(apiKey, package, Convert.ToInt32(timeout.TotalMilliseconds));
-            Console.WriteLine(NuGetResources.PushCommandPackagePushed);
+            Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPackagePushed"));
         }
 
         private static IEnumerable<string> GetPackagesToPush(string packagePath)
@@ -175,7 +175,7 @@ namespace NuGet.Commands
         {
             if (!packagesToPush.Any())
             {
-                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, packagePath));
+                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("UnableToFindFile"), packagePath));
             }
         }
 

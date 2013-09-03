@@ -11,9 +11,9 @@ namespace NuGet
             SemanticVersion semVer;
             if (!SemanticVersion.TryParseStrict(package.Version.ToString(), out semVer))
             {
-                yield return new PackageIssue(NuGetResources.Warning_SemanticVersionTitle,
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Warning_SemanticVersion, package.Version),
-                    NuGetResources.Warning_SemanticVersionSolution);
+                yield return new PackageIssue(LocalizedResourceManager.GetString("Warning_SemanticVersionTitle"),
+                    String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("Warning_SemanticVersion"), package.Version),
+                    LocalizedResourceManager.GetString("Warning_SemanticVersionSolution"));
             }
         }
     }

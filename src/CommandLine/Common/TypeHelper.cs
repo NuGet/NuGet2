@@ -50,7 +50,7 @@ namespace NuGet
             }
 
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                NuGetResources.UnableToConvertTypeError, value.GetType(), type));
+                LocalizedResourceManager.GetString("UnableToConvertTypeError"), value.GetType(), type));
         }
 
         public static bool TypeAllowsNull(Type type)
