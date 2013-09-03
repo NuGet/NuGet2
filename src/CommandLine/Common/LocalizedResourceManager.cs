@@ -23,8 +23,13 @@ namespace NuGet
         public static string GetLanguageName()
         {
             var culture = Thread.CurrentThread.CurrentUICulture;
-            while (culture.CultureTypes.HasFlag(CultureTypes.SpecificCultures))
+            while (!culture.IsNeutralCulture)
             {
+                if (culture.Parent == culture)
+                {
+                    break;
+                }
+
                 culture = culture.Parent;
             }
 
