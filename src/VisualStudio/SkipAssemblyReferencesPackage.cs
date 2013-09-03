@@ -19,6 +19,14 @@ namespace NuGet.VisualStudio
             _basePackage = basePackage;
         }
 
+        public string Source
+        {
+            get
+            {
+                return _basePackage.Source;
+            }
+        }
+
         public bool IsAbsoluteLatestVersion
         {
             get { return _basePackage.IsAbsoluteLatestVersion; }

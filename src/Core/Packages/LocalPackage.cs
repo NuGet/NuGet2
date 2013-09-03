@@ -11,8 +11,9 @@ namespace NuGet
         private const string ResourceAssemblyExtension = ".resources.dll";
         private IList<IPackageAssemblyReference> _assemblyReferences;
 
-        protected LocalPackage()
+        protected LocalPackage(string source)
         {
+            Source = source;
         }
 
         public string Id
@@ -155,6 +156,12 @@ namespace NuGet
         {
             get;
             set;
+        }
+
+        public string Source
+        {
+            get;
+            private set;
         }
 
         public IEnumerable<PackageDependencySet> DependencySets

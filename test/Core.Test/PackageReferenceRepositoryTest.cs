@@ -87,7 +87,7 @@ namespace NuGet.Test
             //var package = PackageUtility.CreatePackage("A");
 
             // Act
-            referenceRepository.AddPackage("A", new SemanticVersion("1.0"), new FrameworkName("Silverlight, Version=2.0"));
+            referenceRepository.AddPackage("A", new SemanticVersion("1.0"), new FrameworkName("Silverlight, Version=2.0"), "source");
 
             // Assert
             Assert.Equal(@"C:\MockFileSystem\packages.config", path);

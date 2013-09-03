@@ -43,6 +43,7 @@ namespace NuGet
         }
 
         public UnzippedPackage(IFileSystem repositoryFileSystem, string packageName)
+            : base(null)
         {
             if (repositoryFileSystem == null)
             {

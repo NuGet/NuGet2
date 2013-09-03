@@ -3510,11 +3510,13 @@ namespace NuGet.Test
             var localRepository = new Mock<IPackageReferenceRepository>();
             localRepository.Setup(p => p.AddPackage("A", 
                                                     new SemanticVersion("1.0"),
-                                                    new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
+                                                    new FrameworkName(".NETFramework, Version=4.0"),
+                                                    It.IsAny<string>())).Verifiable();
 
             localRepository.Setup(p => p.AddPackage("B",
                                                     new SemanticVersion("2.0"),
-                                                    new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
+                                                    new FrameworkName(".NETFramework, Version=4.0"),
+                                                    It.IsAny<string>())).Verifiable();
 
             var projectManager = new ProjectManager(
                 sourceRepository, 

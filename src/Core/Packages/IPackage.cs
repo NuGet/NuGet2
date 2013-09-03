@@ -14,6 +14,8 @@ namespace NuGet
 
         bool Listed { get; }
 
+        string Source { get; }
+
         DateTimeOffset? Published { get; }
 
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }

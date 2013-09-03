@@ -41,7 +41,8 @@ namespace NuGet
         /// </summary>
         /// <param name="fullPackagePath">The full package path on disk.</param>
         /// <exception cref="System.ArgumentException">fullPackagePath</exception>
-        public OptimizedZipPackage(string fullPackagePath)
+        public OptimizedZipPackage(string fullPackagePath) :
+            base(fullPackagePath)
         {
             if (String.IsNullOrEmpty(fullPackagePath))
             {
@@ -69,6 +70,7 @@ namespace NuGet
         /// <param name="fileSystem">The file system which contains the .nupkg file.</param>
         /// <param name="packagePath">The relative package path within the file system.</param>
         public OptimizedZipPackage(IFileSystem fileSystem, string packagePath)
+            : base(fileSystem.GetFullPath(packagePath))
         {
             if (fileSystem == null)
             {
@@ -96,6 +98,7 @@ namespace NuGet
         /// <exception cref="System.ArgumentNullException">fileSystem</exception>
         /// <exception cref="System.ArgumentException">packagePath</exception>
         public OptimizedZipPackage(IFileSystem fileSystem, string packagePath, IFileSystem expandedFileSystem)
+            : base(fileSystem.GetFullPath(packagePath))
         {
             if (fileSystem == null)
             {

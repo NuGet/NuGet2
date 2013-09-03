@@ -274,7 +274,7 @@ namespace NuGet
                 if (_packageReferenceRepository != null)
                 {
                     // save the used project's framework if the repository supports it.
-                    _packageReferenceRepository.AddPackage(package.Id, package.Version, Project.TargetFramework);
+                    _packageReferenceRepository.AddPackage(package.Id, package.Version, Project.TargetFramework, package.Source);
                 }
                 else
                 {

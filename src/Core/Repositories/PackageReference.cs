@@ -5,7 +5,14 @@ namespace NuGet
 {
     public class PackageReference : IEquatable<PackageReference>
     {
-        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework, bool isDevelopmentDependency, bool requireReinstallation = false)
+        public PackageReference(
+            string id, 
+            SemanticVersion version, 
+            IVersionSpec versionConstraint, 
+            FrameworkName targetFramework, 
+            bool isDevelopmentDependency, 
+            string source,
+            bool requireReinstallation = false)
         {
             Id = id;
             Version = version;
@@ -13,12 +20,14 @@ namespace NuGet
             TargetFramework = targetFramework;
             IsDevelopmentDependency = isDevelopmentDependency;
             RequireReinstallation = requireReinstallation;
+            Source = source;
         }
 
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
         public IVersionSpec VersionConstraint { get; set; }
         public FrameworkName TargetFramework { get; private set; }
+        public string Source { get; private set; }
         public bool IsDevelopmentDependency { get; private set; }
         public bool RequireReinstallation { get; private set; }
 

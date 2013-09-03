@@ -32,6 +32,7 @@ namespace NuGet
         }
 
         public ZipPackage(Stream stream)
+            : base(null)
         {
             if (stream == null)
             {
@@ -43,6 +44,7 @@ namespace NuGet
         }
 
         private ZipPackage(string filePath, bool enableCaching)
+            : base(filePath)
         {
             if (String.IsNullOrEmpty(filePath))
             {
@@ -53,7 +55,8 @@ namespace NuGet
             EnsureManifest();
         }
 
-        internal ZipPackage(Func<Stream> streamFactory, bool enableCaching)
+        internal ZipPackage(Func<Stream> streamFactory, bool enableCaching) :
+            base(null)
         {
             if (streamFactory == null)
             {

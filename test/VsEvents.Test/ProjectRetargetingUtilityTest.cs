@@ -140,7 +140,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -165,7 +165,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -190,7 +190,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -214,7 +214,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -238,7 +238,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -263,7 +263,7 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageA);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -292,9 +292,9 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageC);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
-            packageReferences.Add(new PackageReference("B", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
-            packageReferences.Add(new PackageReference("C", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
+            packageReferences.Add(new PackageReference("B", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
+            packageReferences.Add(new PackageReference("C", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.0"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 
@@ -325,8 +325,8 @@ namespace NuGet.VsEvents
             localRepository.AddPackage(packageB);
 
             List<PackageReference> packageReferences = new List<PackageReference>();
-            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=3.0"), isDevelopmentDependency: false));
-            packageReferences.Add(new PackageReference("B", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.5"), isDevelopmentDependency: false));
+            packageReferences.Add(new PackageReference("A", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=3.0"), isDevelopmentDependency: false, source: null));
+            packageReferences.Add(new PackageReference("B", new SemanticVersion("1.0.0"), null, new FrameworkName(".NETFramework, Version=4.5"), isDevelopmentDependency: false, source: null));
 
             FrameworkName projectFramework = new FrameworkName(".NETFramework, Version=3.5");
 

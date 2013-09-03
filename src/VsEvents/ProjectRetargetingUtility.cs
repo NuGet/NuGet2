@@ -110,7 +110,7 @@ namespace NuGet.VsEvents
             foreach (PackageReference packageReference in packageReferences)
             {
                 bool requireReinstallation = packagesToBeReinstalled.Any(p => p.Id.Equals(packageReference.Id, StringComparison.OrdinalIgnoreCase));
-                packageReferenceFile.MarkEntryForReinstallation(packageReference.Id, packageReference.Version, packageReference.TargetFramework, requireReinstallation);
+                packageReferenceFile.MarkEntryForReinstallation(packageReference, requireReinstallation);
             }
         }
 

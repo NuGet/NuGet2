@@ -207,6 +207,14 @@ namespace NuGet
             set;
         }
 
+        public string Source
+        {
+            get
+            {
+                return DownloadUrl.ToString();
+            }
+        }
+
         private string OldHash { get; set; }
 
         private IPackage Package

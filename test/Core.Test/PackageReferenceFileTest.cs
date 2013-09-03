@@ -380,7 +380,9 @@ namespace NuGet.Test
             var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
 
             // Act
-            packageReferenceFile.MarkEntryForReinstallation("A", new SemanticVersion("1.0"), new FrameworkName(".NETFramework, Version=4.5"), true);
+            packageReferenceFile.MarkEntryForReinstallation(
+                new PackageReference("A", new SemanticVersion("1.0"), null, new FrameworkName(".NETFramework, Version=4.5"), isDevelopmentDependency: true, source: null), 
+                requireReinstallation: true);
             var packageReferences = packageReferenceFile.GetPackageReferences().ToList();
 
             // Assert
