@@ -237,6 +237,7 @@
     <Target Name="CopyExecutableOutputToDropDirectory">
         <ItemGroup>
             <ExecutableFiles Include="$(ExeBuildDirectory)\Merged\NuGet.exe;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
+            <ExecutableFiles Condition="Exists('$(ExeBuildDirectory)\Merged\NuGet-Signed.exe')" Include="@(ExecutableFiles);$(ExeBuildDirectory)\Merged\NuGet-Signed.exe"></ExecutableFiles>
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
