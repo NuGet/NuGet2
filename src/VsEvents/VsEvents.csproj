@@ -60,7 +60,9 @@
       <Link>VsUtility.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PackageReferenceFileList.cs" />
     <Compile Include="PackageRestorer.cs" />
+    <Compile Include="ProjectPackageReferenceFile.cs" />
     <Compile Include="ProjectRetargetingHandler.cs" />
     <Compile Include="ProjectRetargetingUtility.cs" />
     <Compile Include="ProjectUpgradeHandler.cs" />

@@ -41,6 +41,8 @@ namespace NuGet.VsEvents
         // indicates whether there are errors during package restore.
         private bool _hasError;
 
+        private PackageReferenceFileList _packageReferenceFileList;
+
         enum VerbosityLevel
         {
             Quiet = 0,
@@ -93,12 +95,13 @@ namespace NuGet.VsEvents
                     return;
                 }
 
-                if (!VsUtility.PackagesConfigExists(_dte.Solution))
+                if (!IsAutomatic())
                 {
                     return;
                 }
-                
-                if (!IsAutomatic())
+
+                _packageReferenceFileList = new PackageReferenceFileList(_dte.Solution);
+                if (_packageReferenceFileList.IsEmpty)
                 {
                     return;
                 }
@@ -169,17 +172,15 @@ namespace NuGet.VsEvents
             _msBuildOutputVerbosity = GetMSBuildOutputVerbositySetting(_dte);
             WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreStarted);
             PackageRestore(_dte.Solution);
-            foreach (Project project in _dte.Solution.Projects)
+
+            foreach (var projectPackageReferenceFile in _packageReferenceFileList.ProjectPackageReferenceFiles)
             {
                 if (HasCanceled())
                 {
                     break;
                 }
 
-                if (project.IsUnloaded() || project.IsNuGetInUse())
-                {
-                    PackageRestore(project);
-                }
+                PackageRestore(projectPackageReferenceFile);
             }
             
             if (HasCanceled())
@@ -214,26 +215,15 @@ namespace NuGet.VsEvents
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
 
-            missingPackages.AddRange(GetMissingPackages(_dte.Solution, fileSystem));
-            foreach (Project project in _dte.Solution.Projects)
+            missingPackages.AddRange(GetMissingPackages(_packageReferenceFileList.SolutionPackageReferenceFile, fileSystem));
+            foreach (var projectReferenceFile in _packageReferenceFileList.ProjectPackageReferenceFiles)
             {
                 if (HasCanceled())
                 {
                     return;
                 }
 
-                if (project.IsUnloaded())
-                {
-                    var packageReferenceFileFullPath = VsUtility.GetPackageReferenceFileFullPath(project);
-                    missingPackages.AddRange(GetMissingPackages(packageReferenceFileFullPath, fileSystem));      
-                }
-                else
-                {
-                    if (project.IsNuGetInUse())
-                    {
-                        missingPackages.AddRange(GetMissingPackages(project, fileSystem));
-                    }
-                }
+                missingPackages.AddRange(GetMissingPackages(projectReferenceFile.FullPath, fileSystem));
             }
 
             if (missingPackages.Count > 0)
@@ -241,37 +231,8 @@ namespace NuGet.VsEvents
                 var errorText = String.Format(CultureInfo.CurrentCulture, 
                     Resources.PackageNotRestoredBecauseOfNoConsent,
                     String.Join(", ", missingPackages.Select(p => p.ToString())));
-                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, TaskPriority.Normal, errorText, hierarchyItem: null);
+                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, TaskPriority.High, errorText, hierarchyItem: null);
             }
-        }
-
-        /// <summary>
-        /// Gets the list of missing solution level packages of the solution.
-        /// </summary>
-        /// <param name="solution">The solution to check.</param>
-        /// <param name="fileSystem">The file sytem of the local repository.</param>
-        /// <returns>The list of missing packages.</returns>
-        private static IEnumerable<PackageReference> GetMissingPackages(Solution solution, IFileSystem fileSystem)
-        {
-            var packageReferenceFileFullPath = Path.Combine(
-                VsUtility.GetNuGetSolutionFolder(solution),
-                VsUtility.PackageReferenceFile);
-            return GetMissingPackages(packageReferenceFileFullPath, fileSystem);
-        }
-
-        /// <summary>
-        /// Gets the list of missing packages of the project.
-        /// </summary>
-        /// <param name="project">The project to check.</param>
-        /// /// <param name="fileSystem">The file sytem of the local repository.</param>
-        /// <returns>The list of missing packages.</returns>
-        private static IEnumerable<PackageReference> GetMissingPackages(Project project, IFileSystem fileSystem)
-        {
-            var projectFullPath = VsUtility.GetFullPath(project);            
-            var packageReferenceFileFullPath = Path.Combine(
-                    Path.GetDirectoryName(projectFullPath),
-                    VsUtility.PackageReferenceFile);
-            return GetMissingPackages(packageReferenceFileFullPath, fileSystem);
         }
 
         /// <summary>
@@ -282,6 +243,11 @@ namespace NuGet.VsEvents
         /// <returns>The list of missing packages.</returns>
         private static IEnumerable<PackageReference> GetMissingPackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
         {
+            if (packageReferenceFileFullPath == null)
+            {
+                return Enumerable.Empty<PackageReference>();
+            }
+
             var packageReferenceFile = new PackageReferenceFile(packageReferenceFileFullPath);
             return packageReferenceFile.GetPackageReferences()
                 .Where(package => !IsPackageInstalled(fileSystem, package.Id, package.Version));
@@ -321,11 +287,11 @@ namespace NuGet.VsEvents
         }
 
         /// <summary>
-        /// Restores NuGet packages for the given project.
+        /// Restores NuGet packages listed in the given project package reference file.
         /// </summary>
-        /// <param name="project">The project whose packages will be restored.</param>
+        /// <param name="projectPackageReferenceFile">The project package reference file.</param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
-        private void PackageRestore(Project project)
+        private void PackageRestore(ProjectPackageReferenceFile projectPackageReferenceFile)
         {
             if (HasCanceled())
             {
@@ -334,14 +300,13 @@ namespace NuGet.VsEvents
 
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
-            var projectName = project.GetName();
+            var projectName = projectPackageReferenceFile.Project.GetName();
             
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectName);
 
             try
             {
-                var packageReferenceFileFullPath = VsUtility.GetPackageReferenceFileFullPath(project);
-                RestorePackages(packageReferenceFileFullPath, fileSystem);
+                RestorePackages(projectPackageReferenceFile.FullPath, fileSystem);
             }
             catch (Exception ex)
             {
@@ -405,6 +370,11 @@ namespace NuGet.VsEvents
         /// <param name="fileSystem">The file system that represents the packages folder.</param>
         private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
         {
+            if (packageReferenceFileFullPath == null)
+            {
+                return;
+            }
+
             var packageReferenceFile = new PackageReferenceFile(packageReferenceFileFullPath);
             var packages = packageReferenceFile.GetPackageReferences().ToList();
             int currentCount = 1;
@@ -466,10 +436,7 @@ namespace NuGet.VsEvents
 
             try
             {
-                var packageReferenceFileFullPath = Path.Combine(
-                    VsUtility.GetNuGetSolutionFolder(solution),
-                    VsUtility.PackageReferenceFile);
-                RestorePackages(packageReferenceFileFullPath, fileSystem);
+                RestorePackages(_packageReferenceFileList.SolutionPackageReferenceFile, fileSystem);
             }
             catch (Exception ex)
             {
@@ -534,5 +501,5 @@ namespace NuGet.VsEvents
             _buildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
             _solutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
         }
-    }
+    } 
 }

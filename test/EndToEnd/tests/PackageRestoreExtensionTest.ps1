@@ -9,6 +9,14 @@ function Test-PackageRestore-SimpleTest {
 	$p2 = New-ClassLibrary
 	$p2 | Install-Package elmah -Version 1.1
 
+	$f = New-SolutionFolder 'Folder1'
+	$p3 = $f | New-ClassLibrary
+	$p3 | Install-Package Newtonsoft.Json -Version 5.0.6
+
+    $f2 = $f | New-SolutionFolder 'Folder2'
+    $p4 = $f2 | New-ClassLibrary
+    $p4 | Install-Package Ninject
+
 	# delete the packages folder
 	$packagesDir = Get-PackagesDir
 	RemoveDirectory $packagesDir
@@ -21,6 +29,8 @@ function Test-PackageRestore-SimpleTest {
 	Assert-True (Test-Path $packagesDir)
 	Assert-Package $p1 FakeItEasy
 	Assert-Package $p2 elmah
+	Assert-Package $p3 Newtonsoft.Json
+    Assert-Package $p4 Ninject
 }
 
 # Tests that package restore works for website project
@@ -128,6 +138,86 @@ function Test-PackageRestore-ErrorMessage {
 
     $output = GetBuildOutput
     Assert-True ($output.Contains('NuGet package restore failed.'))
+}
+
+# Test that package restore will check for missing packages when consent is not granted,
+# while IsAutomatic is true.
+function Test-PackageRestore-CheckForMissingPackages {
+    param($context)
+
+	# Arrange
+	$p1 = New-ClassLibrary	
+	$p1 | Install-Package Newtonsoft.Json -Version 5.0.6
+	
+	$f = New-SolutionFolder 'Folder1'
+	$p2 = $f | New-ClassLibrary
+	$p2 | Install-Package elmah -Version 1.1
+
+    $f2 = $f | New-SolutionFolder 'Folder2'
+    $p3 = $f2 | New-ClassLibrary
+    $p3 | Install-Package Ninject
+
+	# delete the packages folder
+	$packagesDir = Get-PackagesDir
+	RemoveDirectory $packagesDir
+	Assert-False (Test-Path $packagesDir)
+	
+	try {
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'false')
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+
+		# Act
+		Build-Solution
+
+		# Assert
+		$errorlist = Get-Errors
+		Assert-AreEqual 1 $errorlist.Count
+
+		$error = $errorlist[$errorlist.Count-1]
+		Assert-True ($error.Description.Contains('One or more NuGet packages need to be restored but couldn''t be because consent has not been granted.'))
+		Assert-True ($error.Description.Contains('Newtonsoft.Json 5.0.6'))
+		Assert-True ($error.Description.Contains('elmah 1.1'))
+        Assert-True ($error.Description.Contains('Ninject'))
+	}
+	finally {
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+	}
+}	
+
+# Tests that package restore is a no-op when setting PackageRestoreIsAutomatic is false.
+function Test-PackageRestore-IsAutomaticIsFalse {
+    param($context)
+
+	# Arrange
+	$p1 = New-ClassLibrary	
+	$p1 | Install-Package FakeItEasy -version 1.8.0
+	
+	$p2 = New-ClassLibrary
+	$p2 | Install-Package elmah -Version 1.1
+
+	$f = New-SolutionFolder 'Folder1'
+	$p3 = $f | New-ClassLibrary
+	$p3 | Install-Package Newtonsoft.Json -Version 5.0.6
+
+	# delete the packages folder
+	$packagesDir = Get-PackagesDir
+	RemoveDirectory $packagesDir
+	Assert-False (Test-Path $packagesDir)
+
+	try {
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'false')
+
+		# Act
+		Build-Solution
+
+		# Assert		
+		Assert-False (Test-Path $packagesDir)
+	}
+	finally {
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+	}
 }
 
 function GetBuildOutput { 
