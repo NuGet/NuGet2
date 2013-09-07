@@ -374,4 +374,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="OutputConsolePaneName" xml:space="preserve">
     <value>Package Manager</value>
   </data>
+  <data name="InvalidSettingsProperty" xml:space="preserve">
+    <value>Invalid settings property '{0}'. Valid settings properties are: PackageRestoreConsentGranted, PackageRestoreIsAutomatic.</value>
+  </data>
 </root>
