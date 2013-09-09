@@ -277,7 +277,7 @@ namespace NuGet.VisualStudio.Test
                     <package id=""B"" version=""1.2-alpha"" />
                 </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, projectName: null, sourceRepository: new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -340,7 +340,7 @@ namespace NuGet.VisualStudio.Test
                     <package id=""A"" version=""1.0.0.0"" />
                 </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, projectName: null, sourceRepository: new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -407,7 +407,7 @@ namespace NuGet.VisualStudio.Test
                     <package id=""B"" version=""1.2-alpha"" />
                 </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, projectName: null, sourceRepository: new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -479,7 +479,7 @@ namespace NuGet.VisualStudio.Test
             var projectFileSystem = new MockFileSystem();
             projectFileSystem.AddFile("packages.config", tempFile);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, projectName: null, sourceRepository: new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 

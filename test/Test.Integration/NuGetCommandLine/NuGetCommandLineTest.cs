@@ -1516,10 +1516,10 @@ public class Cl_{0} {{
             string packagePath = SavePackage("Test.ContentPackage", "1.6.4");
             string expectedPackage = "ProjectWithDependenciesWithContent.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithDependenciesWithContent",
-                               "1.2.0.0",
-                                 "Thomas",
-                                 "Project with content",
-                                "Title of Package");
+                              "1.2.0.0",
+                              "Thomas",
+                              "Project with content",
+                              "Title of Package");
 
             // add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
             WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");

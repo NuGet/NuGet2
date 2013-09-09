@@ -12,6 +12,95 @@ namespace NuGet.Test
 {
     public class PackageReferenceFileTest
     {
+        [Fact]
+        public void ConstructorNormalizeProjectName()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("packages.project_with_space.config", "");
+
+            // Act
+            var packageReferenceFile = new PackageReferenceFile(
+                fileSystem, "packages.config", "project with space");
+
+            // Assert
+            Assert.Equal("x:\\packages.project_with_space.config", packageReferenceFile.FullConfigFilePath);
+        }
+
+        [Fact]
+        public void GetPackageReferencesNormalizeProjectName()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""luan"" version=""1.0"" />
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            fileSystem.AddFile("packages.project_with_space.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config", "project with space");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToArray();
+
+            // Assert
+            Assert.Equal(1, values.Length);
+            Assert.Equal("luan", values[0].Id);
+        }
+
+        [Fact]
+        public void GetPackageReferencesReadFromProjectConfigFileIfPresent()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""luan"" version=""1.0"" />
+</packages>";
+
+            var projectConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""an"" version=""1.0"" />
+</packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            fileSystem.AddFile("packages.project.config", projectConfig);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config", "project");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToArray();
+
+            // Assert
+            Assert.Equal(1, values.Length);
+            Assert.Equal("an", values[0].Id);
+        }
+
+        [Fact]
+        public void GetPackageReferencesReadFromConfigFileIfProjectConfigFileDoesNotExist()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""luan"" version=""1.0"" />
+</packages>";
+
+            var projectConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""an"" version=""1.0"" />
+</packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            fileSystem.AddFile("packages.project.config", projectConfig);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config", "chocolate");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToArray();
+
+            // Assert
+            Assert.Equal(1, values.Length);
+            Assert.Equal("luan", values[0].Id);
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]

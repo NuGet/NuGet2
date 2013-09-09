@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
@@ -14,8 +11,10 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     {
         // Tests that when package restore is enabled and -RequireConsent is specified,
         // the opt out message is displayed.
-        [Fact]
-        public void InstallCommand_OptOutMessage()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj1.config")]
+        public void InstallCommand_OptOutMessage(string configFileName)
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -56,7 +55,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <None Include='packages.config' />
   </ItemGroup>
 </Project>");
-                Util.CreateFile(proj1Directory, "packages.config",
+                Util.CreateFile(proj1Directory, configFileName,
 @"<packages>
   <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
 </packages>");
@@ -64,7 +63,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var r = CommandRunner.Run(
                     nugetexe,
                     proj1Directory,
-                    "install packages.config -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent -Verbosity detailed",
+                    "install " + configFileName + " -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent -Verbosity detailed",
                     waitForExit: true);
 
                 // Assert
@@ -84,8 +83,10 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
         // Tests that when package restore is enabled, but -RequireConsent is not specified,
         // the opt out message is not displayed.
-        [Fact]
-        public void InstallCommand_NoOptOutMessage()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj1.config")]
+        public void InstallCommand_NoOptOutMessage(string configFileName)
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -126,7 +127,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <None Include='packages.config' />
   </ItemGroup>
 </Project>");
-                Util.CreateFile(proj1Directory, "packages.config",
+                Util.CreateFile(proj1Directory, configFileName,
 @"<packages>
   <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
 </packages>");
@@ -134,7 +135,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var r = CommandRunner.Run(
                     nugetexe,
                     proj1Directory,
-                    "install packages.config -Source " + repositoryPath + " -ConfigFile my.config",
+                    "install " + configFileName + " -Source " + repositoryPath + " -ConfigFile my.config",
                     waitForExit: true);
 
                 // Assert

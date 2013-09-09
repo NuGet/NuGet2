@@ -143,7 +143,7 @@ namespace NuGet.Commands
             {
                 return FileSystem.GetFullPath(solutionFileOrDirectory);
             }
-            
+
             // look for solution files
             var slnFiles = FileSystem.GetFiles(solutionFileOrDirectory, "*.sln").ToArray();
             if (slnFiles.Length > 1)
@@ -368,16 +368,16 @@ namespace NuGet.Commands
             }
         }
 
-        private void RestorePackagesFromConfigFile(string packageRerenceFileName, IFileSystem packagesFolderFileSystem)
+        private void RestorePackagesFromConfigFile(string packageReferenceFilePath, IFileSystem packagesFolderFileSystem)
         {
-            if (FileSystem.FileExists(packageRerenceFileName))
+            if (FileSystem.FileExists(packageReferenceFilePath))
             {
                 if (Console.Verbosity == NuGet.Verbosity.Detailed)
                 {
-                    Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile"), packageRerenceFileName);
+                    Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile"), packageReferenceFilePath);
                 }
 
-                InstallPackages(packagesFolderFileSystem, GetPackageReferences(packageRerenceFileName));
+                InstallPackages(packagesFolderFileSystem, GetPackageReferences(packageReferenceFilePath, projectName: null));
             }
         }
 
@@ -395,9 +395,11 @@ namespace NuGet.Commands
             var solutionDirectory = Path.GetDirectoryName(solutionFileFullPath);
 
             // restore packages for the solution
-            var solutionSettingsFolder = Path.Combine(solutionDirectory, NuGetConstants.NuGetSolutionSettingsFolder);
-            var packageReferenceFileName = Path.Combine(solutionSettingsFolder, Constants.PackageReferenceFile);
-            RestorePackagesFromConfigFile(packageReferenceFileName, packagesFolderFileSystem);
+            var solutionConfigFilePath = Path.Combine(
+                solutionDirectory,
+                NuGetConstants.NuGetSolutionSettingsFolder,
+                Constants.PackageReferenceFile);
+            RestorePackagesFromConfigFile(solutionConfigFilePath, packagesFolderFileSystem);
 
             // restore packages for projects
             var packageReferences = new HashSet<PackageReference>();
@@ -409,20 +411,25 @@ namespace NuGet.Commands
                     continue;
                 }
 
-                packageReferenceFileName = Path.Combine(
+                string projectConfigFilePath = Path.Combine(
                     Path.GetDirectoryName(projectFile),
                     Constants.PackageReferenceFile);
 
-                packageReferences.AddRange(GetPackageReferences(packageReferenceFileName));
+                string projectName = Path.GetFileNameWithoutExtension(projectFile);
+
+                packageReferences.AddRange(GetPackageReferences(projectConfigFilePath, projectName));
             }
 
             InstallPackages(packagesFolderFileSystem, packageReferences);
         }
 
-        private ICollection<PackageReference> GetPackageReferences(string fileName)
+        private static ICollection<PackageReference> GetPackageReferences(string fullConfigFilePath, string projectName)
         {
-            PackageReferenceFile file = new PackageReferenceFile(FileSystem, fileName);
-            return CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
+            var projectFileSystem = new PhysicalFileSystem(Path.GetDirectoryName(fullConfigFilePath));
+            string configFileName = Path.GetFileName(fullConfigFilePath);
+
+            PackageReferenceFile file = new PackageReferenceFile(projectFileSystem, configFileName, projectName);
+            return CommandLineUtility.GetPackageReferences(file, requireVersion: true);
         }
 
         public override void ExecuteCommand()
@@ -438,7 +445,11 @@ namespace NuGet.Commands
             string packagesFolder = GetPackagesFolder();
             IFileSystem packagesFolderFileSystem = CreateFileSystem(packagesFolder);
 
-            if (!_restoringForSolution)
+            if (_restoringForSolution)
+            {
+                RestorePackagesForSolution(packagesFolderFileSystem, _solutionFileFullPath);
+            }
+            else
             {
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
                 // So we'll need to verify that the file exists.
@@ -448,11 +459,7 @@ namespace NuGet.Commands
                     throw new InvalidOperationException(message);
                 }
 
-                InstallPackages(packagesFolderFileSystem, GetPackageReferences(_packagesConfigFileFullPath));
-            }
-            else
-            {
-                RestorePackagesForSolution(packagesFolderFileSystem, _solutionFileFullPath);
+                InstallPackages(packagesFolderFileSystem, GetPackageReferences(_packagesConfigFileFullPath, projectName: null));
             }
         }
     }

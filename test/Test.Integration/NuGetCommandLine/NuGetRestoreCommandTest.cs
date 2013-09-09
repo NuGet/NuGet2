@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
@@ -53,8 +54,10 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             }
         }
 
-        [Fact]
-        public void RestoreCommand_FromSolutionFile()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj2.config")]
+        public void RestoreCommand_FromSolutionFile(string configFileName)
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -114,7 +117,7 @@ EndProject");
     <None Include='packages.config' />
   </ItemGroup>
 </Project>");
-                Util.CreateFile(proj2Directory, "packages.config",
+                Util.CreateFile(proj2Directory, configFileName,
 @"<packages>
   <package id=""packageB"" version=""2.2.0"" targetFramework=""net45"" />
 </packages>");
@@ -259,8 +262,10 @@ EndProject");
 
         // Tests that when package restore is enabled and -RequireConsent is specified, 
         // the opt out message is displayed.
-        [Fact]
-        public void RestoreCommand_OptOutMessage()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj1.config")]
+        public void RestoreCommand_OptOutMessage(string configFileName)
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -311,7 +316,7 @@ EndProject");
     <None Include='packages.config' />
   </ItemGroup>
 </Project>");
-                Util.CreateFile(proj1Directory, "packages.config",
+                Util.CreateFile(proj1Directory, configFileName,
 @"<packages>
   <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
 </packages>");
@@ -463,8 +468,10 @@ EndProject");
 
         // Test that when a directory is passed to nuget.exe restore, and the directory contains
         // just one solution file, restore will work on that solution file.
-        [Fact]
-        public void RestoreCommand_OneSolutionFileInDirectory()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj2.config")]
+        public void RestoreCommand_OneSolutionFileInDirectory(string configFileName)
         {
             // Arrange
             var tempPath = Path.GetTempPath();
@@ -524,7 +531,7 @@ EndProject");
     <None Include='packages.config' />
   </ItemGroup>
 </Project>");
-                Util.CreateFile(proj2Directory, "packages.config",
+                Util.CreateFile(proj2Directory, configFileName,
 @"<packages>
   <package id=""packageB"" version=""2.2.0"" targetFramework=""net45"" />
 </packages>");

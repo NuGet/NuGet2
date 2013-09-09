@@ -137,14 +137,16 @@ namespace NuGet.VisualStudio
         /// <param name="project">Project under whose directory packages.config is searched for</param>
         public static bool PackagesConfigExists(Project project)
         {
-            var packageReferenceFileName = GetPackageReferenceFileFullPath(project);
-
             // Here we just check if the packages.config file exists instead of 
             // calling IsNuGetInUse because that will cause NuGet.VisualStudio.dll to get loaded.
             bool isUnloaded = VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
-            if ((isUnloaded || IsSupported(project)) && File.Exists(packageReferenceFileName))
+            if (isUnloaded || IsSupported(project))
             {
-                return true;
+                Tuple<string, string> configFilePaths = GetPackageReferenceFileFullPaths(project);
+                if (File.Exists(configFilePaths.Item1) || File.Exists(configFilePaths.Item2))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -153,17 +155,21 @@ namespace NuGet.VisualStudio
         /// Returns the full path of the packages config file associated with the project.
         /// </summary>
         /// <param name="project">The project.</param>
-        /// <returns>The full path of the packages config file.</returns>
-        public static string GetPackageReferenceFileFullPath(Project project)
+        /// <returns>A tuple contains full path to packages.project_name.config and packages.config files.</returns>
+        public static Tuple<string, string> GetPackageReferenceFileFullPaths(Project project)
         {
             Debug.Assert(project != null);
             var projectDirectory = GetFullPath(project);
 
-            var packageReferenceFileName = Path.Combine(
+            var packagesProjectConfig = Path.Combine(
+                projectDirectory ?? String.Empty,
+                "packages." + GetName(project) + ".config");
+
+            var packagesConfig = Path.Combine(
                 projectDirectory ?? String.Empty,
                 PackageReferenceFile);
 
-            return packageReferenceFileName;
+            return Tuple.Create(packagesProjectConfig, packagesConfig);
         }
 
         public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, TaskPriority priority, string errorText, IVsHierarchy hierarchyItem)
@@ -257,6 +263,23 @@ namespace NuGet.VisualStudio
             }
 
             return false;
+        }
+
+        public static string GetName(this Project project)
+        {
+            string name = project.Name;
+            if (project.IsJavaScriptProject())
+            {
+                // The JavaScript project initially returns a "(loading..)" suffix to the project Name.
+                // Need to get rid of it for the rest of NuGet to work properly.
+                // TODO: Follow up with the VS team to see if this will be fixed eventually
+                const string suffix = " (loading...)";
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    name = name.Substring(0, name.Length - suffix.Length);
+                }
+            }
+            return name;
         }
     }
 }

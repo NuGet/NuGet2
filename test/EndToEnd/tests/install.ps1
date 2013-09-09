@@ -2425,3 +2425,53 @@ function Test-InstallPackageWithLeadingZeroInVersion
     Assert-Package $p CraigsUtilityLibrary-Reflection 3.0.0001
     Assert-Package $p JSLess 0.01
 }
+
+function Test-InstallPackagePreservesProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $projectPath = $p.Properties.Item("FullPath").Value
+    $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
+    
+    # create file and add to project
+    $newFile = New-Item $packagesConfigPath -ItemType File
+    '<packages></packages>' > $newFile
+    $p.ProjectItems.AddFromFile($packagesConfigPath)
+
+    # Act
+    $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithFolder
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
+}
+
+function Test-InstallPackageAddMoreEntriesToProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $p | Install-Package PackageWithContentFile -source $context.RepositoryRoot
+
+    $file = Get-ProjectItem $p 'packages.config'
+    Assert-NotNull $file
+
+    # rename it
+    $file.Name = 'packages.CoolProject.config'
+
+    # Act
+    $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithFolder
+    Assert-Package $p PackageWithContentFile
+
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
+}

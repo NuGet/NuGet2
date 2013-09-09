@@ -147,7 +147,7 @@ namespace NuGet.ServerExtensions
                 IFileSystem fileSystem = CreateFileSystem();
                 string configFilePath = Path.GetFullPath(packageId);
                 var packageReferenceFile = GetPackageReferenceFile(fileSystem, configFilePath);
-                return CommandLineUtility.GetPackageReferences(packageReferenceFile, configFilePath, requireVersion: false);
+                return CommandLineUtility.GetPackageReferences(packageReferenceFile, requireVersion: false);
             }
             else
             {

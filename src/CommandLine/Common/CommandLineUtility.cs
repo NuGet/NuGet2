@@ -38,21 +38,23 @@ namespace NuGet
             return "'" + source + "'";
         }
 
-        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile file, string fileName, bool requireVersion)
+        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile configFile, bool requireVersion)
         {
-            if (file == null)
+            if (configFile == null)
             {
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException("configFile");
             }
 
-            var packageReferences = file.GetPackageReferences(requireVersion).ToList();
+            var packageReferences = configFile.GetPackageReferences(requireVersion).ToList();
             foreach (var package in packageReferences)
             {
                 // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
                 // with malformed ids / Versions.
                 if (String.IsNullOrEmpty(package.Id))
                 {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandInvalidPackageReference"), fileName));
+                    throw new InvalidDataException(
+                        String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandInvalidPackageReference"), 
+                        configFile.FullConfigFilePath));
                 }
                 if (requireVersion && (package.Version == null))
                 {

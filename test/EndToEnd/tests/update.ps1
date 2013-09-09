@@ -1435,3 +1435,28 @@ function Test-UpdatePackageThrowsWhenOnlyUnusedVersionsOfAPackageIsPresentInPack
     # Update specific package here. Because, when all packages are updated, the PackageNotInstalledException gets caught. We want it to be thrown
     Assert-Throws { Update-Package TestUpdatePackage -Source $context.RepositoryRoot } "'TestUpdatePackage' was not installed in any project. Update failed."
 }
+
+function Test-UpdatePackagePreservesProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $p | Install-Package TestUpdatePackage -version 1.0 -source $context.RepositoryRoot
+
+    $file = Get-ProjectItem $p 'packages.config'
+    Assert-NotNull $file
+
+    # rename it
+    $file.Name = 'packages.CoolProject.config'
+
+    # Act
+    $p | Update-Package TestUpdatePackage -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p TestUpdatePackage '2.0'
+
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
+}

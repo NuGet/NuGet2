@@ -161,10 +161,14 @@ namespace NuGet.VsEvents
         private static PackageReferenceFile GetPackageReferenceFile(Project project)
         {
             Debug.Assert(project != null);
-            var packageReferenceFile = VsUtility.GetPackageReferenceFileFullPath(project);
-            if (File.Exists(packageReferenceFile))
+            Tuple<string, string> packageReferenceFiles = VsUtility.GetPackageReferenceFileFullPaths(project);
+            if (File.Exists(packageReferenceFiles.Item1))
             {
-                return new PackageReferenceFile(packageReferenceFile);
+                return new PackageReferenceFile(packageReferenceFiles.Item1);
+            }
+            else if (File.Exists(packageReferenceFiles.Item2))
+            {
+                return new PackageReferenceFile(packageReferenceFiles.Item2);
             }
             return null;
         }

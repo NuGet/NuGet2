@@ -61,16 +61,20 @@ namespace NuGet.Commands
             string installPath = ResolveInstallPath();
             IFileSystem fileSystem = CreateFileSystem(installPath);
 
-            // If the first argument is a packages.config file, install everything it lists
+            string configFilePath = Path.GetFullPath(Arguments.Count == 0 ? Constants.PackageReferenceFile : Arguments[0]);
+            string configFileName = Path.GetFileName(configFilePath);
+
+            // If the first argument is a packages.xxx.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
-            if (Arguments.Count == 0 || Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            if (configFilePath != null &&
+                configFileName.StartsWith("packages.", StringComparison.OrdinalIgnoreCase) &&
+                configFileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase))
             {
                 Prerelease = true;
-                var configFilePath = Path.GetFullPath(Arguments.Count == 0 ? Constants.PackageReferenceFile : Arguments[0]);
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
                 // We'll try reading from the file so that the file system throws a file not found
                 EnsureFileExists(fileSystem, configFilePath);
-                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(configFilePath), configFilePath);
+                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(configFilePath));
             }
             else
             {
@@ -132,7 +136,7 @@ namespace NuGet.Commands
             return Directory.GetCurrentDirectory();
         }
 
-        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
+        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile configFile)
         {
             // display opt-out message if needed
             if (Console != null && RequireConsent && new PackageRestoreConsent(Settings).IsGranted)
@@ -144,7 +148,7 @@ namespace NuGet.Commands
                 Console.WriteLine(message);
             }
 
-            var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
+            var packageReferences = CommandLineUtility.GetPackageReferences(configFile, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
             if (!installedAny && packageReferences.Any())

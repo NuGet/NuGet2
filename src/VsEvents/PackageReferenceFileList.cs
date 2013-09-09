@@ -80,10 +80,14 @@ namespace NuGet.VsEvents
             }
             else
             {
-                var packageReferenceFileName = VsUtility.GetPackageReferenceFileFullPath(project);
-                if (File.Exists(packageReferenceFileName))
+                Tuple<string, string> packageReferenceFiles = VsUtility.GetPackageReferenceFileFullPaths(project);
+                if (File.Exists(packageReferenceFiles.Item1))
                 {
-                    _projectPackageReferenceFiles.Add(new ProjectPackageReferenceFile(project, packageReferenceFileName));
+                    _projectPackageReferenceFiles.Add(new ProjectPackageReferenceFile(project, packageReferenceFiles.Item1));
+                }
+                else if (File.Exists(packageReferenceFiles.Item2))
+                {
+                    _projectPackageReferenceFiles.Add(new ProjectPackageReferenceFile(project, packageReferenceFiles.Item2));
                 }
             }
         }

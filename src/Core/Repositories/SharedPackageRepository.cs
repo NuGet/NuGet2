@@ -198,9 +198,8 @@ namespace NuGet
         protected virtual IPackageRepository CreateRepository(string path)
         {
             string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
-            string absolutePath = PathUtility.GetAbsolutePath(root, path);
-            string directory = Path.GetDirectoryName(absolutePath);
-            return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
+            string absolutePath = PathUtility.GetAbsolutePath(root, path);            
+            return new PackageReferenceRepository(absolutePath, sourceRepository: this);
         }
 
         protected override IPackage OpenPackage(string path)
@@ -265,7 +264,6 @@ namespace NuGet
                     !FileSystem.FileExists(path) ||
                     !paths.Add(path))
                 {
-
                     // Skip bad entries
                     e.Remove();
                     requiresSave = true;

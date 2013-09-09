@@ -60,9 +60,11 @@ namespace NuGet.Commands
             {
                 throw new CommandLineException(NuGetResources.InvalidFile);
             }
-            
+
+            string inputFileName = Path.GetFileName(inputFile);
             // update with packages.config as parameter
-            if (inputFile.EndsWith(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            if (inputFileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase) &&
+                inputFileName.StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
             {
                 UpdatePackages(inputFile);
                 return;
@@ -88,7 +90,6 @@ namespace NuGet.Commands
             // update with solution as parameter
             string solutionDir = Path.GetDirectoryName(inputFile);
             UpdateAllPackages(solutionDir);
-            
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -96,9 +97,12 @@ namespace NuGet.Commands
         {
             Console.WriteLine(LocalizedResourceManager.GetString("ScanningForProjects"));
 
-            // Search recursively for all packages.config files
-            var packagesConfigFiles = Directory.GetFiles(solutionDir, Constants.PackageReferenceFile, SearchOption.AllDirectories);
-            var projects = packagesConfigFiles.Select(GetProject)
+            // Search recursively for all packages.xxx.config files
+            var packagesConfigFiles = Directory.GetFiles(
+                solutionDir, "*.config", SearchOption.AllDirectories);
+
+            var projects = packagesConfigFiles.Where(s => Path.GetFileName(s).StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
+                                              .Select(GetProject)
                                               .Where(p => p != null)
                                               .ToList();
 
@@ -203,7 +207,7 @@ namespace NuGet.Commands
 
             // Create the local and source repositories
             var sharedPackageRepository = new SharedPackageRepository(pathResolver, sharedRepositoryFileSystem, sharedRepositoryFileSystem);
-            var localRepository = new PackageReferenceRepository(project, sharedPackageRepository);
+            var localRepository = new PackageReferenceRepository(project, project.ProjectName, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
             Console.WriteLine(LocalizedResourceManager.GetString("UpdatingProject"), project.ProjectName);
