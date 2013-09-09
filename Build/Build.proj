@@ -225,6 +225,7 @@
         <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
         <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
+        <MakeDir Directories="$(ExeDropDirectory)\Signed" Condition="!Exists('$(ExeDropDirectory)\Signed')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
@@ -240,6 +241,7 @@
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
+        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe" DestinationFolder="$(ExeDropDirectory)\Signed\NuGet.exe" />
     </Target>
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">
