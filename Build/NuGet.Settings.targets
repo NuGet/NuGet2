@@ -98,7 +98,6 @@
         <MonoBuild>true</MonoBuild>
         <DefineConstants>$(DefineConstants);MONO;</DefineConstants>
     </PropertyGroup>    
-    
-    <Import Project="$(MsBuildThisFileDirectory)\NuGet.Restore.targets"/>
+
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
 </Project>

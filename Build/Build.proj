@@ -114,12 +114,6 @@
         <MonoProjects Include="@(TestProjects)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <RestorePackageProjects Include="@(TestProjects)" />
-        <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
-        <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
-    </ItemGroup>
-
     <Target Name="Go"
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
@@ -146,11 +140,12 @@
                    Targets="Build"
                    Properties="DefineConstants=CODE_ANALYSIS" />
 
+        <PropertyGroup>
+            <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
+        </PropertyGroup>
+        
         <Message Text="Restoring NuGet packages" Importance="High" />
-        <MsBuild Projects="@(RestorePackageProjects)"
-                   Targets="RestorePackages"
-                   Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)"
-                   BuildInParallel="true" />
+        <Exec Command="$(ExeBuildDirectory)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" />
     </Target>
 
     <Target Name="Build">
