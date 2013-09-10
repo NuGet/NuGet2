@@ -241,7 +241,7 @@
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
-        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe" DestinationFolder="$(ExeDropDirectory)\Signed\NuGet.exe" />
+        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe" DestinationFolder="$(ExeDropDirectory)\Signed" />
     </Target>
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">
