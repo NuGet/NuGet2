@@ -445,7 +445,7 @@ namespace NuGet.Commands
                             loadedProjects.First() :
                             new Project(
                                 fullPath,
-                                globalProperties: null,
+                                globalProperties: project.GlobalProperties,
                                 toolsVersion: null,
                                 projectCollection: projectCollection);
 
