@@ -132,32 +132,6 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// Returns true if the solution or one of its project has the packages.config file.
-        /// </summary>
-        /// <param name="solution">Solution under whose directory packages.config is searched for</param>
-        public static bool PackagesConfigExists(Solution solution)
-        {
-            Debug.Assert(solution != null);
-            var packageReferenceFileName = Path.Combine(
-                    GetNuGetSolutionFolder(solution),
-                    PackageReferenceFile);
-            if (File.Exists(packageReferenceFileName))
-            {
-                return true;
-            }
-
-            foreach (Project project in solution.Projects)
-            {
-                if (PackagesConfigExists(project))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Returns true if the project has the packages.config file
         /// </summary>
         /// <param name="project">Project under whose directory packages.config is searched for</param>
