@@ -170,7 +170,7 @@ namespace NuGet.VsEvents
         private void RestorePackages()
         {
             _msBuildOutputVerbosity = GetMSBuildOutputVerbositySetting(_dte);
-            WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreStarted);
+            WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreStarted);
             PackageRestore(_dte.Solution);
 
             foreach (var projectPackageReferenceFile in _packageReferenceFileList.ProjectPackageReferenceFiles)
@@ -191,7 +191,7 @@ namespace NuGet.VsEvents
             {
                 if (!_hasMissingPackages)
                 {
-                    WriteLine(VerbosityLevel.Minimal, Resources.NothingToRestore);
+                    WriteLine(VerbosityLevel.Normal, Resources.NothingToRestore);
                 }
 
                 if (_hasError)
@@ -200,7 +200,7 @@ namespace NuGet.VsEvents
                 }
                 else
                 {
-                    WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinished);
+                    WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinished);
                 }
             }
         }
