@@ -118,6 +118,8 @@ namespace NuGet
             }
             else
             {
+                // if 'a' has less than 4 elements, we pad the '0' at the end 
+                // to make it 4.
                 var b = new string[4] { "0", "0", "0", "0"};
                 Array.Copy(a, 0, b, 0, a.Length);
                 return b;
