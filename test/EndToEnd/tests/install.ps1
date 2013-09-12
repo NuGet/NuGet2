@@ -2407,3 +2407,15 @@ function Test-InstallPackageAddPackagesConfigFileToProject
     Assert-AreEqual 'jquery' $xmlFile.packages.package[0].Id
     Assert-AreEqual 'SkypePackage' $xmlFile.packages.package[1].Id
 }
+
+function Test-InstallPackageWithLeadingZeroInVersion
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package Moq -Version 4.1.1309.0919
+
+    # Assert
+    Assert-Package $p Moq '4.1.1309.0919'
+}
