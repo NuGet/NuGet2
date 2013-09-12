@@ -2381,3 +2381,15 @@ function Test-InstallPackageIntoLightSwitchApplication
 	Assert-Package $clientProject PackageWithPPVBSourceFiles
 	Assert-Package $serverProject NonStrongNameA
 }
+
+function Test-InstallPackageWithLeadingZeroInVersion
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package Moq -Version 4.1.1309.0919
+
+    # Assert
+    Assert-Package $p Moq '4.1.1309.0919'
+}

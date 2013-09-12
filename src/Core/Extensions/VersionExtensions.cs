@@ -77,6 +77,7 @@ namespace NuGet
             string specialVersion = String.IsNullOrEmpty(version.SpecialVersion) ? String.Empty : "-" + version.SpecialVersion;
 
             string originalVersion = version.ToString();
+            string[] originalVersionComponents = version.GetOriginalVersionComponents();
 
             var paths = new LinkedList<string>();
 
@@ -87,8 +88,8 @@ namespace NuGet
                     string twoComponentVersion = String.Format(
                         CultureInfo.InvariantCulture,
                         "{0}.{1}{2}",
-                        coreVersion.Major,
-                        coreVersion.Minor,
+                        originalVersionComponents[0],
+                        originalVersionComponents[1],
                         specialVersion);
 
                     AddVersionToList(originalVersion, paths, twoComponentVersion);
@@ -97,9 +98,9 @@ namespace NuGet
                 string threeComponentVersion = String.Format(
                     CultureInfo.InvariantCulture,
                     "{0}.{1}.{2}{3}",
-                    coreVersion.Major,
-                    coreVersion.Minor,
-                    coreVersion.Build,
+                    originalVersionComponents[0],
+                    originalVersionComponents[1],
+                    originalVersionComponents[2],
                     specialVersion);
 
                 AddVersionToList(originalVersion, paths, threeComponentVersion);
@@ -108,10 +109,10 @@ namespace NuGet
             string fullVersion = String.Format(
                    CultureInfo.InvariantCulture,
                    "{0}.{1}.{2}.{3}{4}",
-                   coreVersion.Major,
-                   coreVersion.Minor,
-                   coreVersion.Build,
-                   coreVersion.Revision,
+                   originalVersionComponents[0],
+                   originalVersionComponents[1],
+                   originalVersionComponents[2],
+                   originalVersionComponents[3],
                    specialVersion);
 
             AddVersionToList(originalVersion, paths, fullVersion);
