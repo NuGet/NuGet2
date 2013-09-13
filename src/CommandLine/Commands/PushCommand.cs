@@ -137,7 +137,11 @@ namespace NuGet.Commands
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
             Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPushingPackage"), package.GetFullName(), sourceName);
 
-            packageServer.PushPackage(apiKey, package, Convert.ToInt32(timeout.TotalMilliseconds));
+            packageServer.PushPackage(
+                apiKey, 
+                package, 
+                new FileInfo(packageToPush).Length,
+                Convert.ToInt32(timeout.TotalMilliseconds));
             Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPackagePushed"));
         }
 

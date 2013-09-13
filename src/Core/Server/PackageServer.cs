@@ -40,9 +40,9 @@ namespace NuGet
         /// <param name="packageStream">Stream representing the package.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
         [Obsolete("This overload is obsolete, please use the overload which takes a Func<Stream>")]
-        public void PushPackage(string apiKey, Stream packageStream, int timeout)
+        public void PushPackage(string apiKey, Stream packageStream, long packageSize, int timeout)
         {
-            PushPackageToServer(apiKey, () => packageStream, timeout);
+            PushPackageToServer(apiKey, () => packageStream, packageSize, timeout);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace NuGet
         /// <param name="apiKey">API key to be used to push the package.</param>
         /// <param name="package">The package to be pushed.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
-        public void PushPackage(string apiKey, IPackage package, int timeout) 
+        public void PushPackage(string apiKey, IPackage package, long packageSize, int timeout) 
         {
             var sourceUri = new Uri(Source);
             if (sourceUri.IsFile)
@@ -62,7 +62,7 @@ namespace NuGet
             }
             else
             {
-                PushPackageToServer(apiKey, package.GetStream, timeout);
+                PushPackageToServer(apiKey, package.GetStream, packageSize, timeout);
             }
         }
 
@@ -71,8 +71,13 @@ namespace NuGet
         /// </summary>
         /// <param name="apiKey">API key to be used to push the package.</param>
         /// <param name="packageStreamFactory">A delegate which can be used to open a stream for the package file.</param>
+        /// <param name="contentLength">Size of the package to be pushed.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
-        private void PushPackageToServer(string apiKey, Func<Stream> packageStreamFactory, int timeout) 
+        private void PushPackageToServer(
+            string apiKey, 
+            Func<Stream> packageStreamFactory, 
+            long packageSize,
+            int timeout) 
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
             
@@ -97,7 +102,7 @@ namespace NuGet
                 }
 
                 var multiPartRequest = new MultipartWebRequest();
-                multiPartRequest.AddFile(packageStreamFactory, "package");
+                multiPartRequest.AddFile(packageStreamFactory, "package", packageSize);
 
                 multiPartRequest.CreateMultipartRequest(request);
             };
