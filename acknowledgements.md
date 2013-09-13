@@ -8,6 +8,8 @@ NuGet Hall of Fame
     - [#2379](https://nuget.codeplex.com/workitem/2379) - Remove the $metadata suffix when persistening feed credentials.
 1. [FilipDeVos](https://www.codeplex.com/site/users/view/FilipDeVos) ([@Filip De Vos](https://twitter.com/foxtricks))
     - [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
+1. [jjgonzalez](https://www.codeplex.com/site/users/view/jjgonzalez)
+    - [#3536](http://nuget.codeplex.com/workitem/3536) - Replacement tokens not passed with -IncludeReferencedProjects.
  
 ## NuGet 2.7
 
