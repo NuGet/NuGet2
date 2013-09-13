@@ -10,6 +10,8 @@ NuGet Hall of Fame
     - [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
 1. [jjgonzalez](https://www.codeplex.com/site/users/view/jjgonzalez)
     - [#3536](http://nuget.codeplex.com/workitem/3536) - Replacement tokens not passed with -IncludeReferencedProjects.
+1. [Sarkie](https://www.codeplex.com/site/users/view/Sarkie)
+    - [#3677](http://nuget.codeplex.com/workitem/3677) - Fix nuget.push throwing OutOfMemoryException when pushing large package.
  
 ## NuGet 2.7
 
