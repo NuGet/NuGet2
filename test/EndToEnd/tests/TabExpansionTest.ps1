@@ -24,10 +24,11 @@ function Test-TabExpansionForInstallPackageSupportsVersion {
     $suggestions = TabExpansion 'Install-Package Antlr -Version ' ''
 
     # Assert
-    Assert-AreEqual 3 $suggestions.Count
-    Assert-AreEqual '3.4.1.9004' $suggestions[0]
-    Assert-AreEqual '3.1.3.42154' $suggestions[1]
-    Assert-AreEqual '3.1.1' $suggestions[2]
+    Assert-AreEqual 4 $suggestions.Count
+    Assert-AreEqual '3.5.0.2' $suggestions[0]
+    Assert-AreEqual '3.4.1.9004' $suggestions[1]
+    Assert-AreEqual '3.1.3.42154' $suggestions[2]
+    Assert-AreEqual '3.1.1' $suggestions[3]
 }
 
 function Test-TabExpansionForInstallPackageShowSuggestionsForProjectName {
