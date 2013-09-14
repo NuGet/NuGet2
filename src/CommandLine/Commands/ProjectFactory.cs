@@ -703,6 +703,9 @@ namespace NuGet.Commands
             // Add the solution dir to the list of properties
             string solutionDir = GetSolutionDir();
 
+            // Add a path separator for Visual Studio macro compatibility
+            solutionDir += Path.DirectorySeparatorChar;
+
             if (!String.IsNullOrEmpty(solutionDir))
             {
                 if (this.ProjectProperties.ContainsKey("SolutionDir"))
