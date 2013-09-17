@@ -813,7 +813,7 @@ namespace NuGet.Test
         private static void AssertConfig(string expected, string actual)
         {
             Assert.Equal(expected.Where(c => !Char.IsWhiteSpace(c)), actual.Where(c => !Char.IsWhiteSpace(c)));
-            
+
             // Verify the actual document is parse-able as an xml
             XDocument.Load(new StringReader(actual));
         }
