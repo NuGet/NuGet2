@@ -304,70 +304,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackagePreservesProjectConfigFile()
-        {
-            // Arrange
-            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            var packageA = PackageUtility.CreatePackage("A");
-            repository.Object.AddPackage(packageA);
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""A"" version=""1.0"" />
-</packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
-
-            var packageB = PackageUtility.CreatePackage("B", "2.0-alpha");
-
-            // Act
-            referenceRepository.AddPackage(packageB);
-
-            // Assert
-            Assert.False(fileSystem.FileExists("packages.config"));
-            Assert.True(fileSystem.FileExists("packages.cool.config"));
-
-            string content = fileSystem.ReadAllText("packages.cool.config");
-
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""A"" version=""1.0"" />
-  <package id=""B"" version=""2.0-alpha"" />
-</packages>", content);
-        }
-
-        [Fact]
-        public void RemovePackagePreservesProjectConfigFile()
-        {
-            // Arrange
-            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            var packageA = PackageUtility.CreatePackage("A");
-            repository.Object.AddPackage(packageA);
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""A"" version=""1.0"" />
-  <package id=""B"" version=""3.0"" />
-</packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
-
-            var packageB = PackageUtility.CreatePackage("B", "3.0");
-
-            // Act
-            referenceRepository.RemovePackage(packageB);
-
-            // Assert
-            Assert.False(fileSystem.FileExists("packages.config"));
-            Assert.True(fileSystem.FileExists("packages.cool.config"));
-
-            string content = fileSystem.ReadAllText("packages.cool.config");
-
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""A"" version=""1.0"" />
-</packages>", content);
-        }
-
-        [Fact]
         public void RemovePackageDeleteProjectConfigFileIfNoPackageLeft()
         {
             // Arrange
@@ -808,6 +744,70 @@ namespace NuGet.Test
             // Assert
             Assert.False(result);
             Assert.Null(version);
+        }
+
+        [Fact]
+        public void AddPackagePreservesProjectConfigFile()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+            var packageB = PackageUtility.CreatePackage("B", "2.0-alpha");
+
+            // Act
+            referenceRepository.AddPackage(packageB);
+
+            // Assert
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+
+            string content = fileSystem.ReadAllText("packages.cool.config");
+
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""2.0-alpha"" />
+</packages>", content);
+        }
+
+        [Fact]
+        public void RemovePackagePreservesProjectConfigFile()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""3.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+            var packageB = PackageUtility.CreatePackage("B", "3.0");
+
+            // Act
+            referenceRepository.RemovePackage(packageB);
+
+            // Assert
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+
+            string content = fileSystem.ReadAllText("packages.cool.config");
+
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>", content);
         }
 
         private static void AssertConfig(string expected, string actual)
