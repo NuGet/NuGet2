@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Common;
 
@@ -16,21 +15,10 @@ namespace NuGet.Commands
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
-    public class InstallCommand : Command
+    public class InstallCommand : DownloadCommandBase
     {
         private static readonly object _satelliteLock = new object();
-        private readonly IPackageRepository _cacheRepository;
-        private readonly List<string> _sources = new List<string>();
-
-        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
-
         private PackageFileTypes _saveOnExpand;
-        
-        [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
-        public ICollection<string> Source
-        {
-            get { return _sources; }
-        }
 
         [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
@@ -44,28 +32,14 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandPrerelease")]
         public bool Prerelease { get; set; }
 
-        [Option(typeof(NuGetCommand), "InstallCommandNoCache")]
-        public bool NoCache { get; set; }
-
         [Option(typeof(NuGetCommand), "InstallCommandRequireConsent")]
         public bool RequireConsent { get; set; }
 
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
-        [Option(typeof(NuGetCommand), "InstallCommandDisableParallel")]
-        public bool DisableParallel { get; set; }
-
         [Option(typeof(NuGetCommand), "InstallCommandSaveOnExpand")]
         public string SaveOnExpand { get; set; }
-
-        /// <remarks>
-        /// Meant for unit testing.
-        /// </remarks>
-        protected IPackageRepository CacheRepository
-        {
-            get { return _cacheRepository; }
-        }
 
         private bool AllowMultipleVersions
         {
@@ -78,14 +52,12 @@ namespace NuGet.Commands
         {
         }
 
-        protected internal InstallCommand(
-            IPackageRepository cacheRepository)
+        protected internal InstallCommand(IPackageRepository cacheRepository) :
+            base(cacheRepository)
         {
-            _cacheRepository = cacheRepository;
-
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
-            DisableParallel = _isMonoRuntime;
+            DisableParallelProcessing = EnvironmentUtility.IsMonoRuntime;
         }
 
         private void CalculateSaveOnExpand()
@@ -147,7 +119,7 @@ namespace NuGet.Commands
                 bool result = InstallPackage(fileSystem, packageId, version);
                 if (!result)
                 {
-                    Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
+                    Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandPackageAlreadyExists"), packageId);
                 }
             }
         }
@@ -172,7 +144,10 @@ namespace NuGet.Commands
                 var solutionSettingsFile = Path.Combine(SolutionDirectory.TrimEnd(Path.DirectorySeparatorChar), NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
-                currentSettings = NuGet.Settings.LoadDefaultSettings(fileSystem);
+                currentSettings = NuGet.Settings.LoadDefaultSettings(
+                    fileSystem,
+                    configFileName: null,
+                    machineWideSettings: MachineWideSettings);
 
                 // Recreate the source provider and credential provider
                 SourceProvider = PackageSourceBuilder.CreateSourceProvider(currentSettings);
@@ -196,26 +171,24 @@ namespace NuGet.Commands
             return Directory.GetCurrentDirectory();
         }
 
-        private IPackageRepository GetRepository()
-        {
-            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
-            bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
-            if (!NoCache)
-            {
-                repository = new AggregateRepository(new[] { CacheRepository, repository }) { IgnoreFailingRepositories = ignoreFailingRepositories };
-            }
-            repository.Logger = Console;
-            return repository;
-        }
-
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
         {
+            // display opt-out message if needed
+            if (Console != null && RequireConsent && new PackageRestoreConsent(Settings).IsGranted)
+            {
+                string message = String.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("RestoreCommandPackageRestoreOptOutMessage"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Console.WriteLine(message);
+            }
+
             var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
             if (!installedAny && packageReferences.Any())
             {
-                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
+                Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandNothingToInstall"), Constants.PackageReferenceFile);
             }
         }
 
@@ -236,9 +209,9 @@ namespace NuGet.Commands
 
             var satellitePackages = new List<IPackage>();
 
-            if (DisableParallel)
+            if (DisableParallelProcessing)
             {
-                foreach(var package in packageReferences)
+                foreach (var package in packageReferences)
                 {
                     RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages);
                 }
@@ -284,7 +257,10 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore))
+            using (packageManager.SourceRepository.StartOperation(
+                RepositoryOperationNames.Restore, 
+                packageId, 
+                version == null ? null : version.ToString()))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
                 if (package.IsSatellitePackage())
@@ -334,7 +310,10 @@ namespace NuGet.Commands
                 }
             }
 
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install))
+            using (packageManager.SourceRepository.StartOperation(
+                RepositoryOperationNames.Install, 
+                packageId, 
+                version == null ? null : version.ToString()))
             {
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
                 return true;
@@ -343,7 +322,7 @@ namespace NuGet.Commands
 
         protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem)
         {
-            var repository = GetRepository();
+            var repository = CreateRepository();
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
 
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
@@ -377,7 +356,11 @@ namespace NuGet.Commands
         {
             if (RequireConsent && !packageRestoreConsent)
             {
-                throw new InvalidOperationException(LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"));
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"),
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                throw new InvalidOperationException(message);
             }
         }
 

@@ -12,8 +12,9 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider
     {
-        private static readonly string OfficialFeedName = VsResources.OfficialSourceName;
-        private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+        private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
+        private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
+        private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
 
         private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
                                                                                  VsResources.VisualStudioExpressForWindows8SourceName,
@@ -22,8 +23,9 @@ namespace NuGet.VisualStudio
 
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
-            { new PackageSource(NuGetConstants.V1FeedUrl, OfficialFeedName), NuGetDefaultSource },
-            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, OfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V1FeedUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyOfficialPackageSourceUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
         };
 
         internal const string ActivePackageSourceSectionName = "activePackageSource";
@@ -42,13 +44,6 @@ namespace NuGet.VisualStudio
             IVsShellInfo vsShellInfo,
             ISolutionManager solutionManager) :
             this(settings, new PackageSourceProvider(settings, new[] { NuGetDefaultSource }, _feedsToMigrate), vsShellInfo, solutionManager)
-        {
-        }
-
-        public VsPackageSourceProvider(
-            ISettings settings,            
-            IVsShellInfo vsShellInfo) :
-            this(settings, vsShellInfo, null)
         {
         }
 
@@ -113,7 +108,7 @@ namespace NuGet.VisualStudio
                 if (value != null &&
                     !IsAggregateSource(value) &&
                     !_packageSources.Contains(value) &&
-                    !value.Name.Equals(OfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
+                    !value.Name.Equals(NuGetOfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
@@ -180,18 +175,6 @@ namespace NuGet.VisualStudio
                 _initialized = true;
                 _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
 
-                // Unlike NuGet Core, Visual Studio has the concept of an official package source. 
-                // We find the official source, if present, and set its IsOfficial it.
-                var officialPackageSource = _packageSources.FirstOrDefault(IsOfficialPackageSource);
-                if (officialPackageSource == null)
-                {
-                    // if there is no official source, add one, but make it disabled
-                    officialPackageSource = NuGetDefaultSource.Clone();
-                    officialPackageSource.IsEnabled = false;
-                    _packageSources.Add(officialPackageSource);
-                }
-                officialPackageSource.IsOfficial = true;
-
                 // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
                 if (_vsShellInfo.IsVisualStudioExpressForWindows8)
                 {
@@ -221,7 +204,7 @@ namespace NuGet.VisualStudio
             {
                 // If there are no sources, pick the first source that's enabled.
                 activeSourceChanged = true;
-                _activePackageSource = NuGetDefaultSource;
+                _activePackageSource = _packageSources.FirstOrDefault(p => p.IsEnabled) ?? AggregatePackageSource.Instance;
             }
             else if (_feedsToMigrate.TryGetValue(_activePackageSource, out migratedActiveSource))
             {
@@ -270,13 +253,6 @@ namespace NuGet.VisualStudio
             {
                 // guard against corrupted data if the active package source is not enabled
                 packageSource.IsEnabled = true;
-
-                // Unlike NuGet Core, Visual Studio has the concept of an official package source. 
-                // If the active package source is the official source, we need to set its IsOfficial it.
-                if (IsOfficialPackageSource(packageSource))
-                {
-                    packageSource.IsOfficial = true;
-                }
             }
 
             return packageSource;
@@ -321,16 +297,6 @@ namespace NuGet.VisualStudio
         private static bool IsAggregateSource(PackageSource packageSource)
         {
             return IsAggregateSource(packageSource.Name, packageSource.Source);
-        }
-
-        private static bool IsOfficialPackageSource(PackageSource packageSource)
-        {
-            if (packageSource == null)
-            {
-                return false;
-            }
-
-            return packageSource.Equals(NuGetDefaultSource);
         }
     }
 }

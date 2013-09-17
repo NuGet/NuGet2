@@ -11,24 +11,6 @@ namespace NuGet.Test
     public class SelfUpdaterTests
     {
         [Fact]
-        public void SelfUpdateNoCommandLinePackageOnServerThrows()
-        {
-            // Arrange
-            var factory = new Mock<IPackageRepositoryFactory>();
-            factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
-
-            ConsoleInfo consoleInfo = GetConsoleInfo();
-            var selfUpdater = new SelfUpdater(factory.Object)
-            {
-                Console = consoleInfo.Console
-            };
-
-            // Act
-            ExceptionAssert.Throws<CommandLineException>(() => selfUpdater.SelfUpdate("c:\foo.exe", new SemanticVersion("2.0")), 
-                "Unable to find 'NuGet.CommandLine' package.");
-        }
-
-        [Fact]
         public void SelfUpdateOlderVersionDoesNotUpdate()
         {
             // Arrange

@@ -21,9 +21,10 @@ namespace NuGet.VisualStudio
         private ISettings _settings;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IMachineWideSettings _machineWideSettings;
         
         [ImportingConstructor]
-        public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider, IVsSourceControlTracker sourceControlTracker)
+        public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider, IVsSourceControlTracker sourceControlTracker, IMachineWideSettings machineWideSettings)
         {
             if (solutionManager == null)
             {
@@ -43,6 +44,7 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _fileSystemProvider = fileSystemProvider;
             _settings = null;
+            _machineWideSettings = machineWideSettings;
 
             EventHandler resetConfiguration = (sender, e) =>
             {
@@ -54,6 +56,14 @@ namespace NuGet.VisualStudio
 
             _solutionManager.SolutionClosing += resetConfiguration;
             sourceControlTracker.SolutionBoundToSourceControl += resetConfiguration;
+        }
+
+        internal RepositorySettings(
+            ISolutionManager solutionManager, 
+            IFileSystemProvider fileSystemProvider, 
+            IVsSourceControlTracker sourceControlTracker) : 
+            this(solutionManager, fileSystemProvider, sourceControlTracker, machineWideSettings: null)
+        {
         }
 
         public string RepositoryPath
@@ -101,7 +111,10 @@ namespace NuGet.VisualStudio
             {
                 if (_settings == null)
                 {
-                    _settings = Settings.LoadDefaultSettings(FileSystem);
+                    _settings = Settings.LoadDefaultSettings(
+                        FileSystem, 
+                        configFileName: null,
+                        machineWideSettings: _machineWideSettings);
                 }
                 return _settings;
             }
@@ -196,13 +209,18 @@ namespace NuGet.VisualStudio
                 XDocument document;
                 using (Stream stream = FileSystem.OpenFile(path))
                 {
-                    document = XDocument.Load(stream);
+                    document = XmlUtility.LoadSafe(stream);
                 }
 
                 // <settings>
                 //    <repositoryPath>..</repositoryPath>
                 // </settings>
-                return document.Root.GetOptionalElementValue("repositoryPath");
+                string repositoryPath = document.Root.GetOptionalElementValue("repositoryPath");
+                if (!String.IsNullOrEmpty(repositoryPath))
+                {
+                    repositoryPath = repositoryPath.Replace('/', Path.DirectorySeparatorChar);
+                }
+                return repositoryPath;
             }
             catch (XmlException e)
             {

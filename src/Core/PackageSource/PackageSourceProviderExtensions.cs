@@ -6,40 +6,34 @@ namespace NuGet
 {
     public static class PackageSourceProviderExtensions
     {
-        public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory)
+        public static AggregateRepository CreateAggregateRepository(
+            this IPackageSourceProvider provider, 
+            IPackageRepositoryFactory factory, 
+            bool ignoreFailingRepositories)
         {
-            return GetAggregate(provider, factory, ignoreFailingRepositories: false);
+            return new AggregateRepository(
+                factory, 
+                provider.GetEnabledPackageSources().Select(s => s.Source), 
+                ignoreFailingRepositories);
         }
 
-        public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories)
+        public static IPackageRepository CreatePriorityPackageRepository(
+            this IPackageSourceProvider provider, 
+            IPackageRepositoryFactory factory,
+            IPackageRepository primaryRepository)
         {
-            return new AggregateRepository(factory, provider.GetEnabledPackageSources().Select(s => s.Source), ignoreFailingRepositories);
-        }
+            var nonActivePackageSources = provider.GetEnabledPackageSources()
+                                          .Where(s => !s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))
+                                          .ToArray();
 
-        public static IPackageRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories, IEnumerable<string> feeds)
-        {
-            Func<string, IPackageRepository> createRepository = factory.CreateRepository;
-
-            if (ignoreFailingRepositories)
+            if (nonActivePackageSources.Length == 0)
             {
-                createRepository = (source) =>
-                {
-                    try
-                    {
-                        return factory.CreateRepository(source);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        return null;
-                    }
-                };
+                return primaryRepository;
             }
 
-            var repositories = (from item in feeds
-                                let repository = createRepository(provider.ResolveSource(item))
-                                where repository != null
-                                select repository).ToArray();
-            return new AggregateRepository(repositories) { IgnoreFailingRepositories = ignoreFailingRepositories };
+            var fallbackRepository = AggregateRepository.Create(factory, sources: nonActivePackageSources, ignoreFailingRepositories: true);
+
+            return new PriorityPackageRepository(primaryRepository, fallbackRepository);
         }
 
         /// <summary>

@@ -140,13 +140,13 @@ namespace NuGet.VisualStudio.Test
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act
-            using (repository.StartOperation("Foo"))
+            using (repository.StartOperation("Foo", "jQuery", "1.0"))
             {
                 method(repository);
             }
 
             // Assert
-            mockOperationAware.Verify(o => o.StartOperation("Foo"));
+            mockOperationAware.Verify(o => o.StartOperation("Foo", "jQuery", "1.0"));
         }
     }
 }

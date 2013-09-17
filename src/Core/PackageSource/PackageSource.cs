@@ -6,13 +6,21 @@ namespace NuGet
     [DataContract]
     public class PackageSource : IEquatable<PackageSource>
     {
+        private readonly int _hashCode;
+
         [DataMember]
         public string Name { get; private set; }
 
         [DataMember]
         public string Source { get; private set; }
 
+        /// <summary>
+        /// This does not represent just the NuGet Official Feed alone
+        /// It may also represent a Default Package Source set by Configuration Defaults
+        /// </summary>
         public bool IsOfficial { get; set; }
+
+        public bool IsMachineWide { get; set; }
 
         public bool IsEnabled { get; set; }
 
@@ -21,7 +29,7 @@ namespace NuGet
         public string Password { get; set; }
 
         public bool IsPasswordClearText { get; set; }
-         
+
         public PackageSource(string source) :
             this(source, source, isEnabled: true)
         {
@@ -53,6 +61,7 @@ namespace NuGet
             Source = source;
             IsEnabled = isEnabled;
             IsOfficial = isOfficial;
+            _hashCode = Name.ToUpperInvariant().GetHashCode() * 3137 + Source.ToUpperInvariant().GetHashCode();
         }
 
         public bool Equals(PackageSource other)
@@ -83,12 +92,12 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() * 3137 + Source.GetHashCode();
+            return _hashCode;
         }
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText };
+            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText, IsMachineWide = IsMachineWide };
         }
     }
 }

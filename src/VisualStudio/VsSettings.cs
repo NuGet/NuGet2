@@ -14,16 +14,32 @@ namespace NuGet.VisualStudio
         private ISettings _defaultSettings;
         private readonly IFileSystemProvider _fileSystemProvider;
 
+        private IMachineWideSettings _machineWideSettings;
+
         [ImportingConstructor]
-        public VsSettings(ISolutionManager solutionManager)
-            : this(solutionManager, 
-            Settings.LoadDefaultSettings(GetSolutionSettingsFileSystem(solutionManager)), 
-            new PhysicalFileSystemProvider())
+        public VsSettings(ISolutionManager solutionManager, IMachineWideSettings machineWideSettings)
+            : this(solutionManager,
+                Settings.LoadDefaultSettings(
+                    GetSolutionSettingsFileSystem(solutionManager), 
+                    null,
+                    machineWideSettings), 
+                new PhysicalFileSystemProvider(),
+                machineWideSettings)
         {
             // Review: Do we need to pass in the VsFileSystemProvider here instead of hardcoding PhysicalFileSystems?
         }
 
+        public VsSettings(ISolutionManager solutionManager)
+            : this(solutionManager, machineWideSettings: null)
+        {
+        }
+
         public VsSettings(ISolutionManager solutionManager, ISettings defaultSettings, IFileSystemProvider fileSystemProvider)
+            : this(solutionManager, defaultSettings, fileSystemProvider, machineWideSettings: null)
+        {
+        }
+
+        public VsSettings(ISolutionManager solutionManager, ISettings defaultSettings, IFileSystemProvider fileSystemProvider, IMachineWideSettings machineWideSettings)
         {
             if (solutionManager == null)
             {
@@ -40,7 +56,8 @@ namespace NuGet.VisualStudio
 
             _solutionManager = solutionManager;
             _defaultSettings = defaultSettings;
-            _fileSystemProvider = fileSystemProvider;
+            _machineWideSettings = machineWideSettings;
+            _fileSystemProvider = fileSystemProvider;            
 
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -48,8 +65,10 @@ namespace NuGet.VisualStudio
 
         private void OnSolutionOpenedOrClosed(object sender, EventArgs e)
         {
-            _defaultSettings = 
-                Settings.LoadDefaultSettings(_solutionManager.SolutionFileSystem);
+            _defaultSettings = Settings.LoadDefaultSettings(
+                _solutionManager.SolutionFileSystem,
+                configFileName: null,
+                machineWideSettings: _machineWideSettings);
         }
 
         private ISettings SolutionSettings
@@ -86,7 +105,7 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValue(section, key, isPath);
             }
             return _defaultSettings.GetValue(section, key, isPath);
-        }
+        }        
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
@@ -100,6 +119,15 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValues(section, isPath);
             }
             return _defaultSettings.GetValues(section, isPath);
+        }
+
+        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        {
+            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
+            {
+                return SolutionSettings.GetSettingValues(section, isPath);
+            }
+            return _defaultSettings.GetSettingValues(section, isPath);
         }
 
         public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)

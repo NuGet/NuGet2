@@ -83,6 +83,49 @@ namespace NuGet
             private set;
         }
 
+        public string[] GetOriginalVersionComponents()
+        {
+            if (!String.IsNullOrEmpty(_originalString))
+            {
+                string original;
+
+                // search the start of the SpecialVersion part, if any
+                int dashIndex = _originalString.IndexOf('-');
+                if (dashIndex != -1)
+                {
+                    // remove the SpecialVersion part
+                    original = _originalString.Substring(0, dashIndex);
+                }
+                else
+                {
+                    original = _originalString;
+                }
+
+                return SplitAndPadVersionString(original);
+            }
+            else
+            {
+                return SplitAndPadVersionString(Version.ToString());
+            }
+        }
+
+        private static string[] SplitAndPadVersionString(string version)
+        {
+            string[] a = version.Split('.');
+            if (a.Length == 4)
+            {
+                return a;
+            }
+            else
+            {
+                // if 'a' has less than 4 elements, we pad the '0' at the end 
+                // to make it 4.
+                var b = new string[4] { "0", "0", "0", "0"};
+                Array.Copy(a, 0, b, 0, a.Length);
+                return b;
+            }
+        }
+
         /// <summary>
         /// Parses a version string using loose semantic versioning rules that allows 2-4 version components followed by an optional special version.
         /// </summary>

@@ -40,11 +40,20 @@ namespace NuGetConsole
             }
 
             var initializer = componentModel.GetService<IHostInitializer>();
-            return Task.Factory.StartNew(() =>
-            {
-                initializer.Start();
-                return new Action(initializer.SetDefaultRunspace);
-            });
+            return Task.Factory.StartNew((state) =>
+                {
+                    var hostInitializer = (IHostInitializer)state;
+                    if (hostInitializer != null)
+                    {
+                        hostInitializer.Start();
+                        return new Action(hostInitializer.SetDefaultRunspace);
+                    }
+                    else
+                    {
+                        return delegate { };
+                    }
+                },
+                initializer);
         }
     }
 }

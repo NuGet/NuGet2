@@ -54,7 +54,7 @@ namespace NuGet.VisualStudio
         /// <param name="name"></param>
         public override void RemoveReference(string name)
         {
-            RemoveReferenceCore(name, Project.Object.References);
+            RemoveReferenceCore(name, Project.GetReferences());
         }
 
         internal void RemoveReferenceCore(string name, References references)

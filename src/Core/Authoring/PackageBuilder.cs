@@ -314,6 +314,11 @@ namespace NuGet
                 return;
             }
 
+            foreach (var dep in dependencies.SelectMany(s => s.Dependencies))
+            {
+                PackageIdValidator.ValidatePackageId(dep.Id);
+            }
+
             if (String.IsNullOrEmpty(version.SpecialVersion))
             {
                 // If we are creating a production package, do not allow any of the dependencies to be a prerelease version.

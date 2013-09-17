@@ -27,7 +27,7 @@ function Test-OpenPackagePageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     $p = Open-PackagePage elmah -Report -WhatIf -PassThru -Version 1.1
 
     # Assert
-    Assert-AreEqual 'https://nuget.org/Package/ReportAbuse/elmah/1.1' $p.OriginalString
+    Assert-AreEqual 'https://www.nuget.org/Package/ReportAbuse/elmah/1.1' $p.OriginalString
 }
 
 function Test-OpenPackagePageFailsIfIdIsSetToTheWrongValue {
@@ -92,13 +92,13 @@ function Test-OpenPackagePageFailsIfLicenseUrlIsNotAvailable {
 
 function Test-OpenPackagePageAcceptSourceName {
     # Act
-    $p = Open-PackagePage 'elmah' -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -Source 'nUGet.OrG' -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
 
     # Act
-    $p = Open-PackagePage 'elmah' -License -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -License -Source 'nuGEt.oRG' -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString

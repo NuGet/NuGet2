@@ -19,8 +19,9 @@ namespace NuGet.PowerShell.Commands
     public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler
     {
         // User Agent. Do NOT localize
-        private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
-        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient));
+        private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
+        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
@@ -34,6 +35,14 @@ namespace NuGet.PowerShell.Commands
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
             _httpClientEvents = httpClientEvents;
+        }
+
+        protected string DefaultUserAgent
+        {
+            get
+            {
+                return _psCommandsUserAgent.Value;
+            }
         }
 
         private ProgressRecordCollection ProgressRecordCache
@@ -117,6 +126,16 @@ namespace NuGet.PowerShell.Commands
                 // unhandled exceptions should be terminating
                 ErrorHandler.HandleException(ex, terminating: true);
             }
+            finally
+            {
+                UnsubscribeEvents();
+            }
+        }
+
+        protected override void StopProcessing()
+        {
+            UnsubscribeEvents();
+            base.StopProcessing();
         }
 
         /// <summary>
@@ -147,11 +166,10 @@ namespace NuGet.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            if (_httpClientEvents != null)
-            {
-                _httpClientEvents.SendingRequest -= OnSendingRequest;
-            }
+            UnsubscribeEvents();
         }
+
+        
 
         protected void SubscribeToProgressEvents()
         {
@@ -451,7 +469,7 @@ namespace NuGet.PowerShell.Commands
             WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 
-        private void OnSendingRequest(object sender, WebRequestEventArgs e)
+        protected virtual void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
             HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
@@ -479,7 +497,7 @@ namespace NuGet.PowerShell.Commands
             int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 2);
 
             Debug.Assert(choice >= 0 && choice < 4);
-            switch (choice) 
+            switch (choice)
             {
                 case 0:
                     return FileConflictResolution.Overwrite;
@@ -497,6 +515,14 @@ namespace NuGet.PowerShell.Commands
             }
 
             return FileConflictResolution.Ignore;
+        }
+
+        private void UnsubscribeEvents()
+        {
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.SendingRequest -= OnSendingRequest;
+            }
         }
 
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>

@@ -167,7 +167,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
+        public void InstallSatellitePackageCopiesFilesToExistingRuntimePackageFolder()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
@@ -679,6 +679,39 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(package));
             batchProcessor.Verify();
+        }
+
+        [Fact]
+        public void InstallPackageDoesNotPerformWalkInfoCheckWhenPassingTheFlag()
+        {
+            // In this test, we simulate installing a solution-level package which depends on 
+            // a project-level package. Under normal condition, this is disallowed by NuGet. 
+            // However, if passing the 'ignoreWalkInfo' parameter with value of 'true', 
+            // NuGet will happily accept that. Hence the installation will succeed.
+            // This is used by the package restore mode.
+
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            // A is solution-level package
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
+                                                             tools: new string[] { "init.ps1"},
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0-RC-1", content: new string[] { "a.txt" } );
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage(packageA, ignoreDependencies: false, allowPrereleaseVersions: true, ignoreWalkInfo: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
         }
 
         private PackageManager CreatePackageManager()

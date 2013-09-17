@@ -21,11 +21,32 @@
     <PropertyGroup>
         <Dev10Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE</Dev10Directory>
         <Dev11Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 11.0\Common7\IDE</Dev11Directory>
-        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' Or Exists('$(Dev11Directory)') ">true</Dev11Available>
+        <Dev12Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 12.0\Common7\IDE</Dev12Directory>
+
+        <Dev10Available Condition=" '$(VisualStudioVersion)' == '10.0' Or Exists('$(Dev10Directory)') ">true</Dev10Available>
+        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' And Exists('$(Dev11Directory)') ">true</Dev11Available>
+        <Dev12Available Condition=" '$(VisualStudioVersion)' == '12.0' And Exists('$(Dev12Directory)') ">true</Dev12Available>
     </PropertyGroup>
+
+    <PropertyGroup Condition=" $(BuildForDev12) == 'true' ">        
+        <ShellAssembly>Microsoft.VisualStudio.Shell.12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
+        <ShellAssemblyHintPath>..\..\lib\Microsoft.VisualStudio.Shell.12.0.dll</ShellAssemblyHintPath>
+
+        <MSBuildAssembly>Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</MSBuildAssembly>
+        <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" $(BuildForDev12) != 'true' ">
+        <ShellAssembly>Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
+        <ShellAssemblyHintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</ShellAssemblyHintPath>
     
+        <MSBuildAssembly>Microsoft.Build</MSBuildAssembly>
+        <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
+        <VCProjectEngineAssemblyHintPath>..\..\lib\Microsoft.VisualStudio.VCProjectEngine.dll</VCProjectEngineAssemblyHintPath>
+    </PropertyGroup>
+
     <!-- If Dev11 is installed, we will no longer be able to open the solution from Dev10 on that box. This is a consequence of us linking against 4.5 components from the GAC -->
-    <PropertyGroup Condition=" $(Dev11Available) == true ">
+    <PropertyGroup Condition=" $(Dev11Available) == 'true' ">
         <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
         <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
         <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
@@ -33,12 +54,20 @@
         <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" $(Dev11Available) != true ">
+    <PropertyGroup Condition=" $(Dev11Available) != 'true' AND $(Dev12Available) != 'true'">
         <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
         <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
         <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
         <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
         <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" $(Dev12Available) == 'true' Or $(BuildForDev12) == 'true'">
+        <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
@@ -69,7 +98,6 @@
         <MonoBuild>true</MonoBuild>
         <DefineConstants>$(DefineConstants);MONO;</DefineConstants>
     </PropertyGroup>    
-    
-    <Import Project="$(MsBuildThisFileDirectory)\NuGet.Restore.targets"/>
+
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
 </Project>

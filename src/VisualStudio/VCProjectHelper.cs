@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.VCProjectEngine;
 
@@ -14,6 +16,61 @@ namespace NuGet.VisualStudio
     public static class VCProjectHelper
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public static IEnumerable<string> GetFiles(object project, string folderPath)
+        {
+            var vcProject = project as VCProject;
+            if (vcProject != null)
+            {
+                if (String.IsNullOrEmpty(folderPath))
+                {
+                    return ExtractFileName((IEnumerable)vcProject.Files);
+                }
+                else
+                {
+                    var filter = GetFilter(vcProject, folderPath, createIfNotExists: false);
+                    if (filter != null)
+                    {
+                        return ExtractFileName((IEnumerable)filter.Files);
+                    }
+                }
+            }
+
+            return new string[0];
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static IEnumerable<string> GetFilters(object project, string folderPath)
+        {
+            var vcProject = project as VCProject;
+            if (vcProject != null)
+            {
+                if (String.IsNullOrEmpty(folderPath))
+                {
+                    return ExtractFileName((IEnumerable)vcProject.Filters);
+                }
+                else
+                {
+                    var filter = GetFilter(vcProject, folderPath, createIfNotExists: false);
+                    if (filter != null)
+                    {
+                        return ExtractFileName((IEnumerable)filter.Filters);
+                    }
+                }
+            }
+
+            return new string[0];
+        }
+
+        private static IEnumerable<string> ExtractFileName(IEnumerable files)
+        {
+            // f is an instance of the VCFileShim, which is not available directly
+            foreach (dynamic f in files)
+            {
+                yield return f.Name;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddFileToProject(object project, string filePath, string folderPath)
         {
             var vcProject = project as VCProject;
@@ -25,7 +82,7 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    var filter = GetFilter(vcProject, folderPath);
+                    var filter = GetFilter(vcProject, folderPath, createIfNotExists: true);
                     if (filter != null)
                     {
                         filter.AddFile(filePath);
@@ -48,7 +105,7 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    var filter = GetFilter(vcProject, folderPath);
+                    var filter = GetFilter(vcProject, folderPath, createIfNotExists: false);
                     if (filter != null)
                     {
                         files = filter.Files as IEnumerable;
@@ -83,7 +140,6 @@ namespace NuGet.VisualStudio
         /// <summary>
         /// Delete all parent, grand parent, etc. of this file if they are empty, after deleting this file.
         /// </summary>
-        /// <param name="file"></param>
         private static void DeleteAllParentFilters(object filter)
         {
             VCFilter currentFilter = filter as VCFilter;
@@ -109,7 +165,7 @@ namespace NuGet.VisualStudio
         /// <summary>
         /// Get the filter that is represented by the specified path
         /// </summary>
-        private static VCFilter GetFilter(VCProject vcProject, string folderPath)
+        private static VCFilter GetFilter(VCProject vcProject, string folderPath, bool createIfNotExists)
         {
             Debug.Assert(!String.IsNullOrEmpty(folderPath));
 
@@ -121,7 +177,7 @@ namespace NuGet.VisualStudio
             {
                 VCFilter childFilter = null;
                 foreach (VCFilter child in parent.Filters) 
-                { 
+                {
                     if (child.Name.Equals(path, StringComparison.OrdinalIgnoreCase)) 
                     {
                         childFilter = child;
@@ -131,8 +187,15 @@ namespace NuGet.VisualStudio
 
                 if (childFilter == null)
                 {
-                    // if a child folder doesn't already exist, create it
-                    childFilter = parent.AddFilter(path);
+                    if (createIfNotExists)
+                    {
+                        // if a child folder doesn't already exist, create it
+                        childFilter = parent.AddFilter(path);
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 parent = childFilter;
             }

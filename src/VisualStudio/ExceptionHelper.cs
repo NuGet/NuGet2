@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio
         {
             if (exception == null)
             {
-                throw new ArgumentNullException("exception");
+                return;
             }
 
             exception = ExceptionUtility.Unwrap(exception);

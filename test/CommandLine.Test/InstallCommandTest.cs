@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
@@ -108,7 +108,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                settings: Settings.LoadDefaultSettings(fileSystem));
+                settings: Settings.LoadDefaultSettings(fileSystem, null, null));
 
             // Act
             string installPath = installCommand.ResolveInstallPath();
@@ -123,7 +123,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithConfigWithCredential();
             var installCommand = new Mock<TestInstallCommand>(
-                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, Settings.LoadDefaultSettings(fileSystem))
+                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, 
+                Settings.LoadDefaultSettings(fileSystem, null, null))
                 {
                     CallBase = true
                 };
@@ -159,7 +160,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                                                        settings: Settings.LoadDefaultSettings(fileSystem))
+                                                        settings: Settings.LoadDefaultSettings(fileSystem, null, null))
                                      {
                                          OutputDirectory = @"Bar\Baz"
                                      };
@@ -179,7 +180,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig(input);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                settings: Settings.LoadDefaultSettings(fileSystem));
+                settings: Settings.LoadDefaultSettings(fileSystem, null, null));
 
             // Act
             string installPath = installCommand.ResolveInstallPath();
@@ -600,8 +601,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var package1 = PackageUtility.CreatePackage("Foo", "1.0.0");
             var package2 = PackageUtility.CreatePackage("Qux", "2.3.56-beta");
             var repository = new MockPackageRepository { package1, package2 };
-            packageManager.Setup(p => p.InstallPackage(package1, true, true)).Verifiable();
-            packageManager.Setup(p => p.InstallPackage(package2, true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package1, true, true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package2, true, true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
@@ -634,7 +635,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             var repository = new MockPackageRepository { package };
-            packageManager.Setup(p => p.InstallPackage(package, true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package, true, true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
@@ -672,7 +673,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
-            packageManager.Setup(p => p.InstallPackage(package, true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package, true, true, true)).Verifiable();
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
             var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
@@ -728,8 +729,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Hence, only check the error message if the language is english.
             var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             if (culture == "en" || culture == "iv") // english or invariant
-                Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
-                    exception.InnerException.Message);
+            {
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    NuGetResources.InstallCommandPackageRestoreConsentNotFound,
+                    NuGet.Resources.NuGetResources.PackageRestoreConsentCheckBoxText.Replace("&", ""));
+                Assert.Equal(message, exception.InnerException.Message);
+            }
         }
 
         [Fact]
@@ -751,7 +757,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // We *shouldn't* be testing if a sequence of operations worked rather that the outcome that satellite package was installed correctly, 
             // but doing so requires work with  nice to have a unit test that tests it. 
             bool langPackInstalled = false;
-            packageManager.Setup(p => p.InstallPackage(package1, true, true)).Callback(() =>
+            packageManager.Setup(p => p.InstallPackage(package1, true, true, true)).Callback(() =>
                 {
                     if (langPackInstalled)
                     {

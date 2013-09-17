@@ -96,6 +96,36 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void DoNotReuseExpandedFolderIfLastModifedTimeChanged()
+        {
+            // Arrange
+            var ms = GetPackageStream();
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new MockFileSystem("y:\\");
+
+            // Act
+            var ozp1 = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem, forceUseCache: true);
+            ozp1.GetFiles().ToList();
+
+            // add some delay to make sure the time from DateTime.Now will be different
+            System.Threading.Thread.Sleep(100);
+
+            // now add the file again to simulate file change
+            ms.Seek(0, SeekOrigin.Begin);
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var ozp2 = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem, forceUseCache: true);
+            ozp2.GetFiles().ToList();
+
+            // Assert
+            Assert.True(ozp1.HasCalledExpandedFolderPath);
+            Assert.True(ozp2.HasCalledExpandedFolderPath);
+        }
+
+        [Fact]
         public void CallingGetFilesTwiceDoesNotExpandFilesIntoSpecifiedFileSystemAgain()
         {
             // Arrange
@@ -284,6 +314,36 @@ namespace NuGet.Test
             Assert.Equal("content\\foo", expandedFileSystem.ReadAllText("random\\content\\foo"));
         }
 
+        [Fact]
+        public void DoNotOverwriteExistingFilesWhileExpandingFilesIfContentsAreEqual()
+        {
+            // Arrange
+            var ms = GetPackageStream();
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new Mock<MockFileSystem>("y:\\")
+            {
+                CallBase = true
+            };
+            expandedFileSystem.Object.AddFile("random\\content\\foo", "content\\foo");
+
+            expandedFileSystem.Setup(f => f.CreateFile("random\\content\\foo"))
+                              .Throws(new InvalidOperationException());
+
+            var ozp = new TestableOptimizedZipPackage(
+                fileSystem, "pam.nupkg", expandedFileSystem.Object);
+
+            // Act
+            ozp.GetFiles().ToList();
+
+            // Assert
+            Assert.True(expandedFileSystem.Object.FileExists("random\\content\\foo"));
+            Assert.True(expandedFileSystem.Object.FileExists("random\\lib\\40\\A.dll"));
+            Assert.Equal("content\\foo", expandedFileSystem.Object.ReadAllText("random\\content\\foo"));
+        }
+
         private static MemoryStream GetPackageStream(
             IEnumerable<IPackageFile> files = null,
             IEnumerable<PackageReferenceSet> references = null)
@@ -324,8 +384,8 @@ namespace NuGet.Test
 
         private class TestableOptimizedZipPackage : OptimizedZipPackage
         {
-            public TestableOptimizedZipPackage(IFileSystem fileSystem, string packagePath, IFileSystem expandedFileSystem)
-                : base(fileSystem, packagePath, expandedFileSystem)
+            public TestableOptimizedZipPackage(IFileSystem fileSystem, string packagePath, IFileSystem expandedFileSystem, bool forceUseCache = false)
+                : base(fileSystem, packagePath, expandedFileSystem, forceUseCache)
             {
             }
 

@@ -76,39 +76,63 @@ namespace NuGet
             Version coreVersion = version.Version;
             string specialVersion = String.IsNullOrEmpty(version.SpecialVersion) ? String.Empty : "-" + version.SpecialVersion;
 
-            var paths = new List<string>(3);
+            string originalVersion = version.ToString();
+            string[] originalVersionComponents = version.GetOriginalVersionComponents();
 
-            paths.Add(String.Format(
-                   CultureInfo.InvariantCulture,
-                   "{0}.{1}.{2}.{3}{4}",
-                   coreVersion.Major,
-                   coreVersion.Minor,
-                   coreVersion.Build,
-                   coreVersion.Revision,
-                   specialVersion));
+            var paths = new LinkedList<string>();
 
             if (coreVersion.Revision == 0)
             {
-                paths.Add(String.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}.{1}.{2}{3}",
-                    coreVersion.Major,
-                    coreVersion.Minor,
-                    coreVersion.Build,
-                    specialVersion));
-
                 if (coreVersion.Build == 0)
                 {
-                    paths.Add(String.Format(
+                    string twoComponentVersion = String.Format(
                         CultureInfo.InvariantCulture,
                         "{0}.{1}{2}",
-                        coreVersion.Major,
-                        coreVersion.Minor,
-                        specialVersion));
+                        originalVersionComponents[0],
+                        originalVersionComponents[1],
+                        specialVersion);
+
+                    AddVersionToList(originalVersion, paths, twoComponentVersion);
                 }
+
+                string threeComponentVersion = String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}.{1}.{2}{3}",
+                    originalVersionComponents[0],
+                    originalVersionComponents[1],
+                    originalVersionComponents[2],
+                    specialVersion);
+
+                AddVersionToList(originalVersion, paths, threeComponentVersion);
             }
 
+            string fullVersion = String.Format(
+                   CultureInfo.InvariantCulture,
+                   "{0}.{1}.{2}.{3}{4}",
+                   originalVersionComponents[0],
+                   originalVersionComponents[1],
+                   originalVersionComponents[2],
+                   originalVersionComponents[3],
+                   specialVersion);
+
+            AddVersionToList(originalVersion, paths, fullVersion);
+
             return paths;
+        }
+
+        private static void AddVersionToList(string originalVersion, LinkedList<string> paths, string nextVersion)
+        {
+            if (nextVersion.Equals(originalVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                // IMPORTANT: we want to put the original version string first in the list. 
+                // This helps the DataServicePackageRepository reduce the number of requests
+                // int the Exists() and FindPackage() methods.
+                paths.AddFirst(nextVersion);
+            }
+            else
+            {
+                paths.AddLast(nextVersion);
+            }
         }
     }
 }

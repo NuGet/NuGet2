@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Win32;
 
 namespace NuGetConsole.Host.PowerShellProvider
@@ -11,9 +12,28 @@ namespace NuGetConsole.Host.PowerShellProvider
         /// Detection logic is obtained from here: 
         /// http://blogs.msdn.com/b/powershell/archive/2009/06/25/detection-logic-poweshell-installation.aspx
         /// </remarks>
-        public static bool CheckIfPowerShell2Installed()
+        public static bool CheckIfPowerShell2OrAboveInstalled()
         {
-            const string keyPath = @"SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine";
+            // PS 1.0 and 2.0 is set under "...\PowerShell\1" key
+            string keyValue = GetSubKeyValue(@"SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine", "PowerShellVersion");
+            if ("2.0".Equals(keyValue, StringComparison.OrdinalIgnoreCase))
+            { 
+                return true; 
+            }
+
+            // PS 3.0 and 4.0 is set under "...\PowerShell\3" key
+            keyValue = GetSubKeyValue(@"SOFTWARE\Microsoft\PowerShell\3\PowerShellEngine", "PowerShellVersion");
+            if ("3.0".Equals(keyValue, StringComparison.OrdinalIgnoreCase) ||
+                "4.0".Equals(keyValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string GetSubKeyValue(string keyPath, string valueName)
+        {
             RegistryKey currentKey = Registry.LocalMachine;
 
             foreach (string subKeyName in keyPath.Split('\\'))
@@ -21,12 +41,11 @@ namespace NuGetConsole.Host.PowerShellProvider
                 currentKey = currentKey.OpenSubKey(subKeyName);
                 if (currentKey == null)
                 {
-                    return false;
+                    return null;
                 }
             }
 
-            string keyValue = (string)currentKey.GetValue("PowerShellVersion");
-            return (keyValue == "2.0");
+            return (string)currentKey.GetValue(valueName);
         }
     }
 }

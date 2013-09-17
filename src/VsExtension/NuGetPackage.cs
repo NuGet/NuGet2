@@ -1,11 +1,11 @@
 extern alias dialog;
 extern alias dialog10;
+extern alias dialog11;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EnvDTE;
@@ -19,9 +19,9 @@ using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-using NuGetConsole.Implementation.Console;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
+using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 namespace NuGet.Tools
 {
@@ -49,7 +49,7 @@ namespace NuGet.Tools
     {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
-        public const string ProductVersion = "2.7.0.0";
+        public const string ProductVersion = "2.8.0.0";
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;
@@ -65,6 +65,7 @@ namespace NuGet.Tools
         private OleMenuCommand _managePackageForSolutionDialogCommand;
         private OleMenuCommandService _mcs;
         private bool _powerConsoleCommandExecuting;
+        private IMachineWideSettings _machineWideSettings;
 
         public NuGetPackage()
         {
@@ -142,6 +143,20 @@ namespace NuGet.Tools
             }
         }
 
+        private IMachineWideSettings MachineWideSettings
+        {
+            get
+            {
+                if (_machineWideSettings == null)
+                {
+                    _machineWideSettings = ServiceLocator.GetInstance<IMachineWideSettings>();
+                    Debug.Assert(_machineWideSettings != null);
+                }
+
+                return _machineWideSettings;
+            }
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -166,10 +181,13 @@ namespace NuGet.Tools
             var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
             Debug.Assert(webProxy != null);
 
-            var settings = Settings.LoadDefaultSettings(_solutionManager == null ? null : _solutionManager.SolutionFileSystem);
+            var settings = Settings.LoadDefaultSettings(
+                _solutionManager == null ? null : _solutionManager.SolutionFileSystem,
+                configFileName: null,
+                machineWideSettings: MachineWideSettings);
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
-
+            
             // when NuGet loads, if the current solution has package 
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
@@ -338,14 +356,26 @@ namespace NuGet.Tools
 
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
-            DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
-                GetVS10PackageManagerWindow(project, parameterString) :
-                GetPackageManagerWindow(project, parameterString);
             try
             {
+                DialogWindow window;
+
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    window = GetVS10PackageManagerWindow(project, parameterString);
+                }
+                else if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    window = GetVS11PackageManagerWindow(project, parameterString);
+                }
+                else
+                {
+                    window = GetPackageManagerWindow(project, parameterString);
+                }
+
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception)
+            catch (Exception exception)
             {
                 MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
@@ -356,6 +386,12 @@ namespace NuGet.Tools
         private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
             return new VS10ManagePackageDialog(project, parameterString);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS11PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS11ManagePackageDialog(project, parameterString);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

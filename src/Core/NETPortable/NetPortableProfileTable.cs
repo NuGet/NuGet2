@@ -67,35 +67,44 @@ namespace NuGet
         private static NetPortableProfileCollection BuildPortableProfileCollection()
         {
             var profileCollection = new NetPortableProfileCollection();
-            profileCollection.AddRange(LoadProfilesFromFramework("v4.0"));
-            profileCollection.AddRange(LoadProfilesFromFramework("v4.5"));
+            string portableRootDirectory =
+                    Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify),
+                        @"Reference Assemblies\Microsoft\Framework\.NETPortable");
+
+            if (Directory.Exists(portableRootDirectory))
+            {
+                foreach (string versionDir in Directory.EnumerateDirectories(portableRootDirectory, "v*", SearchOption.TopDirectoryOnly))
+                {
+                    string profileFilesPath = versionDir + @"\Profile\";
+                    profileCollection.AddRange(LoadProfilesFromFramework(versionDir, profileFilesPath));
+                }
+            }
 
             return profileCollection;
         }
 
-        private static IEnumerable<NetPortableProfile> LoadProfilesFromFramework(string version)
+        private static IEnumerable<NetPortableProfile> LoadProfilesFromFramework(string version, string profileFilesPath)
         {
-            try
+            if (Directory.Exists(profileFilesPath))
             {
-                string profileFilesPath =
-                    Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify),
-                        @"Reference Assemblies\Microsoft\Framework\.NETPortable\" + version + @"\Profile\");
-
-                if (!Directory.Exists(profileFilesPath))
+                try
                 {
-                    return Enumerable.Empty<NetPortableProfile>();
+                    // Note the only change here is that we also pass the .NET framework version (which exists as a parent folder of the 
+                    // actual profile directory, so that we don't lose that information.
+                    return Directory.EnumerateDirectories(profileFilesPath, "Profile*")
+                                    .Select(profileDir => LoadPortableProfile(version, profileDir))
+                                    .Where(p => p != null);
                 }
-
-                // Note the only change here is that we also pass the .NET framework version (which exists as a parent folder of the 
-                // actual profile directory, so that we don't lose that information.
-                return Directory.EnumerateDirectories(profileFilesPath, "Profile*").Select(profileDir => LoadPortableProfile(version, profileDir));
-            }
-            catch (IOException)
-            {
-            }
-            catch (SecurityException)
-            {
+                catch (IOException)
+                {
+                }
+                catch (SecurityException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
             }
 
             return Enumerable.Empty<NetPortableProfile>();
@@ -108,7 +117,7 @@ namespace NuGet
             string supportedFrameworkDirectory = Path.Combine(profileDirectory, "SupportedFrameworks");
             if (!Directory.Exists(supportedFrameworkDirectory))
             {
-                return new NetPortableProfile(version, profileName, Enumerable.Empty<FrameworkName>());
+                return null;
             }
 
             var supportedFrameworks = Directory.EnumerateFiles(supportedFrameworkDirectory, "*.xml")
@@ -130,7 +139,7 @@ namespace NuGet
         {
             try
             {
-                var document = XDocument.Load(stream);
+                var document = XmlUtility.LoadSafe(stream);
                 var root = document.Root;
                 if (root.Name.LocalName.Equals("Framework", StringComparison.Ordinal))
                 {

@@ -5,8 +5,9 @@ namespace NuGet.VisualStudio
 {
     public static class VsVersionHelper
     {
-        private const int MaxVsVersion = 11;
+        private const int MaxVsVersion = 12;
         private static readonly Lazy<int> _vsMajorVersion = new Lazy<int>(GetMajorVsVersion);
+        private static readonly Lazy<string> _fullVsEdition = new Lazy<string>(GetFullVsVersionString);
 
         public static int VsMajorVersion
         {
@@ -16,6 +17,21 @@ namespace NuGet.VisualStudio
         public static bool IsVisualStudio2010
         {
             get { return VsMajorVersion == 10; }
+        }
+
+        public static bool IsVisualStudio2012
+        {
+            get { return VsMajorVersion == 11; }
+        }
+
+        public static bool IsVisualStudio2013
+        {
+            get { return VsMajorVersion == 12; }
+        }
+
+        public static string FullVsEdition
+        {
+            get { return _fullVsEdition.Value; }
         }
 
         private static int GetMajorVsVersion()
@@ -28,6 +44,33 @@ namespace NuGet.VisualStudio
                 return version.Major;
             }
             return MaxVsVersion;
+        }
+
+        private static string GetFullVsVersionString()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+
+            string edition = dte.Edition;
+            if (!edition.StartsWith("VS", StringComparison.OrdinalIgnoreCase))
+            {
+                edition = "VS " + edition;
+            }
+
+            return edition + "/" + dte.Version;
+        }
+
+        public static string GetSKU()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            string sku = dte.Edition;
+            if (sku.Equals("Ultimate", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Premium", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Professional", StringComparison.OrdinalIgnoreCase))
+            {
+                sku = "Pro";
+            }
+
+            return sku;
         }
     }
 }

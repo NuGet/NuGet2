@@ -84,34 +84,6 @@ namespace NuGet.PowerShell.Commands.Test
         }
 
         [Fact]
-        public void InstallPackageCmdletSpecifiesInstallOperationDuringExecution()
-        {
-            // Arrange
-            var repo = new MockPackageRepository();
-            var vsPackageManager = new MockVsPackageManager(repo);
-            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-
-            var cmdlet = new InstallPackageCommand(
-                TestUtils.GetSolutionManager(),
-                packageManagerFactory.Object,
-                null,
-                new Mock<IVsPackageSourceProvider>().Object,
-                null,
-                null,
-                new Mock<IVsCommonOperations>().Object,
-                new Mock<IDeleteOnRestartManager>().Object);
-            cmdlet.Id = "my-id";
-            cmdlet.Version = new SemanticVersion("2.8");
-
-            // Act
-            cmdlet.Execute();
-
-            // Assert
-            Assert.Equal(RepositoryOperationNames.Install, repo.LastOperation);
-        }
-
-        [Fact]
         public void InstallPackageCmdletPassesIgnoreDependencySwitchCorrectly()
         {
             // Arrange
@@ -275,7 +247,15 @@ namespace NuGet.PowerShell.Commands.Test
             repositorySettings.Setup(c => c.RepositoryPath).Returns(String.Empty);
 
             var solutionManager = new Mock<ISolutionManager>();
-            var packageManagerFactory = new Mock<VsPackageManagerFactory>(solutionManager.Object, repositoryFactory.Object, sourceProvider, fileSystemProvider.Object, repositorySettings.Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(
+                solutionManager.Object, 
+                repositoryFactory.Object, 
+                sourceProvider, 
+                fileSystemProvider.Object, 
+                repositorySettings.Object, 
+                new Mock<VsPackageInstallerEvents>().Object,
+                new Mock<IPackageRepository>().Object,
+                /* multiFrameworkTargeting */ null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object);

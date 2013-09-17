@@ -135,7 +135,7 @@ namespace NuGet.Dialog.Providers
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
-            IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName);
+            IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
             IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
 
             List<PackageOperation> allOperations;

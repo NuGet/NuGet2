@@ -207,9 +207,21 @@ namespace NuGet.Common
                 text = text.TrimStart();
                 // Calculate the number of chars to print based on the width of the System.Console
                 int length = Math.Min(text.Length, maxWidth);
-                // Text we can print without overflowing the System.Console.
-                string content = text.Substring(0, length);
-                int leftPadding = startIndex + length - CursorLeft;
+
+                string content;
+
+                // Text we can print without overflowing the System.Console, excluding new line characters.
+                int newLineIndex = text.IndexOf(Environment.NewLine, 0, length, StringComparison.OrdinalIgnoreCase);
+                if (newLineIndex > -1)
+                {
+                    content = text.Substring(0, newLineIndex);
+                }
+                else
+                {
+                    content = text.Substring(0, length);
+                }
+
+                int leftPadding = startIndex + content.Length - CursorLeft;
                 // Print it with the correct padding
                 Out.WriteLine(content.PadLeft(leftPadding));
                 // Get the next substring to be printed
@@ -340,7 +352,7 @@ namespace NuGet.Common
 
             while (true)
             {
-                Write(NuGetResources.FileConflictChoiceText);
+                Write(LocalizedResourceManager.GetString("FileConflictChoiceText"));
                 string answer = ReadLine();                
                 if (!String.IsNullOrEmpty(answer)) 
                 {

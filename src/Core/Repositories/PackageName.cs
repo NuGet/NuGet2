@@ -2,10 +2,16 @@
 
 namespace NuGet
 {
-    public class PackageName : IEquatable<PackageName>
+    public class PackageName : IPackageName, IEquatable<PackageName>
     {
         private readonly string _packageId;
         private readonly SemanticVersion _version;
+
+        public PackageName(string packageId, SemanticVersion version)
+        {
+            _packageId = packageId;
+            _version = version;
+        }
 
         public string Id
         {
@@ -18,12 +24,6 @@ namespace NuGet
             {
                 return _version;
             }
-        }
-
-        public PackageName(string packageId, SemanticVersion version)
-        {
-            _packageId = packageId;
-            _version = version;
         }
 
         public string Name 

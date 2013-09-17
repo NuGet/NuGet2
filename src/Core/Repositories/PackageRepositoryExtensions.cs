@@ -11,17 +11,17 @@ namespace NuGet
 {
     public static class PackageRepositoryExtensions
     {
-        public static IDisposable StartOperation(this IPackageRepository self, string operation)
+        public static IDisposable StartOperation(this IPackageRepository self, string operation, string mainPackageId, string mainPackageVersion)
         {
             IOperationAwareRepository repo = self as IOperationAwareRepository;
             if (repo != null)
             {
-                return repo.StartOperation(operation);
+                return repo.StartOperation(operation, mainPackageId, mainPackageVersion);
             }
             return DisposableAction.NoOp;
         }
 
-        public static bool Exists(this IPackageRepository repository, IPackageMetadata package)
+        public static bool Exists(this IPackageRepository repository, IPackageName package)
         {
             return repository.Exists(package.Id, package.Version);
         }
@@ -88,6 +88,18 @@ namespace NuGet
             {
                 allowUnlisted = true;
             }
+            else if (!allowUnlisted && (constraintProvider == null || constraintProvider == NullConstraintProvider.Instance))
+            {
+                var packageLatestLookup = repository as ILatestPackageLookup;
+                if (packageLatestLookup != null)
+                {
+                    IPackage package;
+                    if (packageLatestLookup.TryFindLatestPackageById(packageId, allowPrereleaseVersions, out package))
+                    {
+                        return package;
+                    }
+                }
+            }
 
             // If the repository implements it's own lookup then use that instead.
             // This is an optimization that we use so we don't have to enumerate packages for
@@ -152,16 +164,7 @@ namespace NuGet
             }
             else
             {
-                // TODO: better fix for next release
-                var dataServiceRepo = repository as DataServicePackageRepository;
-                if (dataServiceRepo != null)
-                {
-                    return dataServiceRepo.FindPackagesById(packageId).ToList();
-                }
-                else
-                {
-                    return FindPackagesByIdCore(repository, packageId);
-                }
+                return FindPackagesByIdCore(repository, packageId);
             }
         }
 
@@ -187,8 +190,10 @@ namespace NuGet
         /// Since Odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of packages.
         /// </summary>
-        private static IEnumerable<IPackage> FindPackages<T>(this IPackageRepository repository, IEnumerable<T> items, Func<IEnumerable<T>,
-                Expression<Func<IPackage, bool>>> filterSelector)
+        private static IEnumerable<IPackage> FindPackages<T>(
+            this IPackageRepository repository, 
+            IEnumerable<T> items, 
+            Func<IEnumerable<T>, Expression<Func<IPackage, bool>>> filterSelector)
         {
             const int batchSize = 10;
 
@@ -197,7 +202,10 @@ namespace NuGet
                 IEnumerable<T> currentItems = items.Take(batchSize);
                 Expression<Func<IPackage, bool>> filterExpression = filterSelector(currentItems);
 
-                var query = repository.GetPackages().Where(filterExpression).OrderBy(p => p.Id);
+                var query = repository.GetPackages()
+                                      .Where(filterExpression)
+                                      .OrderBy(p => p.Id);
+
                 foreach (var package in query)
                 {
                     yield return package;
@@ -378,7 +386,7 @@ namespace NuGet
         /// <param name="includeAllVersions">Indicates whether to include all versions of an update as opposed to only including the latest version.</param>
         public static IEnumerable<IPackage> GetUpdates(
             this IPackageRepository repository,
-            IEnumerable<IPackage> packages,
+            IEnumerable<IPackageName> packages,
             bool includePrerelease,
             bool includeAllVersions,
             IEnumerable<FrameworkName> targetFrameworks = null,
@@ -396,13 +404,13 @@ namespace NuGet
 
         public static IEnumerable<IPackage> GetUpdatesCore(
             this IPackageRepository repository,
-            IEnumerable<IPackageMetadata> packages,
+            IEnumerable<IPackageName> packages,
             bool includePrerelease,
             bool includeAllVersions,
             IEnumerable<FrameworkName> targetFramework,
             IEnumerable<IVersionSpec> versionConstraints)
         {
-            List<IPackageMetadata> packageList = packages.ToList();
+            List<IPackageName> packageList = packages.ToList();
 
             if (!packageList.Any())
             {
@@ -472,7 +480,7 @@ namespace NuGet
         /// </summary>
         private static IEnumerable<IPackage> GetUpdateCandidates(
             IPackageRepository repository,
-            IEnumerable<IPackageMetadata> packages,
+            IEnumerable<IPackageName> packages,
             bool includePrerelease)
         {
 
@@ -492,7 +500,7 @@ namespace NuGet
         /// For the list of input packages generate an expression like:
         /// p => p.Id == 'package1id' or p.Id == 'package2id' or p.Id == 'package3id'... up to package n
         /// </summary>
-        private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<IPackageMetadata> packages)
+        private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<IPackageName> packages)
         {
             return GetFilterExpression(packages.Select(p => p.Id));
         }
@@ -500,7 +508,7 @@ namespace NuGet
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower", Justification = "This is for a linq query")]
         private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<string> ids)
         {
-            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageName));
             Expression expressionBody = ids.Select(id => GetCompareExpression(parameterExpression, id.ToLower()))
                                                 .Aggregate(Expression.OrElse);
 

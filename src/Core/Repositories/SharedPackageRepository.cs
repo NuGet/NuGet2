@@ -145,15 +145,7 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
-            // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
-            string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            Manifest manifest = Manifest.Create(package);
-            FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
-
-            // But in order to maintain backwards compatibility with older versions of NuGet, 
-            // we will save the .nupkg file too. This way, 2.1 will read the .nuspec file, and 
-            // pre 2.1 will read the .nupkg
+            // add .nupkg file
             base.AddPackage(package);
 
             // if this is a solution-level package, add it to the solution's packages.config file
@@ -385,7 +377,7 @@ namespace NuGet
                     {
                         try
                         {
-                            return XDocument.Load(stream);
+                            return XmlUtility.LoadSafe(stream);
                         }
                         catch (XmlException)
                         {
@@ -429,15 +421,46 @@ namespace NuGet
 
         private bool IsSolutionLevel(IPackage package)
         {
-            // A package is solution level if it doesn't have project content & doesn't have dependency & not referenced by any project.
-            //
-            // Technically, the second condition is not totally accurate because a solution-level package can depend on another 
-            // solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
-            // This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
-            // as solution-level ones.
-            return !package.HasProjectContent() && 
-                   !package.DependencySets.SelectMany(p => p.Dependencies).Any() &&
-                   !IsReferenced(package.Id, package.Version);
+            // A package is solution level if 
+            // - it doesn't have project content & 
+            // - it doesn't have dependency on non solution-level package &
+            // - it is not referenced by any project.
+            if (package.HasProjectContent())
+            {
+                return false;
+            }
+
+            if (HasProjectLevelPackageDependency(package))
+            {
+                return false;
+            }
+
+            if (IsReferenced(package.Id, package.Version))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if the package has a dependency on a project-level package.
+        /// </summary>
+        /// <param name="package">The package to check.</param>
+        /// <returns>True if the package has a dependency on a project-level package.</returns>
+        private bool HasProjectLevelPackageDependency(IPackage package)
+        {
+            var dependencies = package.DependencySets.SelectMany(p => p.Dependencies);
+            if (dependencies.IsEmpty())
+            {
+                return false;
+            }
+
+            HashSet<string> solutionLevelPackages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            solutionLevelPackages.AddRange(
+                PackageReferenceFile.GetPackageReferences().Select(packageReference => packageReference.Id));
+
+            return dependencies.Any(dependency => !solutionLevelPackages.Contains(dependency.Id));
         }
 
         private string GetManifestFilePath(string packageId, SemanticVersion version)

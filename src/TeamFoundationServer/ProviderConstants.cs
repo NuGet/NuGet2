@@ -2,6 +2,6 @@
 {
     internal static class ProviderConstants
     {
-        public const int SupportedVsVersion = 11;
+        public const int SupportedVsVersion = 12;
     }
 }

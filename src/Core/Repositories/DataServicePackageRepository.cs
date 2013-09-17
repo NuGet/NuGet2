@@ -1,23 +1,103 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Windows;
 using NuGet.Resources;
 
 namespace NuGet
 {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, IServiceBasedRepository, ICloneableRepository, ICultureAwareRepository, IOperationAwareRepository
+    public class DataServicePackageRepository : 
+        PackageRepositoryBase, 
+        IHttpClientEvents, 
+        IServiceBasedRepository, 
+        ICloneableRepository, 
+        ICultureAwareRepository, 
+        IOperationAwareRepository,
+        IPackageLookup,
+        ILatestPackageLookup,
+        IWeakEventListener
     {
+        private const string FindPackagesByIdSvcMethod = "FindPackagesById";
+        private const string PackageServiceEntitySetName = "Packages";
+        private const string SearchSvcMethod = "Search";
+        private const string GetUpdatesSvcMethod = "GetUpdates";
+
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
-        private const string FindPackagesByIdSvcMethod = "FindPackagesById";
-        private const string SearchSvcMethod = "Search";
-        private const string GetUpdatesSvcMethod = "GetUpdates";
+        private Tuple<string, string, string> _currentOperation;
+
+        public DataServicePackageRepository(Uri serviceRoot)
+            : this(new HttpClient(serviceRoot))
+        {
+        }
+
+        public DataServicePackageRepository(IHttpClient client)
+            : this(client, new PackageDownloader())
+        {
+        }
+
+        public DataServicePackageRepository(IHttpClient client, PackageDownloader packageDownloader)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException("client");
+            }
+            if (packageDownloader == null)
+            {
+                throw new ArgumentNullException("packageDownloader");
+            }
+
+            _httpClient = client;
+            _httpClient.AcceptCompression = true;
+
+            _packageDownloader = packageDownloader;
+
+            if (EnvironmentUtility.RunningFromCommandLine)
+            {
+                _packageDownloader.SendingRequest += OnPackageDownloaderSendingRequest;
+            }
+            else
+            {
+                // weak event pattern            
+                SendingRequestEventManager.AddListener(_packageDownloader, this);
+            }
+        }
+
+        private void OnPackageDownloaderSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            if (_currentOperation != null)
+            {
+                string operation = _currentOperation.Item1;
+                string mainPackageId = _currentOperation.Item2;
+                string mainPackageVersion = _currentOperation.Item3;
+
+                if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
+                {
+                    if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        operation = operation + "-Dependency";
+                    }
+                }
+
+                e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
+
+                if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                    if (!String.IsNullOrEmpty(mainPackageVersion))
+                    {
+                        e.Request.Headers[RepositoryOperationNames.DependentPackageVersionHeaderName] = mainPackageVersion;
+                    }
+                }
+            }
+        }
 
         // Just forward calls to the package downloader
         public event EventHandler<ProgressEventArgs> ProgressAvailable
@@ -46,48 +126,6 @@ namespace NuGet
             }
         }
 
-        public PackageDownloader PackageDownloader
-        {
-            get { return _packageDownloader; }
-        }
-
-        public string CurrentOperation { get; private set; }
-
-        public DataServicePackageRepository(Uri serviceRoot)
-            : this(new HttpClient(serviceRoot))
-        {
-        }
-
-        public DataServicePackageRepository(IHttpClient client)
-            : this(client, new PackageDownloader())
-        {
-        }
-
-        public DataServicePackageRepository(IHttpClient client, PackageDownloader packageDownloader)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException("client");
-            }
-            if (packageDownloader == null)
-            {
-                throw new ArgumentNullException("packageDownloader");
-            }
-
-            _httpClient = client;
-            _httpClient.AcceptCompression = true;
-
-            _packageDownloader = packageDownloader;
-
-            SendingRequest += (sender, e) =>
-            {
-                if (!String.IsNullOrEmpty(CurrentOperation))
-                {
-                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = CurrentOperation;
-                }
-            };
-        }
-
         public CultureInfo Culture
         {
             get
@@ -101,6 +139,12 @@ namespace NuGet
                 }
                 return _culture;
             }
+        }
+
+        // Do NOT delete this property. It is used by the functional test.
+        public PackageDownloader PackageDownloader
+        {
+            get { return _packageDownloader; }
         }
 
         public override string Source
@@ -161,7 +205,7 @@ namespace NuGet
         public override IQueryable<IPackage> GetPackages()
         {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName);
+            return new SmartDataServiceQuery<DataServicePackage>(Context, PackageServiceEntitySetName);
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
@@ -188,12 +232,64 @@ namespace NuGet
 
             if (SupportsPrereleasePackages)
             {
-                searchParameters.Add("includePrerelease", ToString(allowPrereleaseVersions));
+                searchParameters.Add("includePrerelease", ToLowerCaseString(allowPrereleaseVersions));
             }
 
             // Create a query for the search service method
             var query = Context.CreateQuery<DataServicePackage>(SearchSvcMethod, searchParameters);
             return new SmartDataServiceQuery<DataServicePackage>(Context, query);
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            IQueryable<DataServicePackage> query = Context.CreateQuery<DataServicePackage>(PackageServiceEntitySetName).AsQueryable();
+
+            foreach (string versionString in version.GetComparableVersionStrings())
+            {
+                try
+                {
+                    var packages = query.Where(p => p.Id == packageId && p.Version == versionString)
+                                    .Select(p => p.Id)      // since we only want to check for existence, no need to get all attributes
+                                    .ToArray();
+
+                    if (packages.Length == 1)
+                    {
+                        return true;
+                    }
+                }
+                catch (DataServiceQueryException)
+                {
+                    // DataServiceQuery exception will occur when the (id, version) 
+                    // combination doesn't exist.
+                }
+            }
+
+            return false;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            IQueryable<DataServicePackage> query = Context.CreateQuery<DataServicePackage>(PackageServiceEntitySetName).AsQueryable();
+
+            foreach (string versionString in version.GetComparableVersionStrings())
+            {
+                try
+                {
+                    var packages = query.Where(p => p.Id == packageId && p.Version == versionString).ToArray();
+                    Debug.Assert(packages == null || packages.Length <= 1);
+                    if (packages.Length != 0)
+                    {
+                        return packages[0];
+                    }
+                }
+                catch (DataServiceQueryException)
+                {
+                    // DataServiceQuery exception will occur when the (id, version) 
+                    // combination doesn't exist.
+                }
+            }
+
+            return null;
         }
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)
@@ -207,8 +303,8 @@ namespace NuGet
                 }
 
                 var serviceParameters = new Dictionary<string, object> {
-                { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
-            };
+                    { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
+                };
 
                 // Create a query for the search service method
                 var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
@@ -226,7 +322,7 @@ namespace NuGet
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,
@@ -247,8 +343,8 @@ namespace NuGet
             var serviceParameters = new Dictionary<string, object> {
                 { "packageIds", "'" + ids + "'" },
                 { "versions", "'" + versions + "'" },
-                { "includePrerelease", ToString(includePrerelease) },
-                { "includeAllVersions", ToString(includeAllVersions) },
+                { "includePrerelease", ToLowerCaseString(includePrerelease) },
+                { "includeAllVersions", ToLowerCaseString(includeAllVersions) },
                 { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
                 { "versionConstraints", "'" + UrlEncodeOdataParameter(versionConstraintsValue) + "'" }
             };
@@ -262,14 +358,75 @@ namespace NuGet
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            string oldOperation = CurrentOperation;
-            CurrentOperation = operation;
+            Tuple<string, string, string> oldOperation = _currentOperation;
+            _currentOperation = Tuple.Create(operation, mainPackageId, mainPackageVersion);
             return new DisposableAction(() =>
             {
-                CurrentOperation = oldOperation;
+                _currentOperation = oldOperation;
             });
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            latestVersion = null;
+
+            try
+            {
+                var serviceParameters = new Dictionary<string, object> {
+                    { "id", "'" + UrlEncodeOdataParameter(id) + "'" }
+                };
+
+                // Create a query for the search service method
+                var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+                var packages = (IQueryable<DataServicePackage>)query.AsQueryable();
+
+                var latestPackage = packages.Where(p => p.IsLatestVersion)
+                                            .Select(p => new { p.Id, p.Version })
+                                            .FirstOrDefault();
+
+                if (latestPackage != null)
+                {
+                    latestVersion = new SemanticVersion(latestPackage.Version);
+                    return true;
+                }
+            }
+            catch (DataServiceQueryException)
+            {
+            }
+
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            try
+            {
+                var serviceParameters = new Dictionary<string, object> {
+                    { "id", "'" + UrlEncodeOdataParameter(id) + "'" }
+                };
+
+                // Create a query for the search service method
+                var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+                var packages = (IQueryable<DataServicePackage>)query.AsQueryable();
+
+                if (includePrerelease)
+                {
+                    package = packages.Where(p => p.IsAbsoluteLatestVersion).FirstOrDefault();
+                }
+                else
+                {
+                    package = packages.Where(p => p.IsLatestVersion).FirstOrDefault();
+                }
+
+                return package != null;
+            }
+            catch (DataServiceQueryException)
+            {
+                package = null;
+                return false;
+            }
         }
 
         private static string UrlEncodeOdataParameter(string value)
@@ -286,9 +443,22 @@ namespace NuGet
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "OData expects a lower case value.")]
-        private static string ToString(bool value)
+        private static string ToLowerCaseString(bool value)
         {
             return value.ToString().ToLowerInvariant();
+        }
+
+        public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
+        {
+            if (managerType == typeof(SendingRequestEventManager))
+            {
+                OnPackageDownloaderSendingRequest(sender, (WebRequestEventArgs)e);
+                return true;
+            }
+            else
+            {
+                return false;
+            } 
         }
     }
 }

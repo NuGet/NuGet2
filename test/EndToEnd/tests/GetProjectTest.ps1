@@ -126,7 +126,7 @@ function Test-RemovingAmbiguousProjectAllowsSimpleNameToBeUsed {
     Assert-AreEqual $p2 (Get-Project -Name foo\A)
     Assert-AreEqual $p1 (Get-Project -Name A)
 
-    Remove-Project $p1
+    Remove-Project $p1.Name
 
     Assert-AreEqual $p2 (Get-Project -Name foo\A)
     Assert-AreEqual $p2 (Get-Project -Name A)
@@ -147,7 +147,7 @@ function Test-RenameCreatingAmbiguityFollowedByRemovalAllowsSimpleNameToBeUsed {
     Assert-AreEqual $p2 (Get-Project -Name foo\A)
     Assert-AreEqual $p1 (Get-Project -Name A)
 
-    Remove-Project $p1
+    Remove-Project $p1.Name
 
     Assert-AreEqual $p2 (Get-Project -Name foo\A)
     Assert-AreEqual $p2 (Get-Project -Name A)
@@ -173,7 +173,7 @@ function Test-RenamingSolutionFolderDoesNotAffectGetProject {
     Assert-AreEqual $p2 (Get-Project -Name bar\A)
     Assert-AreEqual $p1 (Get-Project -Name A)
     
-    Remove-Project $p1
+    Remove-Project $p1.Name
     Assert-AreEqual $p2 (Get-Project -Name bar\A)
     Assert-AreEqual $p2 (Get-Project -Name A)
 }
@@ -204,7 +204,7 @@ function Test-RenamingSolutionFolderWithDeeplyNestedProjectsDoesNotAffectGetProj
     Assert-AreEqual $p2 (Get-Project -Name bar\bar\A)
     Assert-AreEqual $p1 (Get-Project -Name A)
     
-    Remove-Project $p1
+    Remove-Project $p1.Name
     Assert-AreEqual $p2 (Get-Project -Name bar\bar\A)
     Assert-AreEqual $p2 (Get-Project -Name A)
 }

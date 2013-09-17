@@ -8,6 +8,6 @@ namespace NuGet
     /// </summary>
     public interface IOperationAwareRepository
     {
-        IDisposable StartOperation(string operation);
+        IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion);
     }
 }

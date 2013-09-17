@@ -68,6 +68,29 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void RepositoryPathComesFromConfigFileIsNormalizedToUseCorrectDirectorySeparator()
+        {
+            // Arrange
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"bar\nuget.config", @"
+<settings>
+    <repositoryPath>../lib/</repositoryPath>
+</settings>");
+
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(m => m.GetFileSystem(@"bar\baz\.nuget")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystemProvider.Object, new Mock<IVsSourceControlTracker>().Object);
+
+            // Act
+            string path = repositorySettings.RepositoryPath;
+
+            // Assert
+            Assert.Equal(@"bar\..\lib\", path);
+        }
+
+        [Fact]
         public void RepositoryPathDefaultsToPackagesDirectoryIfConfigFileHasEmptyOrNullRepositoryPath()
         {
             // Arrange
@@ -321,6 +344,40 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(@"bar\baz\foo", p2);
         }
 
+        // Tests that RepositorySettings reads from machine wide settings.
+        [Fact]
+        public void GetValueFromMachineWideSettings()
+        {
+            // Arrange
+            var solutionManager = new Mock<MockSolutionManager>();
+            solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
 
+            var fileSystem = new MockFileSystem();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(m => m.GetFileSystem(@"bar\baz\.nuget")).Returns(fileSystem);
+
+            var sourceControlTracker = new Mock<IVsSourceControlTracker>();            
+
+            fileSystem.AddFile(@"a.config", @"
+<configuration>
+  <config>
+    <add key=""repositorypath"" value=""c:\path"" />
+  </config>
+</configuration>");
+            var settings = new Settings[] {
+                new Settings(fileSystem, "a.config")
+            };
+            var machineWideSettings = new Mock<IMachineWideSettings>();
+            machineWideSettings.SetupGet(m => m.Settings).Returns(settings);
+
+            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystemProvider.Object, sourceControlTracker.Object, machineWideSettings.Object);
+
+
+            // Act
+            var repositoryPath = repositorySettings.RepositoryPath;
+
+            // Assert
+            Assert.Equal(@"c:\path", repositoryPath);
+        }
     }
 }

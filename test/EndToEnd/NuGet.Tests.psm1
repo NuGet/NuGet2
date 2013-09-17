@@ -132,43 +132,56 @@ function global:Run-Test {
     Add-Type -AssemblyName "Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
 
     # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
-    [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
+    try
+    {
+        [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
+    }
+    catch
+    {
+    }
     
     try {
-        for ($counter = 0; $counter -le 1; $counter++) {
-            # Run all tests
-            $tests | %{ 
-                # Trim the Test- prefix
-                $name = $_.Name.Substring(5)
+        # Run all tests
+        $tests | %{ 
+            # Trim the Test- prefix
+            $name = $_.Name.Substring(5)
             
-                "Running Test $name..."
+            "Running Test $name..."
 
-                # Write to log file as we run tests
-                "Running Test $name..." >> $testLogFile
+            # Write to log file as we run tests
+            "Running Test $name..." >> $testLogFile
             
-                $repositoryPath = Join-Path $testRepositoryPath $name
+            $repositoryPath = Join-Path $testRepositoryPath $name
 
-                $values = @{
-                    RepositoryRoot = $testRepositoryPath
-                    TestRoot = $repositoryPath
-                    RepositoryPath = Join-Path $repositoryPath Packages
-                    NuGetExe = $nugetExePath
-                }
+            $values = @{
+                RepositoryRoot = $testRepositoryPath
+                TestRoot = $repositoryPath
+                RepositoryPath = Join-Path $repositoryPath Packages
+                NuGetExe = $nugetExePath
+            }
             
-                if(Test-Path $repositoryPath) {            
-                    pushd 
-                    Set-Location $repositoryPath
-                    # Generate any packages that might be in the repository dir
-                    Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
-                        & $generatePackagesExePath $_.FullName | Out-Null
-                    } 
-                    popd
-                }
+            if (Test-Path $repositoryPath) {            
+                pushd 
+                Set-Location $repositoryPath
+                # Generate any packages that might be in the repository dir
+                Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
+                    & $generatePackagesExePath $_.FullName | Out-Null
+                } 
+                popd
+            }
             
-                $context = New-Object PSObject -Property $values
+            $context = New-Object PSObject -Property $values
+
+            # Some tests are flaky. We give failed tests another chance to succeed.
+            for ($counter = 0; $counter -le 1; $counter++)
+            {
+                if ($counter -eq 1)
+                {
+                    Write-Host -ForegroundColor Blue "Reruning failed test one more time...."
+                }
 
                 try {
-                    & $_ $context
+                    $executionTime = measure-command { & $_ $context }
                 
                     Write-Host -ForegroundColor DarkGreen "Test $name Passed"
                 
@@ -176,6 +189,8 @@ function global:Run-Test {
                         Test = $name
                         Error = $null
                     }
+
+                    $testSucceeded = $true
                 }
                 catch {                     
                     if($_.Exception.Message.StartsWith("SKIP")) {
@@ -187,6 +202,7 @@ function global:Run-Test {
                         }
 
                         Write-Warning "$name was Skipped: $message"
+                        $testSucceeded = $true
                     }
                     else {                    
                         $results[$name] = New-Object PSObject -Property @{ 
@@ -194,6 +210,7 @@ function global:Run-Test {
                             Error = $_
                         }
                         Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
+                        $testSucceeded = $false
                     }
                 }
                 finally {
@@ -205,32 +222,23 @@ function global:Run-Test {
                         # The type might not be loaded so don't fail if it isn't
                     }
 
-                    if($tests.Count -gt 1) {
+                    if ($tests.Count -gt 1 -or (!$testSucceeded -and $counter -eq 0)) {
                         $dte.Solution.Close()
                     }
 
-                    if (Test-Path $repositoryPath) {
-                        # Cleanup the output from running the generate packages tool
-                        Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
-                        Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+                    if ($testSucceeded -or $counter -eq 1) {
+                        if (Test-Path $repositoryPath) {
+                            # Cleanup the output from running the generate packages tool
+                            Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
+                            Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+                        }
                     }
                 }
-            }
 
-            # After the first run, rerun the failed tests if any, but only if there are more than 1 test run.
+                $results[$name] | Add-Member NoteProperty -Name Time -Value $executionTime
+                $results[$name] | Add-Member NoteProperty -Name Retried -Value ($counter -eq 1)
 
-            if ($counter -eq 0)
-            {
-                $failedTests = @($results.GetEnumerator() | ? { $_.Value.Error -and !$_.Value.Skipped } | % { $_.Name })
-                if ($failedTests -gt 0 -and $results.Count -gt 1)
-                {
-                    Write-Warning "There are $($failedTests.Count) failed test(s). Re-running them one more time..."
-
-                    $dte.Solution.Close()
-                    $tests = @($failedTests | % { Get-ChildItem "function:\Test-$_" })
-                }
-                else 
-                {
+                if ($testSucceeded) {
                     break;
                 }
             }
@@ -245,8 +253,12 @@ function global:Run-Test {
                
         Write-TestResults $testRunId $results.Values $testRunOutputPath $LaunchResultsOnFailure
 
-        # Clear out the setting when the tests are done running
-        [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
+        try
+        {
+            # Clear out the setting when the tests are done running
+            [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
+        }
+        catch {}
     }
 }
 
@@ -411,6 +423,12 @@ function Write-HtmlResults
                 <th>
                     Error Message
                 </th>
+                <th>
+                    Execution time
+                </th>
+                <th>
+                    Retried
+                </th>
             </tr>
             {6}
             </table>
@@ -421,6 +439,8 @@ function Write-HtmlResults
     <td class=`"{0}`">{0}</td>
     <td class=`"{0}`">{1}</td>
     <td class=`"{0}`">{2}</td>
+    <td class=`"{0}`">{3}</td>
+    <td class=`"{0}`">{4}</td>
     </tr>"
     
     $pass = 0
@@ -441,9 +461,12 @@ function Write-HtmlResults
             $pass++
         }
         
-        [String]::Format($testTemplate, $status, 
+        [String]::Format($testTemplate, 
+                         $status, 
                          [System.Net.WebUtility]::HtmlEncode($_.Test), 
-                         [System.Net.WebUtility]::HtmlEncode($_.Error))
+                         [System.Net.WebUtility]::HtmlEncode($_.Error),
+                         $_.Time.TotalSeconds,
+                         $_.Retried)
     }
 
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null

@@ -8,12 +8,10 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, IOperationAwareRepository
+    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
-
-        private string _operation;
 
         [ImportingConstructor]
         public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory,
@@ -37,10 +35,7 @@ namespace NuGet.VisualStudio
             get
             {
                 var activeRepository = GetActiveRepository();
-                using (StartOperation(activeRepository))
-                {
-                    return activeRepository == null ? null : activeRepository.Source;
-                }
+                return activeRepository == null ? null : activeRepository.Source;
             }
         }
 
@@ -55,38 +50,26 @@ namespace NuGet.VisualStudio
             get
             {
                 var activeRepository = GetActiveRepository();
-                using (StartOperation(activeRepository))
-                {
-                    return activeRepository != null && activeRepository.SupportsPrereleasePackages;
-                }
+                return activeRepository != null && activeRepository.SupportsPrereleasePackages;
             }
         }
 
         public IQueryable<IPackage> GetPackages()
         {
             var activeRepository = GetActiveRepository();
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository == null ? Enumerable.Empty<IPackage>().AsQueryable() : activeRepository.GetPackages();
-            }
+            return activeRepository == null ? Enumerable.Empty<IPackage>().AsQueryable() : activeRepository.GetPackages();
         }
 
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
             var activeRepository = GetActiveRepository();
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository == null ? null : activeRepository.FindPackage(packageId, version);
-            }
+            return activeRepository == null ? null : activeRepository.FindPackage(packageId, version);
         }
 
         public bool Exists(string packageId, SemanticVersion version)
         {
             var activeRepository = GetActiveRepository();
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository != null ? activeRepository.Exists(packageId, version) : false;
-            }
+            return activeRepository != null ? activeRepository.Exists(packageId, version) : false;
         }
 
         public void AddPackage(IPackage package)
@@ -96,10 +79,8 @@ namespace NuGet.VisualStudio
             {
                 throw new InvalidOperationException(VsResources.NoActivePackageSource);
             }
-            using (StartOperation(activeRepository))
-            {
-                activeRepository.AddPackage(package);
-            }
+            
+            activeRepository.AddPackage(package);
         }
 
         public void RemovePackage(IPackage package)
@@ -109,10 +90,8 @@ namespace NuGet.VisualStudio
             {
                 throw new InvalidOperationException(VsResources.NoActivePackageSource);
             }
-            using (StartOperation(activeRepository))
-            {
-                activeRepository.RemovePackage(package);
-            }
+            
+            activeRepository.RemovePackage(package);
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
@@ -122,19 +101,15 @@ namespace NuGet.VisualStudio
             {
                 return Enumerable.Empty<IPackage>().AsQueryable();
             }
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
-            }
+            
+            return activeRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
 
         public IPackageRepository Clone()
         {
             var activeRepository = GetActiveRepository();
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository == null ? this : activeRepository.Clone();
-            }
+            
+            return activeRepository == null ? this : activeRepository.Clone();
         }
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)
@@ -144,14 +119,12 @@ namespace NuGet.VisualStudio
             {
                 return Enumerable.Empty<IPackage>();
             }
-            using (StartOperation(activeRepository))
-            {
-                return activeRepository.FindPackagesById(packageId);
-            }
+
+            return activeRepository.FindPackagesById(packageId);
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,
@@ -162,10 +135,32 @@ namespace NuGet.VisualStudio
             {
                 return Enumerable.Empty<IPackage>();
             }
-            using (StartOperation(activeRepository))
+
+            return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
             {
-                return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
             }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
         }
 
         internal IPackageRepository GetActiveRepository()
@@ -177,20 +172,10 @@ namespace NuGet.VisualStudio
             return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
-            string old = _operation;
-            _operation = operation;
-            return new DisposableAction(() => _operation = old);
-        }
-
-        private IDisposable StartOperation(IPackageRepository activeRepository)
-        {
-            if (!String.IsNullOrEmpty(_operation))
-            {
-                return activeRepository.StartOperation(_operation);
-            }
-            return DisposableAction.NoOp;
+            var activeRepository = GetActiveRepository();
+            return activeRepository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio
         private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
         private readonly IFileSystemProvider _fileSystemProvider;
-        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
@@ -63,7 +63,7 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
-            IPackageSourceProvider packageSourceProvider,
+            IVsPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
@@ -201,7 +201,7 @@ namespace NuGet.VisualStudio
 
             Task task = Task.Factory.StartNew(() =>
             {
-                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
                 IPackageRepository localRepository = packageManager.LocalRepository;
                 var projectReferences = GetAllPackageReferences(packageManager);
                 foreach (var reference in projectReferences)
@@ -235,9 +235,9 @@ namespace NuGet.VisualStudio
         public void CheckForMissingPackages()
         {
             // This method is called by both Solution Opened and Solution Closed event handlers.
-            // In the case of Solution Closed event, the IsCurrentSolutionEnabledForRestore is false,
+            // In the case of Solution Closed event, the _solutionManager.IsSolutionOpen is false,
             // and so we won't do the unnecessary work of checking for package references.
-            bool missing = IsCurrentSolutionEnabledForRestore && CheckForMissingPackagesCore();
+            bool missing = _solutionManager.IsSolutionOpen && CheckForMissingPackagesCore();
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
@@ -245,7 +245,7 @@ namespace NuGet.VisualStudio
         {
             EnsureNuGetBuild(fromActivation);
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManagerWithAllPackageSources();
             foreach (Project project in _solutionManager.GetProjects())
             {
                 EnablePackageRestore(project, packageManager);
@@ -286,18 +286,40 @@ namespace NuGet.VisualStudio
             if (!VsVersionHelper.IsVisualStudio2010 && 
                 (project.IsJavaScriptProject() ||  project.IsNativeProject()))
             {
-                project.DoWorkInWriterLock(
-                    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
-
-                // When inside the Write lock, calling Project.Save() will cause a deadlock.
-                // Thus we will save it after and outside of the Write lock.
-                project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    EnablePackageRestoreInVs2012(project);
+                }
+                else
+                {
+                    EnablePackageRestoreInVs2013(project);
+                }
             }
             else
             {
                 MsBuildProject buildProject = project.AsMSBuildProject();
                 EnablePackageRestore(project, buildProject, saveProjectWhenDone: true);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnablePackageRestoreInVs2013(Project project)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                project,
+                project.ToVsHierarchy(),
+                buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnablePackageRestoreInVs2012(Project project)
+        {
+            project.DoWorkInWriterLock(
+                buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+
+            // When inside the Write lock, calling Project.Save() will cause a deadlock.
+            // Thus we will save it after and outside of the Write lock.
+            project.Save();
         }
 
         private void EnablePackageRestore(Project project, MsBuildProject buildProject, bool saveProjectWhenDone)
@@ -357,8 +379,9 @@ namespace NuGet.VisualStudio
                 !fileSystem.FileExists(NuGetExeFile) ||
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
-                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
-                IPackageRepository repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
+                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder,
+                // using the active package source first and fall back to other enabled package sources.
+                IPackageRepository repository = CreatePackageRestoreRepository(); 
 
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
@@ -383,6 +406,24 @@ namespace NuGet.VisualStudio
                 // now add the .nuget folder to the solution as a solution folder.
                 _dte.Solution.AddFolderToSolution(VsConstants.NuGetSolutionSettingsFolder, nugetFolderPath);
             }
+        }
+
+        private IPackageRepository CreatePackageRestoreRepository()
+        {
+            var activeSource = _packageSourceProvider.ActivePackageSource;
+
+            if (activeSource == null)
+            {
+                return _packageSourceProvider.CreateAggregateRepository(_packageRepositoryFactory, ignoreFailingRepositories: true);
+            }
+
+            IPackageRepository activeRepository = _packageRepositoryFactory.CreateRepository(activeSource.Source);
+            if (AggregatePackageSource.IsAggregate(activeSource))
+            {
+                return activeRepository;
+            }
+
+            return _packageSourceProvider.CreatePriorityPackageRepository(_packageRepositoryFactory, activeRepository);
         }
 
         /// <summary>
@@ -479,8 +520,9 @@ namespace NuGet.VisualStudio
             if (IsCurrentSolutionEnabledForRestore)
             {
                 EnablePackageRestore(e.Project, _packageManagerFactory.CreatePackageManager());
-                CheckForMissingPackages();
             }
+
+            CheckForMissingPackages();
         }
 
         private void OnPackageReferenceAdded(IVsPackageMetadata metadata)

@@ -33,7 +33,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
                 // Assert
                 Assert.Equal(0, result);
-                var settings = Settings.LoadDefaultSettings(null);
+                var settings = Settings.LoadDefaultSettings(null, null, null);
                 var source = settings.GetValue("packageSources", "test_source");
                 Assert.Equal("http://test_source", source);
             }
@@ -71,7 +71,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Assert
                 Assert.Equal(0, result);
 
-                var settings = Settings.LoadDefaultSettings(null);
+                var settings = Settings.LoadDefaultSettings(null, null, null);
                 var source = settings.GetValue("packageSources", "test_source");
                 Assert.Equal("http://test_source", source);
 
@@ -121,7 +121,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Assert
                 Assert.Equal(0, result);
 
-                var settings = Settings.LoadDefaultSettings(null);
+                var settings = Settings.LoadDefaultSettings(null, null, null);
                 var source = settings.GetValue("packageSources", "test_source");
                 Assert.Equal("http://test_source", source);
 
@@ -172,7 +172,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
             var settings = Settings.LoadDefaultSettings(
                 new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
-                Path.GetFileName(configFile));
+                Path.GetFileName(configFile),
+                null);
             var source = settings.GetValue("packageSources", "test_source");
             Assert.Equal("http://test_source", source);
 

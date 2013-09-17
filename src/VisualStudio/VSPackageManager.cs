@@ -1,12 +1,10 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using EnvDTE;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 
@@ -21,6 +19,8 @@ namespace NuGet.VisualStudio
         private readonly IDeleteOnRestartManager _deleteOnRestartManager;
         private readonly VsPackageInstallerEvents _packageEvents;
         private bool _bindingRedirectEnabled = true;
+        private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
+        private bool _repositoryOperationPending;
 
         public VsPackageManager(ISolutionManager solutionManager,
                 IPackageRepository sourceRepository,
@@ -28,7 +28,8 @@ namespace NuGet.VisualStudio
                 IFileSystem fileSystem,
                 ISharedPackageRepository sharedRepository,
                 IDeleteOnRestartManager deleteOnRestartManager,
-                VsPackageInstallerEvents packageEvents)
+                VsPackageInstallerEvents packageEvents,
+                IVsFrameworkMultiTargeting frameworkMultiTargeting = null)
             : base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
             _solutionManager = solutionManager;
@@ -36,6 +37,7 @@ namespace NuGet.VisualStudio
             _packageEvents = packageEvents;
             _fileSystemProvider = fileSystemProvider;
             _deleteOnRestartManager = deleteOnRestartManager;
+            _frameworkMultiTargeting = frameworkMultiTargeting;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
@@ -84,7 +86,7 @@ namespace NuGet.VisualStudio
             // available packages to perform updates on dependent packages
             var sourceRepository = CreateProjectManagerSourceRepository();
 
-            var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);            
+            var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);
 
             // The package reference repository also provides constraints for packages (via the allowedVersions attribute)
             projectManager.ConstraintProvider = repository;
@@ -115,13 +117,16 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("projects");
             }
 
-            ExecuteOperationsWithPackage(
-                projects,
-                package,
-                operations,
-                projectManager => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
-                logger,
-                packageOperationEventListener);
+            using (StartInstallOperation(package.Id, package.Version.ToString()))
+            {
+                ExecuteOperationsWithPackage(
+                    projects,
+                    package,
+                    operations,
+                    projectManager => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
+                    logger,
+                    packageOperationEventListener);
+            }
         }
 
         public virtual void InstallPackage(
@@ -145,24 +150,34 @@ namespace NuGet.VisualStudio
             bool skipAssemblyReferences,
             ILogger logger)
         {
-            InitializeLogger(logger, projectManager);
-
-            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
-            if (skipAssemblyReferences)
+            try
             {
-                package = new SkipAssemblyReferencesPackage(package);
+                InitializeLogger(logger, projectManager);
+
+                IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+                using (StartInstallOperation(packageId, package.Version.ToString()))
+                {
+                    if (skipAssemblyReferences)
+                    {
+                        package = new SkipAssemblyReferencesPackage(package);
+                    }
+
+                    RunSolutionAction(() =>
+                    {
+                        InstallPackage(
+                            package,
+                            projectManager != null ? projectManager.Project.TargetFramework : null,
+                            ignoreDependencies,
+                            allowPrereleaseVersions);
+
+                        AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
+                    });
+                }
             }
-
-            RunSolutionAction(() =>
+            finally
             {
-                InstallPackage(
-                    package,
-                    projectManager != null ? projectManager.Project.TargetFramework : null,
-                    ignoreDependencies,
-                    allowPrereleaseVersions);
-
-                AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-            });
+                ClearLogger(projectManager);
+            }
         }
 
         public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies,
@@ -178,12 +193,15 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperationsWithPackage(
-                projectManager,
-                package,
-                operations,
-                () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
-                logger);
+            using (StartInstallOperation(package.Id, package.Version.ToString()))
+            {
+                ExecuteOperationsWithPackage(
+                    projectManager,
+                    package,
+                    operations,
+                    () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
+                    logger);
+            }
         }
 
         public void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies)
@@ -213,7 +231,7 @@ namespace NuGet.VisualStudio
                 PackageUninstalling += uninstallingHandler;
                 PackageUninstalled += uninstalledHandler;
 
-                if (appliesToProject)  
+                if (appliesToProject)
                 {
                     RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
                 }
@@ -226,6 +244,7 @@ namespace NuGet.VisualStudio
             {
                 PackageUninstalling -= uninstallingHandler;
                 PackageUninstalled -= uninstalledHandler;
+                ClearLogger(projectManager);
             }
         }
 
@@ -248,24 +267,27 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("projects");
             }
 
-            ExecuteOperationsWithPackage(
-                projects,
-                package,
-                operations,
-                projectManager => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions),
-                logger,
-                packageOperationEventListener);
+            using (StartUpdateOperation(package.Id, package.Version.ToString()))
+            {
+                ExecuteOperationsWithPackage(
+                    projects,
+                    package,
+                    operations,
+                    projectManager => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions),
+                    logger,
+                    packageOperationEventListener);
+            }
         }
 
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
         {
             UpdatePackage(projectManager,
-                          packageId,
-                          () => UpdatePackageReference(projectManager, packageId, version, updateDependencies, allowPrereleaseVersions),
-                          () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions, allowUnlisted: false),
-                          updateDependencies,
-                          allowPrereleaseVersions,
-                          logger);
+                            packageId,
+                            () => UpdatePackageReference(projectManager, packageId, version, updateDependencies, allowPrereleaseVersions),
+                            () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions, allowUnlisted: false),
+                            updateDependencies,
+                            allowPrereleaseVersions,
+                            logger);
         }
 
         private void UpdatePackage(IProjectManager projectManager, string packageId, Action projectAction, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
@@ -282,14 +304,17 @@ namespace NuGet.VisualStudio
 
                 if (newPackage != null && package.Version != newPackage.Version)
                 {
-                    if (appliesToProject)
+                    using (StartUpdateOperation(packageId, newPackage.Version.ToString()))
                     {
-                        RunSolutionAction(projectAction);
-                    }
-                    else
-                    {
-                        // We might be updating a solution only package
-                        UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
+                        if (appliesToProject)
+                        {
+                            RunSolutionAction(projectAction);
+                        }
+                        else
+                        {
+                            // We might be updating a solution only package
+                            UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
+                        }
                     }
                 }
                 else
@@ -315,18 +340,21 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperationsWithPackage(
-                projectManager, 
-                null, 
-                operations, 
-                () => 
+            using (StartUpdateOperation(packageId: null, packageVersion: null))
+            {
+                ExecuteOperationsWithPackage(
+                    projectManager,
+                    null,
+                    operations,
+                    () =>
                     {
                         foreach (var package in packages)
                         {
                             UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions);
                         }
-                    }, 
-                logger);
+                    },
+                    logger);
+            }
         }
 
         public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener)
@@ -368,7 +396,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("packages");
             }
 
-            if (operations == null) 
+            if (operations == null)
             {
                 throw new ArgumentNullException("operations");
             }
@@ -408,6 +436,7 @@ namespace NuGet.VisualStudio
                                     UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies: true, allowPrereleaseVersions: allowPrereleaseVersions);
                                 }
                             }
+                            ClearLogger(projectManager);
                         }
                         catch (Exception ex)
                         {
@@ -546,6 +575,7 @@ namespace NuGet.VisualStudio
             ILogger logger)
         {
             logger = logger ?? NullLogger.Instance;
+            IDisposable disposableAction = StartReinstallOperation(package.Id, package.Version.ToString());
 
             try
             {
@@ -589,6 +619,7 @@ namespace NuGet.VisualStudio
             finally
             {
                 ClearLogger(projectManager);
+                disposableAction.Dispose();
             }
         }
 
@@ -666,17 +697,21 @@ namespace NuGet.VisualStudio
                    if (!projectManager.LocalRepository.Exists(packageId))
                    {
                        SemanticVersion oldVersion = projectsHasPackage[project];
-                       InstallPackage(
-                           projectManager,
-                           packageId,
-                           version: oldVersion,
-                           ignoreDependencies: !updateDependencies,
-                           allowPrereleaseVersions: allowPrereleaseVersions || !String.IsNullOrEmpty(oldVersion.SpecialVersion),
-                           logger: logger);
+                       using (StartReinstallOperation(packageId, oldVersion.ToString()))
+                       {
+                           InstallPackage(
+                               projectManager,
+                               packageId,
+                               version: oldVersion,
+                               ignoreDependencies: !updateDependencies,
+                               allowPrereleaseVersions: allowPrereleaseVersions || !String.IsNullOrEmpty(oldVersion.SpecialVersion),
+                               logger: logger);
+                       }
                    }
                },
                logger,
                eventListener);
+
         }
 
         private void ReinstallSolutionPackage(
@@ -686,6 +721,7 @@ namespace NuGet.VisualStudio
             ILogger logger)
         {
             logger = logger ?? NullLogger.Instance;
+            var disposableAction = StartReinstallOperation(package.Id, package.Version.ToString());
 
             try
             {
@@ -716,6 +752,7 @@ namespace NuGet.VisualStudio
             finally
             {
                 ClearLogger();
+                disposableAction.Dispose();
             }
         }
 
@@ -893,7 +930,7 @@ namespace NuGet.VisualStudio
         {
             return package.HasProjectContent() ||
                  package.DependencySets.SelectMany(p => p.Dependencies).Any() ||
-                _sharedRepository.IsReferenced(package.Id, package.Version);               
+                _sharedRepository.IsReferenced(package.Id, package.Version);
         }
 
         private Exception CreateAmbiguousUpdateException(IProjectManager projectManager, IList<IPackage> packages)
@@ -937,12 +974,19 @@ namespace NuGet.VisualStudio
 
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, version, updateDependencies, allowPrereleaseVersions));
+            string versionString = version == null ? null : version.ToString();
+            using (StartUpdateOperation(packageId, versionString))
+            {
+                RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, version, updateDependencies, allowPrereleaseVersions));
+            }
         }
 
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, versionSpec, updateDependencies, allowPrereleaseVersions));
+            using (StartUpdateOperation(packageId, packageVersion: null))
+            {
+                RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, versionSpec, updateDependencies, allowPrereleaseVersions));
+            }
         }
 
         private void AddPackageReference(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
@@ -981,6 +1025,7 @@ namespace NuGet.VisualStudio
 
                             projectAction(projectManager);
                             successfulAtLeastOnce = true;
+                            ClearLogger(projectManager);
                         }
                         catch (Exception ex)
                         {
@@ -1059,7 +1104,7 @@ namespace NuGet.VisualStudio
 
             try
             {
-                RuntimeHelpers.AddBindingRedirects(_solutionManager, project, _fileSystemProvider);
+                RuntimeHelpers.AddBindingRedirects(_solutionManager, project, _fileSystemProvider, _frameworkMultiTargeting);
             }
             catch (Exception e)
             {
@@ -1242,7 +1287,7 @@ namespace NuGet.VisualStudio
                 // We need to Remove the handlers here since we're going to attempt
                 // a rollback and we don't want modify the collections while rolling back.
                 projectManager.PackageReferenceRemoved -= removeHandler;
-                projectManager.PackageReferenceAdded -= addingHandler;
+                projectManager.PackageReferenceAdding -= addingHandler;
 
                 // When things fail attempt a rollback
                 RollbackProjectActions(projectManager, packagesAdded, packagesRemoved);
@@ -1303,8 +1348,14 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions,
-                ILogger logger, IPackageOperationEventListener eventListener)
+        private void UpdatePackage(
+            string packageId,
+            Action<IProjectManager> projectAction,
+            Func<IPackage> resolvePackage,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
+            ILogger logger,
+            IPackageOperationEventListener eventListener)
         {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
@@ -1351,6 +1402,8 @@ namespace NuGet.VisualStudio
 
                 if (newPackage != null && package.Version != newPackage.Version)
                 {
+                    IDisposable operationDisposable = StartUpdateOperation(newPackage.Id, newPackage.Version.ToString());
+
                     try
                     {
                         InitializeLogger(logger, projectManager: null);
@@ -1361,6 +1414,7 @@ namespace NuGet.VisualStudio
                     finally
                     {
                         ClearLogger(projectManager: null);
+                        operationDisposable.Dispose();
                     }
                 }
                 else
@@ -1461,6 +1515,39 @@ namespace NuGet.VisualStudio
             base.OnUninstalled(e);
 
             _deleteOnRestartManager.MarkPackageDirectoryForDeletion(e.Package);
+        }
+
+        private IDisposable StartInstallOperation(string packageId, string packageVersion)
+        {
+            return StartOperation(RepositoryOperationNames.Install, packageId, packageVersion);
+        }
+
+        private IDisposable StartUpdateOperation(string packageId, string packageVersion)
+        {
+            return StartOperation(RepositoryOperationNames.Update, packageId, packageVersion);
+        }
+
+        private IDisposable StartReinstallOperation(string packageId, string packageVersion)
+        {
+            return StartOperation(RepositoryOperationNames.Reinstall, packageId, packageVersion);
+        }
+
+        private IDisposable StartOperation(string operation, string packageId, string mainPackageVersion)
+        {
+            // If there's a pending operation, don't allow another one to start.
+            // This is for the Reinstall case. Because Reinstall just means
+            // uninstalling and installing, we don't want the child install operation
+            // to override Reinstall value.
+            if (_repositoryOperationPending)
+            {
+                return DisposableAction.NoOp;
+            }
+
+            _repositoryOperationPending = true;
+
+            return DisposableAction.All(
+                SourceRepository.StartOperation(operation, packageId, mainPackageVersion),
+                new DisposableAction(() => _repositoryOperationPending = false));
         }
     }
 }

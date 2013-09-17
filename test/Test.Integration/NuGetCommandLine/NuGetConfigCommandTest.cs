@@ -33,7 +33,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Assert
                 Assert.Equal(0, result);
 
-                var settings = Settings.LoadDefaultSettings(null);
+                var settings = Settings.LoadDefaultSettings(null, null, null);
                 var values = settings.GetValues("config");
                 AssertEqualCollections(values, new[] { "Name1", "Value1", "HTTP_PROXY", "http://127.0.0.1", "HTTP_PROXY.USER", @"domain\user" });
 
@@ -71,7 +71,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
                 var settings = Settings.LoadDefaultSettings(
                     new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
-                    Path.GetFileName(configFile));
+                    Path.GetFileName(configFile),
+                    null);
                 var values = settings.GetValues("config");
                 AssertEqualCollections(values, new[] { "Name1", "Value1", "HTTP_PROXY", "http://127.0.0.1", "HTTP_PROXY.USER", @"domain\user" });
 

@@ -1,15 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace NuGet.Test.Mocks
 {
-    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository
+    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository, IPackageLookup
     {
         private readonly string _source;
         
         public string LastOperation { get; private set; }
+        public string LastMainPackageId { get; private set; }
+        public string LastMainPackageVersion { get; private set; }
 
         public MockPackageRepository()
             : this("")
@@ -152,10 +154,68 @@ namespace NuGet.Test.Mocks
             }
         }
 
-        public IDisposable StartOperation(string operation)
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            List<IPackage> packages;
+            bool result = Packages.TryGetValue(id, out packages);
+            if (result && packages.Count > 0)
+            {
+                // remove unlisted packages
+                packages.RemoveAll(p => !p.IsListed());
+
+                if (!includePrerelease)
+                {
+                    packages.RemoveAll(p => !p.IsReleaseVersion());
+                }
+
+                if (packages.Count > 0)
+                {
+                    packages.Sort((a, b) => b.Version.CompareTo(a.Version));
+                    package = packages[0];
+                    return true;
+                }
+            }
+
+            package = null;
+            return false;
+        }
+
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             LastOperation = null;
-            return new DisposableAction(() => { LastOperation = operation; });
+            LastMainPackageId = null;
+            LastMainPackageVersion = null;
+            return new DisposableAction(() => 
+            { 
+                LastOperation = operation;
+                LastMainPackageId = mainPackageId;
+                LastMainPackageVersion = mainPackageVersion;
+            });
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return FindPackage(packageId, version) != null;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            List<IPackage> packages;
+            if (Packages.TryGetValue(packageId, out packages))
+            {
+                return packages.Find(p => p.Version.Equals(version));
+            }
+            return null;
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            List<IPackage> packages;
+            if (Packages.TryGetValue(packageId, out packages))
+            {
+                return packages;
+            }
+            return Enumerable.Empty<IPackage>();
         }
     }
 }

@@ -1,17 +1,17 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using EnvDTE;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
+using NuGet.VisualStudio.Resources;
 using Xunit;
 using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
-    using System.Globalization;
-    using NuGet.VisualStudio.Resources;
     using PackageUtility = NuGet.Test.PackageUtility;
 
     public partial class VsPackageManagerTest
@@ -430,8 +430,8 @@ namespace NuGet.VisualStudio.Test
                 ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
-            Assert.True(localRepository.IsReferenced("bar1", new SemanticVersion("2.0")));
-            Assert.True(localRepository.IsReferenced("bar2", new SemanticVersion("2.0")));
+            Assert.True(localRepository.IsSolutionReferenced("bar1", new SemanticVersion("2.0")));
+            Assert.True(localRepository.IsSolutionReferenced("bar2", new SemanticVersion("2.0")));
 
             Assert.True(packageManager.LocalRepository.Exists(packageFoo));
             Assert.True(projectManager.LocalRepository.Exists(packageFoo));
@@ -472,8 +472,8 @@ namespace NuGet.VisualStudio.Test
                 ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
-            Assert.True(localRepository.IsReferenced("bar1", new SemanticVersion("2.0")));
-            Assert.True(localRepository.IsReferenced("bar2", new SemanticVersion("2.0")));
+            Assert.True(localRepository.IsSolutionReferenced("bar1", new SemanticVersion("2.0")));
+            Assert.True(localRepository.IsSolutionReferenced("bar2", new SemanticVersion("2.0")));
         }
 
         /// <summary>
@@ -1159,7 +1159,8 @@ namespace NuGet.VisualStudio.Test
                 projectSystem,
                 localRepository.Object,
                 new Mock<IDeleteOnRestartManager>().Object,
-                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
 
             packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager);
 

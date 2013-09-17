@@ -28,12 +28,12 @@ namespace NuGet.Commands
             string packagePath = Arguments[0];
 
             // Don't push symbols by default
-            string source = ResolveSource(packagePath);
+            string source = ResolveSource(packagePath, ConfigurationDefaults.Instance.DefaultPushSource);
 
             var apiKey = GetApiKey(source);
-            if (String.IsNullOrEmpty(apiKey))
+            if (String.IsNullOrEmpty(apiKey) && !IsFileSource(source))
             {
-                Console.WriteWarning(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
+                Console.WriteWarning(LocalizedResourceManager.GetString("NoApiKeyFound"), CommandLineUtility.GetSourceDisplayName(source));
             }
 
             var timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
@@ -50,13 +50,18 @@ namespace NuGet.Commands
             }
         }
 
-        public string ResolveSource(string packagePath)
+        public string ResolveSource(string packagePath, string configurationDefaultPushSource = null)
         {
             string source = Source;
 
             if (String.IsNullOrEmpty(source))
             {
                 source = Settings.GetConfigValue("DefaultPushSource");
+            }
+
+            if (String.IsNullOrEmpty(source))
+            {
+                source = configurationDefaultPushSource;
             }
 
             if (!String.IsNullOrEmpty(source))
@@ -87,7 +92,7 @@ namespace NuGet.Commands
 
                 if (String.IsNullOrEmpty(apiKey))
                 {
-                    Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
+                    Console.WriteWarning(LocalizedResourceManager.GetString("Warning_SymbolServerNotConfigured"), Path.GetFileName(symbolPackagePath), LocalizedResourceManager.GetString("DefaultSymbolServer"));
                 }
                 PushPackage(symbolPackagePath, source, apiKey, timeout);
             }
@@ -130,10 +135,10 @@ namespace NuGet.Commands
             var package = new OptimizedZipPackage(packageToPush);
 
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
+            Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPushingPackage"), package.GetFullName(), sourceName);
 
             packageServer.PushPackage(apiKey, package, Convert.ToInt32(timeout.TotalMilliseconds));
-            Console.WriteLine(NuGetResources.PushCommandPackagePushed);
+            Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPackagePushed"));
         }
 
         private static IEnumerable<string> GetPackagesToPush(string packagePath)
@@ -170,7 +175,7 @@ namespace NuGet.Commands
         {
             if (!packagesToPush.Any())
             {
-                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, packagePath));
+                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("UnableToFindFile"), packagePath));
             }
         }
 
@@ -196,6 +201,24 @@ namespace NuGet.Commands
             }
 
             return apiKey;
+        }
+
+        /// <summary>
+        /// Indicates whether the specified source is a file source, such as: \\a\b, c:\temp, etc.
+        /// </summary>
+        /// <param name="source">The source to test.</param>
+        /// <returns>true if the source is a file source; otherwise, false.</returns>
+        private static bool IsFileSource(string source)
+        {
+            Uri uri;
+            if (Uri.TryCreate(source, UriKind.RelativeOrAbsolute, out uri))
+            {
+                return uri.IsFile;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

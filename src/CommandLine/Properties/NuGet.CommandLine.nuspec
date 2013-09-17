@@ -4,8 +4,10 @@
     <id>NuGet.CommandLine</id>
     <version>$version$</version>
     <authors>Outercurve Foundation</authors>
+    <owners>Outercurve Foundation</owners>
     <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
     <projectUrl>http://nuget.codeplex.com</projectUrl>
+    <copyright>&#169; Outercurve Foundation. All rights reserved.</copyright>
     <description>NuGet Command Line Tool</description>
   </metadata>
   <files>

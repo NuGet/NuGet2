@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Moq;
 using Xunit;
 using NuGet.Test.Mocks;
@@ -1083,7 +1084,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
-            var settings = Settings.LoadDefaultSettings(mockFileSystem);
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Act
             var result = settings.GetValues("SectionName");
@@ -1115,7 +1116,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
-            var settings = Settings.LoadDefaultSettings(mockFileSystem);
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Act
             var result = settings.GetValues("SectionName");
@@ -1146,7 +1147,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
-            var settings = Settings.LoadDefaultSettings(mockFileSystem);
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
             Assert.Equal("value4", settings.GetValue("SectionName", "key4"));
@@ -1177,7 +1178,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
-            var settings = Settings.LoadDefaultSettings(mockFileSystem);
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
             Assert.Equal("LastOneWins2", settings.GetValue("SectionName", "key2"));
@@ -1205,7 +1206,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
-            var settings = Settings.LoadDefaultSettings(mockFileSystem);
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
             Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
@@ -1258,7 +1259,8 @@ namespace NuGet.Test
 
             var settings = Settings.LoadDefaultSettings(
                 mockFileSystem, 
-                "UserDefinedConfigFile.confg");
+                "UserDefinedConfigFile.confg",
+                null);
 
             // Act
             var result = settings.GetValues("SectionName");
@@ -1311,6 +1313,210 @@ namespace NuGet.Test
             // Assert
             mockFileSystem.Verify();
             Assert.Equal(@"x:\mock-directory\Qux\Blah", result);
+        }
+
+        // Checks that the correct files are read, in the right order, 
+        // when laoding machine wide settings.
+        [Fact]
+        public void LoadMachineWideSettings()
+        {
+            // Arrange
+            var fileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key"" value=""value"" />
+  </SectionName>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem(@"C:\");
+
+            mockFileSystem.AddFile(
+                @"NuGet\a1.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a1.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a2.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a3.xconfig",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\a1.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\a2.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\a3.xconfig",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\a1.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\a2.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\a3.xconfig",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\SKU\a1.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\SKU\a2.config",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\SKU\a3.xconfig",
+                fileContent);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\Version\SKU\Dir\a1.config",
+                fileContent);
+            
+            // Act
+            var settings = Settings.LoadMachineWideSettings(
+                mockFileSystem, "IDE", "Version", "SKU", "TestDir");
+
+            // Assert
+            var files = settings.Select(s => s.ConfigFilePath).ToArray();
+            Assert.Equal(
+                files,
+                new string[] {
+                    @"C:\NuGet\Config\IDE\Version\SKU\a1.config",
+                    @"C:\NuGet\Config\IDE\Version\SKU\a2.config",
+                    @"C:\NuGet\Config\IDE\Version\a1.config",
+                    @"C:\NuGet\Config\IDE\Version\a2.config",
+                    @"C:\NuGet\Config\IDE\a1.config",
+                    @"C:\NuGet\Config\IDE\a2.config",
+                    @"C:\NuGet\Config\a1.config",
+                    @"C:\NuGet\Config\a2.config"
+                });            
+        }
+
+        // Tests method GetValue() with machine wide settings.
+        [Fact]
+        public void GetValueWithMachineWideSettings()
+        {
+            // Arrange            
+            var mockFileSystem = new MockFileSystem(@"C:\");
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a1.config",
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+    <add key=""key2"" value=""value2"" />
+  </SectionName>
+</configuration>");
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\a1.config",
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key2"" value=""value3"" />
+    <add key=""key3"" value=""value4"" />
+  </SectionName>
+</configuration>");
+            mockFileSystem.AddFile(
+               "user.config",
+               @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""user"" />
+  </SectionName>
+</configuration>");
+
+            var m = new Mock<IMachineWideSettings>();
+            m.SetupGet(obj => obj.Settings).Returns(
+                Settings.LoadMachineWideSettings(mockFileSystem, "IDE", "Version", "SKU"));
+
+            // Act
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem, 
+                "user.config",
+                m.Object);
+
+            // Assert
+            var v = settings.GetValue("SectionName", "key1");
+            Assert.Equal("value1", v);
+
+            // the value in NuGet\Config\IDE\a1.config overrides the value in
+            // NuGet\Config\a1.config
+            v = settings.GetValue("SectionName", "key2");
+            Assert.Equal("value3", v);
+
+            // the value in user.config overrides the value in NuGet\Config\IDE\a1.config
+            v = settings.GetValue("SectionName", "key3");
+            Assert.Equal("user", v);
+        }
+
+        // Tests method SetValue() with machine wide settings.
+        // Verifies that the user specific config file is modified, while machine
+        // wide settings files are not touched.
+        [Fact]
+        public void SetValueWithMachineWideSettings()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"C:\");
+            var a1Config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+  </SectionName>
+</configuration>";
+            var a2Config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key2"" value=""value2"" />
+    <add key=""key3"" value=""value3"" />
+  </SectionName>
+</configuration>";
+
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a1.config",
+                a1Config);
+            mockFileSystem.AddFile(
+                @"NuGet\Config\IDE\a2.config",
+                a2Config);
+
+            mockFileSystem.AddFile(
+               "user.config",
+               @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""user"" />
+  </SectionName>
+</configuration>");
+
+            var m = new Mock<IMachineWideSettings>();
+            m.SetupGet(obj => obj.Settings).Returns(
+                Settings.LoadMachineWideSettings(mockFileSystem, "IDE", "Version", "SKU"));
+
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                "user.config",
+                m.Object);
+
+            // Act            
+            settings.SetValue("SectionName", "key1", "newValue");
+
+            // Assert
+            var text = mockFileSystem.ReadAllText("user.config");
+            Assert.Equal(
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""user"" />
+    <add key=""key1"" value=""newValue"" />
+  </SectionName>
+</configuration>",
+                 text);
+
+            text = mockFileSystem.ReadAllText(@"NuGet\Config\a1.config");
+            Assert.Equal(a1Config, text);
+
+            text = mockFileSystem.ReadAllText(@"NuGet\Config\IDE\a2.config");
+            Assert.Equal(a2Config, text);
         }
     }
 }

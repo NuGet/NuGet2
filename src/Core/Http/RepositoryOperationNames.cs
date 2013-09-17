@@ -6,6 +6,8 @@
     public static class RepositoryOperationNames
     {
         public static readonly string OperationHeaderName = "NuGet-Operation";
+        public static readonly string DependentPackageHeaderName = "NuGet-DependentPackage";
+        public static readonly string DependentPackageVersionHeaderName = "NuGet-DependentPackageVersion";
 
         public static readonly string Update = "Update";
         public static readonly string Install = "Install";

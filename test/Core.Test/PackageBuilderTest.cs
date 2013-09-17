@@ -760,8 +760,8 @@ namespace NuGet.Test
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            
-            var dependencySet = new PackageDependencySet(null, new [] {
+
+            var dependencySet = new PackageDependencySet(null, new[] {
                 new PackageDependency("B", new VersionSpec
                     {
                         MinVersion = new SemanticVersion("1.0"),
@@ -1534,7 +1534,7 @@ Description is required.");
             var packageAssemblyReferences = new PackageReferenceSet(new FrameworkName("Silverlight, Version=1.0"), new string[] { "foo.dll", "bar", "baz" });
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, new [] { packageAssemblyReferences }),
+            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, new[] { packageAssemblyReferences }),
                 "Invalid assembly reference 'baz'. Ensure that a file named 'baz' exists in the lib directory.");
         }
 
@@ -1717,6 +1717,24 @@ Enabling license acceptance requires a license url.");
 
             // Act & Assert            
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The special version part cannot exceed 20 characters.");
+        }
+
+        [Fact]
+        public void PackageBuilderThrowsIfDependencyIdInvalid()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                Id = "a.b",
+                Version = new SemanticVersion("1.0"),
+                Description = "Description"
+            };
+            builder.Authors.Add("Me");
+
+            builder.DependencySets.Add(new PackageDependencySet(null, new[] { new PackageDependency("brainf%2ack") }));
+
+            // Act & Assert            
+            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID 'brainf%2ack' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
         [Fact]

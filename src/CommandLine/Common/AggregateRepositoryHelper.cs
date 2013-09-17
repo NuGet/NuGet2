@@ -17,7 +17,7 @@ namespace NuGet.Common
             }
             else
             {
-                repository = sourceProvider.GetAggregate(factory, ignoreFailingRepositories: true);
+                repository = sourceProvider.CreateAggregateRepository(factory, ignoreFailingRepositories: true);
             }
 
             return repository;

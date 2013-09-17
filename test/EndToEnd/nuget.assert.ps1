@@ -29,6 +29,26 @@ function Get-ProjectRepository {
     New-Object NuGet.PackageReferenceRepository($fileSystem, $packageManager.LocalRepository)
 }
 
+function Get-ProjectPackageReferences {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project
+    )
+
+    $packageReferenceFile = New-Object NuGet.PackageReferenceFile((Get-ProjectItemPath $Project 'packages.config'))
+    $packageReferencesEnumerable = $packageReferenceFile.GetPackageReferences()
+    $packageReferences = @()
+
+    # In powershell, It is easier to simply iterate over the enumerable and create an array
+    # than to try and use the extension method ToArray in System.Linq
+    foreach($packageReference in $packageReferencesEnumerable)
+    {
+        $packageReferences += $packageReference
+    }
+
+    return ,$packageReferences
+}
+
 function Get-ProjectPackage {
     param(
         [parameter(Mandatory = $true)]

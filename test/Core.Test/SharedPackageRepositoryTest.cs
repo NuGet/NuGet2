@@ -15,7 +15,26 @@ namespace NuGet.Test
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
-        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
+        public void CallAddPackageWillAddNupkgFileButNoNuspecFile(string id, string version, string nuspecPath, string nupkgPath)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\root");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            
+            // Act            
+            repository.AddPackage(PackageUtility.CreatePackage(id, version));
+
+            // Assert
+            Assert.False(fileSystem.FileExists(nuspecPath));
+            Assert.True(fileSystem.FileExists(nupkgPath));
+        }
+
+        [Theory]
+        [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
+        [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
+        public void CallAddPackageToAddBothNuspecFileAndNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -38,7 +57,6 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-            repository.FilesToSave = PackageFileTypes.Nupkg | PackageFileTypes.Nuspec;
 
             // Act
             var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
@@ -49,46 +67,12 @@ namespace NuGet.Test
                     new PackageReferenceSet(null, new [] { "B.dll" }),
                 });
 
-            repository.AddPackage(package);
-
-            // Assert
-            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
-
-            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
-
-            Assert.Equal(2, manifest.Metadata.ReferenceSets.Count);
-
-            var set1 = manifest.Metadata.ReferenceSets[0];
-            Assert.Equal(".NETFramework4.0", set1.TargetFramework);
-            Assert.Equal(1, set1.References.Count);
-            Assert.Equal("A.dll", set1.References[0].File);
-
-            var set2 = manifest.Metadata.ReferenceSets[1];
-            Assert.Null(set2.TargetFramework);
-            Assert.Equal(1, set2.References.Count);
-            Assert.Equal("B.dll", set2.References[0].File);
-        }
-
-        [Fact]
-        public void AddedNuspecDoesNotAddReferencesSectionIfNotPresent()
-        {
-            // Arrange
-            var fileSystem = new MockFileSystem("x:\\root");
-            var configFileSystem = new MockFileSystem();
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-
             // Act
-            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
             repository.AddPackage(package);
 
             // Assert
-            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
-
-            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
-
-            Assert.Equal(0, manifest.Metadata.ReferenceSets.Count);
+            Assert.False(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nupkg"));
         }
 
         [Theory]
@@ -429,6 +413,46 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(configFileSystem.FileExists("packages.config"));
+        }
+
+        // Tests that adding a solution level package which depends on an already installed solution 
+        // level package will succeed.
+        [Fact]
+        public void AddPackageAddSolutionLevelPackageDependingOnAnotherSolutionLevelPackage()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage1 = PackageUtility.CreatePackage("SolutionLevel1", tools: new[] { "Install.ps1" });
+            var solutionPackage2 = PackageUtility.CreatePackage("SolutionLevel2", tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("SolutionLevel1")});            
+            // Act
+            repository.AddPackage(solutionPackage1);
+            repository.AddPackage(solutionPackage2);
+
+            // Assert
+            var packageReferences = repository.PackageReferenceFile.GetPackageReferences()
+                .Select(p => p.Id).OrderBy(id => id).ToArray();
+            Assert.Equal(new [] { "SolutionLevel1", "SolutionLevel2" }, packageReferences);
+        }
+
+        // Tests that adding a solution level package which depends on a project level package will
+        // not succeed.
+        [Fact]
+        public void AddPackageAddSolutionLevelPackageDependingOnProjectLevelPackage()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel2", tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("ProjectLevel1") });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            var packageReferences = repository.PackageReferenceFile.GetPackageReferences().ToArray();
+            Assert.True(packageReferences.IsEmpty());
         }
 
         [Fact]

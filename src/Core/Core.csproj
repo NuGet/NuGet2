@@ -24,7 +24,7 @@
       <LastGenOutput>AnalysisResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\NuGetResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -70,10 +70,12 @@
     <Compile Include="Authoring\PackageDependencySet.cs" />
     <Compile Include="Authoring\PackageReferenceSet.cs" />
     <Compile Include="Authoring\PhysicalPackageAssemblyReference.cs" />
+    <Compile Include="Configuration\ConfigurationDefaults.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\NullSettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Configuration\SettingValue.cs" />
     <Compile Include="EnvironmentVariableWrapper.cs" />
     <Compile Include="Extensions\CredentialProviderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
@@ -94,9 +96,11 @@
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RepositoryOperationNames.cs" />
     <Compile Include="Http\RequestHelper.cs" />
+    <Compile Include="Http\SendingRequestEventManager.cs" />
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="Http\WIFTypeProvider.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="IMachineWideSettings.cs" />
     <Compile Include="Logging\FileConflictResolution.cs" />
     <Compile Include="Logging\IFileConflictResolver.cs" />
     <Compile Include="NETPortable\NetPortableProfile.cs" />
@@ -113,10 +117,12 @@
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
     <Compile Include="Repositories\IPackageCacheRepository.cs" />
+    <Compile Include="Repositories\IPackageName.cs" />
     <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IOperationAwareRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
+    <Compile Include="Repositories\PriorityPackageRepository.cs" />
     <Compile Include="Repositories\UnzippedPackageRepository.cs" />
     <Compile Include="Resources\AnalysisResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -162,6 +168,7 @@
     <Compile Include="Utility\CustomAttributeProviderExtensions.cs" />
     <Compile Include="Utility\DisposableAction.cs" />
     <Compile Include="Utility\EncryptionUtility.cs" />
+    <Compile Include="Utility\EnvironmentUtility.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\ICredentialProvider.cs" />
@@ -276,7 +283,6 @@
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\IPackageFile.cs" />
     <Compile Include="Packages\PackageDependency.cs" />
-    <Compile Include="Utility\Crc32.cs" />
     <Compile Include="Repositories\LocalPackageRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\UriUtility.cs" />

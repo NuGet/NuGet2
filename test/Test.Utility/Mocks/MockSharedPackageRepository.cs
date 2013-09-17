@@ -7,7 +7,11 @@ namespace NuGet.Test.Mocks
 {
     public class MockSharedPackageRepository : MockPackageRepository, ISharedPackageRepository
     {
-        private List<Tuple<string, SemanticVersion>> _references;
+        private Dictionary<string, SemanticVersion> _references = 
+            new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
+
+        private Dictionary<string, SemanticVersion> _solutionReferences = 
+            new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
 
         public MockSharedPackageRepository()
             : this("")
@@ -16,16 +20,19 @@ namespace NuGet.Test.Mocks
 
         public MockSharedPackageRepository(string source) : base(source)
         {
-            _references = new List<Tuple<string, SemanticVersion>>();
         }
 
         public override void AddPackage(IPackage package)
         {
             base.AddPackage(package);
 
-            if (!package.HasProjectContent())
+            if (package.HasProjectContent())
             {
-                AddPackageReferenceEntry(package.Id, package.Version);
+                _references[package.Id] = package.Version;
+            }
+            else
+            {
+                _solutionReferences[package.Id] = package.Version;
             }
         }
 
@@ -33,27 +40,26 @@ namespace NuGet.Test.Mocks
         {
             base.RemovePackage(package);
 
-            RemovePackageReferenceEntry(package.Id, package.Version);
+            if (package.HasProjectContent())
+            {
+                _references.Remove(package.Id);
+            }
+            else
+            {
+                _solutionReferences.Remove(package.Id);
+            }
         }
         
         public bool IsReferenced(string packageId, SemanticVersion version)
         {
-            return _references.Any(r => r.Item1 == packageId && r.Item2 == version);
+            SemanticVersion storedVersion;
+            return _references.TryGetValue(packageId, out storedVersion) && storedVersion == version;
         }
 
         public bool IsSolutionReferenced(string packageId, SemanticVersion version)
         {
-            return _references.Contains(Tuple.Create(packageId, version));
-        }
-
-        private void AddPackageReferenceEntry(string packageId, SemanticVersion version)
-        {
-            _references.Add(Tuple.Create(packageId, version));
-        }
-
-        private void RemovePackageReferenceEntry(string packageId, SemanticVersion version)
-        {
-            _references.Remove(Tuple.Create(packageId, version));
+            SemanticVersion storedVersion;
+            return _solutionReferences.TryGetValue(packageId, out storedVersion) && storedVersion == version;
         }
 
         public void RegisterRepository(string path)

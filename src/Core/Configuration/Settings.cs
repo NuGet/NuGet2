@@ -17,12 +17,19 @@ namespace NuGet
         // next config file to read if any
         private Settings _next;
 
+        private readonly bool _isMachineWideSettings;
+
         public Settings(IFileSystem fileSystem)
-            : this(fileSystem, Constants.SettingsFileName)
+            : this(fileSystem, Constants.SettingsFileName, false)
         {
         }
 
         public Settings(IFileSystem fileSystem, string fileName)
+            : this(fileSystem, fileName, false)
+        {
+        }
+
+        public Settings(IFileSystem fileSystem, string fileName, bool isMachineWideSettings)
         {
             if (fileSystem == null)
             {
@@ -35,6 +42,16 @@ namespace NuGet
             _fileSystem = fileSystem;
             _fileName = fileName;
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _fileName);
+            _isMachineWideSettings = isMachineWideSettings;
+        }
+
+        /// <summary>
+        /// Flag indicating whether this file is a machine wide settings file. A machine wide settings
+        /// file will not be modified.
+        /// </summary>
+        public bool IsMachineWideSettings
+        {
+            get { return _isMachineWideSettings; }
         }
 
         public string ConfigFilePath
@@ -49,23 +66,12 @@ namespace NuGet
         /// <summary>
         /// Loads user settings from the NuGet configuration files. The method walks the directory
         /// tree in <paramref name="fileSystem"/> up to its root, and reads each NuGet.config file
-        /// it finds in the directories. It then loads the configuration file %AppData%\NuGet\NuGet.config.
-        /// </summary>
-        /// <param name="fileSystem">The file system to walk to find configuration files.</param>
-        /// <returns>The settings object loaded.</returns>
-        public static ISettings LoadDefaultSettings(IFileSystem fileSystem)
-        {
-            return LoadDefaultSettings(
-                fileSystem,
-                null);
-        }
-
-        /// <summary>
-        /// Loads user settings from the NuGet configuration files. The method walks the directory
-        /// tree in <paramref name="fileSystem"/> up to its root, and reads each NuGet.config file
-        /// it finds in the directories. It then reads the user specified <paramref name="configFileName"/>
-        /// in <paramref name="fileSystem"/> if <paramref name="configFileName"/> is not null. 
-        /// If <paramref name="configFileName"/> is null, file %AppData%\NuGet\NuGet.config is loaded.
+        /// it finds in the directories. It then reads the user specific settings,
+        /// which is file <paramref name="configFileName"/>
+        /// in <paramref name="fileSystem"/> if <paramref name="configFileName"/> is not null,
+        /// If <paramref name="configFileName"/> is null, the user specific settings file is
+        /// %AppData%\NuGet\NuGet.config.
+        /// After that, the machine wide settings files are added.
         /// </summary>
         /// <remarks>
         /// For example, if <paramref name="fileSystem"/> is c:\dir1\dir2, <paramref name="configFileName"/> 
@@ -74,13 +80,18 @@ namespace NuGet
         ///     c:\dir1\nuget.config
         ///     c:\nuget.config
         ///     c:\dir1\dir2\userConfig.file
+        ///     machine wide settings (e.g. c:\programdata\NuGet\Config\*.config)
         /// </remarks>
         /// <param name="fileSystem">The file system to walk to find configuration files.</param>
         /// <param name="configFileName">The user specified configuration file.</param>
+        /// <param name="machineWideSettings">The machine wide settings. If it's not null, the
+        /// settings files in the machine wide settings are added after the user sepcific 
+        /// config file.</param>
         /// <returns>The settings object loaded.</returns>
         public static ISettings LoadDefaultSettings(
             IFileSystem fileSystem,
-            string configFileName)
+            string configFileName,
+            IMachineWideSettings machineWideSettings)
         {
             // Walk up the tree to find a config file; also look in .nuget subdirectories
             var validSettingFiles = new List<Settings>();
@@ -92,6 +103,40 @@ namespace NuGet
                         .Where(f => f != null));
             }
 
+            LoadUserSpecificSettings(validSettingFiles, fileSystem, configFileName);
+
+            if (machineWideSettings != null)
+            {
+                validSettingFiles.AddRange(machineWideSettings.Settings);
+            }
+
+            if (validSettingFiles.IsEmpty())
+            {
+                // This means we've failed to load all config files and also failed to load or create the one in %AppData%
+                // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                // Returning a null instance prevents us from silently failing and also from picking up the wrong config
+                return NullSettings.Instance;
+            }
+
+            // if multiple setting files were loaded, chain them in a linked list
+            for (int i = 1; i < validSettingFiles.Count; ++i)
+            {
+                validSettingFiles[i]._next = validSettingFiles[i - 1];
+            }
+
+            // return the linked list head. Typicall, it's either the config file in %ProgramData%\NuGet\Config,
+            // or the user specific config (%APPDATA%\NuGet\nuget.config) if there are no machine
+            // wide config files. The head file is the one we want to read first, while the user specific config 
+            // is the one that we want to write to.
+            // TODO: add UI to allow specifying which one to write to
+            return validSettingFiles.Last();
+        }
+
+        private static void LoadUserSpecificSettings(
+            List<Settings> validSettingFiles,
+            IFileSystem fileSystem,
+            string configFileName)
+        {
             // for the default location, allow case where file does not exist, in which case it'll end
             // up being created if needed
             Settings appDataSettings = null;
@@ -110,29 +155,64 @@ namespace NuGet
             {
                 appDataSettings = ReadSettings(fileSystem, configFileName);
             }
+
             if (appDataSettings != null)
             {
                 validSettingFiles.Add(appDataSettings);
             }
+        }
 
-            if (validSettingFiles.IsEmpty())
-            {
-                // This means we've failed to load all config files and also failed to load or create the one in %AppData%
-                // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
-                // Returning a null instance prevents us from silently failing and also from picking up the wrong config
-                return NullSettings.Instance;
+        /// <summary>
+        /// Loads the machine wide settings.
+        /// </summary>
+        /// <remarks>
+        /// For example, if <paramref name="paths"/> is {"IDE", "Version", "SKU" }, then
+        /// the files loaded are (in the order that they are loaded):
+        ///     %programdata%\NuGet\Config\IDE\Version\SKU\*.config
+        ///     %programdata%\NuGet\Config\IDE\Version\*.config
+        ///     %programdata%\NuGet\Config\IDE\*.config
+        ///     %programdata%\NuGet\Config\*.config
+        /// </remarks>
+        /// </remarks>
+        /// <param name="fileSystem">The file system in which the settings files are read.</param>
+        /// <param name="paths">The additional paths under which to look for settings files.</param>
+        /// <returns>The list of settings read.</returns>
+        public static IEnumerable<Settings> LoadMachineWideSettings(
+            IFileSystem fileSystem,
+            params string[] paths)
+        {
+            List<Settings> settingFiles = new List<Settings>();
+            string basePath = @"NuGet\Config";
+            string combinedPath = Path.Combine(paths);
+
+            while (true)
+            {   
+                string directory = Path.Combine(basePath, combinedPath);
+
+                // load setting files in directory
+                foreach (var file in fileSystem.GetFiles(directory, "*.config"))
+                {
+                    var settings = ReadSettings(fileSystem, file, true);
+                    if (settings != null)
+                    {
+                        settingFiles.Add(settings);
+                    }
+                }
+
+                if (combinedPath.Length == 0)
+                {
+                    break;
+                }
+
+                int index = combinedPath.LastIndexOf(Path.DirectorySeparatorChar);
+                if (index < 0)
+                {
+                    index = 0;
+                }
+                combinedPath = combinedPath.Substring(0, index);
             }
 
-            // if multiple setting files were loaded, chain them in a linked list
-            for (int i = 1; i < validSettingFiles.Count; ++i)
-            {
-                validSettingFiles[i]._next = validSettingFiles[i - 1];
-            }
-
-            // return the linked list head, typically %APPDATA%\NuGet\nuget.config
-            // This is the one we want to read first, and also the one that we want to write to
-            // TODO: add UI to allow specifying which one to write to
-            return validSettingFiles.Last();
+            return settingFiles;
         }
 
         public string GetValue(string section, string key)
@@ -227,6 +307,29 @@ namespace NuGet
             return values.AsReadOnly();
         }
 
+        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        {
+            if (String.IsNullOrEmpty(section))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+
+            var settingValues = new List<SettingValue>();
+            var curr = this;
+            while (curr != null)
+            {
+                var values = new List<KeyValuePair<string, string>>();
+                curr.PopulateValues(section, values, isPath);
+                foreach (var v in values)
+                {
+                    settingValues.Add(new SettingValue(v.Key, v.Value, curr.IsMachineWideSettings));
+                }
+                curr = curr._next;
+            }
+
+            return settingValues.AsReadOnly();
+        }
+
         private void PopulateValues(string section, List<KeyValuePair<string, string>> current, bool isPath)
         {
             var sectionElement = GetSection(_config.Root, section);
@@ -276,6 +379,18 @@ namespace NuGet
 
         public void SetValue(string section, string key, string value)
         {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                _next.SetValue(section, key, value);
+                return;
+            }
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -287,6 +402,18 @@ namespace NuGet
 
         public void SetValues(string section, IList<KeyValuePair<string, string>> values)
         {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                _next.SetValues(section, values);
+                return;
+            }
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -306,6 +433,18 @@ namespace NuGet
 
         public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
         {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                _next.SetNestedValues(section, key, values);
+                return;
+            }
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -352,6 +491,17 @@ namespace NuGet
 
         public bool DeleteValue(string section, string key)
         {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                return _next.DeleteValue(section, key);
+            }
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -379,6 +529,17 @@ namespace NuGet
 
         public bool DeleteSection(string section)
         {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                return _next.DeleteSection(section);
+            }
+            
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -527,9 +688,14 @@ namespace NuGet
 
         private static Settings ReadSettings(IFileSystem fileSystem, string settingsPath)
         {
+            return ReadSettings(fileSystem, settingsPath, false);
+        }
+
+        private static Settings ReadSettings(IFileSystem fileSystem, string settingsPath, bool isMachineWideSettings)
+        {
             try
             {
-                return new Settings(fileSystem, settingsPath);
+                return new Settings(fileSystem, settingsPath, isMachineWideSettings);
             }
             catch (XmlException)
             {

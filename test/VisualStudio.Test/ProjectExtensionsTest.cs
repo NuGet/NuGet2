@@ -1,11 +1,11 @@
 ﻿using EnvDTE;
-using Xunit;
 using Moq;
+using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.IO;
 
     public class ProjectExtensionsTest
     {
@@ -20,6 +20,124 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(@"WebProject\Bin", path);
+        }
+
+        [Theory]
+        [InlineData("", "Windows, Version=0.0")]
+        [InlineData(null, "Windows, Version=0.0")]
+        [InlineData("8.0", "Windows, Version=8.0")]
+        [InlineData("8.1", "Windows, Version=8.1")]
+        public void GetTargetFrameworkForJSProjectReturnsCorrectPlatformVersion(string platformVersion, string exptectedTargetFramework)
+        {
+            // Arrange
+            var project = new Mock<Project>();
+            project.Setup(p => p.Kind).Returns(VsConstants.JsProjectTypeGuid);
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(platformVersion);
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetPlatformVersion".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal(exptectedTargetFramework, targetFramework);
+        }
+
+        [Fact]
+        public void GetTargetFrameworkForXnaProjectReturnsWindowsPhoneTargetFramework()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+
+            var xnaProperty = new Mock<Property>();
+            xnaProperty.Setup(x => x.Value).Returns("Windows Phone OS 7.1");
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel".Equals(v))))
+                   .Returns(xnaProperty.Object);
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(".NETFramework,Version=v4.0");
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetFrameworkMoniker".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal("Silverlight,Version=v4.0,Profile=WindowsPhone71", targetFramework);
+        }
+
+        [Fact]
+        public void GetTargetFrameworkForWrongXnaProjectDoesNotReturnWindowsPhoneTargetFramework()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+
+            var xnaProperty = new Mock<Property>();
+            xnaProperty.Setup(x => x.Value).Returns("Windows Phone OS 7.0");    // 7.0 is not recognized. Only 7.1 is.
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel".Equals(v))))
+                   .Returns(xnaProperty.Object);
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(".NETFramework,Version=v4.0");
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetFrameworkMoniker".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal(".NETFramework,Version=v4.0", targetFramework);
+        }
+
+        [Fact]
+        public void GetTargetFrameworkForMissingXnaPropertyDoesNotReturnWindowsPhoneTargetFramework()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(".NETFramework,Version=v4.0");
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetFrameworkMoniker".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal(".NETFramework,Version=v4.0", targetFramework);
+        }
+
+        [Theory]
+        [InlineData(".NETFramework,Version=v4.5")]
+        [InlineData("Silverlight,Version=v4.0")]
+        [InlineData("WindowsPhone,Version=v7.0")]
+        [InlineData("WindowsPhone,Version=v8.0")]
+        public void GetTargetFrameworkForWrongTargetFrameowrkVersionInXnaProjectDoesNotReturnWindowsPhoneTargetFramework(string framework)
+        {
+            // Arrange
+            var project = new Mock<Project>();
+
+            var xnaProperty = new Mock<Property>();
+            xnaProperty.Setup(x => x.Value).Returns("Windows Phone OS 7.1");
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel".Equals(v))))
+                   .Returns(xnaProperty.Object);
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(framework);
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetFrameworkMoniker".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal(framework, targetFramework);
         }
 
         [Fact]

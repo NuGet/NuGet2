@@ -33,7 +33,9 @@ namespace NuGet.VisualStudio.Test
 
         public Property Item(object index)
         {
-            return _properties[index];
+            Property item;
+            _properties.TryGetValue(index, out item);
+            return item;
         }
 
         public void AddProperty(string name, object value)

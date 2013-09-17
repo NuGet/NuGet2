@@ -232,7 +232,7 @@ namespace NuGet
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,
@@ -275,10 +275,54 @@ namespace NuGet
             return allPackages.CollapseById();
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             return DisposableAction.All(
-                Repositories.Select(r => r.StartOperation(operation)));
+                Repositories.Select(r => r.StartOperation(operation, mainPackageId, mainPackageVersion)));
+        }
+
+        public static IPackageRepository Create(
+            IPackageRepositoryFactory factory, 
+            IList<PackageSource> sources, 
+            bool ignoreFailingRepositories)
+        {
+            if (sources.Count == 0)
+            {
+                return null;
+            }
+
+            if (sources.Count == 1)
+            {
+                // optimization: if there is only one package source, create a direct repository out of it.
+                return factory.CreateRepository(sources[0].Source);
+            }
+
+            Func<string, IPackageRepository> createRepository = factory.CreateRepository;
+
+            if (ignoreFailingRepositories)
+            {
+                createRepository = (source) =>
+                {
+                    try
+                    {
+                        return factory.CreateRepository(source);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        return null;
+                    }
+                };
+            }
+
+            var repositories = from source in sources
+                               let repository = createRepository(source.Source)
+                               where repository != null
+                               select repository;
+
+            return new AggregateRepository(repositories)
+                {
+                    IgnoreFailingRepositories = ignoreFailingRepositories
+                };
         }
     }
 }

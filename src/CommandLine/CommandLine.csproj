@@ -27,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.XmlTransform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -42,6 +43,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\MsBuildProjectUtility.cs">
+      <Link>Common\MsBuildProjectUtility.cs</Link>
+    </Compile>
     <Compile Include="Attributes\CommandAttribute.cs" />
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="CommandLineParser.cs" />
@@ -55,6 +59,7 @@
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
+    <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SourcesCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
@@ -66,8 +71,12 @@
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
+    <Compile Include="Common\MSBuildSolutionParser.cs" />
     <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\SelfUpdater.cs" />
+    <Compile Include="Common\Solution.cs" />
+    <Compile Include="Common\ProjectInSolution.cs" />
+    <Compile Include="Common\XBuildSolutionParser.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
     <Compile Include="..\..\Common\NuGetConstants.cs">
@@ -90,6 +99,9 @@
     <Compile Include="DefaultManifestValuesRule.cs" />
     <Compile Include="DefaultPackageRules.cs" />
     <Compile Include="FileConflictAction.cs" />
+    <Compile Include="CommandLineMachineWideSettings.cs" />
+    <Compile Include="Commands\DownloadCommandBase.cs" />
+    <Compile Include="ISolutionParser.cs" />
     <Compile Include="NuGetCommand.cs">
       <DependentUpon>NuGetCommand.resx</DependentUpon>
     </Compile>
@@ -141,7 +153,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\NuGet.Bootstrapper.nuspec" />
     <None Include="Properties\NuGet.CommandLine.nuspec" />
   </ItemGroup>
   <ItemGroup>
@@ -159,17 +170,24 @@
       <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
       <ILMergeOutputFile>NuGet.exe</ILMergeOutputFile>
       <ILMergeOutputFilePath>$(OutputPath)Merged\$(ILMergeOutputFile)</ILMergeOutputFilePath>
+      <ILMergeOutputFilePathSigned>$(OutputPath)Signed\$(ILMergeOutputFile)</ILMergeOutputFilePathSigned>
       <FrameworkPath>$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
       <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
+      <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /ndebug /allowDup NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll</ILMergeCommandArgs>
+      <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /ndebug /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll</ILMergeCommandArgsSigned>
     </PropertyGroup>
     <ItemGroup>
       <ILMergeItems Include="$(OutputPath)\*.dll;$(OutputPath)\*.exe" />
     </ItemGroup>
     <MakeDir Directories="$(OutputPath)Merged" Condition="!Exists('$(OutputPath)Merged')" />
+    <MakeDir Directories="$(OutputPath)Signed" Condition="!Exists('$(OutputPath)Signed')" />
     <Delete Files="$(ILMergeOutputFilePath)" Condition="Exists($(ILMergeOutputFilePath))" />
+    <Delete Files="$(ILMergeOutputFilePathSigned)" Condition="Exists($(ILMergeOutputFilePathSigned))" />
     <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
     <Error Condition="!Exists('$(FrameworkPath)')" Text="Could not find 4.0 reference assemblies in $(FrameworkPath)" />
-    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, $(FrameworkPath)&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:&quot;Merged\$(ILMergeOutputFile)&quot; /log:&quot;Merged\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll" WorkingDirectory="$(OutputPath)" />
+    <Exec Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgs)" WorkingDirectory="$(OutputPath)" />
+    <!-- produce another signed one if signing assembly -->
+    <Exec Condition=" '$(SignASsembly)' == 'true' " Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgsSigned)" WorkingDirectory="$(OutputPath)" />
   </Target>
   <Target Name="AfterBuild">
     <CallTarget Targets="MergeExecutable" />

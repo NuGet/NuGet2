@@ -6,7 +6,7 @@ using NuGet.Server.DataServices;
 using NuGet.Server.Infrastructure;
 using RouteMagic;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof(NuGet.Server.NuGetRoutes), "Start")]
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGet.Server.NuGetRoutes), "Start")]
 
 namespace NuGet.Server
 {

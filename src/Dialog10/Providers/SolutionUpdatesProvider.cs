@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Providers
         protected override bool ExecuteCore(PackageItem item)
         {
             _activePackageManager = GetActivePackageManager();
-            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update))
+            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update, item.Id, item.Version))
             {
                 ShowProgressWindow();
                 IList<Project> selectedProjectsList;
@@ -54,7 +54,7 @@ namespace NuGet.Dialog.Providers
                         item.PackageIdentity,
                         // Selector function to return the initial checkbox state for a Project.
                         // We check a project if it has the current package installed by Id, but not version
-                        project => 
+                        project =>
                             {
                                 var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
                                 return localRepository.Exists(item.Id) && IsVersionConstraintSatisfied(item, localRepository);
@@ -63,9 +63,9 @@ namespace NuGet.Dialog.Providers
                             {
                                 var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
-                                // for the Updates solution dialog, we only enable a project if it has an old version of 
+                                // for the Updates solution dialog, we only enable a project if it has an old version of
                                 // the package installed.
-                                return localRepository.Exists(item.Id) && 
+                                return localRepository.Exists(item.Id) &&
                                        !localRepository.Exists(item.Id, item.PackageIdentity.Version) &&
                                        IsVersionConstraintSatisfied(item, localRepository);
                             }
@@ -102,7 +102,7 @@ namespace NuGet.Dialog.Providers
 
                 if (!isProjectLevel && operations.Any())
                 {
-                    // When dealing with solution level packages, only the set of actions specified under operations are executed. 
+                    // When dealing with solution level packages, only the set of actions specified under operations are executed.
                     // In such a case, no operation to uninstall the current package is specified. We'll identify the package that is being updated and
                     // explicitly add a uninstall operation.
                     var packageToUpdate = _activePackageManager.LocalRepository.FindPackage(item.Id);
@@ -162,7 +162,7 @@ namespace NuGet.Dialog.Providers
             _activePackageManager = GetActivePackageManager();
             Debug.Assert(_activePackageManager != null);
 
-            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName);
+            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
 
             try
             {
@@ -172,16 +172,16 @@ namespace NuGet.Dialog.Providers
                 {
                     return false;
                 }
-                
+
                 RegisterPackageOperationEvents(_activePackageManager, null);
 
                 var allUpdatePackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
                 _activePackageManager.UpdateSolutionPackages(
-                    allUpdatePackages, 
-                    allOperations, 
-                    updateDependencies: true, 
-                    allowPrereleaseVersions: IncludePrerelease, 
-                    logger: this, 
+                    allUpdatePackages,
+                    allOperations,
+                    updateDependencies: true,
+                    allowPrereleaseVersions: IncludePrerelease,
+                    logger: this,
                     eventListener: this);
 
                 return true;

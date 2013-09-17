@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Reflection;
 using EnvDTE80;
 
@@ -23,13 +22,24 @@ namespace NuGet.VisualStudio
         {
             if (_cachedTfsFileSystemProvider == null)
             {
-                var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-                string assemblyName = VsVersionHelper.IsVisualStudio2010 ? "NuGet.TeamFoundationServer10.dll" : "NuGet.TeamFoundationServer.dll";
-
+                string assemblyName;
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    assemblyName = "NuGet.TeamFoundationServer10";
+                }
+                else if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    assemblyName = "NuGet.TeamFoundationServer11";
+                }
+                else 
+                {
+                    assemblyName = "NuGet.TeamFoundationServer";
+                }
+                
                 try
                 {
-                    var assembly = Assembly.LoadFrom(Path.Combine(assemblyDirectory, assemblyName));
+                    Assembly assembly = RuntimeHelpers.LoadAssemblySmart(assemblyName);
+
                     if (assembly != null)
                     {
                         var type = assembly.GetType(typeName, throwOnError: false);

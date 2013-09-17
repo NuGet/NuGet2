@@ -8,7 +8,12 @@ namespace NuGet
 
         public static string GetRepositoryPath(this ISettings settings)
         {
-            return settings.GetValue(ConfigSection, "repositoryPath", isPath: true);
+            string path = settings.GetValue(ConfigSection, "repositoryPath", isPath: true);
+            if (!String.IsNullOrEmpty(path))
+            {
+                path = path.Replace('/', System.IO.Path.DirectorySeparatorChar);
+            }
+            return path;
         }
 
         public static string GetDecryptedValue(this ISettings settings, string section, string key, bool isPath = false)

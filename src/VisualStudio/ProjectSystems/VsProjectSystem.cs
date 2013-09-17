@@ -97,8 +97,10 @@ namespace NuGet.VisualStudio
         {
             bool fileExistsInProject = FileExistsInProject(path);
 
-            // If the file exists on disk but not in the project then skip it
-            if (base.FileExists(path) && !fileExistsInProject)
+            // If the file exists on disk but not in the project then skip it.
+            // One exception is the 'packages.config' file, in which case we want to include
+            // it into the project.
+            if (base.FileExists(path) && !fileExistsInProject && !path.Equals(Constants.PackageReferenceFile))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
             }
@@ -168,7 +170,7 @@ namespace NuGet.VisualStudio
 
         protected virtual void AddGacReference(string name)
         {
-            Project.Object.References.Add(name);
+            Project.GetReferences().Add(name);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
@@ -196,7 +198,7 @@ namespace NuGet.VisualStudio
                 }
 
                 // Add a reference to the project
-                dynamic reference = Project.Object.References.Add(assemblyPath);
+                dynamic reference = Project.GetReferences().Add(assemblyPath);
 
                 // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
                 if (usedTempFile)
@@ -211,32 +213,35 @@ namespace NuGet.VisualStudio
                     }
                 }
 
-                TrySetCopyLocal(reference);
-
-                // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
-                // Most commonly, it happens if this assembly is in the GAC or in the output path.
-                if (!reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase))
+                if (reference != null)
                 {
-                    // Get the msbuild project for this project
-                    MsBuildProject buildProject = Project.AsMSBuildProject();
+                    TrySetCopyLocal(reference);
 
-                    if (buildProject != null)
+                    // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
+                    // Most commonly, it happens if this assembly is in the GAC or in the output path.
+                    if (reference.Path != null && !reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Get the assembly name of the reference we are trying to add
-                        AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
+                        // Get the msbuild project for this project
+                        MsBuildProject buildProject = Project.AsMSBuildProject();
 
-                        // Try to find the item for the assembly name
-                        MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
-                                                   where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
-                                                   select assemblyReferenceNode.Item1).FirstOrDefault();
-
-                        if (item != null)
+                        if (buildProject != null)
                         {
-                            // Add the <HintPath> metadata item as a relative path
-                            item.SetMetadataValue("HintPath", referencePath);
+                            // Get the assembly name of the reference we are trying to add
+                            AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
 
-                            // Save the project after we've modified it.
-                            Project.Save();
+                            // Try to find the item for the assembly name
+                            MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
+                                                       where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
+                                                       select assemblyReferenceNode.Item1).FirstOrDefault();
+
+                            if (item != null)
+                            {
+                                // Add the <HintPath> metadata item as a relative path
+                                item.SetMetadataValue("HintPath", referencePath);
+
+                                // Save the project after we've modified it.
+                                Project.Save();
+                            }
                         }
                     }
                 }
@@ -264,7 +269,7 @@ namespace NuGet.VisualStudio
                 //        almost all the assemblies since Assembly Name is the same as the assembly file name
                 //        In case of F#, the input parameter is case-sensitive as well
                 //        Hence, an override to THIS function is added to take care of that
-                var reference = Project.Object.References.Item(referenceName);
+                var reference = Project.GetReferences().Item(referenceName);
                 if (reference != null)
                 {
                     reference.Remove();
@@ -353,7 +358,7 @@ namespace NuGet.VisualStudio
                     referenceName = Path.GetFileNameWithoutExtension(name);
                 }
 
-                return Project.Object.References.Item(referenceName) != null;
+                return Project.GetReferences().Item(referenceName) != null;
             }
             catch
             {

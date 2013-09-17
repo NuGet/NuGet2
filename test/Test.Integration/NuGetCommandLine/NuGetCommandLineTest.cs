@@ -176,7 +176,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             // Assert
             var settings = Settings.LoadDefaultSettings(
                 new PhysicalFileSystem(testDirectory),
-                "test_nuget.config");
+                "test_nuget.config",
+                null);
             var apiKey = CommandLineUtility.GetApiKey(settings, NuGetConstants.DefaultGalleryServerUrl);
             Assert.Equal("A", apiKey);
 
@@ -1052,7 +1053,7 @@ public class Baz {
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput()
         {
             // Arrange                        
-            string expectedPackage = "ProjectWithCotent.1.5.0.0.nupkg";
+            string expectedPackage = "ProjectWithContent.1.5.0.0.nupkg";
             var contentFiles = new[] { "Foo.xml", "Bar.txt" };
             var sourceFiles = new[] { "A.cs", "B.cs" };
 
@@ -1071,12 +1072,12 @@ public class Cl_{0} {{
 ", index++));
             }
 
-            WriteAssemblyInfo("ProjectWithCotent",
+            WriteAssemblyInfo("ProjectWithContent",
                                "1.5.0.0",
                                "David",
                                "Project with content");
 
-            CreateProject("ProjectWithCotent", content: contentFiles, compile: sourceFiles);
+            CreateProject("ProjectWithContent", content: contentFiles, compile: sourceFiles);
 
             string[] args = new string[] { "pack", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
@@ -1089,10 +1090,10 @@ public class Cl_{0} {{
             Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
             Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithCotent.dll",
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithContent.dll",
                                                                          @"content\Foo.xml",
                                                                          @"content\Bar.txt" });
-            Assert.Equal("ProjectWithCotent", package.Id);
+            Assert.Equal("ProjectWithContent", package.Id);
             Assert.Equal(new SemanticVersion("1.5"), package.Version);
             Assert.Equal("David", package.Authors.First());
             Assert.Equal("Project with content", package.Description);
@@ -1764,7 +1765,7 @@ public class Runner {
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified. Use the -self switch to update NuGet.exe."));
+            Assert.True(consoleOutput.ToString().Contains("No packages.config, project or solution file specified. Use the -self switch to update NuGet.exe."));
         }
 
         [Fact]
@@ -1778,8 +1779,80 @@ public class Runner {
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
+            Assert.True(consoleOutput.ToString().Contains("No packages.config, project or solution file specified."));
         }
+
+        [Fact]
+        public void UpdateCommand_ThrowsOnUpdateWhenMultipleProjectFilesArePresent()
+        {
+            // Arrange
+            WriteProjectFile("foo.cs", "public class foo {}");
+            WriteProjectFile("packages.config", "<?xml version=\"1.0\" encoding=\"utf-8\"?><packages><package id=\"MyPackage\" version=\"1.0.0\" targetFramework=\"net40\" /></packages>");
+            CreateProject("project1", content: new[] { "packages.config" }, compile: new[] { "foo.cs" });
+            CreateProject("project2", content: new[] { "packages.config" }, compile: new[] { "foo.cs" });
+
+            var args = new[] { "update", "packages.config" };
+
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            var result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Found multiple project files for "));
+        }
+
+        [Fact]
+        public void UpdateCommand_ShouldAcceptProjectFileAsInput()
+        {
+            // Arrange
+            WriteProjectFile("foo.cs", "public class foo {}");
+            WriteProjectFile("packages.config", "<?xml version=\"1.0\" encoding=\"utf-8\"?><packages><package id=\"MyPackage\" version=\"1.0.0\" targetFramework=\"net40\" /></packages>");
+            CreateProject("MyProject", content: new[] { "packages.config" }, compile: new[] { "foo.cs" });
+            var packageSource = Path.Combine(ProjectFilesFolder, "repo");
+            Util.CreateDirectory(packageSource);
+            Util.CreateTestPackage("MyPackage", "1.0.0", packageSource, null);
+
+            var repositoryPath = Path.Combine(ProjectFilesFolder, "packages");
+            Util.CreateDirectory(repositoryPath);
+            
+            var args = new[] { "update", "MyProject.csproj", "-RepositoryPath", repositoryPath, "-Source", packageSource };
+
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            var result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public void UpdateCommand_ShouldAcceptPackagesConfigAsInput()
+        {
+            // Arrange
+            WriteProjectFile("foo.cs", "public class foo {}");
+            WriteProjectFile("packages.config", "<?xml version=\"1.0\" encoding=\"utf-8\"?><packages><package id=\"MyPackage\" version=\"1.0.0\" targetFramework=\"net40\" /></packages>");
+            CreateProject("MyProject", content: new[] { "packages.config" }, compile: new[] { "foo.cs" });
+            var packageSource = Path.Combine(ProjectFilesFolder, "repo");
+            Util.CreateDirectory(packageSource);
+            Util.CreateTestPackage("MyPackage", "1.0.0", packageSource, null);
+
+            var repositoryPath = Path.Combine(ProjectFilesFolder, "packages");
+            Util.CreateDirectory(repositoryPath);
+
+            var args = new[] { "update", "packages.config", "-RepositoryPath", repositoryPath, "-Source", packageSource };
+
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            var result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+        }
+
 
         private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles)
         {

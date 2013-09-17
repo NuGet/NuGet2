@@ -4,9 +4,11 @@
     <id>NuGet.Build</id>
     <version>$version$</version>
     <authors>Outercurve Foundation</authors>
+    <owners>Outercurve Foundation</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>MSBuild targets for nuget package restore and package build.</description>
     <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
+    <copyright>&#169; Outercurve Foundation. All rights reserved.</copyright>
     <dependencies>
         <dependency id="NuGet.CommandLine" />
     </dependencies>

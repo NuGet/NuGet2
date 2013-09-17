@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
@@ -83,6 +84,55 @@ namespace NuGet.Test.Extensions
 
             // Act/Assert
             Assert.Equal(expected, spec.Satisfies(new SemanticVersion(semVer)));
+        }
+
+        [Fact]
+        public void GetComparableVersionsReturnMatchingVersionFirst()
+        {
+            // Act
+            var versions = VersionExtensions.GetComparableVersionStrings(new SemanticVersion("1.0.0-alpha")).ToArray();
+
+            // Assert
+            Assert.Equal(3, versions.Length);
+            Assert.Equal("1.0.0-alpha", versions[0]);
+            Assert.Equal("1.0-alpha", versions[1]);
+            Assert.Equal("1.0.0.0-alpha", versions[2]);
+        }
+
+        [Fact]
+        public void GetComparableVersionsReturnMatchingVersionFirst2()
+        {
+            // Act
+            var versions = VersionExtensions.GetComparableVersionStrings(new SemanticVersion("2.0.0.0")).ToArray();
+
+            // Assert
+            Assert.Equal(3, versions.Length);
+            Assert.Equal("2.0.0.0", versions[0]);
+            Assert.Equal("2.0", versions[1]);
+            Assert.Equal("2.0.0", versions[2]);
+        }
+
+        [Fact]
+        public void GetComparableVersionsReturnMatchingVersionFirst3()
+        {
+            // Act
+            var versions = VersionExtensions.GetComparableVersionStrings(new SemanticVersion("1.3.2.0-beta")).ToArray();
+
+            // Assert
+            Assert.Equal(2, versions.Length);
+            Assert.Equal("1.3.2.0-beta", versions[0]);
+            Assert.Equal("1.3.2-beta", versions[1]);
+        }
+
+        [Fact]
+        public void GetComparableVersionsReturnOnlyValidVersion()
+        {
+            // Act
+            var versions = VersionExtensions.GetComparableVersionStrings(new SemanticVersion("1.3.2.4-beta")).ToArray();
+
+            // Assert
+            Assert.Equal(1, versions.Length);
+            Assert.Equal("1.3.2.4-beta", versions[0]);
         }
     }
 }

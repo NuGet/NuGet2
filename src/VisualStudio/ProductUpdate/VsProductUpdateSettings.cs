@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 
-namespace NuGet.VisualStudio.ProductUpdate
+namespace NuGet.VisualStudio
 {
-
     [Export(typeof(IProductUpdateSettings))]
     public class VsProductUpdateSettings : SettingsManagerBase, IProductUpdateSettings
     {

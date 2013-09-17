@@ -1,29 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
-    public class NativeProjectSystem : VsProjectSystem
+    public class NativeProjectSystem : CpsProjectSystem
     {
         public NativeProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
             : base(project, fileSystemProvider)
         {
-        }
-
-        public override bool IsBindingRedirectSupported
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        protected override void AddGacReference(string name)
-        {
-            // Native project doesn't know about GAC
         }
 
         public override bool ReferenceExists(string name)
@@ -42,45 +33,42 @@ namespace NuGet.VisualStudio
             // We disable assembly reference for native projects
         }
 
-        public override void AddImport(string targetPath, ProjectImportLocation location)
+        public override IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
-            if (VsVersionHelper.IsVisualStudio2010)
+            var allFiles = ThreadHelper.Generic.Invoke<IEnumerable<string>>(() =>
             {
-                base.AddImport(targetPath, location);
-            }
-            else
-            {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-
-                if (String.IsNullOrEmpty(targetPath))
+                if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+                    return GetFilesFromProjectForVS2010(path);
                 }
+                else
+                {
+                    return VCProjectHelper.GetFiles(Project.Object, path);
+                }
+            });
 
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                Project.Save();
+            if (filter == null || filter.Equals("*.*", StringComparison.OrdinalIgnoreCase)) 
+            {
+                return allFiles;
             }
+
+            Regex matcher = ProjectExtensions.GetFilterRegex(filter);
+            return allFiles.Where(f => matcher.IsMatch(f));
         }
 
-        public override void RemoveImport(string targetPath)
+        public override IEnumerable<string> GetDirectories(string path)
         {
-            if (VsVersionHelper.IsVisualStudio2010)
+            return ThreadHelper.Generic.Invoke<IEnumerable<string>>(() =>
             {
-                base.RemoveImport(targetPath);
-            }
-            else
-            {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-
-                if (String.IsNullOrEmpty(targetPath))
+                if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+                    return GetFiltersFromProjectForVS2010(path);
                 }
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                Project.Save();
-            }
+                else
+                {
+                    return VCProjectHelper.GetFilters(Project.Object, path);
+                }
+            });
         }
 
         protected override void AddFileToProject(string path)
@@ -98,7 +86,7 @@ namespace NuGet.VisualStudio
             {
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                    AddFileToProjectForVS2010(folderPath, fullPath);
                 }
                 else
                 {
@@ -114,9 +102,15 @@ namespace NuGet.VisualStudio
             string folderPath = Path.GetDirectoryName(path);
             string fullPath = GetFullPath(path);
 
-            bool succeeded = VsVersionHelper.IsVisualStudio2010 
-                ? VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath)
-                : VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            bool succeeded;
+            if (VsVersionHelper.IsVisualStudio2010)
+            {
+                succeeded = RemoveFileFromProjectForVS2010(folderPath, fullPath);
+            }
+            else 
+            {
+                succeeded = VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            }
             
             if (succeeded)
             {
@@ -133,6 +127,34 @@ namespace NuGet.VisualStudio
                     Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddFileToProjectForVS2010(string folderPath, string fullPath)
+        {
+            VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private bool RemoveFileFromProjectForVS2010(string folderPath, string fullPath)
+        {
+            return VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private string[] GetFilesFromProjectForVS2010(string folderPath)
+        {
+            return VisualStudio10.VCProjectHelper.GetFiles(Project.Object, folderPath).ToArray();
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private string[] GetFiltersFromProjectForVS2010(string folderPath)
+        {
+            return VisualStudio10.VCProjectHelper.GetFilters(Project.Object, folderPath).ToArray();
         }
     }
 }

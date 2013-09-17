@@ -126,14 +126,10 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="checkForUpdate.Location" type="System.Drawing.Point, System.Drawing">
-    <value>7, 44</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="checkForUpdate.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>5, 36</value>
   </data>
   <data name="checkForUpdate.Size" type="System.Drawing.Size, System.Drawing">
-    <value>230, 21</value>
+    <value>177, 17</value>
   </data>
   <data name="checkForUpdate.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -159,20 +155,18 @@
   <data name="clearPackageCacheButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="clearPackageCacheButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
     <value>GrowAndShrink</value>
   </data>
   <data name="clearPackageCacheButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 4</value>
-  </data>
-  <data name="clearPackageCacheButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>3, 3</value>
   </data>
   <data name="clearPackageCacheButton.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>11, 0, 11, 0</value>
+    <value>8, 0, 8, 0</value>
   </data>
   <data name="clearPackageCacheButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 27</value>
+    <value>137, 23</value>
   </data>
   <data name="clearPackageCacheButton.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -202,16 +196,13 @@
     <value>GrowAndShrink</value>
   </data>
   <data name="browsePackageCacheButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>188, 4</value>
-  </data>
-  <data name="browsePackageCacheButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>146, 3</value>
   </data>
   <data name="browsePackageCacheButton.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>11, 0, 11, 0</value>
+    <value>8, 0, 8, 0</value>
   </data>
   <data name="browsePackageCacheButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>98, 27</value>
+    <value>77, 23</value>
   </data>
   <data name="browsePackageCacheButton.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -238,16 +229,16 @@
     <value>Top, Left, Right</value>
   </data>
   <data name="UpdateHeaderDivider.Location" type="System.Drawing.Point, System.Drawing">
-    <value>7, 22</value>
+    <value>5, 18</value>
   </data>
   <data name="UpdateHeaderDivider.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="UpdateHeaderDivider.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="UpdateHeaderDivider.Size" type="System.Drawing.Size, System.Drawing">
-    <value>611, 2</value>
+    <value>458, 2</value>
   </data>
   <data name="UpdateHeaderDivider.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -274,10 +265,13 @@
     <value>NoControl</value>
   </data>
   <data name="UpdateHeader.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 14</value>
+    <value>3, 11</value>
+  </data>
+  <data name="UpdateHeader.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 0, 2, 0</value>
   </data>
   <data name="UpdateHeader.Size" type="System.Drawing.Size, System.Drawing">
-    <value>54, 17</value>
+    <value>42, 13</value>
   </data>
   <data name="UpdateHeader.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -304,16 +298,16 @@
     <value>Top, Left, Right</value>
   </data>
   <data name="PackagesCacheHeaderDivider.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 7</value>
+    <value>2, 6</value>
   </data>
   <data name="PackagesCacheHeaderDivider.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="PackagesCacheHeaderDivider.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="PackagesCacheHeaderDivider.Size" type="System.Drawing.Size, System.Drawing">
-    <value>611, 2</value>
+    <value>458, 2</value>
   </data>
   <data name="PackagesCacheHeaderDivider.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
@@ -342,8 +336,11 @@
   <data name="PackagesCacheHeader.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, -1</value>
   </data>
+  <data name="PackagesCacheHeader.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 0, 2, 0</value>
+  </data>
   <data name="PackagesCacheHeader.Size" type="System.Drawing.Size, System.Drawing">
-    <value>107, 17</value>
+    <value>84, 13</value>
   </data>
   <data name="PackagesCacheHeader.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -376,16 +373,13 @@
     <value>2</value>
   </data>
   <data name="tableLayoutPanel1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>-1, 26</value>
-  </data>
-  <data name="tableLayoutPanel1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>-1, 21</value>
   </data>
   <data name="tableLayoutPanel1.RowCount" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
   <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>616, 36</value>
+    <value>462, 29</value>
   </data>
   <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -409,13 +403,10 @@
     <value>True</value>
   </metadata>
   <data name="updatePanel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>-3, 144</value>
-  </data>
-  <data name="updatePanel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>0, 131</value>
   </data>
   <data name="updatePanel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>617, 79</value>
+    <value>463, 64</value>
   </data>
   <data name="updatePanel.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -430,7 +421,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;updatePanel.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>7</value>
   </data>
   <metadata name="PackageRestoreHeader.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -439,10 +430,13 @@
     <value>True</value>
   </data>
   <data name="PackageRestoreHeader.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 83</value>
+    <value>0, 67</value>
+  </data>
+  <data name="PackageRestoreHeader.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 0, 2, 0</value>
   </data>
   <data name="PackageRestoreHeader.Size" type="System.Drawing.Size, System.Drawing">
-    <value>117, 17</value>
+    <value>90, 13</value>
   </data>
   <data name="PackageRestoreHeader.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -465,11 +459,20 @@
   <metadata name="groupBox1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="groupBox1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
   <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 92</value>
+    <value>2, 75</value>
+  </data>
+  <data name="groupBox1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 2, 2, 2</value>
+  </data>
+  <data name="groupBox1.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>611, 2</value>
+    <value>458, 2</value>
   </data>
   <data name="groupBox1.TabIndex" type="System.Int32, mscorlib">
     <value>13</value>
@@ -493,16 +496,19 @@
     <value>True</value>
   </data>
   <data name="packageRestoreConsentCheckBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 113</value>
+    <value>3, 92</value>
+  </data>
+  <data name="packageRestoreConsentCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="packageRestoreConsentCheckBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>381, 21</value>
+    <value>233, 17</value>
   </data>
   <data name="packageRestoreConsentCheckBox.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
   </data>
   <data name="packageRestoreConsentCheckBox.Text" xml:space="preserve">
-    <value>&amp;Allow NuGet to download missing packages during build</value>
+    <value>&amp;Allow NuGet to download missing packages</value>
   </data>
   <data name="&gt;&gt;packageRestoreConsentCheckBox.Name" xml:space="preserve">
     <value>packageRestoreConsentCheckBox</value>
@@ -516,6 +522,39 @@
   <data name="&gt;&gt;packageRestoreConsentCheckBox.ZOrder" xml:space="preserve">
     <value>5</value>
   </data>
+  <data name="packageRestoreAutomaticCheckBox.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.Location" type="System.Drawing.Point, System.Drawing">
+    <value>19, 113</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 2, 2, 2</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>355, 17</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.TabIndex" type="System.Int32, mscorlib">
+    <value>15</value>
+  </data>
+  <data name="packageRestoreAutomaticCheckBox.Text" xml:space="preserve">
+    <value>Auto&amp;matically check for missing packages during build in Visual Studio</value>
+  </data>
+  <data name="&gt;&gt;packageRestoreAutomaticCheckBox.Name" xml:space="preserve">
+    <value>packageRestoreAutomaticCheckBox</value>
+  </data>
+  <data name="&gt;&gt;packageRestoreAutomaticCheckBox.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;packageRestoreAutomaticCheckBox.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;packageRestoreAutomaticCheckBox.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
@@ -523,13 +562,13 @@
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>8, 16</value>
+    <value>6, 13</value>
   </data>
   <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>617, 351</value>
+    <value>463, 285</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>GeneralOptionControl</value>

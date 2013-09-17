@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository
+    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository, ILatestPackageLookup
     {
         private readonly Lazy<IPackageRepository> _repository;
 
@@ -70,13 +70,8 @@ namespace NuGet.Dialog.Providers
             return Repository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
 
-        public IEnumerable<IPackage> FindPackagesById(string packageId)
-        {
-            return Repository.FindPackagesById(packageId);
-        }
-
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> 
+            IEnumerable<IPackageName> 
             packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
@@ -86,10 +81,34 @@ namespace NuGet.Dialog.Providers
             return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
         }
 
-        public IDisposable StartOperation(string operation)
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = Repository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
+            }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = Repository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
+        }
+
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             // Starting an operation is an action that should materialize the repository
-            return Repository.StartOperation(operation);
+            return Repository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

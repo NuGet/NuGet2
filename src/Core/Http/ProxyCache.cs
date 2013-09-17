@@ -30,7 +30,9 @@ namespace NuGet
 
         }
 #else 
-        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(null), new EnvironmentVariableWrapper()));
+        // It's not likely that http proxy settings are set in machine wide settings, 
+        // so not passing machine wide settings to Settings.LoadDefaultSettings() should be fine.
+        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(fileSystem: null, configFileName: null, machineWideSettings: null ), new EnvironmentVariableWrapper()));
 
         private readonly ISettings _settings;
         private readonly IEnvironmentVariableReader _environment;

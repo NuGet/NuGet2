@@ -25,7 +25,7 @@ namespace NuGetConsole.Host.PowerShellProvider
 
         public IHost CreateHost(bool @async)
         {
-            bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
+            bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2OrAboveInstalled();
             if (isPowerShell2Installed)
             {
                 return CreatePowerShellHost(@async);

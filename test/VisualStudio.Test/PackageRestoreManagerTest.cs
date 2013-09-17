@@ -12,6 +12,7 @@ using Xunit;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
+
     public class PackageRestoreManagerTest : IDisposable
     {
         private static readonly string _testRoot = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -204,7 +205,7 @@ namespace NuGet.VisualStudio.Test
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
             packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
                                                                              {
                                                                                  new PackageSource(NuGetConstants.DefaultFeedUrl)
@@ -263,11 +264,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(p => p.GetProjects()).Returns(new[] { project.Object });
 
             // setup file system
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
-
+            var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
@@ -331,11 +328,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(p => p.GetProjects()).Returns(new[] { project.Object });
 
             // setup file system
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
-
+            var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
@@ -499,6 +492,7 @@ namespace NuGet.VisualStudio.Test
 
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(p => p.CreatePackageManager()).Returns(packageManager.Object);
+            packageManagerFactory.Setup(p => p.CreatePackageManagerWithAllPackageSources()).Returns(packageManager.Object);
 
             var packageRestore = CreateInstance(
                 fileSystemProvider: fileSystemProvider.Object,
@@ -589,7 +583,7 @@ namespace NuGet.VisualStudio.Test
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository("x:\\nugetsource")).Returns(packageRepository);
 
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
             packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
                                                                              {
                                                                                  new PackageSource("x:\\nugetsource")
@@ -671,7 +665,7 @@ namespace NuGet.VisualStudio.Test
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             packageRepositoryFactory.Setup(p => p.CreateRepository("x:\\nugetsource")).Returns(packageRepository);
 
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
             packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
                                                                              {
                                                                                  new PackageSource("x:\\nugetsource"),
@@ -769,7 +763,7 @@ namespace NuGet.VisualStudio.Test
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
             packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
                                                                              {
                                                                                  new PackageSource(NuGetConstants.DefaultFeedUrl)
@@ -814,7 +808,7 @@ namespace NuGet.VisualStudio.Test
             IVsThreadedWaitDialogFactory waitDialogFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepository localCache = null,
-            IPackageSourceProvider packageSourceProvider = null,
+            IVsPackageSourceProvider packageSourceProvider = null,
             ISettings settings = null)
         {
 
@@ -871,7 +865,7 @@ namespace NuGet.VisualStudio.Test
 
             if (packageSourceProvider == null)
             {
-                packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
+                packageSourceProvider = new Mock<IVsPackageSourceProvider>().Object;
             }
 
             if (settings == null)

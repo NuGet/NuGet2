@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -10,7 +11,6 @@ using System.Windows.Forms.VisualStyles;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.Options
 {
@@ -25,7 +25,8 @@ namespace NuGet.Options
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _activeSource;
-        private BindingSource _allPackageSources;
+        private BindingSource _packageSources;
+        private BindingSource _machineWidepackageSources;
         private readonly IServiceProvider _serviceProvider;
         private bool _initialized;
         private Size _checkBoxSize;
@@ -70,16 +71,37 @@ namespace NuGet.Options
 
         private void UpdateUI()
         {
+            // It is only allowed for 1 of the listboxes to be selected at any time or neither
+            // Never MUST both the listboxes be selected
+            Debug.Assert(PackageSourcesListBox.SelectedItem == null || MachineWidePackageSourcesListBox.SelectedItem == null);
+
             var selectedSource = (PackageSource)PackageSourcesListBox.SelectedItem;
+            var selectedMachineSource = (PackageSource)MachineWidePackageSourcesListBox.SelectedItem;
 
-            MoveUpButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex > 0;
-            MoveDownButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
-            
-            // do not allow deleting the official NuGet source
-            removeButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
+            if (selectedSource != null)
+            {
+                // THIS BLOCK corresponds to PackageSourcesListBox
 
-            // do not allow editing the official NuGet source
-            BrowseButton.Enabled = updateButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
+                MoveUpButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex > 0;
+                MoveDownButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
+
+                // do not allow deleting the official NuGet source
+                bool allowEditing = selectedSource != null && !selectedSource.IsOfficial;
+                
+                BrowseButton.Enabled = updateButton.Enabled = removeButton.Enabled = allowEditing;
+                NewPackageName.ReadOnly = NewPackageSource.ReadOnly = !allowEditing;
+
+                // Always enable addButton for PackageSourceListBox
+                addButton.Enabled = true;
+            }
+            else if (selectedMachineSource != null)
+            {
+                // THIS BLOCK corresponds to MachineWidePackageSourcesListBox
+
+                addButton.Enabled = removeButton.Enabled = MoveUpButton.Enabled = MoveDownButton.Enabled = BrowseButton.Enabled = updateButton.Enabled = false;
+
+                NewPackageName.ReadOnly = NewPackageSource.ReadOnly = true;
+            }
         }
 
         private void MoveSelectedItem(int offset)
@@ -97,8 +119,8 @@ namespace NuGet.Options
                 return;
             }
             var item = PackageSourcesListBox.SelectedItem;
-            _allPackageSources.Remove(item);
-            _allPackageSources.Insert(newIndex, item);
+            _packageSources.Remove(item);
+            _packageSources.Insert(newIndex, item);
 
             PackageSourcesListBox.SelectedIndex = newIndex;
             UpdateUI();
@@ -113,14 +135,48 @@ namespace NuGet.Options
 
             _initialized = true;
             // get packages sources
-            IList<PackageSource> packageSources = _packageSourceProvider.LoadPackageSources().ToList();
+            IList<PackageSource> allPackageSources = _packageSourceProvider.LoadPackageSources().ToList();
+            IList<PackageSource> packageSources = allPackageSources.Where(ps => !ps.IsMachineWide).ToList();
+            IList<PackageSource> machineWidePackageSources = allPackageSources.Where(ps => ps.IsMachineWide).ToList();
             _activeSource = _packageSourceProvider.ActivePackageSource;
 
             // bind to the package sources, excluding Aggregate
-            _allPackageSources = new BindingSource(packageSources.Select(ps => ps.Clone()).ToList(), null);
-            _allPackageSources.CurrentChanged += OnSelectedPackageSourceChanged;
-            PackageSourcesListBox.DataSource = _allPackageSources;
+            _packageSources = new BindingSource(packageSources.Select(ps => ps.Clone()).ToList(), null);
+            _packageSources.CurrentChanged += OnSelectedPackageSourceChanged;
+            PackageSourcesListBox.GotFocus += PackageSourcesListBox_GotFocus;
+            PackageSourcesListBox.DataSource = _packageSources;
+
+            if (machineWidePackageSources.Count > 0)
+            {
+                _machineWidepackageSources = new BindingSource(machineWidePackageSources.Select(ps => ps.Clone()).ToList(), null);
+                _machineWidepackageSources.CurrentChanged += OnSelectedMachineWidePackageSourceChanged;
+                MachineWidePackageSourcesListBox.GotFocus += MachineWidePackageSourcesListBox_GotFocus;
+                MachineWidePackageSourcesListBox.DataSource = _machineWidepackageSources;
+            }
+            else
+            {
+                MachineWidePackageSourcesListBox.Visible = MachineWideSourcesLabel.Visible = false;
+            }
+
             OnSelectedPackageSourceChanged(null, EventArgs.Empty);
+        }
+
+        private void MachineWidePackageSourcesListBox_GotFocus(object sender, EventArgs e)
+        {
+            if (MachineWidePackageSourcesListBox.SelectedItem == null)
+            {
+                MachineWidePackageSourcesListBox.SelectedItem = (PackageSource)_machineWidepackageSources.Current;
+            }
+            OnSelectedMachineWidePackageSourceChanged(sender, null);
+        }
+
+        private void PackageSourcesListBox_GotFocus(object sender, EventArgs e)
+        {
+            if (PackageSourcesListBox.SelectedItem == null)
+            {
+                PackageSourcesListBox.SelectedItem = (PackageSource)_packageSources.Current;
+            }
+            OnSelectedPackageSourceChanged(sender, null);
         }
 
         /// <summary>
@@ -141,6 +197,7 @@ namespace NuGet.Options
 
             // get package sources as ordered list
             var packageSources = PackageSourcesListBox.Items.Cast<PackageSource>().ToList();
+            packageSources.AddRange(MachineWidePackageSourcesListBox.Items.Cast<PackageSource>().ToList());
             _packageSourceProvider.SavePackageSources(packageSources);
 
             // find the enabled package source 
@@ -159,7 +216,7 @@ namespace NuGet.Options
             // clear this flag so that we will set up the bindings again when the option page is activated next time
             _initialized = false;
 
-            _allPackageSources = null;
+            _packageSources = null;
             ClearNameSource();
             UpdateUI();
         }
@@ -170,13 +227,13 @@ namespace NuGet.Options
             {
                 return;
             }
-            _allPackageSources.Remove(PackageSourcesListBox.SelectedItem);
+            _packageSources.Remove(PackageSourcesListBox.SelectedItem);
             UpdateUI();
         }
 
         private void OnAddButtonClick(object sender, EventArgs e)
         {
-            _allPackageSources.Add(CreateNewPackageSource());
+            _packageSources.Add(CreateNewPackageSource());
 
             // auto-select the newly-added item
             PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.Items.Count - 1;    
@@ -184,7 +241,7 @@ namespace NuGet.Options
 
         private PackageSource CreateNewPackageSource()
         {
-            var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
+            var sourcesList = (IEnumerable<PackageSource>)_packageSources.List;
             for (int i = 0; ; i++)
             {
                 var newName = i == 0 ? "Package source" : "Package source " + i;
@@ -240,13 +297,18 @@ namespace NuGet.Options
             }
 
             var selectedPackageSource = (PackageSource)PackageSourcesListBox.SelectedItem;
+            if (selectedPackageSource == null)
+            {
+                return TryUpdateSourceResults.NotUpdated;
+            }
+
             var newPackageSource = new PackageSource(source, name, selectedPackageSource.IsEnabled);
             if (selectedPackageSource.Equals(newPackageSource)) 
             {
                 return TryUpdateSourceResults.Unchanged;
             }
 
-            var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
+            var sourcesList = (IEnumerable<PackageSource>)_packageSources.List;
 
             // check to see if name has already been added
             // also make sure it's not the same as the aggregate source ('All')
@@ -270,7 +332,7 @@ namespace NuGet.Options
                 return TryUpdateSourceResults.SourceConflicted;
             }
 
-            _allPackageSources[_allPackageSources.Position] = newPackageSource;
+            _packageSources[_packageSources.Position] = newPackageSource;
 
             return TryUpdateSourceResults.Successful;
         }
@@ -290,44 +352,46 @@ namespace NuGet.Options
 
         private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null)
+            var currentListBox = PackageSourcesContextMenu.SourceControl as ListBox;
+            if (currentListBox != null && currentListBox.SelectedItem != null && e.ClickedItem == CopyPackageSourceStripMenuItem)
             {
-                CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+                CopySelectedItem((PackageSource)currentListBox.SelectedItem);
             }
         }
 
         private void PackageSourcesListBox_KeyUp(object sender, KeyEventArgs e)
         {
+            var currentListBox = (ListBox)sender;
             if (e.KeyCode == Keys.C && e.Control)
             {
-                CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+                CopySelectedItem((PackageSource)currentListBox.SelectedItem);
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Space)
             {
-                TogglePackageSourceEnabled(PackageSourcesListBox.SelectedIndex);
+                TogglePackageSourceEnabled(currentListBox.SelectedIndex, currentListBox);
                 e.Handled = true;
             }
         }
 
-        private void TogglePackageSourceEnabled(int itemIndex)
+        private void TogglePackageSourceEnabled(int itemIndex, ListBox currentListBox)
         {
-            if (itemIndex < 0 || itemIndex >= PackageSourcesListBox.Items.Count)
+            if (itemIndex < 0 || itemIndex >= currentListBox.Items.Count)
             {
                 return;
             }
 
-            var item = (PackageSource)PackageSourcesListBox.Items[itemIndex];
+            var item = (PackageSource)currentListBox.Items[itemIndex];
             item.IsEnabled = !item.IsEnabled;
 
-            PackageSourcesListBox.Invalidate(GetCheckBoxRectangleForListBoxItem(itemIndex));
+            currentListBox.Invalidate(GetCheckBoxRectangleForListBoxItem(currentListBox, itemIndex));
         }
 
-        private Rectangle GetCheckBoxRectangleForListBoxItem(int itemIndex)
+        private Rectangle GetCheckBoxRectangleForListBoxItem(ListBox currentListBox, int itemIndex)
         {
             const int edgeMargin = 8;
 
-            Rectangle itemRectangle = PackageSourcesListBox.GetItemRectangle(itemIndex);
+            Rectangle itemRectangle = currentListBox.GetItemRectangle(itemIndex);
 
             // this is the bound of the checkbox
             var checkBoxRectangle = new Rectangle(
@@ -347,20 +411,21 @@ namespace NuGet.Options
 
         private void PackageSourcesListBox_MouseUp(object sender, MouseEventArgs e)
         {
+            var currentListBox = (ListBox)sender;
             if (e.Button == MouseButtons.Right)
             {
-                PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
+                currentListBox.SelectedIndex = currentListBox.IndexFromPoint(e.Location);
             }
             else if (e.Button == MouseButtons.Left)
             {
-                int itemIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
-                if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count)
+                int itemIndex = currentListBox.IndexFromPoint(e.Location);
+                if (itemIndex >= 0 && itemIndex < currentListBox.Items.Count)
                 {
-                    Rectangle checkBoxRectangle = GetCheckBoxRectangleForListBoxItem(itemIndex);
+                    Rectangle checkBoxRectangle = GetCheckBoxRectangleForListBoxItem(currentListBox, itemIndex);
                     // if the mouse click position is inside the checkbox, toggle the IsEnabled property
                     if (checkBoxRectangle.Contains(e.Location))
                     {
-                        TogglePackageSourceEnabled(itemIndex);
+                        TogglePackageSourceEnabled(itemIndex, currentListBox);
                     }
                 }
             }
@@ -368,18 +433,19 @@ namespace NuGet.Options
 
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e)
         {
+            var currentListBox = (ListBox)sender;
             Graphics graphics = e.Graphics;
             e.DrawBackground();
 
-            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count)
+            if (e.Index < 0 || e.Index >= currentListBox.Items.Count)
             {
                 return;
             }
 
-            PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
+            PackageSource currentItem = (PackageSource)currentListBox.Items[e.Index];
 
             using (StringFormat drawFormat = new StringFormat())
-            using (Brush foreBrush = new SolidBrush(e.ForeColor))
+            using (Brush foreBrush = new SolidBrush(currentListBox.SelectionMode == SelectionMode.None ? SystemColors.WindowText : e.ForeColor))
             {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
@@ -450,12 +516,13 @@ namespace NuGet.Options
 
         private void PackageSourcesListBox_MeasureItem(object sender, MeasureItemEventArgs e)
         {
-            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count)
+            var currentListBox = (ListBox)sender;
+            if (e.Index < 0 || e.Index >= currentListBox.Items.Count)
             {
                 return;
             }
 
-            PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
+            PackageSource currentItem = (PackageSource)currentListBox.Items[e.Index];
             using (StringFormat drawFormat = new StringFormat())
             using (Font italicFont = new Font(Font, FontStyle.Italic))
             {
@@ -473,37 +540,52 @@ namespace NuGet.Options
 
         private void PackageSourcesListBox_MouseMove(object sender, MouseEventArgs e)
         {
-            int index = PackageSourcesListBox.IndexFromPoint(e.X, e.Y);
+            var currentListBox = (ListBox)sender;
+            int index = currentListBox.IndexFromPoint(e.X, e.Y);
 
-            if (index >= 0 && index < PackageSourcesListBox.Items.Count && e.Y <= PackageSourcesListBox.PreferredHeight)
+            if (index >= 0 && index < currentListBox.Items.Count && e.Y <= currentListBox.PreferredHeight)
             {
-                string newToolTip = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
-                string currentToolTip = packageListToolTip.GetToolTip(PackageSourcesListBox);
+                string newToolTip = ((PackageSource)currentListBox.Items[index]).Source;
+                string currentToolTip = packageListToolTip.GetToolTip(currentListBox);
                 if (currentToolTip != newToolTip)
                 {
-                    packageListToolTip.SetToolTip(PackageSourcesListBox, newToolTip);
+                    packageListToolTip.SetToolTip(currentListBox, newToolTip);
                 }
             }
             else
             {
-                packageListToolTip.SetToolTip(PackageSourcesListBox, null);
-                packageListToolTip.Hide(PackageSourcesListBox);
+                packageListToolTip.SetToolTip(currentListBox, null);
+                packageListToolTip.Hide(currentListBox);
             }
         }
 
         private void OnSelectedPackageSourceChanged(object sender, EventArgs e)
         {
-            UpdateUI();    
+            MachineWidePackageSourcesListBox.ClearSelected();
+            UpdateUI();
 
-            var selectedPackageSource = (PackageSource)_allPackageSources.Current;
-            if (selectedPackageSource != null)
+            UpdateTextBoxes((PackageSource)_packageSources.Current);
+        }
+
+        private void OnSelectedMachineWidePackageSourceChanged(object sender, EventArgs e)
+        {
+            PackageSourcesListBox.ClearSelected();
+            UpdateUI();
+
+            UpdateTextBoxes((PackageSource)_machineWidepackageSources.Current);
+        }
+
+        private void UpdateTextBoxes(PackageSource packageSource)
+        {
+            if (packageSource != null)
             {
-                NewPackageName.Text = selectedPackageSource.Name;
-                NewPackageSource.Text = selectedPackageSource.Source;
+                NewPackageName.Text = packageSource.Name;
+                NewPackageSource.Text = packageSource.Source;
             }
             else
             {
-                NewPackageName.Text = NewPackageSource.Text = String.Empty;
+                NewPackageName.Text = String.Empty;
+                NewPackageSource.Text = String.Empty;
             }
         }
 

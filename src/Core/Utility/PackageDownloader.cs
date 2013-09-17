@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using NuGet.Resources;
 
 namespace NuGet
@@ -12,6 +11,12 @@ namespace NuGet
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
+
+        public string CurrentDownloadPackageId
+        {
+            get;
+            private set;
+        }
 
         public virtual void DownloadPackage(Uri uri, IPackageMetadata package, Stream targetStream)
         {
@@ -27,7 +32,7 @@ namespace NuGet
             DownloadPackage(downloadClient, package, targetStream);
         }
 
-        public void DownloadPackage(IHttpClient downloadClient, IPackageMetadata package, Stream targetStream)
+        public void DownloadPackage(IHttpClient downloadClient, IPackageName package, Stream targetStream)
         {
             if (downloadClient == null)
             {
@@ -41,28 +46,25 @@ namespace NuGet
 
             // Get the operation display text
             string operation = String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, package.Id, package.Version);
+            CurrentDownloadPackageId = package.Id;
 
             EventHandler<ProgressEventArgs> progressAvailableHandler = (sender, e) =>
             {
                 OnPackageDownloadProgress(new ProgressEventArgs(operation, e.PercentComplete));
             };
 
-            EventHandler<WebRequestEventArgs> beforeSendingRequesthandler = (sender, e) =>
-            {
-                OnSendingRequest(e.Request);
-            };
-
             try
             {
                 downloadClient.ProgressAvailable += progressAvailableHandler;
-                downloadClient.SendingRequest += beforeSendingRequesthandler;
+                downloadClient.SendingRequest += OnSendingRequest;
 
                 downloadClient.DownloadData(targetStream);
             }
             finally
             {
                 downloadClient.ProgressAvailable -= progressAvailableHandler;
-                downloadClient.SendingRequest -= beforeSendingRequesthandler;
+                downloadClient.SendingRequest -= OnSendingRequest;
+                CurrentDownloadPackageId = null;
             }
         }
 
@@ -71,9 +73,9 @@ namespace NuGet
             ProgressAvailable(this, e);
         }
 
-        private void OnSendingRequest(WebRequest webRequest)
+        private void OnSendingRequest(object sender, WebRequestEventArgs webRequestArgs)
         {
-            SendingRequest(this, new WebRequestEventArgs(webRequest));
+            SendingRequest(this, webRequestArgs);
         }
     }
 }

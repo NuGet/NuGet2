@@ -33,6 +33,11 @@ namespace NuGet.VisualStudio
             StatusMessage.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.InfoTextKey);
         }
 
+        public void CleanUp()
+        {
+            _productUpdateService.UpdateAvailable -= OnUpdateAvailable;
+        }
+
         private void OnUpdateAvailable(object sender, ProductUpdateAvailableEventArgs e)
         {
             // this event handler will be invoked on background thread. Has to use Dispatcher to show update bar.

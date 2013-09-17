@@ -155,6 +155,27 @@ namespace NuGet
             }
         }
 
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            IEnumerable<PackageReference> references = GetPackageReferences(id);
+            if (!includePrerelease) 
+            {
+                references = references.Where(r => String.IsNullOrEmpty(r.Version.SpecialVersion));
+            }
+
+            PackageReference reference = references.OrderByDescending(r => r.Version).FirstOrDefault();
+            if (reference != null)
+            {
+                package = GetPackage(reference);
+                return true;
+            }
+            else
+            {
+                package = null;
+                return false;
+            }
+        }
+
         public void AddPackage(string packageId, SemanticVersion version, FrameworkName targetFramework)
         {
             _packageReferenceFile.AddEntry(packageId, version, targetFramework);
