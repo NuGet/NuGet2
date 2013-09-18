@@ -123,7 +123,7 @@ namespace NuGet.Commands
         {
             BuildProject();
 
-            Logger.Log(MessageLevel.Info, NuGetResources.PackagingFilesFromOutputPath, Path.GetDirectoryName(TargetPath));
+            Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("PackagingFilesFromOutputPath"), Path.GetDirectoryName(TargetPath));
 
             var builder = new PackageBuilder();
 
@@ -134,7 +134,7 @@ namespace NuGet.Commands
             }
             catch
             {
-                Logger.Log(MessageLevel.Warning, NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath));
+                Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("UnableToExtractAssemblyMetadata"), Path.GetFileName(TargetPath));
                 ExtractMetadataFromProject(builder);
             }
 
@@ -171,13 +171,13 @@ namespace NuGet.Commands
             if (String.IsNullOrEmpty(builder.Description))
             {
                 builder.Description = "Description";
-                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Description", "Description");
+                Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_UnspecifiedField"), "Description", "Description");
             }
 
             if (!builder.Authors.Any())
             {
                 builder.Authors.Add(Environment.UserName);
-                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Author", Environment.UserName);
+                Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_UnspecifiedField"), "Author", Environment.UserName);
             }
 
             return builder;
@@ -237,7 +237,7 @@ namespace NuGet.Commands
                 {
                     Logger.Log(
                         MessageLevel.Info, 
-                        NuGetResources.BuildingProjectTargetingFramework, 
+                        LocalizedResourceManager.GetString("BuildingProjectTargetingFramework"), 
                         _project.FullPath,
                         TargetFramework);
                 }
@@ -256,7 +256,7 @@ namespace NuGet.Commands
                     if (result.OverallResult == BuildResultCode.Failure)
                     {
                         // If the build fails, report the error
-                        throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+                        throw new CommandLineException(LocalizedResourceManager.GetString("FailedToBuildProject"), Path.GetFileName(_project.FullPath));
                     }
 
                     TargetPath = ResolveTargetPath(result);
@@ -269,7 +269,7 @@ namespace NuGet.Commands
                 // Make if the target path doesn't exist, fail
                 if (!File.Exists(TargetPath))
                 {
-                    throw new CommandLineException(NuGetResources.UnableToFindBuildOutput, TargetPath);
+                    throw new CommandLineException(LocalizedResourceManager.GetString("UnableToFindBuildOutput"), TargetPath);
                 }
             }
         }
@@ -445,7 +445,7 @@ namespace NuGet.Commands
                             loadedProjects.First() :
                             new Project(
                                 fullPath,
-                                globalProperties: null,
+                                globalProperties: project.GlobalProperties,
                                 toolsVersion: null,
                                 projectCollection: projectCollection);
 
@@ -494,7 +494,7 @@ namespace NuGet.Commands
             {
                 var message = string.Format(
                     CultureInfo.InvariantCulture,
-                    NuGetResources.Error_ProcessingNuspecFile,
+                    LocalizedResourceManager.GetString("Error_ProcessingNuspecFile"),
                     project.FullPath,
                     ex.Message);
                 throw new CommandLineException(message, ex);
@@ -615,7 +615,7 @@ namespace NuGet.Commands
             {
                 return;
             }
-            Logger.Log(MessageLevel.Info, NuGetResources.UsingPackagesConfigForDependencies);
+            Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("UsingPackagesConfigForDependencies"));
 
             var file = new PackageReferenceFile(packagesConfig);
 
@@ -707,7 +707,7 @@ namespace NuGet.Commands
             {
                 if (this.ProjectProperties.ContainsKey("SolutionDir"))
                 {
-                    this.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_DuplicatePropertyKey, "SolutionDir");
+                    this.Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_DuplicatePropertyKey"), "SolutionDir");
                 }
 
                 ProjectProperties["SolutionDir"] = solutionDir;
@@ -791,7 +791,7 @@ namespace NuGet.Commands
                 return null;
             }
 
-            Logger.Log(MessageLevel.Info, NuGetResources.UsingNuspecForMetadata, Path.GetFileName(nuspecFile));
+            Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("UsingNuspecForMetadata"), Path.GetFileName(nuspecFile));
 
             using (Stream stream = File.OpenRead(nuspecFile))
             {
@@ -867,7 +867,7 @@ namespace NuGet.Commands
 
                 if (!File.Exists(fullPath))
                 {
-                    Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileDoesNotExist, targetFilePath);
+                    Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_FileDoesNotExist"), targetFilePath);
                     continue;
                 }
 
@@ -880,11 +880,11 @@ namespace NuGet.Commands
                     var isEqual = ContentEquals(targetFile, fullPath);
                     if (isEqual)
                     {
-                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
+                        Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("PackageCommandFileFromDependencyIsNotChanged"), targetFilePath);
                         continue;
                     }
 
-                    Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
+                    Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("PackageCommandFileFromDependencyIsChanged"), targetFilePath);
                 }
 
                 var packageFile = new PhysicalPackageFile
@@ -900,14 +900,14 @@ namespace NuGet.Commands
         {
             if (!builder.Files.Any(p => packageFile.Path.Equals(p.Path, StringComparison.OrdinalIgnoreCase)))
             {
-                WriteDetail(NuGetResources.AddFileToPackage, packageFile.SourcePath, packageFile.TargetPath);
+                WriteDetail(LocalizedResourceManager.GetString("AddFileToPackage"), packageFile.SourcePath, packageFile.TargetPath);
                 builder.Files.Add(packageFile);
             }
             else
             {
                 _logger.Log(
                     MessageLevel.Warning,
-                    NuGetResources.FileNotAddedToPackage, 
+                    LocalizedResourceManager.GetString("FileNotAddedToPackage"), 
                     packageFile.SourcePath, 
                     packageFile.TargetPath);
             }
@@ -968,6 +968,16 @@ namespace NuGet.Commands
             {
                 _packages = packages;
                 _repository = new ReadOnlyPackageRepository(packages.ToList());
+            }
+
+            protected override bool SkipDependencyResolveError
+            {
+                get
+                {
+                    // For the pack command, when don't need to throw if a dependency is missing 
+                    // from a nuspec file.
+                    return true;
+                }
             }
 
             protected override IPackage ResolveDependency(PackageDependency dependency)

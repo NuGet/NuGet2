@@ -12,6 +12,7 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider
     {
+        private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
 
@@ -22,8 +23,9 @@ namespace NuGet.VisualStudio
 
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
-            { new PackageSource(NuGetConstants.V1FeedUrl, NuGetOfficialFeedName), NuGetDefaultSource },
-            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetOfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V1FeedUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyOfficialPackageSourceUrl, NuGetLegacyOfficialFeedName), NuGetDefaultSource },
         };
 
         internal const string ActivePackageSourceSectionName = "activePackageSource";

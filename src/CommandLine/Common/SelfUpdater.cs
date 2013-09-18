@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace NuGet.Common
 {
@@ -36,29 +37,29 @@ namespace NuGet.Common
 
         internal void SelfUpdate(string exePath, SemanticVersion version)
         {
-            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
+            Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandCheckingForUpdates"), NuGetConstants.DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository
             IPackageRepository packageRepository = _repositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
 
-            IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
+            IPackage package = packageRepository.GetUpdates(
+                new [] { new PackageName(NuGetCommandLinePackageId, version) },
+                includePrerelease: true, 
+                includeAllVersions: false, 
+                targetFrameworks: new FrameworkName[] { null },
+                versionConstraints: new VersionSpec[] { null }).FirstOrDefault();
 
-            // We didn't find it so complain
-            if (package == null)
-            {
-                throw new CommandLineException(NuGetResources.UpdateCommandUnableToFindPackage, NuGetCommandLinePackageId);
-            }
-
-            Console.WriteLine(NuGetResources.UpdateCommandCurrentlyRunningNuGetExe, version);
+ 
+            Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandCurrentlyRunningNuGetExe"), version);
 
             // Check to see if an update is needed
-            if (version >= package.Version)
+            if (package == null || version >= package.Version)
             {
-                Console.WriteLine(NuGetResources.UpdateCommandNuGetUpToDate);
+                Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandNuGetUpToDate"));
             }
             else
             {
-                Console.WriteLine(NuGetResources.UpdateCommandUpdatingNuGet, package.Version);
+                Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandUpdatingNuGet"), package.Version);
 
                 // Get NuGet.exe file from the package
                 IPackageFile file = package.GetFiles().FirstOrDefault(f => Path.GetFileName(f.Path).Equals(NuGetExe, StringComparison.OrdinalIgnoreCase));
@@ -66,7 +67,7 @@ namespace NuGet.Common
                 // If for some reason this package doesn't have NuGet.exe then we don't want to use it
                 if (file == null)
                 {
-                    throw new CommandLineException(NuGetResources.UpdateCommandUnableToLocateNuGetExe);
+                    throw new CommandLineException(LocalizedResourceManager.GetString("UpdateCommandUnableToLocateNuGetExe"));
                 }
 
                 // Get the exe path and move it to a temp file (NuGet.exe.old) so we can replace the running exe with the bits we got 
@@ -77,7 +78,7 @@ namespace NuGet.Common
                 // Update the file
                 UpdateFile(exePath, file);
 
-                Console.WriteLine(NuGetResources.UpdateCommandUpdateSuccessful);
+                Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandUpdateSuccessful"));
             }
         }
 

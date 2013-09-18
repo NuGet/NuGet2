@@ -188,7 +188,7 @@ namespace NuGet
         [XmlIgnore]
         public List<ManifestReferenceSet> ReferenceSets { get; set; }
 
-        SemanticVersion IPackageMetadata.Version
+        SemanticVersion IPackageName.Version
         {
             get
             {

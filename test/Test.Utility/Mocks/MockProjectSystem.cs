@@ -11,6 +11,7 @@ namespace NuGet.Test.Mocks
         private HashSet<string> _topImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _bottomImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _excludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private string _projectName;
 
         public MockProjectSystem()
             : this(VersionUtility.DefaultTargetFramework)
@@ -71,7 +72,14 @@ namespace NuGet.Test.Mocks
 
         public virtual string ProjectName
         {
-            get { return Root; }
+            get 
+            { 
+                return _projectName ?? Root; 
+            }
+            set
+            {
+                _projectName = value;
+            }
         }
 
         public virtual bool IsSupportedFile(string path)

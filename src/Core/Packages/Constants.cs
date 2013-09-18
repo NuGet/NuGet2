@@ -40,7 +40,6 @@ namespace NuGet
         public static readonly string SettingsFileName = "NuGet.Config";
         public static readonly string PackageReferenceFile = "packages.config";
 
-        internal const string PackageServiceEntitySetName = "Packages";
         internal const string PackageRelationshipNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
 
         // Starting from nuget 2.0, we use a file with the special name '_._' to represent an empty folder.

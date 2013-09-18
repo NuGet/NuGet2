@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Threading;
+using System.Threading.Tasks;
 using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -21,8 +23,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
 
-        private string _targetDir;
-        private bool _updateWorkingDirectoryPending;
         private IConsole _activeConsole;
         private RunspaceDispatcher _runspace;
         private NuGetPSHost _nugetHost;
@@ -179,8 +179,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     // Hook up solution events
                     _solutionManager.SolutionOpened += (o, e) =>
                     {
-                        UpdateWorkingDirectory();
-                        ExecuteInitScripts();
+                        Task.Factory.StartNew(() =>
+                            {
+                                UpdateWorkingDirectory();
+                                ExecuteInitScripts();
+                            }, 
+                            CancellationToken.None,
+                            TaskCreationOptions.None,
+                            TaskScheduler.Default);
                     };
                     _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
                 }
@@ -198,35 +204,18 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         private void UpdateWorkingDirectory()
         {
-            string targetDir;
-            if (_solutionManager.IsSolutionOpen)
-            {
-                targetDir = _solutionManager.SolutionDirectory;
-            }
-            else
-            {
-                // if there is no solution open, we set the active directory to be user profile folder
-                targetDir = Environment.GetEnvironmentVariable("USERPROFILE");
-            }
-
             if (Runspace.RunspaceAvailability == RunspaceAvailability.Available)
             {
+                // if there is no solution open, we set the active directory to be user profile folder
+                string targetDir = _solutionManager.IsSolutionOpen ?
+                    _solutionManager.SolutionDirectory :
+                    Environment.GetEnvironmentVariable("USERPROFILE");
+
                 Runspace.ChangePSDirectory(targetDir);
-            }
-            else
-            {
-                // If we are in the middle of executing some other scripts, which triggered the solution to be opened/closed, then we 
-                // can't execute Set-Location here because of reentrancy policy. So we save the location and change it later when the 
-                // executing command finishes running.
-                _targetDir = targetDir;
-                _updateWorkingDirectoryPending = true;
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "We don't want execution of init scripts to crash our console.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts()
         {
             // Fix for Bug 1426 Disallow ExecuteInitScripts from being executed concurrently by multiple threads.
@@ -297,7 +286,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             }
 
             NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageManagerConsoleCommandExecutionBegin);
-            _updateWorkingDirectoryPending = false;
             ActiveConsole = console;
             
             string fullCommand;
@@ -305,17 +293,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             {
                 return ExecuteHost(fullCommand, command, inputs);
             }
+
             return false; // constructing multi-line command
         }
 
-        protected void OnExecuteCommandEnd()
+        protected static void OnExecuteCommandEnd()
         {
-            if (_updateWorkingDirectoryPending)
-            {
-                Runspace.ChangePSDirectory(_targetDir);
-                _updateWorkingDirectoryPending = false;
-                _targetDir = null;
-            }
             NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageManagerConsoleCommandExecutionEnd);
         }
 
@@ -394,6 +377,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             get
             {
                 var activePackageSource = _packageSourceProvider.ActivePackageSource;
+                if (activePackageSource.IsAggregate())
+                {
+                    // Starting from 2.7, we will not show the All option if there's only one package source.
+                    // Hence, if All is the active package source in that case, we set the sole package source as active,
+                    // and save it to settings
+                    PackageSource[] packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().ToArray();
+                    if (packageSources.Length == 1)
+                    {
+                        _packageSourceProvider.ActivePackageSource = packageSources[0];
+                        return packageSources[0].Name;
+                    }
+                }
+
                 return activePackageSource == null ? null : activePackageSource.Name;
             }
             set

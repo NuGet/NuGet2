@@ -1,34 +1,43 @@
-﻿using Microsoft.VisualStudio.Settings;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
 {
     internal class SettingsStoreWrapper : ISettingsStore
     {
-        private readonly SettingsStore _store;
+        private readonly IVsSettingsStore _store;
 
-        public SettingsStoreWrapper(SettingsStore store)
+        public SettingsStoreWrapper(IVsSettingsStore store)
         {
             _store = store;
         }
 
         public bool CollectionExists(string collection)
         {
-            return _store.CollectionExists(collection);
+            int exists;
+            int hr = _store.CollectionExists(collection, out exists);
+            return ErrorHandler.Succeeded(hr) && exists == 1;
         }
 
         public bool GetBoolean(string collection, string propertyName, bool defaultValue)
         {
-            return _store.GetBoolean(collection, propertyName, defaultValue);
+            int value;
+            _store.GetBoolOrDefault(collection, propertyName, defaultValue ? 1 : 0, out value);
+            return value != 0;
         }
 
         public int GetInt32(string collection, string propertyName, int defaultValue)
         {
-            return _store.GetInt32(collection, propertyName, defaultValue);
+            int value;
+            int hr = _store.GetIntOrDefault(collection, propertyName, defaultValue, out value);
+            return ErrorHandler.Succeeded(hr) ? value : 0;
         }
 
         public string GetString(string collection, string propertyName, string defaultValue)
         {
-            return _store.GetString(collection, propertyName, defaultValue);
+            string value;
+            int hr = _store.GetStringOrDefault(collection, propertyName, defaultValue, out value);
+            return ErrorHandler.Succeeded(hr) ? value : null;
         }
     }
 }

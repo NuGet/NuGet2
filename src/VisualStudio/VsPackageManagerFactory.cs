@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Composition;
+using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -15,6 +16,7 @@ namespace NuGet.VisualStudio
         private readonly IRepositorySettings _repositorySettings;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
+        private readonly IPackageRepository _activePackageSourceRepository;
         private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
         private RepositoryInfo _repositoryInfo;
 
@@ -24,13 +26,15 @@ namespace NuGet.VisualStudio
                                        IVsPackageSourceProvider packageSourceProvider,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       VsPackageInstallerEvents packageEvents) :
+                                       VsPackageInstallerEvents packageEvents,
+                                       IPackageRepository activePackageSourceRepository) :
             this(solutionManager, 
                  repositoryFactory, 
                  packageSourceProvider, 
                  fileSystemProvider, 
                  repositorySettings, 
                  packageEvents,
+                 activePackageSourceRepository,
                  ServiceLocator.GetGlobalService<SVsFrameworkMultiTargeting, IVsFrameworkMultiTargeting>())
         {
         }
@@ -41,6 +45,7 @@ namespace NuGet.VisualStudio
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
                                        VsPackageInstallerEvents packageEvents,
+                                       IPackageRepository activePackageSourceRepository,
                                        IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             if (solutionManager == null)
@@ -67,6 +72,10 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException("packageEvents");
             }
+            if (activePackageSourceRepository == null)
+            {
+                throw new ArgumentNullException("activePackageSourceRepository");
+            }
 
             _fileSystemProvider = fileSystemProvider;
             _repositorySettings = repositorySettings;
@@ -74,6 +83,7 @@ namespace NuGet.VisualStudio
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageEvents = packageEvents;
+            _activePackageSourceRepository = activePackageSourceRepository;
             _frameworkMultiTargeting = frameworkMultiTargeting;
 
             _solutionManager.SolutionClosing += (sender, e) =>
@@ -87,7 +97,7 @@ namespace NuGet.VisualStudio
         /// </summary>
         public IVsPackageManager CreatePackageManager()
         {
-            return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: true);
+            return CreatePackageManager(_activePackageSourceRepository, useFallbackForDependencies: true);
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies)
@@ -109,6 +119,22 @@ namespace NuGet.VisualStudio
                                         _frameworkMultiTargeting);
         }
 
+        public IVsPackageManager CreatePackageManagerWithAllPackageSources()
+        {
+            return CreatePackageManagerWithAllPackageSources(_activePackageSourceRepository);
+        }
+
+        internal IVsPackageManager CreatePackageManagerWithAllPackageSources(IPackageRepository repository)
+        {
+            if (IsAggregateRepository(repository))
+            {
+               return CreatePackageManager(repository, false);
+            }
+
+            var priorityRepository = _packageSourceProvider.CreatePriorityPackageRepository(_repositoryFactory, repository);
+            return CreatePackageManager(priorityRepository, useFallbackForDependencies: false);
+        }
+
         /// <summary>
         /// Creates a FallbackRepository with an aggregate repository that also contains the primaryRepository.
         /// </summary>
@@ -120,7 +146,7 @@ namespace NuGet.VisualStudio
                 return primaryRepository;
             }
 
-            var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
+            var aggregateRepository = _packageSourceProvider.CreateAggregateRepository(_repositoryFactory, ignoreFailingRepositories: true);
             aggregateRepository.ResolveDependenciesVertically = true;
             return new FallbackRepository(primaryRepository, aggregateRepository);
         }
@@ -129,7 +155,8 @@ namespace NuGet.VisualStudio
         {
             if (repository is AggregateRepository)
             {
-                // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository of all repositories in the package source
+                // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository 
+                // of all repositories in the package source.
                 // Since the repository created here comes from the UI, this holds true.
                 return true;
             }

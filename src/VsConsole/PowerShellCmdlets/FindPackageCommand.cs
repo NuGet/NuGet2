@@ -73,7 +73,6 @@ namespace NuGet.PowerShell.Commands
                            .AsQueryable();
         }
 
-
         protected override IQueryable<IPackage> GetPackagesForUpdate(IPackageRepository sourceRepository)
         {
             IPackageRepository localRepository = PackageManager.LocalRepository;

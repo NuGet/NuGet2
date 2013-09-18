@@ -23,7 +23,7 @@ namespace NuGet.Commands
         {
             if (NoPrompt)
             {
-                Console.WriteWarning(NuGetResources.Warning_NoPromptDeprecated);
+                Console.WriteWarning(LocalizedResourceManager.GetString("Warning_NoPromptDeprecated"));
                 NonInteractive = true;
             }
 
@@ -48,18 +48,18 @@ namespace NuGet.Commands
             string sourceDisplayName = CommandLineUtility.GetSourceDisplayName(source);
             if (String.IsNullOrEmpty(apiKey))
             {
-                Console.WriteWarning(NuGetResources.NoApiKeyFound, sourceDisplayName);
+                Console.WriteWarning(LocalizedResourceManager.GetString("NoApiKeyFound"), sourceDisplayName);
             }
 
-            if (NonInteractive || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName)))
+            if (NonInteractive || Console.Confirm(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("DeleteCommandConfirm"), packageId, packageVersion, sourceDisplayName)))
             {
-                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion, sourceDisplayName);
+                Console.WriteLine(LocalizedResourceManager.GetString("DeleteCommandDeletingPackage"), packageId, packageVersion, sourceDisplayName);
                 gallery.DeletePackage(apiKey, packageId, packageVersion);
-                Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, packageId, packageVersion);
+                Console.WriteLine(LocalizedResourceManager.GetString("DeleteCommandDeletedPackage"), packageId, packageVersion);
             }
             else
             {
-                Console.WriteLine(NuGetResources.DeleteCommandCanceled);
+                Console.WriteLine(LocalizedResourceManager.GetString("DeleteCommandCanceled"));
             }
         }
 

@@ -98,10 +98,12 @@ namespace NuGet.VisualStudio
         {
             if (String.IsNullOrEmpty(source))
             {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
+                // if source is null or empty, we fall back to aggregate package source
+                source = AggregatePackageSource.Instance.Source;
             }
-
+            
             IPackageRepository repository = _repositoryFactory.CreateRepository(source);
+
             InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
         }
 
@@ -110,6 +112,11 @@ namespace NuGet.VisualStudio
             if (project == null)
             {
                 throw new ArgumentNullException("project");
+            }
+
+            if (repository == null)
+            {
+                throw new ArgumentNullException("repository");
             }
 
             using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
@@ -141,7 +148,8 @@ namespace NuGet.VisualStudio
                 {
                     projectManager.PackageReferenceAdded += addedHandler;
                     packageManager.PackageInstalled += installedHandler;
-                    packageManager.BindingRedirectEnabled = false;
+                    // if skipping assembly references, disable binding redirects too.
+                    packageManager.BindingRedirectEnabled = !skipAssemblyReferences;
                     packageManager.InstallPackage(
                         projectManager,
                         packageId,

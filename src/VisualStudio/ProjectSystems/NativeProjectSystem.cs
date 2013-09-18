@@ -1,30 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
-    public class NativeProjectSystem : VsProjectSystem
+    public class NativeProjectSystem : CpsProjectSystem
     {
         public NativeProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
             : base(project, fileSystemProvider)
         {
-        }
-
-        public override bool IsBindingRedirectSupported
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        protected override void AddGacReference(string name)
-        {
-            // Native project doesn't know about GAC
         }
 
         public override bool ReferenceExists(string name)
@@ -43,81 +33,42 @@ namespace NuGet.VisualStudio
             // We disable assembly reference for native projects
         }
 
-        public override void AddImport(string targetPath, ProjectImportLocation location)
+        public override IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
-            if (VsVersionHelper.IsVisualStudio2010)
+            var allFiles = ThreadHelper.Generic.Invoke<IEnumerable<string>>(() =>
             {
-                base.AddImport(targetPath, location);
-            }
-            else
-            {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-                if (String.IsNullOrEmpty(targetPath))
+                if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-                }
-
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                if (VsVersionHelper.IsVisualStudio2012)
-                {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                    Project.Save();
+                    return GetFilesFromProjectForVS2010(path);
                 }
                 else
                 {
-                    AddImportStatementForVS2013(location, relativeTargetPath);
+                    return VCProjectHelper.GetFiles(Project.Object, path);
                 }
+            });
+
+            if (filter == null || filter.Equals("*.*", StringComparison.OrdinalIgnoreCase)) 
+            {
+                return allFiles;
             }
+
+            Regex matcher = ProjectExtensions.GetFilterRegex(filter);
+            return allFiles.Where(f => matcher.IsMatch(f));
         }
 
-        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
-        // in VS2010 and VS2012
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
+        public override IEnumerable<string> GetDirectories(string path)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                Project,
-                Project.ToVsHierarchy(),
-                buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-        }
-
-        public override void RemoveImport(string targetPath)
-        {
-            if (VsVersionHelper.IsVisualStudio2010)
+            return ThreadHelper.Generic.Invoke<IEnumerable<string>>(() =>
             {
-                base.RemoveImport(targetPath);
-            }
-            else
-            {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-
-                if (String.IsNullOrEmpty(targetPath))
+                if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-                }
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-
-                if (VsVersionHelper.IsVisualStudio2012)
-                {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                    Project.Save();
+                    return GetFiltersFromProjectForVS2010(path);
                 }
                 else
                 {
-                    RemoveImportStatementForVS2013(relativeTargetPath);
+                    return VCProjectHelper.GetFilters(Project.Object, path);
                 }
-            }
-        }
-
-        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
-        // in VS2010 and VS2012
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void RemoveImportStatementForVS2013(string relativeTargetPath)
-        {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                Project,
-                Project.ToVsHierarchy(),
-                buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+            });
         }
 
         protected override void AddFileToProject(string path)
@@ -190,6 +141,20 @@ namespace NuGet.VisualStudio
         private bool RemoveFileFromProjectForVS2010(string folderPath, string fullPath)
         {
             return VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private string[] GetFilesFromProjectForVS2010(string folderPath)
+        {
+            return VisualStudio10.VCProjectHelper.GetFiles(Project.Object, folderPath).ToArray();
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private string[] GetFiltersFromProjectForVS2010(string folderPath)
+        {
+            return VisualStudio10.VCProjectHelper.GetFilters(Project.Object, folderPath).ToArray();
         }
     }
 }

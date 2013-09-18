@@ -13,12 +13,20 @@ using NuGet.VisualStudio;
 
 namespace NuGet.VsEvents
 {
-    public sealed class ProjectRetargetingHandler : IVsTrackProjectRetargetingEvents, IDisposable
+    public sealed class ProjectRetargetingHandler : IVsTrackProjectRetargetingEvents, IVsTrackBatchRetargetingEvents, IDisposable
     {
-        private uint _cookie;
+        private uint _cookieProjectRetargeting;
+        private uint _cookieBatchRetargeting;
         private DTE _dte;
         private IVsTrackProjectRetargeting _vsTrackProjectRetargeting;
         private ErrorListProvider _errorListProvider;
+        private IVsMonitorSelection _vsMonitorSelection;
+        private string _platformRetargetingProject;
+
+        private const string NETCore45 = ".NETCore,Version=v4.5";
+        private const string Windows80 = "Windows, Version=8.0";
+        private const string NETCore451 = ".NETCore,Version=v4.5.1";
+        private const string Windows81 = "Windows, Version=8.1";
 
         /// <summary>
         /// Constructs and Registers ("Advises") for Project retargeting events if the IVsTrackProjectRetargeting service is available
@@ -40,19 +48,38 @@ namespace NuGet.VsEvents
             IVsTrackProjectRetargeting vsTrackProjectRetargeting = serviceProvider.GetService(typeof(SVsTrackProjectRetargeting)) as IVsTrackProjectRetargeting;
             if (vsTrackProjectRetargeting != null)
             {
+                _vsMonitorSelection = (IVsMonitorSelection)serviceProvider.GetService(typeof(IVsMonitorSelection));
+                Debug.Assert(_vsMonitorSelection != null);
                 _errorListProvider = new ErrorListProvider(serviceProvider);
                 _dte = dte;
                 _vsTrackProjectRetargeting = vsTrackProjectRetargeting;
 
-                if (_vsTrackProjectRetargeting.AdviseTrackProjectRetargetingEvents(this, out _cookie) == VSConstants.S_OK)
+                // Register for ProjectRetargetingEvents
+                if (_vsTrackProjectRetargeting.AdviseTrackProjectRetargetingEvents(this, out _cookieProjectRetargeting) == VSConstants.S_OK)
                 {
-                    Debug.Assert(_cookie != 0);
+                    Debug.Assert(_cookieProjectRetargeting != 0);
                     _dte.Events.BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
                     _dte.Events.SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
                 }
                 else
                 {
-                    _cookie = 0;
+                    _cookieProjectRetargeting = 0;
+                }
+
+                // Register for BatchRetargetingEvents. Using BatchRetargetingEvents, we need to detect platform retargeting
+                if (_vsTrackProjectRetargeting.AdviseTrackBatchRetargetingEvents(this, out _cookieBatchRetargeting) == VSConstants.S_OK)
+                {
+                    Debug.Assert(_cookieBatchRetargeting != 0);
+                    if (_cookieProjectRetargeting == 0)
+                    {
+                        // Register for dte Events only if they are not already registered for
+                        _dte.Events.BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+                        _dte.Events.SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+                    }
+                }
+                else
+                {
+                    _cookieBatchRetargeting = 0;
                 }
             }
         }
@@ -64,25 +91,40 @@ namespace NuGet.VsEvents
 
         private void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
-            // Clear the error list upon the first build action. This includes building, rebuilding, cleaning and so on
+            // Clear the error list upon the first build action
             // Note that the retargeting error message is shown on the errorlistprovider this class creates
             // Hence, explicit clearing of the error list is required
             _errorListProvider.Tasks.Clear();
+
+            if (Action != vsBuildAction.vsBuildActionClean)
+            {
+                ShowWarningsForPackageReinstallation(_dte.Solution);
+            }
         }
 
-        private void ShowRetargetingError(IList<IPackage> packagesToBeReinstalled, IVsHierarchy pAfterChangeHier)
+        private void ShowWarningsForPackageReinstallation(Solution solution)
+        {
+            Debug.Assert(solution != null);
+
+            foreach (Project project in solution.Projects)
+            {
+                IList<PackageReference> packageReferencesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(project);
+                if (packageReferencesToBeReinstalled.Count > 0)
+                {
+                    Debug.Assert(project.IsNuGetInUse());
+                    IVsHierarchy projectHierarchy = project.ToVsHierarchy();
+                    ShowRetargetingErrorTask(packageReferencesToBeReinstalled.Select(p => p.Id), projectHierarchy, TaskErrorCategory.Warning, TaskPriority.Normal);
+                }
+            }
+        }
+
+        private void ShowRetargetingErrorTask(IEnumerable<string> packagesToBeReinstalled, IVsHierarchy projectHierarchy, TaskErrorCategory errorCategory, TaskPriority priority)
         {
             Debug.Assert(packagesToBeReinstalled != null && !packagesToBeReinstalled.IsEmpty());
 
-            ErrorTask retargetErrorTask = new ErrorTask();
-            retargetErrorTask.Text = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
-                String.Join(", ", packagesToBeReinstalled.Select(p => p.Id)));
-            retargetErrorTask.ErrorCategory = TaskErrorCategory.Error;
-            retargetErrorTask.Category = TaskCategory.BuildCompile;
-            retargetErrorTask.HierarchyItem = pAfterChangeHier;
-            _errorListProvider.Tasks.Add(retargetErrorTask);
-            _errorListProvider.BringToFront();
-            _errorListProvider.ForceShowErrors();
+            var errorText = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
+                    String.Join(", ", packagesToBeReinstalled));
+            VsUtility.ShowError(_errorListProvider, errorCategory, priority, errorText, projectHierarchy);
         }
 
         #region IVsTrackProjectRetargetingEvents
@@ -95,8 +137,9 @@ namespace NuGet.VsEvents
                 IList<IPackage> packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(retargetedProject);
                 if (!packagesToBeReinstalled.IsEmpty())
                 {
-                    ShowRetargetingError(packagesToBeReinstalled, pAfterChangeHier);
+                    ShowRetargetingErrorTask(packagesToBeReinstalled.Select(p => p.Id), pAfterChangeHier, TaskErrorCategory.Error, TaskPriority.High);
                 }
+                ProjectRetargetingUtility.MarkPackagesForReinstallation(retargetedProject, packagesToBeReinstalled);
             }
             return VSConstants.S_OK;
         }
@@ -124,14 +167,82 @@ namespace NuGet.VsEvents
         }
         #endregion
 
+        #region IVsTrackBatchRetargetingEvents
+        int IVsTrackBatchRetargetingEvents.OnBatchRetargetingBegin()
+        {
+            if (VsVersionHelper.IsVisualStudio2013)
+            {
+                Project project = _vsMonitorSelection.GetActiveProject();
+                if (project != null)
+                {
+                    _platformRetargetingProject = null;
+                    string frameworkName = project.GetTargetFramework();
+                    if (NETCore45.Equals(frameworkName, StringComparison.OrdinalIgnoreCase) || Windows80.Equals(frameworkName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _platformRetargetingProject = project.UniqueName;
+                    }
+                }
+            }
+            return VSConstants.S_OK;
+        }
+
+        int IVsTrackBatchRetargetingEvents.OnBatchRetargetingEnd()
+        {
+            _errorListProvider.Tasks.Clear();
+            if (_platformRetargetingProject != null)
+            {
+                try
+                {
+                    Project project = _dte.Solution.Item(_platformRetargetingProject);
+                    if (project != null)
+                    {
+                        string frameworkName = project.GetTargetFramework();
+                        if (NETCore451.Equals(frameworkName, StringComparison.OrdinalIgnoreCase) || Windows81.Equals(frameworkName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            IList<IPackage> packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(project);
+                            if (packagesToBeReinstalled.Count > 0)
+                            {
+                                // By asserting that NuGet is in use, we are also asserting that NuGet.VisualStudio.dll is already loaded
+                                // Hence, it is okay to call project.ToVsHierarchy()
+                                Debug.Assert(project.IsNuGetInUse());
+                                IVsHierarchy projectHierarchy = project.ToVsHierarchy();
+                                ShowRetargetingErrorTask(packagesToBeReinstalled.Select(p => p.Id), projectHierarchy, TaskErrorCategory.Error, TaskPriority.High);
+                            }
+                            ProjectRetargetingUtility.MarkPackagesForReinstallation(project, packagesToBeReinstalled);
+                        }
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // If the solution does not contain a project named '_platformRetargetingProject', it will throw ArgumentException
+                }
+                _platformRetargetingProject = null;
+            }
+            return VSConstants.S_OK;
+        }
+        #endregion
+
         public void Dispose()
         {
-            _errorListProvider.Dispose();
-            if (_cookie != 0 && _vsTrackProjectRetargeting != null)
+            // Nothing is initialized if _vsTrackProjectRetargeting is null. Check if it is not null
+            if(_vsTrackProjectRetargeting != null)
             {
-                _vsTrackProjectRetargeting.UnadviseTrackProjectRetargetingEvents(_cookie);
-                _dte.Events.BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
-                _dte.Events.SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+                _errorListProvider.Dispose();
+                if(_cookieProjectRetargeting != 0)
+                {
+                    _vsTrackProjectRetargeting.UnadviseTrackProjectRetargetingEvents(_cookieProjectRetargeting);
+                }
+
+                if(_cookieBatchRetargeting != 0)
+                {
+                    _vsTrackProjectRetargeting.UnadviseTrackBatchRetargetingEvents(_cookieBatchRetargeting);
+                }
+
+                if (_cookieProjectRetargeting != 0 || _cookieBatchRetargeting != 0)
+                {
+                    _dte.Events.BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
+                    _dte.Events.SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+                }
             }
         }
     }

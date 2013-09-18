@@ -922,11 +922,11 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone"
     }
-    else if ($dte.Version -eq "11.0")
+    elseif ($dte.Version -eq "11.0")
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
     }
-    else if ($dte.Version -eq "12.0")
+    elseif ($dte.Version -eq "12.0")
     {
         $profile = "WindowsPhone,Version=v8.0"
     }
@@ -1078,7 +1078,7 @@ function Test-PackageInstallAcceptsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source' -Version 1.8.0
+    Install-Package FakeItEasy -Project $project.Name -Source 'nuget.org' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1480,7 +1480,7 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://nuget.org/api/v2/"
+    $nugetsource = "https://www.nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository
@@ -1718,14 +1718,7 @@ function Test-InstallPackageThrowsIfThereIsNoCompatibleContentFiles
     
     # Act & Assert
 
-    $version = "v4.0";
-    if ($dte.Version -eq "12.0")
-    {
-        # On VS 2013, Silverlight 4 project is no longer supported
-        $version = "v5.0"
-    }
-
-    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=$version', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v5.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
     Assert-NoPackage $project TestTargetFxContentFiles
 }
 
@@ -2188,8 +2181,8 @@ function Test-InstallMetadataPackageAddPackageToProject
 
 function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
 {
-    # This test requires .NET 4.5 and hence not available to run in VS 2010
-    if ($dte.Version -eq "10.0")
+    # This test uses a particular profile which is available only in VS 2012.
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
     {
         return
     }
@@ -2232,7 +2225,7 @@ function Test-InstallPackageIntoJavascriptApplication
     $p = New-JavaScriptApplication
 
     # Act
-    Install-Package jQuery -ProjectName $p.Name
+    Install-Package jQuery -ProjectName $p.Name 
 
     # Assert
     Assert-Package $p "jQuery"
@@ -2253,4 +2246,232 @@ function Test-InstallPackageIntoNativeWinStoreApplication
 
     # Assert
     Assert-Package $p "zlib"
+}
+
+function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication81
+
+    # Act
+    Install-Package Java -ProjectName $p.Name -source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p Java
+    
+    Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
+    Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}
+
+function Test-SpecifyDifferentVersionThenServerVersion
+{
+    # In this test, we explicitly set the version as "2.0",
+    # whereas the server version is "2.0.0"
+    # this test is to make sure the DataServicePackageRepository 
+    # checks for all variations of "2.0" (2.0, 2.0.0 and 2.0.0.0)
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package jQuery -version 2.0
+
+    # Assert
+    Assert-Package $p jQuery
+}
+
+function Test-InstallLatestVersionWorksCorrectly
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package XamlConverters -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p XamlConverters 0.5
+}
+
+function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package XamlConverters -IncludePrerelease -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p XamlConverters 0.6-beta
+}
+
+function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication81
+
+    # Act
+    Install-Package MarkedUp -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p MarkedUp
+}
+
+function Test-PackageWithConfigTransformInstallToWinJsProject
+{
+    param($context)
+
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication
+
+    # Act
+    Install-Package PackageWithTransform -version 1.0 -ProjectName $p.Name -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p PackageWithTransform
+    Assert-NotNull (Get-ProjectItem $p 'root\a.config')
+    Assert-NotNull (Get-ProjectItem $p 'b.config')
+}
+
+function Test-InstallPackageIntoLightSwitchApplication 
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 because it has the latest LightSwitch template
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    {
+        return
+    }
+
+    # Arrange
+
+    New-LightSwitchApplication LsApp
+
+    # Sleep for 10 seconds for the two sub-projects to be created
+    [System.Threading.Thread]::Sleep(10000)
+
+    $clientProject = Get-Project LsApp.HTMLClient
+    $serverProject = Get-Project LsApp.Server
+
+    # Act
+    Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot -ProjectName $clientProject.Name
+    Install-Package NonStrongNameA -Source $context.RepositoryRoot -ProjectName $serverProject.Name
+    
+    # Assert
+    Assert-Package $clientProject PackageWithPPVBSourceFiles
+    Assert-Package $serverProject NonStrongNameA
+}
+
+function Test-InstallPackageAddPackagesConfigFileToProject
+{
+    param($context)
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    $projectPath = $p.Properties.Item("FullPath").Value
+
+    $packagesConfigPath = Join-Path $projectPath 'packages.config'
+
+    # Write a file to disk, but do not add it to project
+    '<packages><package id="jquery" version="2.0" /></packages>' | out-file $packagesConfigPath
+
+    # Act
+    install-package SkypePackage -projectName $p.Name -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p SkypePackage
+
+    $xmlFile = [xml](Get-Content $packagesConfigPath)
+    Assert-AreEqual 2 $xmlFile.packages.package.Count
+    Assert-AreEqual 'jquery' $xmlFile.packages.package[0].Id
+    Assert-AreEqual 'SkypePackage' $xmlFile.packages.package[1].Id
+}
+
+function Test-InstallPackageWithLeadingZeroInVersion
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package -IgnoreDependencies Moq -Version 4.1.1309.0919
+    $p | Install-Package -IgnoreDependencies EyeSoft.Wpf.Facilities -Version 0.2.2.0000
+    $p | Install-Package -IgnoreDependencies CraigsUtilityLibrary-Reflection -Version 3.0.0001
+    $p | Install-Package -IgnoreDependencies JSLess -Version 0.01
+
+    # Assert
+    Assert-Package $p Moq '4.1.1309.0919'
+    Assert-Package $p EyeSoft.Wpf.Facilities 0.2.2.0000
+    Assert-Package $p CraigsUtilityLibrary-Reflection 3.0.0001
+    Assert-Package $p JSLess 0.01
+}
+
+function Test-InstallPackagePreservesProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $projectPath = $p.Properties.Item("FullPath").Value
+    $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
+    
+    # create file and add to project
+    $newFile = New-Item $packagesConfigPath -ItemType File
+    '<packages></packages>' > $newFile
+    $p.ProjectItems.AddFromFile($packagesConfigPath)
+
+    # Act
+    $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithFolder
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
+}
+
+function Test-InstallPackageAddMoreEntriesToProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $p | Install-Package PackageWithContentFile -source $context.RepositoryRoot
+
+    $file = Get-ProjectItem $p 'packages.config'
+    Assert-NotNull $file
+
+    # rename it
+    $file.Name = 'packages.CoolProject.config'
+
+    # Act
+    $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithFolder
+    Assert-Package $p PackageWithContentFile
+
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
 }

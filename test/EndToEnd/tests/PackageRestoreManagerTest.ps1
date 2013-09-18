@@ -63,7 +63,7 @@ function Test-EnablePackageRestoreModifyProjectThatInstallNewPackages
     Assert-AreEqual "true" (Get-MsBuildPropertyValue $p "RestorePackages")
 }
 
-function Test-EnablePackageRestoreOnCspProjects
+function NoTest-EnablePackageRestoreOnCspProjects
 {
     if ($dte.Version -eq "10.0")
     {

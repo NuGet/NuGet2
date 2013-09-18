@@ -268,7 +268,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -320,7 +320,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v4.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -395,7 +395,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v4.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -470,7 +470,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v4.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -538,7 +538,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v4.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -610,7 +610,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var packageManager = new VsPackageManager(
@@ -685,7 +685,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, projectName: null, sourceRepository: localRepository);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
 
             var installerEvents = new Mock<VsPackageInstallerEvents>(MockBehavior.Strict);
@@ -760,12 +760,12 @@ namespace NuGet.VisualStudio.Test
 
             var projectSystem1 = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
-            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, projectName: null, sourceRepository: localRepository);
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem(new FrameworkName(".NETCore, Version=v4.5"));
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
-            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
 
             var project1 = TestUtils.GetProject("Project1");
@@ -855,12 +855,12 @@ namespace NuGet.VisualStudio.Test
 
             var projectSystem1 = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
-            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, projectName: null, sourceRepository: localRepository);
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem(new FrameworkName(".NETCore, Version=v4.5"));
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
-            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
 
             var project1 = TestUtils.GetProject("Project1");
@@ -947,12 +947,12 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem1 = new MockProjectSystem();
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
-            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, projectName: null, sourceRepository: localRepository);
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem();
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
-            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
 
             var project1 = TestUtils.GetProject("Project1");
@@ -1052,12 +1052,12 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem1 = new MockProjectSystem();
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
-            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, projectName: null, sourceRepository: localRepository);
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem();
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
-            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
 
             var project1 = TestUtils.GetProject("Project1");
@@ -1161,12 +1161,12 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem1 = new MockProjectSystem();
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
-            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, projectName: null, sourceRepository: localRepository);
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem();
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
-            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
 
             var project1 = TestUtils.GetProject("Project1");

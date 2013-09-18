@@ -16,7 +16,10 @@ namespace NuGet
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
 
-        public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository)
+        public PackageReferenceRepository(
+            IFileSystem fileSystem, 
+            string projectName, 
+            ISharedPackageRepository sourceRepository)
         {
             if (fileSystem == null)
             {
@@ -26,8 +29,30 @@ namespace NuGet
             {
                 throw new ArgumentNullException("sourceRepository");
             }
-            _packageReferenceFile = new PackageReferenceFile(fileSystem, Constants.PackageReferenceFile);
-            _fullPath = fileSystem.GetFullPath(Constants.PackageReferenceFile);
+
+            _packageReferenceFile = new PackageReferenceFile(
+                fileSystem, Constants.PackageReferenceFile, projectName);
+
+            _fullPath = _packageReferenceFile.FullConfigFilePath;
+            SourceRepository = sourceRepository;
+        }
+
+        public PackageReferenceRepository(
+            string configFilePath,
+            ISharedPackageRepository sourceRepository)
+        {
+            if (String.IsNullOrEmpty(configFilePath))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "configFilePath");
+            }
+
+            if (sourceRepository == null)
+            {
+                throw new ArgumentNullException("sourceRepository");
+            }
+
+            _packageReferenceFile = new PackageReferenceFile(configFilePath);
+            _fullPath = configFilePath;
             SourceRepository = sourceRepository;
         }
 
@@ -146,6 +171,27 @@ namespace NuGet
                 latestVersion = reference.Version;
                 Debug.Assert(latestVersion != null);
                 return true;
+            }
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            IEnumerable<PackageReference> references = GetPackageReferences(id);
+            if (!includePrerelease) 
+            {
+                references = references.Where(r => String.IsNullOrEmpty(r.Version.SpecialVersion));
+            }
+
+            PackageReference reference = references.OrderByDescending(r => r.Version).FirstOrDefault();
+            if (reference != null)
+            {
+                package = GetPackage(reference);
+                return true;
+            }
+            else
+            {
+                package = null;
+                return false;
             }
         }
 

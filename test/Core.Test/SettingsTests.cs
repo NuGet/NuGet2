@@ -1321,8 +1321,6 @@ namespace NuGet.Test
         public void LoadMachineWideSettings()
         {
             // Arrange
-            var programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-
             var fileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
@@ -1459,8 +1457,6 @@ namespace NuGet.Test
         public void SetValueWithMachineWideSettings()
         {
             // Arrange
-            var programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-
             var mockFileSystem = new MockFileSystem(@"C:\");
             var a1Config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>

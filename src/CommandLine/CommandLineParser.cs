@@ -65,7 +65,7 @@ namespace NuGet
 
                 if (value == null)
                 {
-                    throw new CommandLineException(NuGetResources.MissingOptionValueError, option);
+                    throw new CommandLineException(LocalizedResourceManager.GetString("MissingOptionValueError"), option);
                 }
 
                 AssignValue(command, propInfo, option, value);
@@ -123,7 +123,7 @@ namespace NuGet
             }
             catch
             {
-                throw new CommandLineException(NuGetResources.InvalidOptionValueError, option, value);
+                throw new CommandLineException(LocalizedResourceManager.GetString("InvalidOptionValueError"), option, value);
             }
         }
 
@@ -142,7 +142,7 @@ namespace NuGet
             ICommand cmd = _commandManager.GetCommand(cmdName);
             if (cmd == null)
             {
-                throw new CommandLineException(NuGetResources.UnknowCommandError, cmdName);
+                throw new CommandLineException(LocalizedResourceManager.GetString("UnknowCommandError"), cmdName);
             }
 
             ExtractOptions(cmd, argsEnumerator);
@@ -167,7 +167,7 @@ namespace NuGet
             var result = results.FirstOrDefault();
             if (!results.Any())
             {
-                throw new CommandLineException(NuGetResources.UnknownOptionError, option);
+                throw new CommandLineException(LocalizedResourceManager.GetString("UnknownOptionError"), option);
             }
             else if (results.Skip(1).Any())
             {
@@ -179,7 +179,7 @@ namespace NuGet
                 }
                 catch (InvalidOperationException)
                 {
-                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousOption, value,
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("AmbiguousOption"), value,
                         String.Join(" ", from c in results select getDisplayName(c))));
                 }
             }

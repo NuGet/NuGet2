@@ -154,6 +154,13 @@ namespace NuGet
                 return result;
             }
 
+            if (profileValue.StartsWith("Profile", StringComparison.OrdinalIgnoreCase))
+            {
+                // This can happen if profileValue is an unrecognized profile, or
+                // for some rare cases, the Portable Profile files are missing on disk. 
+                return null;
+            }
+
             VersionUtility.ValidatePortableFrameworkProfilePart(profileValue);
 
             var supportedFrameworks = profileValue.Split(new [] {'+'}, StringSplitOptions.RemoveEmptyEntries)

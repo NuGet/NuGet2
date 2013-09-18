@@ -26,7 +26,27 @@ function Get-ProjectRepository {
     
     $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()    
     $fileSystem = New-Object NuGet.PhysicalFileSystem((Get-ProjectDir $Project))
-    New-Object NuGet.PackageReferenceRepository($fileSystem, $packageManager.LocalRepository)
+    New-Object NuGet.PackageReferenceRepository($fileSystem, $Project.Name, $packageManager.LocalRepository)
+}
+
+function Get-ProjectPackageReferences {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project
+    )
+
+    $packageReferenceFile = New-Object NuGet.PackageReferenceFile((Get-ProjectItemPath $Project 'packages.config'))
+    $packageReferencesEnumerable = $packageReferenceFile.GetPackageReferences()
+    $packageReferences = @()
+
+    # In powershell, It is easier to simply iterate over the enumerable and create an array
+    # than to try and use the extension method ToArray in System.Linq
+    foreach($packageReference in $packageReferencesEnumerable)
+    {
+        $packageReferences += $packageReference
+    }
+
+    return ,$packageReferences
 }
 
 function Get-ProjectPackage {
@@ -76,13 +96,24 @@ function Assert-Package {
         [string]$Id,
         [string]$Version
     )
-    
-    # Check for existance on disk of packages.config
-    Assert-PathExists (Join-Path (Get-ProjectDir $Project) packages.config)
+
+    $configName = "packages." + $Project.Name + ".config"
+
+    # Check for existence of packages.project_name.config
+    $configPath = Join-Path (Get-ProjectDir $Project) $configName
+
+    if (-not (Test-Path $configPath)) 
+    {
+        # Check for existence on disk of packages.config
+        Assert-PathExists (Join-Path (Get-ProjectDir $Project) "packages.config")
+
+        $configName = "packages.config"
+    }
+
     
     # Check for the project item
-    Assert-NotNull (Get-ProjectItem $Project packages.config) "packages.config does not exist in $($Project.Name)"
-    
+    Assert-NotNull (Get-ProjectItem $Project $configName) "$configName does not exist in $($Project.Name)"
+        
     $repository = Get-ProjectRepository $Project
     
     Assert-NotNull $repository "Unable to find the project repository"

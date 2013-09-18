@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
 
@@ -10,11 +10,19 @@ namespace NuGet.VisualStudio
     /// <summary>
     /// This project system represents the JavaScript project in Windows8
     /// </summary>
-    public class JsProjectSystem : VsProjectSystem, IBatchProcessor<string>
+    public class JsProjectSystem : CpsProjectSystem, IBatchProcessor<string>
     {
         public JsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) :
             base(project, fileSystemProvider)
         {
+        }
+
+        public override string ProjectName
+        {
+            get
+            {
+                return Project.GetName();
+            }
         }
 
         public override void AddFile(string path, Stream stream)
@@ -22,6 +30,13 @@ namespace NuGet.VisualStudio
             // ensure the parent folder is created before adding file to the project            
             Project.GetProjectItems(Path.GetDirectoryName(path), createIfNotExists: true);
             base.AddFile(path, stream);
+        }
+
+        public override void AddFile(string path, System.Action<Stream> writeToStream)
+        {
+            // ensure the parent folder is created before adding file to the project            
+            Project.GetProjectItems(Path.GetDirectoryName(path), createIfNotExists: true);
+            base.AddFile(path, writeToStream);
         }
 
         protected override void AddFileToProject(string path)
@@ -36,6 +51,15 @@ namespace NuGet.VisualStudio
 
             // Add the file to project or folder
             ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
+            if (container == null)
+            {
+                throw new ArgumentException(
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        VsResources.Error_FailedToCreateParentFolder,
+                        path,
+                        ProjectName));
+            }
             AddFileToContainer(fullPath, folderPath, container);
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
@@ -55,84 +79,6 @@ namespace NuGet.VisualStudio
             {
                 BaseFileSystem.DeleteDirectory(path, recursive: false);
             }
-        }
-
-        public override void AddImport(string targetPath, ProjectImportLocation location)
-        {
-            if (VsVersionHelper.IsVisualStudio2010)
-            {
-                base.AddImport(targetPath, location);
-            }
-            else
-            {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-
-                if (String.IsNullOrEmpty(targetPath))
-                {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-                }
-
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                if (VsVersionHelper.IsVisualStudio2012)
-                {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                    Project.Save();
-                }
-                else
-                {
-                    AddImportStatementForVS2013(location, relativeTargetPath);
-                }
-            }
-        }
-
-        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
-        // in VS2010 and VS2012
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
-        {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                Project,
-                Project.ToVsHierarchy(),
-                buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-        }
-
-        public override void RemoveImport(string targetPath)
-        {
-            if (VsVersionHelper.IsVisualStudio2010)
-            {
-                base.RemoveImport(targetPath);
-            }
-            else
-            {
-                if (String.IsNullOrEmpty(targetPath))
-                {
-                    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-                }
-
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-                string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                if (VsVersionHelper.IsVisualStudio2012)
-                {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                    Project.Save();
-                }
-                else
-                {
-                    RemoveImportStatementForVS2013(relativeTargetPath);
-                }
-
-            }
-        }
-
-        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
-        // in VS2010 and VS2012
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void RemoveImportStatementForVS2013(string relativeTargetPath)
-        {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                Project,
-                Project.ToVsHierarchy(),
-                buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
         }
 
         public void BeginProcessing(IEnumerable<string> batch, PackageAction action)

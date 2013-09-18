@@ -12,7 +12,6 @@ namespace NuGet
     /// </remarks>
     public class MultipartWebRequest
     {
-        
         private const string FormDataTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n";
         private const string FileTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n";
         private readonly Dictionary<string, string> _formData;
@@ -35,51 +34,80 @@ namespace NuGet
             _formData.Add(key, value);
         }
 
-        public void AddFile(Func<Stream> fileFactory, string fieldName, string contentType = "application/octet-stream")
+        public void AddFile(Func<Stream> fileFactory, string fieldName, long length, string contentType = "application/octet-stream")
         {
-            _files.Add(new PostFileData { FileFactory = fileFactory, FieldName = fieldName, ContentType = contentType });
+            _files.Add(new PostFileData
+                        {
+                            FileFactory = fileFactory,
+                            FieldName = fieldName,
+                            ContentType = contentType,
+                            ContentLength = length
+                        });
         }
 
         public void CreateMultipartRequest(WebRequest request)
         {
             string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", CultureInfo.InvariantCulture);
             request.ContentType = "multipart/form-data; boundary=" + boundary;
+            request.ContentLength = CalculateContentLength(boundary);
 
-            byte[] byteContent;
-            using (var memoryStream = new MemoryStream())
+            using (Stream stream = request.GetRequestStream())
             {
-
                 foreach (var item in _formData)
                 {
                     string header = String.Format(CultureInfo.InvariantCulture, FormDataTemplate, boundary, item.Key, item.Value);
                     byte[] headerBytes = Encoding.UTF8.GetBytes(header);
-                    memoryStream.Write(headerBytes, 0, headerBytes.Length);
-
+                    stream.Write(headerBytes, 0, headerBytes.Length);
                 }
 
-                byte[] newlineBytes = Encoding.UTF8.GetBytes("\r\n");
+                byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
                 foreach (var file in _files)
                 {
                     string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
                     byte[] headerBytes = Encoding.UTF8.GetBytes(header);
-                    memoryStream.Write(headerBytes, 0, headerBytes.Length);
-                    using (Stream fileStream = file.FileFactory())
-                    {
-                        fileStream.CopyTo(memoryStream);
-                    }
-                    memoryStream.Write(newlineBytes, 0, newlineBytes.Length);
+                    stream.Write(headerBytes, 0, headerBytes.Length);
+
+                    Stream fileStream = file.FileFactory();
+                    fileStream.CopyTo(stream, bufferSize: 4 * 1024);
+                    fileStream.Close();
+                    stream.Write(newlineBytes, 0, newlineBytes.Length);
                 }
+
                 string trailer = String.Format(CultureInfo.InvariantCulture, "--{0}--", boundary);
                 byte[] trailerBytes = Encoding.UTF8.GetBytes(trailer);
-                memoryStream.Write(trailerBytes, 0, trailerBytes.Length);
+                stream.Write(trailerBytes, 0, trailerBytes.Length);
+            }
+        }
 
-                byteContent = memoryStream.ToArray();
-            }
-            request.ContentLength = byteContent.Length;
-            using (Stream requestStream = request.GetRequestStream())
+        private long CalculateContentLength(string boundary)
+        {
+            long totalContentLength = 0;
+
+            foreach (var item in _formData)
             {
-                requestStream.Write(byteContent, 0, byteContent.Length);
+                string header = String.Format(CultureInfo.InvariantCulture, FormDataTemplate, boundary, item.Key, item.Value);
+                byte[] headerBytes = Encoding.UTF8.GetBytes(header);
+
+                totalContentLength += headerBytes.Length;
             }
+
+            byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
+            foreach (var file in _files)
+            {
+                string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
+                byte[] headerBytes = Encoding.UTF8.GetBytes(header);
+
+                totalContentLength += headerBytes.Length;
+                totalContentLength += file.ContentLength;
+                totalContentLength += newlineBytes.Length;
+            }
+
+            string trailer = String.Format(CultureInfo.InvariantCulture, "--{0}--", boundary);
+            byte[] trailerBytes = Encoding.UTF8.GetBytes(trailer);
+
+            totalContentLength += trailerBytes.Length;
+
+            return totalContentLength;
         }
 
         private sealed class PostFileData
@@ -89,6 +117,8 @@ namespace NuGet
             public string ContentType { get; set; }
 
             public string FieldName { get; set; }
+
+            public long ContentLength { get; set; }
         }
     }
 }

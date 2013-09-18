@@ -66,7 +66,41 @@ namespace NuGet
 
         public static bool ContentEquals(this Stream stream, Stream otherStream)
         {
-            return Crc32.Calculate(stream) == Crc32.Calculate(otherStream);
+            if (stream.CanSeek && otherStream.CanSeek)
+            {
+                if (stream.Length != otherStream.Length)
+                {
+                    return false;
+                }
+            }
+
+            byte[] buffer = new byte[4*1024];
+            byte[] otherBuffer = new byte[4*1024];
+
+            int bytesRead = 0;
+            do
+            {
+                bytesRead = stream.Read(buffer, 0, buffer.Length);
+                if (bytesRead > 0)
+                {
+                    int otherBytesRead = otherStream.Read(otherBuffer, 0, bytesRead);
+                    if (bytesRead != otherBytesRead)
+                    {
+                        return false;
+                    }
+
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        if (buffer[i] != otherBuffer[i])
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            while (bytesRead > 0);
+
+            return true;
         }
     }
 }

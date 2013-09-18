@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -13,6 +14,7 @@ namespace NuGet
 {
     public class PackageReferenceFile
     {
+        private readonly IFileSystem _fileSystem;
         private readonly string _path;
         private readonly Dictionary<string, string> _constraints = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> _developmentFlags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -23,22 +25,39 @@ namespace NuGet
         {
         }
 
-        public PackageReferenceFile(IFileSystem fileSystem, string path)
+        public PackageReferenceFile(IFileSystem fileSystem, string path) :
+            this(fileSystem, path, projectName: null)
+        {
+        }
+
+        public PackageReferenceFile(IFileSystem fileSystem, string path, string projectName)
         {
             if (fileSystem == null)
             {
                 throw new ArgumentNullException("fileSystem");
             }
+
             if (String.IsNullOrEmpty(path))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
-            FileSystem = fileSystem;
-            _path = path;
-        }
+            _fileSystem = fileSystem;
 
-        private IFileSystem FileSystem { get; set; }
+            if (!String.IsNullOrEmpty(projectName))
+            {
+                string pathWithProjectName = ConstructPackagesConfigFromProjectName(projectName);
+                if (_fileSystem.FileExists(pathWithProjectName))
+                {
+                    _path = pathWithProjectName;
+                }
+            }
+            
+            if (_path == null)
+            {
+                _path = path;
+            }
+        }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
         public IEnumerable<PackageReference> GetPackageReferences()
@@ -62,6 +81,7 @@ namespace NuGet
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
                 string developmentFlagString = e.GetOptionalAttributeValue("developmentDependency");
+                string requireReinstallationString = e.GetOptionalAttributeValue("requireReinstallation");
                 SemanticVersion version = null;
 
                 if (String.IsNullOrEmpty(id))
@@ -115,7 +135,16 @@ namespace NuGet
                     _developmentFlags[id] = developmentFlagString;
                 }
 
-                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag);
+                var requireReinstallation = false;
+                if (!String.IsNullOrEmpty(requireReinstallationString))
+                {
+                    if (!Boolean.TryParse(requireReinstallationString, out requireReinstallation))
+                    {
+                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidRequireReinstallationFlag, requireReinstallationString, _path));
+                    }
+                }
+
+                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag, requireReinstallation);
             }
         }
 
@@ -157,7 +186,33 @@ namespace NuGet
             AddEntry(document, id, version, targetFramework);
         }
 
+        public void MarkEntryForReinstallation(string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
+        {
+            Debug.Assert(id != null);
+            Debug.Assert(version != null);
+
+            XDocument document = GetDocument();
+            if (document != null)
+            {
+                DeleteEntry(id, version);
+                AddEntry(document, id, version, targetFramework, requireReinstallation);
+            }
+        }
+
+        public string FullConfigFilePath
+        {
+            get
+            {
+                return _fileSystem.GetFullPath(_path);
+            }
+        }
+
         private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
+        {
+            AddEntry(document, id, version, targetFramework, requireReinstallation: false);
+        }
+
+        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
         {
             XElement element = FindEntry(document, id, version);
 
@@ -186,6 +241,11 @@ namespace NuGet
             if (_developmentFlags.TryGetValue(id, out developmentFlag))
             {
                 newElement.Add(new XAttribute("developmentDependency", developmentFlag));
+            }
+
+            if (requireReinstallation)
+            {
+                newElement.Add(new XAttribute("requireReinstallation", Boolean.TrueString));
             }
 
             document.Root.Add(newElement);
@@ -224,7 +284,7 @@ namespace NuGet
             // Re-add them sorted
             document.Root.Add(packageElements);
 
-            FileSystem.AddFile(_path, document.Save);
+            _fileSystem.AddFile(_path, document.Save);
         }
 
         private bool DeleteEntry(XDocument document, string id, SemanticVersion version)
@@ -257,7 +317,7 @@ namespace NuGet
                 if (!document.Root.HasElements)
                 {
                     // Remove the file if there are no more elements
-                    FileSystem.DeleteFile(_path);
+                    _fileSystem.DeleteFile(_path);
 
                     return true;
                 }
@@ -271,9 +331,9 @@ namespace NuGet
             try
             {
                 // If the file exists then open and return it
-                if (FileSystem.FileExists(_path))
+                if (_fileSystem.FileExists(_path))
                 {
-                    using (Stream stream = FileSystem.OpenFile(_path))
+                    using (Stream stream = _fileSystem.OpenFile(_path))
                     {
                         return XmlUtility.LoadSafe(stream);
                     }
@@ -291,8 +351,15 @@ namespace NuGet
             catch (XmlException e)
             {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, FileSystem.GetFullPath(_path)), e);
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, _fileSystem.GetFullPath(_path)), e);
             }
+        }
+
+        private static string ConstructPackagesConfigFromProjectName(string projectName)
+        {
+            // we look for packages.<project name>.config file
+            // but we don't want any space in the file name, so convert it to underscore.
+            return "packages." + projectName.Replace(' ', '_') + ".config";
         }
     }
 }

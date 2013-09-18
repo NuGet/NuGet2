@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, IOperationAwareRepository
+    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -118,7 +118,7 @@ namespace NuGet.VisualStudio
         }
 
         public IEnumerable<IPackage> GetUpdates(
-            IEnumerable<IPackage> packages, 
+            IEnumerable<IPackageName> packages, 
             bool includePrerelease, 
             bool includeAllVersions, 
             IEnumerable<FrameworkName> targetFrameworks,
@@ -133,6 +133,30 @@ namespace NuGet.VisualStudio
             return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
         }
 
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
+            }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
+        }
+
         internal IPackageRepository GetActiveRepository()
         {
             if (_packageSourceProvider.ActivePackageSource == null)
@@ -142,10 +166,10 @@ namespace NuGet.VisualStudio
             return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
         }
 
-        public IDisposable StartOperation(string operation, string mainPackageId)
+        public IDisposable StartOperation(string operation, string mainPackageId, string mainPackageVersion)
         {
             var activeRepository = GetActiveRepository();
-            return activeRepository.StartOperation(operation, mainPackageId);
+            return activeRepository.StartOperation(operation, mainPackageId, mainPackageVersion);
         }
     }
 }

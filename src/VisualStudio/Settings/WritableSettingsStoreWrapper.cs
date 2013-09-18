@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.Settings;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
 {
     internal class WritableSettingsStoreWrapper : SettingsStoreWrapper, IWritableSettingsStore
     {
-        private readonly WritableSettingsStore _store;
+        private readonly IVsWritableSettingsStore _store;
 
-        public WritableSettingsStoreWrapper(WritableSettingsStore store)
+        public WritableSettingsStoreWrapper(IVsWritableSettingsStore store)
             : base(store)
         {
             _store = store;
@@ -29,17 +25,17 @@ namespace NuGet.VisualStudio
 
         public bool DeleteProperty(string collection, string propertyName)
         {
-            return _store.DeleteProperty(collection, propertyName);
+            return ErrorHandler.Succeeded(_store.DeleteProperty(collection, propertyName));
         }
 
         public void SetBoolean(string collection, string propertyName, bool value)
         {
-            _store.SetBoolean(collection, propertyName, value);
+            _store.SetBool(collection, propertyName, value ? 1 : 0);
         }
 
         public void SetInt32(string collection, string propertyName, int value)
         {
-            _store.SetInt32(collection, propertyName, value);
+            _store.SetInt(collection, propertyName, value);
         }
 
         public void SetString(string collection, string propertyName, string value)

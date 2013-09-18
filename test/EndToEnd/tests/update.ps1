@@ -348,12 +348,12 @@ function Test-UpdatePackageWithOlderVersionOfSharedDependencyInUse {
 function Test-UpdatePackageAcceptsSourceName {
     # Arrange
     $p = New-ConsoleApplication
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET.ORG'
 
     Assert-Package $p Antlr 3.1.1
 
     # Act
-    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'NuGet official Package Source'
+    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'nuget.org'
 
     # Assert
     Assert-Package $p Antlr 3.1.3.42154
@@ -980,7 +980,7 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://nuget.org/api/v2/"
+    $nugetsource = "https://www.nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository
@@ -1434,4 +1434,29 @@ function Test-UpdatePackageThrowsWhenOnlyUnusedVersionsOfAPackageIsPresentInPack
     # Act & Assert
     # Update specific package here. Because, when all packages are updated, the PackageNotInstalledException gets caught. We want it to be thrown
     Assert-Throws { Update-Package TestUpdatePackage -Source $context.RepositoryRoot } "'TestUpdatePackage' was not installed in any project. Update failed."
+}
+
+function Test-UpdatePackagePreservesProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary "CoolProject"
+
+    $p | Install-Package TestUpdatePackage -version 1.0 -source $context.RepositoryRoot
+
+    $file = Get-ProjectItem $p 'packages.config'
+    Assert-NotNull $file
+
+    # rename it
+    $file.Name = 'packages.CoolProject.config'
+
+    # Act
+    $p | Update-Package TestUpdatePackage -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p TestUpdatePackage '2.0'
+
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
 }

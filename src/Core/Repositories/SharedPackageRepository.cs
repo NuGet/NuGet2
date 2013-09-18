@@ -145,15 +145,7 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
-            // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
-            string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            Manifest manifest = Manifest.Create(package);
-            FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
-
-            // But in order to maintain backwards compatibility with older versions of NuGet, 
-            // we will save the .nupkg file too. This way, 2.1 will read the .nuspec file, and 
-            // pre 2.1 will read the .nupkg
+            // add .nupkg file
             base.AddPackage(package);
 
             // if this is a solution-level package, add it to the solution's packages.config file
@@ -206,9 +198,8 @@ namespace NuGet
         protected virtual IPackageRepository CreateRepository(string path)
         {
             string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
-            string absolutePath = PathUtility.GetAbsolutePath(root, path);
-            string directory = Path.GetDirectoryName(absolutePath);
-            return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
+            string absolutePath = PathUtility.GetAbsolutePath(root, path);            
+            return new PackageReferenceRepository(absolutePath, sourceRepository: this);
         }
 
         protected override IPackage OpenPackage(string path)
@@ -273,7 +264,6 @@ namespace NuGet
                     !FileSystem.FileExists(path) ||
                     !paths.Add(path))
                 {
-
                     // Skip bad entries
                     e.Remove();
                     requiresSave = true;

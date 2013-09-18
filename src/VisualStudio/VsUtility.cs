@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
@@ -33,9 +34,23 @@ namespace NuGet.VisualStudio
             VsConstants.NomadForVisualStudioProjectTypeGuid 
         };
 
+        /// <summary>
+        /// Returns the full path of the project directory.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns>The full path of the project directory.</returns>
         public static string GetFullPath(Project project)
         {
             Debug.Assert(project != null);
+            if (project.IsUnloaded())
+            {
+                // To get the directory of an unloaded project, we use the UniqueName property,
+                // which is the path of the project file relative to the solution directory.
+                var solutionDirectory = Path.GetDirectoryName(project.DTE.Solution.FullName);
+                var projectFileFullPath = Path.Combine(solutionDirectory, project.UniqueName);
+                return Path.GetDirectoryName(projectFileFullPath);
+            }
+
             string fullPath = GetPropertyValue<string>(project, "FullPath");
             if (!String.IsNullOrEmpty(fullPath))
             {
@@ -117,50 +132,154 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// Returns true if the solution or one of its project has the packages.config file.
+        /// Returns true if the project has the packages.config file
         /// </summary>
-        /// <param name="solution">Solution under whose directory packages.config is searched for</param>
-        public static bool PackagesConfigExists(Solution solution)
+        /// <param name="project">Project under whose directory packages.config is searched for</param>
+        public static bool PackagesConfigExists(Project project)
         {
-            Debug.Assert(solution != null);
-            var packageReferenceFileName = Path.Combine(
-                    GetNuGetSolutionFolder(solution),
-                    PackageReferenceFile);
-            if (File.Exists(packageReferenceFileName))
+            // Here we just check if the packages.config file exists instead of 
+            // calling IsNuGetInUse because that will cause NuGet.VisualStudio.dll to get loaded.
+            bool isUnloaded = VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            if (isUnloaded || IsSupported(project))
             {
-                return true;
-            }
-
-            foreach (Project project in solution.Projects)
-            {
-                if (PackagesConfigExists(project))
+                Tuple<string, string> configFilePaths = GetPackageReferenceFileFullPaths(project);
+                if (File.Exists(configFilePaths.Item1) || File.Exists(configFilePaths.Item2))
                 {
                     return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the full path of the packages config file associated with the project.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns>A tuple contains full path to packages.project_name.config and packages.config files.</returns>
+        public static Tuple<string, string> GetPackageReferenceFileFullPaths(Project project)
+        {
+            Debug.Assert(project != null);
+            var projectDirectory = GetFullPath(project);
+
+            var packagesProjectConfig = Path.Combine(
+                projectDirectory ?? String.Empty,
+                "packages." + GetName(project) + ".config");
+
+            var packagesConfig = Path.Combine(
+                projectDirectory ?? String.Empty,
+                PackageReferenceFile);
+
+            return Tuple.Create(packagesProjectConfig, packagesConfig);
+        }
+
+        public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, TaskPriority priority, string errorText, IVsHierarchy hierarchyItem)
+        {
+            ErrorTask retargetErrorTask = new ErrorTask();
+            retargetErrorTask.Text = errorText;
+            retargetErrorTask.ErrorCategory = errorCategory;
+            retargetErrorTask.Category = TaskCategory.BuildCompile;
+            retargetErrorTask.Priority = priority;
+            retargetErrorTask.HierarchyItem = hierarchyItem;
+            errorListProvider.Tasks.Add(retargetErrorTask);
+            errorListProvider.BringToFront();
+            errorListProvider.ForceShowErrors();
+        }
+
+        public static Project GetActiveProject(IVsMonitorSelection vsMonitorSelection)
+        {
+            IntPtr ppHier = IntPtr.Zero;
+            uint pitemid;
+            IVsMultiItemSelect ppMIS;
+            IntPtr ppSC = IntPtr.Zero;
+
+            try
+            {
+                vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
+
+                if (ppHier == IntPtr.Zero)
+                {
+                    return null;
+                }
+
+                // multiple items are selected.
+                if (pitemid == (uint)VSConstants.VSITEMID.Selection)
+                {
+                    return null;
+                }
+
+                IVsHierarchy hierarchy = Marshal.GetTypedObjectForIUnknown(ppHier, typeof(IVsHierarchy)) as IVsHierarchy;
+                if (hierarchy != null)
+                {
+                    object project;
+                    if (hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out project) >= 0)
+                    {
+                        return (Project)project;
+                    }
+                }
+
+                return null;
+            }
+            finally
+            {
+                if (ppHier != IntPtr.Zero)
+                {
+                    Marshal.Release(ppHier);
+                }
+                if (ppSC != IntPtr.Zero)
+                {
+                    Marshal.Release(ppSC);
+                }
+            }
+        }
+
+        public static bool GetIsSolutionNodeSelected(IVsMonitorSelection vsMonitorSelection)
+        {
+            IntPtr ppHier = IntPtr.Zero;
+            uint pitemid;
+            IVsMultiItemSelect ppMIS;
+            IntPtr ppSC = IntPtr.Zero;
+
+            try
+            {
+                vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
+                if (pitemid == (uint)VSConstants.VSITEMID.Root)
+                {
+                    if (ppHier == IntPtr.Zero)
+                    {
+                        return true;
+                    }
+                }
+            }
+            finally
+            {
+                if (ppHier != IntPtr.Zero)
+                {
+                    Marshal.Release(ppHier);
+                }
+                if (ppSC != IntPtr.Zero)
+                {
+                    Marshal.Release(ppSC);
                 }
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Returns true if the project has the packages.config file
-        /// </summary>
-        /// <param name="project">Project under whose directory packages.config is searched for</param>
-        public static bool PackagesConfigExists(Project project)
+        public static string GetName(this Project project)
         {
-            Debug.Assert(project != null);
-            var projectFullPath = GetFullPath(project);
-            var packageReferenceFileName = Path.Combine(
-                Path.GetDirectoryName(projectFullPath) ?? String.Empty,
-                PackageReferenceFile);
-
-            // Here we just check if the packages.config file exists instead of checking
-            // calling IsNuGetInUse because that will cause NuGet.VisualStudio.dll to get loaded.
-            if (IsSupported(project) && File.Exists(packageReferenceFileName))
+            string name = project.Name;
+            if (project.IsJavaScriptProject())
             {
-                return true;
+                // The JavaScript project initially returns a "(loading..)" suffix to the project Name.
+                // Need to get rid of it for the rest of NuGet to work properly.
+                // TODO: Follow up with the VS team to see if this will be fixed eventually
+                const string suffix = " (loading...)";
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    name = name.Substring(0, name.Length - suffix.Length);
+                }
             }
-            return false;
+            return name;
         }
     }
 }

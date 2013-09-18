@@ -40,8 +40,10 @@ namespace NuGet.Server.Infrastructure.Test
             Assert.True(result);
         }
 
-        [Fact]
-        public void AuthenticationServiceReturnsFalseIfKeyDoesNotMatchConfigurationKey()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("incorrect-key")]
+        public void AuthenticationServiceReturnsFalseIfKeyDoesNotMatchConfigurationKey(string key)
         {
             // Arrange
             var collection = new NameValueCollection();
@@ -49,7 +51,7 @@ namespace NuGet.Server.Infrastructure.Test
             collection.Add("apiKey", "test-key");
 
             // Act
-            bool result = PackageAuthenticationService.IsAuthenticatedInternal("incorrect-key", collection);
+            bool result = PackageAuthenticationService.IsAuthenticatedInternal(key, collection);
 
             // Assert
             Assert.False(result);

@@ -48,7 +48,7 @@
 
     <PropertyGroup>
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>7</MinorVersion>
+        <MinorVersion>8</MinorVersion>
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
 
@@ -114,12 +114,6 @@
         <MonoProjects Include="@(TestProjects)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <RestorePackageProjects Include="@(TestProjects)" />
-        <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
-        <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
-    </ItemGroup>
-
     <Target Name="Go"
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
@@ -146,15 +140,16 @@
                    Targets="Build"
                    Properties="DefineConstants=CODE_ANALYSIS" />
 
+        <PropertyGroup>
+            <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
+        </PropertyGroup>
+        
         <Message Text="Restoring NuGet packages" Importance="High" />
-        <MsBuild Projects="@(RestorePackageProjects)"
-                   Targets="RestorePackages"
-                   Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)"
-                   BuildInParallel="true" />
+        <Exec Command="$(ExeBuildDirectory)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" />
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12)" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12);DeployExtension=false" />
     </Target>
 
     <Target Name="BuildMono">
@@ -225,6 +220,7 @@
         <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
         <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
+        <MakeDir Directories="$(ExeDropDirectory)\Signed" Condition="!Exists('$(ExeDropDirectory)\Signed')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
@@ -240,6 +236,7 @@
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
+        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe" DestinationFolder="$(ExeDropDirectory)\Signed" />
     </Target>
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">
@@ -313,7 +310,6 @@
         </PropertyGroup>
 
         <Exec Command="&quot;$(NuGetExe)&quot; pack NuGet.CommandLine.nuspec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack NuGet.Bootstrapper.nuspec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetBuildDropDirectory)&quot;" WorkingDirectory="$(NuGetSrcRoot)\Build" />

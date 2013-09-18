@@ -1,16 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
+using System.Xml.Linq;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
-using System.Xml.Linq;
-using System.Collections.Generic;
-using System.Runtime.Versioning;
 
 namespace NuGet.Test
 {
-
     public class PackageReferenceRepositoryTest
     {
         [Fact]
@@ -24,7 +22,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
 
             // Act
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             referenceRepository.RegisterIfNecessary();
 
             // Assert
@@ -44,7 +42,7 @@ namespace NuGet.Test
             sharedRepository.Object.AddPackage(package);
 
             // Act
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             referenceRepository.AddPackage(package);
             referenceRepository.RegisterIfNecessary();
 
@@ -61,7 +59,7 @@ namespace NuGet.Test
             sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
                             .Callback<string>(p => path = p);
             var fileSystem = new MockFileSystem();
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var package = PackageUtility.CreatePackage("A");
 
             // Act
@@ -85,7 +83,7 @@ namespace NuGet.Test
             sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
                             .Callback<string>(p => path = p);
             var fileSystem = new MockFileSystem();
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             //var package = PackageUtility.CreatePackage("A");
 
             // Act
@@ -110,7 +108,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var package = PackageUtility.CreatePackage("A");
 
             // Act
@@ -134,7 +132,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" allowedVersions=""[1.0, 5.0)"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var A10 = PackageUtility.CreatePackage("A");
             var A20 = PackageUtility.CreatePackage("A", "2.0");
 
@@ -160,7 +158,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" developmentDependency=""false"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var A10 = PackageUtility.CreatePackage("A");
             var A20 = PackageUtility.CreatePackage("A", "2.0");
 
@@ -187,7 +185,7 @@ namespace NuGet.Test
   <package id=""A"" version=""1.0"" />
   <package id=""B"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var package = PackageUtility.CreatePackage("A");
 
             // Act
@@ -214,7 +212,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var package = PackageUtility.CreatePackage("A");
 
             // Act
@@ -238,7 +236,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
 
             // Act
@@ -247,6 +245,119 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(1, packages.Count);
             Assert.Same(packageA, packages[0]);
+        }
+
+        [Fact]
+        public void GetPackagesLoadsFromProjectPackagesConfigIfPresent()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+
+            // Act
+            var packages = referenceRepository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.Same(packageA, packages[0]);
+
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+        }
+
+        [Fact]
+        public void GetPackagesFavorsProjectPackagesConfigOverPlainPackagesConfig()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""B"" version=""1.0"" />
+  <package id=""C"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+
+            // Act
+            var packages = referenceRepository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.Same(packageA, packages[0]);
+
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+        }
+
+        [Fact]
+        public void RemovePackageDeleteProjectConfigFileIfNoPackageLeft()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""3.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+            var packageB = PackageUtility.CreatePackage("B", "3.0");
+
+            // Act
+            referenceRepository.RemovePackage(packageA);
+            referenceRepository.RemovePackage(packageB);
+
+            // Assert
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.False(fileSystem.FileExists("packages.cool.config"));
+        }
+
+        [Fact]
+        public void GetPackagesLoadsPlainPackagesConfigIfProjectPackagesConfigDoesNotExist()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""B"" version=""1.0"" />
+  <package id=""C"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+
+            // Act
+            var packages = referenceRepository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.Same(packageA, packages[0]);
+
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
         }
 
         [Fact]
@@ -261,7 +372,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" targetFramework=""winrt45"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             var targetFramework = referenceRepository.GetPackageTargetFramework("A");
@@ -282,7 +393,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             var targetFramework = referenceRepository.GetPackageTargetFramework("A");
@@ -303,7 +414,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             var targetFramework = referenceRepository.GetPackageTargetFramework("B");
@@ -325,7 +436,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" allowedVersions=""[1.0, 3.0)"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
 
             // Act
@@ -351,7 +462,7 @@ namespace NuGet.Test
 <packages>
   <package id=""A"" version=""1.0"" allowedVersions=""[-1.3, 3)"" />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
 
             // Act & Assert
@@ -377,7 +488,7 @@ namespace NuGet.Test
   <package id=""G"" version="""" />
   <package />
 </packages>");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
 
             // Act
@@ -409,7 +520,7 @@ namespace NuGet.Test
             fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package ");
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
 
             // Act
@@ -424,7 +535,7 @@ namespace NuGet.Test
             var packageA = PackageUtility.CreatePackage("A");
             repository.Object.AddPackage(packageA);
             var fileSystem = new MockFileSystem();
-            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             var packages = referenceRepository.GetPackages().ToList();
@@ -456,9 +567,7 @@ namespace NuGet.Test
   <package id=""A"" version=""2.0-beta"" />
 </packages>");
 
-            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
-                fileSystem, 
-                repository.Object);
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             SemanticVersion latestVersion;
@@ -492,9 +601,7 @@ namespace NuGet.Test
   <package id=""A"" version=""2.0-beta"" />
 </packages>");
 
-            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
-                fileSystem,
-                repository.Object);
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             SemanticVersion latestVersion;
@@ -528,9 +635,7 @@ namespace NuGet.Test
   <package id=""A"" version=""2.0-beta"" />
 </packages>");
 
-            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
-                fileSystem,
-                repository.Object);
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
 
             // Act
             SemanticVersion latestVersion;
@@ -540,7 +645,6 @@ namespace NuGet.Test
             Assert.False(result);
             Assert.Null(latestVersion);
         }
-
 
         [Fact]
         public void GetPackageReferencesFindLatestEntryCorrectly()
@@ -556,7 +660,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", config);
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
-            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
 
             // Act
             SemanticVersion version;
@@ -581,7 +685,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", config);
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
-            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
 
             // Act
             SemanticVersion version;
@@ -606,7 +710,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", config);
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
-            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
 
             // Act
             SemanticVersion version;
@@ -631,7 +735,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", config);
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
-            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
 
             // Act
             SemanticVersion version;
@@ -642,11 +746,75 @@ namespace NuGet.Test
             Assert.Null(version);
         }
 
+        [Fact(Skip="Proble with git line ending handling.")]
+        public void AddPackagePreservesProjectConfigFile()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+            var packageB = PackageUtility.CreatePackage("B", "2.0-alpha");
+
+            // Act
+            referenceRepository.AddPackage(packageB);
+
+            // Assert
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+
+            string content = fileSystem.ReadAllText("packages.cool.config");
+
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""2.0-alpha"" />
+</packages>", content);
+        }
+
+        [Fact(Skip = "Proble with git line ending handling.")]
+        public void RemovePackagePreservesProjectConfigFile()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.cool.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""3.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: "cool", sourceRepository: repository.Object);
+
+            var packageB = PackageUtility.CreatePackage("B", "3.0");
+
+            // Act
+            referenceRepository.RemovePackage(packageB);
+
+            // Assert
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.True(fileSystem.FileExists("packages.cool.config"));
+
+            string content = fileSystem.ReadAllText("packages.cool.config");
+
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>", content);
+        }
+
         private static void AssertConfig(string expected, string actual)
         {
             Assert.Equal(expected.Where(c => !Char.IsWhiteSpace(c)), actual.Where(c => !Char.IsWhiteSpace(c)));
-            
-            // Verify the actual document is parseable as an xml
+
+            // Verify the actual document is parse-able as an xml
             XDocument.Load(new StringReader(actual));
         }
     }

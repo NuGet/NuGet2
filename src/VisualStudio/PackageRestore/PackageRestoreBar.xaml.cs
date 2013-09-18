@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Shell;
@@ -26,6 +27,11 @@ namespace NuGet.VisualStudio
             StatusMessage.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.InfoTextKey);
             RestoreBar.SetResourceReference(Border.BackgroundProperty, VsBrushes.InfoBackgroundKey);
             RestoreBar.SetResourceReference(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey);
+        }
+
+        public void CleanUp()
+        {
+            _packageRestoreManager.PackagesMissingStatusChanged -= OnPackagesMissingStatusChanged;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -63,7 +69,9 @@ namespace NuGet.VisualStudio
                 {
                     if (task.IsFaulted)
                     {
-                        ShowErrorUI();
+                        Exception baseException = task.Exception.GetBaseException();
+                        ShowErrorUI(baseException.Message);
+                        ExceptionHelper.WriteToActivityLog(baseException);
                     }
 
                     NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageRestoreCompleted);
@@ -85,12 +93,12 @@ namespace NuGet.VisualStudio
             StatusMessage.Text = VsResources.PackageRestoreProgressMessage;
         }
 
-        private void ShowErrorUI()
+        private void ShowErrorUI(string error)
         {
             // re-enable the Restore button to allow users to try again
             RestoreButton.Visibility = Visibility.Visible;
             ProgressBar.Visibility = Visibility.Collapsed;
-            StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain;
+            StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain + " " + error;
         }
     }
 }

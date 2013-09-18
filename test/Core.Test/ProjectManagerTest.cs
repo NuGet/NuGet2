@@ -33,6 +33,129 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferenceLoadPackagesProjectNameConfigIfPresent()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(
+                new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.ProjectName = "CoolProject";
+            projectSystem.AddFile("packages.CoolProject.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""luan"" version=""3.0"" />
+</packages>");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\a.dll"});
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(projectManager.Project.FileExists("packages.CoolProject.config"));
+            Assert.False(projectManager.Project.FileExists("packages.config"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePreferPackagesProjectNameConfigOverNormalConfig()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\a.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            IPackage packageB = PackageUtility.CreatePackage(
+                "B",
+                "1.0",
+                assemblyReferences: new[] { "lib\\b.dll" });
+            sourceRepository.AddPackage(packageB);
+
+            IPackage packageC = PackageUtility.CreatePackage(
+                "C",
+                "1.0",
+                assemblyReferences: new[] { "lib\\c.dll" });
+            sourceRepository.AddPackage(packageC);
+
+            var projectSystem = new MockProjectSystem(
+                new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.ProjectName = "CoolProject";
+
+            projectSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""B"" version=""1.0"" />
+</packages>");
+
+            projectSystem.AddFile("packages.CoolProject.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""C"" version=""1.0"" />
+</packages>");
+
+            var localRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            localRepository.AddPackage(packageC);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(projectManager.LocalRepository.Exists("C"));
+            Assert.True(projectManager.Project.FileExists("packages.CoolProject.config"));
+            Assert.True(projectManager.Project.FileExists("packages.config"));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceLoadPackagesProjectNameConfigIfPresent()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(
+                new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.ProjectName = "Cool Project";
+            projectSystem.AddFile("packages.Cool_Project.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+
+            var localRepository = new MockPackageRepository();
+
+            var projectManager = new ProjectManager(
+                sourceRepository, 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem, 
+                localRepository);
+
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\a.dll" });
+            sourceRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageA);
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "2.0-alpha",
+                assemblyReferences: new[] { "lib\\a2.dll" });
+            sourceRepository.AddPackage(packageA2);
+
+            // Act
+            projectManager.AddPackageReference("A", null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists(packageA2));
+            Assert.True(projectManager.Project.FileExists("packages.Cool_Project.config"));
+            Assert.False(projectManager.Project.FileExists("packages.config"));
+        }
+
+        [Fact]
         public void AddPackageReferenceAppliesPackageReferencesCorrectly()
         {
             // Arrange            
@@ -1118,10 +1241,12 @@ namespace NuGet.Test
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.EffectivePath).Returns("web.config.transform");
+            // in the transform snippet below, we put the <add> tag on the same line 
+            // as <configSections> tag to verify that the transform engine preserves 
+            // formatting of the transform file.
             file.Setup(m => m.GetStream()).Returns(() =>
 @"<configuration>
-    <configSections>
-        <add a=""n"" />
+    <configSections> <add a=""n"" />
     </configSections>
 </configuration>
 ".AsStream());
@@ -1136,9 +1261,8 @@ namespace NuGet.Test
             // It does not at the moment, therefore <system.web> element has different indent than <configSections>.
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
-  <configSections>
-    <add a=""n"" />
-  </configSections>
+  <configSections> <add a=""n"" />
+    </configSections>
     <system.web>
         <compilation debug=""true"" targetFramework=""4.0"" />
     </system.web>

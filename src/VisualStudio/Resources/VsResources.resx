@@ -199,7 +199,7 @@
     <value>All</value>
   </data>
   <data name="NuGetOfficialSourceName" xml:space="preserve">
-    <value>NuGet official package source</value>
+    <value>nuget.org</value>
   </data>
   <data name="FailedToAddGacReference" xml:space="preserve">
     <value>Failed to add reference to '{0}'. Please make sure that it is in the Global Assembly Cache.</value>
@@ -294,13 +294,13 @@
 Packages installed into Website projects will not be restored during build. Consider converting those into Web application projects if necessary.</value>
   </data>
   <data name="AskForRestoreMessage" xml:space="preserve">
-    <value>Some NuGet packages are missing from this solution. Click to restore.</value>
+    <value>Some NuGet packages are missing from this solution. Click to restore from your online package sources.</value>
   </data>
   <data name="RestoreButtonLabel" xml:space="preserve">
     <value>_Restore</value>
   </data>
   <data name="PackageRestoreErrorTryAgain" xml:space="preserve">
-    <value>An error occurred while trying to restore packages. Please try again.</value>
+    <value>An error occurred while trying to restore packages:</value>
   </data>
   <data name="PreinstalledPackages_InvalidRegistryValue" xml:space="preserve">
     <value>The preinstalled packages have a reference to a missing Registry value. Could not find a Registry key with name '{0}' under '{1}'.</value>
@@ -361,5 +361,20 @@ Packages installed into Website projects will not be restored during build. Cons
   </data>
   <data name="Warning_PackageNotReferencedByAnyProject" xml:space="preserve">
     <value>Package {0} of version {1} is not referenced by any project.</value>
+  </data>
+  <data name="Error_FailedToCreateParentFolder" xml:space="preserve">
+    <value>Failed to create parent folder for file '{0}' in project {1}.</value>
+  </data>
+  <data name="NuGetLegacyOfficialSourceName" xml:space="preserve">
+    <value>NuGet official package source</value>
+  </data>
+  <data name="InvalidSemanticVersionString" xml:space="preserve">
+    <value>The provided version string is not a valid semantic version.</value>
+  </data>
+  <data name="OutputConsolePaneName" xml:space="preserve">
+    <value>Package Manager</value>
+  </data>
+  <data name="InvalidSettingsProperty" xml:space="preserve">
+    <value>Invalid settings property '{0}'. Valid settings properties are: PackageRestoreConsentGranted, PackageRestoreIsAutomatic.</value>
   </data>
 </root>

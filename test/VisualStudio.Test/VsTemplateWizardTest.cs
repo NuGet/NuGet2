@@ -841,7 +841,7 @@ namespace NuGet.VisualStudio.Test
                 It.Is<IPackageRepository>(p => p is UnzippedPackageRepository && p.Source == @"C:\Some"), 
                 mockProject, 
                 "MyPackage", 
-				"1.0",
+                "1.0",
                 true, 
                 false));
             installerMock.Verify(i => i.InstallPackage(

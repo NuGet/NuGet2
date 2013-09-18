@@ -70,6 +70,45 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void LoadPackageSourcesWhereAMigratedSourceIsAlsoADefaultSource()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("AOld", "urlA", false), new SettingValue("userDefinedSource", "userDefinedSourceUrl", false) });
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            
+            var defaultPackageSourceA = new PackageSource("urlA", "ANew");
+            var defaultPackageSourceB = new PackageSource("urlB", "B");
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: new[] { defaultPackageSourceA, defaultPackageSourceB }, 
+                migratePackageSources: new Dictionary<PackageSource, PackageSource>
+                                        {
+                                            { new PackageSource("urlA", "AOld"), defaultPackageSourceA },
+                                        });
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            // Package Source AOld will be migrated to ANew. B will simply get added
+            // Since default source B got added when there are other package sources it will be disabled
+            // However, package source ANew must stay enabled
+            // PackageSource userDefinedSource is a user package source and is untouched
+            Assert.Equal(3, values.Count);
+            Assert.Equal("urlA", values[0].Source);
+            Assert.Equal("ANew", values[0].Name);
+            Assert.True(values[0].IsEnabled);
+            Assert.Equal("userDefinedSourceUrl", values[1].Source);
+            Assert.Equal("userDefinedSource", values[1].Name);
+            Assert.True(values[1].IsEnabled);
+            Assert.Equal("urlB", values[2].Source);
+            Assert.Equal("B", values[2].Name);
+            Assert.False(values[2].IsEnabled);
+        }
+
+        [Fact]
         public void LoadPackageSourcesPerformMigrationIfSpecified()
         {
             // Arrange
@@ -459,6 +498,114 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void LoadPackageSourcesAddsAConfigurationDefaultBackEvenAfterMigration()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='NuGet official package source' value='https://nuget.org/api/v2' />
+    </packageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null,
+                migratePackageSources: new Dictionary<PackageSource, PackageSource>
+                                       {
+                                           { new PackageSource("https://nuget.org/api/v2", "NuGet official package source"), new PackageSource("https://www.nuget.org/api/v2", "nuget.org")  }
+                                       },
+                configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+
+            // Assert
+            Assert.Equal(2, values.Count);
+            Assert.Equal("nuget.org", values[0].Name);
+            Assert.Equal("https://www.nuget.org/api/v2", values[0].Source);
+            Assert.Equal("NuGet official package source", values[1].Name);
+            Assert.Equal("https://nuget.org/api/v2", values[1].Source);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesDoesNotDuplicateFeedsOnMigration()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false),
+                    new SettingValue("nuget.org", "https://www.nuget.org/api/v2", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null,
+                migratePackageSources: new Dictionary<PackageSource, PackageSource>
+                                       {
+                                           { new PackageSource("https://nuget.org/api/v2", "NuGet official package source"), new PackageSource("https://www.nuget.org/api/v2", "nuget.org")  }
+                                       });
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+
+            // Assert
+            Assert.Equal(1, values.Count);
+            Assert.Equal("nuget.org", values[0].Name);
+            Assert.Equal("https://www.nuget.org/api/v2", values[0].Source);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesDoesNotDuplicateFeedsOnMigrationAndSavesIt()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false),
+                    new SettingValue("nuget.org", "https://www.nuget.org/api/v2", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
+
+            settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> valuePairs) =>
+                    {
+                        Assert.Equal(1, valuePairs.Count);
+                        Assert.Equal("nuget.org", valuePairs[0].Key);
+                        Assert.Equal("https://www.nuget.org/api/v2", valuePairs[0].Value);
+                    })
+                    .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null,
+                migratePackageSources: new Dictionary<PackageSource, PackageSource>
+                                       {
+                                           { new PackageSource("https://nuget.org/api/v2", "NuGet official package source"), new PackageSource("https://www.nuget.org/api/v2", "nuget.org")  }
+                                       });
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+
+            // Assert
+            Assert.Equal(1, values.Count);
+            Assert.Equal("nuget.org", values[0].Name);
+            Assert.Equal("https://www.nuget.org/api/v2", values[0].Source);
+            settings.Verify();
+        }
+
+        [Fact]
         public void DisablePackageSourceAddEntryToSettings()
         {
             // Arrange
@@ -762,7 +909,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B") });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false);
 
             // Assert
             Assert.Equal(2, repo.Repositories.Count());
@@ -785,7 +932,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: true);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: true);
 
             // Assert
             Assert.Equal(2, repo.Repositories.Count());
@@ -808,7 +955,7 @@ namespace NuGet.Test
                 new PackageSource("A"), new PackageSource("B", "B", isEnabled: false), new PackageSource("C", "C", isEnabled: false) });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false);
 
             // Assert
             Assert.Equal(1, repo.Repositories.Count());
@@ -828,7 +975,7 @@ namespace NuGet.Test
             });
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory, ignoreFailingRepositories: true);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory, ignoreFailingRepositories: true);
 
             // Assert
             Assert.False(repo.Repositories.Any());
@@ -845,7 +992,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(Enumerable.Empty<PackageSource>());
 
             // Act
-            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: ignoreRepository);
+            var repo = (AggregateRepository)sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: ignoreRepository);
 
             // Assert
             Assert.True(repo.IgnoreFailingRepositories);
@@ -866,7 +1013,7 @@ namespace NuGet.Test
             sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: false));
+            ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.CreateAggregateRepository(factory.Object, ignoreFailingRepositories: false));
         }
 
         [Fact]

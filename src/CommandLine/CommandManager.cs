@@ -31,7 +31,7 @@ namespace NuGet
 
             if (!results.Any())
             {
-                throw new CommandLineException(NuGetResources.UnknowCommandError, commandName);
+                throw new CommandLineException(LocalizedResourceManager.GetString("UnknowCommandError"), commandName);
             }
 
             var matchedCommand = results.First();
@@ -44,7 +44,7 @@ namespace NuGet
                 if (matchedCommand == null)
                 {
                     // No exact match was found and the result returned multiple prefixes.
-                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousCommand, commandName,
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("AmbiguousCommand"), commandName,
                         String.Join(" ", from c in results select c.CommandAttribute.CommandName)));
                 }
             }
@@ -64,7 +64,7 @@ namespace NuGet
                         // If the property has neither a setter nor is of a type that can be cast to ICollection<> then there's no way to assign 
                         // values to it. In this case throw.
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                            NuGetResources.OptionInvalidWithoutSetter, command.GetType().FullName + "." + propInfo.Name));
+                            LocalizedResourceManager.GetString("OptionInvalidWithoutSetter"), command.GetType().FullName + "." + propInfo.Name));
                     }
                     result.Add(attr, propInfo);
                 }

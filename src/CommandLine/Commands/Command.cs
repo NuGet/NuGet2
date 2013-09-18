@@ -126,7 +126,7 @@ namespace NuGet.Commands
             }
             if (!String.IsNullOrEmpty(name))
             {
-                return new CommandAttribute(name, NuGetResources.DefaultCommandDescription);
+                return new CommandAttribute(name, LocalizedResourceManager.GetString("DefaultCommandDescription"));
             }
             return null;
         }

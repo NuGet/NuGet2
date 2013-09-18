@@ -153,7 +153,7 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    return path;
+                    return Path.GetFullPath(path);
                 }
             }
             else
@@ -215,7 +215,12 @@ namespace NuGet.VisualStudio
                 // <settings>
                 //    <repositoryPath>..</repositoryPath>
                 // </settings>
-                return document.Root.GetOptionalElementValue("repositoryPath");
+                string repositoryPath = document.Root.GetOptionalElementValue("repositoryPath");
+                if (!String.IsNullOrEmpty(repositoryPath))
+                {
+                    repositoryPath = repositoryPath.Replace('/', Path.DirectorySeparatorChar);
+                }
+                return repositoryPath;
             }
             catch (XmlException e)
             {

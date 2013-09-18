@@ -27,6 +27,64 @@ function NoTest-PackFromProject {
     Assert-AreEqual "$($p.Name).dll" $assemblies[0].Name
 }
 
+function Test-PackFromProjectWithDevelopmentDependencySet {
+    param(
+        $context
+    )
+
+    # This test is for bug 3378: Undue circular dependency detected when developmentDependency = "true"
+
+    # Arrange 
+
+    $p = New-MvcApplication
+
+    # install packages from the Basic MVC app manually
+
+    install-package EntityFramework -version 5.0.0 -ignoreDependencies
+    install-package jquery -version 1.8.2 -ignoreDependencies
+    install-package jquery.validation -version 1.10.0 -ignoreDependencies
+    install-package jquery.ui.combined -version 1.8.24 -ignoreDependencies
+    install-package Microsoft.jQuery.Unobtrusive.Validation -version 2.0.30116.0 -ignoreDependencies
+    install-package Microsoft.jQuery.Unobtrusive.Ajax -version 2.0.30116.0 -ignoreDependencies
+    install-package Modernizr -version 2.6.2 -ignoreDependencies
+    install-package Microsoft.Web.Infrastructure -version 1.0.0 -ignoreDependencies
+    install-package Newtonsoft.Json -version 4.5.11 -ignoreDependencies
+    install-package Microsoft.AspNet.Razor -version 2.0.20715.0 -ignoreDependencies
+    install-package Microsoft.AspNet.WebPages -version 2.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.Mvc -version 4.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.Mvc.FixedDisplayModes -version 1.0.0 -ignoreDependencies
+    install-package Microsoft.AspNet.WebApi.Client -version 4.0.20710.0 -ignoreDependencies
+    install-package Microsoft.Net.Http -version 2.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.WebApi.Core -version 4.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.WebApi.WebHost -version 4.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.WebApi -version 4.0.20710.0 -ignoreDependencies
+    install-package Microsoft.AspNet.Providers.Core -version 1.2 -ignoreDependencies
+    install-package Microsoft.AspNet.Providers.LocalDB -version 1.1 -ignoreDependencies
+    install-package Microsoft.AspNet.Web.Optimization -version 1.0.0 -ignoreDependencies
+    install-package WebGrease -version 1.3.0 -ignoreDependencies
+    install-package knockoutjs -version 2.2.0 -ignoreDependencies
+
+    # trying to insert the developmentDependency attribute to jQuery package entry
+
+    $output = (Get-PropertyValue $p FullPath)
+    $packageConfigPath = Join-Path $output 'packages.config'
+
+    $config = [xml](Get-Content $packageConfigPath)       
+    $config.packages.package | ? { $_.id -eq 'jquery' } | % { $_.setAttribute("developmentDependency", "true") }
+    $config.Save($packageConfigPath)
+    
+    $p.Save()
+
+    # Act
+    
+    & $context.NuGetExe pack $p.FullName -build -o $output
+
+    # Assert
+    $packageFile = Get-ChildItem $output -Filter *.nupkg
+    Assert-NotNull $packageFile
+    
+}
+
 function NoTest-PackFromProjectUsesInstalledPackagesAsDependencies {
     param(
         $context

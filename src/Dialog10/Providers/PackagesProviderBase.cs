@@ -706,7 +706,7 @@ namespace NuGet.Dialog.Providers
                 HideProgressWindow();
 
                 bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(
-                    licensePackages.Distinct(PackageEqualityComparer.IdAndVersion));
+                    licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
                 if (!accepted)
                 {
                     return false;

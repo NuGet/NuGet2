@@ -21,7 +21,7 @@ namespace NuGet
             Uri result;
             if (!Uri.TryCreate(source, UriKind.Absolute, out result))
             {
-                throw new CommandLineException(NuGetResources.InvalidSource, source);
+                throw new CommandLineException(LocalizedResourceManager.GetString("InvalidSource"), source);
             }
         }
 
@@ -29,34 +29,36 @@ namespace NuGet
         {
             if (String.IsNullOrEmpty(source) || source.Equals(NuGetConstants.DefaultGalleryServerUrl, StringComparison.OrdinalIgnoreCase))
             {
-                return NuGetResources.LiveFeed + " (" + NuGetConstants.DefaultGalleryServerUrl + ")";
+                return LocalizedResourceManager.GetString("LiveFeed") + " (" + NuGetConstants.DefaultGalleryServerUrl + ")";
             }
             if (source.Equals(NuGetConstants.DefaultSymbolServerUrl, StringComparison.OrdinalIgnoreCase))
             {
-                return NuGetResources.DefaultSymbolServer + " (" + NuGetConstants.DefaultSymbolServerUrl + ")";
+                return LocalizedResourceManager.GetString("DefaultSymbolServer") + " (" + NuGetConstants.DefaultSymbolServerUrl + ")";
             }
             return "'" + source + "'";
         }
 
-        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile file, string fileName, bool requireVersion)
+        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile configFile, bool requireVersion)
         {
-            if (file == null)
+            if (configFile == null)
             {
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException("configFile");
             }
 
-            var packageReferences = file.GetPackageReferences(requireVersion).ToList();
+            var packageReferences = configFile.GetPackageReferences(requireVersion).ToList();
             foreach (var package in packageReferences)
             {
                 // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
                 // with malformed ids / Versions.
                 if (String.IsNullOrEmpty(package.Id))
                 {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandInvalidPackageReference, fileName));
+                    throw new InvalidDataException(
+                        String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandInvalidPackageReference"), 
+                        configFile.FullConfigFilePath));
                 }
                 if (requireVersion && (package.Version == null))
                 {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandPackageReferenceInvalidVersion"), package.Id));
                 }
             }
 

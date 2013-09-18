@@ -61,7 +61,6 @@ namespace NuGet.VisualStudio
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
-
         /// <summary>
         /// Determines if NuGet is used in the project. Currently, it is determined by checking if packages.config is part of the project
         /// </summary>
@@ -285,7 +284,7 @@ namespace NuGet.VisualStudio
             return project.GetProjectTypeGuids().Length == 1 &&
                    outputType == prjOutputType.prjOutputTypeLibrary;
         }
-
+        
         public static bool IsJavaScriptProject(this Project project)
         {
             return project != null && VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
@@ -297,7 +296,6 @@ namespace NuGet.VisualStudio
             const string xnaPropertyValue = "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel";
             return project != null && 
                    "Windows Phone OS 7.1".Equals(project.GetPropertyValue<string>(xnaPropertyValue), StringComparison.OrdinalIgnoreCase);
-
         }
 
         public static bool IsNativeProject(this Project project)
@@ -328,7 +326,7 @@ namespace NuGet.VisualStudio
             return null;
         }
 
-        public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds)
+        public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, string desiredKind)
         {
             ProjectItems projectItems = GetProjectItems(project, path);
 
@@ -340,7 +338,8 @@ namespace NuGet.VisualStudio
             Regex matcher = filter.Equals("*.*", StringComparison.OrdinalIgnoreCase) ? null : GetFilterRegex(filter);
 
             return from ProjectItem p in projectItems
-                   where kinds.Contains(p.Kind) && (matcher == null || matcher.IsMatch(p.Name))
+                   where desiredKind.Equals(p.Kind, StringComparison.OrdinalIgnoreCase) && 
+                         (matcher == null || matcher.IsMatch(p.Name))
                    select p;
         }
 
@@ -359,11 +358,9 @@ namespace NuGet.VisualStudio
             if (project.IsJavaScriptProject())
             {
                 // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
-                // We hard-code the return value so that it behaves as if it had a WinRT target 
-                // framework, i.e. .NETCore, Version=4.5
-
-                // Review: What about future versions? Let's not worry about that for now.
-                return ".NETCore, Version=4.5";
+                // We read the TargetPlatformVersion instead
+                string platformVersion = project.GetPropertyValue<string>("TargetPlatformVersion");
+                return String.IsNullOrEmpty(platformVersion) ? "Windows, Version=0.0" : "Windows, Version=" + platformVersion;
             }
 
             if (project.IsNativeProject())
@@ -402,7 +399,7 @@ namespace NuGet.VisualStudio
             return VsUtility.GetPropertyValue<T>(project, propertyName);
         }
 
-        private static Regex GetFilterRegex(string wildcard)
+        internal static Regex GetFilterRegex(string wildcard)
         {
             string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
             return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
@@ -698,7 +695,7 @@ namespace NuGet.VisualStudio
             References references;
             try
             {
-                references = project.Object.References;
+                references = project.GetReferences();
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
@@ -739,7 +736,7 @@ namespace NuGet.VisualStudio
         private static IList<Project> GetWebsiteReferencedProjects(Project project)
         {
             var projects = new List<Project>();
-            AssemblyReferences references = project.Object.References;
+            AssemblyReferences references = project.GetAssemblyReferences();
             foreach (AssemblyReference reference in references)
             {
                 if (reference.ReferencedProject != null)
@@ -761,7 +758,7 @@ namespace NuGet.VisualStudio
             References references;
             try
             {
-                references = project.Object.References;
+                references = project.GetReferences();
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
@@ -787,7 +784,7 @@ namespace NuGet.VisualStudio
         private static HashSet<string> GetWebsiteLocalAssemblies(Project project, IFileSystemProvider projectFileSystemProvider)
         {
             var assemblies = new HashSet<string>(PathComparer.Default);
-            AssemblyReferences references = project.Object.References;
+            AssemblyReferences references = project.GetAssemblyReferences();
             foreach (AssemblyReference reference in references)
             {
                 // For websites only include bin assemblies
@@ -832,13 +829,13 @@ namespace NuGet.VisualStudio
                 Stack<string> nameParts = new Stack<string>();
 
                 Project cursor = project;
-                nameParts.Push(cursor.Name);
+                nameParts.Push(cursor.GetName());
 
                 // walk up till the solution root
                 while (cursor.ParentProjectItem != null && cursor.ParentProjectItem.ContainingProject != null)
                 {
                     cursor = cursor.ParentProjectItem.ContainingProject;
-                    nameParts.Push(cursor.Name);
+                    nameParts.Push(cursor.GetName());
                 }
 
                 return String.Join("\\", nameParts);
@@ -866,6 +863,7 @@ namespace NuGet.VisualStudio
                     buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
                 }
 
+                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(buildProject, targetsPath);
                 buildProject.ReevaluateIfNecessary();
             }
         }
@@ -886,8 +884,33 @@ namespace NuGet.VisualStudio
                 if (importElement != null)
                 {
                     importElement.Parent.RemoveChild(importElement);
+                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(buildProject, targetsPath);
                     buildProject.ReevaluateIfNecessary();
                 }
+            }
+        }
+
+        /// <summary>
+        /// DO NOT delete this. This method is only called from PowerShell functional test. 
+        /// </summary>
+        public static void RemoveProject(string projectName)
+        {
+            if (String.IsNullOrEmpty(projectName))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "projectName");
+            }
+
+            var solutionManager = (ISolutionManager)ServiceLocator.GetInstance<ISolutionManager>();
+            if (solutionManager != null)
+            {
+                var project = solutionManager.GetProject(projectName);
+                if (project == null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var dte = ServiceLocator.GetGlobalService<SDTE, DTE>();
+                dte.Solution.Remove(project);
             }
         }
 
@@ -932,6 +955,22 @@ namespace NuGet.VisualStudio
 
             Project parentProject = project.ParentProjectItem.ContainingProject;
             return parentProject.IsExplicitlyUnsupported();
+        }
+
+        public static References GetReferences(this Project project)
+        {
+            dynamic projectObj = project.Object;
+            var references = (References)projectObj.References;
+            projectObj = null;
+            return references;
+        }
+
+        public static AssemblyReferences GetAssemblyReferences(this Project project)
+        {
+            dynamic projectObj = project.Object;
+            var references = (AssemblyReferences)projectObj.References;
+            projectObj = null;
+            return references;
         }
 
         public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)

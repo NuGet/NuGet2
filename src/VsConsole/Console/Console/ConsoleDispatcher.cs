@@ -190,7 +190,7 @@ namespace NuGetConsole.Implementation.Console
                                 WriteError(exception.Message);
                             }
 
-                            if (host.IsCommandEnabled)
+                            if (host.IsCommandEnabled && _dispatcher != null)
                             {
                                 Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
                             }

@@ -126,8 +126,12 @@ function New-Project {
     # Set the focus back on the shell
     $window.SetFocus()
 
-    # Return the project
+	if ($TemplateName -eq 'JScriptVisualBasicLightSwitchProjectTemplate')
+	{
+		return
+	}
 
+    # Return the project if it is NOT a LightSwitch project
     for ($counter = 0; $counter -lt 20; $counter++)
     {
         if ($SolutionFolder) {
@@ -195,6 +199,16 @@ function New-ClassLibrary {
     $SolutionFolder | New-Project ClassLibrary $ProjectName
 }
 
+function New-LightSwitchApplication 
+{
+	param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    New-Project JScriptVisualBasicLightSwitchProjectTemplate $ProjectName $SolutionFolder
+}
+
 function New-PortableLibrary 
 {
     param(
@@ -240,6 +254,24 @@ function New-JavaScriptApplication
         {
             $SolutionFolder | New-Project WinJS $ProjectName
         }
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
+}
+
+function New-JavaScriptApplication81 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try 
+    {
+        $SolutionFolder | New-Project WinJSBlue $ProjectName
     }
     catch {
         # If we're unable to create the project that means we probably don't have some SDK installed
@@ -501,7 +533,11 @@ function Get-OutputPath {
     Join-Path (Get-ProjectDir) $outputPath
 }
 
-function Get-Errors {
+function Get-ErrorTasks {
+    param(
+        [parameter(Mandatory = $true)]
+        $vsBuildErrorLevel
+    )
     $dte.ExecuteCommand("View.ErrorList", " ")
     
     # Make sure there are no errors in the error list
@@ -510,9 +546,43 @@ function Get-Errors {
     if(!$errorList) {
         throw "Unable to locate the error list"
     }
+
+    # Forcefully show all the error items so that they can be retrieved when they are present
+    $errorList.Object.ShowErrors = $True
+    $errorList.Object.ShowWarnings = $True
+    $errorList.Object.ShowMessages = $True
     
-    # Get the list of errors from the error list
-    $errorList.Object.ErrorItems    
+    # Get the list of errors from the error list window which contains errors, warnings and info
+    $allItemsInErrorListWindow = $errorList.Object.ErrorItems
+
+    $errorTasks = @()
+    for($i=1; $i -le $allItemsInErrorListWindow.Count; $i++)
+    {
+        $currentErrorLevel = [EnvDTE80.vsBuildErrorLevel]($allItemsInErrorListWindow.Item($i).ErrorLevel)
+        if($currentErrorLevel -eq $vsBuildErrorLevel)
+        {
+            $errorTasks += $allItemsInErrorListWindow.Item($i)
+        }
+    }
+
+    # Force return array. Arrays are zero-based
+    return ,$errorTasks
+}
+
+function Get-Errors {
+    $vsBuildErrorLevelHigh = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelHigh
+    $errors = Get-ErrorTasks $vsBuildErrorLevelHigh
+
+    # Force return array. Arrays are zero-based
+    return ,$errors
+}
+
+function Get-Warnings {
+    $vsBuildErrorLevelMedium = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelMedium
+    $warnings = Get-ErrorTasks $vsBuildErrorLevelMedium
+
+    # Force return array. Arrays are zero-based
+    return ,$warnings
 }
 
 function Get-ProjectItemPath {
@@ -608,10 +678,10 @@ function Add-ProjectReference {
 function Remove-Project {
     param (
         [parameter(Mandatory = $true)]
-        $Project   
+        $ProjectName
     )
 
-    $dte.Solution.Remove($Project)
+    [NuGet.VisualStudio.ProjectExtensions]::RemoveProject($ProjectName)
 }
 
 function Get-SolutionPath {

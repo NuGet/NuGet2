@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.IO;
 using System.Linq;
 using Moq;
@@ -148,6 +149,130 @@ namespace NuGet.Test
             }, allowPrereleaseVersions: true);
 
             context.Verify();
+        }
+
+        [Theory]
+        [InlineData("2.0")]
+        [InlineData("2.0.0.0")]
+        public void ExistsMethodChecksAllComparableVersions(string packageVersion)
+        {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+
+            var packages = new DataServicePackage[] { 
+                new DataServicePackage {
+                    Id = "A", 
+                    Version = "2.0.0"
+                },
+                new DataServicePackage {
+                    Id = "B", 
+                    Version = "1.0.0"
+                }
+            };
+
+            var query = new Mock<IDataServiceQuery<DataServicePackage>>();
+            query.Setup(q => q.AsQueryable()).Returns(packages.AsQueryable());
+
+            context.Setup(c => c.CreateQuery<DataServicePackage>(It.IsAny<string>())).Returns(query.Object);
+
+            // Act
+            bool exists = repository.Object.Exists("A", new SemanticVersion(packageVersion));
+
+            // Assert
+            Assert.True(exists);
+        }
+
+        [Theory]
+        [InlineData("2.0")]
+        [InlineData("2.0.0.0")]
+        public void ExistsMethodCatchDataServiceQueryException(string packageVersion)
+        {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+
+            var query = new Mock<IDataServiceQuery<DataServicePackage>>();
+            query.Setup(q => q.AsQueryable()).Returns(GetPackagesWillThrows().AsQueryable());
+
+            context.Setup(c => c.CreateQuery<DataServicePackage>(It.IsAny<string>())).Returns(query.Object);
+
+            // Act
+            bool exists = repository.Object.Exists("A", new SemanticVersion(packageVersion));
+
+            // Assert
+            Assert.False(exists);
+        }
+
+        [Theory]
+        [InlineData("2.0")]
+        [InlineData("2.0.0.0")]
+        public void FindPackageMethodChecksAllComparableVersions(string packageVersion)
+        {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+
+            var packages = new DataServicePackage[] { 
+                new DataServicePackage {
+                    Id = "A", 
+                    Version = "2.0.0"
+                },
+                new DataServicePackage {
+                    Id = "B", 
+                    Version = "1.0.0"
+                }
+            };
+
+            var query = new Mock<IDataServiceQuery<DataServicePackage>>();
+            query.Setup(q => q.AsQueryable()).Returns(packages.AsQueryable());
+
+            context.Setup(c => c.CreateQuery<DataServicePackage>(It.IsAny<string>())).Returns(query.Object);
+
+            // Act
+            IPackage foundPackage = repository.Object.FindPackage("A", new SemanticVersion(packageVersion));
+
+            // Assert
+            Assert.Equal(packages[0], foundPackage);
+        }
+
+        [Theory]
+        [InlineData("2.0")]
+        [InlineData("2.0.0.0")]
+        public void FindPackageMethodCatchDataServiceQueryException(string packageVersion)
+        {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+
+            var query = new Mock<IDataServiceQuery<DataServicePackage>>();
+            query.Setup(q => q.AsQueryable()).Returns(GetPackagesWillThrows().AsQueryable());
+
+            context.Setup(c => c.CreateQuery<DataServicePackage>(It.IsAny<string>())).Returns(query.Object);
+
+            // Act
+            IPackage foundPackage = repository.Object.FindPackage("A", new SemanticVersion(packageVersion));
+
+            // Assert
+            Assert.Null(foundPackage);
+        }
+
+        private IEnumerable<DataServicePackage> GetPackagesWillThrows()
+        {
+            yield return new DataServicePackage {
+                Id = "B",
+                Version = "1.0"
+            };
+
+            throw new DataServiceQueryException();
         }
 
         [Fact]

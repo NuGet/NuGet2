@@ -1,6 +1,10 @@
 Change Log / Release Notes
 ==========================
 
+## NuGet 2.8
+* [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
+* Load packages.<project_name>.config if it already exists.
+
 ## NuGet 2.7
 
 * [#3281](http://nuget.codeplex.com/workitem/3281) - Support 'Preinstalled Package' functionality outside of VS templates
@@ -10,6 +14,12 @@ Change Log / Release Notes
 * Add Package Restore VS package, which restores NuGet packages when user builds a solution/project inside VS.
 * [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
 * Add restore command to nuget.exe
+* [#2565](https://nuget.codeplex.com/workitem/2565) Handling of Project Retargeting and Project Upgrading Events
+* [#3463](https://nuget.codeplex.com/workitem/3463) Show package restore bar by default, even if package restore mode is not enabled.
+* [#3502](https://nuget.codeplex.com/workitem/3463) Add two method overloads for IsPackageInstalledEx() and GetInstalledPackages() to IVsPackageInstallerServices
+* Package Restore user consent is now default to Yes.
+* Show License friendly names in the dialog.
+* Sign assembly in NuGet.Server package.
 
 ## NuGet 2.6
 

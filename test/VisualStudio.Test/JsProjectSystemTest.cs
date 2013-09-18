@@ -7,6 +7,24 @@ namespace NuGet.VisualStudio.Test
     public class JsProjectSystemTest
     {
         [Fact]
+        public void DoesNotSupportBindingRedirect()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+            project.Setup(s => s.Properties.Item("FullPath").Value).Returns("x:\\");
+
+            var fileSystem = new Mock<IFileSystem>();
+
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(fileSystem.Object);
+
+            var jsproject = new JsProjectSystem(project.Object, fileSystemProvider.Object);
+
+            // Assert
+            Assert.False(jsproject.IsBindingRedirectSupported);
+        }
+
+        [Fact]
         public void BeginProcessorCallsTheSameMethodFromFileSystem()
         {
             // Arrange

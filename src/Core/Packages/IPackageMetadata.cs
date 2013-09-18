@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace NuGet
 {
-    public interface IPackageMetadata
+    public interface IPackageMetadata : IPackageName
     {
-        string Id { get; }
-        SemanticVersion Version { get; }
         string Title { get; }
         IEnumerable<string> Authors { get; }
         IEnumerable<string> Owners { get; }

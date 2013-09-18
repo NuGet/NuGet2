@@ -32,7 +32,7 @@ namespace NuGet
             DownloadPackage(downloadClient, package, targetStream);
         }
 
-        public void DownloadPackage(IHttpClient downloadClient, IPackageMetadata package, Stream targetStream)
+        public void DownloadPackage(IHttpClient downloadClient, IPackageName package, Stream targetStream)
         {
             if (downloadClient == null)
             {

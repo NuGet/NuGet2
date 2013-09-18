@@ -341,7 +341,7 @@ namespace NuGet.Dialog.Providers
         private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            
+
             if (_query == null)
             {
                 IQueryable<IPackage> query = GetPackages(searchTerm: null, allowPrereleaseVersions: Provider.IncludePrerelease);
@@ -355,6 +355,11 @@ namespace NuGet.Dialog.Providers
 
                 // Execute the total count query
                 _totalCount = query.Count();
+
+                if (_totalCount == 0)
+                {
+                    return new LoadPageResult(new IPackage[0], 0, 0);
+                }
 
                 // make sure we don't query a page that is greater than the maximum page number.
                 int maximumPages = (_totalCount + PageSize - 1)/PageSize;
@@ -491,18 +496,22 @@ namespace NuGet.Dialog.Providers
                         ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
                     }
                 }
+                else if (task.IsCanceled)
+                {
+                    HideProgressPane();
+                }
                 else
                 {
                     LoadPageResult result = task.Result;
 
                     UpdateNewPackages(result.Packages.ToList());
-                    
+
                     int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
                     TotalPages = Math.Max(1, totalPages);
                     CurrentPage = Math.Max(1, result.PageNumber);
-                }
 
-                HideProgressPane();
+                    HideProgressPane();
+                }
             }
 
             Provider.OnPackageLoadCompleted(this);
@@ -636,10 +645,14 @@ namespace NuGet.Dialog.Providers
         }
 
         /// <summary>
-        /// Called when thid focu switches away from this node
+        /// Called when the focus switches away from this node
         /// </summary>
         internal virtual void OnClosed()
         {
+            if (IsSearchResultsNode)
+            {
+                Provider.RemoveSearchNode();
+            }
         }
     }
 }

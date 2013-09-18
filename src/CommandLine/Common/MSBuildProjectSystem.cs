@@ -144,6 +144,7 @@ namespace NuGet.Common
                 Project.Xml.Imports.All(import => !targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
             {
                 Project.Xml.AddImport(targetPath);
+                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(Project, targetPath);
                 Project.ReevaluateIfNecessary();
                 Project.Save();
             }
@@ -165,6 +166,7 @@ namespace NuGet.Common
                 if (importElement != null)
                 {
                     Project.Xml.RemoveChild(importElement);
+                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(Project, targetPath);
                     Project.ReevaluateIfNecessary();
                     Project.Save();
                 }

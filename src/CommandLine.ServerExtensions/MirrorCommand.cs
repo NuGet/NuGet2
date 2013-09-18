@@ -11,16 +11,8 @@ namespace NuGet.ServerExtensions
     [Command(typeof(NuGetResources), "mirror", "MirrorCommandDescription",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "MirrorCommandUsageDescription",
         UsageSummaryResourceName = "MirrorCommandUsageSummary", UsageExampleResourceName = "MirrorCommandUsageExamples")]
-    public class MirrorCommand : Command
+    public class MirrorCommand : DownloadCommandBase
     {
-        private readonly List<string> _sources = new List<string>();
-
-        [Option(typeof(NuGetResources), "MirrorCommandSourceDescription", AltName = "src")]
-        public ICollection<string> Source
-        {
-            get { return _sources; }
-        }
-
         [Option(typeof(NuGetResources), "MirrorCommandVersionDescription")]
         public string Version { get; set; }
 
@@ -33,17 +25,22 @@ namespace NuGet.ServerExtensions
         [Option(typeof(NuGetResources), "MirrorCommandTimeoutDescription")]
         public int Timeout { get; set; }
 
-        [Option(typeof(NuGetResources), "MirrorCommandNoCache", AltName = "c")]
-        public bool NoCache { get; set; }
-
         [Option(typeof(NuGetResources), "MirrorCommandNoOp", AltName = "n")]
         public bool NoOp { get; set; }
 
-        private readonly IPackageRepository _cacheRepository = MachineCache.Default;
+        public MirrorCommand() : base(MachineCache.Default)
+        {
+        }
+
+        // for unit test
+        protected MirrorCommand(IPackageRepository cacheRepository) : 
+            base(cacheRepository)
+        {
+        }
 
         public override void ExecuteCommand()
         {
-            var srcRepository = GetSourceRepository();
+            var srcRepository = CreateRepository();
             var dstRepository = GetTargetRepository(Arguments[1], Arguments[2]);
             var mirrorer = GetPackageMirrorer(srcRepository, dstRepository);
             var isPackagesConfig = IsUsingPackagesConfig(Arguments[0]);
@@ -56,7 +53,7 @@ namespace NuGet.ServerExtensions
 
             bool didSomething = false;
 
-            using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror, mainPackageId: null))
+            using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror, mainPackageId: null, mainPackageVersion: null))
             {
                 foreach (var package in toMirror)
                 {
@@ -77,31 +74,11 @@ namespace NuGet.ServerExtensions
             }
         }
 
-        protected virtual IPackageRepository CacheRepository
-        {
-            get { return _cacheRepository; }
-        }
-
         protected virtual IFileSystem CreateFileSystem()
         {
             return new PhysicalFileSystem(Directory.GetCurrentDirectory());
         }
-
-        private IPackageRepository GetSourceRepository()
-        {
-            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
-            bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
-            if (!NoCache)
-            {
-                repository = new AggregateRepository(new[] { CacheRepository, repository })
-                             {
-                                 IgnoreFailingRepositories = ignoreFailingRepositories
-                             };
-            }
-            repository.Logger = Console;
-            return repository;
-        }
-
+       
         private IPackageRepository GetDestinationRepositoryList(string repo)
         {
             return RepositoryFactory.CreateRepository(SourceProvider.ResolveAndValidateSource(repo));
@@ -170,7 +147,7 @@ namespace NuGet.ServerExtensions
                 IFileSystem fileSystem = CreateFileSystem();
                 string configFilePath = Path.GetFullPath(packageId);
                 var packageReferenceFile = GetPackageReferenceFile(fileSystem, configFilePath);
-                return CommandLineUtility.GetPackageReferences(packageReferenceFile, configFilePath, requireVersion: false);
+                return CommandLineUtility.GetPackageReferences(packageReferenceFile, requireVersion: false);
             }
             else
             {

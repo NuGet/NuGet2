@@ -42,7 +42,7 @@ namespace NuGet.VisualStudio
             string name = Path.GetFileNameWithoutExtension(referencePath);
             try
             {
-                Project.Object.References.AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
+                Project.GetAssemblyReferences().AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
                 
                 // Always create a refresh file. Vs does this for us in most cases, however for GACed binaries, it resorts to adding a web.config entry instead.
                 // This may result in deployment issues. To work around ths, we'll always attempt to add a file to the bin.
@@ -100,7 +100,7 @@ namespace NuGet.VisualStudio
 
         protected override void AddGacReference(string name)
         {
-            Project.Object.References.AddFromGAC(name);
+            Project.GetAssemblyReferences().AddFromGAC(name);
         }
 
         public override dynamic GetPropertyValue(string propertyName)
@@ -167,7 +167,7 @@ namespace NuGet.VisualStudio
             AssemblyReference reference = null;
             try
             {
-                reference = Project.Object.References.Item(referenceName);
+                reference = Project.GetAssemblyReferences().Item(referenceName);
                 if (reference != null)
                 {
                     reference.Remove();

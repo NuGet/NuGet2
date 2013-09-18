@@ -19,12 +19,12 @@ namespace NuGet.Common
 
         public List<ProjectInSolution> Projects { get; private set; }
 
-        public Solution(string solutionFileName)
+        public Solution(IFileSystem fileSystem, string solutionFileName)
         {
             var solutionParser = _solutionParserType.GetConstructor(
                 BindingFlags.Instance | BindingFlags.NonPublic, 
                 binder: null, types: Type.EmptyTypes, modifiers: null).Invoke(null);
-            using (var streamReader = new StreamReader(solutionFileName))
+            using (var streamReader = new StreamReader(fileSystem.OpenFile(solutionFileName)))
             {
                 _solutionReaderProperty.SetValue(solutionParser, streamReader, index: null);
                 _parseSolutionMethod.Invoke(solutionParser, parameters: null);
@@ -44,7 +44,7 @@ namespace NuGet.Common
 
             if (solutionParserType == null)
             {
-                throw new CommandLineException(NuGetResources.Error_CannotLoadTypeSolutionParser);
+                throw new CommandLineException(LocalizedResourceManager.GetString("Error_CannotLoadTypeSolutionParser"));
             }
 
             return solutionParserType;

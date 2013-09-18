@@ -1,7 +1,7 @@
 
 function Test-GetPackageRetunsMoreThanServerPagingLimit {
     # Act
-    $packages = Get-Package -ListAvailable -Source 'https://go.microsoft.com/fwlink/?LinkID=206669'
+    $packages = Get-Package -ListAvailable
     
     # Assert
     Assert-True $packages.Count -gt 100 "Get-Package cmdlet returns less than (or equal to) than server side paging limit"
@@ -51,7 +51,7 @@ function Test-GetPackageCollapsesPackageVersionsForListAvailable
 
 function Test-GetPackageAcceptsSourceName {
     # Act
-    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'NuGet official package source')
+    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'nuget.org')
 
     # Assert
     Assert-True (1 -le $p.Count)
@@ -62,9 +62,9 @@ function Test-GetPackageWithUpdatesAcceptsSourceName {
     $p = New-WebApplication
     
     # Act
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
-    Install-Package jQuery -Version 1.4.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
-    $packages = Get-Package -Updates -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET.ORG'
+    Install-Package jQuery -Version 1.4.1 -Project $p.Name -Source 'NUGET.ORG'
+    $packages = Get-Package -Updates -Source 'NUGET.ORG'
     
     # Assert
     Assert-AreEqual 2 $packages.Count
@@ -271,19 +271,6 @@ function Test-ZipPackageLoadsReleaseNotesAttribute {
 
     # Assert
     Assert-AreEqual "This is a release note." $p.ReleaseNotes
-}
-
-function Test-GetPackagesWithUpdatesReturnPackagesWithIsUpdateSet {
-    # Arrange
-    $p = New-WebApplication
-    
-    # Act
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name
-    $packages = @(Get-Package -Updates)
-    
-    # Assert
-    Assert-AreEqual 1 $packages.Count
-    Assert-True $packages[0].IsUpdate
 }
 
 function Test-GetPackagesWithNoUpdatesReturnPackagesWithIsUpdateNotSet {    

@@ -249,6 +249,16 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void TestParseWithInvalidCustomProfileReturnsNull()
+        {
+            // Arrange & Act
+            var profile = NetPortableProfile.Parse("Profile3284");
+
+            // Assert
+            Assert.Null(profile);
+        }
+
+        [Fact]
         public void TestParseWithCustomProfileString3()
         {
             // Arrange & Act
@@ -297,5 +307,7 @@ namespace NuGet.Test
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=3.0")));
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
         }
+
+
     }
 }

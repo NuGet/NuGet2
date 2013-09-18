@@ -92,7 +92,9 @@ namespace NuGet
                 {
                     // Note the only change here is that we also pass the .NET framework version (which exists as a parent folder of the 
                     // actual profile directory, so that we don't lose that information.
-                    return Directory.EnumerateDirectories(profileFilesPath, "Profile*").Select(profileDir => LoadPortableProfile(version, profileDir));
+                    return Directory.EnumerateDirectories(profileFilesPath, "Profile*")
+                                    .Select(profileDir => LoadPortableProfile(version, profileDir))
+                                    .Where(p => p != null);
                 }
                 catch (IOException)
                 {
@@ -115,7 +117,7 @@ namespace NuGet
             string supportedFrameworkDirectory = Path.Combine(profileDirectory, "SupportedFrameworks");
             if (!Directory.Exists(supportedFrameworkDirectory))
             {
-                return new NetPortableProfile(version, profileName, Enumerable.Empty<FrameworkName>());
+                return null;
             }
 
             var supportedFrameworks = Directory.EnumerateFiles(supportedFrameworkDirectory, "*.xml")

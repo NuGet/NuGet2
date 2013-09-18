@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 using Xunit.Extensions;
 
@@ -23,13 +24,20 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Util.CreateDirectory(packageDirectory);
                 var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
 
+                MemoryStream memoryStream = new MemoryStream();
+                TextWriter writer = new StreamWriter(memoryStream);
+                Console.SetOut(writer);
+                
                 // Act
                 string[] args = new string[] { "push", packageFileName, "-Source", source };
                 int r = Program.Main(args);
+                writer.Close();
 
                 // Assert
-                Assert.Equal(0, r);
+                Assert.Equal(0, r);                
                 Assert.True(File.Exists(Path.Combine(source, "testPackage1.1.1.0.nupkg")));
+                var output = Encoding.Default.GetString(memoryStream.ToArray());
+                Assert.DoesNotContain("WARNING: No API Key was provided", output);
             }
             finally
             {

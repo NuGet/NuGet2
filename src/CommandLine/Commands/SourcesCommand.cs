@@ -27,7 +27,7 @@ namespace NuGet.Commands
         {
             if (SourceProvider == null)
             {
-                throw new InvalidOperationException(NuGetResources.Error_SourceProviderIsNull);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_SourceProviderIsNull"));
             }
 
             // Convert to update
@@ -64,14 +64,14 @@ namespace NuGet.Commands
         {
             if (String.IsNullOrEmpty(Name))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNameRequired"));
             }
 
             List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
             var existingSource = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (!existingSource.Any())
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNoMatchingSourcesFound"), Name);
             }
 
             foreach (var source in existingSource)
@@ -81,7 +81,7 @@ namespace NuGet.Commands
 
             SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(
-                enabled ? NuGetResources.SourcesCommandSourceEnabledSuccessfully : NuGetResources.SourcesCommandSourceDisabledSuccessfully,
+                enabled ? LocalizedResourceManager.GetString("SourcesCommandSourceEnabledSuccessfully") : LocalizedResourceManager.GetString("SourcesCommandSourceDisabledSuccessfully"),
                 Name);
         }
 
@@ -89,39 +89,39 @@ namespace NuGet.Commands
         {
             if (String.IsNullOrEmpty(Name))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNameRequired"));
             }
             // Check to see if we already have a registered source with the same name or source
             var sourceList = SourceProvider.LoadPackageSources().ToList();
             var matchingSources = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
             if (!matchingSources.Any())
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNoMatchingSourcesFound"), Name);
             }
 
             sourceList.RemoveAll(matchingSources.Contains);
             SourceProvider.SavePackageSources(sourceList);
-            Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, Name);
+            Console.WriteLine(LocalizedResourceManager.GetString("SourcesCommandSourceRemovedSuccessfully"), Name);
         }
 
         private void AddNewSource()
         {
             if (String.IsNullOrEmpty(Name))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNameRequired"));
             }
-            if (String.Equals(Name, NuGetResources.ReservedPackageNameAll))
+            if (String.Equals(Name, LocalizedResourceManager.GetString("ReservedPackageNameAll")))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandAllNameIsReserved);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandAllNameIsReserved"));
             }
             if (String.IsNullOrEmpty(Source))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandSourceRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandSourceRequired"));
             }
             // Make sure that the Source given is a valid one.
             if (!PathValidator.IsValidSource(Source))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandInvalidSource);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandInvalidSource"));
             }
 
             ValidateCredentials();
@@ -131,32 +131,32 @@ namespace NuGet.Commands
             bool hasName = sourceList.Any(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (hasName)
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandUniqueName);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandUniqueName"));
             }
             bool hasSource = sourceList.Any(ps => String.Equals(Source, ps.Source, StringComparison.OrdinalIgnoreCase));
             if (hasSource)
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandUniqueSource);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandUniqueSource"));
             }
 
             var newPackageSource = new PackageSource(Source, Name) { UserName = UserName, Password = Password, IsPasswordClearText = StorePasswordInClearText };
             sourceList.Add(newPackageSource);
             SourceProvider.SavePackageSources(sourceList);
-            Console.WriteLine(NuGetResources.SourcesCommandSourceAddedSuccessfully, Name);
+            Console.WriteLine(LocalizedResourceManager.GetString("SourcesCommandSourceAddedSuccessfully"), Name);
         }
 
         private void UpdatePackageSource()
         {
             if (String.IsNullOrEmpty(Name))
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNameRequired"));
             }
 
             List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
             int existingSourceIndex = sourceList.FindIndex(ps => Name.Equals(ps.Name, StringComparison.OrdinalIgnoreCase));
             if (existingSourceIndex == -1)
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandNoMatchingSourcesFound"), Name);
             }
             var existingSource = sourceList[existingSourceIndex];
 
@@ -164,14 +164,14 @@ namespace NuGet.Commands
             {
                 if (!PathValidator.IsValidSource(Source))
                 {
-                    throw new CommandLineException(NuGetResources.SourcesCommandInvalidSource);
+                    throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandInvalidSource"));
                 }
 
                 // If the user is updating the source, verify we don't have a duplicate.
                 bool duplicateSource = sourceList.Any(ps => String.Equals(Source, ps.Source, StringComparison.OrdinalIgnoreCase));
                 if (duplicateSource)
                 {
-                    throw new CommandLineException(NuGetResources.SourcesCommandUniqueSource);
+                    throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandUniqueSource"));
                 }
                 existingSource = new PackageSource(Source, existingSource.Name);
             }
@@ -185,7 +185,7 @@ namespace NuGet.Commands
             
             sourceList.Insert(existingSourceIndex, existingSource);
             SourceProvider.SavePackageSources(sourceList);
-            Console.WriteLine(NuGetResources.SourcesCommandUpdateSuccessful, Name);
+            Console.WriteLine(LocalizedResourceManager.GetString("SourcesCommandUpdateSuccessful"), Name);
         }
 
         private void ValidateCredentials()
@@ -196,7 +196,7 @@ namespace NuGet.Commands
             if (userNameEmpty ^ passwordEmpty)
             {
                 // If only one of them is set, throw.
-                throw new CommandLineException(NuGetResources.SourcesCommandCredentialsRequired);
+                throw new CommandLineException(LocalizedResourceManager.GetString("SourcesCommandCredentialsRequired"));
             }
         }
 
@@ -205,10 +205,10 @@ namespace NuGet.Commands
             var sourcesList = SourceProvider.LoadPackageSources().ToList();
             if (!sourcesList.Any())
             {
-                Console.WriteLine(NuGetResources.SourcesCommandNoSources);
+                Console.WriteLine(LocalizedResourceManager.GetString("SourcesCommandNoSources"));
                 return;
             }
-            Console.PrintJustified(0, NuGetResources.SourcesCommandRegisteredSources);
+            Console.PrintJustified(0, LocalizedResourceManager.GetString("SourcesCommandRegisteredSources"));
             Console.WriteLine();
             var sourcePadding = new String(' ', 6);
             for (int i = 0; i < sourcesList.Count; i++)
@@ -221,7 +221,7 @@ namespace NuGet.Commands
                     indexNumber,
                     namePadding,
                     source.Name,
-                    source.IsEnabled ? NuGetResources.SourcesCommandEnabled : NuGetResources.SourcesCommandDisabled);
+                    source.IsEnabled ? LocalizedResourceManager.GetString("SourcesCommandEnabled") : LocalizedResourceManager.GetString("SourcesCommandDisabled"));
                 Console.WriteLine("{0}{1}", sourcePadding, source.Source);
             }
         }
