@@ -771,7 +771,7 @@ namespace NuGet.Test
 
             string content = fileSystem.ReadAllText("packages.cool.config");
 
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
   <package id=""B"" version=""2.0-alpha"" />
@@ -804,7 +804,7 @@ namespace NuGet.Test
 
             string content = fileSystem.ReadAllText("packages.cool.config");
 
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>", content);
