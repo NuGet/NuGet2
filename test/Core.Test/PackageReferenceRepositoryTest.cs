@@ -746,7 +746,7 @@ namespace NuGet.Test
             Assert.Null(version);
         }
 
-        [Fact(Skip="Proble with git line ending handling.")]
+        [Fact]
         public void AddPackagePreservesProjectConfigFile()
         {
             // Arrange
@@ -778,7 +778,7 @@ namespace NuGet.Test
 </packages>", content);
         }
 
-        [Fact(Skip = "Proble with git line ending handling.")]
+        [Fact]
         public void RemovePackagePreservesProjectConfigFile()
         {
             // Arrange
