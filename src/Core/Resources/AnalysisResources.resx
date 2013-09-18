@@ -178,7 +178,7 @@
     <value>Move it into the 'tools' folder.</value>
   </data>
   <data name="ScriptOutsideToolsTitle" xml:space="preserve">
-    <value>PowerScript file outside tools folder.</value>
+    <value>PowerShell file outside tools folder.</value>
   </data>
   <data name="UnrecognizedScriptDescription" xml:space="preserve">
     <value>The script file '{0}' is not recognized by NuGet and hence will not be executed during installation of this package.</value>
@@ -187,7 +187,7 @@
     <value>Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'.</value>
   </data>
   <data name="UnrecognizedScriptTitle" xml:space="preserve">
-    <value>Unrecognized PowerScript file.</value>
+    <value>Unrecognized PowerShell file.</value>
   </data>
   <data name="WinRTObsoleteDescription" xml:space="preserve">
     <value>The file at '{0}' uses the obsolete 'WinRT' as the framework folder.</value>
