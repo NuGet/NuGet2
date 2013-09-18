@@ -86,6 +86,7 @@
     <Compile Include="PackageIdValidatorTest.cs" />
     <Compile Include="PackageOperationExtensionsTest.cs" />
     <Compile Include="PackageReferenceFileTest.cs" />
+    <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageRepositoryExtensionsTest.cs" />
     <Compile Include="PackageRestoreConsentTest.cs" />
     <Compile Include="PackageServerTest.cs" />
