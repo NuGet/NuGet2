@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using EnvDTE;
+﻿using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace NuGet.VisualStudio
 {
@@ -280,6 +278,43 @@ namespace NuGet.VisualStudio
                 }
             }
             return name;
+        }
+
+        /// <summary>
+        /// This method is different from the GetName() method above in that for Website project, 
+        /// it will always return the project name, instead of the full path to the website, when it uses Casini server.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We can treat the website as running IISExpress if we can't get the WebSiteType property.")]
+        public static string GetProperName(this Project project)
+        {
+            if (project.IsWebSite())
+            {
+                try
+                {
+                    // if the WebSiteType property of a WebSite project, it means the Website is configured to run with Casini, 
+                    // as opposed to IISExpress. In which case, Project.Name will return the full path to the directory of the website. 
+                    // We want to extract out the directory name only. 
+                    object websiteType = project.Properties.Item("WebSiteType").Value;
+                    if (Convert.ToInt32(websiteType, CultureInfo.InvariantCulture) == 0)
+                    {
+                        // remove the trailing slash. 
+                        string projectPath =  project.Name;
+                        if (projectPath.Length > 0 && projectPath[projectPath.Length-1] == Path.DirectorySeparatorChar)
+                        {
+                            projectPath = projectPath.Substring(0, projectPath.Length - 1);
+                        }
+
+                        // without the trailing slash, a directory looks like a file name. Hence, call GetFileName gives us the directory name.
+                        return Path.GetFileName(projectPath);
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignore this exception if we can't get the WebSiteType property
+                }
+            }
+
+            return GetName(project);
         }
     }
 }
