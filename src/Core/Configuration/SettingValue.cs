@@ -20,5 +20,23 @@ namespace NuGet
         public string Value { get; private set; }
 
         public bool IsMachineWide { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            var rhs = obj as SettingValue;
+            if (rhs == null)
+            {
+                return false;
+            }
+
+            return rhs.Key == Key && 
+                rhs.Value == Value && 
+                rhs.IsMachineWide == rhs.IsMachineWide;
+        }
+
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Key, Value, IsMachineWide).GetHashCode();
+        }
     }
 }
