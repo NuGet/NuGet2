@@ -73,7 +73,7 @@ namespace NuGet.VisualStudio
             // Create the project system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
 
-            var repository = new PackageReferenceRepository(projectSystem, project.GetName(), _sharedRepository);
+            var repository = new PackageReferenceRepository(projectSystem, project.GetProperName(), _sharedRepository);
 
             // Ensure the logger is null while registering the repository
             FileSystem.Logger = null;

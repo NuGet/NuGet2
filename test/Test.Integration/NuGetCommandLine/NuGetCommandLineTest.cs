@@ -1147,9 +1147,9 @@ public class Cl_{0} {{
             Assert.True(output.Contains("Invalid framework folder"));
             Assert.True(output.Contains("Assembly not inside a framework folder"));
             Assert.True(output.Contains("Assembly outside lib folder"));
-            Assert.True(output.Contains("PowerScript file outside tools folder"));
+            Assert.True(output.Contains("PowerShell file outside tools folder"));
             Assert.True(output.Contains("Transform file outside content folder."));
-            Assert.True(output.Contains("Unrecognized PowerScript file"));
+            Assert.True(output.Contains("Unrecognized PowerShell file"));
         }
 
         [Fact]

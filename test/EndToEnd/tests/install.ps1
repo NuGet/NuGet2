@@ -2450,6 +2450,30 @@ function Test-InstallPackagePreservesProjectConfigFile
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 
+function Test-InstallPackageToWebsitePreservesProjectConfigFile
+{
+    param($context)
+
+    # Arrange
+    $p = New-Website "CoolProject"
+
+    $projectPath = $p.Properties.Item("FullPath").Value
+    $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
+    
+    # create file and add to project
+    $newFile = New-Item $packagesConfigPath -ItemType File
+    '<packages></packages>' > $newFile
+    $p.ProjectItems.AddFromFile($packagesConfigPath)
+
+    # Act
+    $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithFolder
+    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-Null (Get-ProjectItem $p 'packages.config')
+}
+
 function Test-InstallPackageAddMoreEntriesToProjectConfigFile
 {
     param($context)

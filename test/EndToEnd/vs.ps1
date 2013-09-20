@@ -523,6 +523,27 @@ function Get-ProjectDir {
     $path
 }
 
+function Get-ProjectName 
+{
+    param(
+        [parameter(Mandatory = $true)]
+        $Project
+    )
+    
+    $projectName = $Project.Name
+
+    if ($project.Type -eq 'Web Site' -and $project.Properties.Item("WebSiteType").Value -eq "0") 
+	{
+		# If this is a WebSite project and WebSiteType = 0, meaning it's configured to use Casini as opposed to IIS Express, 
+		# then $Project.Name will return the full path to the website directory. We don't want to use the full path, thus
+		# we extract the directory name out of it.
+
+	    $projectName = Split-Path -Leaf $projectName
+    }
+    
+    $projectName
+}
+
 function Get-OutputPath {
     param(
         [parameter(Mandatory = $true)]

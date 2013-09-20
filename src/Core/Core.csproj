@@ -22,6 +22,7 @@
     <EmbeddedResource Include="Resources\AnalysisResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AnalysisResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\NuGetResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

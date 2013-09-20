@@ -26,7 +26,7 @@ function Get-ProjectRepository {
     
     $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()    
     $fileSystem = New-Object NuGet.PhysicalFileSystem((Get-ProjectDir $Project))
-    New-Object NuGet.PackageReferenceRepository($fileSystem, $Project.Name, $packageManager.LocalRepository)
+    New-Object NuGet.PackageReferenceRepository($fileSystem, (Get-ProjectName $Project), $packageManager.LocalRepository)
 }
 
 function Get-ProjectPackageReferences {
@@ -97,7 +97,9 @@ function Assert-Package {
         [string]$Version
     )
 
-    $configName = "packages." + $Project.Name + ".config"
+    $projectName = Get-ProjectName $Project
+
+    $configName = "packages." + $projectName + ".config"
 
     # Check for existence of packages.project_name.config
     $configPath = Join-Path (Get-ProjectDir $Project) $configName
@@ -112,7 +114,7 @@ function Assert-Package {
 
     
     # Check for the project item
-    Assert-NotNull (Get-ProjectItem $Project $configName) "$configName does not exist in $($Project.Name)"
+    Assert-NotNull (Get-ProjectItem $Project $configName) "$configName does not exist in $projectName"
         
     $repository = Get-ProjectRepository $Project
     
@@ -122,7 +124,7 @@ function Assert-Package {
         $actualVersion = [NuGet.SemanticVersion]::Parse($Version)
     }
     
-    Assert-NotNull ([NuGet.PackageRepositoryExtensions]::Exists($repository, $Id, $actualVersion)) "Package $Id $Version is not referenced in $($Project.Name)"
+    Assert-NotNull ([NuGet.PackageRepositoryExtensions]::Exists($repository, $Id, $actualVersion)) "Package $Id $Version is not referenced in $projectName"
 }
 
 function Assert-NoPackage {
