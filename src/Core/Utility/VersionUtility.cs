@@ -61,7 +61,9 @@ namespace NuGet
             { "MonoAndroid", "MonoAndroid" },
             { "MonoTouch", "MonoTouch" },
             { "MonoMac", "MonoMac" },
-            { "native", "native"}
+            { "native", "native"},
+            { "WindowsPhoneApp", "WindowsPhoneApp"},
+            { "wpa", "WindowsPhoneAppa"}
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -79,7 +81,8 @@ namespace NuGet
             { ".NETCore", "win"},
             { "Windows", "win"},
             { ".NETPortable", "portable" },
-            { "WindowsPhone", "wp"}
+            { "WindowsPhone", "wp"},
+            { "WindowsPhoneApp", "wpa"}
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
