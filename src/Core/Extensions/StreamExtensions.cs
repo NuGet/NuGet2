@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace NuGet
@@ -67,14 +68,6 @@ namespace NuGet
 
         public static bool ContentEquals(this Stream stream, Stream otherStream)
         {
-            if (stream.CanSeek && otherStream.CanSeek)
-            {
-                if (stream.Length != otherStream.Length)
-                {
-                    return false;
-                }
-            }
-
             bool isBinaryFile = IsBinary(otherStream);
             otherStream.Seek(0, SeekOrigin.Begin);
 
@@ -92,7 +85,11 @@ namespace NuGet
 
         private static bool CompareText(Stream stream, Stream otherStream)
         {
-            
+            IEnumerable<string> lines = ReadStreamLines(stream);
+            IEnumerable<string> otherLines = ReadStreamLines(otherStream);
+
+            // IMPORTANT: this comparison has to be case-sensitive, hence Ordinal instead of OrdinalIgnoreCase
+            return lines.SequenceEqual(otherLines, StringComparer.Ordinal);
         }
 
         private static IEnumerable<string> ReadStreamLines(Stream stream)
@@ -114,7 +111,7 @@ namespace NuGet
                             counter--;
                         }
                     }
-                    else
+                    else if (counter == 0)
                     {
                         yield return line;
                     }
@@ -124,6 +121,14 @@ namespace NuGet
 
         private static bool CompareBinary(Stream stream, Stream otherStream)
         {
+            if (stream.CanSeek && otherStream.CanSeek)
+            {
+                if (stream.Length != otherStream.Length)
+                {
+                    return false;
+                }
+            }
+
             byte[] buffer = new byte[4 * 1024];
             byte[] otherBuffer = new byte[4 * 1024];
 
