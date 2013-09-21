@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -74,8 +75,57 @@ namespace NuGet
                 }
             }
 
-            byte[] buffer = new byte[4*1024];
-            byte[] otherBuffer = new byte[4*1024];
+            bool isBinaryFile = IsBinary(otherStream);
+            otherStream.Seek(0, SeekOrigin.Begin);
+
+            return isBinaryFile ? CompareBinary(stream, otherStream) : CompareText(stream, otherStream);
+        }
+
+        public static bool IsBinary(Stream stream)
+        {
+            // quick and dirty hack to check if a stream represents binary content
+            byte[] a = new byte[10];
+            int bytesRead = stream.Read(a, 0, 10);
+            int byteZeroIndex = Array.FindIndex(a, 0, bytesRead, d => d == 0);
+            return byteZeroIndex >= 0;
+        }
+
+        private static bool CompareText(Stream stream, Stream otherStream)
+        {
+            
+        }
+
+        private static IEnumerable<string> ReadStreamLines(Stream stream)
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                int counter = 0;
+                while (reader.Peek() != -1)
+                {
+                    string line = reader.ReadLine();
+                    if (line.EndsWith(Constants.BeginIgnoreMarker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        counter++;
+                    }
+                    else if (line.StartsWith(Constants.EndIgnoreMarker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (counter > 0)
+                        {
+                            counter--;
+                        }
+                    }
+                    else
+                    {
+                        yield return line;
+                    }
+                }
+            }
+        }
+
+        private static bool CompareBinary(Stream stream, Stream otherStream)
+        {
+            byte[] buffer = new byte[4 * 1024];
+            byte[] otherBuffer = new byte[4 * 1024];
 
             int bytesRead = 0;
             do
