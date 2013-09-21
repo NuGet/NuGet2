@@ -1435,3 +1435,37 @@ function Test-UpdatePackageThrowsWhenOnlyUnusedVersionsOfAPackageIsPresentInPack
     # Update specific package here. Because, when all packages are updated, the PackageNotInstalledException gets caught. We want it to be thrown
     Assert-Throws { Update-Package TestUpdatePackage -Source $context.RepositoryRoot } "'TestUpdatePackage' was not installed in any project. Update failed."
 }
+
+function Test-UpdatePackageWithContentInLicenseBlocks
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$name = 'PackageWithTextFile'
+
+	Install-Package $name -Version 1.0 -Source $context.RepositoryRoot 
+	
+	$packages = Get-PackagesDir
+	$fooFilePath = Join-Path $packages "$name.1.0\content\text"
+
+	Assert-True (Test-Path $fooFilePath)
+
+	'***************NUget: Begin License Text ---------dsafdsafdas
+sdaflkjdsal;fj;ldsafdsa
+dsaflkjdsa;lkfj;ldsafas
+dsafdsafdsafsdaNuGet: End License Text-------------
+This is a text file 1.0' > $fooFilePath
+
+	# Act
+	Update-Package $name -Source $context.RepositoryRoot
+
+	# Assert
+	Assert-Package $p $name '2.0'
+	
+	$textFilePathInProject = Join-Path (Get-ProjectDir $p) 'text'
+	Assert-True (Test-Path $textFilePathInProject)
+
+	Assert-AreEqual 'This is a text file 2.0' (Get-Content $textFilePathInProject)
+}

@@ -283,21 +283,28 @@ namespace NuGet.Test
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames)
             {
-                string path = PathFixUtility.FixPath(Path.Combine(directory, fileName));
-                var mockFile = new Mock<IPackageFile>();
-                mockFile.Setup(m => m.Path).Returns(path);
-                mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));
-
-                string effectivePath;
-                FrameworkName fn = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
-                mockFile.Setup(m => m.TargetFramework).Returns(fn);
-                mockFile.Setup(m => m.EffectivePath).Returns(effectivePath);
-                mockFile.Setup(m => m.SupportedFrameworks).Returns(
-                    fn == null ? new FrameworkName[0] : new FrameworkName[] { fn });
-
+                var mockFile = CreateMockedPackageFile(directory, fileName);
                 files.Add(mockFile.Object);
             }
             return files;
+        }
+
+        public static Mock<IPackageFile> CreateMockedPackageFile(string directory, string fileName, string content = null)
+        {
+            string path = PathFixUtility.FixPath(Path.Combine(directory, fileName));
+            content = content ?? path;
+            
+            var mockFile = new Mock<IPackageFile>();
+            mockFile.Setup(m => m.Path).Returns(path);
+            mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(content)));
+
+            string effectivePath;
+            FrameworkName fn = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
+            mockFile.Setup(m => m.TargetFramework).Returns(fn);
+            mockFile.Setup(m => m.EffectivePath).Returns(effectivePath);
+            mockFile.Setup(m => m.SupportedFrameworks).Returns(
+                fn == null ? new FrameworkName[0] : new FrameworkName[] { fn });
+            return mockFile;
         }
 
         public static Stream CreateSimplePackageStream(string id, string version = "1.0")

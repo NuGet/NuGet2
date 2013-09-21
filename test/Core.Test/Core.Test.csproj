@@ -120,6 +120,7 @@
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="PackageManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamExtensionsTest.cs" />
     <Compile Include="UnzippedPackageRepositoryTest.cs" />
     <Compile Include="UnzippedPackageTest.cs" />
     <Compile Include="UriHelperTest.cs" />
