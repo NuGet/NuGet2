@@ -153,6 +153,14 @@ namespace NuGet
             }
             else
             {
+                if (!fileSystem.FileExists(configFileName))
+                {
+                    string message = String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.FileDoesNotExit,
+                        fileSystem.GetFullPath(configFileName));
+                    throw new InvalidOperationException(message);
+                }
+
                 appDataSettings = ReadSettings(fileSystem, configFileName);
             }
 

@@ -164,6 +164,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void SetapikeyCommand_WithConfigOption()
         {
             var testDirectory = Path.Combine(_testRootDirectory, "testdir");
+            Util.CreateDirectory(testDirectory);
+            Util.CreateFile(testDirectory, "test_nuget.config", "<configuration/>");
             string[] args = new string[] 
             { 
                 "setapikey", 

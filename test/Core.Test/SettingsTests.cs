@@ -1518,5 +1518,22 @@ namespace NuGet.Test
             text = mockFileSystem.ReadAllText(@"NuGet\Config\IDE\a2.config");
             Assert.Equal(a2Config, text);
         }
+
+        // Tests that when configFileName is not null, the specified
+        // file must exist.
+        [Fact]
+        public void UserSpecifiedConfigFileMustExist()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"C:\");
+
+            // Act and assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => Settings.LoadDefaultSettings(
+                    mockFileSystem,
+                    configFileName: "user.config",
+                    machineWideSettings: null),
+                @"File 'C:\user.config' does not exist.");
+        }
     }
 }

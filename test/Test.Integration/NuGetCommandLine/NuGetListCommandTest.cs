@@ -77,7 +77,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
             // create the config file
             var configFile = Path.GetTempFileName();
-            File.Delete(configFile);
+            Util.CreateFile(Path.GetDirectoryName(configFile), Path.GetFileName(configFile), "<configuration/>");
+
             string[] args = new string[] { 
                 "sources", 
                 "Add", 
