@@ -209,10 +209,8 @@ namespace NuGet
 
         public string Source
         {
-            get
-            {
-                return DownloadUrl.ToString();
-            }
+            get;
+            internal set;
         }
 
         private string OldHash { get; set; }

@@ -189,6 +189,7 @@ namespace NuGet
         private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e)
         {
             var package = (DataServicePackage)e.Entity;
+            package.Source = Source;
 
             // REVIEW: This is the only way (I know) to download the package on demand
             // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage

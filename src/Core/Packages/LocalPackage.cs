@@ -13,7 +13,7 @@ namespace NuGet
 
         protected LocalPackage(string source)
         {
-            Source = source;
+            Source = source == null ? null : Path.GetDirectoryName(source);
         }
 
         public string Id
