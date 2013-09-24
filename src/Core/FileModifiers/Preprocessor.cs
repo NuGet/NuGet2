@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
+using System.Text;
 
 namespace NuGet
 {
@@ -35,7 +36,9 @@ namespace NuGet
 
         public static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)
         {
-            string text = stream.ReadToEnd();
+            // Fix for bug https://nuget.codeplex.com/workitem/3174, source code transfomation to support BOM
+            byte[] bytes = stream.ReadAllBytes();
+            string text = Encoding.UTF8.GetString(bytes);
             return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider, throwIfNotFound));
         }
 
