@@ -1,10 +1,10 @@
+using NuGet.Resources;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
-using NuGet.Resources;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NuGet
 {
