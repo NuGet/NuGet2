@@ -12,6 +12,8 @@ NuGet Hall of Fame
     - [#3536](http://nuget.codeplex.com/workitem/3536) - Replacement tokens not passed with -IncludeReferencedProjects.
 1. [Sarkie](https://www.codeplex.com/site/users/view/Sarkie)
     - [#3677](http://nuget.codeplex.com/workitem/3677) - Fix nuget.push throwing OutOfMemoryException when pushing large package.
+1. [Despostes](https://www.codeplex.com/site/users/view/Despostes)
+	- [#3666](http://nuget.codeplex.com/workitem/3666) - Fix incorrect target path when project references another CLI/C++ project.
  
 ## NuGet 2.7
 
