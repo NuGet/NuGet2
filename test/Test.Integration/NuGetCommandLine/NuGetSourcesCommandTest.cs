@@ -147,7 +147,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         {
             // Arrange
             var configFile = Path.GetTempFileName();
-            File.Delete(configFile);
+            Util.CreateFile(Path.GetDirectoryName(configFile), Path.GetFileName(configFile), "<configuration/>");
 
             string[] args = new string[] { 
                 "sources",

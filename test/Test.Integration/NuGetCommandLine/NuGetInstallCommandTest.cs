@@ -63,7 +63,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var r = CommandRunner.Run(
                     nugetexe,
                     proj1Directory,
-                    "install " + configFileName + " -Source " + repositoryPath + " -ConfigFile my.config -RequireConsent -Verbosity detailed",
+                    "install " + configFileName + " -Source " + repositoryPath + @" -ConfigFile ..\my.config -RequireConsent -Verbosity detailed",
                     waitForExit: true);
 
                 // Assert
@@ -135,7 +135,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var r = CommandRunner.Run(
                     nugetexe,
                     proj1Directory,
-                    "install " + configFileName + " -Source " + repositoryPath + " -ConfigFile my.config",
+                    "install " + configFileName + " -Source " + repositoryPath + @" -ConfigFile ..\my.config",
                     waitForExit: true);
 
                 // Assert

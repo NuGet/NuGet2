@@ -179,6 +179,11 @@ namespace NuGet.Commands
                     NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
+                if (ConfigFile != null)
+                {
+                    ConfigFile = FileSystem.GetFullPath(ConfigFile);
+                }
+
                 Settings = NuGet.Settings.LoadDefaultSettings(
                     fileSystem: fileSystem,
                     configFileName: ConfigFile,

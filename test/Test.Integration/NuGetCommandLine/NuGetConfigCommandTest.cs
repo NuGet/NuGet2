@@ -48,8 +48,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         [Fact]
         public void ConfigCommand_ChangeUserDefinedConfigFile()
         {
-            var configFile = Path.GetTempFileName();
-            File.Delete(configFile);
+            var configFile = Path.GetTempFileName();            
+            Util.CreateFile(Path.GetDirectoryName(configFile), Path.GetFileName(configFile), "<configuration/>");
             try
             {
                 string[] args = new string[] { 
@@ -89,7 +89,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         {
             // Arrange
             var configFile = Path.GetTempFileName();
-            File.Delete(configFile);
+            Util.CreateFile(Path.GetDirectoryName(configFile), Path.GetFileName(configFile), "<configuration/>");
 
             try
             {
