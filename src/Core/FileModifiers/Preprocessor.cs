@@ -36,7 +36,7 @@ namespace NuGet
 
         public static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)
         {
-            // Fix for bug https://nuget.codeplex.com/workitem/3174, source code transfomation to support BOM
+            // Fix for bug https://nuget.codeplex.com/workitem/3174, source code transformations must support BOM
             byte[] bytes = stream.ReadAllBytes();
             string text = Encoding.UTF8.GetString(bytes);
             return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider, throwIfNotFound));
