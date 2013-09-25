@@ -1,6 +1,5 @@
 using System.Linq;
 using NuGet.Server.Infrastructure;
-using QueryInterceptor;
 
 namespace NuGet.Server.DataServices
 {
@@ -17,8 +16,8 @@ namespace NuGet.Server.DataServices
             get
             {
                 var packages = from p in _repository.GetPackages()
-                               select _repository.GetMetadataPackage(p);
-                return packages.InterceptWith(new PackageIdComparisonVisitor());                       
+                               select _repository.GetMetadataPackage(p);             
+                return packages.InterceptWith(new PackageIdComparisonVisitor());
             }
         }
     }
