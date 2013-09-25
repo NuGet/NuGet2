@@ -7,8 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text;
 using EnvDTE;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.TextManager.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
@@ -22,13 +28,23 @@ namespace NuGet.VisualStudio
 
         private FrameworkName _targetFramework;
         private readonly IFileSystem _baseFileSystem;
+        
+        private RunningDocumentTable _rdt;
+        private IServiceProvider _serviceProvider;
+        private IVsEditorAdaptersFactoryService _editorAdapters;
 
-        public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) 
+        public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : this(project, fileSystemProvider, ServiceLocator.PackageServiceProvider)
+        {
+        }
+
+        internal VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider, IServiceProvider serviceProvider) 
             : base(project.GetFullPath())
         {
             Project = project;
             _baseFileSystem = fileSystemProvider.GetFileSystem(project.GetFullPath());
             Debug.Assert(_baseFileSystem != null);
+            _serviceProvider = serviceProvider;
         }
 
         protected Project Project
@@ -85,15 +101,24 @@ namespace NuGet.VisualStudio
 
         public override void AddFile(string path, Stream stream)
         {
-            AddFileCore(path, () => base.AddFile(path, stream));
+            AddFileCore(path, () => base.AddFile(path, stream), () => stream.ReadToEnd());
         }
 
         public override void AddFile(string path, Action<Stream> writeToStream)
         {
-            AddFileCore(path, () => base.AddFile(path, writeToStream));
+            AddFileCore(
+                path, 
+                () => base.AddFile(path, writeToStream), 
+                () =>
+                {
+                    var memoryStream = new MemoryStream();
+                    writeToStream(memoryStream);
+                    return Encoding.Unicode.GetString(memoryStream.GetBuffer());
+                }
+            );
         }
 
-        private void AddFileCore(string path, Action addFile)
+        private void AddFileCore(string path, Action addFile, Func<string> getFileContent)
         {
             bool fileExistsInProject = FileExistsInProject(path);
 
@@ -107,6 +132,18 @@ namespace NuGet.VisualStudio
             else
             {
                 EnsureCheckedOutIfExists(path);
+
+                if (fileExistsInProject)
+                {
+                    // Check if the file is currently open in the VS editor. 
+                    // If it is, we should update it via the Running Document Table (RDT)
+                    bool succeeded = UpdateDocumentViaRunningTable(GetFullPath(path), getFileContent());
+                    if (succeeded)
+                    {
+                        return;
+                    }
+                }
+
                 addFile();
                 if (!fileExistsInProject)
                 {
@@ -485,6 +522,61 @@ namespace NuGet.VisualStudio
             {
 
             }
+        }
+
+        private bool UpdateDocumentViaRunningTable(string filePath, string newContent)
+        {
+            if (_serviceProvider == null)
+            {
+                // for unit tests
+                return false;
+            }
+
+            if (_rdt == null && _editorAdapters == null)
+            {
+                var mefHost = _serviceProvider.GetService(typeof(SComponentModel)) as IComponentModel;
+                if (mefHost == null)
+                {
+                    Debug.Fail("Can't obtain IComponentModel service.");
+                    return false;
+                }
+
+                _editorAdapters = mefHost.GetService<IVsEditorAdaptersFactoryService>();
+                _rdt = new RunningDocumentTable(_serviceProvider);
+            }
+
+            string fullFilePath = GetFullPath(filePath);
+            object document = _rdt.FindDocument(fullFilePath);
+            if (document != null)
+            {
+                var buffer = document as IVsTextBuffer;
+                if (buffer != null)
+                {
+                    // update the document by modifying the text buffer
+                    var textBuffer = _editorAdapters.GetDocumentBuffer(buffer);
+
+                    var wholeSpan = new Span(0, textBuffer.CurrentSnapshot.Length);
+                    if (textBuffer.EditInProgress || textBuffer.IsReadOnly(wholeSpan))
+                    {
+                        return false;
+                    }
+
+                    textBuffer.Replace(wholeSpan, newContent);
+
+                    var persistDocData = document as IVsPersistDocData;
+                    if (persistDocData != null)
+                    {
+                        // tell VS to save the document
+                        string newPath;
+                        int canceled;
+                        persistDocData.SaveDocData(VSSAVEFLAGS.VSSAVE_Save, out newPath, out canceled);
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
