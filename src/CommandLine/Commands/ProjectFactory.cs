@@ -929,9 +929,9 @@ namespace NuGet.Commands
         {
             bool isEqual;
             using (var dependencyFileStream = targetFile.GetStream())
-            using (var fileContentsStream = File.OpenRead(fullPath))
+            using (var fileContentStream = File.OpenRead(fullPath))
             {
-                isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
+                isEqual = dependencyFileStream.ContentEquals(fileContentStream);
             }
             return isEqual;
         }

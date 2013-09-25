@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace NuGet
@@ -64,7 +67,99 @@ namespace NuGet
             return new MemoryStream(encoding.GetBytes(value));
         }
 
+        /// <summary>
+        /// Compare the content of the two streams of data, ingoring the content within the
+        /// BEGIN NUGET IGNORE and END NUGET IGNORE markers.
+        /// </summary>
+        /// <param name="stream">First stream</param>
+        /// <param name="otherStream">Second stream which MUST be a seekable stream.</param>
+        /// <returns>true if the two streams are considered equal.</returns>
         public static bool ContentEquals(this Stream stream, Stream otherStream)
+        {
+            Debug.Assert(otherStream.CanSeek);
+
+            bool isBinaryFile = IsBinary(otherStream);
+            otherStream.Seek(0, SeekOrigin.Begin);
+
+            return isBinaryFile ? CompareBinary(stream, otherStream) : CompareText(stream, otherStream);
+        }
+
+        public static bool IsBinary(Stream stream)
+        {
+            // Quick and dirty trick to check if a stream represents binary content.
+            // We read the first 30 bytes. If there's a character 0 in those bytes, 
+            // we assume this is a binary file. 
+            byte[] a = new byte[30];
+            int bytesRead = stream.Read(a, 0, 30);
+            int byteZeroIndex = Array.FindIndex(a, 0, bytesRead, d => d == 0);
+            return byteZeroIndex >= 0;
+        }
+
+        private static bool CompareText(Stream stream, Stream otherStream)
+        {
+            IEnumerable<string> lines = ReadStreamLines(stream);
+            IEnumerable<string> otherLines = ReadStreamLines(otherStream);
+
+            // IMPORTANT: this comparison has to be case-sensitive, hence Ordinal instead of OrdinalIgnoreCase
+            return lines.SequenceEqual(otherLines, StringComparer.Ordinal);
+        }
+
+        /// <summary>
+        /// Read the specified stream and return all lines, but ignoring those within the 
+        /// BEGIN NUGET IGNORE and END NUGET IGNORE markers.
+        /// </summary>
+        private static IEnumerable<string> ReadStreamLines(Stream stream)
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                var q = new Queue<string>();
+
+                bool hasSeenBeginLine = false;
+
+                while (reader.Peek() != -1)
+                {
+                    string originalLine = reader.ReadLine();
+
+                    string line = originalLine.Trim();
+                    if (line.IndexOf(Constants.EndIgnoreMarker, StringComparison.OrdinalIgnoreCase) > -1)
+                    {
+                        if (hasSeenBeginLine)
+                        {
+                            // ignore all lines in between BEGIN and END marker lines
+                            q.Clear();
+                            hasSeenBeginLine = false;
+                        }
+                        else
+                        {
+                            // avoid the case where END LICENSE TEXT appears before BEGIN LICENCSE TEXT
+                            yield return originalLine;
+                        }
+                    }
+                    else if (line.IndexOf(Constants.BeginIgnoreMarker, StringComparison.OrdinalIgnoreCase) > -1)
+                    {
+                        hasSeenBeginLine = true;
+                        q.Enqueue(originalLine);
+                    }
+                    else if (hasSeenBeginLine)
+                    {
+                        q.Enqueue(originalLine);
+                    }
+                    else
+                    {
+                        // the current line is not within the IGNORE markers.
+                        yield return originalLine;
+                    }
+                }
+
+                // if q contains elements, 
+                while (q.Count > 0)
+                {
+                    yield return q.Dequeue();
+                }
+            }
+        }
+
+        private static bool CompareBinary(Stream stream, Stream otherStream)
         {
             if (stream.CanSeek && otherStream.CanSeek)
             {
@@ -74,8 +169,8 @@ namespace NuGet
                 }
             }
 
-            byte[] buffer = new byte[4*1024];
-            byte[] otherBuffer = new byte[4*1024];
+            byte[] buffer = new byte[4 * 1024];
+            byte[] otherBuffer = new byte[4 * 1024];
 
             int bytesRead = 0;
             do
