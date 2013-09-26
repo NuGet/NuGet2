@@ -367,6 +367,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NuGet Local Cache.
+        /// </summary>
+        public static string NuGetLocalCacheName {
+            get {
+                return ResourceManager.GetString("NuGetLocalCacheName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to nuget.org.
         /// </summary>
         public static string NuGetOfficialSourceName {
@@ -374,7 +383,7 @@ namespace NuGet.VisualStudio.Resources {
                 return ResourceManager.GetString("NuGetOfficialSourceName", resourceCulture);
             }
         }
-        
+             
         /// <summary>
         ///   Looks up a localized string similar to Operation failed..
         /// </summary>
