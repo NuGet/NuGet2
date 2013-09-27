@@ -1120,9 +1120,46 @@ namespace NuGet.Test
 
             // Act
             var result = settings.GetValues("SectionName");
-
+            
             // Assert
             AssertEqualCollections(result, new[] { "key3", "value3", "key4", "value4" });
+        }
+
+        [Fact]
+        public void GetSettingValuesMultipleConfFilesClear()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"C:\mockfilesystem\dir1\dir2");
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <clear /> <!-- i.e. ignore values from prior conf files -->
+    <add key=""key3"" value=""value3"" />
+    <add key=""key4"" value=""value4"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile("NuGet.Config", config);
+            config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+    <add key=""key2"" value=""value2"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
+
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
+
+            // Act
+            var result = settings.GetSettingValues("SectionName", isPath: false);
+
+            // Assert
+            Assert.Equal<SettingValue>(
+                new [] {
+                    new SettingValue("key3", "value3", isMachineWide: false),
+                    new SettingValue("key4", "value4", isMachineWide: false)
+                },
+                result);
         }
 
         [Fact]
@@ -1211,7 +1248,7 @@ namespace NuGet.Test
             // Assert
             Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
             Assert.Equal(null, settings.GetValue("SectionName", "key1"));
-        }
+        }        
 
         [Fact]
         public void GetValueReturnsPathRelativeToConfigWhenPathIsNotRooted()
