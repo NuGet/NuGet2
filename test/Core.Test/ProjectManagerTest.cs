@@ -866,7 +866,7 @@ SDAFLKDSAJFL;KJDSAL;KFJL;DSAKJFL;KDSA
         }
 
         [Fact]
-        public void RemovingPackageWithModifiedContentFileWithinInvalidIgnoreMarkersIgnoreFile()
+        public void RemovingPackageWithModifiedContentFileWithinBeginMarkersRemoveFile()
         {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -893,7 +893,7 @@ fdsalk;fj;lkdsajfl;kdsa");
 
             // Assert
             Assert.False(projectManager.LocalRepository.Exists(packageA));
-            Assert.True(projectSystem.FileExists("a.file"));
+            Assert.False(projectSystem.FileExists("a.file"));
         }
 
         [Fact]
