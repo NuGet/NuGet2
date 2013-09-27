@@ -66,9 +66,7 @@ namespace NuGet.Commands
 
             // If the first argument is a packages.xxx.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
-            if (configFilePath != null &&
-                configFileName.StartsWith("packages.", StringComparison.OrdinalIgnoreCase) &&
-                configFileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase))
+            if (PackageReferenceFile.IsValidConfigFileName(configFileName))
             {
                 Prerelease = true;
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.

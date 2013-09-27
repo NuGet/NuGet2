@@ -63,8 +63,7 @@ namespace NuGet.Commands
 
             string inputFileName = Path.GetFileName(inputFile);
             // update with packages.config as parameter
-            if (inputFileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase) &&
-                inputFileName.StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
+            if (PackageReferenceFile.IsValidConfigFileName(inputFileName))
             {
                 UpdatePackages(inputFile);
                 return;
@@ -98,12 +97,13 @@ namespace NuGet.Commands
             Console.WriteLine(LocalizedResourceManager.GetString("ScanningForProjects"));
 
             // Search recursively for all packages.xxx.config files
-            var packagesConfigFiles = Directory.GetFiles(
+            string[] packagesConfigFiles = Directory.GetFiles(
                 solutionDir, "*.config", SearchOption.AllDirectories);
 
             var projects = packagesConfigFiles.Where(s => Path.GetFileName(s).StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
                                               .Select(GetProject)
                                               .Where(p => p != null)
+                                              .Distinct()
                                               .ToList();
 
             if (projects.Count == 0)
@@ -272,14 +272,14 @@ namespace NuGet.Commands
         {
             // Try to locate the project file associated with this packages.config file
             var directory = Path.GetDirectoryName(packageReferenceFilePath);
-            var projectFiles = ProjectHelper.GetProjectFiles(directory).ToList();
+            var projectFiles = ProjectHelper.GetProjectFiles(directory).Take(2).ToArray();
          
-            if (projectFiles.Count == 0)
+            if (projectFiles.Length == 0)
             {
                 throw new CommandLineException(LocalizedResourceManager.GetString("UnableToLocateProjectFile"), packageReferenceFilePath);
             }
 
-            if (projectFiles.Count > 1)
+            if (projectFiles.Length > 1)
             {
                 throw new CommandLineException(LocalizedResourceManager.GetString("MultipleProjectFilesFound"), packageReferenceFilePath);
             }

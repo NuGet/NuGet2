@@ -54,7 +54,7 @@ namespace NuGet
                 {
                     throw new InvalidDataException(
                         String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("InstallCommandInvalidPackageReference"), 
-                        configFile.FullConfigFilePath));
+                        configFile.FullPath));
                 }
                 if (requireVersion && (package.Version == null))
                 {
