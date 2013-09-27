@@ -69,7 +69,7 @@ namespace NuGet
 
         /// <summary>
         /// Compare the content of the two streams of data, ingoring the content within the
-        /// BEGIN NUGET IGNORE and END NUGET IGNORE markers.
+        /// NUGET: BEGIN LICENSE TEXT and NUGET: END LICENSE TEXCT markers.
         /// </summary>
         /// <param name="stream">First stream</param>
         /// <param name="otherStream">Second stream which MUST be a seekable stream.</param>
@@ -106,55 +106,31 @@ namespace NuGet
 
         /// <summary>
         /// Read the specified stream and return all lines, but ignoring those within the 
-        /// BEGIN NUGET IGNORE and END NUGET IGNORE markers.
+        /// NUGET: BEGIN LICENSE TEXT and NUGET: END LICENSE TEXT markers, case-insenstively.
         /// </summary>
         private static IEnumerable<string> ReadStreamLines(Stream stream)
         {
             using (var reader = new StreamReader(stream))
             {
-                var q = new Queue<string>();
-
                 bool hasSeenBeginLine = false;
 
                 while (reader.Peek() != -1)
                 {
-                    string originalLine = reader.ReadLine();
+                    string line = reader.ReadLine();
 
-                    string line = originalLine.Trim();
                     if (line.IndexOf(Constants.EndIgnoreMarker, StringComparison.OrdinalIgnoreCase) > -1)
                     {
-                        if (hasSeenBeginLine)
-                        {
-                            // ignore all lines in between BEGIN and END marker lines
-                            q.Clear();
-                            hasSeenBeginLine = false;
-                        }
-                        else
-                        {
-                            // avoid the case where END LICENSE TEXT appears before BEGIN LICENCSE TEXT
-                            yield return originalLine;
-                        }
+                        hasSeenBeginLine = false;
                     }
                     else if (line.IndexOf(Constants.BeginIgnoreMarker, StringComparison.OrdinalIgnoreCase) > -1)
                     {
                         hasSeenBeginLine = true;
-                        q.Enqueue(originalLine);
                     }
-                    else if (hasSeenBeginLine)
+                    else if (!hasSeenBeginLine)
                     {
-                        q.Enqueue(originalLine);
+                        // the current line is not within the marker lines.
+                        yield return line;
                     }
-                    else
-                    {
-                        // the current line is not within the IGNORE markers.
-                        yield return originalLine;
-                    }
-                }
-
-                // if q contains elements, 
-                while (q.Count > 0)
-                {
-                    yield return q.Dequeue();
                 }
             }
         }

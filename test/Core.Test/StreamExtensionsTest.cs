@@ -229,7 +229,7 @@ DSALKJFLK;DSAJFDSA
             bool equal = StreamExtensions.ContentEquals(first.AsStream(), second.AsStream());
 
             // Assert
-            Assert.False(equal);
+            Assert.True(equal);
         }
 
         [Fact]
