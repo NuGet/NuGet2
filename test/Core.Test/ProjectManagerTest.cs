@@ -3611,10 +3611,12 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new Mock<IPackageReferenceRepository>();
             localRepository.Setup(p => p.AddPackage("A", 
                                                     new SemanticVersion("1.0"),
+                                                    false,
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
 
             localRepository.Setup(p => p.AddPackage("B",
                                                     new SemanticVersion("2.0"),
+                                                    false,
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
 
             var projectManager = new ProjectManager(
