@@ -550,6 +550,10 @@ namespace NuGet.VisualStudio
             if (document != null)
             {
                 var buffer = document as IVsTextBuffer;
+
+                var t1 = document as IVsTextLines;
+                var t2 = document as IVsTextBufferProvider;
+
                 if (buffer != null)
                 {
                     // update the document by modifying the text buffer
