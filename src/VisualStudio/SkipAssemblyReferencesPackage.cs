@@ -92,6 +92,11 @@ namespace NuGet.VisualStudio
             get { return _basePackage.RequireLicenseAcceptance; }
         }
 
+        public bool DevelopmentDependency
+        {
+            get { return _basePackage.DevelopmentDependency; }
+        }
+
         public string Description
         {
             get { return _basePackage.Description; }

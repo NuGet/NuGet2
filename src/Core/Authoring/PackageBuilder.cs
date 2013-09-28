@@ -113,6 +113,12 @@ namespace NuGet
             set;
         }
 
+        public bool DevelopmentDependency
+        {
+            get;
+            set;
+        }
+
         public string Description
         {
             get;
@@ -381,6 +387,7 @@ namespace NuGet
             LicenseUrl = metadata.LicenseUrl;
             ProjectUrl = metadata.ProjectUrl;
             RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
+            DevelopmentDependency = metadata.DevelopmentDependency;
             Description = metadata.Description;
             Summary = metadata.Summary;
             ReleaseNotes = metadata.ReleaseNotes;

@@ -37,6 +37,7 @@ namespace NuGet.Server.DataServices
                 ProjectUrl = package.ProjectUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             RequireLicenseAcceptance = package.RequireLicenseAcceptance;
+            DevelopmentDependency = package.DevelopmentDependency;
             Description = package.Description;
             Summary = package.Summary;
             ReleaseNotes = package.ReleaseNotes;
@@ -127,6 +128,12 @@ namespace NuGet.Server.DataServices
         }
 
         public bool RequireLicenseAcceptance
+        {
+            get;
+            set;
+        }
+
+        public bool DevelopmentDependency
         {
             get;
             set;

@@ -42,6 +42,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Description</description>
   </metadata>
 </package>", ms.ReadToEnd());
@@ -74,6 +75,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Description</description>
     <releaseNotes>Release Notes</releaseNotes>
   </metadata>
@@ -107,6 +109,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName=""System.Web"" targetFramework="""" />
@@ -142,6 +145,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <references>
       <reference file=""foo.dll"" />
@@ -182,6 +186,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <dependencies>
       <dependency id=""B"" />
@@ -223,6 +228,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <dependencies>
       <group targetFramework=""Silverlight4.0"">
@@ -263,6 +269,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -299,6 +306,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -335,6 +343,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -371,6 +380,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -410,6 +420,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -450,6 +461,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -487,6 +499,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -527,6 +540,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -568,6 +582,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -608,6 +623,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <references>
       <group targetFramework="".NET3.0"">
@@ -653,6 +669,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <references>
       <reference file=""one.dll"" />
@@ -693,6 +710,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -736,6 +754,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>John</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <copyright>Copyright 2012</copyright>
@@ -792,6 +811,7 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <dependencies>
