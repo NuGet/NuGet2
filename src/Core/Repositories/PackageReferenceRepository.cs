@@ -33,7 +33,7 @@ namespace NuGet
             _packageReferenceFile = new PackageReferenceFile(
                 fileSystem, Constants.PackageReferenceFile, projectName);
 
-            _fullPath = _packageReferenceFile.FullConfigFilePath;
+            _fullPath = _packageReferenceFile.FullPath;
             SourceRepository = sourceRepository;
         }
 

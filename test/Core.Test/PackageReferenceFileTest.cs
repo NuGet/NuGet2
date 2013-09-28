@@ -24,7 +24,7 @@ namespace NuGet.Test
                 fileSystem, "packages.config", "project with space");
 
             // Assert
-            Assert.Equal("x:\\packages.project_with_space.config", packageReferenceFile.FullConfigFilePath);
+            Assert.Equal("x:\\packages.project_with_space.config", packageReferenceFile.FullPath);
         }
 
         [Fact]

@@ -30,6 +30,13 @@ namespace NuGet
         {
         }
 
+        /// <summary>
+        /// Create a new instance of PackageReferenceFile, taking into account the project name.
+        /// </summary>
+        /// <remarks>
+        /// If projectName is not empty and the file packages.&lt;projectName&gt;.config 
+        /// exists, use it. Otherwise, use the value specified by 'path' for the config file name.
+        /// </remarks>
         public PackageReferenceFile(IFileSystem fileSystem, string path, string projectName)
         {
             if (fileSystem == null)
@@ -52,11 +59,18 @@ namespace NuGet
                     _path = pathWithProjectName;
                 }
             }
-            
+
             if (_path == null)
             {
                 _path = path;
             }
+        }
+
+        public static bool IsValidConfigFileName(string fileName)
+        {
+            return fileName != null &&
+                fileName.StartsWith("packages.", StringComparison.OrdinalIgnoreCase) &&
+                fileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
@@ -199,7 +213,7 @@ namespace NuGet
             }
         }
 
-        public string FullConfigFilePath
+        public string FullPath
         {
             get
             {
@@ -351,7 +365,7 @@ namespace NuGet
             catch (XmlException e)
             {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, _fileSystem.GetFullPath(_path)), e);
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, FullPath), e);
             }
         }
 

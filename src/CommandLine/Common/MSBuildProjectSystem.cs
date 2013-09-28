@@ -8,7 +8,7 @@ using Microsoft.Build.Evaluation;
 
 namespace NuGet.Common
 {
-    public class MSBuildProjectSystem : PhysicalFileSystem, IMSBuildProjectSystem
+    public class MSBuildProjectSystem : PhysicalFileSystem, IMSBuildProjectSystem, IEquatable<MSBuildProjectSystem>
     {
         public MSBuildProjectSystem(string projectFile)
             : base(Path.GetDirectoryName(projectFile))
@@ -171,6 +171,16 @@ namespace NuGet.Common
                     Project.Save();
                 }
             }
+        }
+
+        public bool Equals(MSBuildProjectSystem other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Project.FullPath.Equals(other.Project.FullPath, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
