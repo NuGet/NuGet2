@@ -14,7 +14,7 @@ namespace NuGet.VisualStudio
     {
         private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
-        private static readonly string NuGetLocalCacheName = VsResources.NuGetLocalCacheName;
+        private static readonly string NuGetLocalCacheName = "NuGet Local Cache";
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
         private static readonly PackageSource NuGetLocalCacheSource = new PackageSource(NuGet.MachineCache.Default.Source, NuGetLocalCacheName);
 
