@@ -125,7 +125,8 @@ namespace NuGet.VisualStudio
         public static string GetNuGetSolutionFolder(Solution solution)
         {
             Debug.Assert(solution != null);
-            var solutionDirectory = Path.GetDirectoryName(solution.FullName);
+            string solutionFilePath = (string)solution.Properties.Item("Path").Value;
+            string solutionDirectory = Path.GetDirectoryName(solutionFilePath);
             return Path.Combine(solutionDirectory, NuGetSolutionSettingsFolder);
         }
 
