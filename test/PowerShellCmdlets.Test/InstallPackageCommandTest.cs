@@ -255,7 +255,8 @@ namespace NuGet.PowerShell.Commands.Test
                 repositorySettings.Object, 
                 new Mock<VsPackageInstallerEvents>().Object,
                 new Mock<IPackageRepository>().Object,
-                /* multiFrameworkTargeting */ null);
+                /* multiFrameworkTargeting */ null,
+                /* machineWideSettings */ null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object);
