@@ -302,7 +302,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision()
+        public void FindDependencyPicksLowestMajorAndMinorVersion()
         {
             // Arrange
             var repository = new MockPackageRepository() {
@@ -337,56 +337,15 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal("B", package1.Id);
-            Assert.Equal(new SemanticVersion("1.0.9"), package1.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package1.Version);
             Assert.Equal("B", package2.Id);
-            Assert.Equal(new SemanticVersion("1.0.9"), package2.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package2.Version);
             Assert.Equal("B", package3.Id);
-            Assert.Equal(new SemanticVersion("1.0.9"), package3.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package3.Version);
             Assert.Equal("B", package4.Id);
             Assert.Equal(new SemanticVersion("1.0"), package4.Version);
             Assert.Equal("B", package5.Id);
-            Assert.Equal(new SemanticVersion("1.0.1"), package5.Version);
-        }
-
-        [Fact]
-        public void ResolveSafeVersionReturnsNullIfPackagesNull()
-        {
-            // Act
-            var package = PackageRepositoryExtensions.ResolveSafeVersion(null);
-
-            // Assert
-            Assert.Null(package);
-        }
-
-        [Fact]
-        public void ResolveSafeVersionReturnsNullIfEmptyPackages()
-        {
-            // Act
-            var package = PackageRepositoryExtensions.ResolveSafeVersion(Enumerable.Empty<IPackage>());
-
-            // Assert
-            Assert.Null(package);
-        }
-
-        [Fact]
-        public void ResolveSafeVersionReturnsHighestBuildAndRevisionWithLowestMajorAndMinor()
-        {
-            var packages = new[] { 
-                PackageUtility.CreatePackage("A", "0.9"),
-                PackageUtility.CreatePackage("A", "0.9.3"),
-                PackageUtility.CreatePackage("A", "1.0"),
-                PackageUtility.CreatePackage("A", "1.0.2"),
-                PackageUtility.CreatePackage("A", "1.0.12"),
-                PackageUtility.CreatePackage("A", "1.0.13"),
-            };
-
-            // Act
-            var package = PackageRepositoryExtensions.ResolveSafeVersion(packages);
-
-            // Assert
-            Assert.NotNull(package);
-            Assert.Equal("A", package.Id);
-            Assert.Equal(new SemanticVersion("0.9.3"), package.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package5.Version);
         }
 
         private static IPackageRepository GetEmptyRepository()

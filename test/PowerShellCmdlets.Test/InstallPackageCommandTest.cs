@@ -548,9 +548,10 @@ namespace NuGet.PowerShell.Commands.Test
         {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("0.5") }) });
-            var packageB1 = PackageUtility.CreatePackage("B", "1.0.0", listed: true);
-            var packageB2 = PackageUtility.CreatePackage("B", "1.0.2-alpha", listed: true);
-            var packageB3 = PackageUtility.CreatePackage("B", "1.0.2", listed: false);
+            var packageB1 = PackageUtility.CreatePackage("B", "1.0.0", listed: false);
+            var packageB2 = PackageUtility.CreatePackage("B", "1.0.1", listed: true);
+            var packageB3 = PackageUtility.CreatePackage("B", "1.0.2-alpha", listed: true);
+            var packageB4 = PackageUtility.CreatePackage("B", "1.0.2", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>();
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
@@ -571,6 +572,7 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Verify();
             sharedRepository.Verify(s => s.AddPackage(packageB1), Times.Never());
             sharedRepository.Verify(s => s.AddPackage(packageB3), Times.Never());
+            sharedRepository.Verify(s => s.AddPackage(packageB4), Times.Never());
         }
 
         [Fact]

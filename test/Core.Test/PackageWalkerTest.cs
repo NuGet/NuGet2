@@ -1089,7 +1089,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallWalkerResolvesLowestMajorAndMinorVersionButHighestBuildAndRevisionForDependencies()
+        public void InstallWalkerResolvesLowestMajorAndMinorVersionForDependencies()
         {
             // Arrange
 
@@ -1126,9 +1126,9 @@ namespace NuGet.Test
             Assert.Equal("D", packages[0].Package.Id);
             Assert.Equal(new SemanticVersion("2.0"), packages[0].Package.Version);
             Assert.Equal("C", packages[1].Package.Id);
-            Assert.Equal(new SemanticVersion("1.1.3"), packages[1].Package.Version);
+            Assert.Equal(new SemanticVersion("1.1.1"), packages[1].Package.Version);
             Assert.Equal("B", packages[2].Package.Id);
-            Assert.Equal(new SemanticVersion("1.0.9"), packages[2].Package.Version);
+            Assert.Equal(new SemanticVersion("1.0"), packages[2].Package.Version);
             Assert.Equal("A", packages[3].Package.Id);
             Assert.Equal(new SemanticVersion("1.0"), packages[3].Package.Version);
         }
