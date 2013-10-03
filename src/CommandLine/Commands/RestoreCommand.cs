@@ -230,20 +230,6 @@ namespace NuGet.Commands
             return false;
         }
 
-        protected virtual IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem)
-        {
-            var repository = CreateRepository();
-            var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths: true);
-
-            IPackageRepository localRepository = new LocalPackageRepository(pathResolver, packagesFolderFileSystem);
-            var packageManager = new PackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
-            {
-                Logger = Console
-            };
-
-            return packageManager;
-        }
-
         private void EnsurePackageRestoreConsent(bool packageRestoreConsent)
         {
             if (RequireConsent && !packageRestoreConsent)
@@ -263,7 +249,7 @@ namespace NuGet.Commands
             bool packageRestoreConsent,
             ConcurrentQueue<IPackage> satellitePackages)
         {
-            var packageManager = CreatePackageManager(packagesFolderFileSystem);
+            var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
             if (IsPackageInstalled(packageManager.LocalRepository, packagesFolderFileSystem, packageId, version))
             {
                 return false;
@@ -351,7 +337,7 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(packagesFolderFileSystem);
+            var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
             foreach (var package in satellitePackages)
             {
                 packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: false);
@@ -427,6 +413,7 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            CalculateEffectivePackageSaveMode();
             DetermineRestoreMode();
             if (_restoringForSolution && !String.IsNullOrEmpty(SolutionDirectory))
             {

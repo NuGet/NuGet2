@@ -18,8 +18,7 @@ namespace NuGet.Commands
     public class InstallCommand : DownloadCommandBase
     {
         private static readonly object _satelliteLock = new object();
-        private PackageFileTypes _saveOnExpand;
-
+        
         [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -36,10 +35,7 @@ namespace NuGet.Commands
         public bool RequireConsent { get; set; }
 
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
-        public string SolutionDirectory { get; set; }
-
-        [Option(typeof(NuGetCommand), "InstallCommandSaveOnExpand")]
-        public string SaveOnExpand { get; set; }
+        public string SolutionDirectory { get; set; }        
 
         private bool AllowMultipleVersions
         {
@@ -60,43 +56,9 @@ namespace NuGet.Commands
             DisableParallelProcessing = EnvironmentUtility.IsMonoRuntime;
         }
 
-        private void CalculateSaveOnExpand()
-        {
-            string saveOnExpandValue = SaveOnExpand;
-            if (string.IsNullOrEmpty(saveOnExpandValue))
-            {
-                saveOnExpandValue = Settings.GetConfigValue("SaveOnExpand");
-            }
-
-            _saveOnExpand = PackageFileTypes.None;
-            if (!string.IsNullOrEmpty(saveOnExpandValue))
-            {
-                foreach (var v in saveOnExpandValue.Split(';'))
-                {
-                    if (v.Equals(PackageFileTypes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        _saveOnExpand |= PackageFileTypes.Nupkg;
-                    }
-                    else if (v.Equals(PackageFileTypes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        _saveOnExpand |= PackageFileTypes.Nuspec;
-                    }
-                    else
-                    {
-                        Console.WriteWarning("Invalid SaveOnExpand value {0}.", _saveOnExpand);
-                    }
-                }
-
-                if (_saveOnExpand == PackageFileTypes.None)
-                {
-                    Console.WriteWarning("Invalid SaveOnExpand value {0}. The option is ignored.", _saveOnExpand);
-                }
-            }
-        }
-
         public override void ExecuteCommand()
         {
-            CalculateSaveOnExpand();
+            CalculateEffectivePackageSaveMode();
             string installPath = ResolveInstallPath();
             IFileSystem fileSystem = CreateFileSystem(installPath);
 
@@ -235,7 +197,7 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
             foreach (var package in satellitePackages)
             {
                 packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: Prerelease);
@@ -250,7 +212,7 @@ namespace NuGet.Commands
             bool packageRestoreConsent,
             List<IPackage> satellitePackages)
         {
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
             if (IsPackageInstalled(packageManager.LocalRepository, fileSystem, packageId, version))
             {
                 return false;
@@ -286,7 +248,7 @@ namespace NuGet.Commands
             string packageId,
             SemanticVersion version)
         {
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
 
             if (!AllowMultipleVersions)
             {
@@ -318,24 +280,6 @@ namespace NuGet.Commands
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
                 return true;
             }
-        }
-
-        protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem)
-        {
-            var repository = CreateRepository();
-            var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
-
-            IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
-            if (_saveOnExpand != PackageFileTypes.None)
-            {
-                localRepository.FilesToSave = _saveOnExpand;
-            }
-            var packageManager = new PackageManager(repository, pathResolver, fileSystem, localRepository)
-                                 {
-                                     Logger = Console
-                                 };
-
-            return packageManager;
         }
 
         protected internal virtual IFileSystem CreateFileSystem(string path)

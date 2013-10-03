@@ -200,38 +200,38 @@ namespace NuGet.VisualStudio
 					configSettingsFileSystem, 
 					configFileName: null, 
 					machineWideSettings: _machineWideSettings);
-                repository.FilesToSave = CalculateSaveOnExpand(settings);
+                repository.PackageSaveMode = CalculatePackageSaveMode(settings);
                 _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }
 
             return _repositoryInfo;
         }
 
-        private PackageFileTypes CalculateSaveOnExpand(ISettings settings)
+        private PackageSaveModes CalculatePackageSaveMode(ISettings settings)
         {
-            PackageFileTypes retValue = PackageFileTypes.None;
+            PackageSaveModes retValue = PackageSaveModes.None;
             if (settings != null)
             {
-                string saveOnExpandValue = settings.GetConfigValue("SaveOnExpand");
-                if (!string.IsNullOrEmpty(saveOnExpandValue))
+                string packageSaveModeValue = settings.GetConfigValue("PackageSaveMode");
+                if (!string.IsNullOrEmpty(packageSaveModeValue))
                 {
-                    foreach (var v in saveOnExpandValue.Split(';'))
+                    foreach (var v in packageSaveModeValue.Split(';'))
                     {
-                        if (v.Equals(PackageFileTypes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                        if (v.Equals(PackageSaveModes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
                         {
-                            retValue |= PackageFileTypes.Nupkg;
+                            retValue |= PackageSaveModes.Nupkg;
                         }
-                        else if (v.Equals(PackageFileTypes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                        else if (v.Equals(PackageSaveModes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
                         {
-                            retValue |= PackageFileTypes.Nuspec;
+                            retValue |= PackageSaveModes.Nuspec;
                         }
                     }
                 }
             }
 
-            if (retValue == PackageFileTypes.None)
+            if (retValue == PackageSaveModes.None)
             {
-                retValue = PackageFileTypes.Nupkg;
+                retValue = PackageSaveModes.Nupkg;
             }
 
             return retValue;

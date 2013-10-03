@@ -5,22 +5,22 @@ namespace NuGet
 {
     public abstract class PackageRepositoryBase : IPackageRepository
     {
-        private PackageFileTypes _packageSave;
+        private PackageSaveModes _packageSave;
 
         protected PackageRepositoryBase()
         {
-            _packageSave = PackageFileTypes.Nupkg;
+            _packageSave = PackageSaveModes.Nupkg;
         }
 
         public abstract string Source { get; }
 
 
-        public PackageFileTypes FilesToSave 
+        public PackageSaveModes PackageSaveMode 
         {
             get { return _packageSave; }
             set
             {
-                if (value == PackageFileTypes.None)
+                if (value == PackageSaveModes.None)
                 {
                     throw new ArgumentException("PackageSave cannot be set to None");
                 }

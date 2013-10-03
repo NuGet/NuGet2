@@ -37,8 +37,8 @@ namespace NuGet.ServerExtensions
             get { return _source.Source; }
         }
 
-        // SaveOnExpand property does not apply to this class
-        public PackageFileTypes FilesToSave
+        // PackageSaveMode property does not apply to this class
+        public PackageSaveModes PackageSaveMode
         {
             set { throw new NotSupportedException(); }
             get { throw new NotSupportedException(); }

@@ -13,7 +13,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     public class NuGetInstallCommandTest
     {
         [Fact]
-        public void InstallCommand_SaveOnExpandNuspec()
+        public void InstallCommand_PackageSaveModeNuspec()
         {
             var tempPath = Path.GetTempPath();
             var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -33,7 +33,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     "install", "testPackage1", 
                     "-OutputDirectory", outputDirectory,
                     "-Source", source, 
-                    "-SaveOnExpand", "nuspec" };
+                    "-PackageSaveMode", "nuspec" };
                 int r = Program.Main(args);
 
                 // Assert
@@ -56,7 +56,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
-        public void InstallCommand_SaveOnExpandNupkg()
+        public void InstallCommand_PackageSaveModeNupkg()
         {
             var tempPath = Path.GetTempPath();
             var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -76,7 +76,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     "install", "testPackage1", 
                     "-OutputDirectory", outputDirectory,
                     "-Source", source, 
-                    "-SaveOnExpand", "nupkg" };
+                    "-PackageSaveMode", "nupkg" };
                 int r = Program.Main(args);
 
                 // Assert
@@ -99,7 +99,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
-        public void InstallCommand_SaveOnExpandNuspecNupkg()
+        public void InstallCommand_PackageSaveModeNuspecNupkg()
         {
             var tempPath = Path.GetTempPath();
             var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -119,7 +119,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     "install", "testPackage1", 
                     "-OutputDirectory", outputDirectory,
                     "-Source", source, 
-                    "-SaveOnExpand", "nupkg;nuspec" };
+                    "-PackageSaveMode", "nupkg;nuspec" };
                 int r = Program.Main(args);
 
                 // Assert
@@ -141,11 +141,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             }
         }
 
-        // Test that after a package is installed with -SaveOnExpand nuspec, nuget.exe
+        // Test that after a package is installed with -PackageSaveMode nuspec, nuget.exe
         // can detect that the package is already installed when trying to install the same
         // package.
         [Fact]
-        public void InstallCommand_SaveOnExpandNuspecReinstall()
+        public void InstallCommand_PackageSaveModeNuspecReinstall()
         {
             var tempPath = Path.GetTempPath();
             var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -164,7 +164,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     "install", "testPackage1", 
                     "-OutputDirectory", outputDirectory,
                     "-Source", source, 
-                    "-SaveOnExpand", "nuspec" };
+                    "-PackageSaveMode", "nuspec" };
                 int r = Program.Main(args);
                 Assert.Equal(0, r);
 
@@ -189,9 +189,9 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             }
         }
 
-        // Test that SaveOnExpand specified in nuget.config file is used.
+        // Test that PackageSaveMode specified in nuget.config file is used.
         [Fact]
-        public void InstallCommand_SaveOnExpandInConfigFile()
+        public void InstallCommand_PackageSaveModeInConfigFile()
         {
             var tempPath = Path.GetTempPath();
             var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -208,7 +208,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
                 var configFile = Path.Combine(source, "nuget.config");
                 string[] args = new string[] { 
-                    "config", "-Set", "SaveOnExpand=nuspec",
+                    "config", "-Set", "PackageSaveMode=nuspec",
                     "-ConfigFile", configFile };
                 int r = Program.Main(args);
 

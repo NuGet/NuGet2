@@ -5,7 +5,7 @@ using System.Linq;
 namespace NuGet
 {
     [Flags]
-    public enum PackageFileTypes
+    public enum PackageSaveModes
     {
         None = 0, 
         Nuspec = 1,
@@ -21,12 +21,12 @@ namespace NuGet
     public interface IPackageRepository
     {
         string Source { get; }        
-        PackageFileTypes FilesToSave { get; set; }
+        PackageSaveModes PackageSaveMode { get; set; }
         bool SupportsPrereleasePackages { get; }
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call might be expensive")]
         IQueryable<IPackage> GetPackages();
 
-        // Which files (nuspec/nupkg) are saved is controlled by property FilesToSave.
+        // Which files (nuspec/nupkg) are saved is controlled by property PackageSaveMode.
         void AddPackage(IPackage package);
         void RemovePackage(IPackage package);
     }

@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public PackageFileTypes FilesToSave
+        public PackageSaveModes PackageSaveMode
         {
             set { throw new NotSupportedException(); }
             get { throw new NotSupportedException(); }
