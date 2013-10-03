@@ -597,6 +597,8 @@ function Test-SimpleBindingRedirectsClassLibraryReference {
     # Act
     $d | Install-Package E -Source $context.RepositoryPath
     $e | Install-Package E -Source $context.RepositoryPath
+    $d | Update-Package F -Safe -Source $context.RepositoryPath
+    $e | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
     Assert-Package $d E
@@ -625,6 +627,7 @@ function Test-SimpleBindingRedirectsIndirectReference {
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
     Assert-Null (Get-ProjectItem $b app.config)
@@ -645,6 +648,7 @@ function Test-SimpleBindingRedirectsNonWeb {
 
     # Act
     $projects | Install-Package E -Source $context.RepositoryPath
+    $projects | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
     $projects | %{ Assert-Package $_ E; 
@@ -667,6 +671,7 @@ function Test-BindingRedirectComplex {
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     Assert-Package $c E; 
 
@@ -684,6 +689,7 @@ function Test-SimpleBindingRedirectsWebsite {
 
     # Act
     $a | Install-Package E -Source $context.RepositoryPath
+    $a | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
     Assert-Package $a E; 
@@ -705,6 +711,7 @@ function Test-BindingRedirectInstallLargeProject {
     Add-ProjectReference $p $projects[0]
 
     $projects[$projects.Length - 1] | Install-Package E -Source $context.RepositoryPath
+    $projects[$projects.Length - 1] | Update-Package F -Safe -Source $context.RepositoryPath
     Assert-BindingRedirect $p web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
@@ -724,6 +731,7 @@ function Test-BindingRedirectDuplicateReferences {
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     Assert-Package $c E 
 
@@ -748,6 +756,7 @@ function Test-BindingRedirectClassLibraryWithDifferentDependents {
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     Assert-Package $c E
 
@@ -777,6 +786,7 @@ function Test-BindingRedirectProjectsThatReferenceSameAssemblyFromDifferentLocat
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     Assert-Package $c E
 
@@ -825,6 +835,7 @@ function Test-BindingRedirectProjectsThatReferenceDifferentVersionsOfSameAssembl
 
     # Act
     $c | Install-Package E -Source $context.RepositoryPath
+    $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     Assert-Package $c E
 
@@ -1391,6 +1402,7 @@ function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary
       
     # Act
     $a | Install-Package E -Source $context.RepositoryPath
+    $a | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
     Assert-Package $a E

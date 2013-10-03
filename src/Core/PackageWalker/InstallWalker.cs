@@ -243,7 +243,7 @@ namespace NuGet
                                OldPackage = oldPackage,
                                NewPackage = g.Where(p => p.Version > oldPackage.Version)
                                              .OrderBy(p => p.Version)
-                                             .ResolveSafeVersion()
+                                             .FirstOrDefault()
                            };
 
             foreach (var p in packages)
