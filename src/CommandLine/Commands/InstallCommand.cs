@@ -198,7 +198,7 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
             foreach (var package in satellitePackages)
             {
                 packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: Prerelease);
@@ -213,7 +213,7 @@ namespace NuGet.Commands
             bool packageRestoreConsent,
             List<IPackage> satellitePackages)
         {
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
             if (IsPackageInstalled(packageManager.LocalRepository, fileSystem, packageId, version))
             {
                 return false;
@@ -249,7 +249,7 @@ namespace NuGet.Commands
             string packageId,
             SemanticVersion version)
         {
-            var packageManager = CreatePackageManager(fileSystem);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
 
             if (!AllowMultipleVersions)
             {
@@ -281,20 +281,6 @@ namespace NuGet.Commands
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
                 return true;
             }
-        }
-
-        protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem)
-        {
-            var repository = CreateRepository();
-            var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
-
-            IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
-            var packageManager = new PackageManager(repository, pathResolver, fileSystem, localRepository)
-                                 {
-                                     Logger = Console
-                                 };
-
-            return packageManager;
         }
 
         protected internal virtual IFileSystem CreateFileSystem(string path)
