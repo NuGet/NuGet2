@@ -1133,6 +1133,47 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), packages[3].Package.Version);
         }
 
+        [Fact]
+        public void InstallWalkerResolvesLowestMajorAndMinorVersionOfListedPackagesForDependencies()
+        {
+            // Arrange
+
+            // A 1.0 -> B 1.0
+            // B 1.0 -> C 1.1
+            // C 1.1 -> D 1.0
+
+            var A10 = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { PackageDependency.CreateDependency("B", "1.0") });
+
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
+                PackageUtility.CreatePackage("B", "1.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }, listed: false),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                A10,
+                PackageUtility.CreatePackage("D", "2.0"),
+                PackageUtility.CreatePackage("C", "1.1.3", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }),
+                PackageUtility.CreatePackage("C", "1.1.1", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }, listed: false),
+                PackageUtility.CreatePackage("C", "1.5.1", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }),
+                PackageUtility.CreatePackage("B", "1.0.9", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
+                PackageUtility.CreatePackage("B", "1.1", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") })
+            };
+
+
+            IPackageOperationResolver resolver = new InstallWalker(new MockPackageRepository(),
+                                                                   repository,
+                                                                   NullLogger.Instance,
+                                                                   ignoreDependencies: false,
+                                                                   allowPrereleaseVersions: false);
+            // Act
+            var packages = resolver.ResolveOperations(A10).ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            Assert.Equal("B", packages[0].Package.Id);
+            Assert.Equal(new SemanticVersion("1.0.1"), packages[0].Package.Version);
+            Assert.Equal("A", packages[1].Package.Id);
+            Assert.Equal(new SemanticVersion("1.0"), packages[1].Package.Version);
+        }
+
         private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation)
         {
             Assert.Equal(expectedAction, operation.Action);
