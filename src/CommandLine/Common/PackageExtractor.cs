@@ -41,12 +41,18 @@ namespace NuGet.Common
                     }
                     else
                     {
-                        mutex.WaitOne(TimeSpan.FromMinutes(2));
+                        // if mutex.WaitOne returns false, you don't own the mutex. 
+                        created = mutex.WaitOne(TimeSpan.FromMinutes(2));
                     }
                 }
                 finally
                 {
-                    mutex.ReleaseMutex();
+                    // If you don't own the mutex, you can't release it (exception thrown).
+                    // cf http://msdn.microsoft.com/en-us/library/system.threading.mutex.releasemutex.aspx
+                    if (created)
+                    {
+                        mutex.ReleaseMutex();
+                    }
                 }
             }
         }
