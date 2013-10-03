@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
+using System.Web.Configuration;
 using Ninject;
+using NuGet.Resources;
 using NuGet.Server.DataServices;
 
 namespace NuGet.Server.Infrastructure
@@ -35,9 +37,29 @@ namespace NuGet.Server.Infrastructure
                    select GetMetadataPackage(package);
         }
 
+        public bool AllowOverrideExistingPackageOnPush
+        {
+            get
+            {
+                var appSettings = WebConfigurationManager.AppSettings;
+                bool value;
+                if (!Boolean.TryParse(appSettings["allowOverrideExistingPackageOnPush"], out value))
+                {
+                    // If the setting is misconfigured, treat it as success (backwards compatibility).
+                    return true;
+                }
+                return value; 
+
+            }
+        }
+
         public override void AddPackage(IPackage package)
         {
             string fileName = PathResolver.GetPackageFileName(package);
+            if (FileSystem.FileExists(fileName) && !AllowOverrideExistingPackageOnPush)
+            {
+                throw new InvalidOperationException(String.Format(NuGetResources.Error_PackageAlreadyExists, package));
+            }
             using (Stream stream = package.GetStream())
             {
                 FileSystem.AddFile(fileName, stream);
@@ -64,9 +86,9 @@ namespace NuGet.Server.Infrastructure
         {
             IPackage package = base.OpenPackage(path);
 
-            _cacheLock.EnterWriteLock();            
+            _cacheLock.EnterWriteLock();
             try
-            {                
+            {
                 DateTime start = DateTime.Now;
                 while (true)
                 {
@@ -93,7 +115,7 @@ namespace NuGet.Server.Infrastructure
                     _derivedDataComputed.WaitOne(MaxWaitMs);
 
                     _cacheLock.EnterWriteLock();
-                }                                
+                }
             }
             finally
             {

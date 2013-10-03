@@ -36,8 +36,15 @@ namespace NuGet.Server
             // Make sure they can access this package
             if (Authenticate(context, apiKey, package.Id))
             {
-                _serverRepository.AddPackage(package);
-                WriteStatus(context, HttpStatusCode.Created, "");
+                try
+                {
+                    _serverRepository.AddPackage(package);
+                    WriteStatus(context, HttpStatusCode.Created, "");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    WriteStatus(context, HttpStatusCode.InternalServerError, ex.Message);
+                }
             }
         }
 
