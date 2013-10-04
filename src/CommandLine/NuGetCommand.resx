@@ -446,7 +446,7 @@ nuget update -Self</value>
     <value>The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.</value>
     <comment>Please don't localize "%AppData%\NuGet\NuGet.config".</comment>
   </data>
-  <data name="CommandDisableParallel" xml:space="preserve">
+  <data name="CommandDisableParallelProcessing" xml:space="preserve">
     <value>Disable parallel processing of packages for this command.</value>
   </data>
   <data name="PackageCommandMinClientVersion" xml:space="preserve">

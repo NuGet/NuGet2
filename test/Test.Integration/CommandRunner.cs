@@ -32,6 +32,11 @@ namespace NuGet.Test.Integration
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
+                result = standardOutput.ReadToEnd();
+                if (string.IsNullOrEmpty(result))
+                {
+                    result = errorOutput.ReadToEnd();
+                }
 
                 if (waitForExit)
                 {
@@ -41,13 +46,7 @@ namespace NuGet.Test.Integration
                 {
                     exitCode = p.ExitCode;
                 }
-            }
-
-            result = standardOutput.ReadToEnd();
-            if (string.IsNullOrEmpty(result))
-            {
-                result = errorOutput.ReadToEnd();
-            }
+            }           
 
             Console.WriteLine(result);
 

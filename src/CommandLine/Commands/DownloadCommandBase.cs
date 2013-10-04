@@ -47,5 +47,18 @@ namespace NuGet.Commands
                 return new PriorityPackageRepository(CacheRepository, repository);
             }
         }
+
+        protected virtual IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem, bool useSideBySidePaths)
+        {
+            var repository = CreateRepository();
+            var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths);
+            IPackageRepository localRepository = new LocalPackageRepository(pathResolver, packagesFolderFileSystem);
+            var packageManager = new PackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
+            {
+                Logger = Console
+            };
+
+            return packageManager;
+        }
     }
 }
