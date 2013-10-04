@@ -254,7 +254,7 @@ namespace NuGet.Commands
             bool packageRestoreConsent,
             ConcurrentQueue<IPackage> satellitePackages)
         {
-            var packageManager = CreatePackageManager(packagesFolderFileSystem, true);
+            var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
             if (IsPackageInstalled(packageManager.LocalRepository, packagesFolderFileSystem, packageId, version))
             {
                 return false;
@@ -342,7 +342,7 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(packagesFolderFileSystem, true);
+            var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
             foreach (var package in satellitePackages)
             {
                 packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: false);
