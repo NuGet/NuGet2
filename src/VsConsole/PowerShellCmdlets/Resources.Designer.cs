@@ -70,6 +70,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The source at {0} is unreachable. Falling back to NuGet Local Cache at {1}.
+        /// </summary>
+        internal static string Cmdlet_FallbackToCache {
+            get {
+                return ResourceManager.GetString("Cmdlet_FallbackToCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Skip this file and all subsequent files.
         /// </summary>
         internal static string Cmdlet_FileConflictNoAllHelp {
@@ -156,6 +165,15 @@ namespace NuGet.PowerShell.Commands {
         internal static string Cmdlet_InvalidPSDrive {
             get {
                 return ResourceManager.GetString("Cmdlet_InvalidPSDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source at {0} is unreachable. There is no NuGet Local Cache found.
+        /// </summary>
+        internal static string Cmdlet_LocalCacheFailure {
+            get {
+                return ResourceManager.GetString("Cmdlet_LocalCacheFailure", resourceCulture);
             }
         }
         

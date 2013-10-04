@@ -14,10 +14,8 @@ namespace NuGet.VisualStudio
     {
         private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
-        private static readonly string NuGetLocalCacheName = "NuGet Local Cache";
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
-        private static readonly PackageSource NuGetLocalCacheSource = new PackageSource(NuGet.MachineCache.Default.Source, NuGetLocalCacheName);
-
+        
         private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
                                                                                  VsResources.VisualStudioExpressForWindows8SourceName,
                                                                                  isEnabled: true,
@@ -45,7 +43,7 @@ namespace NuGet.VisualStudio
             ISettings settings,            
             IVsShellInfo vsShellInfo,
             ISolutionManager solutionManager) :
-            this(settings, new PackageSourceProvider(settings, new[] { NuGetDefaultSource, NuGetLocalCacheSource }, _feedsToMigrate), vsShellInfo, solutionManager)
+            this(settings, new PackageSourceProvider(settings, new[] { NuGetDefaultSource}, _feedsToMigrate), vsShellInfo, solutionManager)
         {
         }
 
@@ -123,7 +121,7 @@ namespace NuGet.VisualStudio
 
         internal static IEnumerable<PackageSource> DefaultSources
         {
-            get { return new[] { NuGetDefaultSource }; }
+            get { return new[] { NuGetDefaultSource}; }
         }
 
         internal static Dictionary<PackageSource, PackageSource> FeedsToMigrate
