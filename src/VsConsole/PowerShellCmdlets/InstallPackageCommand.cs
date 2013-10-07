@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Net.NetworkInformation;
@@ -62,10 +63,11 @@ namespace NuGet.PowerShell.Commands
         [Parameter]
         public FileConflictAction FileConflictAction { get; set; }
 
-        string fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
-        string localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
-        string cacheStatusMessage = String.Empty;
-        object currentSource = String.Empty;
+        private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
+        private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
+        private string _cacheStatusMessage = String.Empty;
+        // Type for _currentSource can be either string (actual path to the Source), or PackageSource.
+        private object _currentSource = String.Empty;
 
         protected override IVsPackageManager CreatePackageManager()
         {
@@ -85,12 +87,12 @@ namespace NuGet.PowerShell.Commands
             bool isAnySourceAvailable = false;
             if (!String.IsNullOrEmpty(Source))
             {
-                currentSource = Source;
+                _currentSource = Source;
                 isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, null, NetworkInterface.GetIsNetworkAvailable()); 
             }
             else
             {
-                currentSource = _packageSourceProvider.ActivePackageSource;
+                _currentSource = _packageSourceProvider.ActivePackageSource;
                 isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, _packageSourceProvider, NetworkInterface.GetIsNetworkAvailable());
             }
             
@@ -98,7 +100,7 @@ namespace NuGet.PowerShell.Commands
             if (!isAnySourceAvailable)
             {
                 Source = NuGet.MachineCache.Default.Source;
-                CacheStatusMessage(currentSource, Source);
+                CacheStatusMessage(_currentSource, Source);
             }                                                  
             /**** End of Fallback to Cache logic ***/
 
@@ -124,9 +126,9 @@ namespace NuGet.PowerShell.Commands
                 SubscribeToProgressEvents();
                 if (PackageManager != null)
                 {
-                    if (!String.IsNullOrEmpty(cacheStatusMessage))
+                    if (!String.IsNullOrEmpty(_cacheStatusMessage))
                     {
-                         this.Log(MessageLevel.Warning, String.Format(cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
+                         this.Log(MessageLevel.Warning, String.Format(_cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
                     }
                     PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
@@ -142,7 +144,7 @@ namespace NuGet.PowerShell.Commands
                     string cache = NuGet.MachineCache.Default.Source;
                     if (!String.IsNullOrEmpty(cache))
                     {
-                        this.Log(MessageLevel.Warning, String.Format(fallbackToLocalCacheMessge, currentSource, cache));
+                        this.Log(MessageLevel.Warning, String.Format(fallbackToLocalCacheMessge, _currentSource, cache));
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         if (packageManager != null)
@@ -153,7 +155,7 @@ namespace NuGet.PowerShell.Commands
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
             finally
@@ -196,11 +198,11 @@ namespace NuGet.PowerShell.Commands
         {
             if (!String.IsNullOrEmpty(cacheSource))
             {
-                cacheStatusMessage = String.Format(fallbackToLocalCacheMessge, currentSource, Source);
+                _cacheStatusMessage = String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, currentSource, Source);
             }
             else
             {
-                cacheStatusMessage = String.Format(localCacheFailureMessage, currentSource);
+                _cacheStatusMessage = String.Format(CultureInfo.CurrentCulture, _localCacheFailureMessage, currentSource);
             }
         }
     }

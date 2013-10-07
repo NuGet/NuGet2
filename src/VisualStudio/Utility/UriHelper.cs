@@ -89,13 +89,15 @@ namespace NuGet.VisualStudio
 
         private static bool IsLocalOrUncSharePresent(string currentSource)
         {
-            Uri currentURI = new Uri(currentSource);
-
-            if (currentURI.HostNameType == UriHostNameType.Basic || currentURI.IsUnc)
+            Uri currentURI;
+            if (Uri.TryCreate(currentSource, UriKind.RelativeOrAbsolute, out currentURI))
             {
-                if (Directory.Exists(currentSource))
+                if (currentURI.IsFile || currentURI.IsUnc)
                 {
-                    return true;
+                    if (Directory.Exists(currentSource))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
