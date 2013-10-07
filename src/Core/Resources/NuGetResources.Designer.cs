@@ -203,16 +203,7 @@ namespace NuGet.Resources {
                 return ResourceManager.GetString("DuplicateDependenciesDefined", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to There are no writable config files..
-        /// </summary>
-        public static string Error_PackageAlreadyExists {
-            get {
-                return ResourceManager.GetString("Error_PackageAlreadyExists", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to There are no writable config files..
         /// </summary>
@@ -223,7 +214,16 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occurred while loading packages from&apos;{0}&apos;: {1}.
+        ///   Looks up a localized string similar to Package {0} already exists..
+        /// </summary>
+        public static string Error_PackageAlreadyExists {
+            get {
+                return ResourceManager.GetString("Error_PackageAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred while loading packages from &apos;{0}&apos;: {1}.
         /// </summary>
         public static string ErrorLoadingPackages {
             get {

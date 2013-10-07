@@ -37,22 +37,6 @@ namespace NuGet.Server.Infrastructure
                    select GetMetadataPackage(package);
         }
 
-        public bool AllowOverrideExistingPackageOnPush
-        {
-            get
-            {
-                var appSettings = WebConfigurationManager.AppSettings;
-                bool value;
-                if (!Boolean.TryParse(appSettings["allowOverrideExistingPackageOnPush"], out value))
-                {
-                    // If the setting is misconfigured, treat it as success (backwards compatibility).
-                    return true;
-                }
-                return value; 
-
-            }
-        }
-
         public override void AddPackage(IPackage package)
         {
             string fileName = PathResolver.GetPackageFileName(package);
@@ -78,13 +62,34 @@ namespace NuGet.Server.Infrastructure
         public override void RemovePackage(IPackage package)
         {
             string fileName = PathResolver.GetPackageFileName(package);
-            FileSystem.DeleteFile(fileName);
-            DeleteData(package);
+            if (EnableDelisting)
+            {
+                var fullPath = FileSystem.GetFullPath(fileName);
+                File.SetAttributes(fullPath, File.GetAttributes(fullPath) | FileAttributes.Hidden);
+                // changing file attributes doesn't mark the file as modified. We want to mark the file as modified to
+                // ensure the various caches will properly reprocess this package
+                File.SetLastWriteTime(fullPath, DateTime.Now);
+            }
+            else
+            {
+                FileSystem.DeleteFile(fileName);
+                DeleteData(package);
+            }
         }
 
         protected override IPackage OpenPackage(string path)
         {
             IPackage package = base.OpenPackage(path);
+
+            if (EnableDelisting)
+            {
+                // hidden packages are considered delisted
+                var localPackage = package as LocalPackage;
+                if (localPackage != null)
+                {
+                    localPackage.Listed = ! File.GetAttributes(FileSystem.GetFullPath(path)).HasFlag(FileAttributes.Hidden);
+                }
+            }
 
             _cacheLock.EnterWriteLock();
             try
@@ -192,6 +197,7 @@ namespace NuGet.Server.Infrastructure
         {
             var packages = GetPackages().Find(searchTerm)
                                         .FilterByPrerelease(allowPrereleaseVersions)
+                                        .Where(p => p.Listed)
                                         .AsQueryable();
 
             // TODO: Enable this when we can make it faster
@@ -236,6 +242,31 @@ namespace NuGet.Server.Infrastructure
                 Path = path,
                 FullPath = FileSystem.GetFullPath(path)
             };
+        }
+
+        private static bool AllowOverrideExistingPackageOnPush
+        {
+            get
+            {
+                // If the setting is misconfigured, treat it as success (backwards compatibility).
+                return GetBooleanAppSetting("allowOverrideExistingPackageOnPush", true);
+            }
+        }
+
+        private static bool EnableDelisting
+        {
+            get
+            {
+                // If the setting is misconfigured, treat it as off (backwards compatibility).
+                return GetBooleanAppSetting("enableDelisting", false);
+            }
+        }
+
+        private static bool GetBooleanAppSetting(string key, bool defaultValue)
+        {
+            var appSettings = WebConfigurationManager.AppSettings;
+            bool value;
+            return !Boolean.TryParse(appSettings[key], out value) ? defaultValue : value;
         }
     }
 }

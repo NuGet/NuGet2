@@ -65,7 +65,7 @@ namespace NuGet.Server
 
             IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
 
-            if (requestedPackage == null)
+            if (requestedPackage == null || ! requestedPackage.Listed)
             {
                 // Package not found
                 WritePackageNotFound(context, packageId, version);

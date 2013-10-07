@@ -13,6 +13,8 @@ namespace NuGet
 
         protected LocalPackage()
         {
+            // local packages are typically listed; exception is with those served by NuGet.Server when delist feature is turned on
+            Listed = true;
         }
 
         public string Id
@@ -139,10 +141,8 @@ namespace NuGet
 
         public bool Listed
         {
-            get
-            {
-                return true;
-            }
+            get;
+            set;
         }
 
         public DateTimeOffset? Published
