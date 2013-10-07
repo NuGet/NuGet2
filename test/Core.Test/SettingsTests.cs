@@ -33,6 +33,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(configFile)).Returns(config.AsStream());
             mockFileSystem.Setup(m => m.FileExists(configFile)).Returns(true);
+            mockFileSystem.Setup(m => m.GetFullPath(configFile)).Returns(configFile);
 
             // Act
             new Settings(mockFileSystem.Object);

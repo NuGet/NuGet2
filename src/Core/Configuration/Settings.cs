@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using NuGet.Resources;
@@ -41,7 +42,9 @@ namespace NuGet
             }
             _fileSystem = fileSystem;
             _fileName = fileName;
-            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _fileName);
+            XDocument conf = null;
+            ExecuteSynchronized(() => conf = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _fileName));
+            _config = conf;
             _isMachineWideSettings = isMachineWideSettings;
         }
 
@@ -172,7 +175,6 @@ namespace NuGet
         ///     %programdata%\NuGet\Config\IDE\Version\*.config
         ///     %programdata%\NuGet\Config\IDE\*.config
         ///     %programdata%\NuGet\Config\*.config
-        /// </remarks>
         /// </remarks>
         /// <param name="fileSystem">The file system in which the settings files are read.</param>
         /// <param name="paths">The additional paths under which to look for settings files.</param>
@@ -560,7 +562,7 @@ namespace NuGet
 
         private void Save()
         {
-            _fileSystem.AddFile(_fileName, _config.Save);
+            ExecuteSynchronized(() => _fileSystem.AddFile(_fileName, _config.Save));
         }
 
         // When isPath is true, then the setting value is checked to see if it can be interpreted
@@ -569,7 +571,7 @@ namespace NuGet
         private KeyValuePair<string, string> ReadValue(XElement element, bool isPath)
         {
             var keyAttribute = element.Attribute("key");
-            var valueAttribute = element.Attribute("value");            
+            var valueAttribute = element.Attribute("value");
 
             if (keyAttribute == null || String.IsNullOrEmpty(keyAttribute.Value) || valueAttribute == null)
             {
@@ -685,6 +687,38 @@ namespace NuGet
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Wrap all IO operations on setting files with this function to avoid file-in-use errors
+        /// </summary>
+        private void ExecuteSynchronized(Action ioOperation)
+        {
+            var fileName = _fileSystem.GetFullPath(_fileName);
+
+            // Global: ensure mutex is honored across TS sessions 
+            using (var mutex = new Mutex(false, "Global\\" + EncryptionUtility.GenerateUniqueToken(fileName)))
+            {
+                var owner = false;
+                try
+                {
+                    // operations on NuGet.config should be very short lived
+                    owner = mutex.WaitOne(TimeSpan.FromMinutes(1));
+                    // decision here is to proceed even if we were not able to get mutex ownership
+                    // and let the potential IO errors bubble up. Reasoning is that failure to get
+                    // ownership probably means faulty hardware and in this case it's better to report
+                    // back than hang
+                    ioOperation();
+                }
+                finally
+                {
+                    if (owner)
+                    {
+                        mutex.ReleaseMutex();
+                    }
+                }
+            }
+            
         }
     }
 }
