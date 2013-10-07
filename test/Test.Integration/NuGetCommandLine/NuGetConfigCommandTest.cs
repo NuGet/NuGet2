@@ -13,10 +13,9 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         [Fact]
         public void ConfigCommand_ChangeDefaultConfigFile()
         {
-            try
+            using (var preserver = new DefaultConfigurationFilePreserver())
             {
                 // Arrange
-                NugetProgramStatic.BackupAndDeleteDefaultConfigurationFile();            
                 string[] args = new string[] { 
                     "config", 
                     "-Set", 
@@ -37,11 +36,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var values = settings.GetValues("config");
                 AssertEqualCollections(values, new[] { "Name1", "Value1", "HTTP_PROXY", "http://127.0.0.1", "HTTP_PROXY.USER", @"domain\user" });
 
-            }
-            finally
-            {
-                // Cleanup
-                NugetProgramStatic.RestoreDefaultConfigurationFile();
             }
         }
 
