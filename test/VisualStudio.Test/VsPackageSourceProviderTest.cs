@@ -12,8 +12,7 @@ namespace NuGet.VisualStudio.Test
         private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
         private const string NuGetOfficialFeedName = "nuget.org";
         private const string NuGetLegacyOfficialFeedName = "NuGet official package source";
-        private const string NuGetLocalCacheSource = "NuGet Local Cache";
-
+        
         [Fact]
         public void CtorIfFirstRunningAddsDefaultSource()
         {
@@ -178,25 +177,7 @@ namespace NuGet.VisualStudio.Test
             Assert.False(sources[1].IsEnabled);
             Assert.True(sources[1].IsOfficial);
         }
-
-        [Fact]
-        public void LoadPackageSourcesAddCacheSourceIfMissing()
-        {
-            // Arrange
-            var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s=>s.GetSettingValues("packagesources", true)).Returns(new[] {new SettingValue(NuGetLocalCacheSource, NuGet.MachineCache.Default.Source, false)});
-            var sourceProvider = CreateCacheSourceProvider(userSettings.Object);
-            
-            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
-
-            // Act
-            var sources = provider.LoadPackageSources().ToList();
-
-            // Assert
-            Assert.Equal(1, sources.Count);
-            AssertPackageSource(sources[0], NuGetLocalCacheSource, NuGet.MachineCache.Default.Source);
-         }
-
+              
         [Fact]
         public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
         {
@@ -602,11 +583,6 @@ namespace NuGet.VisualStudio.Test
         private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
         {
             return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null);
-        }
-
-        private static PackageSourceProvider CreateCacheSourceProvider(ISettings settings)
-        {
-            return new PackageSourceProvider(settings, VsPackageSourceProvider.CacheSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null);
-        }
+        }              
     }
 }

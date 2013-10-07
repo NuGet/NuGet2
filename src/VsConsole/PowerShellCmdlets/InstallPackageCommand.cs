@@ -144,7 +144,7 @@ namespace NuGet.PowerShell.Commands
                     string cache = NuGet.MachineCache.Default.Source;
                     if (!String.IsNullOrEmpty(cache))
                     {
-                        this.Log(MessageLevel.Warning, String.Format(fallbackToLocalCacheMessge, _currentSource, cache));
+                        this.Log(MessageLevel.Warning, String.Format(_fallbackToLocalCacheMessge, _currentSource, cache));
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         if (packageManager != null)
