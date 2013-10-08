@@ -32,10 +32,7 @@
       </Group>
       <Group guid="guidToolsGroup" id="idToolsGroup" priority="0x100">
         <Parent guid="guidToolsGroup" id="idLibraryPackageManager" />
-      </Group>
-      <Group guid="guidPackagesRestoreGroup" id="idPackagesRestoreGroup" priority="0x100">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_SOLNNODE" />
-      </Group>
+      </Group>      
     </Groups>
 
     <Buttons>
@@ -93,8 +90,8 @@
             </Strings>
         </Button>
 
-        <Button guid="guidPackagesRestoreGroup" id="cmdidRestorePackages" priority="0x001" type="Button">
-            <Parent guid="guidPackagesRestoreGroup" id="idPackagesRestoreGroup" />
+        <Button guid="guidDialogCmdSet" id="cmdidRestorePackages" priority="0x0300" type="Button">
+            <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
             <Icon guid="guidToolbarImages" id="bmpPackageRestore" />
             <CommandFlag>DefaultInvisible</CommandFlag>
             <CommandFlag>DynamicVisibility</CommandFlag>
@@ -152,7 +149,7 @@
   <VisibilityConstraints>
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
-    <VisibilityItem guid="guidPackagesRestoreGroup" id="cmdidRestorePackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidRestorePackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
   </VisibilityConstraints>
 
@@ -186,8 +183,8 @@
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
       </CommandPlacement>
-      <CommandPlacement guid="guidPackagesRestoreGroup" id="cmdidRestorePackages" priority="0xF101">
-          <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS" />
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidRestorePackages" priority="0xF101">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
       </CommandPlacement>
   </CommandPlacements>
 
@@ -222,13 +219,10 @@
       <IDSymobl name="idGeneralSettings" value="0x300" />
       <IDSymobl name="cmdIdVisualizer" value="0x310" />
     </GuidSymbol>
-    <GuidSymbol name="guidPackagesRestoreGroup" value="{B4B288EF-D5B7-4669-9D6A-ACD644F90AC8}">
-        <IDSymbol name="idPackagesRestoreGroup" value="0x0100" />
-        <IDSymbol name="cmdidRestorePackages" value="0x0300" />
-    </GuidSymbol>
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="cmdidAddPackages" value="0x0100" />
         <IDSymbol name="cmdidAddPackagesForSolution" value="0x0200" />
+        <IDSymbol name="cmdidRestorePackages" value="0x0300" />
     </GuidSymbol>
     <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
         <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
