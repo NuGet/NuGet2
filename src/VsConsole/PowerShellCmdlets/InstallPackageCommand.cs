@@ -76,6 +76,22 @@ namespace NuGet.PowerShell.Commands
                 return null;
             }
             
+            if (_packageSourceProvider != null && _packageSourceProvider.ActivePackageSource != null)
+            {
+                FallbackToCacheIfNeccessary();
+            }            
+            
+            if (!String.IsNullOrEmpty(Source))
+            {
+                var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
+                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true);
+            }
+
+            return base.CreatePackageManager();
+        }
+
+        private void FallbackToCacheIfNeccessary()
+        {
             /**** Fallback to Cache logic***/
             //1. Check if there is any http source (in active sources or Source switch)
             //2. Check if -Source switch is specified and not http, the path is available
@@ -88,30 +104,23 @@ namespace NuGet.PowerShell.Commands
             if (!String.IsNullOrEmpty(Source))
             {
                 _currentSource = Source;
-                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, null, NetworkInterface.GetIsNetworkAvailable()); 
+                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, null, NetworkInterface.GetIsNetworkAvailable());
             }
             else
             {
                 _currentSource = _packageSourceProvider.ActivePackageSource;
                 isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, _packageSourceProvider, NetworkInterface.GetIsNetworkAvailable());
             }
-            
+
             //if no local or UNC source is available or no source is http, fallback to local cache
             if (!isAnySourceAvailable)
             {
                 Source = NuGet.MachineCache.Default.Source;
                 CacheStatusMessage(_currentSource, Source);
-            }                                                  
-            /**** End of Fallback to Cache logic ***/
-
-            //At this point, Source might be value from -Source switch or NuGet Local Cache
-            if (!String.IsNullOrEmpty(Source))
-            {
-                var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
-                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true);
             }
 
-            return base.CreatePackageManager();
+            //At this point, Source might be value from -Source switch or NuGet Local Cache
+            /**** End of Fallback to Cache logic ***/
         }
 
         protected override void ProcessRecordCore()
@@ -128,7 +137,7 @@ namespace NuGet.PowerShell.Commands
                 {
                     if (!String.IsNullOrEmpty(_cacheStatusMessage))
                     {
-                         this.Log(MessageLevel.Warning, String.Format(_cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
+                         this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
                     }
                     PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
@@ -144,7 +153,7 @@ namespace NuGet.PowerShell.Commands
                     string cache = NuGet.MachineCache.Default.Source;
                     if (!String.IsNullOrEmpty(cache))
                     {
-                        this.Log(MessageLevel.Warning, String.Format(_fallbackToLocalCacheMessge, _currentSource, cache));
+                        this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, _currentSource, cache));
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         if (packageManager != null)
