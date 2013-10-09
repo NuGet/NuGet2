@@ -213,6 +213,12 @@ namespace NuGet.VisualStudio
             if (settings != null)
             {
                 string packageSaveModeValue = settings.GetConfigValue("PackageSaveMode");
+                // TODO: remove following block of code when shipping NuGet version post 2.8
+                if (string.IsNullOrEmpty(packageSaveModeValue))
+                {
+                    packageSaveModeValue = settings.GetConfigValue("SaveOnExpand");
+                }
+                // end of block of code to remove when shipping NuGet version post 2.8
                 if (!string.IsNullOrEmpty(packageSaveModeValue))
                 {
                     foreach (var v in packageSaveModeValue.Split(';'))
