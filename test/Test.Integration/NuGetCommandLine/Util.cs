@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using Moq;
 using Xunit;
-using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
@@ -30,8 +28,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 packageBuilder.LicenseUrl = licenseUrl;
             }
 
-            var dependencies = new PackageDependency("Dummy");
-            packageBuilder.DependencySets.Add(new PackageDependencySet(null, new[] { dependencies }));
+            packageBuilder.Files.Add(CreatePackageFile(@"content\test1.txt"));
             packageBuilder.Authors.Add("test author");
 
             var packageFileName = string.Format("{0}.{1}.nupkg", packageId, version);
@@ -80,6 +77,20 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 writer.Write(fileContent);
             }
+        }
+
+        private static IPackageFile CreatePackageFile(string name)
+        {
+            var file = new Mock<IPackageFile>();
+            file.SetupGet(f => f.Path).Returns(name);
+            file.Setup(f => f.GetStream()).Returns(new MemoryStream());
+
+            string effectivePath;
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
+            file.SetupGet(f => f.TargetFramework).Returns(fx);
+
+            return file.Object;
         }
     }
 }

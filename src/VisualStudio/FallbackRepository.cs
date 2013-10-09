@@ -24,6 +24,18 @@ namespace NuGet.VisualStudio
             get { return _primaryRepository.Source; }
         }
 
+        public PackageSaveModes PackageSaveMode
+        {
+            get
+            {
+                return _primaryRepository.PackageSaveMode;
+            }
+            set
+            {
+                _primaryRepository.PackageSaveMode = value;
+            }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get

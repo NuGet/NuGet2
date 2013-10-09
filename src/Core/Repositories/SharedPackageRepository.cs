@@ -101,7 +101,7 @@ namespace NuGet
                     return new UnzippedPackage(FileSystem, packageDirectory);
                 }
             }
-            
+
             return null;
         }
 
@@ -132,7 +132,7 @@ namespace NuGet
                 string nupkgPath = partialPath + Constants.PackageExtension;
                 if (FileSystem.FileExists(nupkgPath))
                 {
-                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);
+                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);                    
                 }
                 else if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
                 {

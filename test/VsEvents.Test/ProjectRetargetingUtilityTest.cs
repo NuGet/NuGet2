@@ -118,7 +118,8 @@ namespace NuGet.VsEvents
                 repositorySettings, 
                 new Mock<VsPackageInstallerEvents>().Object, 
                 mockAggregateRepository.Object,
-                frameworkMultiTargeting: null);
+                frameworkMultiTargeting: null,
+				machineWideSettings: null);
 
             // Act & Assert
             // Get RepositoryPath throws InvalidOperationException and GetLocalRepository() handles it to return null

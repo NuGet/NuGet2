@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
+using System.Text;
+using System.Threading;
 
 namespace NuGet
 {
     /// <summary>
     /// The machine cache represents a location on the machine where packages are cached. It is a specific implementation of a local repository and can be used as such.
+    /// NOTE: this is a shared location, and as such all IO operations need to be properly serialized
     /// </summary>
     public class MachineCache : LocalPackageRepository, IPackageCacheRepository
     {
@@ -73,27 +76,61 @@ namespace NuGet
             }
 
             string path = GetPackageFilePath(package);
-            using (var stream = package.GetStream())
-            {
-                TryAct(() => FileSystem.AddFile(path, stream));
-            }
+            TryAct(() =>
+                {
+                    // we want to do this in the TryAct, i.e. in the mutex
+                    // for cases where package was added to cache by another process
+                    if (FileSystem.FileExists(path))
+                    {
+                        return true;
+                    }
+                    string tmp = GetTempFile(path);
+                    using (var stream = package.GetStream())
+                    {
+                        FileSystem.AddFile(tmp, stream);
+                    }
+                    FileSystem.MoveFile(tmp, path);
+                    return true;
+                }, path);
+        }
+
+        // Unfortunately, there are many locations that query directly the filesystem to
+        // assess if a package is present in the cache instead of calling into MachineCache.Exists
+        // To guard against file in use issues, we create the cache entry with a tmp name and 
+        // rename when the file is ready for consumption.
+        private static string GetTempFile(string filename)
+        {
+            return filename + ".tmp";
         }
 
         public override bool Exists(string packageId, SemanticVersion version)
         {
             string packagePath = GetPackageFilePath(packageId, version);
-            return FileSystem.FileExists(packagePath);
+            return TryAct(() => FileSystem.FileExists(packagePath), packagePath);
         }
 
-        public Stream CreatePackageStream(string packageId, SemanticVersion version)
+        public bool InvokeOnPackage(string packageId, SemanticVersion version, Action<Stream> action)
         {
             if (FileSystem is NullFileSystem)
             {
-                return null;
+                return false;
             }
 
             string packagePath = GetPackageFilePath(packageId, version);
-            return FileSystem.CreateFile(packagePath);
+            return TryAct(() =>
+                {
+                    string tmp = GetTempFile(packagePath);
+                    using (var stream = FileSystem.CreateFile(tmp))
+                    {
+                        if (stream == null)
+                        {
+                            return false;
+                        }
+                        action(stream);
+                    }
+                    FileSystem.MoveFile(tmp, packagePath);
+                    return true;
+                }, packagePath);
         }
 
         public void Clear()
@@ -105,7 +142,11 @@ namespace NuGet
         {
             foreach (var packageFile in files)
             {
-                TryAct(() => FileSystem.DeleteFileSafe(packageFile));
+                TryAct(() => 
+                { 
+                    FileSystem.DeleteFileSafe(packageFile);
+                    return true;
+                }, packageFile);
             }
         }
 
@@ -157,11 +198,42 @@ namespace NuGet
         /// We use this method instead of the "safe" methods in FileSystem because it attempts to retry multiple times with delays.
         /// In our case, if we are unable to perform IO over the machine cache, we want to quit trying immediately.
         /// </remarks>
-        private static void TryAct(Action action)
+        private bool TryAct(Func<bool> action, string path)
         {
             try
             {
-                action();
+                // Global: machine cache is per user across TS sessions
+                var mutexName = "Global\\" + EncryptionUtility.GenerateUniqueToken(FileSystem.GetFullPath(path) ?? path);
+                using (var mutex = new Mutex(false, mutexName))
+                {
+                    bool owner = false;
+                    try
+                    {
+                        try
+                        {
+                            owner = mutex.WaitOne(TimeSpan.FromMinutes(3));
+                            // ideally we should throw an exception here if !owner such as
+                            // throw new TimeoutException(string.Format("Timeout waiting for Machine Cache mutex for {0}", fullPath));
+                            // we decided against it: machine cache operations being "best effort" basis.
+                            // this may cause "File in use" exceptions for long lasting operations such as downloading a large package on 
+                            // a slow network connection
+                        }
+                        catch (AbandonedMutexException)
+                        {
+                            // TODO: consider logging a warning; abandonning a mutex is an indication something wrong is going on
+                            owner = true; // now mine
+                        }
+
+                        return action();
+                    }
+                    finally
+                    {
+                        if (owner)
+                        {
+                            mutex.ReleaseMutex();
+                        }
+                    }
+                }
             }
             catch (IOException)
             {
@@ -170,6 +242,7 @@ namespace NuGet
             {
                 // Do nothing if this fails. 
             }
+            return false;
         }
     }
 }

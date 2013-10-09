@@ -53,7 +53,8 @@ namespace NuGet.Common
                 }
                 catch (IOException)
                 {
-                    return 60;
+                    // probably means redirected to file
+                    return int.MaxValue;
                 }
             }
             set

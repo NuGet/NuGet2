@@ -453,6 +453,9 @@ nuget update -Self</value>
     <value>Set the minClientVersion attribute for the created package.</value>
     <comment>Please don't localize "minClientVersion"</comment>
   </data>
+  <data name="CommandPackageSaveMode" xml:space="preserve">
+    <value>Specifies types of files to save after package installation: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
   <data name="PackageCommandIncludeReferencedProjects" xml:space="preserve">
     <value>Include referenced projects either as dependencies or as part of the package.</value>
   </data>

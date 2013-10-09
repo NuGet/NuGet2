@@ -131,7 +131,7 @@ namespace NuGet.Test
             // Arrange
             var zipPackage = PackageUtility.CreatePackage("A", "1.2");
             var uri = new Uri("http://nuget.org");
-            var mockRepository = new MockPackageCacheRepository();
+            var mockRepository = new MockPackageCacheRepository(true);
             var packageDownloader = new Mock<PackageDownloader>();
             packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
                              .Callback(() => mockRepository.AddPackage(zipPackage))
@@ -166,7 +166,7 @@ namespace NuGet.Test
             // Arrange
             var uri = new Uri("http://nuget.org");
             var mockRepository = new Mock<MockPackageRepository>().As<IPackageCacheRepository>();
-            mockRepository.Setup(s => s.CreatePackageStream(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns((Stream)null);
+            mockRepository.Setup(s => s.InvokeOnPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), It.IsAny<Action<Stream>>())).Returns(false);
 
             var packageDownloader = new Mock<PackageDownloader>();
             packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
@@ -206,7 +206,7 @@ namespace NuGet.Test
             // Arrange
             var zipPackage = PackageUtility.CreatePackage("A", "1.2");
             var uri = new Uri("http://nuget.org");
-            var mockRepository = new MockPackageCacheRepository();
+            var mockRepository = new MockPackageCacheRepository(true);
             var packageDownloader = new Mock<PackageDownloader>();
             packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
                              .Callback(() => mockRepository.AddPackage(zipPackage))
@@ -249,7 +249,7 @@ namespace NuGet.Test
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
             hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns(hashBytes);
 
-            var mockRepository = new MockPackageCacheRepository();
+            var mockRepository = new MockPackageCacheRepository(true);
             mockRepository.Add(zipPackage);
 
             var servicePackage = new DataServicePackage
@@ -287,17 +287,15 @@ namespace NuGet.Test
                   .Returns(zipPackage1);
             lookup.Setup(s => s.Exists("A", new SemanticVersion("1.2")))
                   .Returns(true);
-            mockRepository.Setup(s => s.CreatePackageStream("A", new SemanticVersion("1.2")))
-                          .Returns(new MemoryStream());
 
             var uri = new Uri("http://nuget.org");
             var packageDownloader = new Mock<PackageDownloader>();
             packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
-                             .Callback(() => 
-                                 {
-                                     lookup.Setup(s => s.FindPackage("A", new SemanticVersion("1.2")))
+                             .Callback(() =>
+                                {
+                                    lookup.Setup(s => s.FindPackage("A", new SemanticVersion("1.2")))
                                            .Returns(zipPackage2);
-                                 })
+                                })
                              .Verifiable();
 
             var context = new Mock<IDataServiceContext>();
@@ -313,6 +311,16 @@ namespace NuGet.Test
                 Downloader = packageDownloader.Object,
                 Context = context.Object
             };
+
+            mockRepository.Setup(s => s.InvokeOnPackage("A", new SemanticVersion("1.2"), It.IsAny<Action<Stream>>()))
+                .Callback(() =>
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        packageDownloader.Object.DownloadPackage(servicePackage.DownloadUrl, servicePackage, stream);
+                    }
+                })
+                .Returns(true);
 
             // Act 1
             servicePackage.EnsurePackage(mockRepository.Object);

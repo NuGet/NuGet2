@@ -29,6 +29,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceRepository.Add(package_A12);
             
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.SetupSet(s => s.PackageSaveMode = PackageSaveModes.Nupkg);
             sharedRepository.Setup(s => s.AddPackage(package_A12)).Callback<IPackage>(p => packages.Add(p)).Verifiable();
             sharedRepository.Setup(s => s.GetPackages()).Returns(packages.AsQueryable());
             
@@ -345,6 +346,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceRepository.AddRange(new[] { package_A12, package_B20 });
 
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.SetupSet(s => s.PackageSaveMode = PackageSaveModes.Nupkg);
             sharedRepository.Setup(s => s.AddPackage(package_A12)).Callback<IPackage>(p => packages.Add(p)).Verifiable();
             sharedRepository.Setup(s => s.AddPackage(package_B20)).Callback<IPackage>(p => packages.Add(p)).Verifiable();
             sharedRepository.Setup(s => s.GetPackages()).Returns(packages.AsQueryable());

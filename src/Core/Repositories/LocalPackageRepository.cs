@@ -81,13 +81,45 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            string packageFilePath = GetPackageFilePath(package);
+            if (PackageSaveMode.HasFlag(PackageSaveModes.Nuspec))
+            {
+                // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
+                // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
+                string packageFilePath = GetManifestFilePath(package.Id, package.Version);
+                Manifest manifest = Manifest.Create(package);
 
-            FileSystem.AddFileWithCheck(packageFilePath, package.GetStream);
+                // The IPackage object doesn't carry the References information.
+                // Thus we set the References for the manifest to the set of all valid assembly references
+                manifest.Metadata.ReferenceSets = package.AssemblyReferences
+                                                      .GroupBy(f => f.TargetFramework)
+                                                      .Select(
+                                                        g => new ManifestReferenceSet
+                                                        {
+                                                            TargetFramework = g.Key == null ? null : VersionUtility.GetFrameworkString(g.Key),
+                                                            References = g.Select(p => new ManifestReference { File = p.Name }).ToList()
+                                                        })
+                                                      .ToList();
+
+                FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
+            }
+
+            if (PackageSaveMode.HasFlag(PackageSaveModes.Nupkg))
+            {
+                string packageFilePath = GetPackageFilePath(package);
+
+                FileSystem.AddFileWithCheck(packageFilePath, package.GetStream);
+            }
         }
 
         public override void RemovePackage(IPackage package)
         {
+            string manifestFilePath = GetManifestFilePath(package.Id, package.Version);
+            if (FileSystem.FileExists(manifestFilePath))
+            {
+                // delete .nuspec file
+                FileSystem.DeleteFileSafe(manifestFilePath);
+            }
+
             // Delete the package file
             string packageFilePath = GetPackageFilePath(package);
             FileSystem.DeleteFileSafe(packageFilePath);
@@ -136,7 +168,10 @@ namespace NuGet
             // Files created by the path resolver. This would take into account the non-side-by-side scenario 
             // and we do not need to match this for id and version.
             var packageFileName = PathResolver.GetPackageFileName(packageId, version);
-            var filesMatchingFullName = GetPackageFiles(packageFileName);
+            var manifestFileName = Path.ChangeExtension(packageFileName, Constants.ManifestExtension);
+            var filesMatchingFullName = Enumerable.Concat(
+                GetPackageFiles(packageFileName), 
+                GetPackageFiles(manifestFileName));
 
             if (version != null && version.Version.Revision < 1)
             {
@@ -150,12 +185,15 @@ namespace NuGet
                 string partialName = version.Version.Build < 1 ?
                                         String.Join(".", packageId, version.Version.Major, version.Version.Minor) :
                                         String.Join(".", packageId, version.Version.Major, version.Version.Minor, version.Version.Build);
+                string partialManifestName = partialName + "*" + Constants.ManifestExtension;
                 partialName += "*" + Constants.PackageExtension;
 
                 // Partial names would result is gathering package with matching major and minor but different build and revision. 
                 // Attempt to match the version in the path to the version we're interested in.
                 var partialNameMatches = GetPackageFiles(partialName).Where(path => FileNameMatchesPattern(packageId, version, path));
-                return Enumerable.Concat(filesMatchingFullName, partialNameMatches);
+                var partialManifestNameMatches = GetPackageFiles(partialManifestName).Where(
+                    path => FileNameMatchesPattern(packageId, version, path));
+                return Enumerable.Concat(filesMatchingFullName, partialNameMatches).Concat(partialManifestNameMatches);
             }
             return filesMatchingFullName;
         }
@@ -231,7 +269,9 @@ namespace NuGet
         internal IEnumerable<string> GetPackageFiles(string filter = null)
         {
             filter = filter ?? "*" + Constants.PackageExtension;
-            Debug.Assert(filter.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(
+                filter.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase) ||
+                filter.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
 
             // Check for package files one level deep. We use this at package install time
             // to determine the set of installed packages. Installed packages are copied to 
@@ -253,7 +293,12 @@ namespace NuGet
 
         protected virtual IPackage OpenPackage(string path)
         {
-            if (FileSystem.FileExists(path))
+            if (!FileSystem.FileExists(path))
+            {
+                return null;
+            }
+
+            if (Path.GetExtension(path) == Constants.PackageExtension)
             {
                 OptimizedZipPackage package;
                 try
@@ -269,13 +314,11 @@ namespace NuGet
 
                 return package;
             }
-            else
+            else if (Path.GetExtension(path) == Constants.ManifestExtension)
             {
-                // if the .nupkg file doesn't exist, fall back to searching for the .nuspec file
-                var nuspecPath = Path.ChangeExtension(path, Constants.ManifestExtension);
-                if (FileSystem.FileExists(nuspecPath))
+                if (FileSystem.FileExists(path))
                 {
-                    return new UnzippedPackage(FileSystem, Path.GetFileNameWithoutExtension(nuspecPath));
+                    return new UnzippedPackage(FileSystem, Path.GetFileNameWithoutExtension(path));
                 }
             }
 
@@ -304,6 +347,14 @@ namespace NuGet
             return name.Length > packageId.Length &&
                    SemanticVersion.TryParse(name.Substring(packageId.Length + 1), out parsedVersion) &&
                    parsedVersion == version;
+        }
+
+        private string GetManifestFilePath(string packageId, SemanticVersion version)
+        {
+            string packageDirectory = PathResolver.GetPackageDirectory(packageId, version);
+            string manifestFileName = packageDirectory + Constants.ManifestExtension;
+
+            return Path.Combine(packageDirectory, manifestFileName);
         }
 
         private class PackageCacheEntry

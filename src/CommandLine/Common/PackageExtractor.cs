@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace NuGet.Common
 {
@@ -26,11 +22,8 @@ namespace NuGet.Common
         /// <seealso cref="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
         private static string GenerateUniqueToken(IPackageManager packageManager, string packageId, SemanticVersion version)
         {
-            var packagePath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
-            var pathBytes = Encoding.UTF8.GetBytes(packagePath);
-            var hashProvider = new CryptoHashProvider("SHA256");
-
-            return Convert.ToBase64String(hashProvider.CalculateHash(pathBytes)).ToUpperInvariant();
+            var fullPath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
+            return EncryptionUtility.GenerateUniqueToken(fullPath);
         }
 
         private static void ExecuteLocked(string name, Action action)
@@ -48,12 +41,18 @@ namespace NuGet.Common
                     }
                     else
                     {
-                        mutex.WaitOne(TimeSpan.FromMinutes(2));
+                        // if mutex.WaitOne returns false, you don't own the mutex. 
+                        created = mutex.WaitOne(TimeSpan.FromMinutes(2));
                     }
                 }
                 finally
                 {
-                    mutex.ReleaseMutex();
+                    // If you don't own the mutex, you can't release it (exception thrown).
+                    // cf http://msdn.microsoft.com/en-us/library/system.threading.mutex.releasemutex.aspx
+                    if (created)
+                    {
+                        mutex.ReleaseMutex();
+                    }
                 }
             }
         }

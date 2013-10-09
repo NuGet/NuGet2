@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using NuGet.Runtime;
@@ -45,43 +47,74 @@ namespace NuGet
         [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "It's constructed using CreateInstanceAndUnwrap in another app domain")]
         private sealed class MetadataExtractor : MarshalByRefObject
         {
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It's a marshal by ref object used to collection information in another app domain")]
-            [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom", Justification = "We need to load the assembly to extract metadata")]
-            public AssemblyMetadata GetMetadata(string path)
-            {
-                Assembly assembly = Assembly.LoadFrom(path);
-                AssemblyName assemblyName = assembly.GetName();
 
-                SemanticVersion version;
-                string assemblyInformationalVersion = GetAttributeValueOrDefault<AssemblyInformationalVersionAttribute>(assembly, a => a.InformationalVersion);
-                if (!SemanticVersion.TryParse(assemblyInformationalVersion, out version))
+            private class AssemblyResolver
+            {
+                private readonly string _lookupPath;
+
+                public AssemblyResolver(string assemblyPath)
                 {
-                    version = new SemanticVersion(assemblyName.Version);
+                    _lookupPath = Path.GetDirectoryName(assemblyPath);
                 }
 
-                return new AssemblyMetadata
+                public Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
                 {
-                    Name = assemblyName.Name,
-                    Version = version,
-                    Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(assembly, a => a.Title),
-                    Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(assembly, a => a.Company),
-                    Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description),
-                    Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(assembly, a => a.Copyright)
-                };
+                    var name = new AssemblyName(args.Name);
+                    var assemblyPath = Path.Combine(_lookupPath, name.Name + ".dll");
+                    return File.Exists(assemblyPath) ? 
+                        Assembly.ReflectionOnlyLoadFrom(assemblyPath) : // load from same folder as parent assembly
+                        Assembly.ReflectionOnlyLoad(args.Name);         // load from GAC
+                }
             }
 
-            private static string GetAttributeValueOrDefault<T>(Assembly assembly, Func<T, string> selector) where T : Attribute
+            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It's a marshal by ref object used to collection information in another app domain")]
+            public AssemblyMetadata GetMetadata(string path)
             {
-                // Get the attribute
-                T attribute = assembly.GetCustomAttribute<T>();
+                var resolver = new AssemblyResolver(path);
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += resolver.ReflectionOnlyAssemblyResolve;
 
-                if (attribute != null)
+                try
                 {
-                    string value = selector(attribute);
-                    // Return the value only if it isn't null or empty so that we can use ?? to fall back
-                    if (!String.IsNullOrEmpty(value))
+                    Assembly assembly = Assembly.ReflectionOnlyLoadFrom(path);
+                    AssemblyName assemblyName = assembly.GetName();
+
+                    var attributes = CustomAttributeData.GetCustomAttributes(assembly);
+
+                    SemanticVersion version;
+                    string assemblyInformationalVersion = GetAttributeValueOrDefault<AssemblyInformationalVersionAttribute>(attributes);
+                    if (!SemanticVersion.TryParse(assemblyInformationalVersion, out version))
                     {
-                        return value;
+                        version = new SemanticVersion(assemblyName.Version);
+                    }
+
+                    return new AssemblyMetadata
+                    {
+                        Name = assemblyName.Name,
+                        Version = version,
+                        Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(attributes),
+                        Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(attributes),
+                        Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(attributes),
+                        Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(attributes)
+                    };
+                }
+                finally
+                {
+                    AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= resolver.ReflectionOnlyAssemblyResolve;
+                }
+            }
+
+            private static string GetAttributeValueOrDefault<T>(IList<CustomAttributeData> attributes) where T : Attribute
+            {
+                foreach (var attribute in attributes)
+                {
+                    if (attribute.Constructor.DeclaringType == typeof(T))
+                    {
+                        string value = attribute.ConstructorArguments[0].Value.ToString();
+                        // Return the value only if it isn't null or empty so that we can use ?? to fall back
+                        if (!String.IsNullOrEmpty(value))
+                        {
+                            return value;
+                        }
                     }
                 }
                 return null;

@@ -41,7 +41,7 @@ namespace NuGet.VisualStudio.Test
                 }
             });
 
-            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1, null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act
@@ -88,7 +88,7 @@ namespace NuGet.VisualStudio.Test
                 }
             });
 
-            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1, null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act
@@ -125,7 +125,7 @@ namespace NuGet.VisualStudio.Test
             //mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
             mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
-            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1, null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act
@@ -157,7 +157,7 @@ namespace NuGet.VisualStudio.Test
             //mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
             mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
-            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, new Mock<VsPackageInstallerEvents>().Object, mockRepository1, null);
             packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act

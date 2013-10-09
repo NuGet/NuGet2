@@ -14,10 +14,9 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         [Fact]
         public void SourcesCommandTest_AddSource()
         {
-            try
+            using (var preserver = new DefaultConfigurationFilePreserver())
             {
                 // Arrange
-                NugetProgramStatic.BackupAndDeleteDefaultConfigurationFile();
 
                 string[] args = new string[] { 
                     "sources",
@@ -25,7 +24,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     "-Name",
                     "test_source",
                     "-Source",
-                    "http://test_source"            
+                    "http://test_source"
                 };
 
                 // Act
@@ -37,20 +36,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var source = settings.GetValue("packageSources", "test_source");
                 Assert.Equal("http://test_source", source);
             }
-            finally
-            {
-                // Cleanup
-                NugetProgramStatic.RestoreDefaultConfigurationFile();
-            }
         }
 
         [Fact]
         public void SourcesCommandTest_AddWithUserNamePassword()
         {
-            try
+            using (var preserver = new DefaultConfigurationFilePreserver())
             {
                 // Arrange
-                NugetProgramStatic.BackupAndDeleteDefaultConfigurationFile();
 
                 string[] args = new string[] { 
                     "sources",
@@ -86,20 +79,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var password = EncryptionUtility.DecryptString(credentials[1].Value);
                 Assert.Equal("test_password", password);
             }
-            finally
-            {
-                // Cleanup
-                NugetProgramStatic.RestoreDefaultConfigurationFile();
-            }
         }
 
         [Fact]
         public void SourcesCommandTest_AddWithUserNamePasswordInClearText()
         {
-            try
+            using (var preserver = new DefaultConfigurationFilePreserver())
             {
                 // Arrange
-                NugetProgramStatic.BackupAndDeleteDefaultConfigurationFile();
 
                 string[] args = new string[] { 
                     "sources",
@@ -134,11 +121,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
                 Assert.Equal("ClearTextPassword", credentials[1].Key);
                 Assert.Equal("test_password", credentials[1].Value);
-            }
-            finally
-            {
-                // Cleanup
-                NugetProgramStatic.RestoreDefaultConfigurationFile();
             }
         }
 

@@ -64,6 +64,12 @@ namespace NuGet
             }
         }
 
+        public PackageSaveModes PackageSaveMode
+        {
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get { return true; }

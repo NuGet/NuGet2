@@ -718,7 +718,7 @@ namespace NuGet.PowerShell.Commands.Test
                                            PackageUtility.CreatePackage("C", "2.0.3.4-alpha", listed: false)
                                        };
 
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);            
             repositoryFactory.Setup(r => r.CreateRepository("NuGet Official Source")).Returns(sourceRepository);
 
             var solutionManager = TestUtils.GetSolutionManager();
@@ -728,6 +728,7 @@ namespace NuGet.PowerShell.Commands.Test
                                         PackageUtility.CreatePackage("C", "1.0.0")
                                     };
             var localRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            localRepository.SetupSet(p => p.PackageSaveMode = PackageSaveModes.Nupkg);
             localRepository.Setup(p => p.GetPackages()).Returns(localPackages.AsQueryable()).Verifiable();
 
             var packageManager = new VsPackageManager(
@@ -786,6 +787,7 @@ namespace NuGet.PowerShell.Commands.Test
                                         PackageUtility.CreatePackage("C", "1.0.0")
                                     };
             var localRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            localRepository.SetupSet(p => p.PackageSaveMode = PackageSaveModes.Nupkg);
             localRepository.Setup(p => p.GetPackages()).Returns(localPackages.AsQueryable()).Verifiable();
 
             var packageManager = new VsPackageManager(

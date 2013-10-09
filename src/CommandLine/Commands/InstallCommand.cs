@@ -18,7 +18,7 @@ namespace NuGet.Commands
     public class InstallCommand : DownloadCommandBase
     {
         private static readonly object _satelliteLock = new object();
-
+        
         [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -35,7 +35,7 @@ namespace NuGet.Commands
         public bool RequireConsent { get; set; }
 
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
-        public string SolutionDirectory { get; set; }
+        public string SolutionDirectory { get; set; }        
 
         private bool AllowMultipleVersions
         {
@@ -58,6 +58,7 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            CalculateEffectivePackageSaveMode();
             string installPath = ResolveInstallPath();
             IFileSystem fileSystem = CreateFileSystem(installPath);
 

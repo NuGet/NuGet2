@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -7,6 +8,8 @@ namespace NuGet.Commands
     {
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
+
+        protected PackageSaveModes EffectivePackageSaveMode { get; set; }
 
         protected DownloadCommandBase(IPackageRepository cacheRepository)
         {
@@ -24,6 +27,43 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "CommandDisableParallelProcessing")]
         public bool DisableParallelProcessing { get; set; }
+
+        [Option(typeof(NuGetCommand), "CommandPackageSaveMode")]
+        public string PackageSaveMode { get; set; }
+        
+        protected void CalculateEffectivePackageSaveMode()
+        {
+            string packageSaveModeValue = PackageSaveMode;
+            if (string.IsNullOrEmpty(packageSaveModeValue))
+            {
+                packageSaveModeValue = Settings.GetConfigValue("PackageSaveMode");
+            }
+
+            EffectivePackageSaveMode = PackageSaveModes.None;
+            if (!string.IsNullOrEmpty(packageSaveModeValue))
+            {
+                foreach (var v in packageSaveModeValue.Split(';'))
+                {
+                    if (v.Equals(PackageSaveModes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        EffectivePackageSaveMode |= PackageSaveModes.Nupkg;
+                    }
+                    else if (v.Equals(PackageSaveModes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        EffectivePackageSaveMode |= PackageSaveModes.Nuspec;
+                    }
+                    else
+                    {
+                        Console.WriteWarning("Invalid PackageSaveMode value {0}.", EffectivePackageSaveMode);
+                    }
+                }
+
+                if (EffectivePackageSaveMode == PackageSaveModes.None)
+                {
+                    Console.WriteWarning("Invalid PackageSaveMode value {0}. The option is ignored.", EffectivePackageSaveMode);
+                }
+            }
+        }
 
         /// <remarks>
         /// Meant for unit testing.
@@ -53,6 +93,11 @@ namespace NuGet.Commands
             var repository = CreateRepository();
             var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths);
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, packagesFolderFileSystem);
+            if (EffectivePackageSaveMode != PackageSaveModes.None)
+            {
+                localRepository.PackageSaveMode = EffectivePackageSaveMode;
+            }
+
             var packageManager = new PackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
             {
                 Logger = Console

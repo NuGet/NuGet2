@@ -229,7 +229,7 @@
     <value>Packing files from '{0}'.</value>
   </data>
   <data name="UnableToExtractAssemblyMetadata" xml:space="preserve">
-    <value>Unable to extract metadata from '{0}'.</value>
+    <value>Unable to extract metadata from '{0}': {1}</value>
   </data>
   <data name="UsingPackagesConfigForDependencies" xml:space="preserve">
     <value>Found packages.config. Using packages listed as dependencies</value>

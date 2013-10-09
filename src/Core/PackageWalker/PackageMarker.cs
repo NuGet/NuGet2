@@ -22,6 +22,13 @@ namespace NuGet
             }
         }
 
+        // PackageSaveMode property does not apply to this class
+        public PackageSaveModes PackageSaveMode
+        {
+            set { throw new NotSupportedException(); }
+            get { throw new NotSupportedException(); }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get { return true; }

@@ -374,33 +374,9 @@ namespace NuGet
             if (refreshPackage)
             {
                 // We either do not have a package available locally or they are invalid. Download the package from the server.
-                Stream targetStream = null;
-                try
-                {
-                    targetStream = cacheRepository.CreatePackageStream(packageMetadata.Id, packageMetadata.Version);
-
-                    // this can happen when access to the %LocalAppData% directory is blocked, e.g. on Windows Azure Web Site build
-                    if (targetStream != null)
-                    {
-                        _usingMachineCache = true;
-                    }
-                    else
-                    {
-                        // if we can't store the package into machine cache, store it in memory
-                        targetStream = new MemoryStream();
-                        _usingMachineCache = false;
-                    }
-    
-                    // download package into the stream
-                    Downloader.DownloadPackage(DownloadUrl, this, targetStream);
-                }
-                finally
-                {
-                    if (targetStream != null && _usingMachineCache)
-                    {
-                        targetStream.Dispose();
-                    }
-                }
+                _usingMachineCache = cacheRepository.InvokeOnPackage(packageMetadata.Id, packageMetadata.Version,
+                    (stream) => Downloader.DownloadPackage(DownloadUrl, this, stream)
+                    );
 
                 if (_usingMachineCache)
                 {
@@ -409,9 +385,13 @@ namespace NuGet
                 }
                 else
                 {
-                    targetStream.Seek(0, SeekOrigin.Begin);
-                    _package = new ZipPackage(targetStream);
-                    targetStream.Dispose();
+                    // this can happen when access to the %LocalAppData% directory is blocked, e.g. on Windows Azure Web Site build
+                    using (var targetStream = new MemoryStream())
+                    {
+                        Downloader.DownloadPackage(DownloadUrl, this, targetStream);
+                        targetStream.Seek(0, SeekOrigin.Begin);
+                        _package = new ZipPackage(targetStream);
+                    }
                 }
 
                 OldHash = PackageHash;

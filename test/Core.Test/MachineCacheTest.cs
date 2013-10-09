@@ -174,16 +174,16 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CreatePackageStreamReturnsNullForNullFileSystem()
+        public void InvokeOnPackageReturnsFalseForNullFileSystem()
         {
             // Arrange
             var cache = new MachineCache(NullFileSystem.Instance);
 
             // Act
-            Stream stream = cache.CreatePackageStream("A", new SemanticVersion("2.0-alpha"));
+            bool usingMachineCache = cache.InvokeOnPackage("A", new SemanticVersion("2.0-alpha"), stream => { });
 
             // Assert
-            Assert.Null(stream);
+            Assert.False(usingMachineCache);
         }
     }
 }

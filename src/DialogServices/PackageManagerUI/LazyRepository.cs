@@ -25,6 +25,18 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public PackageSaveModes PackageSaveMode
+        {
+            get
+            {
+                return Repository.PackageSaveMode;
+            }
+            set
+            {
+                Repository.PackageSaveMode = value;
+            }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get

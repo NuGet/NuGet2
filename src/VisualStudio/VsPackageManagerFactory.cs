@@ -19,6 +19,7 @@ namespace NuGet.VisualStudio
         private readonly IPackageRepository _activePackageSourceRepository;
         private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
         private RepositoryInfo _repositoryInfo;
+		private readonly IMachineWideSettings _machineWideSettings;
 
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
@@ -27,7 +28,8 @@ namespace NuGet.VisualStudio
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
                                        VsPackageInstallerEvents packageEvents,
-                                       IPackageRepository activePackageSourceRepository) :
+                                       IPackageRepository activePackageSourceRepository,
+									   IMachineWideSettings machineWideSettings) :
             this(solutionManager, 
                  repositoryFactory, 
                  packageSourceProvider, 
@@ -35,7 +37,8 @@ namespace NuGet.VisualStudio
                  repositorySettings, 
                  packageEvents,
                  activePackageSourceRepository,
-                 ServiceLocator.GetGlobalService<SVsFrameworkMultiTargeting, IVsFrameworkMultiTargeting>())
+                 ServiceLocator.GetGlobalService<SVsFrameworkMultiTargeting, IVsFrameworkMultiTargeting>(),
+				 machineWideSettings)
         {
         }
 
@@ -46,7 +49,8 @@ namespace NuGet.VisualStudio
                                        IRepositorySettings repositorySettings,
                                        VsPackageInstallerEvents packageEvents,
                                        IPackageRepository activePackageSourceRepository,
-                                       IVsFrameworkMultiTargeting frameworkMultiTargeting)
+                                       IVsFrameworkMultiTargeting frameworkMultiTargeting,
+									   IMachineWideSettings machineWideSettings)
         {
             if (solutionManager == null)
             {
@@ -85,6 +89,7 @@ namespace NuGet.VisualStudio
             _packageEvents = packageEvents;
             _activePackageSourceRepository = activePackageSourceRepository;
             _frameworkMultiTargeting = frameworkMultiTargeting;
+			_machineWideSettings = machineWideSettings;
 
             _solutionManager.SolutionClosing += (sender, e) =>
             {
@@ -191,12 +196,53 @@ namespace NuGet.VisualStudio
                     storeFileSystem, 
                     configSettingsFileSystem);
 
+                var settings = Settings.LoadDefaultSettings(
+					configSettingsFileSystem, 
+					configFileName: null, 
+					machineWideSettings: _machineWideSettings);
+                repository.PackageSaveMode = CalculatePackageSaveMode(settings);
                 _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }
 
             return _repositoryInfo;
         }
 
+        private PackageSaveModes CalculatePackageSaveMode(ISettings settings)
+        {
+            PackageSaveModes retValue = PackageSaveModes.None;
+            if (settings != null)
+            {
+                string packageSaveModeValue = settings.GetConfigValue("PackageSaveMode");
+                // TODO: remove following block of code when shipping NuGet version post 2.8
+                if (string.IsNullOrEmpty(packageSaveModeValue))
+                {
+                    packageSaveModeValue = settings.GetConfigValue("SaveOnExpand");
+                }
+                // end of block of code to remove when shipping NuGet version post 2.8
+                if (!string.IsNullOrEmpty(packageSaveModeValue))
+                {
+                    foreach (var v in packageSaveModeValue.Split(';'))
+                    {
+                        if (v.Equals(PackageSaveModes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            retValue |= PackageSaveModes.Nupkg;
+                        }
+                        else if (v.Equals(PackageSaveModes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            retValue |= PackageSaveModes.Nuspec;
+                        }
+                    }
+                }
+            }
+
+            if (retValue == PackageSaveModes.None)
+            {
+                retValue = PackageSaveModes.Nupkg;
+            }
+
+            return retValue;
+        }
+        
         protected internal virtual IFileSystem GetConfigSettingsFileSystem(string configFolderPath)
         {
             return new SolutionFolderFileSystem(ServiceLocator.GetInstance<DTE>().Solution, VsConstants.NuGetSolutionSettingsFolder, configFolderPath);

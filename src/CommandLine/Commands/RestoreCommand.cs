@@ -425,6 +425,7 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            CalculateEffectivePackageSaveMode();
             DetermineRestoreMode();
             if (_restoringForSolution && !String.IsNullOrEmpty(SolutionDirectory))
             {
