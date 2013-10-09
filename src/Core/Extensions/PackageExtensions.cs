@@ -190,7 +190,7 @@ namespace NuGet
         /// </summary>
         public static IEnumerable<IPackage> AsCollapsed(this IEnumerable<IPackage> source)
         {
-            return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+            return source.DistinctLast<IPackage>(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
         /// <summary>

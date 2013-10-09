@@ -933,7 +933,7 @@ namespace NuGet.Test
             Assert.True(projectManager.LocalRepository.Exists(packageA));
             Assert.True(projectSystem.FileExists("a.file"));
 
-            string s = projectSystem.ReadAllText("a.file");
+            projectSystem.ReadAllText("a.file");
 
             // now modify 'a.file' to include ignore line markers
             projectSystem.AddFile("a.file", @"content\a.file
@@ -975,7 +975,7 @@ SDAFLKDSAJFL;KJDSAL;KFJL;DSAKJFL;KDSA
             Assert.True(projectManager.LocalRepository.Exists(packageA));
             Assert.True(projectSystem.FileExists("a.file"));
 
-            string s = projectSystem.ReadAllText("a.file");
+            projectSystem.ReadAllText("a.file");
 
             // now modify 'a.file' to include ignore line markers
             projectSystem.AddFile("a.file", @"this is awesome.");
@@ -1003,7 +1003,7 @@ SDAFLKDSAJFL;KJDSAL;KFJL;DSAKJFL;KDSA
             Assert.True(projectManager.LocalRepository.Exists(packageA));
             Assert.True(projectSystem.FileExists("a.file"));
 
-            string s = projectSystem.ReadAllText("a.file");
+            projectSystem.ReadAllText("a.file");
 
             // now modify 'a.file' to include ignore line markers
             projectSystem.AddFile("a.file", @"content\a.file
