@@ -20,6 +20,7 @@ src/Server/Server.Publish.xml
 DebugConstants.cs
 *.log
 packages/*
+WebMatrixExtension/packages/*
 !packages/Microsoft.Web.Xdt.1.0.0-alpha/
 *.userprefs
 .DS_Store

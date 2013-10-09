@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <featured>
+    <nugetId>microsoft-web-helpers</nugetId>
+    <nugetId>Facebook.Helper</nugetId>
+    <nugetId>Twitter.Helper</nugetId>
+    <nugetId>PayPal.Helper</nugetId>
+    <nugetId>RazorDebugger</nugetId>
+    <nugetId>BBCode</nugetId>
+    <nugetId>IE9.Helper</nugetId>
+    <nugetId>jQuery</nugetId>
+    <nugetId>EntityFramework</nugetId>
+    <nugetId>51Degrees.mobi-WebMatrix</nugetId>
+  </featured>
+</feed>

@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetExtension", "NuGetExtension\NuGetExtension.csproj", "{79CE8EFB-AF8D-4420-A8D4-EF4CFD6526F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetExtension.Tests", "NuGetExtension.Tests\NuGetExtension.Tests.csproj", "{DBD1F949-6EFA-4704-BBCB-C580048408ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79CE8EFB-AF8D-4420-A8D4-EF4CFD6526F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79CE8EFB-AF8D-4420-A8D4-EF4CFD6526F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBD1F949-6EFA-4704-BBCB-C580048408ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBD1F949-6EFA-4704-BBCB-C580048408ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

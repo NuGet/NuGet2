@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{79CE8EFB-AF8D-4420-A8D4-EF4CFD6526F3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NuGet.WebMatrix</RootNamespace>
+    <AssemblyName>NuGetExtension</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.WebMatrix.Core, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.WebMatrix.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WebMatrix.Extensibility, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.WebMatrix.Extensibility.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=1.6.30117.9648, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\NuGet25\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\NuGetCommands.cs" />
+    <Compile Include="Commands\NuGetCommandTarget.cs" />
+    <Compile Include="Converters\ColorToBrushConverter.cs" />
+    <Compile Include="Converters\FixUrlConverter.cs" />
+    <Compile Include="Core\FeedSource.cs" />
+    <Compile Include="Core\FeedSourceStore.cs" />
+    <Compile Include="Core\FilterManager.cs" />
+    <Compile Include="Core\IFeedSourceStore.cs" />
+    <Compile Include="Core\IPackageManager.cs" />
+    <Compile Include="Core\IStringSequenceStore.cs" />
+    <Compile Include="Core\NativeMethods.cs" />
+    <Compile Include="Core\StringSequenceFeedSourceStore.cs" />
+    <Compile Include="Core\StringSequenceStore.cs" />
+    <Compile Include="Data\IListViewFilter.cs" />
+    <Compile Include="Data\ListViewFilter.cs" />
+    <Compile Include="Data\VirtualizingList.cs" />
+    <Compile Include="Data\VirtualizingListEntry.cs" />
+    <Compile Include="Data\VirtualizingListPlaceholder.cs" />
+    <Compile Include="Data\VirtualizingListViewFilter.cs" />
+    <Compile Include="GalleryDescriptors.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="ListViewWithPointer.cs" />
+    <Compile Include="ModuleGlobals.cs" />
+    <Compile Include="NuGetGallery.cs" />
+    <Compile Include="NuGetRibbonProvider.cs" />
+    <Compile Include="NuGet\NuGetFeedSourceStore.cs" />
+    <Compile Include="NuGet\NuGetPackageManager.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="IdleDelayTimer.cs" />
+    <Compile Include="WPF\Model\NuGetModel.cs" />
+    <Compile Include="WPF\Model\PackageSourcesModel.cs" />
+    <Compile Include="WPF\ViewModel\ButtonBarViewModel.cs" />
+    <Compile Include="WPF\ViewModel\ButtonViewModel.cs" />
+    <Compile Include="WPF\ViewModel\NuGetViewModel.cs" />
+    <Compile Include="WPF\ViewModel\PackageSourcesViewModel.cs" />
+    <Compile Include="WPF\ViewModel\PackageViewModel.cs" />
+    <Compile Include="WPF\ViewModel\PackageViewModelAction.cs" />
+    <Compile Include="WPF\View\NuGetButtonBar.xaml.cs">
+      <DependentUpon>NuGetButtonBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\View\NuGetView.xaml.cs">
+      <DependentUpon>NuGetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\View\SearchPageHeader.xaml.cs">
+      <DependentUpon>SearchPageHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\View\SourceManagerView.xaml.cs">
+      <DependentUpon>SourceManagerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NuGetExtension.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NuGetPackageManager.NuSpec">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="WPF\View\NuGetButtonBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WPF\View\NuGetView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WPF\View\SearchPageHeader.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WPF\View\SourceManagerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\backarrow.png" />
+    <Resource Include="Resources\nuget_16.png" />
+    <Resource Include="Resources\nuget_32.png" />
+    <Resource Include="Resources\nuget_48.png" />
+    <Resource Include="Resources\nuget_96.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\ClearSearch.png" />
+    <Content Include="Resources\MagGlass.png" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Build package out of nuspec -->
+  <PropertyGroup>
+    <MajorVersion>2</MajorVersion>
+    <MinorVersion>5</MinorVersion>
+    <!-- Ensure that we come up with a new version every 65535 years -->
+    <VersionStartYear>2010</VersionStartYear>
+    <!-- Build number is of the format (CurrentYear - VersionStartYear + 1)(2 digit month)(2 digit day) -->
+    <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
+    <Revision>$(BUILD_NUMBER)</Revision>
+    <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+    <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
+  </PropertyGroup>
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+    <PropertyGroup>
+      <NuGetExe>..\..\..\..\lib\NuGet.exe</NuGetExe>
+    </PropertyGroup>
+    <Exec Command="$(NuGetExe) pack NuGetPackageManager.NuSpec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(OutputPath)" />
+  </Target>
+</Project>

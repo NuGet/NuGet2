@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{DBD1F949-6EFA-4704-BBCB-C580048408ED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NuGet.WebMatrix.Tests</RootNamespace>
+    <AssemblyName>NuGetExtension.Tests</AssemblyName>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--<Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\public\ext\VisualStudio\VS10RTM\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.MMF">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Tests\MMFv40dbg\Microsoft.MMF.dll</HintPath>
+    </Reference>-->
+    <Reference Include="Microsoft.WebMatrix.Core, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.WebMatrix.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WebMatrix.Extensibility, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.WebMatrix.Extensibility.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.1.1309.1617\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=1.6.30117.9648, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\NuGet25\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="xunit">
+      <HintPath>..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions">
+      <HintPath>..\packages\xunit.extensions.1.9.2\lib\net20\xunit.extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ModelTests\PackageSourcesModelTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\InMemoryFeedSourceStore.cs" />
+    <Compile Include="Utilities\InMemoryPackageManager.cs" />
+    <Compile Include="Utilities\PackageFactory.cs" />
+    <Compile Include="Utilities\PackageStub.cs" />
+    <Compile Include="Utilities\TemporaryDispatcherThread.cs" />
+    <Compile Include="ViewModelTests\ButtonBarViewModelTests.cs" />
+    <Compile Include="ViewModelTests\EndToEndTests.cs" />
+    <Compile Include="ViewModelTests\NuGetViewModelTests.cs" />
+    <Compile Include="CoreTests\FilterManagerTest.cs" />
+    <Compile Include="Mocks\IPackageManagerMock.cs" />
+    <Compile Include="Mocks\IPackageMock.cs" />
+    <Compile Include="Mocks\IWebMatrixHostMock.cs" />
+    <Compile Include="ModelTests\NuGetModelTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ViewModelTests\featured.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NuGetExtension\NuGetExtension.csproj">
+      <Project>{79ce8efb-af8d-4420-a8d4-ef4cfd6526f3}</Project>
+      <Name>NuGetExtension</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

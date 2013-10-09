@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <version>2.5</version>
+    <authors>WebMatrix Team</authors>
+    <owners />
+    <id>NuGetPackageManager</id>
+    <title />
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+This is the extension for NuGet Package Manager</description>
+    <summary />
+  </metadata>
+  <files>
+    <file src="NuGetExtension.dll" target="content\NuGetPackageManager\NuGetExtension.dll" />
+    <file src="NuGet.Core.dll" target="content\NuGetPackageManager\NuGet.Core.dll" />
+    <!-- =LOCALIZE= The resource assemblies below are added during a localized build. Please do not remove or edit this line.
+    <file src="cs-CZ\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\cs\NuGetExtension.resources.dll" />
+    <file src="de-DE\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\de\NuGetExtension.resources.dll" />
+    <file src="es-ES\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\es\NuGetExtension.resources.dll" />
+    <file src="fr-FR\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\fr\NuGetExtension.resources.dll" />
+    <file src="it-IT\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\it\NuGetExtension.resources.dll" />
+    <file src="ja-JP\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\ja\NuGetExtension.resources.dll" />
+    <file src="ko-KR\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\ko\NuGetExtension.resources.dll" />
+    <file src="pl-PL\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\pl\NuGetExtension.resources.dll" />
+    <file src="pt-BR\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\pt\NuGetExtension.resources.dll" />
+    <file src="ru-RU\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\ru\NuGetExtension.resources.dll" />
+    <file src="tr-TR\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\tr\NuGetExtension.resources.dll" />
+    <file src="zh-CN\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\zh-CHS\NuGetExtension.resources.dll" />
+    <file src="zh-TW\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\zh-CHT\NuGetExtension.resources.dll" />
+    =LOCALIZE= Please do not remove this line. -->
+  </files>
+</package>

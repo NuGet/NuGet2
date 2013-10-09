@@ -1,0 +1,630 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Downloads" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="ExtensionName" xml:space="preserve">
+    <value>NuGet</value>
+  </data>
+  <data name="Filter_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Filter_AllDescription" xml:space="preserve">
+    <value>All {0}</value>
+  </data>
+  <data name="Filter_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Filter_InstalledDescription" xml:space="preserve">
+    <value>Installed {0}</value>
+  </data>
+  <data name="Filter_Updated" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="Filter_UpdatedDescription" xml:space="preserve">
+    <value>Updates available for installed {0}</value>
+  </data>
+  <data name="GalleryCommandName" xml:space="preserve">
+    <value>NuGet</value>
+  </data>
+  <data name="RibbonGroupName" xml:space="preserve">
+    <value>NuGet</value>
+  </data>
+  <data name="String__Close" xml:space="preserve">
+    <value>_Close</value>
+  </data>
+  <data name="String_NuGetGalleryHeading" xml:space="preserve">
+    <value>&lt;Bold&gt;NuGet&lt;/Bold&gt; Gallery</value>
+  </data>
+  <data name="String_SourceManagerb" xml:space="preserve">
+    <value>Manage your &lt;Bold&gt; Package Sources&lt;/Bold&gt;</value>
+  </data>
+  <data name="String__Install" xml:space="preserve">
+    <value>_Install</value>
+  </data>
+  <data name="String__Update" xml:space="preserve">
+    <value>U_pdate</value>
+  </data>
+  <data name="String__Uninstall" xml:space="preserve">
+    <value>_Uninstall</value>
+  </data>
+  <data name="String_PleaseWait" xml:space="preserve">
+    <value>Please wait...</value>
+  </data>
+  <data name="String_LoadingNuGetGallery" xml:space="preserve">
+    <value>Loading NuGet gallery...</value>
+  </data>
+  <data name="String_EnterSearchString" xml:space="preserve">
+    <value>Enter Search String</value>
+  </data>
+  <data name="String_ClearSearchResults" xml:space="preserve">
+    <value>Clear Search Results</value>
+  </data>
+  <data name="String_Authors" xml:space="preserve">
+    <value>Authors</value>
+  </data>
+  <data name="String_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="String_CurrentVersion" xml:space="preserve">
+    <value>The current version is</value>
+  </data>
+  <data name="String_ViewProjectSite" xml:space="preserve">
+    <value>View project site...</value>
+  </data>
+  <data name="String_PeopleHaveDownloaded" xml:space="preserve">
+    <value>people have downloaded this package</value>
+  </data>
+  <data name="String_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="String_ErrorOccurred" xml:space="preserve">
+    <value>An error occurred.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="nuget_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\nuget_32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="String_I__Accept" xml:space="preserve">
+    <value>I _Accept</value>
+  </data>
+  <data name="String_I__Decline" xml:space="preserve">
+    <value>I _Decline</value>
+  </data>
+  <data name="String_HeaderText" xml:space="preserve">
+    <value>Each package is licensed to you by its owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses.</value>
+  </data>
+  <data name="String_DependenciesToBeInstall" xml:space="preserve">
+    <value>Dependencies which will be installed:</value>
+  </data>
+  <data name="String_LicenseText" xml:space="preserve">
+    <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
+  </data>
+  <data name="String_ViewLicense" xml:space="preserve">
+    <value>View license terms</value>
+  </data>
+  <data name="String_AcceptEula" xml:space="preserve">
+    <value>Accept EULA</value>
+  </data>
+  <data name="String_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="String_PackageInformation" xml:space="preserve">
+    <value>Retrieving package information...</value>
+  </data>
+  <data name="String_MoreInformation" xml:space="preserve">
+    <value>More information:</value>
+  </data>
+  <data name="CuratedFeedSourceTitle" xml:space="preserve">
+    <value>WebMatrix Package Source</value>
+  </data>
+  <data name="String_Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="String_UninstallMessage" xml:space="preserve">
+    <value>Are you sure you want to uninstall the package? Doing so may break your site if it uses functionality provided by this package.</value>
+  </data>
+  <data name="String__No" xml:space="preserve">
+    <value>_No</value>
+  </data>
+  <data name="String__Yes" xml:space="preserve">
+    <value>_Yes</value>
+  </data>
+  <data name="String_FeaturedCategory" xml:space="preserve">
+    <value>Featured Packages</value>
+  </data>
+  <data name="String_InstalledCategory" xml:space="preserve">
+    <value>Installed Packages</value>
+  </data>
+  <data name="String_LoadingFeaturedPackages" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="String_UnableToLoadPackages" xml:space="preserve">
+    <value />
+  </data>
+  <data name="String_ErrorGettingInstalledPackages" xml:space="preserve">
+    <value />
+  </data>
+  <data name="String_NoInstalledPackages" xml:space="preserve">
+    <value />
+  </data>
+  <data name="String_Add" xml:space="preserve">
+    <value>Add</value>
+    <comment>_</comment>
+  </data>
+  <data name="String_AddSource" xml:space="preserve">
+    <value>Add Source</value>
+  </data>
+  <data name="String_AddSourceEllipse" xml:space="preserve">
+    <value>Add source...</value>
+  </data>
+  <data name="String_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="String_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="String_URL" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="String__Ok" xml:space="preserve">
+    <value>_OK</value>
+    <comment>_k</comment>
+  </data>
+  <data name="String__Disable" xml:space="preserve">
+    <value>_Disable</value>
+  </data>
+  <data name="String__Enable" xml:space="preserve">
+    <value>_Enable</value>
+  </data>
+  <data name="Notification_Installed" xml:space="preserve">
+    <value>The {0} '{1}' was successfully installed.</value>
+  </data>
+  <data name="Notification_Uninstalled" xml:space="preserve">
+    <value>The {0} '{1}' was successfully uninstalled.</value>
+  </data>
+  <data name="Notification_Updated" xml:space="preserve">
+    <value>The {0} '{1}' was successfully updated.</value>
+  </data>
+  <data name="Notification_NugetPackage" xml:space="preserve">
+    <value>NuGet package</value>
+  </data>
+  <data name="NugetIcon96" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\nuget_96.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NuGet_PackageSourceName" xml:space="preserve">
+    <value>NuGet Official Package Source</value>
+  </data>
+  <data name="String_LastUpdated" xml:space="preserve">
+    <value>Last Updated</value>
+  </data>
+  <data name="String_ReportAbuse" xml:space="preserve">
+    <value>Report abuse...</value>
+  </data>
+  <data name="String_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="String_ViewPackageDetailsOnline" xml:space="preserve">
+    <value>View package details online...</value>
+  </data>
+  <data name="WindowsNamedAnyAnyAnySpecified" xml:space="preserve">
+    <value>{0} operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyAnyAnyNewer" xml:space="preserve">
+    <value>{0} or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyAnyx86Specified" xml:space="preserve">
+    <value>{0} x86 operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyAnyx86Newer" xml:space="preserve">
+    <value>{0} x86 or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyAnyx64Specified" xml:space="preserve">
+    <value>{0} x64 operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyAnyx64Newer" xml:space="preserve">
+    <value>{0} x64 or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientAnySpecified" xml:space="preserve">
+    <value>{0} client operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientAnyNewer" xml:space="preserve">
+    <value>{0} client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientx86Specified" xml:space="preserve">
+    <value>{0} x86 client operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientx86Newer" xml:space="preserve">
+    <value>{0} x86 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientx64Specified" xml:space="preserve">
+    <value>{0} x64 client operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyClientx64Newer" xml:space="preserve">
+    <value>{0} x64 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerAnySpecified" xml:space="preserve">
+    <value>{0} server operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerAnyNewer" xml:space="preserve">
+    <value>{0} server or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerx86Specified" xml:space="preserve">
+    <value>{0} x86 server operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerx86Newer" xml:space="preserve">
+    <value>{0} x86 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerx64Specified" xml:space="preserve">
+    <value>{0} x64 server operating system.</value>
+  </data>
+  <data name="WindowsNamedAnyServerx64Newer" xml:space="preserve">
+    <value>{0} x64 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyAnySpecified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyAnyNewer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyx86Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyx86Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyx64Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumAnyx64Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientAnySpecified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} client operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientAnyNewer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientx86Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 client operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientx86Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientx64Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 client operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumClientx64Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerAnySpecified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} server operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerAnyNewer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} server or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerx86Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 server operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerx86Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x86 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerx64Specified" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 server operating system.</value>
+  </data>
+  <data name="WindowsNamedMinimumServerx64Newer" xml:space="preserve">
+    <value>{0} minimum Service Pack {2} x64 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyAnySpecified" xml:space="preserve">
+    <value>Windows version {1} operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyAnyNewer" xml:space="preserve">
+    <value>Windows version {1} or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyx86Specified" xml:space="preserve">
+    <value>Windows version {1} x86 operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyx86Newer" xml:space="preserve">
+    <value>Windows version {1} x86 or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyx64Specified" xml:space="preserve">
+    <value>Windows version {1} x64 operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyAnyx64Newer" xml:space="preserve">
+    <value>Windows version {1} x64 or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientAnySpecified" xml:space="preserve">
+    <value>Windows version {1} client operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientAnyNewer" xml:space="preserve">
+    <value>Windows version {1} client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientx86Specified" xml:space="preserve">
+    <value>Windows version {1} x86 client operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientx86Newer" xml:space="preserve">
+    <value>Windows version {1} x86 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientx64Specified" xml:space="preserve">
+    <value>Windows version {1} x64 client operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyClientx64Newer" xml:space="preserve">
+    <value>Windows version {1} x64 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerAnySpecified" xml:space="preserve">
+    <value>Windows version {1} server operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerAnyNewer" xml:space="preserve">
+    <value>Windows version {1} server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerx86Specified" xml:space="preserve">
+    <value>Windows version {1} x86 server operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerx86Newer" xml:space="preserve">
+    <value>Windows version {1} x86 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerx64Specified" xml:space="preserve">
+    <value>Windows version {1} x64 server operating system.</value>
+  </data>
+  <data name="WindowsNumericAnyServerx64Newer" xml:space="preserve">
+    <value>Windows version {1} x64 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyAnySpecified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyAnyNewer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyx86Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyx86Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyx64Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumAnyx64Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientAnySpecified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} client operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientAnyNewer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientx86Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 client operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientx86Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientx64Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 client operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumClientx64Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 client or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerAnySpecified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} server operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerAnyNewer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerx86Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 server operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerx86Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x86 server or newer operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerx64Specified" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 server operating system.</value>
+  </data>
+  <data name="WindowsNumericMinimumServerx64Newer" xml:space="preserve">
+    <value>Windows version {1} minimum Service Pack {2} x64 server or newer operating system.</value>
+  </data>
+  <data name="String_SystemRequirementsNotMet" xml:space="preserve">
+    <value>The current operating system does not meet the package system requirements.</value>
+  </data>
+  <data name="Windows7" xml:space="preserve">
+    <value>Windows 7</value>
+  </data>
+  <data name="Windows8" xml:space="preserve">
+    <value>Windows 8</value>
+  </data>
+  <data name="WindowsVista" xml:space="preserve">
+    <value>Windows Vista</value>
+  </data>
+  <data name="WindowsXP" xml:space="preserve">
+    <value>Windows XP</value>
+  </data>
+  <data name="GalleryCommandTooltip" xml:space="preserve">
+    <value>Open NuGet Gallery</value>
+  </data>
+  <data name="RibbonButtonKeyTip" xml:space="preserve">
+    <value>U</value>
+  </data>
+  <data name="PackageSourcesManagerHeader" xml:space="preserve">
+    <value>Configure Package Sources</value>
+  </data>
+  <data name="String_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ClickForReadme" xml:space="preserve">
+    <value>Readme.txt</value>
+  </data>
+  <data name="ContentPackageSourceTitle" xml:space="preserve">
+    <value>NuGet Web Content Package Source</value>
+  </data>
+  <data name="PackageId" xml:space="preserve">
+    <value>Package Id</value>
+  </data>
+  <data name="PackageIdToolTipFormat" xml:space="preserve">
+    <value>Package Id: {0}</value>
+  </data>
+  <data name="Filter_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Filter_DisabledDescription" xml:space="preserve">
+    <value>Disabled {0}</value>
+  </data>
+  <data name="String_InstalledVersion" xml:space="preserve">
+    <value>Installed Version</value>
+  </data>
+  <data name="String_NotInstalled" xml:space="preserve">
+    <value>Not Installed</value>
+  </data>
+  <data name="String_Searching" xml:space="preserve">
+    <value>Searching...</value>
+  </data>
+  <data name="String_Installing" xml:space="preserve">
+    <value>Installing...</value>
+  </data>
+  <data name="String_Uninstalling" xml:space="preserve">
+    <value>Uninstalling...</value>
+  </data>
+  <data name="String_Updating" xml:space="preserve">
+    <value>Updating...</value>
+  </data>
+  <data name="String_InstallPrompt" xml:space="preserve">
+    <value>Would you like to install this package?</value>
+  </data>
+  <data name="String_UpdatePrompt" xml:space="preserve">
+    <value>Would you like to update this package?</value>
+  </data>
+  <data name="MultiFilter_DisplayName" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="String_YourQueryReturnedZeroResults" xml:space="preserve">
+    <value>Your query returned zero results</value>
+  </data>
+  <data name="Prerelease_Filter_IncludePrerelease" xml:space="preserve">
+    <value>Include Prerelease</value>
+  </data>
+  <data name="Prerelease_Filter_StableOnly" xml:space="preserve">
+    <value>Stable Only</value>
+  </data>
+  <data name="ClearSearch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\ClearSearch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MagGlass" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\MagGlass.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+</root>
