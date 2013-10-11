@@ -103,23 +103,17 @@ namespace NuGet.VisualStudio
             return false;
         }
         
-        public static bool IsAnySourceAvailable(string source, IVsPackageSourceProvider packageSourceProvider, bool checkHttp)
+        public static bool IsAnySourceAvailable(IVsPackageSourceProvider packageSourceProvider, bool checkHttp)
         {           
-            //If the source switch or any of the enabled sources is http, return true
+            //If any of the enabled sources is http, return true
             if (checkHttp)
             {
                 bool isHttpSource;
-                isHttpSource = (packageSourceProvider == null)? UriHelper.IsHttpSource(source): UriHelper.IsHttpSource(source, packageSourceProvider);
+                isHttpSource = UriHelper.IsHttpSource(packageSourceProvider);
                  if (isHttpSource)
                 {
                     return true;
                 }
-            }
-
-            //If directory exists for -Source, return true;
-            if (Directory.Exists(source))
-            {
-                return true;
             }
 
             if (packageSourceProvider != null)

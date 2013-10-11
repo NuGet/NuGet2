@@ -94,29 +94,24 @@ namespace NuGet.PowerShell.Commands
         {
             /**** Fallback to Cache logic***/
             //1. Check if there is any http source (in active sources or Source switch)
-            //2. Check if -Source switch is specified and not http, the path is available
-            //3. Check if any one of the UNC or local sources is available (in active sources)
-            //4. If none of the above is true, fallback to cache
+            //2. Check if any one of the UNC or local sources is available (in active sources)
+            //3. If none of the above is true, fallback to cache
 
             //Check if any of the active package source is available. This function will return true if there is any http source in active sources
             //For http sources, we will continue and fallback to cache at a later point if the resource is unavailable
-            bool isAnySourceAvailable = false;
-            if (!String.IsNullOrEmpty(Source))
+            
+            if (String.IsNullOrEmpty(Source))
             {
-                _currentSource = Source;
-                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, null, NetworkInterface.GetIsNetworkAvailable());
-            }
-            else
-            {
+                bool isAnySourceAvailable = false;
                 _currentSource = _packageSourceProvider.ActivePackageSource;
-                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(Source, _packageSourceProvider, NetworkInterface.GetIsNetworkAvailable());
-            }
+                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(_packageSourceProvider, NetworkInterface.GetIsNetworkAvailable());
 
-            //if no local or UNC source is available or no source is http, fallback to local cache
-            if (!isAnySourceAvailable)
-            {
-                Source = NuGet.MachineCache.Default.Source;
-                CacheStatusMessage(_currentSource, Source);
+                //if no local or UNC source is available or no source is http, fallback to local cache
+                if (!isAnySourceAvailable)
+                {
+                    Source = NuGet.MachineCache.Default.Source;
+                    CacheStatusMessage(_currentSource, Source);
+                }
             }
 
             //At this point, Source might be value from -Source switch or NuGet Local Cache
