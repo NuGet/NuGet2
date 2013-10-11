@@ -2511,3 +2511,37 @@ function Test-InstallPackageAddMoreEntriesToProjectConfigFile
     Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
+
+# Tests that when -MaxDependencyPatches is specified, the dependency with
+# the largest patch number is installed
+function Test-InstallPackageWithMaxDependencyPatches
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package jquery.validation -version 1.10 -MaxDependencyPatches
+
+    # Assert
+    Assert-Package $p jquery.validation 1.10
+    Assert-Package $p jquery 1.4.4
+}
+
+# Tests that when -MaxDependencyPatches is not specified, the dependency with
+# the smallest patch number is installed
+function Test-InstallPackageWithoutMaxDependencyPatches
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package jquery.validation -version 1.10
+
+    # Assert
+    Assert-Package $p jquery.validation 1.10
+    Assert-Package $p jquery 1.4.1
+}

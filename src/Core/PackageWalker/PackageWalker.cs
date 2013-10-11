@@ -22,6 +22,7 @@ namespace NuGet
         {
             _targetFramework = targetFramework;
             Marker = new PackageMarker();
+            MaxDependencyPatches = false;
         }
 
         protected FrameworkName TargetFramework
@@ -64,6 +65,20 @@ namespace NuGet
             }
         }
 
+        /// <summary>
+        /// If true, the dependency with the maximum patch number is picked.
+        /// If false, the dependency with the mininum patch number is picked.
+        /// </summary>
+        /// <remarks>
+        /// The patch number is the part after major and minor. E.g. for version 1.2.3.4, 
+        /// the patch number is 3.4.
+        /// </remarks>
+        public bool MaxDependencyPatches
+        {
+            get;
+            set;
+        }
+
         protected PackageMarker Marker
         {
             get;
@@ -99,8 +114,12 @@ namespace NuGet
                 foreach (var dependency in package.GetCompatiblePackageDependencies(TargetFramework))
                 {
                     // Try to resolve the dependency from the visited packages first
-                    IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions, preferListedPackages: false) ??
-                                                  ResolveDependency(dependency);
+                    IPackage resolvedDependency = Marker.ResolveDependency(
+                        dependency, constraintProvider: null, 
+                        allowPrereleaseVersions: AllowPrereleaseVersions, 
+                        preferListedPackages: false, 
+                        maxDependencyPatches: MaxDependencyPatches) ??
+                        ResolveDependency(dependency);
 
                     if (resolvedDependency == null)
                     {

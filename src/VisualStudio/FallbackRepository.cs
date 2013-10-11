@@ -69,11 +69,11 @@ namespace NuGet.VisualStudio
             _primaryRepository.RemovePackage(package);
         }
 
-        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages, bool maxDependencyPatches)
         {
             // Use the primary repository to look up dependencies. Fallback to the aggregate repository only if we can't find a package here.
-            return _primaryRepository.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages) ??
-                   _dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
+            return _primaryRepository.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, maxDependencyPatches) ??
+                _dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, maxDependencyPatches);
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)

@@ -439,6 +439,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} {1}.
+        /// </summary>
+        public static string Log_PackageOperation {
+            get {
+                return ResourceManager.GetString("Log_PackageOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} already has a reference to &apos;{1}&apos;..
         /// </summary>
         public static string Log_ProjectAlreadyReferencesPackage {

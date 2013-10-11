@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             var dependencyResolver = repository as IDependencyResolver;
-            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new SemanticVersion("1.0.0.0") }), null, allowPrereleaseVersions: false, preferListedPackages: false);
+            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new SemanticVersion("1.0.0.0") }), null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: false);
             List<IPackage> packages = repository.GetPackages().ToList();
 
             // Assert
@@ -298,7 +298,7 @@ namespace NuGet.VisualStudio.Test
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
             dependencyResolver.As<IDependencyResolver>()
-                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false, It.IsAny<bool>()))
+                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false, It.IsAny<bool>(), false))
                               .Throws(new Exception("This method should not be called."));
             var primaryRepository = new MockPackageRepository();
             primaryRepository.AddPackage(package);
@@ -318,7 +318,7 @@ namespace NuGet.VisualStudio.Test
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
             dependencyResolver.As<IDependencyResolver>()
-                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false, It.IsAny<bool>()))
+                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false, It.IsAny<bool>(), false))
                               .Throws(new Exception("Connection failure."));
             var aggregateRepository = new AggregateRepository(new[] { dependencyResolver.Object }) { IgnoreFailingRepositories = true };
             var primaryRepository = new MockPackageRepository();

@@ -15,7 +15,9 @@ namespace NuGet
         IPackageRepository LocalRepository { get; }
 
         ILogger Logger { get; set; }
-        
+
+        bool MaxDependencyPatches { get; set; }
+
         /// <summary>
         /// Remote repository to install packages from.
         /// </summary>

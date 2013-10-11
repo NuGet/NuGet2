@@ -116,7 +116,7 @@ namespace NuGet.PowerShell.Commands
                 // terminating
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
-
+            
             try
             {
                 SubscribeToProgressEvents();

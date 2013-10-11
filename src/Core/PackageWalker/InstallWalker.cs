@@ -23,7 +23,7 @@ namespace NuGet
                                IPackageRepository sourceRepository,
                                ILogger logger,
                                bool ignoreDependencies,
-                               bool allowPrereleaseVersions) 
+                               bool allowPrereleaseVersions)
             : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions)
         {
         }
@@ -43,7 +43,7 @@ namespace NuGet
                  allowPrereleaseVersions: allowPrereleaseVersions)
         {
         }
-
+        
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
                              IPackageConstraintProvider constraintProvider,
@@ -204,12 +204,17 @@ namespace NuGet
 
             // Uninstall the conflicting package. We set throw on conflicts to false since we've
             // already decided that there were no conflicts based on the above code.
-            var resolver = new UninstallWalker(repository,
-                                               dependentsResolver,
-                                               TargetFramework,
-                                               NullLogger.Instance,
-                                               removeDependencies: !IgnoreDependencies,
-                                               forceRemove: false) { ThrowOnConflicts = false };
+            var resolver = new UninstallWalker(
+                repository,
+                dependentsResolver,
+                TargetFramework,
+                NullLogger.Instance,
+                removeDependencies: !IgnoreDependencies,
+                forceRemove: false) 
+                {
+                    DisableWalkInfo = this.DisableWalkInfo,
+                    ThrowOnConflicts = false 
+                };
 
             foreach (var operation in resolver.ResolveOperations(package))
             {
@@ -219,6 +224,13 @@ namespace NuGet
                     _operations.AddOperation(operation);
                 }
             }
+        }
+
+        private IPackage SelectDependency(IEnumerable<IPackage> dependencies)
+        {
+            return MaxDependencyPatches ?
+                dependencies.ResolveSafeVersion() :
+                dependencies.FirstOrDefault();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
@@ -241,9 +253,8 @@ namespace NuGet
                            select new
                            {
                                OldPackage = oldPackage,
-                               NewPackage = g.Where(p => p.Version > oldPackage.Version)
-                                             .OrderBy(p => p.Version)
-                                             .FirstOrDefault()
+                               NewPackage = SelectDependency(g.Where(p => p.Version > oldPackage.Version)
+                                   .OrderBy(p => package.Version))
                            };
 
             foreach (var p in packages)
@@ -342,14 +353,14 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false);
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, maxDependencyPatches: MaxDependencyPatches);
             if (package != null)
             {
                 return package;
             }
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true);
+            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, maxDependencyPatches: MaxDependencyPatches);
             return sourcePackage;
         }
 

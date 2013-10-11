@@ -81,6 +81,20 @@ namespace NuGet
             }
         }
 
+        internal bool DisableWalkInfo
+        {
+            get;
+            set;
+        }
+
+        protected override bool IgnoreWalkInfo
+        {
+            get
+            {
+                return DisableWalkInfo ? true : base.IgnoreWalkInfo;
+            }
+        }
+
         private Stack<PackageOperation> Operations
         {
             get;

@@ -54,11 +54,18 @@ namespace NuGet
 
         protected override void OnAfterPackageWalk(IPackage package)
         {
-            PackageWalkInfo info = GetPackageInfo(package);
-
-            if (AcceptedTargets.HasFlag(info.Target))
+            if (DisableWalkInfo)
             {
                 base.OnAfterPackageWalk(package);
+            }
+            else
+            {
+                PackageWalkInfo info = GetPackageInfo(package);
+
+                if (AcceptedTargets.HasFlag(info.Target))
+                {
+                    base.OnAfterPackageWalk(package);
+                }
             }
         }
     }

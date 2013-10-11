@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
@@ -49,6 +48,7 @@ namespace NuGet
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
+            MaxDependencyPatches = false;
         }
 
         public IFileSystem FileSystem
@@ -87,6 +87,12 @@ namespace NuGet
             }
         }
 
+        public bool MaxDependencyPatches
+        {
+            get;
+            set;
+        }
+
         public void InstallPackage(string packageId)
         {
             InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -122,11 +128,13 @@ namespace NuGet
             bool ignoreWalkInfo = false)
         {
             var installerWalker = new InstallWalker(
-                    LocalRepository, SourceRepository, targetFramework, Logger, ignoreDependencies, allowPrereleaseVersions)
-                {
-                    DisableWalkInfo = ignoreWalkInfo
-                };
-            
+                LocalRepository, SourceRepository,
+                targetFramework, Logger,
+                ignoreDependencies, allowPrereleaseVersions)
+            {
+                DisableWalkInfo = ignoreWalkInfo,
+                MaxDependencyPatches = MaxDependencyPatches
+            };
             Execute(package, installerWalker);
         }
 

@@ -207,4 +207,10 @@
   <data name="Cmdlet_LocalCacheFailure" xml:space="preserve">
     <value>The source at {0} is unreachable. There is no NuGet Local Cache found</value>
   </data>
+  <data name="Cmdlet_NothingToDo" xml:space="preserve">
+    <value>Nothing to do</value>
+  </data>
+  <data name="Cmdlet_PackageOperation" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>  
 </root>

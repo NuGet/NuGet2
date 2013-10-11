@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Resources;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -38,7 +39,6 @@ namespace NuGet.VisualStudio
             _fileSystemProvider = fileSystemProvider;
             _deleteOnRestartManager = deleteOnRestartManager;
             _frameworkMultiTargeting = frameworkMultiTargeting;
-
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -497,11 +497,11 @@ namespace NuGet.VisualStudio
             UpdatePackages(
                 LocalRepository,
                 package => ReinstallPackage(
-                                package.Id,
-                                updateDependencies: updateDependencies,
-                                allowPrereleaseVersions: allowPrereleaseVersions,
-                                logger: logger,
-                                eventListener: eventListener),
+                    package.Id,
+                    updateDependencies: updateDependencies,
+                    allowPrereleaseVersions: allowPrereleaseVersions,
+                    logger: logger,
+                    eventListener: eventListener),
                 logger);
         }
 
@@ -530,7 +530,7 @@ namespace NuGet.VisualStudio
         {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
-
+            
             if (appliesToProject)
             {
                 ReinstallPackageToAllProjects(packageId, updateDependencies, allowPrereleaseVersions, logger, eventListener);
@@ -666,7 +666,6 @@ namespace NuGet.VisualStudio
                         {
                             // save the version installed in this project so that we can restore the correct version later
                             projectsHasPackage.Add(project, projectPackage.Version);
-
                             UninstallPackage(
                                 projectManager,
                                 packageId,
@@ -712,6 +711,13 @@ namespace NuGet.VisualStudio
                logger,
                eventListener);
 
+        }
+
+        private static PackageAction ReverseAction(PackageAction packageAction)
+        {
+            return packageAction == PackageAction.Install ?
+                PackageAction.Uninstall :
+                PackageAction.Install;            
         }
 
         private void ReinstallSolutionPackage(

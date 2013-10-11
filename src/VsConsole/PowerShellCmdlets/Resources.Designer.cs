@@ -241,6 +241,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nothing to do.
+        /// </summary>
+        internal static string Cmdlet_NothingToDo {
+            get {
+                return ResourceManager.GetString("Cmdlet_NothingToDo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to locate a .nuspec file in the specified project..
         /// </summary>
         internal static string Cmdlet_NuspecFileNotFound {
@@ -282,6 +291,15 @@ namespace NuGet.PowerShell.Commands {
         internal static string Cmdlet_PackageIdNotFound {
             get {
                 return ResourceManager.GetString("Cmdlet_PackageIdNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1}.
+        /// </summary>
+        internal static string Cmdlet_PackageOperation {
+            get {
+                return ResourceManager.GetString("Cmdlet_PackageOperation", resourceCulture);
             }
         }
         
