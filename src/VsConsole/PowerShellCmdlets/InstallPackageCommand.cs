@@ -64,6 +64,9 @@ namespace NuGet.PowerShell.Commands
         public FileConflictAction FileConflictAction { get; set; }
 
         [Parameter]
+        public SwitchParameter WhatIf { get; set; }
+
+        [Parameter]
         public SwitchParameter MaxDependencyPatches { get; set; }
 
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
@@ -227,6 +230,7 @@ namespace NuGet.PowerShell.Commands
             }
 
             packageManager.MaxDependencyPatches = MaxDependencyPatches;
+            packageManager.WhatIf = WhatIf;
             packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
         }
     }

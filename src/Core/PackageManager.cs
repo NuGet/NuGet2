@@ -93,6 +93,12 @@ namespace NuGet
             set;
         }
 
+        public bool WhatIf
+        {
+            get;
+            set;
+        }
+
         public void InstallPackage(string packageId)
         {
             InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -127,6 +133,12 @@ namespace NuGet
             bool allowPrereleaseVersions,
             bool ignoreWalkInfo = false)
         {
+            if (WhatIf)
+            {
+                // This prevents InstallWalker from downloading the packages
+                ignoreWalkInfo = true;
+            }
+
             var installerWalker = new InstallWalker(
                 LocalRepository, SourceRepository,
                 targetFramework, Logger,
@@ -168,14 +180,28 @@ namespace NuGet
                 }
                 else
                 {
-                    ExecuteInstall(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        ExecuteInstall(operation.Package);
+                    }
                 }
             }
             else
             {
                 if (packageExists)
                 {
-                    ExecuteUninstall(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        ExecuteUninstall(operation.Package);
+                    }
                 }
             }
         }
@@ -289,7 +315,10 @@ namespace NuGet
                                                  targetFramework: null,
                                                  logger: Logger,
                                                  removeDependencies: removeDependencies,
-                                                 forceRemove: forceRemove));
+                                                 forceRemove: forceRemove)
+                                                 {
+                                                     DisableWalkInfo = WhatIf
+                                                 });
         }
 
         protected virtual void ExecuteUninstall(IPackage package)

@@ -212,5 +212,8 @@
   </data>
   <data name="Cmdlet_PackageOperation" xml:space="preserve">
     <value>{0} {1}</value>
-  </data>  
+  </data>
+  <data name="Cmdlet_WhatIfReinstallUnsupported" xml:space="preserve">
+    <value>Specifying both -Reinstall and -WhatIf is not supported for now.</value>
+  </data>
 </root>

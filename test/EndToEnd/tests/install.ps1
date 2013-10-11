@@ -14,6 +14,17 @@
     Assert-SolutionPackage Castle.Core
 }
 
+function Test-PackageInstallWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication
+    
+    # Act
+    Install-Package FakeItEasy -Project $project.Name -version 1.8.0 -WhatIf
+    
+    # Assert: no packages are installed
+	Assert-Null (Get-ProjectPackage $project FakeItEasy)
+}
+
 function Test-WebsiteSimpleInstall {
     param(
         $context

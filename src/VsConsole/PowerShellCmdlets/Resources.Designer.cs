@@ -331,6 +331,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifying both -Reinstall and -WhatIf is not supported for now..
+        /// </summary>
+        internal static string Cmdlet_WhatIfReinstallUnsupported {
+            get {
+                return ResourceManager.GetString("Cmdlet_WhatIfReinstallUnsupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &amp;Yes.
         /// </summary>
         internal static string Cmdlet_Yes {

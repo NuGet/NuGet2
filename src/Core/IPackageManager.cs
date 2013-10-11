@@ -18,6 +18,8 @@ namespace NuGet
 
         bool MaxDependencyPatches { get; set; }
 
+        bool WhatIf { get; set; }
+        
         /// <summary>
         /// Remote repository to install packages from.
         /// </summary>

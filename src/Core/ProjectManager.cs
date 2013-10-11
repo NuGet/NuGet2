@@ -111,6 +111,12 @@ namespace NuGet
             set;
         }
 
+        public bool WhatIf
+        {
+            get;
+            set;
+        }
+
         public virtual void AddPackageReference(string packageId)
         {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -142,6 +148,7 @@ namespace NuGet
                                               !ignoreDependencies,
                                               allowPrereleaseVersions)
                                               {
+                                                  DisableWalkInfo = WhatIf,
                                                   AcceptedTargets = PackageTargets.Project,
                                                   MaxDependencyPatches = MaxDependencyPatches
                                               });
@@ -176,14 +183,28 @@ namespace NuGet
                 }
                 else
                 {
-                    AddPackageReferenceToProject(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        AddPackageReferenceToProject(operation.Package);
+                    }
                 }
             }
             else
             {
                 if (packageExists)
                 {
-                    RemovePackageReferenceFromProject(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        RemovePackageReferenceFromProject(operation.Package);
+                    }
                 }
             }
         }

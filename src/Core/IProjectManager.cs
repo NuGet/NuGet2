@@ -9,6 +9,7 @@ namespace NuGet
         IProjectSystem Project { get; }
         IPackageRepository SourceRepository { get; }
         bool MaxDependencyPatches { get; set; }
+        bool WhatIf { get; set; }
 
         event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;
         event EventHandler<PackageOperationEventArgs> PackageReferenceAdding;

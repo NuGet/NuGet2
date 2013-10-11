@@ -41,7 +41,7 @@ function Test-UpdatingPackageWithSharedDependency {
     $p = New-ClassLibrary
 
     # Act
-    Install-Package D -Version 1.0 -Source $context.RepositoryPath
+	Install-Package D -Version 1.0 -Source $context.RepositoryPath
     Assert-Package $p D 1.0
     Assert-Package $p B 1.0
     Assert-Package $p C 1.0
@@ -73,6 +73,43 @@ function Test-UpdatingPackageWithSharedDependency {
     Assert-Null (Get-SolutionPackage C 1.0)
     Assert-Null (Get-SolutionPackage A 2.0)
     Assert-Null (Get-SolutionPackage A 1.0)
+}
+
+function Test-UpdatingPackageWhatIf {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+	Install-Package D -Version 1.0 -Source $context.RepositoryPath
+    Assert-Package $p D 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p A 2.0
+
+	# Act
+	Update-Package D -Source $context.RepositoryPath -WhatIf
+
+	# Assert: no packages are touched
+	Assert-Package $p D 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p A 2.0
+}
+
+function Test-UpdatingPackageWhatIfCannotBeUsedWithReinstall {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+	Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
+    Assert-Package $p Castle.Core 1.2.0
+
+	# Act & Assert
+	Assert-Throws { Update-Package Castle.Core -Reinstall -WhatIf } "Specifying both -Reinstall and -WhatIf is not supported for now."
 }
 
 function Test-UpdatingPackageWithSharedDependencySimple {

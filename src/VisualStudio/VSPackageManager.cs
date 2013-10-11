@@ -170,7 +170,10 @@ namespace NuGet.VisualStudio
                             ignoreDependencies,
                             allowPrereleaseVersions);
 
-                        AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
+                        if (!WhatIf)
+                        {
+                            AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
+                        }
                     });
                 }
             }
@@ -1282,7 +1285,7 @@ namespace NuGet.VisualStudio
 
                 action();
 
-                if (BindingRedirectEnabled && projectManager.Project.IsBindingRedirectSupported)
+                if (!WhatIf && BindingRedirectEnabled && projectManager.Project.IsBindingRedirectSupported)
                 {
                     // Only add binding redirects if install was successful
                     AddBindingRedirects(projectManager);
@@ -1350,7 +1353,16 @@ namespace NuGet.VisualStudio
                                             .Reduce();
             foreach (var operation in packageOperations)
             {
-                ExecuteUninstall(operation.Package);
+                if (WhatIf)
+                {
+                    Logger.Log(MessageLevel.Info, NuGet.Resources.NuGetResources.Log_PackageOperation,
+                        operation.Action,
+                        operation.Package);
+                }
+                else
+                {
+                    ExecuteUninstall(operation.Package);
+                }
             }
         }
 

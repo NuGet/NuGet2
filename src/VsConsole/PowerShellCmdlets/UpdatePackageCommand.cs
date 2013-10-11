@@ -99,6 +99,9 @@ namespace NuGet.PowerShell.Commands
         [Parameter]
         public FileConflictAction FileConflictAction { get; set; }
 
+        [Parameter]
+        public SwitchParameter WhatIf { get; set; }
+
         protected override IVsPackageManager CreatePackageManager()
         {
             if (!String.IsNullOrEmpty(Source))
@@ -116,12 +119,24 @@ namespace NuGet.PowerShell.Commands
                 // terminating
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
-            
+
+            if (WhatIf && Reinstall)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_WhatIfReinstallUnsupported);
+                return;
+            }
+
             try
             {
                 SubscribeToProgressEvents();
                 if (PackageManager != null)
                 {
+                    PackageManager.WhatIf = WhatIf;
+                    if (ProjectManager != null)
+                    {
+                        ProjectManager.WhatIf = WhatIf;
+                    }
+
                     if (Reinstall)
                     {
                         PerformReinstalls(ProjectManager);
