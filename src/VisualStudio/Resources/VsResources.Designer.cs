@@ -322,15 +322,6 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid settings property &apos;{0}&apos;. Valid settings properties are: PackageRestoreConsentGranted, PackageRestoreIsAutomatic..
-        /// </summary>
-        public static string InvalidSettingsProperty {
-            get {
-                return ResourceManager.GetString("InvalidSettingsProperty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already installed..
         /// </summary>
         public static string Log_PackageAlreadyInstalled {

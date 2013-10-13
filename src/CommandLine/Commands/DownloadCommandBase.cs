@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -54,13 +55,12 @@ namespace NuGet.Commands
                     }
                     else
                     {
-                        Console.WriteWarning("Invalid PackageSaveMode value {0}.", EffectivePackageSaveMode);
+                        string message = String.Format(
+                            CultureInfo.CurrentCulture,
+                            LocalizedResourceManager.GetString("Warning_InvalidPackageSaveMode"),
+                            v);
+                        Console.WriteWarning(message);
                     }
-                }
-
-                if (EffectivePackageSaveMode == PackageSaveModes.None)
-                {
-                    Console.WriteWarning("Invalid PackageSaveMode value {0}. The option is ignored.", EffectivePackageSaveMode);
                 }
             }
         }

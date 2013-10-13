@@ -2,56 +2,90 @@
 function Test-PackageRestore-SimpleTest {
     param($context)
 
-	# Arrange
-	$p1 = New-ClassLibrary	
-	$p1 | Install-Package FakeItEasy -version 1.8.0
-	
-	$p2 = New-ClassLibrary
-	$p2 | Install-Package elmah -Version 1.1
+    # Arrange
+    $p1 = New-ClassLibrary	
+    $p1 | Install-Package FakeItEasy -version 1.8.0
+    
+    $p2 = New-ClassLibrary
+    $p2 | Install-Package elmah -Version 1.1
 
-	$f = New-SolutionFolder 'Folder1'
-	$p3 = $f | New-ClassLibrary
-	$p3 | Install-Package Newtonsoft.Json -Version 5.0.6
+    $f = New-SolutionFolder 'Folder1'
+    $p3 = $f | New-ClassLibrary
+    $p3 | Install-Package Newtonsoft.Json -Version 5.0.6
 
     $f2 = $f | New-SolutionFolder 'Folder2'
     $p4 = $f2 | New-ClassLibrary
     $p4 | Install-Package Ninject
 
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	RemoveDirectory $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    RemoveDirectory $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	# Act
-	Build-Solution
+    # Act
+    Build-Solution
 
-	# Assert
-	Assert-True (Test-Path $packagesDir)
-	Assert-Package $p1 FakeItEasy
-	Assert-Package $p2 elmah
-	Assert-Package $p3 Newtonsoft.Json
+    # Assert
+    Assert-True (Test-Path $packagesDir)
+    Assert-Package $p1 FakeItEasy
+    Assert-Package $p2 elmah
+    Assert-Package $p3 Newtonsoft.Json
     Assert-Package $p4 Ninject
+}
+
+# Tests that package restore honors PackageSaveMode in config
+function Test-PackageRestore-PackageSaveMode {
+    param($context)
+
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', 'nuspec')
+
+        # Arrange
+        $p1 = New-ClassLibrary	
+        $p1 | Install-Package FakeItEasy -version 1.8.0
+    
+        # delete the packages folder
+        $packagesDir = Get-PackagesDir
+        RemoveDirectory $packagesDir
+        Assert-False (Test-Path $packagesDir)
+    
+        # Act
+        Build-Solution
+
+        # Assert	    
+        # the nuspec file should exist
+        $nuspecFile = Join-Path $packagesDir "FakeItEasy.1.8.0\FakeItEasy.1.8.0.nuspec"
+        Assert-PathExists $nuspecFile
+
+        # while the nupkg file should not
+        $nupkgFile = Join-Path $packagesDir "FakeItEasy.1.8.0\FakeItEasy.1.8.0.nupkg"
+        Assert-False (Test-Path $nupkgFile)
+    }
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', $null)
+    }
+    
 }
 
 # Tests that package restore works for website project
 function Test-PackageRestore-Website {
     param($context)
 
-	# Arrange
-	$p = New-WebSite	
-	$p | Install-Package JQuery
-	
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	Remove-Item -Recurse -Force $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # Arrange
+    $p = New-WebSite	
+    $p | Install-Package JQuery
+    
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    Remove-Item -Recurse -Force $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	# Act
-	Build-Solution
+    # Act
+    Build-Solution
 
-	# Assert
-	Assert-True (Test-Path $packagesDir)
-	Assert-Package $p JQuery
+    # Assert
+    Assert-True (Test-Path $packagesDir)
+    Assert-Package $p JQuery
 }
 
 # Tests that package restore works for JavaScript Metro project
@@ -62,21 +96,21 @@ function Test-PackageRestore-JavaScriptMetroProject {
         return
     }
 
-	# Arrange
-	$p = New-JavaScriptApplication	
-	Install-Package JQuery -projectName $p.Name
-	
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	Remove-Item -Recurse -Force $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # Arrange
+    $p = New-JavaScriptApplication	
+    Install-Package JQuery -projectName $p.Name
+    
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    Remove-Item -Recurse -Force $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	# Act
-	Build-Solution
+    # Act
+    Build-Solution
 
-	# Assert
-	Assert-True (Test-Path $packagesDir)
-	Assert-Package $p JQuery
+    # Assert
+    Assert-True (Test-Path $packagesDir)
+    Assert-Package $p JQuery
 }
 
 # Tests that package restore works for unloaded projects, as long as
@@ -84,52 +118,52 @@ function Test-PackageRestore-JavaScriptMetroProject {
 function Test-PackageRestore-UnloadedProjects{
     param($context)
 
-	# Arrange
-	$p1 = New-ClassLibrary	
-	$p1 | Install-Package Microsoft.Bcl.Build -version 1.0.8
-	
-	$p2 = New-ClassLibrary
+    # Arrange
+    $p1 = New-ClassLibrary	
+    $p1 | Install-Package Microsoft.Bcl.Build -version 1.0.8
+    
+    $p2 = New-ClassLibrary
 
-	$solutionDir = $dte.Solution.FullName
-	$packagesDir = Get-PackagesDir
-	$dte.Solution.SaveAs($solutionDir)
+    $solutionDir = $dte.Solution.FullName
+    $packagesDir = Get-PackagesDir
+    $dte.Solution.SaveAs($solutionDir)
     Close-Solution
 
-	# delete the packages folder
-	Remove-Item -Recurse -Force $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # delete the packages folder
+    Remove-Item -Recurse -Force $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	# reopen the solution. Now the project that references Microsoft.Bcl.Build
-	# will not be loaded because of missing targets file
-	Open-Solution $solutionDir
+    # reopen the solution. Now the project that references Microsoft.Bcl.Build
+    # will not be loaded because of missing targets file
+    Open-Solution $solutionDir
 
-	# Act
-	Build-Solution
+    # Act
+    Build-Solution
 
-	# Assert
-	$dir = Join-Path $packagesDir "Microsoft.Bcl.Build.1.0.8"
-	Assert-PathExists $dir
+    # Assert
+    $dir = Join-Path $packagesDir "Microsoft.Bcl.Build.1.0.8"
+    Assert-PathExists $dir
 }
 
 # Tests that an error will be generated if package restore fails
 function Test-PackageRestore-ErrorMessage {
     param($context)
 
-	# Arrange
-	$p = New-ClassLibrary	
-	Install-Package -Source $context.RepositoryRoot -Project $p.Name NonStrongNameB
-	
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	Remove-Item -Recurse -Force $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # Arrange
+    $p = New-ClassLibrary	
+    Install-Package -Source $context.RepositoryRoot -Project $p.Name NonStrongNameB
+    
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    Remove-Item -Recurse -Force $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	# Act
+    # Act
     # package restore will fail because the source $context.RepositoryRoot is not
     # listed in the settings.
-	Build-Solution
+    Build-Solution
 
-	# Assert
+    # Assert
     $errorlist = Get-Errors
     Assert-AreEqual 1 $errorlist.Count
 
@@ -145,79 +179,79 @@ function Test-PackageRestore-ErrorMessage {
 function Test-PackageRestore-CheckForMissingPackages {
     param($context)
 
-	# Arrange
-	$p1 = New-ClassLibrary	
-	$p1 | Install-Package Newtonsoft.Json -Version 5.0.6
-	
-	$f = New-SolutionFolder 'Folder1'
-	$p2 = $f | New-ClassLibrary
-	$p2 | Install-Package elmah -Version 1.1
+    # Arrange
+    $p1 = New-ClassLibrary	
+    $p1 | Install-Package Newtonsoft.Json -Version 5.0.6
+    
+    $f = New-SolutionFolder 'Folder1'
+    $p2 = $f | New-ClassLibrary
+    $p2 | Install-Package elmah -Version 1.1
 
     $f2 = $f | New-SolutionFolder 'Folder2'
     $p3 = $f2 | New-ClassLibrary
     $p3 | Install-Package Ninject
 
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	RemoveDirectory $packagesDir
-	Assert-False (Test-Path $packagesDir)
-	
-	try {
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'false')
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    RemoveDirectory $packagesDir
+    Assert-False (Test-Path $packagesDir)
+    
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'false')
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
 
-		# Act
-		Build-Solution
+        # Act
+        Build-Solution
 
-		# Assert
-		$errorlist = Get-Errors
-		Assert-AreEqual 1 $errorlist.Count
+        # Assert
+        $errorlist = Get-Errors
+        Assert-AreEqual 1 $errorlist.Count
 
-		$error = $errorlist[$errorlist.Count-1]
-		Assert-True ($error.Description.Contains('One or more NuGet packages need to be restored but couldn''t be because consent has not been granted.'))
-		Assert-True ($error.Description.Contains('Newtonsoft.Json 5.0.6'))
-		Assert-True ($error.Description.Contains('elmah 1.1'))
+        $error = $errorlist[$errorlist.Count-1]
+        Assert-True ($error.Description.Contains('One or more NuGet packages need to be restored but couldn''t be because consent has not been granted.'))
+        Assert-True ($error.Description.Contains('Newtonsoft.Json 5.0.6'))
+        Assert-True ($error.Description.Contains('elmah 1.1'))
         Assert-True ($error.Description.Contains('Ninject'))
-	}
-	finally {
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
-	}
+    }
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+    }
 }	
 
 # Tests that package restore is a no-op when setting PackageRestoreIsAutomatic is false.
 function Test-PackageRestore-IsAutomaticIsFalse {
     param($context)
 
-	# Arrange
-	$p1 = New-ClassLibrary	
-	$p1 | Install-Package FakeItEasy -version 1.8.0
-	
-	$p2 = New-ClassLibrary
-	$p2 | Install-Package elmah -Version 1.1
+    # Arrange
+    $p1 = New-ClassLibrary	
+    $p1 | Install-Package FakeItEasy -version 1.8.0
+    
+    $p2 = New-ClassLibrary
+    $p2 | Install-Package elmah -Version 1.1
 
-	$f = New-SolutionFolder 'Folder1'
-	$p3 = $f | New-ClassLibrary
-	$p3 | Install-Package Newtonsoft.Json -Version 5.0.6
+    $f = New-SolutionFolder 'Folder1'
+    $p3 = $f | New-ClassLibrary
+    $p3 | Install-Package Newtonsoft.Json -Version 5.0.6
 
-	# delete the packages folder
-	$packagesDir = Get-PackagesDir
-	RemoveDirectory $packagesDir
-	Assert-False (Test-Path $packagesDir)
+    # delete the packages folder
+    $packagesDir = Get-PackagesDir
+    RemoveDirectory $packagesDir
+    Assert-False (Test-Path $packagesDir)
 
-	try {
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'false')
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'false')
 
-		# Act
-		Build-Solution
+        # Act
+        Build-Solution
 
-		# Assert		
-		Assert-False (Test-Path $packagesDir)
-	}
-	finally {
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
-	}
+        # Assert		
+        Assert-False (Test-Path $packagesDir)
+    }
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreConsentGranted', 'true')
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageRestoreIsAutomatic', 'true')
+    }
 }
 
 function GetBuildOutput { 
@@ -233,16 +267,16 @@ function GetBuildOutput {
 function RemoveDirectory {
     param($dir)
 
-	$iteration = 0
-	while ($iteration++ -lt 10)
-	{
-	    if (Test-Path $dir)
-		{
-		    Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
-		}
-		else 
-		{
-		    break;
-		}
-	}
+    $iteration = 0
+    while ($iteration++ -lt 10)
+    {
+        if (Test-Path $dir)
+        {
+            Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
+        }
+        else 
+        {
+            break;
+        }
+    }
 }

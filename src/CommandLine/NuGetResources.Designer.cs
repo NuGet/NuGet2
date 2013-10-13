@@ -16247,6 +16247,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid PackageSaveMode value &apos;{0}&apos;..
+        /// </summary>
+        internal static string Warning_InvalidPackageSaveMode {
+            get {
+                return ResourceManager.GetString("Warning_InvalidPackageSaveMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Option &apos;NoPrompt&apos; has been deprecated. Use &apos;NonInteractive&apos; instead..
         /// </summary>
         internal static string Warning_NoPromptDeprecated {

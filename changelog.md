@@ -4,6 +4,7 @@ Change Log / Release Notes
 ## NuGet 2.8
 * [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
 * Load packages.<project_name>.config if it already exists.
+* Option -PackageSaveMode is supported by nuget.exe install and restore commands.
 
 ## NuGet 2.7
 
