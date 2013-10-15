@@ -101,6 +101,8 @@ namespace NuGet.Dialog
             // the console the first time an entry is written to it
             var providerServices = new ProviderServices();
             _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
+            _smartOutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+            _smartOutputConsoleProvider.Clear();
             providerServices.OutputConsoleProvider = _smartOutputConsoleProvider;
             _providerSettings = providerServices.ProviderSettings;
             _updateAllUIService = providerServices.UpdateAllUIService;
