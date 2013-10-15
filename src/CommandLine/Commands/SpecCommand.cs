@@ -33,10 +33,6 @@ namespace NuGet.Commands
             set;
         }
 
-        // TODO: Temporarily hide the real ConfigFile parameter from the help text.
-        // When we fix #3231, we should remove this property.
-        public new string ConfigFile { get; set; }
-
         public override void ExecuteCommand()
         {
             var manifest = new Manifest();
@@ -123,6 +119,16 @@ namespace NuGet.Commands
                     throw;
                 }
             }
+        }
+
+        public override bool IncludedInHelp(string optionName)
+        {
+            if (string.Equals(optionName, "ConfigFile", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return base.IncludedInHelp(optionName);
         }
 
         private static string RemoveSchemaNamespace(string content)
