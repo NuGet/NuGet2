@@ -261,9 +261,7 @@ namespace NuGet.Dialog
                                     IPackageRestoreManager packageRestoreManager,
                                     RestartRequestBar restartRequestBar)
         {
-
-            // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
-            IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
+            IVsPackageManager packageManager = packageManagerFactory.CreatePackageManagerToManageInstalledPackages();
 
             IPackageRepository localRepository;
 
