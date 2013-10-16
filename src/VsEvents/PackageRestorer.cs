@@ -301,16 +301,23 @@ namespace NuGet.VsEvents
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
             var projectName = projectPackageReferenceFile.Project.GetName();
-            
-            WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectName);
 
             try
             {
+                WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectName);            
+                WriteLine(VerbosityLevel.Detailed, Resources.RestoringPackagesListedInFile, 
+                    projectPackageReferenceFile.FullPath);
                 RestorePackages(projectPackageReferenceFile.FullPath, fileSystem);
             }
             catch (Exception ex)
             {
-                var message = String.Format(CultureInfo.CurrentCulture, Resources.PackageRestoreFailedForProject, projectName, ex.Message);
+                var exceptionMessage = _msBuildOutputVerbosity >= (int)VerbosityLevel.Detailed ?
+                    ex.ToString() :
+                    ex.Message;
+                var message = String.Format(
+                    CultureInfo.CurrentCulture, 
+                    Resources.PackageRestoreFailedForProject, projectName, 
+                    exceptionMessage);
                 WriteLine(VerbosityLevel.Quiet, message);
                 ActivityLog.LogError(LogEntrySource, message);
                 VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, 
