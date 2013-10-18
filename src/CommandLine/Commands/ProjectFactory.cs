@@ -846,6 +846,8 @@ namespace NuGet.Commands
             // Skip files that are added by dependency packages 
             string packagesConfig = GetPackagesConfig();
             IPackageRepository repository = GetPackagesRepository();
+            string projectName = Path.GetFileNameWithoutExtension(_project.FullPath);
+
             var contentFilesInDependencies = new List<IPackageFile>();
             if (packagesConfig != null && repository != null)
             {
@@ -860,7 +862,6 @@ namespace NuGet.Commands
             foreach (var item in _project.GetItems(itemType))
             {
                 string fullPath = item.GetMetadataValue("FullPath");
-
                 if (_excludeFiles.Contains(Path.GetFileName(fullPath)))
                 {
                     continue;
@@ -874,8 +875,13 @@ namespace NuGet.Commands
                     continue;
                 }
 
+                // if IncludeReferencedProjects is true and we are adding source files,
+                // add projectName as part of the target to avoid file conflicts.
+                string targetPath = IncludeReferencedProjects && itemType == SourcesItemType ?               
+                    Path.Combine(targetFolder, projectName, targetFilePath) :
+                    Path.Combine(targetFolder, targetFilePath);
+
                 // Check that file is added by dependency
-                string targetPath = Path.Combine(targetFolder, targetFilePath);
                 IPackageFile targetFile = contentFilesInDependencies.Find(a => a.Path.Equals(targetPath, StringComparison.OrdinalIgnoreCase));
                 if (targetFile != null)
                 {

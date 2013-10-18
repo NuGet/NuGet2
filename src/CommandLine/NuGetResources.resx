@@ -481,9 +481,6 @@
     <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>
     <comment>Please do not localize the letters inside the [] brackets.</comment>
   </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported" xml:space="preserve">
-    <value>Specifying both -IncludeReferencedProjects and -Symbols is not supported.</value>
-  </data>
   <data name="Error_MultipleSolutions" xml:space="preserve">
     <value>This folder contains more than one solution file.</value>
   </data>
@@ -5248,46 +5245,7 @@ To prevent NuGet from downloading packages during build, open the Visual Studio 
   </data>
   <data name="FileConflictChoiceText_cht" xml:space="preserve">
     <value>[Y] 是  [A] 全部皆是  [N] 否  [L] 全部皆否 ?</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_csy" xml:space="preserve">
-    <value>Současné zadání -IncludeReferencedProjects a -Symbols není podporováno.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_deu" xml:space="preserve">
-    <value>Die gemeinsame Angabe von "-IncludeReferencedProjects" und "-Symbols" wird nicht unterstützt.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_esp" xml:space="preserve">
-    <value>No se admite especificar -IncludeReferencedProjects y -Symbols.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_fra" xml:space="preserve">
-    <value>La spécification de -IncludeReferencedProjects et de -Symbols n'est pas prise en charge.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_ita" xml:space="preserve">
-    <value>Specificare - Includere Riferimenti Progetti e Simboli non è supportato</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_jpn" xml:space="preserve">
-    <value>-IncludeReferencedProjects と -Symbols の両方を指定することはできません。</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_kor" xml:space="preserve">
-    <value>-IncludeReferencedProjects 및 -Symbols 모두 지정할 수 없습니다.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_plk" xml:space="preserve">
-    <value>Jednoczesne określanie parametrów -IncludeReferencedProjects i -Symbols nie jest obsługiwane.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_ptb" xml:space="preserve">
-    <value>A especificação de IncludeReferencedProjects e Symbols não é suportada.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_rus" xml:space="preserve">
-    <value>Нельзя одновременно указать -IncludeReferencedProjects и -Symbols, так как это не поддерживается.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_trk" xml:space="preserve">
-    <value>-IncludeReferencedProjects ve -Symbols öğelerini birlikte belirtme desteklenmiyor.</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_chs" xml:space="preserve">
-    <value>不支持同时指定 -IncludeReferencedProjects 和 -Symbols。</value>
-  </data>
-  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported_cht" xml:space="preserve">
-    <value>不支援指定 -IncludeReferencedProjects 和 -Symbols。</value>
-  </data>
+  </data>  
   <data name="Error_MultipleSolutions_csy" xml:space="preserve">
     <value>Tato složka obsahuje více než jeden soubor řešení.</value>
   </data>

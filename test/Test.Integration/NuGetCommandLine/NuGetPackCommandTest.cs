@@ -124,9 +124,9 @@ namespace Proj2
             }
         }
 
-        // Test that -IncludeReferencedProjects and -Symbols cannot be used together.
+        // Test creating symbol package with -IncludeReferencedProject.
         [Fact]
-        public void PackCommand_WithProjectReferences_Symbols()
+        public void PackCommand_WithProjectReferencesSymbols()
         {
             var targetDir = ConfigurationManager.AppSettings["TargetDir"];
             var nugetexe = Path.Combine(targetDir, "nuget.exe");
@@ -135,16 +135,20 @@ namespace Proj2
             try
             {
                 Util.CreateDirectory(workingDirectory);
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                var proj2Directory = Path.Combine(workingDirectory, "proj2");
+                Util.CreateDirectory(proj1Directory);
+                Util.CreateDirectory(proj2Directory);
 
                 // create project 1
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1.csproj",
 @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
     xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <OutputPath>out1</OutputPath>
+    <OutputPath>out</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -156,7 +160,7 @@ namespace Proj2
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1_file1.cs",
 @"using System;
 
@@ -168,23 +172,23 @@ namespace Proj1
     }
 }");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1_file2.txt",
                     "file2");
 
                 // Create project 2, which references project 1
                 Util.CreateFile(
-                    workingDirectory,
+                    proj2Directory,
                     "proj2.csproj",
 @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
     xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <OutputPath>out2</OutputPath>
+    <OutputPath>out</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include='proj1.csproj' />
+    <ProjectReference Include='..\proj1\proj1.csproj' />
   </ItemGroup>
   <ItemGroup>
     <Compile Include='proj2_file1.cs' />
@@ -192,7 +196,7 @@ namespace Proj1
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj2Directory,
                     "proj2_file1.cs",
 @"using System;
 
@@ -204,16 +208,30 @@ namespace Proj2
     }
 }");
 
-                // Act
+                // Act 
                 var r = CommandRunner.Run(
-                    nugetexe, 
-                    workingDirectory,
-                    "pack proj2.csproj -build -symbols -IncludeReferencedProjects",
-                    waitForExit: true);    
-                
+                    nugetexe,
+                    proj2Directory,
+                    "pack proj2.csproj -build -IncludeReferencedProjects -symbols",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
                 // Assert
-                Assert.NotEqual(0, r.Item1);
-                Assert.True(r.Item2.Contains("not supported"));
+                var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.symbols.nupkg"));
+                var files = package.GetFiles().Select(f => f.Path).ToArray();
+                Array.Sort(files);
+                Assert.Equal(
+                    files,
+                    new string[] 
+                    { 
+                        @"content\proj1_file2.txt",
+                        @"lib\net40\proj1.dll",
+                        @"lib\net40\proj1.pdb",
+                        @"lib\net40\proj2.dll",
+                        @"lib\net40\proj2.pdb",
+                        @"src\proj1\proj1_file1.cs",
+                        @"src\proj2\proj2_file1.cs",
+                    });
             }
             finally
             {

@@ -106,12 +106,6 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-            if (IncludeReferencedProjects && Symbols)
-            {
-                throw new CommandLineException(
-                    LocalizedResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported"));
-            }
-
             if (Verbose)
             {
                 Console.WriteWarning(LocalizedResourceManager.GetString("Option_VerboseDeprecated"));
