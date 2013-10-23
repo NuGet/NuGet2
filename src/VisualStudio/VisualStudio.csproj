@@ -28,6 +28,7 @@
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="DeleteOnRestart\IDeleteOnRestartManager.cs" />
+    <Compile Include="FrameworkAssemblyResolver.cs" />
     <Compile Include="IRegistryKey.cs" />
     <Compile Include="ISourceControlFileSystem.cs" />
     <Compile Include="IVsCommonOperations.cs" />
@@ -145,6 +146,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="$(ComponentHostAssembly)" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />

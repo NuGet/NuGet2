@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="DeleteOnRestartManagerTest.cs" />
     <Compile Include="FallbackRepositoryTest.cs" />
+    <Compile Include="FrameworkAssemblyResolverTest.cs" />
     <Compile Include="JsProjectSystemTest.cs" />
     <Compile Include="MockProjectPackageRepository.cs" />
     <Compile Include="Mocks\MockDteProperties.cs" />
