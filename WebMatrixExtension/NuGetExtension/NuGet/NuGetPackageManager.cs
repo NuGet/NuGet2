@@ -14,18 +14,29 @@ namespace NuGet.WebMatrix
         // "WebMatrix {<assembly version>}-{<build number>}"
         private const string UserAgentClientFormat = "WebMatrix {0}-{1}";
 
-        private static readonly List<string> TargetFrameworks = new List<string>() { VersionUtility.DefaultTargetFramework.FullName };
+        // We currently hardcode the targetFramework version to .NET40 
+        // (VersionUtility.DefaultTargetFramework returns that value)
+        // Once, site version is exposed via extensibility in v4 or later
+        // we can change it
+        private static readonly FrameworkName TargetFramework = VersionUtility.DefaultTargetFramework;
+        private static readonly List<string> TargetFrameworks = new List<string>() { TargetFramework.FullName };
 
         private WebProjectManager _webProjectManager;
 
         private bool _includePrerelease;
 
+        public NuGetPackageManager(Uri sourceUrl, string siteRoot)
+            : this(sourceUrl, siteRoot, null)
+        {
+        }
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NuGetPackageManager"/> class.
         /// </summary>
-        public NuGetPackageManager(Uri sourceUrl, string siteRoot)
+        public NuGetPackageManager(Uri sourceUrl, string siteRoot, IWebMatrixHost host)
         {
-            _webProjectManager = new WebProjectManager(sourceUrl.AbsoluteUri, siteRoot);
+            _webProjectManager = new WebProjectManager(sourceUrl.AbsoluteUri, siteRoot, host);
 
             // set the user agent to reflect the webmatrix assembly version and build number
             var extensibilityAssembly = typeof(IWebMatrixHost).Assembly;
@@ -61,7 +72,7 @@ namespace NuGet.WebMatrix
             InstallWalker walker = new InstallWalker(
                 _webProjectManager.LocalRepository, 
                 _webProjectManager.SourceRepository,
-                VersionUtility.DefaultTargetFramework,
+                TargetFramework,
                 NullLogger.Instance,
                 ignoreDependencies: false, 
                 allowPrereleaseVersions: IncludePrerelease);
@@ -70,6 +81,40 @@ namespace NuGet.WebMatrix
             return from operation in operations
                    where operation.Package != package && operation.Action == PackageAction.Install
                    select operation.Package;
+        }
+
+        public IEnumerable<IPackage> GetPackagesToBeInstalledForUpdateAll()
+        {
+            InstallWalker walker = new InstallWalker(
+                _webProjectManager.LocalRepository,
+                _webProjectManager.SourceRepository,
+                TargetFramework,
+                NullLogger.Instance,
+                ignoreDependencies: false,
+                allowPrereleaseVersions: IncludePrerelease);
+            
+            var packagesToUpdate = GetPackagesWithUpdates();
+            var allOperations = new List<PackageOperation>();
+
+            foreach (IPackage package in packagesToUpdate)
+            {
+                if (!allOperations.Any(operation => operation.Action == PackageAction.Install &&
+                    operation.Package.Id == package.Id &&
+                    operation.Package.Version == package.Version))
+                {
+                    var operations = walker.ResolveOperations(package);
+                    allOperations.AddRange(operations);
+                }
+            }
+
+            return (from operation in allOperations
+                   where operation.Action == PackageAction.Install
+                   select operation.Package).Distinct();
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            return _webProjectManager.SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions: IncludePrerelease, allowUnlisted: false);
         }
 
         public IEnumerable<IPackage> FindPackages(IEnumerable<string> packageIds)
@@ -157,6 +202,16 @@ namespace NuGet.WebMatrix
                     AppDomain.Unload(appDomain);
                 }
             }
+        }
+
+        public IEnumerable<string> UpdateAllPackages()
+        {
+            return _webProjectManager.UpdateAllPackages();
+        }
+
+        public IPackage GetUpdate(IPackage package)
+        {
+            return _webProjectManager.GetUpdate(package);
         }
 
         protected string SourceRepositorySource

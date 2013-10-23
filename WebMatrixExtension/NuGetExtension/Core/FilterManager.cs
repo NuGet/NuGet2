@@ -84,16 +84,16 @@ namespace NuGet.WebMatrix
 
         public void UpdateFilters()
         {
-            // populate the installed packages first (other categories depend on this information)
-            var populateInstalledTask = StartPopulatingInstalledFilter();
+            // populate the installed packages first, followed by disabled filter (other categories depend on this information)
+            var populateInstalledTask = StartPopulatingInstalledAndDisabledFilters();
             populateInstalledTask.Wait();
 
             // Start populating the filters
-            var populateFiltersTask = StartPopulatingFilters();
+            var populateFiltersTask = StartPopulatingAllAndUpdateFilters();
             populateFiltersTask.Wait();
         }
 
-        private Task StartPopulatingInstalledFilter()
+        private Task StartPopulatingInstalledAndDisabledFilters()
         {
             return Task.Factory.StartNew(() =>
             {
@@ -115,7 +115,7 @@ namespace NuGet.WebMatrix
             });
         }
 
-        private Task StartPopulatingFilters()
+        private Task StartPopulatingAllAndUpdateFilters()
         {
             // the child tasks here are created with AttachedToParent, the outer task will not
             // complete until all children have.
@@ -125,12 +125,12 @@ namespace NuGet.WebMatrix
                 // 1. Get the packages
                 // 2. Create view models and add to filters
                 Task.Factory
-                    .StartNew(UpdateAllFilter, TaskCreationOptions.AttachedToParent);
+                    .StartNew(UpdateTheAllFilter, TaskCreationOptions.AttachedToParent);
 
                 Task.Factory
                     .StartNew<IEnumerable<IPackage>>(GetUpdatePackages, TaskCreationOptions.AttachedToParent)
                     .ContinueWith(
-                        UpdateFilterWithResult(_updatesFilter, PackageViewModelAction.Update),
+                        UpdateUpdatesFilter(),
                         CancellationToken.None,
                         TaskContinuationOptions.AttachedToParent | TaskContinuationOptions.OnlyOnRanToCompletion,
                         this._scheduler);
@@ -164,7 +164,7 @@ namespace NuGet.WebMatrix
             }
         }
 
-        private void UpdateAllFilter()
+        private void UpdateTheAllFilter()
         {
             // updating the 'all' filter can take a matter of seconds -- so only update when it's timed out
             if (this._allFilter == null)
@@ -220,7 +220,7 @@ namespace NuGet.WebMatrix
             }
         }
 
-        private Action<Task<IEnumerable<IPackage>>> UpdateFilterWithResult(ListViewFilter filter, PackageViewModelAction packageAction)
+        private Action<Task<IEnumerable<IPackage>>> UpdateUpdatesFilter()
         {
             return (task) =>
             {
@@ -229,23 +229,19 @@ namespace NuGet.WebMatrix
                     return;
                 }
 
-                AddPackagesToFilter(filter, task.Result, packageAction);
-            };
-        }
-
-        private void AddPackagesToFilter(ListViewFilter filter, IEnumerable<IPackage> packages, PackageViewModelAction packageAction)
-        {
-            filter.Items.Clear();
-            foreach (var package in packages)
-            {
-                var packageViewModel = new PackageViewModel(this.Model, package, packageAction);
-                filter.Items.Add(new ListViewItemWrapper()
+                _updatesFilter.Items.Clear();
+                var packages = task.Result;
+                foreach (var package in packages)
                 {
-                    Item = packageViewModel,
-                    SearchText = packageViewModel.SearchText,
-                    Name = packageViewModel.Name,
-                });
-            }
+                    var packageViewModel = new PackageViewModel(this.Model, package, PackageViewModelAction.Update);
+                    _updatesFilter.Items.Add(new ListViewItemWrapper()
+                    {
+                        Item = packageViewModel,
+                        SearchText = packageViewModel.SearchText,
+                        Name = packageViewModel.Name,
+                    });
+                }
+            };
         }
 
         /// <summary>
@@ -317,7 +313,7 @@ namespace NuGet.WebMatrix
             viewModels = installed.Select((local) => new PackageViewModel(
                 this.Model,
                 local,
-                null,
+                true,
                 PackageViewModelAction.InstallOrUninstall));
 
             return viewModels;

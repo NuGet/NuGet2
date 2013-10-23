@@ -63,6 +63,14 @@ namespace NuGet.WebMatrix
                 InvariantName = "updateButton",
             };
 
+            this.UpdateAllButton = new ButtonViewModel()
+            {
+                Command = this.NuGetViewModel.ShowLicensePageForAllCommand,
+                CommandParameter = PackageViewModelAction.UpdateAll,
+                Text = Resources.String__Update_All,
+                InvariantName = "updateAllButton",
+            };
+
             this.YesButton = new ButtonViewModel()
             {
                 // this is dynamic:
@@ -164,7 +172,21 @@ namespace NuGet.WebMatrix
             }
             else if (this.NuGetViewModel.IsLicensePageVisible)
             {
-                this.AcceptButton.Command = this.NuGetViewModel.PackageAction == PackageViewModelAction.InstallOrUninstall ? this.NuGetViewModel.InstallCommand : this.NuGetViewModel.UpdateCommand;
+                switch (this.NuGetViewModel.PackageAction)
+                {
+                    case PackageViewModelAction.InstallOrUninstall:
+                        this.AcceptButton.Command = this.NuGetViewModel.InstallCommand;
+                        break;
+
+                    case PackageViewModelAction.Update:
+                        this.AcceptButton.Command = this.NuGetViewModel.UpdateCommand;
+                        break;
+
+                    case PackageViewModelAction.UpdateAll:
+                        this.AcceptButton.Command = this.NuGetViewModel.UpdateAllCommand;
+                        break;
+                }
+
                 this.ActionButtons.Add(this.AcceptButton);
                 this.ActionButtons.Add(this.DeclineButton);
             }
@@ -188,6 +210,11 @@ namespace NuGet.WebMatrix
             else
             {
                 SetComboBoxesVisibility(true, true);
+
+                if (this.NuGetViewModel.ShowUpdateAll)
+                {
+                    this.ActionButtons.Add(this.UpdateAllButton);
+                }
 
                 // there is a package -- determine which buttons to show
                 var selectedPackage = this.NuGetViewModel.SelectedPackage;
@@ -268,6 +295,12 @@ namespace NuGet.WebMatrix
         }
 
         internal ButtonViewModel UpdateButton
+        {
+            get;
+            private set;
+        }
+
+        internal ButtonViewModel UpdateAllButton
         {
             get;
             private set;

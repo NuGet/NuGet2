@@ -87,7 +87,8 @@ namespace NuGet.WebMatrix
                 packageSourcesViewModel,
                 (sourceUrl, siteRoot) => new NuGetPackageManager(
                         sourceUrl,
-                        siteRoot),
+                        siteRoot,
+                        this.Host),
                 installRoot,
                 GetCurrentTaskScheduler());
 

@@ -21,6 +21,20 @@ namespace NuGet.WebMatrix.DependentTests
             }
         }
 
+        internal Func<IEnumerable<IPackage>> GetPackagesToBeInstalledForUpdateAllFunc { get; set; }
+
+        public IEnumerable<IPackage> GetPackagesToBeInstalledForUpdateAll()
+        {
+            if (GetPackagesToBeInstalledForUpdateAllFunc != null)
+            {
+                return GetPackagesToBeInstalledForUpdateAllFunc();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         internal Func<IEnumerable<string>, IEnumerable<IPackage>> FindPackagesFunc { get; set; }
         
         public IEnumerable<IPackage> FindPackages(IEnumerable<string> packageIds)
@@ -70,6 +84,34 @@ namespace NuGet.WebMatrix.DependentTests
             if (GetRemotePackagesFunc != null)
             {
                 return GetRemotePackagesFunc();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal Func<IPackage, IPackage> GetUpdateFunc { get; set; }
+
+        public IPackage GetUpdate(IPackage package)
+        {
+            if (GetUpdateFunc != null)
+            {
+                return GetUpdateFunc(package);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal Func<string, SemanticVersion, IPackage> FindPackageFunc { get; set; }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            if (FindPackageFunc != null)
+            {
+                return FindPackageFunc(packageId, version);
             }
             else
             {
@@ -140,6 +182,20 @@ namespace NuGet.WebMatrix.DependentTests
             if (UpdatePackageFunc != null)
             {
                 return UpdatePackageFunc(package);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal Func<IEnumerable<string>> UpdateAllPackagesFunc { get; set; }
+
+        public IEnumerable<string> UpdateAllPackages()
+        {
+            if (UpdateAllPackagesFunc != null)
+            {
+                return UpdateAllPackagesFunc();
             }
             else
             {

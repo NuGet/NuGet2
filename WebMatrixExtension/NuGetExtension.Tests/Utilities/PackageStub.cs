@@ -14,10 +14,16 @@ namespace NuGet.WebMatrix.Tests.Utilities
         }
 
         public PackageStub(string id, Version version)
+            : this(id, version, null)
+        {
+        }
+
+        public PackageStub(string id, Version version, IEnumerable<PackageDependency> dependencies)
         {
             this.Id = id;
             this.Version = new SemanticVersion(version);
             this.IsLatestVersion = true;
+            this.Dependencies = dependencies;
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
@@ -192,6 +198,22 @@ namespace NuGet.WebMatrix.Tests.Utilities
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get { return (ICollection<PackageReferenceSet>)Enumerable.Empty<PackageReferenceSet>(); }
+        }
+
+        public override bool Equals(object obj)
+        {
+            PackageStub packageStub = obj as PackageStub;
+            if (packageStub == null)
+            {
+                return false;
+            }
+
+            return (packageStub.Id == this.Id && packageStub.Version == this.Version);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode() ^ this.Version.GetHashCode();
         }
     }
 }

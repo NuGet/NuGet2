@@ -68,7 +68,7 @@ namespace NuGet.WebMatrix
                     INuGetPackageManager packageManager;
                     if (packageManagerCreator == null)
                     {
-                        packageManager = new NuGetPackageManager(remoteSource.SourceUrl, destination);
+                        packageManager = new NuGetPackageManager(remoteSource.SourceUrl, destination, webMatrixHost);
                     }
                     else
                     {
@@ -420,6 +420,41 @@ namespace NuGet.WebMatrix
                 var message = string.Format(Resources.Notification_Updated, _packageKind, package.Id);
 
                 ShowMessageAndReadme(package, message);
+            }
+
+            return result;
+        }
+
+        public IEnumerable<string> UpdateAllPackages(bool inDetails)
+        {
+            Exception exception = null;
+            IEnumerable<string> result;
+
+            try
+            {
+                result = this.PackageManager.UpdateAllPackages();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+                throw;
+            }
+            finally
+            {
+                // Log the result of the update
+                var telemetry = WebMatrixTelemetryServiceProvider.GetTelemetryService();
+                if (telemetry != null)
+                {
+                    string appId = _webMatrixHost.WebSite.ApplicationIdentifier;
+                    //telemetry.LogPackageUpdate(_galleryId, package.Id, appId, exception, inDetails, isFeatured: false, isCustomFeed: !FeedSource.IsBuiltIn);
+                }
+            }
+
+            if (_webMatrixHost != null)
+            {
+                var message = string.Format(Resources.Notification_UpdatedAll);
+
+                _webMatrixHost.ShowNotification(message);
             }
 
             return result;

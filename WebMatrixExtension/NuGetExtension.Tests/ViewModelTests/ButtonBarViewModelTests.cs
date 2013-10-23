@@ -162,6 +162,109 @@ namespace NuGet.WebMatrix.Tests.ViewModelTests
         }
 
         /// <summary>
+        /// When more than 1 package has updates available, it should show the 'updateAll' 'update' 'uninstall' and 'cancel' buttons,
+        /// only when the updates filter is selected
+        /// </summary>
+        [Fact]
+        public void UpdateAllShownUpdatablePackageSelectedUpdatesFilter()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installedPackage1 = PackageFactory.Create("update1", new Version(1, 0));
+                var installedPackage2 = PackageFactory.Create("update2", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installedPackage1);
+                this.PackageManager.InstalledPackages.Add(installedPackage2);
+
+                var remotePackage1 = PackageFactory.Create("update1", new Version(2, 0));
+                var remotePackage2 = PackageFactory.Create("update2", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remotePackage1);
+                this.PackageManager.RemotePackages.Add(remotePackage2);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Updated, installedPackage1.Id);
+
+                Assert.Equal(
+                    new ButtonViewModel[] { buttonBarViewModel.UpdateAllButton, buttonBarViewModel.UpdateButton, buttonBarViewModel.UninstallButton, buttonBarViewModel.CloseButton },
+                    buttonBarViewModel.ActionButtons);
+            }
+        }
+
+        /// <summary>
+        /// When All filter is selected, 'updateAll' should not be shown
+        /// even when more than 1 package has updates available
+        /// </summary>
+        [Fact]
+        public void UpdateAllNotShownIfAllFilterIsSelected()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installedPackage1 = PackageFactory.Create("update1", new Version(1, 0));
+                var installedPackage2 = PackageFactory.Create("update2", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installedPackage1);
+                this.PackageManager.InstalledPackages.Add(installedPackage2);
+
+                var remotePackage1 = PackageFactory.Create("update1", new Version(2, 0));
+                var remotePackage2 = PackageFactory.Create("update2", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remotePackage1);
+                this.PackageManager.RemotePackages.Add(remotePackage2);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_All, installedPackage1.Id);
+                Assert.False(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateAllButton));
+                Assert.True(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateButton));
+            }
+        }
+
+        /// <summary>
+        /// When Installed filter is selected, 'updateAll' should not be shown
+        /// even when more than 1 package has updates available
+        /// </summary>
+        [Fact]
+        public void UpdateAllNotShownIfInstalledFilterIsSelected()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installedPackage1 = PackageFactory.Create("update1", new Version(1, 0));
+                var installedPackage2 = PackageFactory.Create("update2", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installedPackage1);
+                this.PackageManager.InstalledPackages.Add(installedPackage2);
+
+                var remotePackage1 = PackageFactory.Create("update1", new Version(2, 0));
+                var remotePackage2 = PackageFactory.Create("update2", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remotePackage1);
+                this.PackageManager.RemotePackages.Add(remotePackage2);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Installed, installedPackage1.Id);
+                Assert.False(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateAllButton));
+                Assert.True(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateButton));
+            }
+        }
+
+        /// <summary>
+        /// When only 1 package has updates available, 'updateAll' button should not be shown
+        /// even when the updates filter is selected
+        /// </summary>
+        [Fact]
+        public void UpdateAllNotShownWhenOnly1PackageHasUpdates()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installedPackage1 = PackageFactory.Create("update1", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installedPackage1);
+
+                var remotePackage1 = PackageFactory.Create("update1", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remotePackage1);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Updated, installedPackage1.Id);
+
+                Assert.False(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateAllButton));
+                Assert.True(buttonBarViewModel.ActionButtons.Contains(buttonBarViewModel.UpdateButton));
+            }
+        }
+
+        /// <summary>
         /// A disablable package should have the enable option as well as the others
         /// </summary>
         [Fact]

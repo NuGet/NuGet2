@@ -17,5 +17,10 @@ namespace NuGet.WebMatrix.Tests.Utilities
         {
             return new PackageStub(id, version);
         }
+
+        public static IPackage Create(string id, Version version, IEnumerable<PackageDependency> dependencies)
+        {
+            return new PackageStub(id, version, dependencies);
+        }
     }
 }

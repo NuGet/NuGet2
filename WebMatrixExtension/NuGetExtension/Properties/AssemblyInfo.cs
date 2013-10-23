@@ -4,3 +4,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("NuGetExtension")]
 
 [assembly: InternalsVisibleTo("NuGetExtension.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

@@ -199,14 +199,35 @@
                 </TextBlock.ToolTip>
               </TextBlock>
               <TextBlock
+                x:Name="PackageVersion"
+                Margin="0 0 10 0"
+                Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                Text="{Binding DisplayVersion, Mode=OneWay}">
+                <TextBlock.Style>
+                  <Style
+                    TargetType="{x:Type TextBlock}">
+                    <Style.Triggers>
+                      <DataTrigger
+                        Binding="{Binding DisplayVersion, Mode=OneWay}"
+                        Value="{x:Null}">
+                        <Setter
+                          Property="Visibility"
+                          Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock
                 x:Name="DownloadCount"
+                Margin="0 0 10 0"
                 Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
                 <TextBlock.Style>
                   <Style
                     TargetType="{x:Type TextBlock}">
                     <Style.Triggers>
                       <DataTrigger
-                        Binding="{Binding DownloadCount, Mode=OneWay}"
+                        Binding="{Binding UninstalledDownloadCount}"
                         Value="{x:Null}">
                         <Setter
                           Property="Visibility"
@@ -220,6 +241,29 @@
             <Run
                   Text="{Binding DownloadCount, Mode=OneWay,StringFormat= \{0:N0\}}" />
               </TextBlock>
+              <TextBlock
+                x:Name="InstalledVersion"
+                Margin="0 0 10 0"
+                Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                <TextBlock.Style>
+                  <Style
+                    TargetType="{x:Type TextBlock}">
+                    <Style.Triggers>
+                      <DataTrigger
+                        Binding="{Binding DisplayInstalledVersion, Mode=OneWay}"
+                        Value="{x:Null}">
+                        <Setter
+                          Property="Visibility"
+                          Value="Collapsed" />
+                      </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            <Run
+                  Text="{x:Static self:Resources.String_InstalledVersion}" />
+            <Run
+                  Text="{Binding DisplayInstalledVersion, Mode=OneWay}" />
+              </TextBlock>                 
             </StackPanel>
             <TextBlock
               x:Name="ItemDescription"
@@ -493,7 +537,7 @@
                 <TextBlock
                   Grid.Column="1"
                   Grid.Row="4"
-                  Text="{Binding Item.Version, TargetNullValue={x:Static self:Resources.String_Unknown}}" />
+                  Text="{Binding Item.LatestUninstalledVersion, TargetNullValue={x:Static self:Resources.String_Unknown}}" />
 
                 <!-- Installed Version -->
                 <TextBlock
@@ -1100,60 +1144,130 @@
                 Text="{x:Static self:Resources.String_HeaderText}"
                 TextWrapping="Wrap"
                 Margin="0,10,0,0" />
-              <Control
-                Template="{StaticResource LicensePagePackageTemplate}"
-                Margin="0,20,0,0"
-                DataContext="{Binding Path=Item}" />
-              <StackPanel
-                Orientation="Vertical"
-                Margin="0,10,0,0">
-                <StackPanel.Style>
-                  <Style
-                    TargetType="{x:Type StackPanel}">
-                    <Style.Triggers>
-                      <DataTrigger
-                        Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
-                        Value="True">
-                        <Setter
-                          Property="Visibility"
-                          Value="{Binding Path=Item.Dependencies, Converter={StaticResource nullToVisibilityConverter}, Mode=OneWay}" />
-                      </DataTrigger>
-                    </Style.Triggers>
-                  </Style>
-                </StackPanel.Style>
-                <TextBlock
-                  Text="{x:Static self:Resources.String_DependenciesToBeInstall}" />
-                <ItemsControl
-                  x:Name="Dependencies">
-                  <ItemsControl.Style>
-                    <Style
-                      TargetType="{x:Type ItemsControl}">
-                      <Style.Triggers>
-                        <DataTrigger
-                          Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
-                          Value="True">
-                          <Setter
-                            Property="ItemsSource"
-                            Value="{Binding Path=Item.Dependencies}" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </ItemsControl.Style>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Control
-                        Template="{StaticResource LicensePagePackageTemplate}"
-                        Margin="0,5,0,0" />
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <StackPanel
-                        Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                </ItemsControl>
+              <StackPanel x:Name="UpdateAllEula"
+                    Orientation="Vertical"
+                    Margin="0,10,0,0">
+                    <StackPanel.Style>
+                      <Style
+                        TargetType="{x:Type StackPanel}">
+                        <Style.Triggers>
+                          <DataTrigger
+                            Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
+                            Value="True">
+                            <Setter
+                              Property="Visibility"
+                              Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type self:NuGetView}}, Path=DataContext.IsUpdatingAll, 
+                                Converter={StaticResource BoolToVis}, Mode=OneWay}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </StackPanel.Style>
+                    <TextBlock
+                      Text="{x:Static self:Resources.String_PackagesForUpdateAll}" />
+                    <ItemsControl
+                      x:Name="UpdateAllPackages">
+                      <ItemsControl.Style>
+                        <Style
+                          TargetType="{x:Type ItemsControl}">
+                          <Style.Triggers>
+                            <DataTrigger
+                              Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
+                              Value="True">
+                              <Setter
+                                Property="ItemsSource"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type self:NuGetView}}, Path=DataContext.PackagesToDisplayForUpdateAll}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ItemsControl.Style>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Control
+                            Template="{StaticResource LicensePagePackageTemplate}"
+                            Margin="0,5,0,0" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <StackPanel
+                            Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                    </ItemsControl>                  
               </StackPanel>
+              <StackPanel
+                    Orientation="Vertical"
+                    Margin="0,10,0,0">
+                    <StackPanel.Style>
+                      <Style
+                        TargetType="{x:Type StackPanel}">
+                        <Style.Triggers>
+                          <DataTrigger
+                            Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
+                            Value="True">
+                            <Setter
+                              Property="Visibility"
+                              Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type self:NuGetView}}, Path=DataContext.NotUpdatingAll, 
+                                Converter={StaticResource BoolToVis}, Mode=OneWay}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </StackPanel.Style>
+                  <Control
+                    Template="{StaticResource LicensePagePackageTemplate}"
+                    Margin="0,20,0,0"
+                    DataContext="{Binding Path=Item}" />
+                  <StackPanel
+                    Orientation="Vertical"
+                    Margin="0,10,0,0">
+                    <StackPanel.Style>
+                      <Style
+                        TargetType="{x:Type StackPanel}">
+                        <Style.Triggers>
+                          <DataTrigger
+                            Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
+                            Value="True">
+                            <Setter
+                              Property="Visibility"
+                              Value="{Binding Path=Item.Dependencies, Converter={StaticResource nullToVisibilityConverter}, Mode=OneWay}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </StackPanel.Style>
+                    <TextBlock
+                      Text="{x:Static self:Resources.String_DependenciesToBeInstall}" />
+                    <ItemsControl
+                      x:Name="Dependencies">
+                      <ItemsControl.Style>
+                        <Style
+                          TargetType="{x:Type ItemsControl}">
+                          <Style.Triggers>
+                            <DataTrigger
+                              Binding="{Binding ElementName=InstallPageGrid, Path=IsVisible, Mode=OneWay}"
+                              Value="True">
+                              <Setter
+                                Property="ItemsSource"
+                                Value="{Binding Path=Item.Dependencies}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ItemsControl.Style>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Control
+                            Template="{StaticResource LicensePagePackageTemplate}"
+                            Margin="0,5,0,0" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <StackPanel
+                            Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                  </StackPanel>
+                </StackPanel>
             </StackPanel>
             <TextBlock
               Grid.Row="1"

@@ -19,6 +19,7 @@ namespace NuGet.WebMatrix
 
         private IPackage _package;
         private IPackage _remotePackage;
+        private bool _shouldPullRemotePackage;
         private Lazy<string> _name;
         private Lazy<string> _searchText;
         private Lazy<ImageSource> _iconImageSource;
@@ -33,7 +34,7 @@ namespace NuGet.WebMatrix
             NuGetModel model,
             IPackage package,
             PackageViewModelAction packageAction)
-            : this(model, package, null, packageAction)
+            : this(model, package, false, packageAction)
         {
         }
 
@@ -43,15 +44,14 @@ namespace NuGet.WebMatrix
         public PackageViewModel(
             NuGetModel model,
             IPackage package,
-            IPackage remotePackage,
+            bool shouldPullRemotePackage,
             PackageViewModelAction packageAction)
         {
             Debug.Assert(package != null, "package parameter should not be null");
-            Debug.Assert(remotePackage == null || model.IsPackageInstalled(package), "A remote package should only be provided for installed packages");
 
             this.Model = model;
             _package = package;
-            _remotePackage = remotePackage;
+            _shouldPullRemotePackage = shouldPullRemotePackage;
             this.PackageAction = packageAction;
 
             this.LaunchUrlCommand = new RelayCommand(url => this.OpenUrl(url as Uri));
@@ -173,11 +173,19 @@ namespace NuGet.WebMatrix
             }
         }
 
+        public int? UninstalledDownloadCount
+        {
+            get
+            {
+                return IsInstalled ? null : DownloadCount;
+            }
+        }
+
         public int? DownloadCount
         {
             get
             {
-                DataServicePackage dataServicePackage = _package as DataServicePackage ?? _remotePackage as DataServicePackage;
+                DataServicePackage dataServicePackage = _package as DataServicePackage ?? this.RemotePackage as DataServicePackage;
                 if (dataServicePackage == null)
                 {
                     return null;
@@ -189,6 +197,26 @@ namespace NuGet.WebMatrix
             }
         }
 
+        private void InitializeRemotePackage()
+        {
+            /// REMOTEPACKAGE SHOULD BE NULL IF THE FILTER IS NOT 'INSTALLED' 
+            /// IF THE FILTER IS INSTALLED, WE QUERY FOR THE REMOTE PACKAGE WHEN 'HasUpdates' property IS RETRIEVED
+            /// THIS HAPPENS WHEN A PACKAGE IS SELECTED IN THE INSTALLED FILTER
+            /// USING THE REMOTE PACKAGE, WE DETERMINE IF A NEW VERSION IS AVAILABLE. ALSO, WE USE THE REMOTE PACKAGE
+            /// TO GET PACKAGE GALLERY URL, ICON URL, and REPORT ABUSE URL
+            if (_remotePackage == null && _shouldPullRemotePackage)
+            {
+                var packageManager = this.Model.PackageManager;
+                var installedPackage = this.InstalledPackage;
+                _remotePackage = packageManager.GetUpdate(InstalledPackage) ??
+                    (packageManager.FindPackage(installedPackage.Id, installedPackage.Version) ?? _package);
+                this.OnPropertyChanged("GalleryPackageUrl");
+                this.OnPropertyChanged("IconUrl");
+                this.OnPropertyChanged("ReportAbuseUrl");
+                this.OnPropertyChanged("DisplayInstalledVersion");
+            }
+        }
+
         public bool HasUpdates
         {
             get
@@ -197,8 +225,9 @@ namespace NuGet.WebMatrix
                 // the 'remote' package or the 'local' and 'remote' packages
                 // we want to compare the remote package first if we have one
                 var installedPackage = this.GetInstalledPackages().SingleOrDefault();
+                InitializeRemotePackage();
                 if (installedPackage != null)
-                {
+                {                    
                     if (this.RemotePackage != null)
                     {
                         return installedPackage.Version < this.RemotePackage.Version;
@@ -283,7 +312,7 @@ namespace NuGet.WebMatrix
         {
             get
             {
-                DataServicePackage dataServicePackage = _package as DataServicePackage ?? _remotePackage as DataServicePackage;
+                DataServicePackage dataServicePackage = _package as DataServicePackage ?? this.RemotePackage as DataServicePackage;
                 if (dataServicePackage == null)
                 {
                     return null;
@@ -311,6 +340,10 @@ namespace NuGet.WebMatrix
             }
         }
 
+        /// <summary>
+        /// This is the installed version of the package
+        /// If a package is not installed, this will return null and does not apply
+        /// </summary>
         public string InstalledVersion
         {
             get
@@ -318,7 +351,7 @@ namespace NuGet.WebMatrix
                 var installedPackage = this.InstalledPackage;
                 if (installedPackage != null)
                 {
-                    return installedPackage.Version.Version.ToString();
+                    return installedPackage.Version.ToString();
                 }
                 else
                 {
@@ -421,6 +454,13 @@ namespace NuGet.WebMatrix
             }
         }
 
+        /// <summary>
+        /// REMOTEPACKAGE SHOULD BE NULL IF THE FILTER IS NOT 'INSTALLED'
+        /// IF THE FILTER IS INSTALLED, WE QUERY FOR THE REMOTE PACKAGE WHEN 'HasUpdates' property IS RETRIEVED
+        /// THIS HAPPENS WHEN A PACKAGE IS SELECTED IN THE INSTALLED FILTER
+        /// USING THE REMOTE PACKAGE, WE DETERMINE IF A NEW VERSION IS AVAILABLE. ALSO, WE USE THE REMOTE PACKAGE
+        /// TO GET PACKAGE GALLERY URL, ICON URL, and REPORT ABUSE URL
+        /// </summary>
         internal IPackage RemotePackage
         {
             get
@@ -437,12 +477,45 @@ namespace NuGet.WebMatrix
             }
         }
 
-        public string Version
+        /// <summary>
+        /// This is the version displayed alongside the package ID
+        /// In the installed filter, this is the installed version
+        /// On other filters, this is the latest uninstalled version
+        /// </summary>
+        public string DisplayVersion
+        {
+            get
+            {
+                return IsInstalled ? ((_package.Version != null) ? _package.Version.ToString() : null) : Resources.String_NotInstalled;
+            }
+        }
+
+        /// <summary>
+        /// THIS DOES NOT APPLY FOR THE INSTALLED FILTER. null is returned for the installed filter
+        /// This is the installed version of the package
+        /// </summary>
+        public string DisplayInstalledVersion
+        {
+            get
+            {
+                return _shouldPullRemotePackage ? null : InstalledVersion;
+            }
+        }
+
+        /// <summary>
+        /// THIS IS ONLY USED WHEN THE PACKAGE IS NOT INSTALLED OR NEEDS AN UPDATE
+        /// This is the newer version of the package that is not installed
+        /// </summary>
+        public string LatestUninstalledVersion
         {
             get
             {
                 string version;
-                if (_package.Version != null)
+                if (this.RemotePackage != null)
+                {
+                    version = this.RemotePackage.Version.ToString();
+                }
+                else if (_package.Version != null)
                 {
                     version = _package.Version.ToString();
                 }
@@ -474,7 +547,7 @@ namespace NuGet.WebMatrix
         {
             get
             {
-                DataServicePackage dataServicePackage = _package as DataServicePackage ?? _remotePackage as DataServicePackage;
+                DataServicePackage dataServicePackage = _package as DataServicePackage ?? this.RemotePackage as DataServicePackage;
                 if (dataServicePackage == null)
                 {
                     return null;
