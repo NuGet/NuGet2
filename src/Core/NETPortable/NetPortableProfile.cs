@@ -110,26 +110,26 @@ namespace NuGet
             }
         }
 
-        public bool IsCompatibleWith(NetPortableProfile other)
+        public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
         {
-            if (other == null)
+            if (projectFrameworkProfile == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException("projectFrameworkProfile");
             }
 
-            return other.SupportedFrameworks.All(
+            return projectFrameworkProfile.SupportedFrameworks.All(
                 projectFramework => this.SupportedFrameworks.Any(
                     packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework)));
         }
 
-        public bool IsCompatibleWith(FrameworkName framework)
+        public bool IsCompatibleWith(FrameworkName projectFramework)
         {
-            if (framework == null)
+            if (projectFramework == null)
             {
-                throw new ArgumentNullException("framework");
+                throw new ArgumentNullException("projectFramework");
             }
 
-            return SupportedFrameworks.Any(f => VersionUtility.IsCompatible(framework, f));
+            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework));
         }
 
         /// <summary>
