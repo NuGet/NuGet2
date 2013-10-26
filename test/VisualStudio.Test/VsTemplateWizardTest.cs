@@ -64,7 +64,7 @@ namespace NuGet.VisualStudio.Test
             return BuildDocument(repository, BuildPackageElement("pack", "1.0"), additionalChild);
         }
 
-        private static XElement BuildPackageElement(string id = null, string version = null, bool skipAssemblyReferences = false)
+        private static XElement BuildPackageElement(string id = null, string version = null, bool skipAssemblyReferences = false, bool includeDependencies = false)
         {
             var packageElement = new XElement(VSTemplateNamespace + "package");
             if (id != null)
@@ -78,6 +78,10 @@ namespace NuGet.VisualStudio.Test
             if (skipAssemblyReferences)
             {
                 packageElement.Add(new XAttribute("skipAssemblyReferences", skipAssemblyReferences.ToString()));
+            }
+            if (includeDependencies)
+            {
+                packageElement.Add(new XAttribute("includeDependencies", includeDependencies.ToString()));
             }
             return packageElement;
         }
@@ -725,6 +729,24 @@ namespace NuGet.VisualStudio.Test
             InvalidPackageElementHelper(content);
         }
 
+        [Fact]
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithInvalidSkipAssemblyReferencesAttribute()
+        {
+            var packageElement = BuildPackageElement("MyPackage", "1.0.0");
+            packageElement.Add(new XAttribute("skipAssemblyReferences", "sure"));
+            
+            InvalidPackageElementHelper(new[] { packageElement });
+        }
+
+        [Fact]
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithInvalidIncludeDependenciesAttribute()
+        {
+            var packageElement = BuildPackageElement("MyPackage", "1.0.0");
+            packageElement.Add(new XAttribute("includeDependencies", "yeah"));
+
+            InvalidPackageElementHelper(new[] { packageElement });
+        }
+
         private static void InvalidPackageElementHelper(XElement[] content)
         {
             // Arrange
@@ -805,6 +827,34 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
+        }
+
+        [Fact]
+        public void RunFinished_ForProject_InstallsDependenciesWhenIncludeDependenciesIsTrue()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0", includeDependencies: true),
+                BuildPackageElement("MyOtherPackage", "2.0"));
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+            wizard.ProjectFinishedGenerating(mockProject);
+
+            // Act
+            wizard.RunFinished();
+
+            // Assert (the key here is that the ignoreDependencies parameter is false for MyPackage because we said to includeDependencies on that package element)
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", false, false));
             installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");

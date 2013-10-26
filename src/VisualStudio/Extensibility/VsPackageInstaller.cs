@@ -170,6 +170,11 @@ namespace NuGet.VisualStudio
 
         public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, bool skipAssemblyReferences, Project project, IDictionary<string, string> packageVersions)
         {
+            this.InstallPackagesFromRegistryRepository(keyName, isPreUnzipped, skipAssemblyReferences, ignoreDependencies: true, project: project, packageVersions: packageVersions);
+        }
+
+        public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, bool skipAssemblyReferences, bool ignoreDependencies, Project project, IDictionary<string, string> packageVersions)
+        {
             if (String.IsNullOrEmpty(keyName))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "keyName");
@@ -188,11 +193,16 @@ namespace NuGet.VisualStudio
             var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
             var repositoryPath = preinstalledPackageInstaller.GetRegistryRepositoryPath(keyName, _registryKeys, ThrowError);
 
-            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, packageVersions, repositoryPath);
+            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, ignoreDependencies, packageVersions, repositoryPath);
             preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
         }
 
         public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, bool skipAssemblyReferences, Project project, IDictionary<string, string> packageVersions)
+        {
+            InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped, skipAssemblyReferences, ignoreDependencies: true, project: project, packageVersions: packageVersions);
+        }
+
+        public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, bool skipAssemblyReferences, bool ignoreDependencies, Project project, IDictionary<string, string> packageVersions)
         {
             if (String.IsNullOrEmpty(extensionId))
             {
@@ -212,16 +222,16 @@ namespace NuGet.VisualStudio
             var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
             var repositoryPath = preinstalledPackageInstaller.GetExtensionRepositoryPath(extensionId, _vsExtensionManager, ThrowError);
 
-            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, packageVersions, repositoryPath);
+            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, ignoreDependencies, packageVersions, repositoryPath);
             preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
         }
 
-        private static PreinstalledPackageConfiguration GetPreinstalledPackageConfiguration(bool isPreUnzipped, bool skipAssemblyReferences, IDictionary<string, string> packageVersions, string repositoryPath)
+        private static PreinstalledPackageConfiguration GetPreinstalledPackageConfiguration(bool isPreUnzipped, bool skipAssemblyReferences, bool ignoreDependencies, IDictionary<string, string> packageVersions, string repositoryPath)
         {
             List<PreinstalledPackageInfo> packageInfos = new List<PreinstalledPackageInfo>();
             foreach (var package in packageVersions)
             {
-                packageInfos.Add(new PreinstalledPackageInfo(package.Key, package.Value, skipAssemblyReferences));
+                packageInfos.Add(new PreinstalledPackageInfo(package.Key, package.Value, skipAssemblyReferences, ignoreDependencies));
             }
 
             var config = new PreinstalledPackageConfiguration(repositoryPath, packageInfos, isPreUnzipped);
