@@ -362,4 +362,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="Warning_PackageNotReferencedByAnyProject" xml:space="preserve">
     <value>Package {0} of version {1} is not referenced by any project.</value>
   </data>
+  <data name="ProjectFileProcessor_PropertyNotFound" xml:space="preserve">
+    <value>The package attempted to set property '{0}' to the value '{1}' on the project item '{2}', but the property was unavailable.</value>
+  </data>
 </root>

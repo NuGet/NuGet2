@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NuGet.Authoring;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test.ProjectFileProcessing
@@ -10,16 +9,20 @@ namespace NuGet.VisualStudio.Test.ProjectFileProcessing
         [Fact]
         public void FromManifestFilesCanBeCalledWithNull()
         {
-            var sut = new VsPackageProcessorExtractor();
+            // Arrange
+            var extractor = new VsPackageProcessorExtractor();
 
-            var result = sut.FromManifestFiles(null);
+            // Act
+            var result = extractor.FromManifestFiles(null);
 
+            // Assert
             Assert.NotNull(result);
         }
 
         [Fact]
         public void FromManifestFilesFindsCustomTool()
         {
+            // Arrange
             const string toolName = "Ammer";
             var file = new ManifestFile
                 {
@@ -34,20 +37,23 @@ namespace NuGet.VisualStudio.Test.ProjectFileProcessing
                         }
                 };
 
-            var sut = new VsPackageProcessorExtractor();
+            var extractor = new VsPackageProcessorExtractor();
 
-            var result = sut.FromManifestFiles(
-                new[] {new PackageManifestFile(file)})
+            // Act
+            var result = extractor.FromManifestFiles(
+                new[] { new PackageManifestFile(file) })
                             .OfType<VsProjectItemCustomToolSetter>()
                             .Single();
 
+            // Assert
             Assert.Equal(toolName, result.CustomToolName);
         }
 
         [Fact]
         public void FromManifestFilesFindsCustomToolAndNamespace()
         {
-            const string toolNamespace = "Nuget.ProjectFileProcessing";
+            // Arrange
+            const string toolNamespace = "NuGet.ProjectFileProcessing";
             var file = new ManifestFile
                 {
                     Source = "*.settings",
@@ -66,19 +72,22 @@ namespace NuGet.VisualStudio.Test.ProjectFileProcessing
                         }
                 };
 
-            var sut = new VsPackageProcessorExtractor();
+            var extractor = new VsPackageProcessorExtractor();
 
-            var result = sut.FromManifestFiles(
+            // Act
+            var result = extractor.FromManifestFiles(
                 new[] {new PackageManifestFile(file)})
                             .OfType<VsProjectItemCustomToolSetter>()
                             .Single();
 
+            // Assert
             Assert.Equal(toolNamespace, result.CustomToolNamespace);
         }
 
         [Fact]
         public void FromManifestFilesFindsPropertySetters()
         {
+            // Arrange
             const string pattern = "*.settings";
             const string propertyName = "PropertyName";
             const string propertyValue = "PropertyValue";
@@ -95,13 +104,15 @@ namespace NuGet.VisualStudio.Test.ProjectFileProcessing
                         }
                 };
 
-            var sut = new VsPackageProcessorExtractor();
+            var extractor = new VsPackageProcessorExtractor();
 
-            var result = sut.FromManifestFiles(
+            // Act
+            var result = extractor.FromManifestFiles(
                 new[] {new PackageManifestFile(file)})
                             .OfType<VsProjectItemPropertySetter>()
                             .Single();
 
+            // Assert
             Assert.Equal(pattern, result.MatchPattern);
             Assert.Equal(propertyName, result.PropertyName);
             Assert.Equal(propertyValue, result.PropertyValue);

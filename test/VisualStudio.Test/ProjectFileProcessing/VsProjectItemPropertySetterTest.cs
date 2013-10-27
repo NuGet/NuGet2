@@ -5,11 +5,11 @@ namespace NuGet.VisualStudio.Test
 {
     public class VsProjectItemPropertySetterTest
     {
-        const string TargetPath = "File.txt";
-        const string PropertyName = "PropertyName";
-        const string PropertyValue = "PropertyValue";
+        private const string TargetPath = "File.txt";
+        private const string PropertyName = "PropertyName";
+        private const string PropertyValue = "PropertyValue";
 
-        static Mock<IProjectFileProcessingProjectItem> GetProjectItemMock()
+        private static Mock<IProjectFileProcessingProjectItem> GetProjectItemMock()
         {
             var projectItemMock = new Mock<IProjectFileProcessingProjectItem>();
             projectItemMock
@@ -21,8 +21,7 @@ namespace NuGet.VisualStudio.Test
             return projectItemMock;
         }
 
-        static Mock<IProjectFileProcessingProject> GetProjectMock(
-            IProjectFileProcessingProjectItem projectItem)
+        private static Mock<IProjectFileProcessingProject> GetProjectMock(IProjectFileProcessingProjectItem projectItem)
         {
             var projectMock = new Mock<IProjectFileProcessingProject>();
             projectMock
@@ -35,18 +34,19 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void VsPropertySetterSetsPropertyOnMatch()
         {
+            // Arrange
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
             var processor = new VsProjectItemPropertySetter("*.txt", PropertyName, PropertyValue);
 
-            var sut = new ProjectFileProcessingBuilder(null)
+            var builder = new ProjectFileProcessingBuilder(null)
                 .WithProcessor(processor)
                 .Build(projectMock.Object);
 
-            // act
-            sut.Process(TargetPath);
+            // Act
+            builder.Process(TargetPath);
 
-            // assert
+            // Assert
             projectItemMock.Verify(
                 o => o.SetPropertyValue(PropertyName, PropertyValue),
                 Times.Once());
@@ -55,18 +55,19 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void VsPropertySetterDoesNotSetPropertyOnMisMatch()
         {
+            // Arrange
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
             var processor = new VsProjectItemPropertySetter("*.xxx", PropertyName, PropertyValue);
 
-            var sut = new ProjectFileProcessingBuilder(null)
+            var builder = new ProjectFileProcessingBuilder(null)
                 .WithProcessor(processor)
                 .Build(projectMock.Object);
 
-            // act
-            sut.Process(TargetPath);
+            // Act
+            builder.Process(TargetPath);
 
-            // assert
+            // Assert
             projectItemMock.Verify(
                 o => o.SetPropertyValue(PropertyName, PropertyValue),
                 Times.Never());
@@ -75,18 +76,19 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void VsPropertySetterDoesNothingIfProjectItemNotFound()
         {
+            // Arrange
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
             var processor = new VsProjectItemPropertySetter("*.txt", PropertyName, PropertyValue);
 
-            var sut = new ProjectFileProcessingBuilder(null)
+            var builder = new ProjectFileProcessingBuilder(null)
                 .WithProcessor(processor)
                 .Build(projectMock.Object);
 
-            // act
-            sut.Process("XXX");
+            // Act
+            builder.Process("XXX");
 
-            // assert
+            // Assert
             projectItemMock.Verify(
                 o => o.SetPropertyValue(PropertyName, PropertyValue),
                 Times.Never());

@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using NuGet.Resources;
 
-namespace NuGet.Authoring
+namespace NuGet
 {
     [XmlType("property")]
     public class ManifestFileProperty

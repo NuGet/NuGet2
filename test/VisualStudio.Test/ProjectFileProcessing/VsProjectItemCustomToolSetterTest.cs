@@ -6,40 +6,41 @@ namespace NuGet.VisualStudio.Test
 {
     public class VsProjectItemCustomToolSetterTest
     {
-        const string MatchPattern = "*.txt";
-        const string CustomTool = "CustomTool";
-        const string CustomToolNamespace = "CustomToolNamespace";
+        private const string MatchPattern = "*.txt";
+        private const string CustomTool = "CustomTool";
+        private const string CustomToolNamespace = "CustomToolNamespace";
 
         [Fact]
         public void MatchPatternCanNotBeNull()
         {
-            var ex =
-                Assert.Throws<ArgumentException>(
-                    () => GetSut(null, CustomTool, CustomToolNamespace));
+            // Arrange & Act
+            var ex = Assert.Throws<ArgumentException>(() => new VsProjectItemCustomToolSetter(null, CustomTool, CustomToolNamespace));
 
+            // Assert
             Assert.Equal("matchPattern", ex.ParamName);
         }
 
         [Fact]
         public void CustomToolPropertyCanNotBeNull()
         {
-            var ex =
-                Assert.Throws<ArgumentException>(
-                    () => GetSut(MatchPattern, null, CustomToolNamespace));
+            // Arrange & Act
+            var ex = Assert.Throws<ArgumentException>(() => new VsProjectItemCustomToolSetter(MatchPattern, null, CustomToolNamespace));
 
-            Assert.Equal("customTool", ex.ParamName);
+            // Assert
+            Assert.Equal("customToolName", ex.ParamName);
         }
 
         [Fact]
         public void CustomToolNamespacePropertyCanBeNull()
         {
-            Assert.DoesNotThrow(
-                () => GetSut(MatchPattern, CustomTool, null));
+            // Arrange, Act, and Assert
+            Assert.DoesNotThrow(() => new VsProjectItemCustomToolSetter(MatchPattern, CustomTool, null));
         }
 
         [Fact]
         public void SetsTheCustomToolProperty()
         {
+            // Arrange
             var projectItemMock = new Mock<IProjectFileProcessingProjectItem>();
             projectItemMock
                 .Setup(o => o.SetPropertyValue(
@@ -47,17 +48,19 @@ namespace NuGet.VisualStudio.Test
                     CustomTool))
                 .Verifiable();
 
-            var sut = GetSut(
-                MatchPattern, CustomTool, CustomToolNamespace);
+            var setter = new VsProjectItemCustomToolSetter(MatchPattern, CustomTool, CustomToolNamespace);
 
-            sut.Process(projectItemMock.Object);
+            // Act
+            setter.Process(projectItemMock.Object);
 
+            // Assert
             projectItemMock.Verify();
         }
 
         [Fact]
         public void SetsTheCustomToolNamespaceProperty()
         {
+            // Arrange
             var projectItemMock = new Mock<IProjectFileProcessingProjectItem>();
             projectItemMock
                 .Setup(o => o.SetPropertyValue(
@@ -65,37 +68,31 @@ namespace NuGet.VisualStudio.Test
                     CustomToolNamespace))
                 .Verifiable();
 
-            var sut = GetSut(
-                MatchPattern, CustomTool, CustomToolNamespace);
+            var setter = new VsProjectItemCustomToolSetter(MatchPattern, CustomTool, CustomToolNamespace);
 
-            sut.Process(projectItemMock.Object);
+            // Act
+            setter.Process(projectItemMock.Object);
 
+            // Assert
             projectItemMock.Verify();
         }
 
         [Fact]
         public void CallsRunCustomTool()
         {
+            // Arrange
             var projectItemMock = new Mock<IProjectFileProcessingProjectItem>();
             projectItemMock
                 .Setup(o => o.RunCustomTool())
                 .Verifiable();
 
-            var sut = GetSut(
-                MatchPattern, CustomTool, CustomToolNamespace);
+            var setter = new VsProjectItemCustomToolSetter(MatchPattern, CustomTool, CustomToolNamespace);
 
-            sut.Process(projectItemMock.Object);
+            // Act
+            setter.Process(projectItemMock.Object);
 
+            // Assert
             projectItemMock.Verify();
-        }
-
-        static VsProjectItemCustomToolSetter GetSut(
-            string matchPattern,
-            string customTool, string customToolNamespace)
-        {
-            return new VsProjectItemCustomToolSetter(
-                matchPattern,
-                customTool, customToolNamespace);
         }
     }
 }

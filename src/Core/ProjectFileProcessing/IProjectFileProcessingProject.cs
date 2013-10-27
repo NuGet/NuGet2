@@ -3,17 +3,17 @@
 namespace NuGet
 {
     /// <summary>
-    /// <para>Abstraction for methods on a pProject required for package file processing</para>
+    /// Abstraction for methods on a Project required for package file processing
     /// </summary>
     public interface IProjectFileProcessingProject
     {
         /// <summary>
-        /// <para>Get an item from the project given its path</para>
+        /// Get an item from the project given its path
         /// </summary>
         IProjectFileProcessingProjectItem GetItem(string path);
 
         /// <summary>
-        /// <para>Gets processors for a given package</para>
+        /// Gets processors for a given package
         /// </summary>
         IEnumerable<IProjectFileProcessor> GetProcessorsFromPackage(IPackage package);
     }

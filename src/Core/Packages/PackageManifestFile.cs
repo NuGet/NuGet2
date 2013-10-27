@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace NuGet
 {
-    public class PackageManifestFile:IPackageManifestFile
+    public class PackageManifestFile : IPackageManifestFile
     {
         readonly string _source;
         readonly string _target;
-        readonly string _exclude; 
+        readonly string _exclude;
         readonly IEnumerable<IPackageManifestFileProperty> _properties;
 
         internal PackageManifestFile(ManifestFile file)

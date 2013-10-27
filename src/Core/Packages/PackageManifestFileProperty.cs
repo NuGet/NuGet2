@@ -1,8 +1,6 @@
-﻿using NuGet.Authoring;
-
-namespace NuGet
+﻿namespace NuGet
 {
-    public class PackageManifestFileProperty:IPackageManifestFileProperty
+    public class PackageManifestFileProperty : IPackageManifestFileProperty
     {
         readonly string _name;
         readonly string _value;

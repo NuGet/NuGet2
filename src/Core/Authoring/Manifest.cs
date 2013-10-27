@@ -10,7 +10,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using NuGet.Authoring;
 using NuGet.Resources;
 
 namespace NuGet
@@ -127,14 +126,12 @@ namespace NuGet
             return schemaNamespace;
         }
 
-        public static Manifest Create(
-            IPackageMetadata metadata)
+        public static Manifest Create(IPackageMetadata metadata)
         {
             return Create(metadata, null);
         }
 
-        public static Manifest Create(
-            IPackageMetadata metadata, IEnumerable<IPackageManifestFile> files)
+        public static Manifest Create(IPackageMetadata metadata, IEnumerable<IPackageManifestFile> files)
         {
             return new Manifest
                 {
@@ -159,15 +156,17 @@ namespace NuGet
                             FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
                             ReferenceSets = CreateReferenceSets(metadata),
                             MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
-
                         },
                     Files = Create(files)
                 };
         }
 
-        static List<ManifestFile> Create(IEnumerable<IPackageManifestFile> files)
+        private static List<ManifestFile> Create(IEnumerable<IPackageManifestFile> files)
         {
-            if (files == null) return null;
+            if (files == null)
+            {
+                return null;
+            }
 
             return files.Select(f => new ManifestFile
                 {

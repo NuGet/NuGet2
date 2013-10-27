@@ -2,10 +2,9 @@
 
 namespace NuGet.VisualStudio
 {
-    public abstract class VsProjectItemProcessorBase:
-        IProjectFileProcessor
-    { 
-        readonly string _matchPattern;
+    public abstract class VsProjectItemProcessorBase : IProjectFileProcessor
+    {
+        private readonly string _matchPattern;
 
         protected VsProjectItemProcessorBase(string matchPattern)
         {

@@ -46,7 +46,7 @@ namespace NuGet
         /// <summary>
         /// File Properties for processing on add
         /// </summary>
-        internal const string SchemaVersionV7 = "http://schemas.microsoft.com/packaging/2013/07/nuspec.xsd";
+        internal const string SchemaVersionV7 = "http://schemas.microsoft.com/packaging/2013/11/nuspec.xsd";
 
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,

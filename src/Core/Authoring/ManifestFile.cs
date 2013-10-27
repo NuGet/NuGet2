@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using NuGet.Authoring;
 using NuGet.Resources;
 
 namespace NuGet
@@ -30,11 +29,7 @@ namespace NuGet
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlArray("properties")]
-        public List<ManifestFileProperty> Properties
-        {
-            get;
-            set;
-        }
+        public List<ManifestFileProperty> Properties { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

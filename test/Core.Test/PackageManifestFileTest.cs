@@ -36,7 +36,6 @@ namespace NuGet.Test
                     }));
 
             var ms = new MemoryStream();
-            //var ms = File.Create("C:\\temp\\temp.zip");
             builder.Save(ms);
             ms.Seek(0, SeekOrigin.Begin);
 

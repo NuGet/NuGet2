@@ -17,7 +17,7 @@ namespace NuGet
         public const int XdtTransformationVersion = 6;
         public const int FilePropertiesVersion = 7;
 
-        static readonly Type[] _xmlAttributes = new[] {typeof (XmlElementAttribute), typeof (XmlAttributeAttribute), typeof (XmlArrayAttribute)};
+        private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
         public static int GetManifestVersion(ManifestMetadata manifest)
         {
@@ -29,12 +29,12 @@ namespace NuGet
             return GetManifestVersion(manifest.Metadata, manifest.Files);
         }
 
-        static int GetManifestVersion(ManifestMetadata manifest, IEnumerable<ManifestFile> files)
+        private static int GetManifestVersion(ManifestMetadata manifest, IEnumerable<ManifestFile> files)
         {
             return Math.Max(VisitObject(manifest), GetMaxVersionFromManifest(manifest, files));
         }
 
-        static int GetMaxVersionFromManifest(ManifestMetadata metadata, IEnumerable<ManifestFile> files)
+        private static int GetMaxVersionFromManifest(ManifestMetadata metadata, IEnumerable<ManifestFile> files)
         {
             if (ManifestFilesHaveProperties(files))
             {
@@ -60,8 +60,7 @@ namespace NuGet
             }
 
             SemanticVersion semanticVersion;
-            if (SemanticVersion.TryParse(metadata.Version, out semanticVersion) &&
-                !String.IsNullOrEmpty(semanticVersion.SpecialVersion))
+            if (SemanticVersion.TryParse(metadata.Version, out semanticVersion) && !String.IsNullOrEmpty(semanticVersion.SpecialVersion))
             {
                 return SemverVersion;
             }
@@ -69,13 +68,12 @@ namespace NuGet
             return DefaultVersion;
         }
 
-        static bool ManifestFilesHaveProperties(IEnumerable<ManifestFile> files)
+        private static bool ManifestFilesHaveProperties(IEnumerable<ManifestFile> files)
         {
-            return files != null && files
-                                        .Any(f => f.Properties != null && f.Properties.Any());
+            return files != null && files.Any(f => f.Properties != null && f.Properties.Any());
         }
 
-        static int VisitObject(object obj)
+        private static int VisitObject(object obj)
         {
             if (obj == null)
             {
@@ -86,7 +84,7 @@ namespace NuGet
                     select VisitProperty(obj, property)).Max();
         }
 
-        static int VisitProperty(object obj, PropertyInfo property)
+        private static int VisitProperty(object obj, PropertyInfo property)
         {
             if (!IsManifestMetadata(property))
             {
@@ -125,7 +123,7 @@ namespace NuGet
             return version;
         }
 
-        static int VisitList(IList list)
+        private static int VisitList(IList list)
         {
             var version = DefaultVersion;
 
@@ -137,13 +135,13 @@ namespace NuGet
             return version;
         }
 
-        static int GetPropertyVersion(PropertyInfo property)
+        private static int GetPropertyVersion(PropertyInfo property)
         {
             var attribute = property.GetCustomAttribute<ManifestVersionAttribute>();
             return attribute != null ? attribute.Version : DefaultVersion;
         }
 
-        static bool IsManifestMetadata(PropertyInfo property)
+        private static bool IsManifestMetadata(PropertyInfo property)
         {
             return _xmlAttributes.Any(attr => property.GetCustomAttribute(attr) != null);
         }

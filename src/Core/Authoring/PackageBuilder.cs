@@ -396,8 +396,7 @@ namespace NuGet
 
             if (manifest.Metadata.ReferenceSets != null)
             {
-                PackageAssemblyReferences
-                    .AddRange(manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
+                PackageAssemblyReferences.AddRange(manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
             }
 
             ManifestFiles = manifest.Files == null

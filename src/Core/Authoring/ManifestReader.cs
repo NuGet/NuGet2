@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using NuGet.Authoring;
 using NuGet.Resources;
 
 namespace NuGet
@@ -240,8 +239,6 @@ namespace NuGet
 
         private static List<ManifestDependency> ReadDependencies(XElement containerElement)
         {
-
-
             // element is <dependency>
             return (from element in containerElement.ElementsNoNamespace("dependency")
                     let idElement = element.Attribute("id")

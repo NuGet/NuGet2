@@ -1,17 +1,17 @@
 ﻿namespace NuGet
 {
     /// <summary>
-    /// <para>Abstraction for a file processor</para>
+    /// Abstraction for a file processor
     /// </summary>
     public interface IProjectFileProcessor
     {
         /// <summary>
-        /// <para>Check for match given a project item</para>
+        /// Check for match given a project item
         /// </summary>
         bool IsMatch(IProjectFileProcessingProjectItem projectItem);
 
         /// <summary>
-        /// <para>Process the project item passed</para>
+        /// Process the project item
         /// </summary>
         void Process(IProjectFileProcessingProjectItem projectItem);
     }

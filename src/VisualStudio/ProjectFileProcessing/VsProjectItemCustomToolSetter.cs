@@ -2,25 +2,29 @@
 
 namespace NuGet.VisualStudio
 {
-    public class VsProjectItemCustomToolSetter:
-        VsProjectItemProcessorBase
+    /// <summary>
+    /// A project item processor that handles both the CustomTool and CustomToolNamespace, running the custom tool after setting the properties.
+    /// </summary>
+    public class VsProjectItemCustomToolSetter : VsProjectItemProcessorBase
     {
         readonly string _customToolName;
         readonly string _customToolNamespace;
 
-        public const string CustomToolPropertyName = "CustomTool";
-        public const string CustomToolNamespacePropertyName = "CustomToolNamespace";
+        public const string CustomToolPropertyName = "customtool";
+        public const string CustomToolNamespacePropertyName = "customtoolnamespace";
 
-        public VsProjectItemCustomToolSetter(
-            string matchPattern, 
-            string customToolName, 
-            string customToolNamespace) : 
-                base(matchPattern)
+        public VsProjectItemCustomToolSetter(string matchPattern, string customToolName, string customToolNamespace)
+            : base(matchPattern)
         {
             if (string.IsNullOrWhiteSpace(matchPattern))
-                throw new ArgumentException("matchPattern cannot be null, empty or whitespace", "matchPattern");
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "matchPattern");
+            }
+
             if (string.IsNullOrWhiteSpace(customToolName))
-                throw new ArgumentException("customTool cannot be null, empty or whitespace", "customToolName");
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "customToolName");
+            }
 
             _customToolName = customToolName;
             _customToolNamespace = customToolNamespace;
@@ -36,8 +40,7 @@ namespace NuGet.VisualStudio
             get { return _customToolNamespace; }
         }
 
-        public override void Process(
-            IProjectFileProcessingProjectItem projectItem)
+        public override void Process(IProjectFileProcessingProjectItem projectItem)
         {
             projectItem.SetPropertyValue(CustomToolPropertyName, CustomToolName);
             projectItem.SetPropertyValue(CustomToolNamespacePropertyName, CustomToolNamespace);

@@ -11,7 +11,7 @@ namespace NuGet.Test.Mocks
         private HashSet<string> _topImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _bottomImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _excludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        Func<string, IProjectFileProcessingProjectItem> _getItem;
+        private Func<string, IProjectFileProcessingProjectItem> _getItem;
 
         public MockProjectSystem(FrameworkName frameworkName, string root = @"x:\MockFileSystem")
             : base(root)

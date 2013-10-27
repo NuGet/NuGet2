@@ -57,16 +57,24 @@ namespace NuGet
                         {
                             // Ignore uninstall transform file during installation
                             string truncatedPath;
-                            IPackageFileTransformer uninstallTransformer =
-                                FindFileTransformer(fileTransformers, fte => fte.UninstallExtension, file.EffectivePath, out truncatedPath);
+                            IPackageFileTransformer uninstallTransformer = FindFileTransformer(fileTransformers, fte => fte.UninstallExtension, file.EffectivePath, out truncatedPath);
+
                             if (uninstallTransformer != null)
                             {
                                 continue;
                             }
+
                             TryAddFile(project, path, file.GetStream);
                         }
 
-                        fileProcessingExecutor.Process(path);
+                        try
+                        {
+                            fileProcessingExecutor.Process(path);
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            project.Logger.Log(MessageLevel.Warning, ex.Message);
+                        }
                     }
                 }
             }
