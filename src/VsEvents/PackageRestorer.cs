@@ -337,9 +337,13 @@ namespace NuGet.VsEvents
         private void RestorePackage(PackageReference package)
         {
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackage, package);
-            
+
+            // during package restore, use local cache as the primary source, other active sources
+            // as secondary source.
+            var activePackageSourceRepository = ServiceLocator.GetInstance<IPackageRepository>();
+            var repository = new PriorityPackageRepository(NuGet.MachineCache.Default, activePackageSourceRepository);
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            var packageManager = packageManagerFactory.CreatePackageManagerWithAllPackageSources();
+            var packageManager = packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id, package.Version.ToString()))
             {
                 var resolvedPackage = PackageHelper.ResolvePackage(
