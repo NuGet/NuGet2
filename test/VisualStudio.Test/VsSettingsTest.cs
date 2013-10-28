@@ -145,6 +145,7 @@ namespace NuGet.VisualStudio.Test
             var solutionManager = new Mock<MockSolutionManager>();
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
             solutionManager.Setup(s => s.SolutionDirectory).Returns(@"x:\solution").Verifiable();
+            solutionManager.Setup(s => s.SolutionFileSystem).Returns(new MockFileSystem(@"x:\solution"));
             var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
 
             var fileSystemA = new MockFileSystem();
