@@ -36,10 +36,25 @@ namespace NuGet
             }
 
             var dependency = package.GetCompatiblePackageDependencies(targetFramework: null).FirstOrDefault();
-            if (dependency != null && dependency.Id.Equals(SpecCommand.SampleManifestDependency.Id, StringComparison.Ordinal)
-                                   && dependency.VersionSpec.ToString().Equals("[" + SpecCommand.SampleManifestDependency.Version + "]", StringComparison.Ordinal))
+            if (dependency != null && 
+                dependency.Id.Equals(SpecCommand.SampleManifestDependency.Id, StringComparison.Ordinal) &&
+                dependency.VersionSpec != null &&
+                dependency.VersionSpec.ToString().Equals("[" + SpecCommand.SampleManifestDependency.Version + "]", StringComparison.Ordinal))
             {
                 yield return CreateIssueFor("Dependency", dependency.ToString());
+            }
+
+            if (dependency != null && dependency.VersionSpec == null)
+            {
+                var message = String.Format(
+                    CultureInfo.CurrentCulture, 
+                    LocalizedResourceManager.GetString("Warning_UnspecifiedDependencyVersion"), 
+                    dependency.Id);
+                var issue = new PackageIssue(
+                    LocalizedResourceManager.GetString("Warning_UnspecifiedDependencyVersionTitle"),
+                    message,
+                    LocalizedResourceManager.GetString("Warning_UnspecifiedDependencyVersionSolution"));
+                yield return issue;
             }
         }
 

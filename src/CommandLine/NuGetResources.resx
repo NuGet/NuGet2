@@ -5245,7 +5245,7 @@ To prevent NuGet from downloading packages during build, open the Visual Studio 
   </data>
   <data name="FileConflictChoiceText_cht" xml:space="preserve">
     <value>[Y] 是  [A] 全部皆是  [N] 否  [L] 全部皆否 ?</value>
-  </data>  
+  </data>
   <data name="Error_MultipleSolutions_csy" xml:space="preserve">
     <value>Tato složka obsahuje více než jeden soubor řešení.</value>
   </data>
@@ -5734,5 +5734,14 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   </data>
   <data name="Warning_InvalidPackageSaveMode" xml:space="preserve">
     <value>Invalid PackageSaveMode value '{0}'.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion" xml:space="preserve">
+    <value>The version of dependency '{0}' is not specified.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution" xml:space="preserve">
+    <value>Specifiy the version of dependency and rebuild your package.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle" xml:space="preserve">
+    <value>Specify version of dependencies.</value>
   </data>
 </root>

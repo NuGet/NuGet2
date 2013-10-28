@@ -16760,6 +16760,33 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The version of dependency &apos;{0}&apos; is not specified..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersion {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifiy the version of dependency and rebuild your package..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersionSolution {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersionSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify version of dependencies..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersionTitle {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersionTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
         /// </summary>
         internal static string Warning_UnspecifiedField {
