@@ -1415,6 +1415,82 @@ namespace NuGet.Test
             Assert.Equal(expectedScore, score);
         }
 
+        /// <summary>
+        /// The following example is used in the comments provided in the product code too including how the computation takes place
+        /// Refer VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary for more details
+        /// For example, Let Project target net45+sl5+monotouch+monoandroid. And, Package has 4 profiles
+        /// A: net45+sl5, B: net40+sl5+monotouch, C: net40+sl4+monotouch+monoandroid, D: net40+sl4+monotouch+monoandroid+wp71
+        /// </summary>
+        [Theory]
+        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net45+sl5", -502)]
+        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl5+MonoTouch", -303)]
+        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
+        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
+        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithOptionalFx(string frameworkName, string targetFrameworkName, int expectedScore)
+        {            
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=5.0"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=0.0"), 
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Arrange
+            var framework = VersionUtility.ParseFrameworkName(frameworkName);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+
+            // Act
+            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
+
+            // Assert
+            Assert.Equal(expectedScore, score);
+        }
+
+        /// <summary>
+        /// This test is used to ensure that when the packageTargetFrameworkProfile is already available in NetPortableProfileCollection
+        /// Still the 
+        /// </summary>
+        [Theory]
+        [InlineData("portable-net40+sl40+MonoTouch+MonoAndroid", "portable-net40+sl40+MonoTouch+MonoAndroid", -4)]
+        [InlineData("portable-net45+MonoTouch+MonoAndroid", "portable-net40+sl40+MonoTouch+MonoAndroid", -54)]
+        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithPreLoadedPackageProfile(string frameworkName, string targetFrameworkName, int expectedScore)
+        {
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=0.0"), 
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Arrange
+            var framework = VersionUtility.ParseFrameworkName(frameworkName);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+
+            // Act
+            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
+
+            // Assert
+            Assert.Equal(expectedScore, score);
+        }
+
         private NetPortableProfileCollection BuildProfileCollection()
         {
             var profileCollection = new NetPortableProfileCollection();

@@ -961,25 +961,65 @@ namespace NuGet
             // .NET 4.5 (0) + SL4 (1) + WP71 (0)                            == 1
             // .NET 4.0 (1) + SL5 (0) + WP71 (0)                            == 1
 
-            NetPortableProfile frameworkProfile = NetPortableProfile.Parse(projectFrameworkName.Profile);
+            NetPortableProfile projectFrameworkProfile = NetPortableProfile.Parse(projectFrameworkName.Profile);
             Debug.Assert(projectFrameworkName != null);
 
-            NetPortableProfile targetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile);
+            NetPortableProfile packageTargetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile);
             Debug.Assert(packageTargetFrameworkName != null);
 
-            int score = 0;
-            foreach (var framework in targetFrameworkProfile.SupportedFrameworks)
+            // If there are optionalFrameworks in the packageTargetFrameworkProfile, create a new profile where 
+            // supportedFrameworks is concatenated with the optionalFrameworks
+            if (!packageTargetFrameworkProfile.OptionalFrameworks.IsEmpty())
             {
-                var matchingFramework = frameworkProfile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(f, framework));
-                if (matchingFramework != null && matchingFramework.Version > framework.Version)
+                packageTargetFrameworkProfile = new NetPortableProfile(packageTargetFrameworkProfile.FrameworkVersion, packageTargetFrameworkProfile.Name,
+                    packageTargetFrameworkProfile.SupportedFrameworks.Concat(packageTargetFrameworkProfile.OptionalFrameworks), null);
+            }
+
+            int nonMatchingCompatibleFrameworkCount = 0;
+            int inCompatibleOptionalFrameworkCount = 0;
+            foreach (var supportedPackageTargetFramework in packageTargetFrameworkProfile.SupportedFrameworks)
+            {
+                var compatibleProjectFramework = projectFrameworkProfile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(f, supportedPackageTargetFramework));
+                if (compatibleProjectFramework != null && compatibleProjectFramework.Version > supportedPackageTargetFramework.Version)
                 {
-                    score++;
+                    nonMatchingCompatibleFrameworkCount++;
                 }
             }
 
+            foreach (var optionalProjectFramework in projectFrameworkProfile.OptionalFrameworks)
+            {
+                var compatiblePackageTargetFramework = packageTargetFrameworkProfile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(f, optionalProjectFramework));
+                if(compatiblePackageTargetFramework == null || compatiblePackageTargetFramework.Version > optionalProjectFramework.Version)
+                {
+                    inCompatibleOptionalFrameworkCount++;
+                }
+                else if (compatiblePackageTargetFramework != null && compatiblePackageTargetFramework.Version < optionalProjectFramework.Version)
+                {
+                    // we check again if the package version < project version, because, if they are equal, they are matching compatible frameworks
+                    // neither inCompatibleOptionalFrameworkCount nor nonMatchingCompatibleFrameworkCount should be incremented
+                    nonMatchingCompatibleFrameworkCount++;
+                }
+            }
+
+            // The following is the maximum project framework count which is also the maximum possible incompatibilities
+            int maxPossibleIncompatibleFrameworkCount = 1 + projectFrameworkProfile.SupportedFrameworks.Count + projectFrameworkProfile.OptionalFrameworks.Count;
+
+            // This is to ensure that profile with compatible optional frameworks wins over profiles without, even, when supported frameworks are highly compatible
+            // If there are no incompatible optional frameworks, the score below will be simply nonMatchingCompatibleFrameworkCount
+            // For example, Let Project target net45+sl5+monotouch+monoandroid. And, Package has 4 profiles, (THIS EXAMPLE IS LIKELY NOT A REAL_WORLD SCENARIO :))
+            // A: net45+sl5, B: net40+sl5+monotouch, C: net40+sl4+monotouch+monoandroid, D: net40+sl4+monotouch+monoandroid+wp71
+            // At this point, Compatibility is as follows. C = D > B > A. Scores for A = (5 * 2 + 0), B = (5 * 1 + 1), C = (5 * 0 + 2), D = (5 * 0 + 2)
+            // The scores are 10, 6, 2 and 2. Both C and D are the most compatible with a score of 2
+            // Clearly, having more number of frameworks, supported and optional, that are compatible is preferred over most compatible supported frameworks alone
+            int score = maxPossibleIncompatibleFrameworkCount * inCompatibleOptionalFrameworkCount +
+                nonMatchingCompatibleFrameworkCount;
+
             // This is to ensure that if two portable frameworks have the same score,
             // we pick the one that has less number of supported platforms.
-            score = score * 50 + targetFrameworkProfile.SupportedFrameworks.Count;
+            // In the example described in comments above, both C and D had an equal score of 2. With the following correction, new scores are as follows
+            // A = (10 * 50 + 2), B = (6 * 50 + 3), C = (2 * 50 + 4), D = (2 * 50 + 5)
+            // A = 502, B = 303, C = 104, D = 105. And, C has the lowest score and the most compatible
+            score = score * 50 + packageTargetFrameworkProfile.SupportedFrameworks.Count;
 
             // Our algorithm returns lowest score for the most compatible framework. 
             // However, the caller of this method expects it to have the highest score. 
