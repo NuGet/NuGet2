@@ -66,6 +66,15 @@ namespace NuGet
             }
         }
 
+
+        public static PackageReferenceFile CreateFromProject(string projectFileFullPath)
+        {
+            var fileSystem = new PhysicalFileSystem(Path.GetDirectoryName(projectFileFullPath));
+            string projectName = Path.GetFileNameWithoutExtension(projectFileFullPath);
+            var file = new PackageReferenceFile(fileSystem, Constants.PackageReferenceFile, projectName);
+            return file;
+        }
+
         public static bool IsValidConfigFileName(string fileName)
         {
             return fileName != null &&

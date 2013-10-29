@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using System.Configuration;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {    
@@ -974,8 +975,10 @@ namespace Proj2
         }
 
         // Test that NuGet packages of the project are added as dependencies
-        [Fact]
-        public void PackCommand_PackagesAddedAsDependencies()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj1.config")]
+        public void PackCommand_PackagesAddedAsDependencies(string packagesConfigFileName)
         {
             var targetDir = ConfigurationManager.AppSettings["TargetDir"];
             var nugetexe = Path.Combine(targetDir, "nuget.exe");
@@ -1005,7 +1008,6 @@ namespace Proj2
   </ItemGroup>
   <ItemGroup>
     <Content Include='proj1_file2.txt' />
-    <Content Include='packages.config' />
   </ItemGroup>
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
@@ -1023,7 +1025,7 @@ namespace Proj1
 }");
                 Util.CreateFile(
                     proj1Directory,
-                    "packages.config",
+                    packagesConfigFileName,
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""testPackage1"" version=""1.1.0"" targetFramework=""net45"" />
