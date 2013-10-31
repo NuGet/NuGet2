@@ -212,7 +212,10 @@ namespace NuGet
 
         private void RaiseSendingRequest(WebRequestEventArgs e)
         {
-            _sendingRequest(this, e);
+            if (_sendingRequest != null)
+            {
+                _sendingRequest(this, e);
+            }
         }
 
         public override IQueryable<IPackage> GetPackages()
