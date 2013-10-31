@@ -34,6 +34,7 @@ namespace NuGet
         /// <param name="version">.NET framework version that the profile belongs to, like "v4.0".</param>
         /// <param name="name">Name of the portable profile, like "win+net45".</param>
         /// <param name="supportedFrameworks">Supported frameworks.</param>
+        /// <param name="optionalFrameworks">Optional frameworks.</param>
         public NetPortableProfile(string version, string name, IEnumerable<FrameworkName> supportedFrameworks, IEnumerable<FrameworkName> optionalFrameworks)
         {
             if (String.IsNullOrEmpty(version))
@@ -139,14 +140,15 @@ namespace NuGet
                 throw new ArgumentNullException("projectFramework");
             }
 
-            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework));
+            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
+                || NetPortableProfileTable.HasCompatibleProfileWith(this, projectFramework);
         }
 
         /// <summary>
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue)
+        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
         {
             if (String.IsNullOrEmpty(profileValue))
             {
@@ -161,6 +163,11 @@ namespace NuGet
             var result = NetPortableProfileTable.GetProfile(profileValue);
             if (result != null)
             {
+                if (treatOptionalFrameworksAsSupportedFrameworks)
+                {
+                    result = new NetPortableProfile(result.Name, result.SupportedFrameworks.Concat(result.OptionalFrameworks));
+                }
+
                 return result;
             }
 

@@ -962,18 +962,10 @@ namespace NuGet
             // .NET 4.0 (1) + SL5 (0) + WP71 (0)                            == 1
 
             NetPortableProfile projectFrameworkProfile = NetPortableProfile.Parse(projectFrameworkName.Profile);
-            Debug.Assert(projectFrameworkName != null);
+            Debug.Assert(projectFrameworkProfile != null);
 
-            NetPortableProfile packageTargetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile);
-            Debug.Assert(packageTargetFrameworkName != null);
-
-            // If there are optionalFrameworks in the packageTargetFrameworkProfile, create a new profile where 
-            // supportedFrameworks is concatenated with the optionalFrameworks
-            if (!packageTargetFrameworkProfile.OptionalFrameworks.IsEmpty())
-            {
-                packageTargetFrameworkProfile = new NetPortableProfile(packageTargetFrameworkProfile.FrameworkVersion, packageTargetFrameworkProfile.Name,
-                    packageTargetFrameworkProfile.SupportedFrameworks.Concat(packageTargetFrameworkProfile.OptionalFrameworks), null);
-            }
+            NetPortableProfile packageTargetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile, treatOptionalFrameworksAsSupportedFrameworks: true);
+            Debug.Assert(packageTargetFrameworkProfile != null);
 
             int nonMatchingCompatibleFrameworkCount = 0;
             int inCompatibleOptionalFrameworkCount = 0;
@@ -1029,16 +1021,16 @@ namespace NuGet
 
         internal static long GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(FrameworkName projectFrameworkName, FrameworkName packagePortableFramework)
         {
-            NetPortableProfile profile = NetPortableProfile.Parse(packagePortableFramework.Profile);
-            if (profile == null)
+            NetPortableProfile packageFrameworkProfile = NetPortableProfile.Parse(packagePortableFramework.Profile, treatOptionalFrameworksAsSupportedFrameworks: true);
+            if (packageFrameworkProfile == null)
             {
                 // defensive coding, this should never happen
                 Debug.Fail("'portableFramework' is not a valid portable framework.");
-                return 0;
+                return long.MinValue;
             }
 
             // among the supported frameworks by the Portable library, pick the one that is compatible with 'projectFrameworkName'
-            var compatibleFramework = profile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(projectFrameworkName, f));
+            var compatibleFramework = packageFrameworkProfile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(projectFrameworkName, f));
 
             if (compatibleFramework != null)
             {
@@ -1047,12 +1039,19 @@ namespace NuGet
                 // This is to ensure that if two portable frameworks have the same score,
                 // we pick the one that has less number of supported platforms.
                 // The *2 is to make up for the /2 to which the result of this method is subject.
-                score -= (profile.SupportedFrameworks.Count * 2);
+                score -= (packageFrameworkProfile.SupportedFrameworks.Count * 2);
 
                 return score;
             }
+            else if(NetPortableProfileTable.HasCompatibleProfileWith(packageFrameworkProfile, projectFrameworkName))
+            {
+                // Get the list of portable profiles that supports projectFrameworkName
+                // And, see if there is atleast 1 profile which is compatible with packageFrameworkProfile
+                // If so, return 0 - (packageFrameworkProfile.SupportedFrameworks.Count * 2)
+                return 0 - (packageFrameworkProfile.SupportedFrameworks.Count * 2);
+            }
 
-            return 0;
+            return long.MinValue;
         }
 
         private static bool TryParseVersion(string versionString, out SemanticVersion version)
