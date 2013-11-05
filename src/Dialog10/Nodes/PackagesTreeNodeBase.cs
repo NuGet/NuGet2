@@ -14,10 +14,10 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Providers
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsSortDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer
+    internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsSortDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer
     {
-        // The number of extensions to show per page.
-        private const int DefaultItemsPerPage = 10;
+        // The number of extensions to show per page for online
+        public const int DefaultItemsPerPage = 10;
 
         // We cache the query until it changes (due to sort order or search)
         private IEnumerable<IPackage> _query;
@@ -38,6 +38,9 @@ namespace NuGet.Dialog.Providers
         private bool _includePrereleaseWhenLastLoaded;
         private readonly bool _collapseVersions;
 
+        // true if packages are fetched in pages. Otherwise, all packages are fetched in 1 page.
+        private bool _isPaged;
+
         private CancellationTokenSource _currentCancellationSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -48,9 +51,11 @@ namespace NuGet.Dialog.Providers
             Debug.Assert(provider != null);
 
             _collapseVersions = collapseVersions;
-            Parent = parent;
+            Parent = parent;            
             Provider = provider;
             PageSize = DefaultItemsPerPage;
+
+            _isPaged = this is IVsPageDataSource;
         }
 
         public bool CollapseVersions
@@ -58,6 +63,14 @@ namespace NuGet.Dialog.Providers
             get
             {
                 return _collapseVersions;
+            }
+        }
+
+        public bool IsPaged
+        {
+            get
+            {
+                return _isPaged;
             }
         }
 
@@ -359,6 +372,11 @@ namespace NuGet.Dialog.Providers
                 if (_totalCount == 0)
                 {
                     return new LoadPageResult(new IPackage[0], 0, 0);
+                }
+
+                if (!_isPaged)
+                {
+                    PageSize = _totalCount;
                 }
 
                 // make sure we don't query a page that is greater than the maximum page number.

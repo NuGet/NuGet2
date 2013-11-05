@@ -37,7 +37,6 @@ namespace NuGet.Dialog.Providers
             IPackageRestoreManager packageRestoreManager)
             : base(localRepository, resources, providerServices, progressProvider, solutionManager)
         {
-
             if (packageManager == null)
             {
                 throw new ArgumentNullException("packageManager");

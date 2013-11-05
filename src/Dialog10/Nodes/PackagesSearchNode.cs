@@ -12,7 +12,6 @@ namespace NuGet.Dialog.Providers
         public PackagesSearchNode(PackagesProviderBase provider, IVsExtensionsTreeNode parent, PackagesTreeNodeBase baseNode, string searchText) :
             base(parent, provider, baseNode.CollapseVersions)
         {
-
             if (baseNode == null)
             {
                 throw new ArgumentNullException("baseNode");
@@ -76,5 +75,5 @@ namespace NuGet.Dialog.Providers
             }
             return base.ApplyOrdering(query);
         }
-    }
+    }    
 }

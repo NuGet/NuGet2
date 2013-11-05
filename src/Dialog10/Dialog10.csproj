@@ -68,6 +68,8 @@
     </Compile>
     <Compile Include="Nodes\EmptyTreeNode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Nodes\PagedPackagesSearchNode.cs" />
+    <Compile Include="Nodes\OnlineTreeNode.cs" />
     <Compile Include="Providers\InstalledProvider.cs" />
     <Compile Include="LoadPageResult.cs" />
     <Compile Include="Providers\OnlineProvider.cs" />

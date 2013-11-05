@@ -32,7 +32,6 @@ namespace NuGet.Dialog.Providers
             ISolutionManager solutionManager) :
             base(localRepository, resources, providerServices, progressProvider, solutionManager)
         {
-
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageManagerFactory = packageManagerFactory;
@@ -115,7 +114,7 @@ namespace NuGet.Dialog.Providers
 
         protected virtual PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository repository)
         {
-            return new SimpleTreeNode(this, source.Name, RootNode, repository);
+            return new OnlineTreeNode(this, source.Name, RootNode, repository);
         }
 
         protected internal virtual IVsPackageManager GetActivePackageManager()
