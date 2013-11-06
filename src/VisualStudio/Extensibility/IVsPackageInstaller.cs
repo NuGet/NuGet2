@@ -100,9 +100,6 @@ namespace NuGet.VisualStudio
         /// <param name="packageVersions">A dictionary of packages/versions to install where the key is the package id and the value is the version.</param>
         /// <remarks>
         /// If any version of the package is already installed, no action will be taken.
-        /// <para>
-        /// Dependencies are always ignored.
-        /// </para>
         /// </remarks>
         void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, bool skipAssemblyReferences, bool ignoreDependencies, Project project, IDictionary<string, string> packageVersions);
     }
