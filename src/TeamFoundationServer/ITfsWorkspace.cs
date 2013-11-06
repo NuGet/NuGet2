@@ -19,6 +19,7 @@ namespace NuGet.TeamFoundationServer
         IEnumerable<string> GetItemsRecursive(string fullPath);
         IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath, RecursionType recursionType);
         IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath);
+        IEnumerable<ITfsPendingChange> GetPendingChanges(IEnumerable<string> files);
         void Undo(IEnumerable<ITfsPendingChange> pendingChanges);
     }
 }

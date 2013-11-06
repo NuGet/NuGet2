@@ -15,12 +15,7 @@ namespace NuGet
             return fileSystem.GetFiles(path, filter, recursive: false);
         }
 
-        public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files)
-        {
-            AddFiles(fileSystem, files, String.Empty);
-        }
-
-        public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir)
+        public static void AddFiles(IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir)
         {
             AddFiles(fileSystem, files, rootDir, preserveFilePath: true);
         }
@@ -42,12 +37,7 @@ namespace NuGet
             }
         }
 
-        internal static void DeleteFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files)
-        {
-            DeleteFiles(fileSystem, files, String.Empty);
-        }
-
-        internal static void DeleteFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir)
+        internal static void DeleteFiles(IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir)
         {
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -131,19 +121,21 @@ namespace NuGet
             DoSafeAction(() => fileSystem.DeleteFile(path), fileSystem.Logger);
         }
 
-        internal static void DeleteFileSafe(this IFileSystem fileSystem, string path, Func<Stream> streamFactory)
+        public static bool ContentEqual(IFileSystem fileSystem, string path, Func<Stream> streamFactory)
+        {
+            using (Stream stream = streamFactory(),
+                fileStream = fileSystem.OpenFile(path))
+            {
+                return stream.ContentEquals(fileStream);
+            }
+        }
+
+        public static void DeleteFileSafe(this IFileSystem fileSystem, string path, Func<Stream> streamFactory)
         {
             // Only delete the file if it exists and the checksum is the same
             if (fileSystem.FileExists(path))
             {
-                bool contentEqual;
-                using (Stream stream = streamFactory(),
-                              fileStream = fileSystem.OpenFile(path))
-                {
-                    contentEqual = stream.ContentEquals(fileStream);
-                }
-
-                if (contentEqual)
+                if (ContentEqual(fileSystem, path, streamFactory))
                 {
                     fileSystem.DeleteFileSafe(path);
                 }

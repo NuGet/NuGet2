@@ -55,6 +55,11 @@ namespace NuGet
             // Do nothing
         }
 
+        public void DeleteFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            // Do nothing
+        }
+
         public bool FileExists(string path)
         {
             return false;
@@ -71,6 +76,11 @@ namespace NuGet
         }
 
         public void AddFile(string path, Action<Stream> writeToStream)
+        {
+            // Do nothing
+        }
+
+        public void AddFiles(IEnumerable<IPackageFile> files, string rootDir)
         {
             // Do nothing
         }

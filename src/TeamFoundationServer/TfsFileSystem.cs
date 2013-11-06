@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using NuGet.Resources;
 using NuGet.VisualStudio;
 
 namespace NuGet.TeamFoundationServer
 {
     public class TfsFileSystem : PhysicalFileSystem, ISourceControlFileSystem, IBatchProcessor<string>
     {
+        // A flag indicating whether TFS operation should be performed or not in single file operation.
+        // This flag is set to false by DeleteFiles() and AddFiles() so that TFS operation is 
+        // skipped during single file processing since they will add / remove files from TFS in
+        // bulk mode.
+        bool _disableTfs;
+
         public TfsFileSystem(Workspace workspace, string path)
             : this(new TfsWorkspaceWrapper(workspace), path)
         {
@@ -23,6 +30,7 @@ namespace NuGet.TeamFoundationServer
             }
 
             Workspace = workspace;
+            _disableTfs = false;
         }
 
         public ITfsWorkspace Workspace { get; private set; }
@@ -47,35 +55,74 @@ namespace NuGet.TeamFoundationServer
             AddFileCore(path, () => base.AddFile(path, writeToStream));
         }
 
-        private void AddFileCore(string path, Action addFile)
+        public override void AddFiles(IEnumerable<IPackageFile> files, string rootDir)
         {
-            string fullPath = GetFullPath(path);
-
-            // See if there are any pending changes for this file
-            var pendingChanges = Workspace.GetPendingChanges(fullPath, RecursionType.None).ToArray();
-            var pendingDeletes = pendingChanges.Where(c => c.IsDelete);
-
-            // We would need to pend an edit if (a) the file is pending delete (b) is bound to source control and does not already have pending edits or adds
-            bool sourceControlBound = IsSourceControlBound(path);
-            bool requiresEdit = pendingDeletes.Any() || (!pendingChanges.Any(c => c.IsEdit || c.IsAdd) && sourceControlBound);
-
-            // Undo all pending deletes
-            Workspace.Undo(pendingDeletes);
-
-            // If the file was marked as deleted, and we undid the change or has no pending adds or edits, we need to edit it.
-            if (requiresEdit)
+            _disableTfs = true;
+            HashSet<string> filesToAdd = new HashSet<string>();
+            try
             {
-                // If the file exists, but there is not pending edit then edit the file (if it is under source control)
-                requiresEdit = Workspace.PendEdit(fullPath);
+                foreach (var f in files)
+                {
+                    var path = GetFullPath(Path.Combine(rootDir, f.Path));
+                    if (FileExists(path))
+                    {
+                        Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
+                    }
+
+                    filesToAdd.Add(path);
+                    filesToAdd.Add(Path.GetDirectoryName(path));
+
+                    using (Stream stream = f.GetStream())
+                    {
+                        AddFile(path, stream);
+                    }
+                }
+            }
+            finally
+            {
+                _disableTfs = false;
             }
 
-            // Write to the underlying file system.
-            addFile();
+            Workspace.PendAdd(filesToAdd);
+        }
 
-            // If we didn't have to edit the file, this must be a new file.
-            if (!sourceControlBound)
+        private void AddFileCore(string path, Action addFile)
+        {
+            if (!_disableTfs)
             {
-                Workspace.PendAdd(fullPath);
+                string fullPath = GetFullPath(path);
+
+                // See if there are any pending changes for this file
+                var pendingChanges = Workspace.GetPendingChanges(fullPath, RecursionType.None).ToArray();
+                var pendingDeletes = pendingChanges.Where(c => c.IsDelete);
+
+                // We would need to pend an edit if (a) the file is pending delete (b) is bound to source control and does not already have pending edits or adds
+                bool sourceControlBound = IsSourceControlBound(path);
+                bool requiresEdit = pendingDeletes.Any() || (!pendingChanges.Any(c => c.IsEdit || c.IsAdd) && sourceControlBound);
+
+                // Undo all pending deletes
+                Workspace.Undo(pendingDeletes);
+
+                // If the file was marked as deleted, and we undid the change or has no pending adds or edits, we need to edit it.
+                if (requiresEdit)
+                {
+                    // If the file exists, but there is not pending edit then edit the file (if it is under source control)
+                    requiresEdit = Workspace.PendEdit(fullPath);
+                }
+
+
+                // Write to the underlying file system.
+                addFile();
+
+                // If we didn't have to edit the file, this must be a new file.
+                if (!sourceControlBound)
+                {
+                    Workspace.PendAdd(fullPath);
+                }
+            }
+            else
+            {
+                addFile();
             }
         }
 
@@ -123,6 +170,42 @@ namespace NuGet.TeamFoundationServer
             }
         }
 
+        public override void DeleteFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            HashSet<string> filesToPendDelete = new HashSet<string>();
+            foreach (var file in files)
+            {
+                var fullPath = GetFullPath(Path.Combine(rootDir, file.Path));
+                if (FileExists(fullPath))
+                {
+                    if (FileSystemExtensions.ContentEqual(this, fullPath, file.GetStream))
+                    {
+                        filesToPendDelete.Add(fullPath);
+                    }
+                    else
+                    {
+                        Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileModified, fullPath);
+                    }
+                }
+            }
+
+            // undo pending changes
+            List<ITfsPendingChange> pendingChanges = Workspace.GetPendingChanges(
+                GetFullPath(rootDir), RecursionType.Full).ToList();
+            Workspace.Undo(pendingChanges);
+
+            foreach (var pendingChange in pendingChanges)
+            {
+                if (pendingChange.IsAdd)
+                {
+                    filesToPendDelete.Remove(pendingChange.LocalItem);
+                    base.DeleteFile(pendingChange.LocalItem);
+                }
+            }
+
+            Workspace.PendDelete(filesToPendDelete, RecursionType.None);
+        }
+
         public bool BindToSourceControl(IEnumerable<string> paths)
         {
             if (paths == null)
@@ -150,6 +233,11 @@ namespace NuGet.TeamFoundationServer
 
         private bool DeleteItem(string path, RecursionType recursionType)
         {
+            if (_disableTfs)
+            {
+                return false;
+            }
+
             string fullPath = GetFullPath(path);
 
             var pendingChanges = Workspace.GetPendingChanges(fullPath);
@@ -168,7 +256,11 @@ namespace NuGet.TeamFoundationServer
         protected override void EnsureDirectory(string path)
         {
             base.EnsureDirectory(path);
-            Workspace.PendAdd(GetFullPath(path));
+
+            if (!_disableTfs)
+            {
+                Workspace.PendAdd(GetFullPath(path));
+            }
         }
 
         public void BeginProcessing(IEnumerable<string> batch, PackageAction action)
