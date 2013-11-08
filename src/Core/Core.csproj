@@ -111,6 +111,7 @@
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
+    <Compile Include="PackageWalker\DependencyVersion.cs" />
     <Compile Include="PackageWalker\NuGetVersionNotSatisfiedException.cs" />
     <Compile Include="ProjectSystem\ProjectImportLocation.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />

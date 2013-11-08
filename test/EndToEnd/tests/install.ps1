@@ -2523,9 +2523,9 @@ function Test-InstallPackageAddMoreEntriesToProjectConfigFile
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 
-# Tests that when -MaxDependencyPatches is specified, the dependency with
+# Tests that when -DependencyVersion HighestPath is specified, the dependency with
 # the largest patch number is installed
-function Test-InstallPackageWithMaxDependencyPatches
+function Test-InstallPackageWithDependencyVersionHighest
 {
     param($context)
 
@@ -2533,16 +2533,16 @@ function Test-InstallPackageWithMaxDependencyPatches
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package jquery.validation -version 1.10 -MaxDependencyPatches
+    $p | Install-Package jquery.validation -version 1.10 -DependencyVersion HighestPatch
 
     # Assert
     Assert-Package $p jquery.validation 1.10
     Assert-Package $p jquery 1.4.4
 }
 
-# Tests that when -MaxDependencyPatches is not specified, the dependency with
+# Tests that when -DependencyVersion is not specified, the dependency with
 # the smallest patch number is installed
-function Test-InstallPackageWithoutMaxDependencyPatches
+function Test-InstallPackageWithoutDependencyVersion
 {
     param($context)
 

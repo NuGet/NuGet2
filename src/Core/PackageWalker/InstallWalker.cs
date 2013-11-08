@@ -228,9 +228,7 @@ namespace NuGet
 
         private IPackage SelectDependency(IEnumerable<IPackage> dependencies)
         {
-            return MaxDependencyPatches ?
-                dependencies.ResolveSafeVersion() :
-                dependencies.FirstOrDefault();
+            return dependencies.SelectDependency(DependencyVersion);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
@@ -353,14 +351,14 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, maxDependencyPatches: MaxDependencyPatches);
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
             if (package != null)
             {
                 return package;
             }
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, maxDependencyPatches: MaxDependencyPatches);
+            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, dependencyVersion: DependencyVersion);
             return sourcePackage;
         }
 

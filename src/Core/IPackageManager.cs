@@ -16,7 +16,7 @@ namespace NuGet
 
         ILogger Logger { get; set; }
 
-        bool MaxDependencyPatches { get; set; }
+        DependencyVersion DependencyVersion { get; set; }
 
         bool WhatIf { get; set; }
         

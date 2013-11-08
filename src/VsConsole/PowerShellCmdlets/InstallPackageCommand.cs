@@ -44,6 +44,7 @@ namespace NuGet.PowerShell.Commands
             _productUpdateService = productUpdateService;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         [Parameter(Position = 2)]
@@ -67,7 +68,7 @@ namespace NuGet.PowerShell.Commands
         public SwitchParameter WhatIf { get; set; }
 
         [Parameter]
-        public SwitchParameter MaxDependencyPatches { get; set; }
+        public DependencyVersion DependencyVersion { get; set; }
 
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
         private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
@@ -142,7 +143,7 @@ namespace NuGet.PowerShell.Commands
                 
                 if (ProjectManager != null)
                 {
-                    ProjectManager.MaxDependencyPatches = MaxDependencyPatches;
+                    ProjectManager.DependencyVersion = DependencyVersion;
                 }
 
                 if (!String.IsNullOrEmpty(_cacheStatusMessage))
@@ -229,7 +230,7 @@ namespace NuGet.PowerShell.Commands
                 return;
             }
 
-            packageManager.MaxDependencyPatches = MaxDependencyPatches;
+            packageManager.DependencyVersion = DependencyVersion;
             packageManager.WhatIf = WhatIf;
             packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
         }

@@ -575,7 +575,7 @@ namespace NuGet.PowerShell.Commands.Test
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object);
             cmdlet.Id = "A";
             cmdlet.IncludePrerelease = true;
-            cmdlet.MaxDependencyPatches = true;
+            cmdlet.DependencyVersion = DependencyVersion.HighestPatch;
             cmdlet.Execute();
 
             // Assert

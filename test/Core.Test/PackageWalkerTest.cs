@@ -79,7 +79,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>();
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false, true, false))
+            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
                               .Returns(packageB).Verifiable();
             var localRepository = new MockPackageRepository();
 
@@ -114,7 +114,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false, true, false))
+            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
                               .Returns(packageB12).Verifiable();
             var localRepository = new MockPackageRepository();
 
@@ -1120,7 +1120,7 @@ namespace NuGet.Test
                 ignoreDependencies: false,
                 allowPrereleaseVersions: false)
                 {
-                    MaxDependencyPatches = true
+                    DependencyVersion = DependencyVersion.HighestPatch
                 };
 
             // Act
@@ -1138,7 +1138,7 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), packages[3].Package.Version);
         }
 
-        // Tests that when maxDependencyPatches is false, the dependency with the lowest major minor and patch version
+        // Tests that when DependencyVersion is lowest, the dependency with the lowest major minor and patch version
         // is picked.
         [Fact]
         public void InstallWalkerResolvesLowestMajorAndMinorAndPatchVersionOfListedPackagesForDependencies()
@@ -1173,7 +1173,7 @@ namespace NuGet.Test
                 ignoreDependencies: false,
                 allowPrereleaseVersions: false)
                 {
-                    MaxDependencyPatches = false
+                    DependencyVersion = DependencyVersion.Lowest
                 };
 
             // Act
@@ -1187,7 +1187,7 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), packages[1].Package.Version);
         }
 
-        // Tests that when maxDependencyPatches is true, the dependency with the lowest major minor and highest patch version
+        // Tests that when DependencyVersion is HighestPatch, the dependency with the lowest major minor and highest patch version
         // is picked.
         [Fact]
         public void InstallWalkerResolvesLowestMajorAndMinorHighestPatchVersionOfListedPackagesForDependencies()
@@ -1222,7 +1222,7 @@ namespace NuGet.Test
                 ignoreDependencies: false,
                 allowPrereleaseVersions: false)
                 {
-                    MaxDependencyPatches = true
+                    DependencyVersion = DependencyVersion.HighestPatch
                 };
 
             // Act

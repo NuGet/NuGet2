@@ -48,7 +48,7 @@ namespace NuGet
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
-            MaxDependencyPatches = false;
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         public IFileSystem FileSystem
@@ -87,7 +87,7 @@ namespace NuGet
             }
         }
 
-        public bool MaxDependencyPatches
+        public DependencyVersion DependencyVersion
         {
             get;
             set;
@@ -145,7 +145,7 @@ namespace NuGet
                 ignoreDependencies, allowPrereleaseVersions)
             {
                 DisableWalkInfo = ignoreWalkInfo,
-                MaxDependencyPatches = MaxDependencyPatches
+                DependencyVersion = DependencyVersion
             };
             Execute(package, installerWalker);
         }

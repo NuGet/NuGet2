@@ -301,8 +301,8 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0.0"), package.Version);
         }
 
-        // Test that when maxDependencyPatches is false, the dependency with the lowest patch number 
-        // is picked.
+        // Test that when dependencyVersion is DependencyVersions.Lowest, 
+        // the dependency with the lowest patch number is picked.
         [Fact]
         public void FindDependencyPicksLowestMajorAndMinorVersion()
         {
@@ -333,19 +333,19 @@ namespace NuGet.Test
             // Act
             IPackage package1 = repository.ResolveDependency(
                 dependency1, constraintProvider: null, allowPrereleaseVersions: false, 
-                preferListedPackages: false, maxDependencyPatches: false);
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Lowest);
             IPackage package2 = repository.ResolveDependency(
                 dependency2, constraintProvider: null, allowPrereleaseVersions: false,
-                preferListedPackages: false, maxDependencyPatches: false);
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Lowest);
             IPackage package3 = repository.ResolveDependency(
                 dependency3, constraintProvider: null, allowPrereleaseVersions: false,
-                preferListedPackages: false, maxDependencyPatches: false);
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Lowest);
             IPackage package4 = repository.ResolveDependency(
                 dependency4, constraintProvider: null, allowPrereleaseVersions: false,
-                preferListedPackages: false, maxDependencyPatches: false);
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Lowest);
             IPackage package5 = repository.ResolveDependency(
                 dependency5, constraintProvider: null, allowPrereleaseVersions: false,
-                preferListedPackages: false, maxDependencyPatches: false);
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Lowest);
 
             // Assert
             Assert.Equal("B", package1.Id);
@@ -358,6 +358,126 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), package4.Version);
             Assert.Equal("B", package5.Id);
             Assert.Equal(new SemanticVersion("1.0"), package5.Version);
+        }
+
+        // Test that when dependencyVersion is DependencyVersions.Highest, 
+        // the dependency with the highest version is picked.
+        [Fact]
+        public void FindDependencyPicksHighest()
+        {
+            // Arrange
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "3.0"),
+                PackageUtility.CreatePackage("B", "2.0"),
+                PackageUtility.CreatePackage("B", "1.0"),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                PackageUtility.CreatePackage("B", "1.0.9"),
+                PackageUtility.CreatePackage("B", "1.1")
+            };
+
+            // B >= 1.0
+            PackageDependency dependency1 = PackageDependency.CreateDependency("B", "1.0");
+
+            // B >= 1.0.0
+            PackageDependency dependency2 = PackageDependency.CreateDependency("B", "1.0.0");
+
+            // B >= 1.0.0.0
+            PackageDependency dependency3 = PackageDependency.CreateDependency("B", "1.0.0.0");
+
+            // B = 1.0
+            PackageDependency dependency4 = PackageDependency.CreateDependency("B", "[1.0]");
+
+            // B >= 1.0.0 && <= 2.0
+            PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 2.0]");
+
+            // Act
+            IPackage package1 = repository.ResolveDependency(
+                dependency1, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Highest);
+            IPackage package2 = repository.ResolveDependency(
+                dependency2, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Highest);
+            IPackage package3 = repository.ResolveDependency(
+                dependency3, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Highest);
+            IPackage package4 = repository.ResolveDependency(
+                dependency4, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Highest);
+            IPackage package5 = repository.ResolveDependency(
+                dependency5, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.Highest);
+
+            // Assert
+            Assert.Equal("B", package1.Id);
+            Assert.Equal(new SemanticVersion("3.0"), package1.Version);
+            Assert.Equal("B", package2.Id);
+            Assert.Equal(new SemanticVersion("3.0"), package2.Version);
+            Assert.Equal("B", package3.Id);
+            Assert.Equal(new SemanticVersion("3.0"), package3.Version);
+            Assert.Equal("B", package4.Id);
+            Assert.Equal(new SemanticVersion("1.0"), package4.Version);
+            Assert.Equal("B", package5.Id);
+            Assert.Equal(new SemanticVersion("2.0"), package5.Version);
+        }
+        
+        // Test that when dependencyVersion is DependencyVersions.HighestMinor, 
+        // the dependency with the highest minor version is picked.
+        [Fact]
+        public void FindDependencyPicksHighestMinor()
+        {
+            // Arrange
+            var repository = new MockPackageRepository() {                
+                PackageUtility.CreatePackage("B", "1.0"),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                PackageUtility.CreatePackage("B", "1.0.9"),
+                PackageUtility.CreatePackage("B", "1.1"),
+                PackageUtility.CreatePackage("B", "2.0"),
+                PackageUtility.CreatePackage("B", "3.0")
+            };
+
+            // B >= 1.0
+            PackageDependency dependency1 = PackageDependency.CreateDependency("B", "1.0");
+
+            // B >= 1.0.0
+            PackageDependency dependency2 = PackageDependency.CreateDependency("B", "1.0.0");
+
+            // B >= 1.0.0.0
+            PackageDependency dependency3 = PackageDependency.CreateDependency("B", "1.0.0.0");
+
+            // B = 1.0
+            PackageDependency dependency4 = PackageDependency.CreateDependency("B", "[1.0]");
+
+            // B >= 1.0.0 && <= 2.0
+            PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 2.0]");
+
+            // Act
+            IPackage package1 = repository.ResolveDependency(
+                dependency1, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.HighestMinor);
+            IPackage package2 = repository.ResolveDependency(
+                dependency2, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.HighestMinor);
+            IPackage package3 = repository.ResolveDependency(
+                dependency3, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.HighestMinor);
+            IPackage package4 = repository.ResolveDependency(
+                dependency4, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.HighestMinor);
+            IPackage package5 = repository.ResolveDependency(
+                dependency5, constraintProvider: null, allowPrereleaseVersions: false,
+                preferListedPackages: false, dependencyVersion: DependencyVersion.HighestMinor);
+
+            // Assert
+            Assert.Equal("B", package1.Id);
+            Assert.Equal(new SemanticVersion("1.1"), package1.Version);
+            Assert.Equal("B", package2.Id);
+            Assert.Equal(new SemanticVersion("1.1"), package2.Version);
+            Assert.Equal("B", package3.Id);
+            Assert.Equal(new SemanticVersion("1.1"), package3.Version);
+            Assert.Equal("B", package4.Id);
+            Assert.Equal(new SemanticVersion("1.0"), package4.Version);
+            Assert.Equal("B", package5.Id);
+            Assert.Equal(new SemanticVersion("1.1"), package5.Version);
         }
 
         [Fact]
@@ -388,11 +508,11 @@ namespace NuGet.Test
             PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 1.0.8]");
 
             // Act
-            IPackage package1 = repository.ResolveDependency(dependency1, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: true);
-            IPackage package2 = repository.ResolveDependency(dependency2, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: true);
-            IPackage package3 = repository.ResolveDependency(dependency3, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: true);
-            IPackage package4 = repository.ResolveDependency(dependency4, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: true);
-            IPackage package5 = repository.ResolveDependency(dependency5, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, maxDependencyPatches: true);
+            IPackage package1 = repository.ResolveDependency(dependency1, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, dependencyVersion: DependencyVersion.HighestPatch);
+            IPackage package2 = repository.ResolveDependency(dependency2, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, dependencyVersion: DependencyVersion.HighestPatch);
+            IPackage package3 = repository.ResolveDependency(dependency3, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, dependencyVersion: DependencyVersion.HighestPatch);
+            IPackage package4 = repository.ResolveDependency(dependency4, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, dependencyVersion: DependencyVersion.HighestPatch);
+            IPackage package5 = repository.ResolveDependency(dependency5, constraintProvider: null, allowPrereleaseVersions: false, preferListedPackages: false, dependencyVersion: DependencyVersion.HighestPatch);
 
             // Assert
             Assert.Equal("B", package1.Id);

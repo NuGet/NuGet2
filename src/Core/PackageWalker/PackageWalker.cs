@@ -22,7 +22,7 @@ namespace NuGet
         {
             _targetFramework = targetFramework;
             Marker = new PackageMarker();
-            MaxDependencyPatches = false;
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         protected FrameworkName TargetFramework
@@ -65,15 +65,7 @@ namespace NuGet
             }
         }
 
-        /// <summary>
-        /// If true, the dependency with the maximum patch number is picked.
-        /// If false, the dependency with the mininum patch number is picked.
-        /// </summary>
-        /// <remarks>
-        /// The patch number is the part after major and minor. E.g. for version 1.2.3.4, 
-        /// the patch number is 3.4.
-        /// </remarks>
-        public bool MaxDependencyPatches
+        public DependencyVersion DependencyVersion
         {
             get;
             set;
@@ -117,8 +109,8 @@ namespace NuGet
                     IPackage resolvedDependency = Marker.ResolveDependency(
                         dependency, constraintProvider: null, 
                         allowPrereleaseVersions: AllowPrereleaseVersions, 
-                        preferListedPackages: false, 
-                        maxDependencyPatches: MaxDependencyPatches) ??
+                        preferListedPackages: false,
+                        dependencyVersion: DependencyVersion) ??
                         ResolveDependency(dependency);
 
                     if (resolvedDependency == null)

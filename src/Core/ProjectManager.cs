@@ -54,7 +54,7 @@ namespace NuGet
             PathResolver = pathResolver;
             LocalRepository = localRepository;
             _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
-            MaxDependencyPatches = false;
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         public IPackagePathResolver PathResolver
@@ -105,7 +105,7 @@ namespace NuGet
             }
         }
 
-        public bool MaxDependencyPatches
+        public DependencyVersion DependencyVersion
         {
             get;
             set;
@@ -137,7 +137,7 @@ namespace NuGet
         {
             var dependentsWalker = new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id))
             {
-                MaxDependencyPatches = MaxDependencyPatches
+                DependencyVersion = DependencyVersion
             };
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
@@ -150,7 +150,7 @@ namespace NuGet
                                               {
                                                   DisableWalkInfo = WhatIf,
                                                   AcceptedTargets = PackageTargets.Project,
-                                                  MaxDependencyPatches = MaxDependencyPatches
+                                                  DependencyVersion = DependencyVersion
                                               });
         }
 
