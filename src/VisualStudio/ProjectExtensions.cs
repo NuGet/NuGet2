@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio
                                                                         };
 
         private static readonly IEnumerable<string> _fileKinds = new[] { VsConstants.VsProjectItemKindPhysicalFile, VsConstants.VsProjectItemKindSolutionItem };
-        private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder };
+        private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder, VsConstants.TDSItemTypeGuid };
 
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] 
