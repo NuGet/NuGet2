@@ -87,12 +87,12 @@ namespace NuGet.VisualStudio
             return (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }
 
-        private static bool IsLocalOrUncSharePresent(string currentSource)
+        private static bool IsLocal(string currentSource)
         {
             Uri currentURI;
             if (Uri.TryCreate(currentSource, UriKind.RelativeOrAbsolute, out currentURI))
             {
-                if (currentURI.IsFile || currentURI.IsUnc)
+                if (currentURI.IsFile)
                 {
                     if (Directory.Exists(currentSource))
                     {
@@ -102,15 +102,59 @@ namespace NuGet.VisualStudio
             }
             return false;
         }
-        
+
+        private static bool IsUNC(string currentSource)
+        {
+            Uri currentURI;
+            if (Uri.TryCreate(currentSource, UriKind.RelativeOrAbsolute, out currentURI))
+            {
+                if (currentURI.IsUnc)
+                {
+                    if (Directory.Exists(currentSource))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool IsAnySourceLocal(IVsPackageSourceProvider packageSourceProvider, out string localSource)
+        {
+            localSource = string.Empty;
+            if (packageSourceProvider != null)
+            {
+                //If any of the active sources is local folder and is available, return true
+                IEnumerable<PackageSource> sources = null;
+                PackageSource activeSource = packageSourceProvider.ActivePackageSource;
+                if (activeSource.IsAggregate())
+                {
+                    sources = packageSourceProvider.GetEnabledPackageSources();
+                    foreach (PackageSource s in sources)
+                    {
+                        if (IsLocal(s.Source))
+                        {
+                            localSource = s.Source;
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (IsLocal(activeSource.Source)) return true;
+                }
+            }
+            return false;
+        }
+
         public static bool IsAnySourceAvailable(IVsPackageSourceProvider packageSourceProvider, bool checkHttp)
-        {           
+        {
             //If any of the enabled sources is http, return true
             if (checkHttp)
             {
                 bool isHttpSource;
                 isHttpSource = UriHelper.IsHttpSource(packageSourceProvider);
-                 if (isHttpSource)
+                if (isHttpSource)
                 {
                     return true;
                 }
@@ -126,12 +170,12 @@ namespace NuGet.VisualStudio
                     sources = packageSourceProvider.GetEnabledPackageSources();
                     foreach (PackageSource s in sources)
                     {
-                        if (IsLocalOrUncSharePresent(s.Source)) return true;
+                        if (IsLocal(s.Source) || IsUNC(s.Source)) return true;
                     }
                 }
                 else
                 {
-                    if (IsLocalOrUncSharePresent(activeSource.Source)) return true;
+                    if (IsLocal(activeSource.Source) || IsUNC(activeSource.Source)) return true;
                 }
             }
 

@@ -177,14 +177,7 @@ namespace NuGet
             {
                 throw CreatePackageConflictException(package, conflictResult.Package, incompatiblePackages);
             }
-            else if (package.Version < conflictResult.Package.Version)
-            {
-                // REVIEW: Should we have a flag to allow downgrading?
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.NewerVersionAlreadyReferenced, package.Id));
-            }
-            else if (package.Version > conflictResult.Package.Version)
+            else 
             {
                 Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
             }
