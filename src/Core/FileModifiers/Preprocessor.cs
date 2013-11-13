@@ -13,8 +13,6 @@ namespace NuGet
     /// </summary>
     public class Preprocessor : IPackageFileTransformer
     {
-        private static readonly Regex _tokenRegex = new Regex(@"\$(?<propertyName>\w+)\$");
-
         public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
             ProjectSystemExtensions.TryAddFile(projectSystem, targetPath, () => Process(file, projectSystem).AsStream());
@@ -37,12 +35,32 @@ namespace NuGet
         public static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)
         {
             string text = stream.ReadToEnd();
-            return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider, throwIfNotFound));
+            var tokenizer = new Tokenizer(text);
+            StringBuilder result = new StringBuilder();
+            for (; ; )
+            {
+                Token token = tokenizer.Read();
+                if (token == null)
+                {
+                    break;
+                }
+
+                if (token.Category == TokenCategory.Variable)
+                {
+                    var replaced = ReplaceToken(token.Value, propertyProvider, throwIfNotFound);
+                    result.Append(replaced);
+                }
+                else
+                {
+                    result.Append(token.Value);
+                }
+            }
+
+            return result.ToString();
         }
 
-        private static string ReplaceToken(Match match, IPropertyProvider propertyProvider, bool throwIfNotFound)
+        private static string ReplaceToken(string propertyName, IPropertyProvider propertyProvider, bool throwIfNotFound)
         {
-            string propertyName = match.Groups["propertyName"].Value;
             var value = propertyProvider.GetPropertyValue(propertyName);
             if (value == null && throwIfNotFound)
             {
@@ -50,5 +68,5 @@ namespace NuGet
             }
             return value;
         }
-    }
+    }    
 }

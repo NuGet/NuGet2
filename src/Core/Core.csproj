@@ -210,6 +210,9 @@
     <Compile Include="Http\RedirectedHttpClient.cs" />
     <Compile Include="Utility\ProjectManagerExtensions.cs" />
     <Compile Include="Utility\ReadOnlyHashSet.cs" />
+    <Compile Include="Utility\Token.cs" />
+    <Compile Include="Utility\Tokenizer.cs" />
+    <Compile Include="Utility\TokenCategory.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
     <Compile Include="FileModifiers\XdtTransformer.cs" />
