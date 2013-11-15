@@ -209,16 +209,6 @@ namespace NuGet.PowerShell.Commands
                     if (!String.IsNullOrEmpty(cache))
                     {
                         this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, _currentSource, cache));
-
-                        List<PackageSource> curatedSources = new List<PackageSource>();
-                        foreach (PackageSource s in _packageSourceProvider.GetEnabledPackageSources())
-                        {
-                            if (UriHelper.IsHttpSource(s.Source))
-                            {
-                                _packageSourceProvider.DisablePackageSource(s);
-                            }
-                        }
-
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         InstallPackage(packageManager);

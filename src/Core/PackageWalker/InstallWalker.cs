@@ -351,7 +351,6 @@ namespace NuGet
             }
 
             // Next, query the source repo for the same dependency
-            
             IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, dependencyVersion: DependencyVersion);
             return sourcePackage;
         }
