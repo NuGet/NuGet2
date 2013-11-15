@@ -395,10 +395,8 @@ Mock<IVsShellInfo>().Object);
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object, true);
             cmdlet.Id = "A";
 
-
             // Assert
-            ExceptionAssert.Throws<NotImplementedException>(() => cmdlet.Execute(), "WriteWarning");
-            sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Never());
+            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.Execute(), "Unable to find package 'A'."); 
         }
 
         [Fact]

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
@@ -201,13 +202,23 @@ namespace NuGet.PowerShell.Commands
             {
                 if (((ex is System.Net.WebException) ||
                     (ex.InnerException is System.Net.WebException) ||
-                    (ex.InnerException is System.InvalidOperationException) ||
-                    (ex is System.InvalidOperationException)) && (String.IsNullOrEmpty(Source)))
+                    (ex.InnerException is System.InvalidOperationException))
+                    && (String.IsNullOrEmpty(Source)))
                 {
                     string cache = NuGet.MachineCache.Default.Source;
                     if (!String.IsNullOrEmpty(cache))
                     {
                         this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, _currentSource, cache));
+
+                        List<PackageSource> curatedSources = new List<PackageSource>();
+                        foreach (PackageSource s in _packageSourceProvider.GetEnabledPackageSources())
+                        {
+                            if (UriHelper.IsHttpSource(s.Source))
+                            {
+                                _packageSourceProvider.DisablePackageSource(s);
+                            }
+                        }
+
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         InstallPackage(packageManager);
