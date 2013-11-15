@@ -23,11 +23,16 @@
     <Compile Include="..\..\Common\MsBuildProjectUtility.cs">
       <Link>Common\MsBuildProjectUtility.cs</Link>
     </Compile>
+    <Compile Include="..\CommandLine\Common\PackageExtractor.cs">
+      <Link>Extensibility\PackageExtractor.cs</Link>
+    </Compile>
     <Compile Include="DeleteOnRestart\DeleteOnRestartManager.cs" />
     <Compile Include="DeleteOnRestart\RestartRequestBar.xaml.cs">
       <DependentUpon>RestartRequestBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="Extensibility\IVsPackageRestorer.cs" />
+    <Compile Include="Extensibility\VsPackageRestorer.cs" />
     <Compile Include="Extensibility\VsPackageUninstaller.cs" />
     <Compile Include="Extensibility\IVsPackageUninstaller.cs" />
     <Compile Include="Extensibility\IVsPackageMetadata.cs" />

@@ -19,7 +19,7 @@ namespace NuGet.Common
         /// We want to base the lock name off of the full path of the package, however, the Mutex looks for files on disk if a path is given.
         /// Additionally, it also fails if the string is longer than 256 characters. Therefore we obtain a base-64 encoded hash of the path.
         /// </summary>
-        /// <seealso cref="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
+        /// <seealso href="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
         private static string GenerateUniqueToken(IPackageManager packageManager, string packageId, SemanticVersion version)
         {
             var fullPath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
