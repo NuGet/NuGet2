@@ -353,9 +353,8 @@ Mock<IVsShellInfo>().Object);
                         .Returns(new[] { new KeyValuePair<string, string>("All", @"(All)"),
                                          });
 
-            var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new
-
-Mock<IVsShellInfo>().Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new 
+                Mock<IVsShellInfo>().Object);
             var activeSource = provider.ActivePackageSource;
 
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -609,6 +608,50 @@ Mock<IVsShellInfo>().Object);
             sharedRepository.Verify();
         }
 
+        //Unit test for https://nuget.codeplex.com/workitem/3844
+        [Fact]
+        public void InstallPackageIgnoresFailingRepositoriesWhenInstallingPackageWithOrWithoutDependencies()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", "1.0.0", listed: true);
+            var packageC = PackageUtility.CreatePackage("C", "2.0.0");
+            
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageC)).Verifiable();
+
+            var mockRepository = new Mock<IPackageRepository>();
+            mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
+            var packageRepository = new AggregateRepository(new[] { 
+                new MockPackageRepository { 
+                    packageA
+                }, 
+                mockRepository.Object,
+                new MockPackageRepository { 
+                   packageB 
+                },
+                new MockPackageRepository { 
+                   packageC 
+                },
+            });
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object, true);
+            cmdlet.Id = "A";
+            cmdlet.Execute();
+            cmdlet.Id = "C";
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+        }
+            
         [Fact]
         public void InstallPackageShouldPickListedPackagesOverUnlistedOnesAsDependency()
         {
@@ -876,6 +919,12 @@ Mock<IVsShellInfo>().Object);
         private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
         {
             return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate);
+        }
+
+        private static IEnumerable<IPackage> GetPackagesWithException()
+        {
+            yield return PackageUtility.CreatePackage("A");
+            throw new InvalidOperationException();
         }
     }
 }
