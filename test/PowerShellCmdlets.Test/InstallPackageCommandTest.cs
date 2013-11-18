@@ -624,7 +624,7 @@ Mock<IVsShellInfo>().Object);
             sharedRepository.Setup(s => s.AddPackage(packageC)).Verifiable();
 
             var mockRepository = new Mock<IPackageRepository>();
-            mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
+            mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable()).Verifiable();
             var packageRepository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
                     packageA
@@ -650,6 +650,7 @@ Mock<IVsShellInfo>().Object);
 
             // Assert
             sharedRepository.Verify();
+            mockRepository.Verify();
         }
             
         [Fact]
