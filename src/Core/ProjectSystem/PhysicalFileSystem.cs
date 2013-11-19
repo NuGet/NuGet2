@@ -316,7 +316,14 @@ namespace NuGet
                 return;
             }
 
-            File.Move(srcFull, destFull);
+            try
+            {
+                File.Move(srcFull, destFull);
+            }
+            catch (IOException)
+            {
+                File.Delete(srcFull);
+            }
         }
     }
 }
