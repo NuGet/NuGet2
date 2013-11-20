@@ -1240,6 +1240,65 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), packages[3].Package.Version);
         }
 
+        [Fact]
+        public void ResolveOperationsForPackagesWherePackagesOrderIsDifferentFromItsDependencyOrder()
+        {
+            // Arrange
+
+            // A 1.0 -> B 1.0 to 1.5
+            // A 2.0 -> B 1.8
+            // B 1.0
+            // B 2.0
+            // C 1.0
+            // C 2.0
+
+            var A10 = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { PackageDependency.CreateDependency("B", "[1.0, 1.5]") });
+            var A20 = PackageUtility.CreatePackage("A", "2.0", dependencies: new[] { PackageDependency.CreateDependency("B", "1.8") });
+            var B10 = PackageUtility.CreatePackage("B", "1.0");
+            var B20 = PackageUtility.CreatePackage("B", "2.0");
+            var C10 = PackageUtility.CreatePackage("C", "1.0");
+            var C20 = PackageUtility.CreatePackage("C", "2.0");
+
+            var sourceRepository = new MockPackageRepository() {
+                A10,                
+                A20,
+                B10,
+                B20,
+                C10,
+                C20,
+            };
+
+            var localRepository = new MockPackageRepository() {
+                A10,
+                B10,
+                C10
+            };
+
+            var resolver = new InstallWalker(localRepository,
+                sourceRepository,
+                constraintProvider: NullConstraintProvider.Instance,
+                logger: NullLogger.Instance,
+                targetFramework: null,
+                ignoreDependencies: false,
+                allowPrereleaseVersions: false);
+
+            var updatePackages = new List<IPackage> { A20, B20, C20 };
+            IList<IPackage> allUpdatePackagesByDependencyOrder;
+
+            // Act
+            var operations = resolver.ResolveOperations(updatePackages, out allUpdatePackagesByDependencyOrder);
+
+            // Assert
+            Assert.True(operations.Count == 3);
+            Assert.True(operations[0].Package == B20 && operations[0].Action == PackageAction.Install);
+            Assert.True(operations[1].Package == A20 && operations[1].Action == PackageAction.Install);
+            Assert.True(operations[2].Package == C20 && operations[2].Action == PackageAction.Install);
+
+            Assert.True(allUpdatePackagesByDependencyOrder[0] == B20);
+            Assert.True(allUpdatePackagesByDependencyOrder[1] == A20);
+            Assert.True(allUpdatePackagesByDependencyOrder[2] == C20);
+        }
+
         private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation)
         {
             Assert.Equal(expectedAction, operation.Action);

@@ -436,4 +436,7 @@
   <data name="Log_PackageOperation" xml:space="preserve">
     <value>{0} {1}</value>
   </data>
+  <data name="Log_UpdatingPackagesWithoutOldVersion" xml:space="preserve">
+    <value>Updating '{0}' to version '{1}' in project '{2}'.</value>
+  </data>
 </root>

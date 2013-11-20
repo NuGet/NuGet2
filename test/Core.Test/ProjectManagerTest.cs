@@ -1792,6 +1792,53 @@ fdsalk;fj;lkdsajfl;kdsa");
         }
 
         [Fact]
+        public void UpdatePackageReferenceUsingRemotePackageRemovesOldPackageReferenceIncludingDependencies()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            // A 1.0 -> B 1.0
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { PackageDependency.CreateDependency("B", "1.0") });
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0", content: new[] { "D.a" });
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB10);
+
+            projectManager.LocalRepository.AddPackage(packageA10);
+            projectManager.LocalRepository.AddPackage(packageB10);
+
+            // Act & Assert
+            projectManager.UpdatePackageReference(packageA20, updateDependencies: true, allowPrereleaseVersions: true);
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB10));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceUsingRemotePackageDoesNotThrowForPackageNotInstalled()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0", content: new[] { "D.a" });
+
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+
+            // Act & Assert
+            projectManager.UpdatePackageReference(packageA20, updateDependencies: true, allowPrereleaseVersions: true);            
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+        }
+
+        [Fact]
         public void UpdatePackageHasNoEffectIfConstraintsDefinedDontAllowForUpdates()
         {
             // Arrange

@@ -353,7 +353,7 @@ namespace NuGet.VisualStudio
                     {
                         foreach (var package in packages)
                         {
-                            UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions);
+                            UpdatePackageReference(projectManager, package, updateDependencies, allowPrereleaseVersions);
                         }
                     },
                     logger);
@@ -436,7 +436,7 @@ namespace NuGet.VisualStudio
                                 var localPackage = projectManager.LocalRepository.FindPackage(package.Id);
                                 if (localPackage != null && localPackage.Version < package.Version)
                                 {
-                                    UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies: true, allowPrereleaseVersions: allowPrereleaseVersions);
+                                    UpdatePackageReference(projectManager, package, updateDependencies, allowPrereleaseVersions);
                                 }
                             }
                             ClearLogger(projectManager);
@@ -981,6 +981,8 @@ namespace NuGet.VisualStudio
             RunProjectAction(projectManager, () => projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies));
         }
 
+        // If the remote package is already determined, consider using the overload which directly takes in the remote package
+        // Can avoid calls FindPackage calls to source repository
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
             string versionString = version == null ? null : version.ToString();
@@ -995,6 +997,14 @@ namespace NuGet.VisualStudio
             using (StartUpdateOperation(packageId, packageVersion: null))
             {
                 RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, versionSpec, updateDependencies, allowPrereleaseVersions));
+            }
+        }
+
+        private void UpdatePackageReference(IProjectManager projectManager, IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
+        {
+            using (StartUpdateOperation(package.Id, package.Version.ToString()))
+            {
+                RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions));
             }
         }
 
@@ -1476,6 +1486,7 @@ namespace NuGet.VisualStudio
 
         private void UpdatePackages(IPackageRepository localRepository, Action<IPackage> updateAction, ILogger logger)
         {
+            // BUGBUG: TargetFramework should be passed for more efficient package walking
             var packageSorter = new PackageSorter(targetFramework: null);
             // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
             var packages = packageSorter.GetPackagesByDependencyOrder(localRepository).Reverse();

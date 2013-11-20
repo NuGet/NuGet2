@@ -24,6 +24,7 @@ namespace NuGet
 
         void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions);
         void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions);
+        void UpdatePackageReference(IPackage remotePackage, bool updateDependencies, bool allowPrereleaseVersions);
 
         bool IsInstalled(IPackage package);
     }
