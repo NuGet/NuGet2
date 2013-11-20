@@ -121,7 +121,8 @@ namespace NuGet.VisualStudio
                    select new PreinstalledPackageInfo(
                        declaration.id,
                        declaration.version,
-                       declaration.skipAssemblyReferences != null && Boolean.Parse(declaration.skipAssemblyReferences)
+                       (declaration.skipAssemblyReferences != null && 
+                       Boolean.Parse(declaration.skipAssemblyReferences) == false) ? false : true
                     );
         }
 
