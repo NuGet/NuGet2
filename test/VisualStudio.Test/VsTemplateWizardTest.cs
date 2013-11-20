@@ -75,10 +75,8 @@ namespace NuGet.VisualStudio.Test
             {
                 packageElement.Add(new XAttribute("version", version));
             }
-            if (skipAssemblyReferences)
-            {
-                packageElement.Add(new XAttribute("skipAssemblyReferences", skipAssemblyReferences.ToString()));
-            }
+            
+            packageElement.Add(new XAttribute("skipAssemblyReferences", skipAssemblyReferences.ToString()));
             return packageElement;
         }
 
