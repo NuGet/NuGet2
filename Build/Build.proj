@@ -17,6 +17,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
@@ -142,8 +143,8 @@
 
     <Target Name="RestorePackages">
         <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
-                   Targets="Build"
-                   Properties="DefineConstants=CODE_ANALYSIS" />
+                 Targets="Build"
+                 Properties="DefineConstants=CODE_ANALYSIS" />
 
         <PropertyGroup>
             <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
@@ -155,7 +156,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12);DeployExtension=false" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;DeployExtension=false" />
     </Target>
 
     <Target Name="BuildMono">
@@ -181,7 +182,7 @@
             <Output TaskParameter="InvalidItems" ItemName="InvalidFiles" />
         </CheckUnexpectedAssemblies>
 
-        <ItemGroup Condition=" $(BuildForDev12) == 'true' ">
+        <ItemGroup Condition=" $(VisualStudioVersion) == '12.0' ">
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog11.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll"></UnwantedAssembly>
@@ -189,7 +190,7 @@
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer11.dll"></UnwantedAssembly>
         </ItemGroup>
 
-        <ItemGroup Condition=" $(BuildForDev12) != 'true' ">
+        <ItemGroup Condition=" $(VisualStudioVersion) == '11.0' or $(VisualStudioVersion) == '10.0' ">
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio12.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer.dll"></UnwantedAssembly>
@@ -208,8 +209,8 @@
 
     <Target Name="RunTests" Condition=" '$(DisableRunningUnitTests)' != 'true' ">        
         <MsBuild Projects="@(TestProjects)"
-                  Targets="RunTests"
-                  BuildInParallel="$(BuildTestsInParallel)" />
+                 Targets="RunTests"
+                 BuildInParallel="$(BuildTestsInParallel)" />
     </Target>
 
     <Target Name="ReportFxCopResults">
@@ -247,7 +248,7 @@
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">
         <Message Text="Rebuilding server extensions" />
-        <MSBuild Projects="$(NuGetSrcRoot)\CommandLine.ServerExtensions\CommandLine.ServerExtensions.csproj" Properties="CIBuild=true;SignAssembly=false;" Targets="Clean;Build" />
+        <MSBuild Projects="$(NuGetSrcRoot)\CommandLine.ServerExtensions\CommandLine.ServerExtensions.csproj" Properties="CIBuild=true;SignAssembly=false" Targets="Clean;Build" />
         <!-- Since this is an extension, it needs to be compiled against the IL Merged nuget.exe. So we rebuild it with the magic flag that tells it to be compiled -->
         <ItemGroup>
             <ServerExtensionsOutputItems Include="$(ServerExtensionsBuildDirectory)\NuGet.ServerExtensions.dll" />
@@ -260,6 +261,8 @@
 
         <!-- Delete the source file for good measure -->
         <Delete Files="@(ServerExtensionsOutputItems)" />
+        <!-- also delete the output file in obj folder so that it won't interfere with the next build -->
+        <Delete Files="$(NuGetSrcRoot)\CommandLine.ServerExtensions\obj\$(ConfigFolderPath)\NuGet.ServerExtensions.dll" />
     </Target>
 
     <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
@@ -310,7 +313,7 @@
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
-    <Target Name="BuildPackages" Condition=" '$(BuildForDev12)' != 'true' ">
+    <Target Name="BuildPackages" Condition="$(VisualStudioVersion)=='10.0' Or $(VisualStudioVersion) == '11.0' ">
         <PropertyGroup>
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>
