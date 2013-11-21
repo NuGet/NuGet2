@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
@@ -11,7 +11,7 @@
     <RootNamespace>NuGet.VisualStudio12</RootNamespace>
     <AssemblyName>NuGet.VisualStudio12</AssemblyName>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-    <DefineConstants Condition=" '$(BuildForDev12)' == 'true' ">$(DefineConstants);VS12</DefineConstants>
+    <DefineConstants Condition="$(VisualStudioVersion) == '12'">$(DefineConstants);VS12</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="$(MSBuildAssembly)" />
