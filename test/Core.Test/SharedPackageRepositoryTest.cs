@@ -281,7 +281,7 @@ namespace NuGet.Test
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>One</id>
-    <version>2.0-alpha</version>
+    <version>1.0.0-alpha</version>
     <authors>test</authors>
     <description>My package description.</description>
   </metadata>

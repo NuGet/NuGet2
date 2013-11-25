@@ -32,6 +32,26 @@ function Test-UpdatingPackageInProjectDoesntRemoveFromSolutionIfInUse {
     Assert-Null (Get-SolutionPackage Castle.Core 1.2.0)
 }
 
+function Test-UpdatingPackageWithPackageSaveModeNuspec {
+	# Arrange
+	try {
+		[NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', 'nuspec')
+		
+		$p = New-ClassLibrary
+		Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
+		Assert-Package $p Castle.Core 1.2.0
+    
+		# Act
+		Update-Package Castle.Core
+
+		# Assert
+		# Assert-Package $p Castle.Core 2.5.1
+	}
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', $null)
+    }
+}
+
 function Test-UpdatingPackageWithSharedDependency {
     param(
         $context
