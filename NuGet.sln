@@ -69,7 +69,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "src\VsCon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine", "src\CommandLine\CommandLine.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer", "src\TeamFoundationServer\TeamFoundationServer.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer12", "src\TeamFoundationServer12\TeamFoundationServer12.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "src\VsConsole\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"
 EndProject
@@ -99,7 +99,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DialogServices", "src\Dialo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog10", "src\Dialog10\Dialog10.csproj", "{5984731D-613C-440A-833A-F92A3E3CF793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog", "src\Dialog\Dialog.csproj", "{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog12", "src\Dialog12\Dialog12.csproj", "{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer10", "src\TeamFoundationServer10\TeamFoundationServer10.csproj", "{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}"
 EndProject

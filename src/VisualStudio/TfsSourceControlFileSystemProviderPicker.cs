@@ -2,6 +2,8 @@
 using System.ComponentModel.Composition;
 using System.Reflection;
 using EnvDTE80;
+using NuGet.VisualStudio.Resources;
+using System.Globalization;
 
 namespace NuGet.VisualStudio
 {
@@ -31,11 +33,19 @@ namespace NuGet.VisualStudio
                 {
                     assemblyName = "NuGet.TeamFoundationServer11";
                 }
-                else 
+                else if (VsVersionHelper.IsVisualStudio2013)
                 {
-                    assemblyName = "NuGet.TeamFoundationServer";
+                    assemblyName = "NuGet.TeamFoundationServer12";
                 }
-                
+                else
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        VsResources.Error_UnsupportedVSVersion,
+                        VsVersionHelper.FullVsEdition);
+                    throw new InvalidOperationException(message);
+                }
+
                 try
                 {
                     Assembly assembly = RuntimeHelpers.LoadAssemblySmart(assemblyName);

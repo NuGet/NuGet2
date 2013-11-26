@@ -156,7 +156,10 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;DeployExtension=false" />
+        <PropertyGroup>
+            <EnableCodeAnalysis Condition="'$(EnableCodeAnalysis)' == ''" >true</EnableCodeAnalysis>
+        </PropertyGroup>
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=$(EnableCodeAnalysis);DeployExtension=false" />
     </Target>
 
     <Target Name="BuildMono">

@@ -1,4 +1,4 @@
-extern alias dialog;
+ï»¿extern alias dialog12;
 extern alias dialog10;
 extern alias dialog11;
 using System;
@@ -19,9 +19,15 @@ using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
+
+#if VS12
+using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+#endif
+
+#if VS11 || VS10
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
+#endif
 
 namespace NuGet.Tools
 {
@@ -214,7 +220,7 @@ namespace NuGet.Tools
                 // menu command for opening Package Manager Console
                 CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, PkgCmdIDList.cmdidPowerConsole);
                 OleMenuCommand powerConsoleExecuteCommand = new OleMenuCommand(ExecutePowerConsoleCommand, null, BeforeQueryStatusForPowerConsole, toolwndCommandID);
-                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                // '$' - This indicates that the input line other than the argument forms a single argument string with no autocompletion
                 //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
                 powerConsoleExecuteCommand.ParametersDescription = "$";
                 _mcs.AddCommand(powerConsoleExecuteCommand);
@@ -222,7 +228,7 @@ namespace NuGet.Tools
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
                 _managePackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, managePackageDialogCommandID);
-                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                // '$' - This indicates that the input line other than the argument forms a single argument string with no autocompletion
                 //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
                 _managePackageDialogCommand.ParametersDescription = "$";
                 _mcs.AddCommand(_managePackageDialogCommand);
@@ -230,7 +236,7 @@ namespace NuGet.Tools
                 // menu command for opening "Manage NuGet packages for solution" dialog
                 CommandID managePackageForSolutionDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialogForSolution);
                 _managePackageForSolutionDialogCommand = new OleMenuCommand(ShowManageLibraryPackageForSolutionDialog, null, BeforeQueryStatusForAddPackageForSolutionDialog, managePackageForSolutionDialogCommandID);
-                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                // '$' - This indicates that the input line other than the argument forms a single argument string with no autocompletion
                 //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
                 _managePackageForSolutionDialogCommand.ParametersDescription = "$";
                 _mcs.AddCommand(_managePackageForSolutionDialogCommand);
@@ -360,6 +366,7 @@ namespace NuGet.Tools
             {
                 DialogWindow window;
 
+#if VS10 || VS11
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
                     window = GetVS10PackageManagerWindow(project, parameterString);
@@ -368,9 +375,21 @@ namespace NuGet.Tools
                 {
                     window = GetVS11PackageManagerWindow(project, parameterString);
                 }
+#endif
+                
+#if VS12
+                if (VsVersionHelper.IsVisualStudio2013)
+                {
+                    window = GetVS12PackageManagerWindow(project, parameterString);
+                }
+#endif
                 else
                 {
-                    window = GetPackageManagerWindow(project, parameterString);
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.Error_UnsupportedVSVersion,
+                        VsVersionHelper.FullVsEdition);
+                    throw new InvalidOperationException(message);
                 }
 
                 window.ShowModal();
@@ -382,6 +401,7 @@ namespace NuGet.Tools
             }
         }
 
+#if VS10 || VS11
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
@@ -393,12 +413,15 @@ namespace NuGet.Tools
         {
             return new VS11ManagePackageDialog(project, parameterString);
         }
+#endif
 
+#if VS12
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetPackageManagerWindow(Project project, string parameterString)
+        private static DialogWindow GetVS12PackageManagerWindow(Project project, string parameterString)
         {
-            return new ManagePackageDialog(project, parameterString);
+            return new VS12ManagePackageDialog(project, parameterString);
         }
+#endif
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
