@@ -15,6 +15,14 @@ using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
+#if VS10 || VS11 || VS12
+using NuGetVS = NuGet.VisualStudio12;
+#endif
+
+#if VS14
+using NuGetVS = NuGet.VisualStudio14;
+#endif
+
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRestoreManager))]
@@ -305,7 +313,7 @@ namespace NuGet.VisualStudio
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnablePackageRestoreInVs2013(Project project)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+            NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 project,
                 project.ToVsHierarchy(),
                 buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));

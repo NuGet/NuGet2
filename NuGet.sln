@@ -133,6 +133,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsEvents", "src\VsEvents\Vs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsEvents.Test", "test\VsEvents.Test\VsEvents.Test.csproj", "{61C7D2E8-79A2-4645-AA84-3C81C89588E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog14", "src\Dialog14\Dialog14.csproj", "{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio14", "src\VisualStudio14\VisualStudio14.csproj", "{EEA49A74-6EFC-410E-9745-BAD367AC151D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
@@ -826,6 +830,46 @@ Global
 		{61C7D2E8-79A2-4645-AA84-3C81C89588E9}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{61C7D2E8-79A2-4645-AA84-3C81C89588E9}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{61C7D2E8-79A2-4645-AA84-3C81C89588E9}.Release|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Coverage|Mixed Platforms.Build.0 = Coverage|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Debug|Any CPU.ActiveCfg = Mono Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Debug|Any CPU.Build.0 = Mono Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Debug|Mixed Platforms.ActiveCfg = Mono Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Debug|Mixed Platforms.Build.0 = Mono Debug|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Release|Any CPU.ActiveCfg = Mono Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Release|Any CPU.Build.0 = Mono Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Release|Mixed Platforms.ActiveCfg = Mono Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Mono Release|Mixed Platforms.Build.0 = Mono Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Coverage|Mixed Platforms.Build.0 = Coverage|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Debug|Any CPU.ActiveCfg = Mono Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Debug|Any CPU.Build.0 = Mono Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Debug|Mixed Platforms.ActiveCfg = Mono Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Debug|Mixed Platforms.Build.0 = Mono Debug|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Release|Any CPU.ActiveCfg = Mono Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Release|Any CPU.Build.0 = Mono Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Release|Mixed Platforms.ActiveCfg = Mono Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Mono Release|Mixed Platforms.Build.0 = Mono Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EEA49A74-6EFC-410E-9745-BAD367AC151D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

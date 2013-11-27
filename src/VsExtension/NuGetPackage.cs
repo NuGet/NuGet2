@@ -1,6 +1,7 @@
-﻿extern alias dialog12;
-extern alias dialog10;
+﻿extern alias dialog10;
 extern alias dialog11;
+extern alias dialog12;
+extern alias dialog14;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -20,13 +21,17 @@ using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 
+#if VS11 || VS10
+using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
+using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
+#endif
+
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
 #endif
 
-#if VS11 || VS10
-using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
-using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
+#if VS14
+using VS14ManagePackageDialog = dialog14::NuGet.Dialog.PackageManagerWindow;
 #endif
 
 namespace NuGet.Tools
@@ -378,10 +383,17 @@ namespace NuGet.Tools
 #endif
                 
 #if VS12
-                if (VsVersionHelper.IsVisualStudio2013)
-                {
-                    window = GetVS12PackageManagerWindow(project, parameterString);
-                }
+				if (VsVersionHelper.IsVisualStudio2013)
+				{
+					window = GetVS12PackageManagerWindow(project, parameterString);
+				}
+#endif
+
+#if VS14
+				if (VsVersionHelper.IsVisualStudio2014)
+				{
+					window = GetVS14PackageManagerWindow(project, parameterString);
+				}
 #endif
                 else
                 {
@@ -420,6 +432,14 @@ namespace NuGet.Tools
         private static DialogWindow GetVS12PackageManagerWindow(Project project, string parameterString)
         {
             return new VS12ManagePackageDialog(project, parameterString);
+        }
+#endif
+
+#if VS14
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS14PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS14ManagePackageDialog(project, parameterString);
         }
 #endif
 
