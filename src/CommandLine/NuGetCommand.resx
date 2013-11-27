@@ -370,6 +370,9 @@ nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/
   <data name="SourcesCommandSourceDescription" xml:space="preserve">
     <value>Path to the package(s) source.</value>
   </data>
+  <data name="SourcesCommandFormatDescription" xml:space="preserve">
+    <value>Applies to the list action. Accepts two values: Detailed (the default) and Short.</value>
+  </data>
   <data name="SourcesCommandUsageSummary" xml:space="preserve">
     <value>&lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source]</value>
     <comment>Only localize "[name]" and "[source]"</comment>
