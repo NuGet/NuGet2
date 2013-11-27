@@ -454,6 +454,11 @@ namespace NuGet.Test.NuGetCommandLine
             {
                 return new[] { CommandAttribute };
             }
+
+            public bool IncludedInHelp(string optionName)
+            {
+                return true;
+            }
         }
 
 

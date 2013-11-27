@@ -14,6 +14,17 @@
     Assert-SolutionPackage Castle.Core
 }
 
+function Test-PackageInstallWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication
+    
+    # Act
+    Install-Package FakeItEasy -Project $project.Name -version 1.8.0 -WhatIf
+    
+    # Assert: no packages are installed
+	Assert-Null (Get-ProjectPackage $project FakeItEasy)
+}
+
 function Test-WebsiteSimpleInstall {
     param(
         $context
@@ -2510,4 +2521,38 @@ function Test-InstallPackageAddMoreEntriesToProjectConfigFile
 
     Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
     Assert-Null (Get-ProjectItem $p 'packages.config')
+}
+
+# Tests that when -DependencyVersion HighestPath is specified, the dependency with
+# the largest patch number is installed
+function Test-InstallPackageWithDependencyVersionHighest
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package jquery.validation -version 1.10 -DependencyVersion HighestPatch
+
+    # Assert
+    Assert-Package $p jquery.validation 1.10
+    Assert-Package $p jquery 1.4.4
+}
+
+# Tests that when -DependencyVersion is not specified, the dependency with
+# the smallest patch number is installed
+function Test-InstallPackageWithoutDependencyVersion
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package jquery.validation -version 1.10
+
+    # Assert
+    Assert-Package $p jquery.validation 1.10
+    Assert-Package $p jquery 1.4.1
 }

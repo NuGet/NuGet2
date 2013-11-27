@@ -9,6 +9,10 @@ namespace NuGet.WebMatrix
     {
         IEnumerable<IPackage> FindDependenciesToBeInstalled(IPackage package);
 
+        IEnumerable<IPackage> GetPackagesToBeInstalledForUpdateAll();
+
+        IPackage FindPackage(string packageId, SemanticVersion version);
+
         IEnumerable<IPackage> FindPackages(IEnumerable<string> packageIds);
 
         IQueryable<IPackage> GetInstalledPackages();
@@ -26,6 +30,10 @@ namespace NuGet.WebMatrix
         IEnumerable<string> UninstallPackage(IPackage package);
 
         IEnumerable<string> UpdatePackage(IPackage package);
+
+        IEnumerable<string> UpdateAllPackages();
+
+        IPackage GetUpdate(IPackage package);
 
         bool SupportsEnableDisable
         {

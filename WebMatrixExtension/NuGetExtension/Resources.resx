@@ -627,4 +627,31 @@
   <data name="MagGlass" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\MagGlass.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="NoAllLabel" xml:space="preserve">
+    <value>No to A_ll</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>_No</value>
+  </data>
+  <data name="YesAllLabel" xml:space="preserve">
+    <value>Yes to _All</value>
+  </data>
+  <data name="YesLabel" xml:space="preserve">
+    <value>_Yes</value>
+  </data>
+  <data name="FileConflictResolution" xml:space="preserve">
+    <value>File Conflict Resolution</value>
+  </data>
+  <data name="String__Update_All" xml:space="preserve">
+    <value>Up_date All</value>
+  </data>
+  <data name="Notification_UpdatedAll" xml:space="preserve">
+    <value>All the packages were updated</value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="String_PackagesForUpdateAll" xml:space="preserve">
+    <value>The following packages will be updated</value>
+  </data>
 </root>

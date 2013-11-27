@@ -160,7 +160,7 @@ namespace NuGet.VisualStudio
                             InfoHandler(String.Format(CultureInfo.CurrentCulture, VsResources.PreinstalledPackages_PackageInstallStatus, package.Id, package.Version));
                         }
 
-                        packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
+                        packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: package.IgnoreDependencies, skipAssemblyReferences: package.SkipAssemblyReferences);
                     }
                     catch (InvalidOperationException exception)
                     {

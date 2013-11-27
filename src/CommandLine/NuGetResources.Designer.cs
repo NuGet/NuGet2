@@ -2734,132 +2734,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifying both -IncludeReferencedProjects and -Symbols is not supported..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 不支持同时指定 -IncludeReferencedProjects 和 -Symbols。.
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_chs {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_chs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 不支援指定 -IncludeReferencedProjects 和 -Symbols。.
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_cht {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_cht", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Současné zadání -IncludeReferencedProjects a -Symbols není podporováno..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_csy {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_csy", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Die gemeinsame Angabe von &quot;-IncludeReferencedProjects&quot; und &quot;-Symbols&quot; wird nicht unterstützt..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_deu {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_deu", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No se admite especificar -IncludeReferencedProjects y -Symbols..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_esp {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_esp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to La spécification de -IncludeReferencedProjects et de -Symbols n&apos;est pas prise en charge..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_fra {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_fra", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specificare - Includere Riferimenti Progetti e Simboli non è supportato.
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_ita {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_ita", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to -IncludeReferencedProjects と -Symbols の両方を指定することはできません。.
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_jpn {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_jpn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to -IncludeReferencedProjects 및 -Symbols 모두 지정할 수 없습니다..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_kor {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_kor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Jednoczesne określanie parametrów -IncludeReferencedProjects i -Symbols nie jest obsługiwane..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_plk {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_plk", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A especificação de IncludeReferencedProjects e Symbols não é suportada..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_ptb {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_ptb", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Нельзя одновременно указать -IncludeReferencedProjects и -Symbols, так как это не поддерживается..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_rus {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_rus", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to -IncludeReferencedProjects ve -Symbols öğelerini birlikte belirtme desteklenmiyor..
-        /// </summary>
-        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported_trk {
-            get {
-                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported_trk", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to This folder contains more than one solution file..
         /// </summary>
         internal static string Error_MultipleSolutions {
@@ -16247,6 +16121,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid PackageSaveMode value &apos;{0}&apos;..
+        /// </summary>
+        internal static string Warning_InvalidPackageSaveMode {
+            get {
+                return ResourceManager.GetString("Warning_InvalidPackageSaveMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Option &apos;NoPrompt&apos; has been deprecated. Use &apos;NonInteractive&apos; instead..
         /// </summary>
         internal static string Warning_NoPromptDeprecated {
@@ -16873,6 +16756,33 @@ namespace NuGet {
         internal static string Warning_SymbolServerNotConfigured_trk {
             get {
                 return ResourceManager.GetString("Warning_SymbolServerNotConfigured_trk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The version of dependency &apos;{0}&apos; is not specified..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersion {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifiy the version of dependency and rebuild your package..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersionSolution {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersionSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify version of dependencies..
+        /// </summary>
+        internal static string Warning_UnspecifiedDependencyVersionTitle {
+            get {
+                return ResourceManager.GetString("Warning_UnspecifiedDependencyVersionTitle", resourceCulture);
             }
         }
         

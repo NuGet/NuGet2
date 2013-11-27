@@ -46,6 +46,7 @@
                             <xs:element name="projectUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
                             <xs:element name="iconUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
                             <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+                            <xs:element name="developmentDependency" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="description" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="summary" maxOccurs="1" minOccurs="0" type="xs:string" />
                             <xs:element name="releaseNotes" maxOccurs="1" minOccurs="0" type="xs:string" />

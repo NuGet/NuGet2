@@ -224,12 +224,34 @@ namespace NuGet
         {
             Debug.Assert(!String.IsNullOrEmpty(packageId), "The caller has to ensure packageId is never null.");
 
-            var packagePaths = GetPackageFiles(packageId + "*" + Constants.PackageExtension);
+            HashSet<IPackage> packages = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+
+            // get packages through nupkg files
+            packages.AddRange(
+                GetPackages(
+                    openPackage, 
+                    packageId, 
+                    GetPackageFiles(packageId + "*" + Constants.PackageExtension)));
+
+            // then, get packages through nuspec files
+            packages.AddRange(
+                GetPackages(
+                    openPackage, 
+                    packageId, 
+                    GetPackageFiles(packageId + "*" + Constants.ManifestExtension)));
+            return packages;
+        }
+
+        internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage, 
+            string packageId,
+            IEnumerable<string> packagePaths)
+        {
             return from path in packagePaths
                    let package = GetPackage(openPackage, path)
                    where package.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
                    select package;
         }
+
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
         {

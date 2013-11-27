@@ -8,6 +8,8 @@ namespace NuGet
         ILogger Logger { get; set; }
         IProjectSystem Project { get; }
         IPackageRepository SourceRepository { get; }
+        DependencyVersion DependencyVersion { get; set; }
+        bool WhatIf { get; set; }
 
         event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;
         event EventHandler<PackageOperationEventArgs> PackageReferenceAdding;

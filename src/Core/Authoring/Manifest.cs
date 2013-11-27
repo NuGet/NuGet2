@@ -146,6 +146,7 @@ namespace NuGet
                     ProjectUrl = ConvertUrlToStringSafe(metadata.ProjectUrl),
                     IconUrl = ConvertUrlToStringSafe(metadata.IconUrl),
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
+                    DevelopmentDependency = metadata.DevelopmentDependency,
                     Description = metadata.Description.SafeTrim(),
                     Copyright = metadata.Copyright.SafeTrim(),
                     Summary = metadata.Summary.SafeTrim(),

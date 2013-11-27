@@ -111,7 +111,7 @@ namespace NuGet
 
         public void AddPackage(IPackage package)
         {
-            AddPackage(package.Id, package.Version, targetFramework: null);
+            AddPackage(package.Id, package.Version, package.DevelopmentDependency, targetFramework: null);
         }
 
         public void RemovePackage(IPackage package)
@@ -201,9 +201,9 @@ namespace NuGet
             }
         }
 
-        public void AddPackage(string packageId, SemanticVersion version, FrameworkName targetFramework)
+        public void AddPackage(string packageId, SemanticVersion version, bool developmentDependency, FrameworkName targetFramework)
         {
-            _packageReferenceFile.AddEntry(packageId, version, targetFramework);
+            _packageReferenceFile.AddEntry(packageId, version, developmentDependency, targetFramework);
 
             // Notify the source repository every time we add a new package to the repository.
             // This doesn't really need to happen on every package add, but this is over agressive

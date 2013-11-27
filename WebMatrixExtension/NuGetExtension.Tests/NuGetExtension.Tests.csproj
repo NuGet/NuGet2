@@ -47,6 +47,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreTests\WebProjectManagerTest.cs" />
+    <Compile Include="Mocks\MockPackageRepository.cs" />
+    <Compile Include="Mocks\MockServiceBasePackageRepository.cs" />
     <Compile Include="ModelTests\PackageSourcesModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\InMemoryFeedSourceStore.cs" />

@@ -65,6 +65,11 @@ namespace NuGet.Commands
             }
         }
 
+        public virtual bool IncludedInHelp(string optionName)
+        {
+            return true;
+        }
+
         public void Execute()
         {
             if (Help)

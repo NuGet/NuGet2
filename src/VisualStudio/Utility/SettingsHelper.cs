@@ -18,10 +18,12 @@ namespace NuGet.VisualStudio
         /// Sets a NuGet user settings property.
         /// </summary>
         /// <param name="property">The name of the settings property to set.</param>
-        /// <param name="value">The value of the settings property.</param>
+        /// <param name="value">The value of the settings property. 
+        /// If null, the settings property will be deleted.</param>
         public static void Set(string property, string value)
         {
-            var packageRestoreConsent = new PackageRestoreConsent(ServiceLocator.GetInstance<ISettings>());
+            var settings = ServiceLocator.GetInstance<ISettings>();
+            var packageRestoreConsent = new PackageRestoreConsent(settings);
             if (string.Equals(property, "PackageRestoreConsentGranted", StringComparison.OrdinalIgnoreCase))
             {
                 packageRestoreConsent.IsGrantedInSettings = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
@@ -32,11 +34,14 @@ namespace NuGet.VisualStudio
             }
             else
             {
-                string message = String.Format(
-                    CultureInfo.CurrentCulture,
-                    VsResources.InvalidSettingsProperty,
-                    property);
-                throw new InvalidOperationException(message);
+                if (value == null)
+                {
+                    settings.DeleteConfigValue(property);
+                }
+                else
+                {
+                    settings.SetConfigValue(property, value);
+                }
             }
         }
     }

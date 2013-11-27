@@ -15,7 +15,7 @@
       <Menu guid="guidToolsGroup" id="idLibraryPackageManager" type="Menu" priority="0x500">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
         <Strings>
-          <ButtonText>Library Package Ma&amp;nager</ButtonText>
+          <ButtonText>NuGet Package Ma&amp;nager</ButtonText>
         </Strings>
       </Menu>
     </Menus>

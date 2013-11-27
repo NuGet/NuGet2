@@ -66,6 +66,15 @@ namespace NuGet
             }
         }
 
+
+        public static PackageReferenceFile CreateFromProject(string projectFileFullPath)
+        {
+            var fileSystem = new PhysicalFileSystem(Path.GetDirectoryName(projectFileFullPath));
+            string projectName = Path.GetFileNameWithoutExtension(projectFileFullPath);
+            var file = new PackageReferenceFile(fileSystem, Constants.PackageReferenceFile, projectName);
+            return file;
+        }
+
         public static bool IsValidConfigFileName(string fileName)
         {
             return fileName != null &&
@@ -190,14 +199,19 @@ namespace NuGet
 
         public void AddEntry(string id, SemanticVersion version)
         {
-            AddEntry(id, version, targetFramework: null);
+            AddEntry(id, version, developmentDependency: false);
         }
 
-        public void AddEntry(string id, SemanticVersion version, FrameworkName targetFramework)
+        public void AddEntry(string id, SemanticVersion version, bool developmentDependency)
+        {
+            AddEntry(id, version, developmentDependency, targetFramework: null);
+        }
+
+        public void AddEntry(string id, SemanticVersion version, bool developmentDependency, FrameworkName targetFramework)
         {
             XDocument document = GetDocument(createIfNotExists: true);
 
-            AddEntry(document, id, version, targetFramework);
+            AddEntry(document, id, version, developmentDependency, targetFramework);
         }
 
         public void MarkEntryForReinstallation(string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
@@ -209,7 +223,7 @@ namespace NuGet
             if (document != null)
             {
                 DeleteEntry(id, version);
-                AddEntry(document, id, version, targetFramework, requireReinstallation);
+                AddEntry(document, id, version, false, targetFramework, requireReinstallation);
             }
         }
 
@@ -221,12 +235,12 @@ namespace NuGet
             }
         }
 
-        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
+        private void AddEntry(XDocument document, string id, SemanticVersion version, bool developmentDependency, FrameworkName targetFramework)
         {
-            AddEntry(document, id, version, targetFramework, requireReinstallation: false);
+            AddEntry(document, id, version, developmentDependency, targetFramework, requireReinstallation: false);
         }
 
-        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
+        private void AddEntry(XDocument document, string id, SemanticVersion version, bool developmentDependency, FrameworkName targetFramework, bool requireReinstallation)
         {
             XElement element = FindEntry(document, id, version);
 
@@ -255,6 +269,10 @@ namespace NuGet
             if (_developmentFlags.TryGetValue(id, out developmentFlag))
             {
                 newElement.Add(new XAttribute("developmentDependency", developmentFlag));
+            }
+            else if(developmentDependency)
+            {
+                newElement.Add(new XAttribute("developmentDependency", "true"));
             }
 
             if (requireReinstallation)

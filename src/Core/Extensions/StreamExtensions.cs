@@ -64,7 +64,22 @@ namespace NuGet
 
         public static Stream AsStream(this string value, Encoding encoding)
         {
-            return new MemoryStream(encoding.GetBytes(value));
+            var memoryStream = new MemoryStream();
+
+            try
+            {
+                var bytes = encoding.GetPreamble();
+                memoryStream.Write(bytes, 0, bytes.Length);
+                bytes = encoding.GetBytes(value);
+                memoryStream.Write(bytes, 0, bytes.Length);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                return memoryStream;
+            }
+            catch
+            {
+                memoryStream.Dispose();
+                throw;
+            }
         }
 
         /// <summary>

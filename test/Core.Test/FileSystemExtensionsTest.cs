@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Moq;
 using NuGet.Test.Mocks;
@@ -15,7 +16,7 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
 
             // Act
-            fileSystem.AddFiles(files);
+            fileSystem.AddFiles(files, String.Empty);
 
             // Assert
             Assert.True(fileSystem.FileExists("A"));
@@ -34,7 +35,7 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
 
             // Act
-            mockFileSystem.Object.AddFiles(files);
+            mockFileSystem.Object.AddFiles(files, String.Empty);
 
             // Assert
             mockFileSystem.Verify(m => m.AddFile("A", It.IsAny<Stream>()), Times.Never());

@@ -228,7 +228,8 @@ namespace NuGet.Test
             // Arrange
             var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: "Outercurve",
                 licenseUrl: "http://nuget.org/license", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
-                requiresLicenseAcceptance: true, description: "This is not a description", summary: "This is a summary", releaseNotes: "Release notes",
+                requiresLicenseAcceptance: true, developmentDependency: true, description: "This is not a description",
+                summary: "This is a summary", releaseNotes: "Release notes",
                 copyright: "Copyright 2012", language: "fr-FR", tags: "Test Unit",
                 dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
                 assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
@@ -248,6 +249,7 @@ namespace NuGet.Test
                     ProjectUrl = "http://nuget.org/project",
                     IconUrl = "https://nuget.org/icon",
                     RequireLicenseAcceptance = true,
+                    DevelopmentDependency = true,
                     Summary = "This is a summary",
                     ReleaseNotes = "Release notes",
                     Copyright = "Copyright 2012",
@@ -329,6 +331,7 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     
     <extra>This element is not defined in schema.</extra>
@@ -346,6 +349,7 @@ namespace NuGet.Test
             Assert.Equal("1.0", manifest.Metadata.Version);
             Assert.Equal("Luan", manifest.Metadata.Authors);
             Assert.False(manifest.Metadata.RequireLicenseAcceptance);
+            Assert.False(manifest.Metadata.DevelopmentDependency);
             Assert.Equal("Descriptions", manifest.Metadata.Description);
         }
 
@@ -573,6 +577,7 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.ProjectUrl, actual.Metadata.ProjectUrl);
             Assert.Equal(expected.Metadata.ReleaseNotes, actual.Metadata.ReleaseNotes);
             Assert.Equal(expected.Metadata.RequireLicenseAcceptance, actual.Metadata.RequireLicenseAcceptance);
+            Assert.Equal(expected.Metadata.DevelopmentDependency, actual.Metadata.DevelopmentDependency);
             Assert.Equal(expected.Metadata.Summary, actual.Metadata.Summary);
             Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
             Assert.Equal(expected.Metadata.MinClientVersion, actual.Metadata.MinClientVersion);
@@ -660,6 +665,7 @@ namespace NuGet.Test
                                             string projectUrl = null,
                                             string iconUrl = null,
                                             bool? requiresLicenseAcceptance = null,
+                                            bool? developmentDependency = null,
                                             string description = "Test description",
                                             string summary = null,
                                             string releaseNotes = null,
@@ -706,6 +712,10 @@ namespace NuGet.Test
             if (requiresLicenseAcceptance != null)
             {
                 metadata.Add(new XElement("requireLicenseAcceptance", requiresLicenseAcceptance.ToString().ToLowerInvariant()));
+            }
+            if (developmentDependency != null)
+            {
+                metadata.Add(new XElement("developmentDependency", developmentDependency.ToString().ToLowerInvariant()));
             }
             if (summary != null)
             {

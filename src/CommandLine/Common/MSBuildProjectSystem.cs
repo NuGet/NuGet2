@@ -132,42 +132,44 @@ namespace NuGet.Common
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
         }
 
-        public void AddImport(string targetPath, ProjectImportLocation location)
+        public void AddImport(string targetFullPath, ProjectImportLocation location)
         {
-            if (targetPath == null)
+            if (targetFullPath == null)
             {
-                throw new ArgumentNullException("targetPath");
+                throw new ArgumentNullException("targetFullPath");
             }
+
+            var targetRelativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetFullPath);
 
             // adds an <Import> element to this project file.
             if (Project.Xml.Imports == null ||
-                Project.Xml.Imports.All(import => !targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+                Project.Xml.Imports.All(import => !targetRelativePath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
             {
-                Project.Xml.AddImport(targetPath);
-                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(Project, targetPath);
-                Project.ReevaluateIfNecessary();
+                Project.Xml.AddImport(targetRelativePath);
+                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(Project, targetRelativePath);
                 Project.Save();
             }
         }
 
-        public void RemoveImport(string targetPath)
+        public void RemoveImport(string targetFullPath)
         {
-            if (targetPath == null)
+            if (targetFullPath == null)
             {
-                throw new ArgumentNullException("targetPath");
+                throw new ArgumentNullException("targetFullPath");
             }
 
             if (Project.Xml.Imports != null)
             {
+                var targetRelativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetFullPath);
+
                 // search for this import statement and remove it
                 var importElement = Project.Xml.Imports.FirstOrDefault(
-                    import => targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
+                    import => targetRelativePath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
 
                 if (importElement != null)
                 {
                     Project.Xml.RemoveChild(importElement);
-                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(Project, targetPath);
-                    Project.ReevaluateIfNecessary();
+                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(Project, targetRelativePath);
                     Project.Save();
                 }
             }

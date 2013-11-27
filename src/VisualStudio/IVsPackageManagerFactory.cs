@@ -6,6 +6,8 @@ namespace NuGet.VisualStudio
 
         IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies);
 
+        IVsPackageManager CreatePackageManagerToManageInstalledPackages();
+
         IVsPackageManager CreatePackageManagerWithAllPackageSources();
     }
 }

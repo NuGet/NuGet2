@@ -556,6 +556,45 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
         }
 
+        // Tests that when
+        // - -ExcludeVersion is specified;
+        // - The version of the package to install is not specified;
+        // - The package in the source repository is not newer than the existing package;
+        // Then nuget won't install the package.
+        [Theory]
+        [InlineData("0.7")]
+        [InlineData("1.0")]
+        public void InstallCommandNoOps_ExcludingVersionIsTrue_VersionIsEmpty_ExistingPackageIsNewerOrSame(
+            string installedVersion)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"baz\baz.nupkg");
+            var baz = PackageUtility.CreatePackage("Baz", installedVersion);
+            var packages = new List<IPackage> { baz };
+            var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
+            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.Exists("Baz", new SemanticVersion(installedVersion))).Returns(true);
+            repository.Setup(c => c.FindPackagesById("Baz")).Returns(packages);
+
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var console = new MockConsole();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
+            {
+                Console = console,
+                ExcludeVersion = true
+            };
+
+            installCommand.Arguments.Add("Baz");
+
+            // Act 
+            installCommand.ExecuteCommand();
+
+            // Assert 
+            repository.Verify();
+            Assert.Equal("Package \"Baz\" is already installed." + Environment.NewLine, console.Output);
+        }
+
         [Fact]
         public void InstallCommandNoOpsIfExcludingVersionAndALowerVersionOfThePackageIsAlreadyInstalled()
         {

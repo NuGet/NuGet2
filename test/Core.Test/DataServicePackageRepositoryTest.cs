@@ -323,8 +323,8 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(new object[] { NuGetFeedSchema.SchemaWithNoMethods, 0, 32, new[] { "Id", "Version", "IsLatestVersion" }, new string[0] })]
-        [InlineData(new object[] { NuGetFeedSchema.SchemaWithMethod, 1, 31, new[] { "Id", "Version", "IsLatestVersion" }, new[] { "Search" } })]
+        [InlineData(new object[] { NuGetFeedSchema.SchemaWithNoMethods, 0, 33, new[] { "Id", "Version", "IsLatestVersion" }, new string[0] })]
+        [InlineData(new object[] { NuGetFeedSchema.SchemaWithMethod, 1, 32, new[] { "Id", "Version", "IsLatestVersion" }, new[] { "Search" } })]
         public void ExtractMethodNamesFromSchemaFindsMethodNamesAndProperties(string schema, int expectedMethodCount, int expectedProperties,
                 IEnumerable<string> sampleProperties, IEnumerable<string> expectedMethods)
         {
@@ -380,6 +380,7 @@ namespace NuGet.Test
         <Property Name=""Rating"" Type=""Edm.Double"" Nullable=""false"" />
         <Property Name=""VersionRating"" Type=""Edm.Double"" Nullable=""false"" />
         <Property Name=""RequireLicenseAcceptance"" Type=""Edm.Boolean"" Nullable=""false"" />
+        <Property Name=""DevelopmentDependency"" Type=""Edm.Boolean"" Nullable=""false"" />
         <Property Name=""Description"" Type=""Edm.String"" Nullable=""true"" />
         <Property Name=""Summary"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationSummary"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""false"" />
         <Property Name=""ReleaseNotes"" Type=""Edm.String"" Nullable=""true"" />
@@ -430,6 +431,7 @@ namespace NuGet.Test
         <Property Name=""PackageSize"" Type=""Edm.Int64"" Nullable=""false"" />
         <Property Name=""Price"" Type=""Edm.Decimal"" Nullable=""false"" />
         <Property Name=""RequireLicenseAcceptance"" Type=""Edm.Boolean"" Nullable=""false"" />
+        <Property Name=""DevelopmentDependency"" Type=""Edm.Boolean"" Nullable=""false"" />
         <Property Name=""IsLatestVersion"" Type=""Edm.Boolean"" Nullable=""false"" />
         <Property Name=""VersionRating"" Type=""Edm.Double"" Nullable=""false"" />
         <Property Name=""VersionRatingsCount"" Type=""Edm.Int32"" Nullable=""false"" />

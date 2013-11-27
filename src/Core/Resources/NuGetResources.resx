@@ -433,4 +433,7 @@
   <data name="Error_PackageAlreadyExists" xml:space="preserve">
     <value>Package {0} already exists.</value>
   </data>
+  <data name="Log_PackageOperation" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
 </root>

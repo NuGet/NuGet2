@@ -101,6 +101,7 @@ namespace NuGet.Test
                     { "MyGlobalProperty", "true" }
                 };
             var project = new Project(XmlReader.Create(new StringReader(projectXml)), cmdLineProperties, null);
+            project.FullPath = Path.Combine(project.DirectoryPath, "test.csproj");
             
             // Act
             var factory = new ProjectFactory(project) { Build = false };

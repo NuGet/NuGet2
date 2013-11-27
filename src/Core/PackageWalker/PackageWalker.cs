@@ -22,6 +22,7 @@ namespace NuGet
         {
             _targetFramework = targetFramework;
             Marker = new PackageMarker();
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         protected FrameworkName TargetFramework
@@ -64,6 +65,12 @@ namespace NuGet
             }
         }
 
+        public DependencyVersion DependencyVersion
+        {
+            get;
+            set;
+        }
+
         protected PackageMarker Marker
         {
             get;
@@ -99,8 +106,12 @@ namespace NuGet
                 foreach (var dependency in package.GetCompatiblePackageDependencies(TargetFramework))
                 {
                     // Try to resolve the dependency from the visited packages first
-                    IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions, preferListedPackages: false) ??
-                                                  ResolveDependency(dependency);
+                    IPackage resolvedDependency = Marker.ResolveDependency(
+                        dependency, constraintProvider: null, 
+                        allowPrereleaseVersions: AllowPrereleaseVersions, 
+                        preferListedPackages: false,
+                        dependencyVersion: DependencyVersion) ??
+                        ResolveDependency(dependency);
 
                     if (resolvedDependency == null)
                     {

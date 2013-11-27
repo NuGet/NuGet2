@@ -310,17 +310,22 @@ namespace NuGet
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions, bool preferListedPackages)
         {
-            return ResolveDependency(repository, dependency, constraintProvider: null, allowPrereleaseVersions: allowPrereleaseVersions, preferListedPackages: preferListedPackages);
+            return ResolveDependency(repository, dependency, constraintProvider: null, allowPrereleaseVersions: allowPrereleaseVersions, preferListedPackages: preferListedPackages, dependencyVersion: DependencyVersion.Lowest);
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
         {
+            return ResolveDependency(repository, dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, dependencyVersion: DependencyVersion.Lowest);
+        }
+
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages, DependencyVersion dependencyVersion)
+        {
             IDependencyResolver dependencyResolver = repository as IDependencyResolver;
             if (dependencyResolver != null)
             {
-                return dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
+                return dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, dependencyVersion);
             }
-            return ResolveDependencyCore(repository, dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
+            return ResolveDependencyCore(repository, dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, dependencyVersion);
         }
 
         internal static IPackage ResolveDependencyCore(
@@ -328,7 +333,8 @@ namespace NuGet
             PackageDependency dependency,
             IPackageConstraintProvider constraintProvider,
             bool allowPrereleaseVersions,
-            bool preferListedPackages)
+            bool preferListedPackages,
+            DependencyVersion dependencyVersion)
         {
             if (repository == null)
             {
@@ -350,24 +356,38 @@ namespace NuGet
             if (preferListedPackages)
             {
                 // pick among Listed packages first
-                IPackage listedSelectedPackage = ResolveDependencyCore(candidates.Where(PackageExtensions.IsListed),
-                                                                       dependency);
+                IPackage listedSelectedPackage = ResolveDependencyCore(
+                    candidates.Where(PackageExtensions.IsListed),
+                    dependency, 
+                    dependencyVersion);
                 if (listedSelectedPackage != null)
                 {
                     return listedSelectedPackage;
                 }
             }
 
-            return ResolveDependencyCore(candidates, dependency);
+            return ResolveDependencyCore(candidates, dependency, dependencyVersion);
         }
 
-        private static IPackage ResolveDependencyCore(IEnumerable<IPackage> packages, PackageDependency dependency)
+        /// <summary>
+        /// From the list of packages <paramref name="packages"/>, selects the package that best 
+        /// matches the <paramref name="dependency"/>.
+        /// </summary>
+        /// <param name="packages">The list of packages.</param>
+        /// <param name="dependency">The dependency used to select package from the list.</param>
+        /// <param name="dependencyVersion">Indicates the method used to select dependency. 
+        /// Applicable only when dependency.VersionSpec is not null.</param>
+        /// <returns>The selected package.</returns>
+        private static IPackage ResolveDependencyCore(
+            IEnumerable<IPackage> packages, 
+            PackageDependency dependency, 
+            DependencyVersion dependencyVersion)
         {
             // If version info was specified then use it
             if (dependency.VersionSpec != null)
             {
-                packages = packages.FindByVersion(dependency.VersionSpec);
-                return packages.OrderBy(p => p.Version).FirstOrDefault();
+                packages = packages.FindByVersion(dependency.VersionSpec).OrderBy(p => p.Version);
+                return packages.SelectDependency(dependencyVersion);
             }
             else
             {
@@ -548,6 +568,54 @@ namespace NuGet
             }
 
             return packages;
+        }
+
+        /// <summary>
+        /// Selects the dependency package from the list of candidate packages 
+        /// according to <paramref name="dependencyVersion"/>.
+        /// </summary>
+        /// <param name="packages">The list of candidate packages.</param>
+        /// <param name="dependencyVersion">The rule used to select the package from 
+        /// <paramref name="packages"/> </param>
+        /// <returns>The selected package.</returns>
+        /// <remarks>Precondition: <paramref name="packages"/> are ordered by ascending version.</remarks>        
+        internal static IPackage SelectDependency(this IEnumerable<IPackage> packages, DependencyVersion dependencyVersion)
+        {
+            if (packages == null || !packages.Any())
+            {
+                return null;
+            }
+
+            if (dependencyVersion == DependencyVersion.Lowest)
+            {
+                return packages.FirstOrDefault();
+            }
+            else if (dependencyVersion == DependencyVersion.Highest)
+            {
+                return packages.LastOrDefault();
+            }
+            else if (dependencyVersion == DependencyVersion.HighestPatch)
+            {
+                var groups = from p in packages
+                             group p by new { p.Version.Version.Major, p.Version.Version.Minor } into g
+                             orderby g.Key.Major, g.Key.Minor
+                             select g;
+                return (from p in groups.First()
+                        orderby p.Version descending
+                        select p).FirstOrDefault();
+            }
+            else if (dependencyVersion == DependencyVersion.HighestMinor)
+            {
+                var groups = from p in packages
+                             group p by new { p.Version.Version.Major } into g
+                             orderby g.Key.Major
+                             select g;
+                return (from p in groups.First()
+                        orderby p.Version descending
+                        select p).FirstOrDefault();
+            }            
+
+            throw new ArgumentOutOfRangeException("dependencyVersion");
         }
     }
 }

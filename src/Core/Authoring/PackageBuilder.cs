@@ -113,6 +113,12 @@ namespace NuGet
             set;
         }
 
+        public bool DevelopmentDependency
+        {
+            get;
+            set;
+        }
+
         public string Description
         {
             get;
@@ -254,7 +260,25 @@ namespace NuGet
                 package.PackageProperties.Language = Language;
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
                 package.PackageProperties.Title = Title;
+                package.PackageProperties.LastModifiedBy = CreatorInfo();
             }
+        }
+
+        private static string CreatorInfo()
+        {
+            List<string> creatorInfo = new List<string>();
+            var assembly = typeof(PackageBuilder).Assembly;
+            creatorInfo.Add(assembly.FullName);
+            creatorInfo.Add(Environment.OSVersion.ToString());
+
+            var attributes = assembly.GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), true);
+            if (attributes.Length > 0)
+            {
+                var attribute = (System.Runtime.Versioning.TargetFrameworkAttribute)attributes[0];
+                creatorInfo.Add(attribute.FrameworkDisplayName);
+            }
+
+            return String.Join(";", creatorInfo);
         }
 
         private static int DetermineMinimumSchemaVersion(Collection<IPackageFile> Files)
@@ -381,6 +405,7 @@ namespace NuGet
             LicenseUrl = metadata.LicenseUrl;
             ProjectUrl = metadata.ProjectUrl;
             RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
+            DevelopmentDependency = metadata.DevelopmentDependency;
             Description = metadata.Description;
             Summary = metadata.Summary;
             ReleaseNotes = metadata.ReleaseNotes;

@@ -114,7 +114,7 @@ namespace NuGet.WebMatrix.Tests.ModelTests
             IEnumerable<FeedSource> result = null;
             this.Store
                 .Setup(s => s.SavePackageSources(It.IsAny<IEnumerable<FeedSource>>()))
-                .Callback((object[] args) => result = args[0] as IEnumerable<FeedSource>);
+                .Callback((IEnumerable<FeedSource> packages) => result = packages);
 
             // Use the model to save the default sources
             this.Model.SavePackageSources(feedSources);
@@ -130,7 +130,7 @@ namespace NuGet.WebMatrix.Tests.ModelTests
             IEnumerable<FeedSource> result = null;
             this.Store
                 .Setup(s => s.SavePackageSources(It.IsAny<IEnumerable<FeedSource>>()))
-                .Callback((object[] args) => result = args[0] as IEnumerable<FeedSource>);
+                .Callback((IEnumerable<FeedSource> packages) => result = packages);
 
             // Build up the list of expected results
             Random rand = new Random(DateTime.Now.Millisecond);

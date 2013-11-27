@@ -135,6 +135,12 @@ namespace NuGet
             set;
         }
 
+        public bool DevelopmentDependency
+        {
+            get;
+            set;
+        }
+
         public string Description
         {
             get;

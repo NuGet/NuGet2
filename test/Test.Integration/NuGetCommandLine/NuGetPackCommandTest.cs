@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using System.Configuration;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {    
@@ -124,9 +125,9 @@ namespace Proj2
             }
         }
 
-        // Test that -IncludeReferencedProjects and -Symbols cannot be used together.
+        // Test creating symbol package with -IncludeReferencedProject.
         [Fact]
-        public void PackCommand_WithProjectReferences_Symbols()
+        public void PackCommand_WithProjectReferencesSymbols()
         {
             var targetDir = ConfigurationManager.AppSettings["TargetDir"];
             var nugetexe = Path.Combine(targetDir, "nuget.exe");
@@ -135,16 +136,20 @@ namespace Proj2
             try
             {
                 Util.CreateDirectory(workingDirectory);
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                var proj2Directory = Path.Combine(workingDirectory, "proj2");
+                Util.CreateDirectory(proj1Directory);
+                Util.CreateDirectory(proj2Directory);
 
                 // create project 1
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1.csproj",
 @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
     xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <OutputPath>out1</OutputPath>
+    <OutputPath>out</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -156,7 +161,7 @@ namespace Proj2
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1_file1.cs",
 @"using System;
 
@@ -168,23 +173,23 @@ namespace Proj1
     }
 }");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj1Directory,
                     "proj1_file2.txt",
                     "file2");
 
                 // Create project 2, which references project 1
                 Util.CreateFile(
-                    workingDirectory,
+                    proj2Directory,
                     "proj2.csproj",
 @"<Project ToolsVersion='4.0' DefaultTargets='Build' 
     xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <OutputPath>out2</OutputPath>
+    <OutputPath>out</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include='proj1.csproj' />
+    <ProjectReference Include='..\proj1\proj1.csproj' />
   </ItemGroup>
   <ItemGroup>
     <Compile Include='proj2_file1.cs' />
@@ -192,7 +197,7 @@ namespace Proj1
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
                 Util.CreateFile(
-                    workingDirectory,
+                    proj2Directory,
                     "proj2_file1.cs",
 @"using System;
 
@@ -204,16 +209,30 @@ namespace Proj2
     }
 }");
 
-                // Act
+                // Act 
                 var r = CommandRunner.Run(
-                    nugetexe, 
-                    workingDirectory,
-                    "pack proj2.csproj -build -symbols -IncludeReferencedProjects",
-                    waitForExit: true);    
-                
+                    nugetexe,
+                    proj2Directory,
+                    "pack proj2.csproj -build -IncludeReferencedProjects -symbols",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
                 // Assert
-                Assert.NotEqual(0, r.Item1);
-                Assert.True(r.Item2.Contains("not supported"));
+                var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.symbols.nupkg"));
+                var files = package.GetFiles().Select(f => f.Path).ToArray();
+                Array.Sort(files);
+                Assert.Equal(
+                    files,
+                    new string[] 
+                    { 
+                        @"content\proj1_file2.txt",
+                        @"lib\net40\proj1.dll",
+                        @"lib\net40\proj1.pdb",
+                        @"lib\net40\proj2.dll",
+                        @"lib\net40\proj2.pdb",
+                        @"src\proj1\proj1_file1.cs",
+                        @"src\proj2\proj2_file1.cs",
+                    });
             }
             finally
             {
@@ -338,7 +357,6 @@ namespace Proj2
                 Directory.Delete(workingDirectory, true);
             }
         }
-
 
         // Test that when creating a package from project file, a referenced project that
         // has a nuspec file is added as dependency. withCustomReplacementTokens = true 
@@ -957,8 +975,10 @@ namespace Proj2
         }
 
         // Test that NuGet packages of the project are added as dependencies
-        [Fact]
-        public void PackCommand_PackagesAddedAsDependencies()
+        [Theory]
+        [InlineData("packages.config")]
+        [InlineData("packages.proj1.config")]
+        public void PackCommand_PackagesAddedAsDependencies(string packagesConfigFileName)
         {
             var targetDir = ConfigurationManager.AppSettings["TargetDir"];
             var nugetexe = Path.Combine(targetDir, "nuget.exe");
@@ -988,7 +1008,6 @@ namespace Proj2
   </ItemGroup>
   <ItemGroup>
     <Content Include='proj1_file2.txt' />
-    <Content Include='packages.config' />
   </ItemGroup>
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
 </Project>");
@@ -1006,7 +1025,7 @@ namespace Proj1
 }");
                 Util.CreateFile(
                     proj1Directory,
-                    "packages.config",
+                    packagesConfigFileName,
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""testPackage1"" version=""1.1.0"" targetFramework=""net45"" />
@@ -1051,6 +1070,112 @@ namespace Proj1
             }
         }
 
+        // Test that nuget displays warnings when dependency version is not specified
+        // in nuspec.
+        [Fact]
+        public void PackCommand_WarningDependencyVersionNotSpecified()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                Util.CreateDirectory(proj1Directory);
+
+                // create project 1
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1.csproj",
+@"<Project ToolsVersion='4.0' DefaultTargets='Build' 
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Config Condition=" + "\" '$(Config)' == ''\"" + @">Debug</Config>        
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" + "\"'$(Config)'=='Debug'\"" + @">
+    <OutputPath>debug_out</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" + "\"'$(Config)'=='Release'\"" + @">
+    <OutputPath>release_out</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include='proj1_file1.cs' />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include='proj1_file2.txt' />
+  </ItemGroup>
+  <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
+</Project>");
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1_file1.cs",
+@"using System;
+
+namespace Proj1
+{
+    public class Class1
+    {
+        public int A { get; set; }
+    }
+}");
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1_file2.txt",
+                    "file2");
+
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1.nuspec",
+@"<?xml version=""1.0""?>
+<package >
+  <metadata>
+    <id>Package</id>
+    <version>1.0.0</version>
+    <authors>feiling</authors>
+    <owners>feiling</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>description</description>
+    <releaseNotes>release notes</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <dependencies>
+      <dependency id=""json"" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src=""release_out\"" target=""lib\net40"" />
+  </files>
+</package>");
+                var msbuild = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                    @"Microsoft.NET\Framework\v4.0.30319\msbuild.exe");
+                var r = CommandRunner.Run(
+                    msbuild,
+                    proj1Directory,
+                    "proj1.csproj /p:Config=Release",
+                    waitForExit: true);
+
+                // Act 
+                r = CommandRunner.Run(
+                    nugetexe,
+                    proj1Directory,
+                    "pack proj1.nuspec",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
+                // Assert
+                Assert.Contains("Issue: Specify version of dependencies.", r.Item2);
+                Assert.Contains("Description: The version of dependency 'json' is not specified.", r.Item2);
+                Assert.Contains("Solution: Specifiy the version of dependency and rebuild your package.", r.Item2);
+            }
+            finally
+            {
+                Directory.Delete(workingDirectory, true);
+            }
+        }
 
         /// <summary>
         /// Creates a simple project.

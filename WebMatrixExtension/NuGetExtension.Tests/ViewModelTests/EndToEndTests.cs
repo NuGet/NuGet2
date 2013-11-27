@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
@@ -232,6 +233,70 @@ namespace NuGet.WebMatrix.Tests.ViewModelTests
         }
 
         /// <summary>
+        /// Select a package from the 'installed' view and walk through the updater
+        /// </summary>
+        [Fact]
+        public void UpdatePackageFromInstalled()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installed = PackageFactory.Create("update", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installed);
+
+                var remote = PackageFactory.Create("update", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remote);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Installed, installed.Id);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.UpdateButton, PackageViewModelAction.Update);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsDetailsPaneVisible, "The details page should be shown.");
+                Assert.Equal<PackageViewModelAction>(PackageViewModelAction.Update, buttonBarViewModel.NuGetViewModel.PackageAction);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.YesButton);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsLicensePageVisible, "The license page should be shown.");
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.AcceptButton);
+
+                var installedPackage = this.PackageManager.InstalledPackages.FirstOrDefault();
+                Assert.Equal(remote, installedPackage);
+            }
+        }
+
+        /// <summary>
+        /// Select a package from the 'updates' view and click 'updateall' to update all packages
+        /// </summary>
+        [Fact]
+        public void UpdateAllPackagesFromUpdates()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installed1 = PackageFactory.Create("update1", new Version(1, 0));
+                var installed2 = PackageFactory.Create("update2", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installed1);
+                this.PackageManager.InstalledPackages.Add(installed2);
+
+                var remote1 = PackageFactory.Create("update1", new Version(2, 0));
+                var remote2 = PackageFactory.Create("update2", new Version(2, 0));
+                this.PackageManager.RemotePackages.Add(remote1);
+                this.PackageManager.RemotePackages.Add(remote2);
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Updated, installed1.Id);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.UpdateAllButton, PackageViewModelAction.UpdateAll);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsLicensePageVisible, "The license page should be shown.");
+                Assert.Equal<PackageViewModelAction>(PackageViewModelAction.UpdateAll, buttonBarViewModel.NuGetViewModel.PackageAction);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.AcceptButton);
+
+                var installedPackages = this.PackageManager.InstalledPackages.ToArray();
+                Assert.Equal(remote1, installedPackages[0]);
+                Assert.Equal(remote2, installedPackages[1]);
+            }
+        }
+
+        /// <summary>
         /// Enables a package and checks that it's no longer shown as disabled
         /// </summary>
         [Fact]
@@ -432,7 +497,7 @@ namespace NuGet.WebMatrix.Tests.ViewModelTests
 
                 // Select Disabled Filter and check that the prerelease filter is NOT visible
                 this.SelectFilter(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Disabled);
-                Assert.Equal<Visibility>(buttonBarViewModel.NuGetViewModel.ShowFeedSourceComboBox, Visibility.Visible);
+                Assert.NotEqual<Visibility>(buttonBarViewModel.NuGetViewModel.ShowFeedSourceComboBox, Visibility.Visible);
 
                 // Select Updates Filter and check that the prerelease filter is visible
                 this.SelectFilter(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Updated);

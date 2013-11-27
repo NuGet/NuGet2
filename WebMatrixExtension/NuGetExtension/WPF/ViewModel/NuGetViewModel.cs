@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -66,6 +67,7 @@ namespace NuGet.WebMatrix
             _preferences = this.Host.GetExtensionSpecificPreferences(this.Descriptor.PreferencesStore);
             _selectedPrereleaseFilter = LoadPrereleaseFilter();
             _includePrerelease = (_selectedPrereleaseFilter == Resources.Prerelease_Filter_IncludePrerelease);
+            PackagesToDisplayForUpdateAll = new List<PackageViewModel>();
 
             this.ShowDetailsPageCommand = new RelayCommand(this.ShowDetailsPage, this.CanShowDetailsPage);
             this.ShowLicensePageCommand = new RelayCommand(this.ShowLicensePage, this.CanShowLicensePage);
@@ -76,6 +78,9 @@ namespace NuGet.WebMatrix
             this.InstallCommand = new RelayCommand(this.Install, this.CanInstall);
             this.UpdateCommand = new RelayCommand(this.Update, this.CanUpdate);
             this.UninstallCommand = new RelayCommand(this.Uninstall, this.CanUninstall);
+
+            this.UpdateAllCommand = new RelayCommand(this.UpdateAll, this.CanUpdateAll);
+            this.ShowLicensePageForAllCommand = new RelayCommand(this.ShowLicensePageForAll, this.CanShowLicensePageForAll);
 
             this.DisableCommand = new RelayCommand(this.Disable, this.CanDisable);
             this.EnableCommand = new RelayCommand(this.Enable, this.CanEnable);
@@ -256,6 +261,22 @@ namespace NuGet.WebMatrix
                 // IIS-OOB #34652 -- Push a notification that the loading-state has changed
                 // which will affect button state
                 System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        public bool IsUpdatingAll
+        {
+            get
+            {
+                return PackageAction == PackageViewModelAction.UpdateAll;
+            }
+        }
+
+        public bool NotUpdatingAll
+        {
+            get
+            {
+                return PackageAction != PackageViewModelAction.UpdateAll;
             }
         }
 
@@ -538,6 +559,15 @@ namespace NuGet.WebMatrix
             }
         }
 
+        public bool ShowUpdateAll
+        {
+            get
+            {
+                IListViewFilter updatesFilter = this.Filters.Where(p => p.Name == Resources.Filter_Updated).FirstOrDefault();
+                return (SelectedFilter != null && SelectedFilter.Name == Resources.Filter_Updated) && (updatesFilter != null ? (updatesFilter.Count > 1) : false);
+            }
+        }
+
         private void UpdateMessage()
         {
             string message = null;
@@ -618,6 +648,12 @@ namespace NuGet.WebMatrix
                 OnPropertyChanged("SelectedFilter");
                 this.BeginSearch();
             }
+        }
+
+        public List<PackageViewModel> PackagesToDisplayForUpdateAll
+        {
+            get;
+            private set;
         }
 
         public object SelectedItem
@@ -850,6 +886,8 @@ namespace NuGet.WebMatrix
                 else
                 {
                     IsLicensePageVisible = true;
+                    OnPropertyChanged("IsUpdatingAll");
+                    OnPropertyChanged("NotUpdatingAll");
                 }
             }
             finally
@@ -857,6 +895,39 @@ namespace NuGet.WebMatrix
                 Loading = false;
                 LoadingMessage = null;
             }
+        }
+
+        internal ICommand ShowLicensePageForAllCommand
+        {
+            get;
+            private set;
+        }
+
+        private bool CanShowLicensePageForAll(object ignore)
+        {
+            return
+                !this.IsLicensePageVisible &&
+                !this.IsDetailsPaneVisible &&
+                !this.IsUninstallPageVisible;
+        }
+
+        private void ShowLicensePageForAll(object ignore)
+        {
+            this.PackageAction = PackageViewModelAction.UpdateAll;
+            PackagesToDisplayForUpdateAll.Clear();
+            Loading = true;
+            LoadingMessage = Resources.String_PackageInformation;
+
+            Task<IEnumerable<IPackage>> dependenciesTask = Task.Factory.StartNew<IEnumerable<IPackage>>(() => _nuGetModel.PackageManager.GetPackagesToBeInstalledForUpdateAll(), 
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+
+            var packagesToDisplay = dependenciesTask.Result;
+            foreach (IPackage package in packagesToDisplay)
+            {
+                PackagesToDisplayForUpdateAll.Add(new PackageViewModel(_nuGetModel, package, PackageViewModelAction.Update));
+            }
+
+            _primaryTask = dependenciesTask.ContinueWith(EndShowLicensePage, this.Scheduler);
         }
 
         internal ICommand ShowUninstallPageCommand
@@ -979,6 +1050,33 @@ namespace NuGet.WebMatrix
             }
 
             this.BeginUpdateModel(this.SelectedFeedSource, _includePrerelease);
+        }
+
+        internal ICommand UpdateAllCommand
+        {
+            get;
+            private set;
+        }
+
+        private bool CanUpdateAll(object ignore)
+        {
+            return this.IsLicensePageVisible;
+        }
+
+        private void UpdateAll(object ignore)
+        {
+            Loading = true;
+            LoadingMessage = Resources.String_Updating;
+            IsLicensePageVisible = false;
+            IsDetailsPaneVisible = false;
+
+            var task = Task.Factory.StartNew(UpdateAllPackages, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+            _primaryTask = task.ContinueWith(EndUpdate, this.Scheduler);
+        }
+
+        private void UpdateAllPackages()
+        {
+            _nuGetModel.UpdateAllPackages(inDetails: true);
         }
 
         internal ICommand UninstallCommand

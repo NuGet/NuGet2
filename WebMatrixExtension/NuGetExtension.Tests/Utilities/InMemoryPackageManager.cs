@@ -42,6 +42,11 @@ namespace NuGet.WebMatrix.Tests.Utilities
             return dependencies.SelectMany(dependency => this.RemotePackages.Where(remote => remote.Id == dependency.Id && dependency.VersionSpec.Satisfies(remote.Version)));
         }
 
+        public IEnumerable<IPackage> GetPackagesToBeInstalledForUpdateAll()
+        {
+            return GetPackagesWithUpdates();
+        }
+
         public IEnumerable<IPackage> FindPackages(IEnumerable<string> packageIds)
         {
             return packageIds.SelectMany(id => this.RemotePackages.Where(remote => remote.Id == id));
@@ -60,6 +65,22 @@ namespace NuGet.WebMatrix.Tests.Utilities
         public IQueryable<IPackage> GetRemotePackages()
         {
             return this.RemotePackages.AsQueryable<IPackage>();
+        }
+
+        public IPackage GetUpdate(IPackage package)
+        {
+            IPackage latestVersion = this.RemotePackages.Where(remote => (package.Id == remote.Id)).OrderByDescending(remote => remote.Version).FirstOrDefault();
+            if (latestVersion != null && latestVersion.Version > package.Version)
+            {
+                return latestVersion;
+            }
+
+            return null;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            return this.RemotePackages.Where(remote => (remote.Id == packageId && remote.Version == version)).FirstOrDefault();
         }
 
         public IEnumerable<string> InstallPackage(IPackage package)
@@ -114,12 +135,29 @@ namespace NuGet.WebMatrix.Tests.Utilities
             return Enumerable.Empty<string>();
         }
 
+        /// <summary>
+        /// Only updates if there is an update. Otherwise returns doing nothing
+        /// </summary>
+        /// <param name="package"></param>
+        /// <returns></returns>
         public IEnumerable<string> UpdatePackage(IPackage package)
         {
-            Assert.True(this.InstalledPackages.Contains(package), "The package be already installed");
+            IPackage installedPackage = this.InstalledPackages.Where(p => String.Equals(p.Id, package.Id, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            Assert.True(installedPackage != null, "The package be already installed");
 
-            this.InstalledPackages.Remove(package);
+            this.InstalledPackages.Remove(installedPackage);
             this.InstalledPackages.Add(package);
+            return Enumerable.Empty<string>();
+        }
+
+        public IEnumerable<string> UpdateAllPackages()
+        {
+            var packagesToUpdate = GetPackagesWithUpdates();
+            var allErrors = new List<string>();
+            foreach (IPackage package in packagesToUpdate)
+            {
+                allErrors.Concat(UpdatePackage(package));
+            }
             return Enumerable.Empty<string>();
         }
 

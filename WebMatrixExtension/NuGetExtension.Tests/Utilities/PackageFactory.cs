@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NuGet;
+using System.Runtime.Versioning;
 
 namespace NuGet.WebMatrix.Tests.Utilities
 {
@@ -16,6 +17,16 @@ namespace NuGet.WebMatrix.Tests.Utilities
         public static IPackage Create(string id, Version version)
         {
             return new PackageStub(id, version);
+        }
+
+        public static IPackage Create(string id, Version version, IEnumerable<PackageDependency> dependencies)
+        {
+            return new PackageStub(id, version, dependencies);
+        }
+
+        public static IPackage Create(string id, Version version, IEnumerable<PackageDependency> dependencies, IEnumerable<FrameworkName> supportedFrameworks)
+        {
+            return new PackageStub(id, version, dependencies, supportedFrameworks);
         }
     }
 }

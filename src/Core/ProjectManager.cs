@@ -17,7 +17,7 @@ namespace NuGet
         public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving;
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved;
-
+        
         private ILogger _logger;
         private IPackageConstraintProvider _constraintProvider;
         private readonly IPackageReferenceRepository _packageReferenceRepository;
@@ -54,6 +54,7 @@ namespace NuGet
             PathResolver = pathResolver;
             LocalRepository = localRepository;
             _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
+            DependencyVersion = DependencyVersion.Lowest;
         }
 
         public IPackagePathResolver PathResolver
@@ -104,6 +105,18 @@ namespace NuGet
             }
         }
 
+        public DependencyVersion DependencyVersion
+        {
+            get;
+            set;
+        }
+
+        public bool WhatIf
+        {
+            get;
+            set;
+        }
+
         public virtual void AddPackageReference(string packageId)
         {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -122,16 +135,22 @@ namespace NuGet
 
         public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
+            var dependentsWalker = new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id))
+            {
+                DependencyVersion = DependencyVersion
+            };
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
-                                              new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id)),
+                                              dependentsWalker,
                                               ConstraintProvider,
                                               Project.TargetFramework,
                                               NullLogger.Instance,
                                               !ignoreDependencies,
                                               allowPrereleaseVersions)
                                               {
-                                                  AcceptedTargets = PackageTargets.Project
+                                                  DisableWalkInfo = WhatIf,
+                                                  AcceptedTargets = PackageTargets.Project,
+                                                  DependencyVersion = DependencyVersion
                                               });
         }
 
@@ -164,14 +183,28 @@ namespace NuGet
                 }
                 else
                 {
-                    AddPackageReferenceToProject(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        AddPackageReferenceToProject(operation.Package);
+                    }
                 }
             }
             else
             {
                 if (packageExists)
                 {
-                    RemovePackageReferenceFromProject(operation.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                    }
+                    else
+                    {
+                        RemovePackageReferenceFromProject(operation.Package);
+                    }
                 }
             }
         }
@@ -274,7 +307,7 @@ namespace NuGet
                 if (_packageReferenceRepository != null)
                 {
                     // save the used project's framework if the repository supports it.
-                    _packageReferenceRepository.AddPackage(package.Id, package.Version, Project.TargetFramework);
+                    _packageReferenceRepository.AddPackage(package.Id, package.Version, package.DevelopmentDependency, Project.TargetFramework);
                 }
                 else
                 {

@@ -9,12 +9,12 @@ namespace NuGet.VisualStudio
     internal sealed class PreinstalledPackageInfo
     {
         /// <summary>
-        /// Information for a single preinstalled package that will have its assembly references added.
+        /// Information for a single preinstalled package that will have its assembly references added and its dependencies ignored.
         /// </summary>
         /// <param name="id">The package Id.</param>
         /// <param name="version">The package version.</param>
         public PreinstalledPackageInfo(string id, string version) :
-            this(id, version, skipAssemblyReferences: false)
+            this(id, version, skipAssemblyReferences: false, ignoreDependencies: true)
         {
         }
 
@@ -24,7 +24,8 @@ namespace NuGet.VisualStudio
         /// <param name="id">The package Id.</param>
         /// <param name="version">The package version.</param>
         /// <param name="skipAssemblyReferences">A boolean indicating whether assembly references from the package should be skipped.</param>
-        public PreinstalledPackageInfo(string id, string version, bool skipAssemblyReferences)
+        /// <param name="ignoreDependencies">A boolean indicating whether dependencies from the package should be ignored.</param>
+        public PreinstalledPackageInfo(string id, string version, bool skipAssemblyReferences, bool ignoreDependencies)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(id));
             Debug.Assert(!String.IsNullOrWhiteSpace(version));
@@ -32,10 +33,12 @@ namespace NuGet.VisualStudio
             Id = id;
             Version = new SemanticVersion(version);
             SkipAssemblyReferences = skipAssemblyReferences;
+            IgnoreDependencies = ignoreDependencies;
         }
 
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
         public bool SkipAssemblyReferences { get; private set; }
+        public bool IgnoreDependencies { get; private set; }
     }
 }

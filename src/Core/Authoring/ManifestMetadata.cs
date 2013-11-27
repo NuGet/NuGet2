@@ -82,6 +82,9 @@ namespace NuGet
         [XmlElement("requireLicenseAcceptance")]
         public bool RequireLicenseAcceptance { get; set; }
 
+        [XmlElement("developmentDependency")]
+        public bool DevelopmentDependency { get; set; }
+
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("description")]
         public string Description { get; set; }

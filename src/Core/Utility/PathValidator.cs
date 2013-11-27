@@ -22,6 +22,7 @@ namespace NuGet
         /// Validates that path is properly formatted as a local path. 
         /// </summary>
         /// <remarks>
+        /// On Windows, a valid local path must starts with the drive letter.
         /// Example: C:\, C:\path, C:\path\to\
         /// Bad: C:, C:\\path\\, C:\invalid\*\"\chars
         /// </remarks>
@@ -32,7 +33,17 @@ namespace NuGet
         {
             try
             {
-                return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\") && Path.IsPathRooted(path) && (path.IndexOfAny(_invalidPathChars) == -1);
+                if (!(Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                    Environment.OSVersion.Platform == PlatformID.Unix))
+                {
+                    // Checking driver letter on Windows
+                    if (!Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\"))
+                    {
+                        return false;
+                    }
+                }
+
+                return Path.IsPathRooted(path) && (path.IndexOfAny(_invalidPathChars) == -1);
             }
             catch
             {

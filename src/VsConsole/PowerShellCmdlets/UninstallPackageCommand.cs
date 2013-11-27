@@ -38,6 +38,9 @@ namespace NuGet.PowerShell.Commands
         [Parameter]
         public SwitchParameter RemoveDependencies { get; set; }
 
+        [Parameter]
+        public SwitchParameter WhatIf { get; set; }
+
         protected override void ProcessRecordCore()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -47,6 +50,12 @@ namespace NuGet.PowerShell.Commands
             }
 
             IProjectManager projectManager = ProjectManager;
+            PackageManager.WhatIf = WhatIf;
+            if (projectManager != null)
+            {
+                projectManager.WhatIf = WhatIf;
+            }
+
             PackageManager.UninstallPackage(projectManager, Id, Version, Force.IsPresent, RemoveDependencies.IsPresent, this);
         }
     }

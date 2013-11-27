@@ -10,7 +10,7 @@ namespace NuGet.Dialog.Test
     /// <summary>
     /// Concrete class to assist in testing the abstract PackagesTreeNodeBase
     /// </summary>
-    internal class MockTreeNode : PackagesTreeNodeBase
+    internal class MockTreeNode : PackagesTreeNodeBase, IVsPageDataSource
     {
         private int _numberOfPackages;
         private IEnumerable<IPackage> _packages;

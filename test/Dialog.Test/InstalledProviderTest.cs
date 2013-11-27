@@ -153,6 +153,7 @@ namespace NuGet.Dialog.Test
             Assert.Equal(1, extentionsTree.Nodes.Count);
 
             Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.False(((SimpleTreeNode)extentionsTree.Nodes[0]).IsPaged);
             Assert.Equal("All", extentionsTree.Nodes[0].Name);
             Assert.False(((SimpleTreeNode)extentionsTree.Nodes[0]).CollapseVersions);
         }

@@ -5,5 +5,6 @@ namespace NuGet.WebMatrix
     {
         Update,
         InstallOrUninstall,
+        UpdateAll,
     }
 }

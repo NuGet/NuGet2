@@ -87,7 +87,7 @@ namespace NuGet.Test
             //var package = PackageUtility.CreatePackage("A");
 
             // Act
-            referenceRepository.AddPackage("A", new SemanticVersion("1.0"), new FrameworkName("Silverlight, Version=2.0"));
+            referenceRepository.AddPackage("A", new SemanticVersion("1.0"), false, new FrameworkName("Silverlight, Version=2.0"));
 
             // Assert
             Assert.Equal(@"C:\MockFileSystem\packages.config", path);
@@ -95,6 +95,30 @@ namespace NuGet.Test
             AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" targetFramework=""sl20"" />
+</packages>", fileSystem.ReadAllText("packages.config"));
+        }
+
+        [Fact]
+        public void AddPackageAddsEntryToPackagesConfigWithDevelopmentDependency()
+        {
+            // Arrange
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            string path = null;
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
+                            .Callback<string>(p => path = p);
+            var fileSystem = new MockFileSystem();
+            var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
+            //var package = PackageUtility.CreatePackage("A");
+
+            // Act
+            referenceRepository.AddPackage("A", new SemanticVersion("1.0"), true, new FrameworkName("Silverlight, Version=2.0"));
+
+            // Assert
+            Assert.Equal(@"C:\MockFileSystem\packages.config", path);
+            Assert.True(fileSystem.FileExists("packages.config"));
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" targetFramework=""sl20"" developmentDependency=""true""/>
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 

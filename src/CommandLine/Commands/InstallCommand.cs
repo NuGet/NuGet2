@@ -79,12 +79,7 @@ namespace NuGet.Commands
             {
                 string packageId = Arguments[0];
                 SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
-
-                bool result = InstallPackage(fileSystem, packageId, version);
-                if (!result)
-                {
-                    Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandPackageAlreadyExists"), packageId);
-                }
+                InstallPackage(fileSystem, packageId, version);
             }
         }
 
@@ -245,33 +240,17 @@ namespace NuGet.Commands
             }
         }
 
-        private bool InstallPackage(
+        private void InstallPackage(
             IFileSystem fileSystem,
             string packageId,
             SemanticVersion version)
         {
             var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
 
-            if (!AllowMultipleVersions)
+            if (!PackageInstallNeeded(packageManager, packageId, version))
             {
-                var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
-                if (installedPackage != null)
-                {
-                    if (version != null && installedPackage.Version >= version)
-                    {
-                        // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
-                        return false;
-                    }
-                    else if (packageManager.SourceRepository.Exists(packageId, version))
-                    {
-                        // If the package is already installed, but
-                        // (a) the version we require is different from the one that is installed, 
-                        // (b) side-by-side is disabled
-                        // we need to uninstall it.
-                        // However, before uninstalling, make sure the package exists in the source repository. 
-                        packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
-                    }
-                }
+                Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandPackageAlreadyExists"), packageId);
+                return;
             }
 
             using (packageManager.SourceRepository.StartOperation(
@@ -280,8 +259,62 @@ namespace NuGet.Commands
                 version == null ? null : version.ToString()))
             {
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if package install is needed.
+        /// Package install is not needed if 
+        /// - AllowMultipleVersions is false;
+        /// - there is an existing package, and its version is newer than or equal to the 
+        /// package to be installed.
+        /// </summary>
+        /// <param name="packageManager">The pacakge manager.</param>
+        /// <param name="packageId">The id of the package to install.</param>
+        /// <param name="version">The version of the package to install.</param>
+        /// <returns>True if package install is neede; otherwise, false.</returns>
+        private bool PackageInstallNeeded(
+            IPackageManager packageManager,
+            string packageId,
+            SemanticVersion version)
+        {
+            if (AllowMultipleVersions)
+            {
                 return true;
             }
+
+            var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
+            if (installedPackage == null)
+            {
+                return true;
+            }
+
+            if (version == null)
+            {
+                // need to query the source repository to get the version to be installed.
+                IPackage package = packageManager.SourceRepository.FindPackage(
+                    packageId, 
+                    version,
+                    NullConstraintProvider.Instance,
+                    allowPrereleaseVersions: Prerelease, 
+                    allowUnlisted: false);
+                if (package == null)
+                {
+                    return false;
+                }
+
+                version = package.Version;
+            }
+
+            if (installedPackage.Version >= version)
+            {
+                // If the installed pacakge has newer version, no install is needed.
+                return false;
+            }
+
+            // install is needed. In this case, uninstall the existing pacakge.
+            packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
+            return true;
         }
 
         protected internal virtual IFileSystem CreateFileSystem(string path)

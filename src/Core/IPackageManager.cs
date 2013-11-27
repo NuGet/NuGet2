@@ -15,6 +15,10 @@ namespace NuGet
         IPackageRepository LocalRepository { get; }
 
         ILogger Logger { get; set; }
+
+        DependencyVersion DependencyVersion { get; set; }
+
+        bool WhatIf { get; set; }
         
         /// <summary>
         /// Remote repository to install packages from.

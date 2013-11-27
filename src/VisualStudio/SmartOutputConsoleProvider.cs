@@ -34,6 +34,17 @@ namespace NuGet.VisualStudio
             }
         }
 
+        /// <summary>
+        /// Clears the output in the console
+        /// </summary>
+        public void Clear()
+        {
+            if (_bufferedConsole != null)
+            {
+                _bufferedConsole.Clear();
+            }
+        }
+
         private class BufferedOutputConsole : IConsole
         {
             private readonly IConsole _baseConsole;
@@ -98,6 +109,7 @@ namespace NuGet.VisualStudio
 
             public void Clear()
             {
+                _baseConsole.Clear();
                 _messages.Clear();
             }
 
@@ -105,7 +117,6 @@ namespace NuGet.VisualStudio
             {
                 if (_messages.Length > 0)
                 {
-                    _baseConsole.Clear();
                     _baseConsole.WriteLine(_messages.ToString());
                     _messages.Clear();
                 }

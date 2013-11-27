@@ -880,7 +880,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows()
+        public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedDowngradesPackage()
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -905,7 +905,9 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageB10);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", SemanticVersion.Parse("1.0")), @"Already referencing a newer version of 'A'.");
+            projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
+            Assert.False(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageA10));
         }
 
         [Fact]
@@ -1689,7 +1691,7 @@ fdsalk;fj;lkdsajfl;kdsa");
         }
 
         [Fact]
-        public void UpdatePackageReferenceToOlderVersionThrows()
+        public void UpdatePackageReferenceToOlderVersionDowngradesPackage()
         {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1708,7 +1710,9 @@ fdsalk;fj;lkdsajfl;kdsa");
             projectManager.LocalRepository.AddPackage(packageA20);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: SemanticVersion.Parse("1.0")), @"Already referencing a newer version of 'A'.");
+            projectManager.UpdatePackageReference("A", new SemanticVersion("2.0"));
+            Assert.False(projectManager.LocalRepository.Exists(packageA30));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
         }
 
         [Fact]
@@ -3611,10 +3615,12 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new Mock<IPackageReferenceRepository>();
             localRepository.Setup(p => p.AddPackage("A", 
                                                     new SemanticVersion("1.0"),
+                                                    false,
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
 
             localRepository.Setup(p => p.AddPackage("B",
                                                     new SemanticVersion("2.0"),
+                                                    false,
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
 
             var projectManager = new ProjectManager(

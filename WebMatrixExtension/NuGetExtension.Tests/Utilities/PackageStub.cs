@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NuGet;
+using System.Runtime.Versioning;
 
 namespace NuGet.WebMatrix.Tests.Utilities
 {
@@ -14,10 +15,23 @@ namespace NuGet.WebMatrix.Tests.Utilities
         }
 
         public PackageStub(string id, Version version)
+            : this(id, version, null)
+        {
+        }
+
+        public PackageStub(string id, Version version, IEnumerable<PackageDependency> dependencies)
+            : this(id, version, dependencies, null)
+        {
+
+        }
+
+        public PackageStub(string id, Version version, IEnumerable<PackageDependency> dependencies, IEnumerable<FrameworkName> supportedFrameworks)
         {
             this.Id = id;
             this.Version = new SemanticVersion(version);
             this.IsLatestVersion = true;
+            this.Dependencies = dependencies;
+            this.SupportedFrameworks = supportedFrameworks ?? Enumerable.Empty<FrameworkName>();
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
@@ -35,9 +49,15 @@ namespace NuGet.WebMatrix.Tests.Utilities
             throw new NotImplementedException();
         }
 
-        public IEnumerable<System.Runtime.Versioning.FrameworkName> GetSupportedFrameworks()
+        public IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
-            throw new NotImplementedException();
+            return SupportedFrameworks;
+        }
+
+        private IEnumerable<FrameworkName> SupportedFrameworks
+        {
+            get;
+            set;
         }
 
         public bool IsAbsoluteLatestVersion
@@ -192,6 +212,22 @@ namespace NuGet.WebMatrix.Tests.Utilities
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get { return (ICollection<PackageReferenceSet>)Enumerable.Empty<PackageReferenceSet>(); }
+        }
+
+        public override bool Equals(object obj)
+        {
+            PackageStub packageStub = obj as PackageStub;
+            if (packageStub == null)
+            {
+                return false;
+            }
+
+            return (packageStub.Id == this.Id && packageStub.Version == this.Version);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode() ^ this.Version.GetHashCode();
         }
     }
 }

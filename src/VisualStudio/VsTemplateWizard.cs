@@ -97,17 +97,22 @@ namespace NuGet.VisualStudio
                                 let id = packageElement.GetOptionalAttributeValue("id")
                                 let version = packageElement.GetOptionalAttributeValue("version")
                                 let skipAssemblyReferences = packageElement.GetOptionalAttributeValue("skipAssemblyReferences")
-                                select new { id, version, skipAssemblyReferences }).ToList();
+                                let includeDependencies = packageElement.GetOptionalAttributeValue("includeDependencies")
+                                select new { id, version, skipAssemblyReferences, includeDependencies }).ToList();
 
             SemanticVersion semVer;
             bool skipAssemblyReferencesValue;
+            bool includeDependenciesValue;
             var missingOrInvalidAttributes = from declaration in declarations
                                              where
                                                  String.IsNullOrWhiteSpace(declaration.id) ||
                                                  String.IsNullOrWhiteSpace(declaration.version) ||
                                                  !SemanticVersion.TryParse(declaration.version, out semVer) ||
                                                  (declaration.skipAssemblyReferences != null &&
-                                                  !Boolean.TryParse(declaration.skipAssemblyReferences, out skipAssemblyReferencesValue))
+                                                  !Boolean.TryParse(declaration.skipAssemblyReferences, out skipAssemblyReferencesValue)) ||
+                                                 (declaration.includeDependencies != null &&
+                                                  !Boolean.TryParse(declaration.includeDependencies, out includeDependenciesValue))
+
                                              select declaration;
 
             if (missingOrInvalidAttributes.Any())

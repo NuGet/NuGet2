@@ -66,6 +66,7 @@ namespace NuGet
 
             Func<IPackageRepository, bool> supportsPrereleasePackages = Wrap(r => r.SupportsPrereleasePackages, defaultValue: true);
             _supportsPrereleasePackages = new Lazy<bool>(() => _repositories.All(supportsPrereleasePackages));
+            IgnoreFailingRepositories = true;
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
@@ -122,17 +123,17 @@ namespace NuGet
             return Repositories.Any(exists);
         }
 
-        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages, DependencyVersion dependencyVersion)
         {
             if (ResolveDependenciesVertically)
             {
-                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages));
+                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, dependencyVersion));
 
                 return Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
                                         .ToArray()
                                         .WhenAny(package => package != null);
             }
-            return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
+            return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages, dependencyVersion);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]

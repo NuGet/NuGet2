@@ -165,6 +165,11 @@ namespace NuGet.Test.NuGetCommandLine
             {
                 return new[] { CommandAttribute };
             }
+
+            public bool IncludedInHelp(string optionName)
+            {
+                return true;
+            }
         }
 
         private class MockCommandBadOption : ICommand
@@ -193,6 +198,11 @@ namespace NuGet.Test.NuGetCommandLine
             {
                 return new[] { CommandAttribute };
             }
+
+            public bool IncludedInHelp(string optionName)
+            {
+                return true;
+            }
         }
 
         private class MockCommandEmptyAttributes : ICommand
@@ -214,6 +224,11 @@ namespace NuGet.Test.NuGetCommandLine
             public IEnumerable<CommandAttribute> GetCommandAttribute()
             {
                 return Enumerable.Empty<CommandAttribute>();
+            }
+
+            public bool IncludedInHelp(string optionName)
+            {
+                return true;
             }
         }
     }

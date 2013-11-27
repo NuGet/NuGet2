@@ -111,7 +111,7 @@ namespace NuGet.Dialog.Test
             // Assert
             Assert.Equal(1, extentionsTree.Nodes.Count);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[0]);
             Assert.Equal("One", extentionsTree.Nodes[0].Name);
         }
 
@@ -127,13 +127,13 @@ namespace NuGet.Dialog.Test
             // Assert
             Assert.Equal(3, extentionsTree.Nodes.Count);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[0]);
             Assert.Equal("All", extentionsTree.Nodes[0].Name);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[1]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[1]);
             Assert.Equal("One", extentionsTree.Nodes[1].Name);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[2]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[2]);
             Assert.Equal("Two", extentionsTree.Nodes[2].Name);
         }
 
@@ -149,15 +149,15 @@ namespace NuGet.Dialog.Test
             // Assert
             Assert.Equal(3, extentionsTree.Nodes.Count);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[0]);
             Assert.Equal("All", extentionsTree.Nodes[0].Name);
             Assert.False(extentionsTree.Nodes[0].IsSelected);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[1]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[1]);
             Assert.Equal("One", extentionsTree.Nodes[1].Name);
             Assert.True(extentionsTree.Nodes[1].IsSelected);
 
-            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[2]);
+            Assert.IsType(typeof(OnlineTreeNode), extentionsTree.Nodes[2]);
             Assert.Equal("Two", extentionsTree.Nodes[2].Name);
             Assert.False(extentionsTree.Nodes[2].IsSelected);
         }
@@ -338,6 +338,8 @@ namespace NuGet.Dialog.Test
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            Assert.True(firstTreeNode.IsPaged);
+
             firstTreeNode.Repository.AddPackage(packageA2);
             firstTreeNode.Repository.AddPackage(packageA1);
             firstTreeNode.Repository.AddPackage(packageC);

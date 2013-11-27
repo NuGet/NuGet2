@@ -70,6 +70,12 @@ namespace NuGet.VsEvents
                 return;
             }
 
+            // Ignore "Miscellaneous Files" project
+            if (VsConstants.VsProjectKindMisc.Equals(project.Kind, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             if (VsConstants.VsProjectItemKindSolutionFolder.Equals(project.Kind, StringComparison.OrdinalIgnoreCase))
             {
                 foreach (ProjectItem item in project.ProjectItems)
