@@ -127,7 +127,11 @@ namespace NuGet.VisualStudio
                        declaration.id,
                        declaration.version,
                        (declaration.skipAssemblyReferences != null && 
-                       Boolean.Parse(declaration.skipAssemblyReferences) == false) ? false : true
+                       Boolean.Parse(declaration.skipAssemblyReferences) == false) ? false : true,
+
+                       // Note that the declaration uses "includeDependencies" but we need to invert it to become ignoreDependencies
+                       // The declaration uses includeDependencies so that the default value can be 'false'
+                       ignoreDependencies: !(declaration.includeDependencies != null && Boolean.Parse(declaration.includeDependencies))
                     );
         }
 
