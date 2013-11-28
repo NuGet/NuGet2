@@ -1,4 +1,4 @@
-﻿<pfui:DialogWindow
+﻿<pfui:VsDialogWindow
      x:Class="NuGet.Dialog.PackageManagerUI.FileConflictDialog"
      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,8 +7,8 @@
      mc:Ignorable="d" 
      xmlns:resources="clr-namespace:NuGet.Dialog"
      xmlns:vsresources="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio"
-     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
-     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
+     xmlns:pfui="clr-namespace:NuGet.VisualStudio;assembly=NuGet.VisualStudio"
+     xmlns:vsfx="clr-namespace:NuGet.VisualStudio;assembly=NuGet.VisualStudio"
      ShowInTaskbar="False"
      ResizeMode="NoResize"
      MinHeight="180"
@@ -47,4 +47,4 @@
             VerticalAlignment="Top"
             Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
     </DockPanel>
-</pfui:DialogWindow>
+</pfui:VsDialogWindow>

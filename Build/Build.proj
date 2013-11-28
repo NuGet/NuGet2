@@ -72,11 +72,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
             <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
-        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<AllUsers>false</AllUsers>]]></Find>
             <ReplaceWith><![CDATA[<AllUsers>true</AllUsers>]]></ReplaceWith>
         </RegexTransform>
@@ -108,6 +108,8 @@
         <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\VisualStudio11.Test\VisualStudio11.Test.csproj" 
+		      Condition="'$(MonoBuild)' == '' and $(VisualStudioVersion) != '10.0'" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />

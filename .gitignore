@@ -24,3 +24,4 @@ WebMatrixExtension/packages/*
 !packages/Microsoft.Web.Xdt.1.0.0-alpha/
 *.userprefs
 .DS_Store
+src/VsExtension/source.extension.vsixmanifest

@@ -1,6 +1,13 @@
-﻿extern alias dialog12;
+﻿#if VS11 || VS10
 extern alias dialog10;
 extern alias dialog11;
+#endif
+
+#if VS12
+extern alias dialog12;
+#endif
+
+
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -17,16 +24,17 @@ using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
+
 using NuGetConsole;
 using NuGetConsole.Implementation;
-
-#if VS12
-using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
-#endif
 
 #if VS11 || VS10
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
+#endif
+
+#if VS12
+using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
 #endif
 
 namespace NuGet.Tools

@@ -49,10 +49,14 @@
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="ProjectSystems\CpsProjectSystem.cs" />
+    <Compile Include="QuickSearch\NugetSearchProvider.cs" />
+    <Compile Include="QuickSearch\NugetSearchTask.cs" />
+    <Compile Include="QuickSearch\NuGetStaticSearchResult.cs" />
     <Compile Include="Settings\ISettingsManager.cs" />
     <Compile Include="Settings\ISettingsStore.cs" />
     <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="Utility\SettingsHelper.cs" />
+    <Compile Include="VisualStudioUIWrapper.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -193,6 +197,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />

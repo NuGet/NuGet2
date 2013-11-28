@@ -2,13 +2,14 @@
 using System.Windows.Controls;
 using System.Windows.Interop;
 using Microsoft.VisualStudio.PlatformUI;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
     /// <summary>
     /// Interaction logic for FileConflictDialog.xaml
     /// </summary>
-    public partial class FileConflictDialog : DialogWindow
+    public partial class FileConflictDialog : VsDialogWindow
     {
         public FileConflictDialog()
         {

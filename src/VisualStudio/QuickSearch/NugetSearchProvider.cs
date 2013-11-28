@@ -6,6 +6,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Internal.VisualStudio.PlatformUI;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio11
 {
@@ -93,14 +94,14 @@ namespace NuGet.VisualStudio11
 
         public string DisplayText
         {
-            get { return Resources.NuGetSearchProvider_DisplayText; }
+            get { return VsResources.NuGetSearchProvider_DisplayText; }
         }
 
         public string Description
         {
             get
             {
-                return Resources.NuGetSearchProvider_Description;
+                return VsResources.NuGetSearchProvider_Description;
             }
         }
 
@@ -112,7 +113,7 @@ namespace NuGet.VisualStudio11
         {
             get
             {
-                return Resources.NuGetSearchProvider_CategoryShortcut;
+                return VsResources.NuGetSearchProvider_CategoryShortcut;
             }
         }
 

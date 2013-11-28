@@ -16,7 +16,7 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog
 {
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-    public partial class PackageManagerWindow : DialogWindow
+    public partial class PackageManagerWindow : VsDialogWindow
     {
         internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet VS Packages Dialog";
