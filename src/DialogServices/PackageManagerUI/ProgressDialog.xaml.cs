@@ -5,13 +5,14 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.VisualStudio.PlatformUI;
 using System.Windows;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
     /// <summary>
     /// Interaction logic for ProgressDialog.xaml
     /// </summary>
-    public partial class ProgressDialog : DialogWindow
+    public partial class ProgressDialog : VsDialogWindow
     {
         private bool _completed;
 

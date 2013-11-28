@@ -53,10 +53,14 @@
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="ProjectSystems\CpsProjectSystem.cs" />
+    <Compile Include="QuickSearch\NugetSearchProvider.cs" />
+    <Compile Include="QuickSearch\NugetSearchTask.cs" />
+    <Compile Include="QuickSearch\NuGetStaticSearchResult.cs" />
     <Compile Include="Settings\ISettingsManager.cs" />
     <Compile Include="Settings\ISettingsStore.cs" />
     <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="Utility\SettingsHelper.cs" />
+    <Compile Include="VisualStudioUIWrapper.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -197,6 +201,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -272,14 +277,12 @@
       <Project>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</Project>
       <Name>VisualStudio10</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj" 
-		      Condition="$(VisualStudioVersion)=='12.0'">
+    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj"> 
       <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
       <Name>VisualStudio12</Name>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\VisualStudio14\VisualStudio14.csproj"
-		      Condition="$(VisualStudioVersion)=='14.0'">
+    <ProjectReference Include="..\VisualStudio14\VisualStudio14.csproj">
       <Project>{EEA49A74-6EFC-410E-9745-BAD367AC151D}</Project>
       <Name>VisualStudio14</Name>
       <Private>True</Private>

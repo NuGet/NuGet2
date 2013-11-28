@@ -3,6 +3,7 @@ using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System.Diagnostics.CodeAnalysis;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio11
 {
@@ -31,7 +32,7 @@ namespace NuGet.VisualStudio11
             _searchText = searchText;
             _supportedManagePackageCommand = supportedManagePackageCommand;
 
-            DisplayText = String.Format(CultureInfo.CurrentCulture, Resources.NuGetStaticResult_DisplayText, searchText);
+            DisplayText = String.Format(CultureInfo.CurrentCulture, VsResources.NuGetStaticResult_DisplayText, searchText);
             _searchProvider = provider;
         }
 

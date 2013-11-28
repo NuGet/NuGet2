@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
@@ -52,7 +52,7 @@
     <Compile Include="NuGetVSEventsPackage.cs" />
     <Compile Include="NuGetPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProvideBindingPath.cs" Condition=" $(VisualStudioVersion) == '10.0' Or $(VisualStudioVersion) == '11.0' " />
+    <Compile Include="ProvideBindingPath.cs" Condition="$(VisualStudioVersion)=='10.0' Or $(VisualStudioVersion)=='11.0'" />
     <Compile Include="ProvideExpressLoadKeyAttribute.cs" />
     <Compile Include="ProvideSearchProviderAttribute.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -105,17 +105,31 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Dialog10\Dialog10.csproj">
+    <ProjectReference Include="..\Dialog10\Dialog10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
       <Name>Dialog10</Name>
       <Aliases>dialog10</Aliases>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\Dialog11\Dialog11.csproj">
+    <ProjectReference Include="..\Dialog11\Dialog11.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{fd1e159b-a36f-49e4-856d-8555a20d09cf}</Project>
       <Name>Dialog11</Name>
       <Aliases>dialog11</Aliases>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\Dialog12\Dialog12.csproj" Condition="$(VisualStudioVersion)=='12.0'">
+      <Project>{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}</Project>
+      <Name>Dialog12</Name>
+      <Aliases>dialog12</Aliases>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\Dialog14\Dialog14.csproj" Condition="$(VisualStudioVersion)=='14.0'">
+      <Project>{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}</Project>
+      <Name>Dialog14</Name>
+      <Aliases>dialog14</Aliases>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
@@ -125,49 +139,29 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\Dialog12\Dialog12.csproj">
-      <Project>{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}</Project>
-      <Name>Dialog12</Name>
-      <Aliases>dialog12</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Dialog14\Dialog14.csproj">
-      <Project>{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}</Project>
-      <Name>Dialog14</Name>
-      <Aliases>dialog14</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
     <ProjectReference Include="..\Options\Options.csproj">
       <Project>{53ab7187-cdf3-48b5-b90e-8919d3cb904d}</Project>
       <Name>Options</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj">
+    <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
       <Name>TeamFoundationServer10</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TeamFoundationServer11\TeamFoundationServer11.csproj">
+    <ProjectReference Include="..\TeamFoundationServer11\TeamFoundationServer11.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{5220a205-0c3f-4cd5-b1b4-7cd5b8298d7a}</Project>
       <Name>TeamFoundationServer11</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TeamFoundationServer12\TeamFoundationServer12.csproj" Condition="$(VisualStudioVersion)=='12.0'">
+      <Project>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</Project>
+      <Name>TeamFoundationServer12</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
       <Name>VisualStudio.Interop</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\VisualStudio10\VisualStudio10.csproj">
-      <Project>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</Project>
-      <Name>VisualStudio10</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\VisualStudio11\VisualStudio11.csproj">
-      <Project>{051531b6-553f-4b29-bb4a-959e431d1fdc}</Project>
-      <Name>VisualStudio11</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
@@ -206,12 +200,6 @@
       <Name>Core</Name>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\TeamFoundationServer12\TeamFoundationServer12.csproj">
-      <Project>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</Project>
-      <Name>TeamFoundationServer12</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
@@ -269,6 +257,11 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
+  <Target Name="BeforeBuild">
+    <Copy SourceFiles="vs10.vsixmanifest" DestinationFiles="source.extension.vsixmanifest" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'" />
+    <Copy SourceFiles="vs12.vsixmanifest" DestinationFiles="source.extension.vsixmanifest" Condition="$(VisualStudioVersion)=='12.0'" />
+    <Copy SourceFiles="vs14.vsixmanifest" DestinationFiles="source.extension.vsixmanifest" Condition="$(VisualStudioVersion)=='14.0'" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

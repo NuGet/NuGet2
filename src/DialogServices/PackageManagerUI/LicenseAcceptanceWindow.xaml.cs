@@ -9,7 +9,7 @@ namespace NuGet.Dialog.PackageManagerUI
     /// <summary>
     /// Interaction logic for LicenseAcceptanceWindow.xaml
     /// </summary>
-    public partial class LicenseAcceptanceWindow : DialogWindow
+    public partial class LicenseAcceptanceWindow : VsDialogWindow
     {
         public LicenseAcceptanceWindow()
         {

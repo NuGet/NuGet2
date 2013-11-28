@@ -1,7 +1,16 @@
-﻿extern alias dialog10;
+﻿﻿#if VS11 || VS10
+extern alias dialog10;
 extern alias dialog11;
+#endif
+
+#if VS12
 extern alias dialog12;
+#endif
+
+#if VS14
 extern alias dialog14;
+#endif
+
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -18,6 +27,7 @@ using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
+
 using NuGetConsole;
 using NuGetConsole.Implementation;
 

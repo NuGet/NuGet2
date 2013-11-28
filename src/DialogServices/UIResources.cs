@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Windows;
 using Microsoft.VisualStudio.Shell;
-using NuGet.VisualStudio;
 
 namespace NuGet.Dialog 
 {
@@ -18,7 +17,7 @@ namespace NuGet.Dialog
         {
             get
             {
-                if (VsVersionHelper.IsVisualStudio2010)
+                if (NuGet.VisualStudio.VsVersionHelper.IsVisualStudio2010)
                 {
                     return VsBrushes.NewProjectBackgroundKey;
                 }
@@ -44,7 +43,7 @@ namespace NuGet.Dialog
         {
             get
             {
-                if (VsVersionHelper.IsVisualStudio2010)
+                if (NuGet.VisualStudio.VsVersionHelper.IsVisualStudio2010)
                 {
                     return VsBrushes.WindowKey;
                 }

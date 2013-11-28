@@ -1,10 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog
 {
-    public partial class SolutionExplorer : DialogWindow
+    public partial class SolutionExplorer : VsDialogWindow
     {
         public SolutionExplorer()
         {

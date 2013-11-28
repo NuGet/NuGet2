@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
              xmlns:local="clr-namespace:NuGet.Dialog"
-             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0" 
+             xmlns:vsfx="clr-namespace:NuGet.VisualStudio;assembly=NuGet.VisualStudio"
              d:DesignHeight="30" d:DesignWidth="400">
     <UserControl.CommandBindings>
         <CommandBinding Command="Open" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed" />
