@@ -509,7 +509,6 @@ namespace NuGet.Test
   <package id=""B"" version=""1.0"" />
   <package id=""A"" version=""1.0"" />
   <package id="""" version=""1.0"" />
-  <package id=""G"" version="""" />
   <package />
 </packages>");
             var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: repository.Object);
@@ -528,7 +527,6 @@ namespace NuGet.Test
   <package id=""B"" version=""1.0"" />
   <package id=""A"" version=""1.0"" />
   <package id="""" version=""1.0"" />
-  <package id=""G"" version="""" />
   <package />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
