@@ -69,6 +69,11 @@ namespace NuGet
             AddFileCore(path, writeToStream);
         }
 
+        public virtual void AddFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            FileSystemExtensions.AddFiles(this, files, rootDir);
+        }
+
         private void AddFileCore(string path, Action<Stream> writeToStream)
         {
             EnsureDirectory(Path.GetDirectoryName(path));
@@ -123,6 +128,11 @@ namespace NuGet
             {
 
             }
+        }
+
+        public virtual void DeleteFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            FileSystemExtensions.DeleteFiles(this, files, rootDir);
         }
 
         public virtual void DeleteDirectory(string path)
@@ -316,7 +326,14 @@ namespace NuGet
                 return;
             }
 
-            File.Move(srcFull, destFull);
+            try
+            {
+                File.Move(srcFull, destFull);
+            }
+            catch (IOException)
+            {
+                File.Delete(srcFull);
+            }
         }
     }
 }

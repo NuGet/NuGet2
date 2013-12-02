@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace NuGet
         // This acts as a "retainment" queue. It contains packages that are already installed but need to be kept during 
         // a package walk. This is to prevent those from being uninstalled in subsequent encounters.
         private readonly HashSet<IPackage> _packagesToKeep = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+        private IDictionary<string, IList<IPackage>> _packagesByDependencyOrder;
 
         // this ctor is used for unit tests
         internal InstallWalker(IPackageRepository localRepository,
@@ -297,6 +299,14 @@ namespace NuGet
                 {
                     try
                     {
+                        //
+                        // BUGBUG: What if the new package required license acceptance but the new dependency package did not?!
+                        //         When a dependency package that does not require license acceptance, like jQuery 1.7.1.1,
+                        //         is being updated to a version incompatible with its dependents, like jQuery 2.0.3 and its dependent Microsoft.jQuery.Unobtrusive.Ajax 2.0.20710.0
+                        //         Then, the dependent package is updated such that the new dependent package is compatible with the new dependency package
+                        //         In the example above, Microsoft.jQuery.Unobtrusive.Ajax 2.0.20710.0 will be updated to 2.0.30506.0. 2.0.30506.0 requires license acceptance
+                        //         But, the update happens anyways, just because, the user chose to update jQuery
+                        //
                         // Remove the old package
                         Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
 
@@ -340,6 +350,17 @@ namespace NuGet
 
                 // and mark the package as being "retained".
                 _packagesToKeep.Add(package);
+            }
+
+            if (_packagesByDependencyOrder != null)
+            {
+                IList<IPackage> packages;
+                if (!_packagesByDependencyOrder.TryGetValue(package.Id, out packages))
+                {
+                    _packagesByDependencyOrder[package.Id] = packages = new List<IPackage>();
+                }
+
+                packages.Add(package);
             }
         }
 
@@ -385,6 +406,49 @@ namespace NuGet
             _packagesToKeep.Clear();
 
             Walk(package);
+            return Operations.Reduce();
+        }
+
+        /// <summary>
+        /// Resolve operations for a list of packages clearing the package marker only once at the beginning. When the packages are interdependent, this method performs efficiently
+        /// Also, sets the packagesByDependencyOrder to the input packages, but in dependency order
+        /// NOTE: If package A 1.0 depends on package B 1.0 and A 2.0 does not depend on B 2.0; and, A 2.0 and B 2.0 are the input packages (likely from the updates tab in dialog)
+        ///       then, the packagesbyDependencyOrder will have A followed by B. Since, A 2.0 does not depend on B 2.0. This is also true because GetConflict in this class
+        ///       would only the PackageMarker and not the installed packages for information
+        /// </summary>
+        /// <param name="packages">The list of packages to resolve operations for. If from the dialog node, the list may be sorted, mostly, alphabetically</param>
+        /// <param name="packagesByDependencyOrder">Same set of packages returned in the dependency order</param>
+        /// <returns>
+        /// Returns a list of Package Operations to be performed for the installation of the packages passed
+        /// Also, the out parameter packagesByDependencyOrder would returned the packages passed in the dependency order
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "In addition to operations, need to return packagesByDependencyOrder.")]
+        public IList<PackageOperation> ResolveOperations(IEnumerable<IPackage> packages, out IList<IPackage> packagesByDependencyOrder)
+        {
+            _packagesByDependencyOrder = new Dictionary<string, IList<IPackage>>();
+            _operations.Clear();
+            Marker.Clear();
+            _packagesToKeep.Clear();
+
+            Debug.Assert(Operations is List<PackageOperation>);
+            foreach (var package in packages)
+            {
+                if (!_operations.Contains(package, PackageAction.Install))
+                {
+                    Walk(package);
+                }
+            }
+
+            // Flatten the dictionary to create a list of all the packages. Only this item the packages visited first during the walk will appear on the list. Also, only retain distinct elements
+            IEnumerable<IPackage> allPackagesByDependencyOrder = _packagesByDependencyOrder.SelectMany(p => p.Value).Distinct();
+
+            // Only retain the packages for which the operations are being resolved for
+            packagesByDependencyOrder = allPackagesByDependencyOrder.Where(p => packages.Any(q => p.Id == q.Id && p.Version == q.Version)).ToList();
+            Debug.Assert(packagesByDependencyOrder.Count == packages.Count());
+
+            _packagesByDependencyOrder.Clear();
+            _packagesByDependencyOrder = null;
+
             return Operations.Reduce();
         }
 

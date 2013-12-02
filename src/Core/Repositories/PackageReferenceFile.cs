@@ -109,19 +109,12 @@ namespace NuGet
 
                 if (String.IsNullOrEmpty(id))
                 {
-                    // If the id is empty, ignore the record unless unspecified versions are allowed
+                    // If the id is empty, ignore the record
                     continue;
                 }
 
-                if (String.IsNullOrEmpty(versionString))
-                {
-                    // If the version is empty, ignore the record unless unspecified versions are allowed
-                    if (requireVersion)
-                    {
-                        continue;
-                    }
-                }
-                else if (!SemanticVersion.TryParse(versionString, out version))
+                // If the version is invalid, raise an error unless it's both empty and not required
+                if ((requireVersion || !String.IsNullOrEmpty(versionString)) && !SemanticVersion.TryParse(versionString, out version))
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionString, _path));
                 }

@@ -8,7 +8,7 @@ namespace NuGet
     /// Keeps track of a package's visited state while walking a graph. It also acts as a package repository and
     /// a dependents resolver for the live graph.
     /// </summary>
-    public sealed class PackageMarker : IPackageRepository, IDependentsResolver
+    public sealed class PackageMarker : IPackageRepository, IDependentsResolver, IPackageLookup
     {
         private readonly Dictionary<string, Dictionary<IPackage, VisitedState>> _visited = new Dictionary<string, Dictionary<IPackage, VisitedState>>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<IPackage, HashSet<IPackage>> _dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageEqualityComparer.IdAndVersion);
@@ -149,6 +149,27 @@ namespace NuGet
         {
             Processing,
             Completed
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return FindPackage(packageId, version) != null;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            return FindPackagesById(packageId).Where(p => p.Version.Equals(version)).FirstOrDefault();
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            Dictionary<IPackage, VisitedState> packages = GetLookup(packageId);
+            if (packages != null)
+            {
+                return packages.Keys.Where(p => packages[p] == VisitedState.Completed);
+            }
+
+            return Enumerable.Empty<IPackage>();
         }
     }
 }

@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <version>2.5</version>
-    <authors>WebMatrix Team</authors>
-    <owners />
+    <authors>Outercurve Foundation</authors>
+    <owners>Outercurve Foundation</owners>
     <id>NuGetPackageManager</id>
     <title />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

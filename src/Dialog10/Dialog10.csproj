@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
@@ -66,30 +66,71 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Nodes\EmptyTreeNode.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Nodes\PagedPackagesSearchNode.cs" />
-    <Compile Include="Nodes\OnlineTreeNode.cs" />
-    <Compile Include="Providers\InstalledProvider.cs" />
-    <Compile Include="LoadPageResult.cs" />
-    <Compile Include="Providers\OnlineProvider.cs" />
-    <Compile Include="PackageItem.cs" />
-    <Compile Include="PackageManagerWindow.xaml.cs">
+    <Compile Include="..\Dialog\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\LoadPageResult.cs">
+      <Link>LoadPageResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\EmptyTreeNode.cs">
+      <Link>Nodes\EmptyTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\PackagesSearchNode.cs">
+      <Link>Nodes\PackagesSearchNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\PagedPackagesSearchNode.cs">
+      <Link>Nodes\PagedPackagesSearchNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\PackagesTreeNodeBase.cs">
+      <Link>Nodes\PackagesTreeNodeBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\RootTreeNode.cs">
+      <Link>Nodes\RootTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\SimpleTreeNode.cs">
+      <Link>Nodes\SimpleTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\OnlineTreeNode.cs">
+      <Link>Nodes\OnlineTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Nodes\UpdatesTreeNode.cs">
+      <Link>Nodes\UpdatesTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\PackageItem.cs">
+      <Link>PackageItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\PackageManagerWindow.xaml.cs">
+      <Link>PackageManagerWindow.xaml.cs</Link>
       <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PackageSortDescriptor.cs" />
-    <Compile Include="Providers\PackagesProviderBase.cs" />
-    <Compile Include="Nodes\PackagesSearchNode.cs" />
-    <Compile Include="Nodes\PackagesTreeNodeBase.cs" />
+    <Compile Include="..\Dialog\PackageSortDescriptor.cs">
+      <Link>PackageSortDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\InstalledProvider.cs">
+      <Link>Providers\InstalledProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\OnlineProvider.cs">
+      <Link>Providers\OnlineProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\PackagesProviderBase.cs">
+      <Link>Providers\PackagesProviderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\OnlineSearchProvider.cs">
+      <Link>Providers\SearchProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\SolutionInstalledProvider.cs">
+      <Link>Providers\SolutionInstalledProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\SolutionOnlineProvider.cs">
+      <Link>Providers\SolutionOnlineProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\SolutionUpdatesProvider.cs">
+      <Link>Providers\SolutionUpdatesProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog\Providers\UpdatesProvider.cs">
+      <Link>Providers\UpdatesProvider.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Nodes\RootTreeNode.cs" />
-    <Compile Include="Nodes\SimpleTreeNode.cs" />
-    <Compile Include="Providers\OnlineSearchProvider.cs" />
-    <Compile Include="Providers\SolutionInstalledProvider.cs" />
-    <Compile Include="Providers\SolutionOnlineProvider.cs" />
-    <Compile Include="Providers\SolutionUpdatesProvider.cs" />
-    <Compile Include="Providers\UpdatesProvider.cs" />
-    <Compile Include="Nodes\UpdatesTreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
@@ -110,25 +151,29 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="CommonStyles.xaml">
+    <Page Include="..\Dialog\CommonStyles.xaml">
+      <Link>CommonStyles.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="OnlineProviderTemplates.xaml">
+    <Page Include="..\Dialog\OnlineProviderTemplates.xaml">
+      <Link>OnlineProviderTemplates.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PackageManagerWindow.xaml">
+    <Page Include="..\Dialog\PackageManagerWindow.xaml">
+      <Link>PackageManagerWindow.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TemplateStyles.xaml">
+    <Page Include="..\Dialog\TemplateStyles.xaml">
+      <Link>TemplateStyles.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <None Include="PackagesProvider.cd" />
+    <None Include="..\Dialog\PackagesProvider.cd" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

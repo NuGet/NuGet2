@@ -138,7 +138,7 @@ namespace NuGet.Test
             var values = packageReferenceFile.GetPackageReferences();
 
             // Assert
-            Assert.Empty(values);
+            ExceptionAssert.Throws<InvalidDataException>(() => values.ToList(), "Unable to parse version value '' from 'packages.config'.");
         }
 
         [Fact]

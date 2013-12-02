@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
@@ -9,16 +10,34 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidFilePathReturnsTrueForValidLocalPath()
         {
-            // Act
-            var isValid = PathValidator.IsValidLocalPath(@"C:\Path\To\Source");
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                // Act
+                var isValid = PathValidator.IsValidLocalPath("/Path/To/Source");
 
-            // Assert
-            Assert.True(isValid);
+                // Assert
+                Assert.True(isValid);
+            }
+            else
+            {
+                // Act
+                var isValid = PathValidator.IsValidLocalPath(@"C:\Path\To\Source");
+
+                // Assert
+                Assert.True(isValid);
+            }
         }
 
         [Fact]
         public void IsValidUncPathReturnsTrueForValidUncPath()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\share\Path\To\Source");
 
@@ -31,6 +50,12 @@ namespace NuGet.VisualStudio.Test
         [InlineData(new object[] { @"C:\Path\<\Source" })]
         public void IsValidFilePathReturnsFalseForInvalidLocalPathFormat(string path)
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidLocalPath(path);
 
@@ -41,8 +66,15 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidFilePathReturnsFalseForRelativePath()
         {
+            var path = @"Path\To\Source";
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                path = path.Replace('\\', '/');
+            }
+
             // Act
-            var isValid = PathValidator.IsValidLocalPath(@"Path\To\Source");
+            var isValid = PathValidator.IsValidLocalPath(path);
 
             // Assert
             Assert.False(isValid);
@@ -51,6 +83,12 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"C:Path\To\Source");
 
@@ -59,8 +97,14 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForAbsolutePathWithoutDriveLetter()
+        public void IsValidFilePathReturnsFalseForAbsolutePathWithoutDriveLetterOnWindows()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"\Path\To\Source");
 
@@ -71,6 +115,12 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidUncPathReturnsFalseForInvalidUncPathMissingShare()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\");
 
@@ -81,6 +131,12 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\server");
 
@@ -91,8 +147,15 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidFilePathReturnsFalseForInvalidLocalPathBadCharacters()
         {
+            var path = @"C:\Path\*\:\""\Source";
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                path = @"/Path/*/:/""/Source";
+            }
+
             // Act
-            var isValid = PathValidator.IsValidLocalPath(@"C:\Path\*\:\""\Source");
+            var isValid = PathValidator.IsValidLocalPath(path);
 
             // Assert
             Assert.False(isValid);
@@ -101,6 +164,12 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void IsValidUncPathReturnsFalseForInvalidUncPathBadCharacters()
         {
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return;
+            }
+
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\share\*\:\""\Source");
 

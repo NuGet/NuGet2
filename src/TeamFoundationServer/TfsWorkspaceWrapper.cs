@@ -107,6 +107,12 @@ namespace NuGet.TeamFoundationServer
                 .Select(p => new TfsPendingChangeWrapper(p));
         }
 
+        public IEnumerable<ITfsPendingChange> GetPendingChanges(IEnumerable<string> files)
+        {
+            return _workspace.GetPendingChanges(files.ToArray())
+                .Select(p => new TfsPendingChangeWrapper(p));
+        }
+
         public IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath, RecursionType recursionType)
         {
             return _workspace.GetPendingChangesEnumerable(fullPath, recursionType)

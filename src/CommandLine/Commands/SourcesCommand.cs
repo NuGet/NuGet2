@@ -4,6 +4,12 @@ using System.Linq;
 
 namespace NuGet.Commands
 {
+    public enum SourcesListFormat
+    {
+        Detailed,
+        Short
+    }
+
     [Command(typeof(NuGetCommand), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
         MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand : Command
@@ -22,6 +28,9 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "SourcesCommandStorePasswordInClearTextDescription")]
         public bool StorePasswordInClearText { get; set; }
+
+        [Option(typeof(NuGetCommand), "SourcesCommandFormatDescription")]
+        public SourcesListFormat Format { get; set; }
         
         public override void ExecuteCommand()
         {
@@ -36,7 +45,15 @@ namespace NuGet.Commands
             // TODO: Change these in to switches so we don't have to parse them here.
             if (String.IsNullOrEmpty(action) || action.Equals("List", StringComparison.OrdinalIgnoreCase))
             {
-                PrintRegisteredSources();
+                switch (Format)
+                {
+                    case SourcesListFormat.Short:
+                        PrintRegisteredSourcesShort();
+                        break;
+                    default:
+                        PrintRegisteredSourcesDetailed();
+                        break;
+                }
             }
             else if (action.Equals("Add", StringComparison.OrdinalIgnoreCase))
             {
@@ -200,7 +217,25 @@ namespace NuGet.Commands
             }
         }
 
-        private void PrintRegisteredSources()
+        private void PrintRegisteredSourcesShort()
+        {
+            foreach (var source in SourceProvider.LoadPackageSources())
+            {
+                Console.Write(source.IsEnabled ? 'E' : 'D');
+                if (source.IsMachineWide)
+                {
+                    Console.Write('M');
+                }
+                if (source.IsOfficial)
+                {
+                    Console.Write('O');
+                }
+                Console.Write(' ');
+                Console.WriteLine(source.Source);
+            }
+        }
+
+        private void PrintRegisteredSourcesDetailed()
         {
             var sourcesList = SourceProvider.LoadPackageSources().ToList();
             if (!sourcesList.Any())

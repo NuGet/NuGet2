@@ -128,6 +128,11 @@ namespace NuGet.Test.Mocks
             Deleted.Add(path);
         }
 
+        public virtual void DeleteFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            FileSystemExtensions.DeleteFiles(this, files, rootDir);
+        }
+
         public virtual bool FileExists(string path)
         {
             return Paths.ContainsKey(path);
@@ -208,6 +213,11 @@ namespace NuGet.Test.Mocks
             byte[] buffer = ms.ToArray();
             Paths[path] = () => new MemoryStream(buffer);
             _createdTime[path] = DateTime.UtcNow;
+        }
+
+        public virtual void AddFiles(IEnumerable<IPackageFile> files, string rootDir)
+        {
+            FileSystemExtensions.AddFiles(this, files, rootDir);
         }
 
         public virtual void AddFile(string path, Func<Stream> getStream)

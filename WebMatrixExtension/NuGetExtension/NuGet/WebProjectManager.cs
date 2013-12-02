@@ -331,7 +331,7 @@ namespace NuGet.WebMatrix
 
         internal static IQueryable<IPackage> GetPackages(IPackageRepository repository, string searchTerm, bool allowPrereleaseVersions)
         {
-            return repository.Search(searchTerm: searchTerm, allowPrereleaseVersions: allowPrereleaseVersions);
+            return repository.Search(searchTerm: searchTerm, targetFrameworks: TargetFrameworks.Select(f => f.FullName), allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
         internal static string GetWebRepositoryDirectory(string siteRoot)
