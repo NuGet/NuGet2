@@ -189,7 +189,7 @@
     </Reference>
     <Reference Include="$(VCProjectEngineAssembly)">
       <HintPath>$(VCProjectEngineAssemblyHintPath)</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
