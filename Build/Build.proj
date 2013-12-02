@@ -187,6 +187,11 @@
             <Output TaskParameter="InvalidItems" ItemName="InvalidFiles" />
         </CheckUnexpectedAssemblies>
 
+        <ItemGroup Condition=" $(VisualStudioVersion) == '14.0' ">
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll" />
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio12.dll" />
+        </ItemGroup>
+
         <ItemGroup Condition=" $(VisualStudioVersion) == '12.0' ">
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog11.dll"></UnwantedAssembly>
