@@ -152,6 +152,11 @@ namespace NuGet.PowerShell.Commands
                 //Downgrade only if package to be installed newly is lower version than the one currently installed
                 if (packageToBeUninstalled != null && packageToBeUninstalled.Version > Version)
                 {
+                    if (!IgnoreDependencies)
+                    {
+                        //PackageManager.UninstallPackage(ProjectManager, Id, packageToBeUninstalled.Version, false, true);
+                        //PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+                    }
                     return true;
                 }
             }

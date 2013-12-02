@@ -13,6 +13,7 @@ namespace NuGet
         private readonly bool _ignoreDependencies;
         private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
+        private bool isDowngrade;
 
         // This acts as a "retainment" queue. It contains packages that are already installed but need to be kept during 
         // a package walk. This is to prevent those from being uninstalled in subsequent encounters.
@@ -179,7 +180,11 @@ namespace NuGet
             }
             else 
             {
-                Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
+                if (package.Version < conflictResult.Package.Version)
+                {
+                    isDowngrade = true;
+                }
+               Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
             }
         }
 
@@ -344,10 +349,13 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
-            if (package != null)
+            if (!isDowngrade)
             {
-                return package;
+                IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
+                if (package != null)
+                {
+                    return package;
+                } 
             }
 
             // Next, query the source repo for the same dependency

@@ -1699,15 +1699,17 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0]
-            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
-            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0");
-            IPackage packageA30 = PackageUtility.CreatePackage("A", "3.0");
-
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0", 
+                                                               content: new[] { "foo" });
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                content: new[] { "foo" });
+            IPackage packageA30 = PackageUtility.CreatePackage("A", "3.0",
+                                                                content: new[] { "foo" });
             sourceRepository.AddPackage(packageA10);
             sourceRepository.AddPackage(packageA20);
             sourceRepository.AddPackage(packageA30);
 
-            projectManager.LocalRepository.AddPackage(packageA20);
+            projectManager.LocalRepository.AddPackage(packageA30);
 
             // Act & Assert
             projectManager.UpdatePackageReference("A", new SemanticVersion("2.0"));
