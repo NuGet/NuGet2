@@ -374,9 +374,6 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="OutputConsolePaneName" xml:space="preserve">
     <value>Package Manager</value>
   </data>
-  <data name="Error_UnsupportedVSVersion" xml:space="preserve">
-    <value>This version of VisualStudio is not supported: {0}</value>
-  </data>
   <data name="NuGetSearchProvider_CategoryShortcut" xml:space="preserve">
     <value>nuget</value>
   </data>

@@ -386,33 +386,21 @@ namespace NuGet.Tools
                 {
                     window = GetVS10PackageManagerWindow(project, parameterString);
                 }
-                else if (VsVersionHelper.IsVisualStudio2012)
+                else 
                 {
+                    // VS 2012
                     window = GetVS11PackageManagerWindow(project, parameterString);
                 }
 #endif
                 
 #if VS12
-				if (VsVersionHelper.IsVisualStudio2013)
-				{
-					window = GetVS12PackageManagerWindow(project, parameterString);
-				}
+				window = GetVS12PackageManagerWindow(project, parameterString);
 #endif
 
 #if VS14
-				if (VsVersionHelper.IsVisualStudio2014)
-				{
-					window = GetVS14PackageManagerWindow(project, parameterString);
-				}
+				window = GetVS14PackageManagerWindow(project, parameterString);
 #endif
-                else
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.Error_UnsupportedVSVersion,
-                        VsVersionHelper.FullVsEdition);
-                    throw new InvalidOperationException(message);
-                }
+                
 
                 window.ShowModal();
             }

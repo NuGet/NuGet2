@@ -159,6 +159,13 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\TeamFoundationServer14\TeamFoundationServer14.csproj"
+		      Condition="$(VisualStudioVersion)=='14.0'">
+      <Project>{7dd28cac-d7b8-4053-b820-9da44565d40c}</Project>
+      <Name>TeamFoundationServer14</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
       <Name>VisualStudio.Interop</Name>
