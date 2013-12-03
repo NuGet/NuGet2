@@ -1958,17 +1958,15 @@ function Test-InstallFailCleansUpSatellitePackageFiles
 
     # Act 
     $p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
-    try {
-        $p | Install-Package A.fr -Source $context.RepositoryPath
-    } catch {}
-
+    $p | Install-Package A.fr -Source $context.RepositoryPath
+    
     # Assert
-    Assert-Package $p A 1.2.0
+    Assert-Package $p A 1.0.0
 
     $solutionDir = Get-SolutionDir
-    Assert-SolutionPackage A -Version 1.2.0
-    Assert-NoSolutionPackage A -Version 1.0.0
-    Assert-NoSolutionPackage A.fr -Version 1.0.0
+    Assert-NoSolutionPackage A -Version 1.2.0
+    Assert-SolutionPackage A -Version 1.0.0
+    Assert-SolutionPackage A.fr -Version 1.0.0
 }
 
 function Test-FileTransformWorksOnDependentFile

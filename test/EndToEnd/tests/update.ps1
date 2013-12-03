@@ -980,8 +980,6 @@ function Test-UpdatePackageDowngradesIfNewVersionLessThanInstalledPrereleaseVers
 
 	$p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0
     Assert-Package $p 'PreReleaseTestPackage' 1.0
-
-    #Assert-Throws { $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0 } "Already referencing a newer version of 'PreReleaseTestPackage'."
 }
 
 function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagIsNotSpecified {
