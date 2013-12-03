@@ -1951,6 +1951,9 @@ function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 function Test-InstallFailCleansUpSatellitePackageFiles 
 {
     # Verification for work item 2311
+	###############################################################
+	#The test is changed since we support Allow Downgrade now     #
+	###############################################################
     param ($context)
 
     # Arrange
