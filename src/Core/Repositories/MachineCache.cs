@@ -128,6 +128,7 @@ namespace NuGet
                         }
                         action(stream);
                     }
+                    FileSystem.DeleteFile(packagePath);
                     FileSystem.MoveFile(tmp, packagePath);
                     return true;
                 }, packagePath);

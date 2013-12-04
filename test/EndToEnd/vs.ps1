@@ -131,8 +131,15 @@ function New-Project {
 		return
 	}
 
+    if ($TemplateName -eq "EmptyWeb")
+    {
+        # For WebSite project, the project name can be something like "ProjectName(12)".
+        # So, use wildcard to search
+        $ProjectName = "$ProjectName*"
+    }
+
     # Return the project if it is NOT a LightSwitch project
-    for ($counter = 0; $counter -lt 20; $counter++)
+    for ($counter = 0; $counter -lt 5; $counter++)
     {
         if ($SolutionFolder) {
             $solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
