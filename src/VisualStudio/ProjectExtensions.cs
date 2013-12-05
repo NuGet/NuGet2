@@ -842,6 +842,12 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public static void Save(this Project project, IFileSystem fileSystem)
+        {
+            fileSystem.MakeFileWritable(project.FullName);
+            project.Save();
+        }
+
         public static void AddImportStatement(this Project project, string targetsPath, ProjectImportLocation location)
         {
             AddImportStatement(project.AsMSBuildProject(), targetsPath, location);

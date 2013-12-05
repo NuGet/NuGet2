@@ -42,7 +42,7 @@ namespace NuGet.VisualStudio
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
                     Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                    Project.Save();
+                    Project.Save(this);
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
                     Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                    Project.Save();
+                    Project.Save(this);
                 }
                 else
                 {

@@ -240,7 +240,7 @@ namespace NuGet.VisualStudio
                                 item.SetMetadataValue("HintPath", referencePath);
 
                                 // Save the project after we've modified it.
-                                Project.Save();
+                                Project.Save(this);
                             }
                         }
                     }
@@ -391,8 +391,8 @@ namespace NuGet.VisualStudio
             }
 
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-            Project.AddImportStatement(relativeTargetPath, location);
-            Project.Save();
+            Project.AddImportStatement(relativeTargetPath, location);            
+            Project.Save(this);
         }
 
         public virtual void RemoveImport(string targetPath)
@@ -403,7 +403,7 @@ namespace NuGet.VisualStudio
             }
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
             Project.RemoveImportStatement(relativeTargetPath);
-            Project.Save();
+            Project.Save(this);
         }
 
         public virtual bool IsSupportedFile(string path)

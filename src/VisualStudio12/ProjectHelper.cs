@@ -16,7 +16,7 @@ namespace NuGet.VisualStudio12
         public static async void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
             await DoWorkInWriterLock((IVsProject)hierarchy, action);
-            project.Save();
+            project.Save(this);
         }
 
         private static async Task DoWorkInWriterLock(IVsProject project, Action<MsBuildProject> action)
