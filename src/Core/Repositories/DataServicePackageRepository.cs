@@ -429,11 +429,11 @@ namespace NuGet
 
                 if (includePrerelease)
                 {
-                    package = packages.Where(p => p.IsAbsoluteLatestVersion).FirstOrDefault();
+                    package = packages.Where(p => p.IsAbsoluteLatestVersion).OrderByDescending(p => p.Version).FirstOrDefault();
                 }
                 else
                 {
-                    package = packages.Where(p => p.IsLatestVersion).FirstOrDefault();
+                    package = packages.Where(p => p.IsLatestVersion).OrderByDescending(p => p.Version).FirstOrDefault();
                 }
 
                 return package != null;
