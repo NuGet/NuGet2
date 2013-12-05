@@ -14,7 +14,7 @@ namespace NuGet
         private readonly bool _ignoreDependencies;
         private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
-        private bool isDowngrade;
+        private bool _isDowngrade;
 
         // This acts as a "retainment" queue. It contains packages that are already installed but need to be kept during 
         // a package walk. This is to prevent those from being uninstalled in subsequent encounters.
@@ -182,9 +182,10 @@ namespace NuGet
             }
             else 
             {
-                if (package.Version < conflictResult.Package.Version)
+                if (!_isDowngrade && (package.Version < conflictResult.Package.Version))
                 {
-                    isDowngrade = true;
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
+                       NuGetResources.NewerVersionAlreadyReferenced, package.Id));
                 }
                Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
             }
@@ -370,7 +371,7 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            if (!isDowngrade)
+            if (!_isDowngrade)
             {
                 IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
                 if (package != null)
@@ -401,10 +402,17 @@ namespace NuGet
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package)
         {
+            //Check if the package is installed. This is necessary to know if this is a fresh-install or a downgrade operation
+            IPackage packageUnderInstallation = Repository.FindPackage(package.Id);
+            if (packageUnderInstallation != null && packageUnderInstallation.Version > package.Version)
+            {
+                _isDowngrade = true;
+            }
+
             _operations.Clear();
             Marker.Clear();
             _packagesToKeep.Clear();
-
+            
             Walk(package);
             return Operations.Reduce();
         }

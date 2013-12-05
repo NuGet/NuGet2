@@ -1951,25 +1951,25 @@ function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 function Test-InstallFailCleansUpSatellitePackageFiles 
 {
     # Verification for work item 2311
-	###############################################################
-	#The test is changed since we support Allow Downgrade now     #
-	###############################################################
-    param ($context)
+	#This also verifies "Fresh Install Of Parent Package Throws When Dependency Package Already Has A Newer Version Installed"
+	param ($context)
 
     # Arrange
     $p = New-ClassLibrary
 
     # Act 
     $p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
+    try {
     $p | Install-Package A.fr -Source $context.RepositoryPath
+    } catch {}
     
     # Assert
-    Assert-Package $p A 1.0.0
+    Assert-Package $p A 1.2.0
 
     $solutionDir = Get-SolutionDir
-    Assert-NoSolutionPackage A -Version 1.2.0
-    Assert-SolutionPackage A -Version 1.0.0
-    Assert-SolutionPackage A.fr -Version 1.0.0
+    Assert-SolutionPackage A -Version 1.2.0
+    Assert-NoSolutionPackage A -Version 1.0.0
+    Assert-NoSolutionPackage A.fr -Version 1.0.0
 }
 
 function Test-FileTransformWorksOnDependentFile

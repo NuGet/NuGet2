@@ -901,15 +901,46 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageA20);
             sourceRepository.AddPackage(packageB10);
             sourceRepository.AddPackage(packageA10);
-            sourceRepository.AddPackage(packageA20);
-            sourceRepository.AddPackage(packageB10);
-
+            
             // Act & Assert
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
             Assert.False(projectManager.LocalRepository.Exists(packageA20));
             Assert.True(projectManager.LocalRepository.Exists(packageA10));
         }
 
+        [Fact]
+        public void DowngradeDependencyPackagesWhenParentPackagesIsDowngraded()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                    new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0"))
+                                                                }, content: new[] { "foo" });
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                    new PackageDependency("B", VersionUtility.ParseVersionSpec("2.0"))
+                                                                }, content: new[] { "foo" });
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "foo" });
+            projectManager.LocalRepository.AddPackage(packageA20);
+            projectManager.LocalRepository.AddPackage(packageB20);
+
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB20);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageB10);
+
+            // Act & Assert
+            projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
+            Assert.False(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB10));
+        }
+          
         [Fact]
         public void RemovingUnknownPackageReferenceThrows()
         {
