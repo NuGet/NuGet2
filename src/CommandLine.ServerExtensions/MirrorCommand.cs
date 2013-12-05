@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
 using System.IO;
 using NuGet.Common;
 using NuGet.Commands;
@@ -28,6 +26,9 @@ namespace NuGet.ServerExtensions
         [Option(typeof(NuGetResources), "MirrorCommandNoOp", AltName = "n")]
         public bool NoOp { get; set; }
 
+        [Option(typeof(NuGetResources), "MirrorCommandDependenciesMode")]
+        public MirrorDependenciesMode DependenciesMode { get; set; }
+
         public MirrorCommand() : base(MachineCache.Default)
         {
         }
@@ -43,35 +44,29 @@ namespace NuGet.ServerExtensions
             var srcRepository = CreateRepository();
             var dstRepository = GetTargetRepository(Arguments[1], Arguments[2]);
             var mirrorer = GetPackageMirrorer(srcRepository, dstRepository);
-            var isPackagesConfig = IsUsingPackagesConfig(Arguments[0]);
-            var toMirror = GetPackagesToMirror(Arguments[0], isPackagesConfig);
+            var isConfigFile = IsConfigFile(Arguments[0]);
+            var toMirror = GetPackagesToMirror(Arguments[0], isConfigFile);
 
-            if (isPackagesConfig && !String.IsNullOrEmpty(Version))
+            if (isConfigFile && !String.IsNullOrEmpty(Version))
             {
-                throw new ArgumentException(NuGetResources.MirrorCommandNoVersionIfPackagesConfig);
+                throw new ArgumentException(NuGetResources.MirrorCommandNoVersionIfUsingConfigFile);
             }
 
-            bool didSomething = false;
+            int countMirrored=0;
 
             using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror, mainPackageId: null, mainPackageVersion: null))
             {
                 foreach (var package in toMirror)
                 {
-                    if (mirrorer.MirrorPackage(
-                                    package.Id,
-                                    package.Version,
-                                    ignoreDependencies: false,
-                                    allowPrereleaseVersions: AllowPrereleaseVersion(package.Version, isPackagesConfig)))
-                    {
-                        didSomething = true;
-                    }
+                    countMirrored += mirrorer.MirrorPackage(
+                        package.Id,
+                        package.Version,
+                        AllowPrereleaseVersion(package.Version, isConfigFile),
+                        DependenciesMode);
                 }
             }
 
-            if (!didSomething)
-            {
-                Console.Log(MessageLevel.Warning, NuGetResources.MirrorCommandDidNothing);
-            }
+            Console.Log(MessageLevel.Info, NuGetResources.MirrorCommandCountMirrored, countMirrored);
         }
 
         protected virtual IFileSystem CreateFileSystem()
@@ -135,24 +130,25 @@ namespace NuGet.ServerExtensions
             return new PackageReferenceFile(fileSystem, Path.GetFullPath(configFilePath));
         }
 
-        private static bool IsUsingPackagesConfig(string packageId)
+        private static bool IsConfigFile(string packageId)
         {
-            return Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase);
+            return
+                // support of packages.config is for backwards compatibility.
+                Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase) ||
+                Path.GetFileName(packageId).Equals(Constants.MirroringReferenceFile, StringComparison.OrdinalIgnoreCase);
         }
 
-        private IEnumerable<PackageReference> GetPackagesToMirror(string packageId, bool isPackagesConfig)
+        private IEnumerable<PackageReference> GetPackagesToMirror(string packageId, bool isConfigFile)
         {
-            if (isPackagesConfig)
+            if (isConfigFile)
             {
                 IFileSystem fileSystem = CreateFileSystem();
                 string configFilePath = Path.GetFullPath(packageId);
                 var packageReferenceFile = GetPackageReferenceFile(fileSystem, configFilePath);
                 return CommandLineUtility.GetPackageReferences(packageReferenceFile, requireVersion: false);
             }
-            else
-            {
-                return new[] { new PackageReference(packageId, GetVersion(), versionConstraint: null, targetFramework: null, isDevelopmentDependency: false) };
-            }
+            
+            return new[] { new PackageReference(packageId, GetVersion(), versionConstraint: null, targetFramework: null, isDevelopmentDependency: false) };
         }
 
         private bool AllowPrereleaseVersion(SemanticVersion version, bool isUsingPackagesConfig)

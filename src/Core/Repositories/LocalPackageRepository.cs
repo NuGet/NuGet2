@@ -246,12 +246,34 @@ namespace NuGet
             string packageId,
             IEnumerable<string> packagePaths)
         {
-            return from path in packagePaths
-                   let package = GetPackage(openPackage, path)
-                   where package.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
-                   select package;
-        }
+            foreach (var path in packagePaths)
+            {
+                IPackage package = null;
+                try 
+                {
+                    package = GetPackage(openPackage, path);
+                }
+                catch (InvalidOperationException)
+                {
+                    // ignore error for unzipped packages (nuspec files).
+                    if (string.Equals(
+                        Constants.ManifestExtension, 
+                        Path.GetExtension(path), 
+                        StringComparison.OrdinalIgnoreCase))
+                    {                        
+                    }
+                    else 
+                    {
+                        throw;
+                    }
+                }
 
+                if (package != null && package.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase))
+                {
+                    yield return package;
+                }
+            }
+        }
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
         {

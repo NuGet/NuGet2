@@ -2477,12 +2477,11 @@ function Test-InstallPackagePreservesProjectConfigFile
 function Test-InstallPackageToWebsitePreservesProjectConfigFile
 {
     param($context)
-
+    
     # Arrange
     $p = New-Website "CoolProject"
-
     $projectPath = $p.Properties.Item("FullPath").Value
-    $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
+    $packagesConfigPath = Join-Path $projectPath "packages.$($p.Name).config"
     
     # create file and add to project
     $newFile = New-Item $packagesConfigPath -ItemType File
@@ -2494,7 +2493,7 @@ function Test-InstallPackageToWebsitePreservesProjectConfigFile
 
     # Assert
     Assert-Package $p PackageWithFolder
-    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-NotNull (Get-ProjectItem $p "packages.$($p.Name).config")
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 

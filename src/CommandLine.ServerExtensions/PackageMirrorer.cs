@@ -4,6 +4,13 @@ using System.Runtime.Versioning;
 
 namespace NuGet.ServerExtensions
 {
+    public enum MirrorDependenciesMode
+    {
+        Mirror,
+        Ignore,
+        Fail
+    }
+
     public class PackageMirrorer
     {
         private ILogger _logger;
@@ -54,36 +61,37 @@ namespace NuGet.ServerExtensions
             set;
         }
 
-        public bool MirrorPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public int MirrorPackage(string packageId, SemanticVersion version, bool allowPrereleaseVersions, MirrorDependenciesMode mirrorDependenciesMode)
         {
             IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, TargetRepository, packageId, version, allowPrereleaseVersions);
 
-            return MirrorPackage(package, ignoreDependencies, allowPrereleaseVersions);
+            return MirrorPackage(package, allowPrereleaseVersions, mirrorDependenciesMode);
         }
 
-        public bool MirrorPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public int MirrorPackage(IPackage package, bool allowPrereleaseVersions, MirrorDependenciesMode mirrorDependenciesMode)
         {
-            return MirrorPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+            return MirrorPackage(package, targetFramework: null, allowPrereleaseVersions: allowPrereleaseVersions, mirrorDependenciesMode: mirrorDependenciesMode);
         }
 
-        public bool MirrorPackage(IPackage package, FrameworkName targetFramework, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public int MirrorPackage(IPackage package, FrameworkName targetFramework, bool allowPrereleaseVersions, MirrorDependenciesMode mirrorDependenciesMode)
         {
+
             return Execute(package, new InstallWalker(TargetRepository,
-                                               SourceRepository,
-                                               targetFramework,
-                                               Logger,
-                                               ignoreDependencies,
-                                               allowPrereleaseVersions));
+                                               sourceRepository: mirrorDependenciesMode == MirrorDependenciesMode.Fail ? TargetRepository : SourceRepository,
+                                               targetFramework: targetFramework,
+                                               logger: Logger,
+                                               ignoreDependencies: mirrorDependenciesMode == MirrorDependenciesMode.Ignore,
+                                               allowPrereleaseVersions: allowPrereleaseVersions));
         }
 
-        private bool Execute(IPackage package, IPackageOperationResolver resolver)
+        private int Execute(IPackage package, IPackageOperationResolver resolver)
         {
             var packagesToMirror = resolver.ResolveOperations(package)
                                            .Where(o => o.Action == PackageAction.Install)
                                            .Select(o => o.Package)
                                            .ToList();
 
-            bool mirrored = false;
+            int countMirrored = 0;
             foreach (var p in packagesToMirror)
             {
                 if (TargetRepository.Exists(package))
@@ -93,24 +101,20 @@ namespace NuGet.ServerExtensions
                 else
                 {
                     ExecuteMirror(p);
-                    mirrored = true;
+                    countMirrored++;
+                    Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageMirroredSuccessfully, p.GetFullName(), TargetRepository.Source);
                 }
             }
 
-            if (mirrored)
-            {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyPresent, package.GetFullName(), TargetRepository.Source);
-            }
-            return mirrored;
+            return countMirrored;
         }
 
         private void ExecuteMirror(IPackage package)
         {
-            if (!NoOp)
+            if (! NoOp)
             {
                 TargetRepository.AddPackage(package);
             }
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageMirroredSuccessfully, package.GetFullName(), TargetRepository.Source);
         }
     }
 }

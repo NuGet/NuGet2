@@ -145,7 +145,7 @@ namespace NuGet.PowerShell.Commands
         private bool IsDowngradePackage()
         {
             //if Version to downgrade is not specified, bail out
-            if (Version != null)
+            if (Version != null && ProjectManager != null)
             {
                 //Check if the package is installed
                 IPackage packageToBeUninstalled = ProjectManager.LocalRepository.FindPackage(Id);
@@ -190,7 +190,6 @@ namespace NuGet.PowerShell.Commands
                 }
                 else
                 {
-
                     InstallPackage(PackageManager);
                 }
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
