@@ -211,22 +211,31 @@ namespace NuGet.Dialog.Providers
 
         private void UpdateNumberOfPackages(PackagesTreeNodeBase selectedNode)
         {
-            if (selectedNode != null && !selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
+            // OnPackageLoadCompleted(selectedNode), which calls this method, is called by QueryExecutionCompleted
+            // QueryExecutionCompleted is called when an asynchronous query execution completes
+            // And, queries are executed from several places including SortSelectionChanged on the node which is always 
+            // called by default on the first node, not necessarily, the selected node by VsExtensionsProvider
+            // This means the selectedNode, here, may not actually be THE selectedNode at this point
+            // So, check if it is indeed selected before doing anything. Note that similar check is performed on QueryExecutionCompleted too
+            if (selectedNode != null && selectedNode.IsSelected)
             {
-                // After performing Update All, if user switches to another page, we don't want to show 
-                // the Update All button again. Here we check to make sure there's at least one enabled package.
-                if (selectedNode.Extensions.OfType<PackageItem>().Any(p => p.IsEnabled))
+                if (!selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
                 {
-                    _updateAllUIService.Show();
+                    // After performing Update All, if user switches to another page, we don't want to show 
+                    // the Update All button again. Here we check to make sure there's at least one enabled package.
+                    if (selectedNode.Extensions.OfType<PackageItem>().Any(p => p.IsEnabled))
+                    {
+                        _updateAllUIService.Show();
+                    }
+                    else
+                    {
+                        _updateAllUIService.Hide();
+                    }
                 }
                 else
                 {
                     _updateAllUIService.Hide();
                 }
-            }
-            else
-            {
-                _updateAllUIService.Hide();
             }
         }
 
