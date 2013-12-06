@@ -6,6 +6,7 @@ using System.Runtime.Versioning;
 using System.Security;
 using System.Xml;
 using System.Xml.Linq;
+using VersionStringISetTuple = System.Tuple<System.Version, System.Collections.Generic.ISet<string>>;
 
 namespace NuGet
 {
@@ -19,6 +20,8 @@ namespace NuGet
         // by this key. I used dictionary here since I saw no value in creating a custom collection 
         // like it's done already for the _portableProfiles. Not sure why it's done that way there.
         private static IDictionary<string, NetPortableProfile> _portableProfilesByCustomProfileString;
+        // key is the identifier of the optional framework and value is the list of tuple of (optional Framework Version, set of profiles in which they are optional)
+        private static IDictionary<string, List<VersionStringISetTuple>> _portableProfilesSetByOptionalFrameworks;
 
         public static NetPortableProfile GetProfile(string profileName)
         {
@@ -52,6 +55,7 @@ namespace NuGet
                     // existing collection as well as the CustomProfileString-indexed one.
                     // This keeps both in sync.
                     Profiles = BuildPortableProfileCollection();
+                    CreateOptionalFrameworksDictionary();
                 }
 
                 return _portableProfiles;
@@ -61,7 +65,69 @@ namespace NuGet
                 // This setter is only for Unit Tests.
                 _portableProfiles = value;
                 _portableProfilesByCustomProfileString = _portableProfiles.ToDictionary(x => x.CustomProfileString);
+                CreateOptionalFrameworksDictionary();
             }
+        }
+
+        private static void CreateOptionalFrameworksDictionary()
+        {            
+            if (_portableProfiles != null)
+            {
+                _portableProfilesSetByOptionalFrameworks = new Dictionary<string, List<VersionStringISetTuple>>();
+                foreach (var portableProfile in _portableProfiles)
+                {
+                    foreach (var optionalFramework in portableProfile.OptionalFrameworks)
+                    {
+                        // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
+                        if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
+                        {
+                            _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
+                        }
+
+                        List<VersionStringISetTuple> listVersionStringISetTuple = _portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
+                        if (listVersionStringISetTuple != null)
+                        {
+                            VersionStringISetTuple versionStringITuple = listVersionStringISetTuple.Where(tuple => tuple.Item1.Equals(optionalFramework.Version)).FirstOrDefault();
+                            if (versionStringITuple == null)
+                            {
+                                versionStringITuple = new VersionStringISetTuple(optionalFramework.Version, new HashSet<string>());
+                                listVersionStringISetTuple.Add(versionStringITuple);
+                            }
+                            versionStringITuple.Item2.Add(portableProfile.Name);
+                        }
+                    }
+                }
+            }
+        }
+
+        internal static bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
+        {
+            List<VersionStringISetTuple> versionProfileISetTupleList = null;
+
+            // In the dictionary _portableProfilesSetByOptionalFrameworks, 
+            // key is the identifier of the optional framework and value is the tuple of (optional Framework Version, set of profiles in which they are optional)
+            // We try to get a value with key as projectOptionalFrameworkName.Identifier. If one exists, we check if the project version is >= the version from the retrieved tuple
+            // If so, then, we see if one of the profiles, in the set from the retrieved tuple, is compatible with the packageFramework profile
+            if (_portableProfilesSetByOptionalFrameworks != null
+                && _portableProfilesSetByOptionalFrameworks.TryGetValue(projectOptionalFrameworkName.Identifier, out versionProfileISetTupleList))
+            {
+                foreach (var versionProfileISetTuple in versionProfileISetTupleList)
+                {
+                    if (projectOptionalFrameworkName.Version >= versionProfileISetTuple.Item1)
+                    {
+                        foreach (var profileName in versionProfileISetTuple.Item2)
+                        {
+                            NetPortableProfile profile = GetProfile(profileName);
+                            if (profile != null && packageFramework.IsCompatibleWith(profile))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static NetPortableProfileCollection BuildPortableProfileCollection()
@@ -120,16 +186,25 @@ namespace NuGet
                 return null;
             }
 
-            var supportedFrameworks = Directory.EnumerateFiles(supportedFrameworkDirectory, "*.xml")
-                                               .Select(LoadSupportedFramework)
-                                               .Where(p => p != null);
-
-            return new NetPortableProfile(version, profileName, supportedFrameworks);
+            return LoadPortableProfile(version, profileName, new PhysicalFileSystem(supportedFrameworkDirectory),
+                Directory.EnumerateFiles(supportedFrameworkDirectory, "*.xml"));
         }
 
-        private static FrameworkName LoadSupportedFramework(string frameworkFile)
+        internal static NetPortableProfile LoadPortableProfile(string version, string profileName, IFileSystem fileSystem, IEnumerable<string> frameworkFiles)
         {
-            using (Stream stream = File.OpenRead(frameworkFile))
+            var frameworks = frameworkFiles.Select(p => LoadSupportedFramework(fileSystem, p)).Where(p => p != null);
+            // Bug - 2926
+            var optionalFrameworks = frameworks.Where(p => p.Identifier.StartsWith("Mono", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            // If there are no optionalFrameworks, just set supportedFrameworks = frameworks
+            var supportedFrameworks = optionalFrameworks.IsEmpty() ? frameworks : frameworks.Where(p => !optionalFrameworks.Contains(p));
+
+            return new NetPortableProfile(version, profileName, supportedFrameworks, optionalFrameworks);
+        }
+
+        private static FrameworkName LoadSupportedFramework(IFileSystem fileSystem, string frameworkFile)
+        {
+            using (Stream stream = fileSystem.OpenFile(frameworkFile))
             {
                 return LoadSupportedFramework(stream);
             }

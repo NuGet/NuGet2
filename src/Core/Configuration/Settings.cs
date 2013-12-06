@@ -110,7 +110,9 @@ namespace NuGet
 
             if (machineWideSettings != null)
             {
-                validSettingFiles.AddRange(machineWideSettings.Settings);
+                validSettingFiles.AddRange(
+                    machineWideSettings.Settings.Select(
+                        s => new Settings(s._fileSystem, s._fileName, s._isMachineWideSettings)));
             }
 
             if (validSettingFiles.IsEmpty())
