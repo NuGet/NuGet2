@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Runtime.Versioning;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -59,8 +60,8 @@ namespace NuGet.VisualStudio
                 if (frameworkMultiTargeting != null)
                 {
                     // filter out assemblies that already exist in the target framework (CodePlex issue #3072)
-                    string targetFramework = project.GetTargetFramework();
-                    redirects = redirects.Where(p => !IsAssemblyAvaialbleInFramework(p.Name, targetFramework, frameworkMultiTargeting));
+                    FrameworkName targetFrameworkName = project.GetTargetFrameworkName();
+                    redirects = redirects.Where(p => !FrameworkAssemblyResolver.IsHigherAssemblyVersionInFramework(p.Name, p.AssemblyNewVersion, targetFrameworkName, fileSystemProvider));
                 }
 
                 // Create a binding redirect manager over the configuration
@@ -142,14 +143,6 @@ namespace NuGet.VisualStudio
             }
 
             projects.Add(projectUniqueName);
-        }
-
-        private static bool IsAssemblyAvaialbleInFramework(string assembly, string targetFramework, IVsFrameworkMultiTargeting frameworkMultiTargeting)
-        {
-            bool result;
-            int succeeded = frameworkMultiTargeting.IsReferenceableInTargetFx(assembly, targetFramework, out result);
-            
-            return ErrorHandler.Succeeded(succeeded) && result;
         }
 
         /// <summary>

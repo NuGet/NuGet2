@@ -16,10 +16,10 @@ namespace NuGet
         /// <summary>
         /// Creates a portable profile with the given name and supported frameworks.
         /// </summary>
-        public NetPortableProfile(string name, IEnumerable<FrameworkName> supportedFrameworks)
+        public NetPortableProfile(string name, IEnumerable<FrameworkName> supportedFrameworks, IEnumerable<FrameworkName> optionalFrameworks = null)
             // This zero version is compatible with the existing behavior, which used 
             // the string "v0.0" as the version for constructed instances of this class always.
-            : this("v0.0", name, supportedFrameworks)
+            : this("v0.0", name, supportedFrameworks, optionalFrameworks)
         {
         }
 
@@ -34,7 +34,8 @@ namespace NuGet
         /// <param name="version">.NET framework version that the profile belongs to, like "v4.0".</param>
         /// <param name="name">Name of the portable profile, like "win+net45".</param>
         /// <param name="supportedFrameworks">Supported frameworks.</param>
-        public NetPortableProfile(string version, string name, IEnumerable<FrameworkName> supportedFrameworks)
+        /// <param name="optionalFrameworks">Optional frameworks.</param>
+        public NetPortableProfile(string version, string name, IEnumerable<FrameworkName> supportedFrameworks, IEnumerable<FrameworkName> optionalFrameworks)
         {
             if (String.IsNullOrEmpty(version))
             {
@@ -63,6 +64,8 @@ namespace NuGet
 
             Name = name;
             SupportedFrameworks = new ReadOnlyHashSet<FrameworkName>(frameworks);
+            OptionalFrameworks = (optionalFrameworks == null || optionalFrameworks.IsEmpty()) ? new ReadOnlyHashSet<FrameworkName>(Enumerable.Empty<FrameworkName>())
+                : new ReadOnlyHashSet<FrameworkName>(optionalFrameworks);
             FrameworkVersion = version;
         }
 
@@ -78,17 +81,24 @@ namespace NuGet
 
         public ISet<FrameworkName> SupportedFrameworks { get; private set; }
 
+        public ISet<FrameworkName> OptionalFrameworks { get; private set; }
+
         public bool Equals(NetPortableProfile other)
         {
             // NOTE: equality and hashcode does not change when you add Version, since 
             // no two profiles across framework versions have the same name.
             return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase) &&
-                   SupportedFrameworks.SetEquals(other.SupportedFrameworks);
+                   SupportedFrameworks.SetEquals(other.SupportedFrameworks) &&
+                   OptionalFrameworks.SetEquals(other.OptionalFrameworks);
         }
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() * 3137 + SupportedFrameworks.GetHashCode();
+            HashCodeCombiner hashCodeCombiner = new HashCodeCombiner();
+            hashCodeCombiner.AddObject(Name);
+            hashCodeCombiner.AddObject(SupportedFrameworks);
+            hashCodeCombiner.AddObject(OptionalFrameworks);
+            return hashCodeCombiner.CombinedHash;
         }
 
         /// <summary>
@@ -103,40 +113,42 @@ namespace NuGet
             {
                 if (_customProfile == null)
                 {
-                    _customProfile = String.Join("+", SupportedFrameworks.Select(f => VersionUtility.GetShortFrameworkName(f)));
+                    var frameworks = SupportedFrameworks.Concat(OptionalFrameworks);
+                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f)));
                 }
 
                 return _customProfile;
             }
         }
 
-        public bool IsCompatibleWith(NetPortableProfile other)
+        public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
         {
-            if (other == null)
+            if (projectFrameworkProfile == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException("projectFrameworkProfile");
             }
 
-            return other.SupportedFrameworks.All(
+            return projectFrameworkProfile.SupportedFrameworks.All(
                 projectFramework => this.SupportedFrameworks.Any(
                     packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework)));
         }
 
-        public bool IsCompatibleWith(FrameworkName framework)
+        public bool IsCompatibleWith(FrameworkName projectFramework)
         {
-            if (framework == null)
+            if (projectFramework == null)
             {
-                throw new ArgumentNullException("framework");
+                throw new ArgumentNullException("projectFramework");
             }
 
-            return SupportedFrameworks.Any(f => VersionUtility.IsCompatible(framework, f));
+            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
+                || NetPortableProfileTable.HasCompatibleProfileWith(this, projectFramework);
         }
 
         /// <summary>
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue)
+        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
         {
             if (String.IsNullOrEmpty(profileValue))
             {
@@ -151,6 +163,11 @@ namespace NuGet
             var result = NetPortableProfileTable.GetProfile(profileValue);
             if (result != null)
             {
+                if (treatOptionalFrameworksAsSupportedFrameworks)
+                {
+                    result = new NetPortableProfile(result.Name, result.SupportedFrameworks.Concat(result.OptionalFrameworks));
+                }
+
                 return result;
             }
 
