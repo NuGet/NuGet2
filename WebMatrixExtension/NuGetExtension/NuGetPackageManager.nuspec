@@ -3,7 +3,7 @@
   <metadata>
     <version>2.5</version>
     <authors>Outercurve Foundation</authors>
-    <owners>Outercurve Foundation</owners>
+    <owners>outercurve</owners>
     <id>NuGetPackageManager</id>
     <title />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
