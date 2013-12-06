@@ -12,7 +12,7 @@ namespace NuGet
     public class InstallWalker : PackageWalker, IPackageOperationResolver
     {
         private readonly bool _ignoreDependencies;
-        private readonly bool _allowPrereleaseVersions;
+        private bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
         private bool _isDowngrade;
 
@@ -429,12 +429,13 @@ namespace NuGet
         /// </summary>
         /// <param name="packages">The list of packages to resolve operations for. If from the dialog node, the list may be sorted, mostly, alphabetically</param>
         /// <param name="packagesByDependencyOrder">Same set of packages returned in the dependency order</param>
+        /// <param name="allowPrereleaseVersionsBasedOnPackage">If true, allowPrereleaseVersion is determined based on package before walking that package. Otherwise, existing value is used</param>
         /// <returns>
         /// Returns a list of Package Operations to be performed for the installation of the packages passed
         /// Also, the out parameter packagesByDependencyOrder would returned the packages passed in the dependency order
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "In addition to operations, need to return packagesByDependencyOrder.")]
-        public IList<PackageOperation> ResolveOperations(IEnumerable<IPackage> packages, out IList<IPackage> packagesByDependencyOrder)
+        public IList<PackageOperation> ResolveOperations(IEnumerable<IPackage> packages, out IList<IPackage> packagesByDependencyOrder, bool allowPrereleaseVersionsBasedOnPackage = false)
         {
             _packagesByDependencyOrder = new Dictionary<string, IList<IPackage>>();
             _operations.Clear();
@@ -446,7 +447,21 @@ namespace NuGet
             {
                 if (!_operations.Contains(package, PackageAction.Install))
                 {
-                    Walk(package);
+                    var allowPrereleaseVersions = _allowPrereleaseVersions;
+                    try
+                    {
+                        if (allowPrereleaseVersionsBasedOnPackage)
+                        {
+                            // Update _allowPrereleaseVersions before walking a package if allowPrereleaseVersionsBasedOnPackage is set to true
+                            // This is mainly used when bulk resolving operations for reinstalling packages
+                            _allowPrereleaseVersions = _allowPrereleaseVersions || !package.IsReleaseVersion();
+                        }
+                        Walk(package);
+                    }
+                    finally
+                    {
+                        _allowPrereleaseVersions = allowPrereleaseVersions;
+                    }
                 }
             }
 
