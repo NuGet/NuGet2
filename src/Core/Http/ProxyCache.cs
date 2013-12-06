@@ -159,17 +159,21 @@ namespace NuGet
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             if (proxy != null)
             {
-                Uri proxyAddress = new Uri(proxy.GetProxy(uri).AbsoluteUri);
-                if (String.Equals(proxyAddress.AbsoluteUri, uri.AbsoluteUri))
+                Uri proxyUri = proxy.GetProxy(uri);
+                if (proxyUri != null)
                 {
-                    return false;
+                    Uri proxyAddress = new Uri(proxyUri.AbsoluteUri);
+                    if (String.Equals(proxyAddress.AbsoluteUri, uri.AbsoluteUri))
+                    {
+                        return false;
+                    }
+                    bool bypassUri = proxy.IsBypassed(uri);
+                    if (bypassUri)
+                    {
+                        return false;
+                    }
+                    proxy = new WebProxy(proxyAddress);
                 }
-                bool bypassUri = proxy.IsBypassed(uri);
-                if (bypassUri)
-                {
-                    return false;
-                }
-                proxy = new WebProxy(proxyAddress);
             }
 
             return proxy != null;
