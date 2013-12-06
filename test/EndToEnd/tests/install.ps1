@@ -1951,7 +1951,7 @@ function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 function Test-InstallFailCleansUpSatellitePackageFiles 
 {
     # Verification for work item 2311
-	#This also verifies "Fresh Install Of Parent Package Throws When Dependency Package Already Has A Newer Version Installed"
+	# This also verifies "Fresh Install Of Parent Package Throws When Dependency Package Already Has A Newer Version Installed"
 	param ($context)
 
     # Arrange

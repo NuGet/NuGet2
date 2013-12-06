@@ -371,6 +371,9 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
+            //Prerelease is included when we try to look at the local repository. 
+            //In case of downgrade, we are going to look only at source repo and not local. 
+            //That way we will downgrade dependencies when parent package is downgraded.
             if (!_isDowngrade)
             {
                 IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
