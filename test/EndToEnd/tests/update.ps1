@@ -95,6 +95,28 @@ function Test-UpdatingPackageWithSharedDependency {
     Assert-Null (Get-SolutionPackage A 1.0)
 }
 
+# Tests that when a dependency package is updated, its dependent packages
+# will be updated to the right version
+function Test-UpdatingPackageDependentPackageVersion {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+	Install-Package jquery.validation -Version 1.8
+    Assert-Package $p jquery.validation 1.8
+    Assert-Package $p jquery 1.4.1
+    
+	# Act
+	Update-Package jquery -version 2.0.3
+
+	# Assert: jquery.validation is updated to 1.8.0.1
+	Assert-Package $p jquery 2.0.3
+    Assert-Package $p jquery.validation 1.8.0.1
+}
+
+
 function Test-UpdatingPackageWhatIf {
     param(
         $context

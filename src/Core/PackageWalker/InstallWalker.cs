@@ -253,7 +253,7 @@ namespace NuGet
                            {
                                OldPackage = oldPackage,
                                NewPackage = SelectDependency(g.Where(p => p.Version > oldPackage.Version)
-                                   .OrderBy(p => package.Version))
+                                   .OrderBy(p => p.Version))
                            };
 
             foreach (var p in packages)
