@@ -2506,11 +2506,20 @@ function Test-InstallPackageToWebsitePreservesProjectConfigFile
 {
     param($context)
     
-    # Arrange
+	# Arrange
     $p = New-Website "CoolProject"
+	$packagesConfigFileName = "packages.CoolProject.config"
+	if ($dte.Version -gt '10.0')
+	{
+		# on dev 11.0 etc, the project name could be something lkie
+		# "CoolProject(12)". So we need to get the project name
+		# to construct the packages config file name.
+	    $packagesConfigFileName = "packages.$($p.Name).config"
+	}
+
     $projectPath = $p.Properties.Item("FullPath").Value
-    $packagesConfigPath = Join-Path $projectPath "packages.$($p.Name).config"
-    
+    $packagesConfigPath = Join-Path $projectPath $packagesConfigFileName    
+	
     # create file and add to project
     $newFile = New-Item $packagesConfigPath -ItemType File
     '<packages></packages>' > $newFile
@@ -2521,7 +2530,7 @@ function Test-InstallPackageToWebsitePreservesProjectConfigFile
 
     # Assert
     Assert-Package $p PackageWithFolder
-    Assert-NotNull (Get-ProjectItem $p "packages.$($p.Name).config")
+    Assert-NotNull (Get-ProjectItem $p $packagesConfigFileName)
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 
