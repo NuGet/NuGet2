@@ -169,6 +169,69 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &gt;&gt; {0} are being added from &apos;{1}&apos;{2}.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assembly references.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo_AssemblyReferences {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo_AssemblyReferences", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Build files.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo_BuildFiles {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo_BuildFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Content files.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo_ContentFiles {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo_ContentFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  (not framework-specific).
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo_NotFrameworkSpecific {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo_NotFrameworkSpecific", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &gt;&gt; PowerShell scripts are being executed from &apos;{0}&apos;{1}.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfo_PowershellScripts {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfo_PowershellScripts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For adding package &apos;{0}&apos; to project &apos;{1}&apos; that targets &apos;{2}&apos;,.
+        /// </summary>
+        public static string Debug_TargetFrameworkInfoPrefix {
+            get {
+                return ResourceManager.GetString("Debug_TargetFrameworkInfoPrefix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dependency &apos;{0}&apos; has an invalid version..
         /// </summary>
         public static string DependencyHasInvalidVersion {
@@ -214,7 +277,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package {0} already exists..
+        ///   Looks up a localized string similar to Package &apos;{0}&apos; already exists..
         /// </summary>
         public static string Error_PackageAlreadyExists {
             get {

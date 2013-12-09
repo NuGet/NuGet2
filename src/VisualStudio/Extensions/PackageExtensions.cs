@@ -28,7 +28,7 @@ namespace NuGet.VisualStudio
             this IPackage package,
             string scriptName,
             FrameworkName targetFramework,
-            out string toolFilePath)
+            out IPackageFile toolFile)
         {
             if (scriptName.Equals("init.ps1", StringComparison.OrdinalIgnoreCase))
             {
@@ -36,11 +36,11 @@ namespace NuGet.VisualStudio
                                                .FirstOrDefault(a => a.Path.Equals("tools\\init.ps1", StringComparison.OrdinalIgnoreCase));
                 if (initFile != null)
                 {
-                    toolFilePath = "tools\\init.ps1";
+                    toolFile = initFile;
                     return true;
                 }
 
-                toolFilePath = null;
+                toolFile = null;
                 return false;
             }
 
@@ -52,12 +52,12 @@ namespace NuGet.VisualStudio
                 IPackageFile foundToolFile = toolFiles.FirstOrDefault(p => p.EffectivePath.Equals(scriptName, StringComparison.OrdinalIgnoreCase));
                 if (foundToolFile != null && !foundToolFile.IsEmptyFolder())
                 {
-                    toolFilePath = foundToolFile.Path;
+                    toolFile = foundToolFile;
                     return true;
                 }
             }
 
-            toolFilePath = null;
+            toolFile = null;
             return false;
         }
     }

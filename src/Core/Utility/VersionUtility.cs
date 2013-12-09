@@ -562,6 +562,11 @@ namespace NuGet
             return name + "-" + profile;
         }
 
+        public static string GetTargetFrameworkLogString(FrameworkName targetFramework)
+        {
+            return (targetFramework == null || targetFramework == VersionUtility.EmptyFramework) ? NuGetResources.Debug_TargetFrameworkInfo_NotFrameworkSpecific : String.Empty;
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public static FrameworkName ParseFrameworkNameFromFilePath(string filePath, out string effectivePath)
         {

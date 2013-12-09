@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Versioning;
 using EnvDTE;
+using NuGet.Resources;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 
@@ -41,10 +42,11 @@ namespace NuGet.VisualStudio
 
         public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, FrameworkName targetFramework, ILogger logger)
         {
-            string scriptPath, fullPath;
-            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptPath))
+            string fullPath;
+            IPackageFile scriptFile;
+            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptFile))
             {
-                fullPath = Path.Combine(installPath, scriptPath);
+                fullPath = Path.Combine(installPath, scriptFile.Path);
             }
             else
             {
@@ -53,6 +55,15 @@ namespace NuGet.VisualStudio
 
             if (File.Exists(fullPath))
             {
+                if (project != null && scriptFile != null)
+                {
+                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), project.Name,
+                        VersionUtility.GetShortFrameworkName(targetFramework));
+
+                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo_PowershellScripts,
+                        Path.GetDirectoryName(scriptFile.Path), VersionUtility.GetTargetFrameworkLogString(scriptFile.TargetFramework));
+                }
+
                 string toolsPath = Path.GetDirectoryName(fullPath);
                 string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath);
 

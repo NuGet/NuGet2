@@ -269,6 +269,29 @@ namespace NuGet
 
             try
             {
+                if (assemblyReferences.Count > 0 || contentFiles.Count > 0 || buildFiles.Count > 0)
+                {
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), Project.ProjectName, VersionUtility.GetShortFrameworkName(Project.TargetFramework));
+
+                    if (assemblyReferences.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_AssemblyReferences,
+                            Path.GetDirectoryName(assemblyReferences[0].Path), VersionUtility.GetTargetFrameworkLogString(assemblyReferences[0].TargetFramework));
+                    }
+
+                    if (contentFiles.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_ContentFiles,
+                            Path.GetDirectoryName(contentFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(contentFiles[0].TargetFramework));
+                    }
+
+                    if (buildFiles.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_BuildFiles,
+                            Path.GetDirectoryName(buildFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(buildFiles[0].TargetFramework));
+                    }
+                }
+
                 // Add content files
                 Project.AddFiles(contentFiles, _fileTransformers);
 
