@@ -592,6 +592,26 @@ function Test-BindingRedirectDoesNotAddToSilverlightProject {
     Assert-NoBindingRedirect $c app.config HostSL '0.0.0.0-1.0.1.0' '1.0.1.0'
 }
 
+function Test-SimpleBindingRedirectsClassLibraryUpdatePackage {
+    # Arrange
+    $a = New-ClassLibrary
+      
+    # Act
+    $a | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $a E
+    Assert-Reference $a E 1.0.0.0
+    Assert-Reference $a F 1.0.0.0
+    Assert-Null (Get-ProjectItem $a app.config)
+
+    $a | Update-Package F -Safe -Source $context.RepositoryPath
+
+    Assert-NotNull (Get-ProjectItem $a app.config)
+    Assert-Reference $a F 1.0.5.0
+    Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
 function Test-SimpleBindingRedirectsClassLibraryReference {
     param(
         $context
@@ -618,9 +638,9 @@ function Test-SimpleBindingRedirectsClassLibraryReference {
     Assert-Reference $e E 1.0.0.0
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-BindingRedirect $b web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
-    Assert-Null (Get-ProjectItem $d app.config)
+    Assert-BindingRedirect $d app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $e app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-Null (Get-ProjectItem $d web.config)
-    Assert-Null (Get-ProjectItem $e app.config)
     Assert-Null (Get-ProjectItem $e web.config)
 }
 
@@ -641,11 +661,11 @@ function Test-SimpleBindingRedirectsIndirectReference {
     $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
-    Assert-Null (Get-ProjectItem $b app.config)
     Assert-Null (Get-ProjectItem $b web.config)
-    Assert-Null (Get-ProjectItem $c app.config)
     Assert-Null (Get-ProjectItem $c web.config)
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $c app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
 function Test-SimpleBindingRedirectsNonWeb {
@@ -1405,28 +1425,6 @@ function Test-InstallPackageWithValuesFromPipe {
 
     # Assert
     #Assert-Package $p Microsoft-web-helpers
-}
-
-function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary {
-    # Arrange
-    $a = New-ClassLibrary
-      
-    # Act
-    $a | Install-Package E -Source $context.RepositoryPath
-    $a | Update-Package F -Safe -Source $context.RepositoryPath
-
-    # Assert
-    Assert-Package $a E
-    Assert-Reference $a E 1.0.0.0
-    Assert-Null (Get-ProjectItem $a app.config)
-
-    $redirect = $a | Add-BindingRedirect
-
-    Assert-AreEqual F $redirect.Name
-    Assert-AreEqual '0.0.0.0-1.0.5.0' $redirect.OldVersion
-    Assert-AreEqual '1.0.5.0' $redirect.NewVersion
-    Assert-NotNull (Get-ProjectItem $a app.config)
-    Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
 function Test-InstallPackageInstallsHighestReleasedPackageIfPreReleaseFlagIsNotSet {

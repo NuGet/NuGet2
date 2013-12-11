@@ -24,14 +24,12 @@ namespace NuGet.VisualStudio
         {
             if (project.SupportsBindingRedirects())
             {
-                // When we're adding binding redirects explicitly, don't check the project type
                 return AddBindingRedirects(
                     project, 
                     fileSystemProvider, 
                     domain, 
                     new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase), 
-                    frameworkMultiTargeting,
-                    checkProjectType: false);
+                    frameworkMultiTargeting);
             }
 
             return Enumerable.Empty<AssemblyBinding>();
@@ -42,34 +40,30 @@ namespace NuGet.VisualStudio
             IFileSystemProvider fileSystemProvider, 
             AppDomain domain, 
             IDictionary<string, HashSet<string>> projectAssembliesCache, 
-            IVsFrameworkMultiTargeting frameworkMultiTargeting,
-            bool checkProjectType = true)
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             var redirects = Enumerable.Empty<AssemblyBinding>();
-            // Only add binding redirects to projects that aren't class libraries
-            if (!checkProjectType || project.SupportsConfig())
+
+            // Create a project system
+            IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project, fileSystemProvider);
+
+            // Run this on the UI thread since it enumerates all references
+            IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure(fileSystemProvider, projectAssembliesCache));
+
+            redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
+
+            if (frameworkMultiTargeting != null)
             {
-                // Create a project system
-                IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project, fileSystemProvider);
-
-                // Run this on the UI thread since it enumerates all references
-                IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure(fileSystemProvider, projectAssembliesCache));
-
-                redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
-
-                if (frameworkMultiTargeting != null)
-                {
-                    // filter out assemblies that already exist in the target framework (CodePlex issue #3072)
-                    FrameworkName targetFrameworkName = project.GetTargetFrameworkName();
-                    redirects = redirects.Where(p => !FrameworkAssemblyResolver.IsHigherAssemblyVersionInFramework(p.Name, p.AssemblyNewVersion, targetFrameworkName, fileSystemProvider));
-                }
-
-                // Create a binding redirect manager over the configuration
-                var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
-
-                // Add the redirects
-                manager.AddBindingRedirects(redirects);
+                // filter out assemblies that already exist in the target framework (CodePlex issue #3072)
+                FrameworkName targetFrameworkName = project.GetTargetFrameworkName();
+                redirects = redirects.Where(p => !FrameworkAssemblyResolver.IsHigherAssemblyVersionInFramework(p.Name, p.AssemblyNewVersion, targetFrameworkName, fileSystemProvider));
             }
+
+            // Create a binding redirect manager over the configuration
+            var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
+
+            // Add the redirects
+            manager.AddBindingRedirects(redirects);
 
             return redirects;
         }
