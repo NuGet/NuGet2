@@ -165,7 +165,7 @@
   </Target>
   <Target Name="AfterBuild">
     <PropertyGroup>
-      <NuGetExe>..\..\..\..\lib\NuGet.exe</NuGetExe>
+      <NuGetExe>..\..\..\..\NuGet.exe</NuGetExe>
     </PropertyGroup>
     <Exec Command="$(NuGetExe) pack NuGetPackageManager.NuSpec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(OutputPath)" />
   </Target>
