@@ -123,6 +123,7 @@ namespace NuGet.Server.DataServices
         {
             return Repository.FindPackagesById(id)
                              .Select(Repository.GetMetadataPackage)
+                             .Where(package => package.Listed)
                              .AsQueryable();
         }
 
