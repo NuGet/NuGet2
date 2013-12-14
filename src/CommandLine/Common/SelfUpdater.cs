@@ -41,14 +41,12 @@ namespace NuGet.Common
 
             // Get the nuget command line package from the specified repository
             IPackageRepository packageRepository = _repositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
-
             IPackage package = packageRepository.GetUpdates(
                 new [] { new PackageName(NuGetCommandLinePackageId, version) },
                 includePrerelease: true, 
                 includeAllVersions: false, 
-                targetFrameworks: new FrameworkName[] { null },
-                versionConstraints: new VersionSpec[] { null }).FirstOrDefault();
-
+                targetFrameworks: null,
+                versionConstraints: null).FirstOrDefault();
  
             Console.WriteLine(LocalizedResourceManager.GetString("UpdateCommandCurrentlyRunningNuGetExe"), version);
 
