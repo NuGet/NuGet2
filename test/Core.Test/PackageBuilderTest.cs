@@ -42,7 +42,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Description</description>
   </metadata>
 </package>", ms.ReadToEnd());
@@ -75,7 +74,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Description</description>
     <releaseNotes>Release Notes</releaseNotes>
   </metadata>
@@ -109,7 +107,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName=""System.Web"" targetFramework="""" />
@@ -145,7 +142,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <references>
       <reference file=""foo.dll"" />
@@ -186,7 +182,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <dependencies>
       <dependency id=""B"" />
@@ -228,7 +223,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <dependencies>
       <group targetFramework=""Silverlight4.0"">
@@ -269,7 +263,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -306,7 +299,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -343,7 +335,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -380,7 +371,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -420,7 +410,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -461,7 +450,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -499,7 +487,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -540,7 +527,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -582,7 +568,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -623,7 +608,53 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
+    <description>Descriptions</description>
+    <references>
+      <group targetFramework="".NET3.0"">
+        <reference file=""one.dll"" />
+      </group>
+    </references>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Fact]
+        public void CreatePackageUsesV5SchemaNamespaceIfDevelopmentDependency()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+                DevelopmentDependency = true
+            };
+            builder.Authors.Add("Luan");
+            builder.PackageAssemblyReferences.Add(
+                new PackageReferenceSet(
+                    new FrameworkName(".NET, Version=3.0"),
+                    new[] { "one.dll" }));
+            builder.Files.Add(CreatePackageFile("lib\\one.dll"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
     <description>Descriptions</description>
     <references>
       <group targetFramework="".NET3.0"">
@@ -669,7 +700,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <references>
       <reference file=""one.dll"" />
@@ -710,7 +740,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
   </metadata>
 </package>", manifestStream.ReadToEnd());
@@ -754,7 +783,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>John</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <copyright>Copyright 2012</copyright>
@@ -811,7 +839,6 @@ namespace NuGet.Test
     <authors>David</authors>
     <owners>David</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <dependencies>
