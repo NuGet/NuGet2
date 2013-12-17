@@ -861,12 +861,24 @@ namespace NuGet.VisualStudio
             {
                 ProjectImportElement pie = buildProject.Xml.AddImport(targetsPath);
                 pie.Condition = "Exists('" + targetsPath + "')";
+
                 if (location == ProjectImportLocation.Top)
                 {
                     // There's no public constructor to create a ProjectImportElement directly.
                     // So we have to cheat by adding Import at the end, then remove it and insert at the beginning
                     pie.Parent.RemoveChild(pie);
                     buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
+                }
+                else
+                {
+                    // the import might get added into an ImportGroup. In this case, 
+                    // we remove it from the ImportGroup and add it at the end of the 
+                    // project.
+                    if (pie.Parent.GetType() == typeof(ProjectImportGroupElement))
+                    {
+                        pie.Parent.RemoveChild(pie);
+                        buildProject.Xml.AppendChild(pie);
+                    }
                 }
 
                 NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(buildProject, targetsPath);
