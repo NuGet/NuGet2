@@ -162,6 +162,12 @@
     <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
   </PropertyGroup>
   <Target Name="BeforeBuild">
+    <PropertyGroup>
+      <NuGetExe>..\lib\NuGet.exe</NuGetExe>
+      <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
+    </PropertyGroup>
+    <Message Text="Restoring NuGet packages for all the projects in NuGetExtension.sln" Importance="High" />
+    <Exec Command="$(NuGetExe) restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="..\"/>
   </Target>
   <Target Name="AfterBuild">
     <PropertyGroup>
