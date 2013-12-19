@@ -88,7 +88,7 @@ namespace NuGet.Commands
             }
         }
 
-        protected virtual IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem, bool useSideBySidePaths)
+        protected virtual IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem, bool useSideBySidePaths, bool checkDowngrade = true)
         {
             var repository = CreateRepository();
             var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths);
@@ -100,7 +100,8 @@ namespace NuGet.Commands
 
             var packageManager = new PackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
             {
-                Logger = Console
+                Logger = Console,
+                CheckDowngrade = checkDowngrade
             };
 
             return packageManager;
