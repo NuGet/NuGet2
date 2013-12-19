@@ -657,7 +657,7 @@ namespace NuGet.Test
         [InlineData(new object[] { "", "abcd" })]
         [InlineData(new object[] { "abcd", null })]
         [InlineData(new object[] { "abcd", "" })]
-        public void LoadPackageSourcesIgnoresInvalidCredentialPairs(string userName, string password)
+        public void LoadPackageSourcesIgnoresInvalidCredentialPairsFromSettings(string userName, string password)
         {
             // Arrange
             var settings = new Mock<ISettings>();
@@ -683,7 +683,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void LoadPackageSourcesReadsCredentialPairs()
+        public void LoadPackageSourcesReadsCredentialPairsFromSettings()
         {
             // Arrange
             string encryptedPassword = EncryptionUtility.EncryptString("topsecret");
@@ -712,7 +712,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void LoadPackageSourcesReadsClearTextCredentialPairs()
+        public void LoadPackageSourcesReadsClearTextCredentialPairsFromSettings()
         {
             // Arrange
             const string clearTextPassword = "topsecret";
@@ -739,6 +739,130 @@ namespace NuGet.Test
             Assert.True(values[1].IsPasswordClearText);
             Assert.Equal("topsecret", values[1].Password);
         }
+
+        [Theory]
+        [InlineData("Username=john;Password=johnspassword")]
+        [InlineData("uSerName=john;PASSWOrD=johnspassword")]
+        [InlineData(" Username=john;  Password=johnspassword   ")]
+        public void LoadPackageSourcesLoadsCredentialPairsFromEnvironmentVariables(string rawCredentials)
+        {
+            // Arrange
+            const string userName = "john";
+            const string password = "johnspassword";
+
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "onesource", false), 
+                                     new SettingValue("two", "twosource", false), 
+                                     new SettingValue("three", "threesource", false)
+                                });
+
+            var environment = new Mock<IEnvironmentVariableReader>();
+            environment.Setup(e => e.GetEnvironmentVariable("NuGetPackageSourceCredentials_two"))
+                .Returns(rawCredentials);
+
+            var provider = CreatePackageSourceProvider(settings.Object, environment:environment.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Equal(userName, values[1].UserName);
+            Assert.Equal(password, values[1].Password);
+        }
+
+        [Theory]
+        [InlineData("uername=john;Password=johnspassword")]
+        [InlineData(".Username=john;Password=johnspasswordf")]
+        [InlineData("What is this I don't even")]
+        public void LoadPackageSourcesIgnoresMalformedCredentialPairsFromEnvironmentVariables(string rawCredentials)
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "onesource", false), 
+                                     new SettingValue("two", "twosource", false), 
+                                     new SettingValue("three", "threesource", false)
+                                });
+
+            var environment = new Mock<IEnvironmentVariableReader>();
+            environment.Setup(e => e.GetEnvironmentVariable("NuGetPackageSourceCredentials_two"))
+                .Returns(rawCredentials);
+
+            var provider = CreatePackageSourceProvider(settings.Object, environment: environment.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Null(values[1].UserName);
+            Assert.Null(values[1].Password);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesEnvironmentCredentialsTakePrecedenceOverSettingsCredentials()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "onesource", false), 
+                                     new SettingValue("two", "twosource", false), 
+                                     new SettingValue("three", "threesource", false)
+                                });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
+                    .Returns(new[] { new KeyValuePair<string, string>("Username", "settinguser"), new KeyValuePair<string, string>("ClearTextPassword", "settingpassword") });
+
+
+            var environment = new Mock<IEnvironmentVariableReader>();
+            environment.Setup(e => e.GetEnvironmentVariable("NuGetPackageSourceCredentials_two"))
+                .Returns("Username=envirouser;Password=enviropassword");
+
+            var provider = CreatePackageSourceProvider(settings.Object, environment: environment.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Equal("envirouser", values[1].UserName);
+            Assert.Equal("enviropassword", values[1].Password);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesWhenEnvironmentCredentialsAreMalformedFallsbackToSettingsCredentials()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "onesource", false), 
+                                     new SettingValue("two", "twosource", false), 
+                                     new SettingValue("three", "threesource", false)
+                                });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
+                    .Returns(new[] { new KeyValuePair<string, string>("Username", "settinguser"), new KeyValuePair<string, string>("ClearTextPassword", "settingpassword") });
+
+
+            var environment = new Mock<IEnvironmentVariableReader>();
+            environment.Setup(e => e.GetEnvironmentVariable("NuGetPackageSourceCredentials_two"))
+                .Returns("I for one don't understand environment variables");
+
+            var provider = CreatePackageSourceProvider(settings.Object, environment: environment.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Equal("settinguser", values[1].UserName);
+            Assert.Equal("settingpassword", values[1].Password);
+        }
+
 
         // Test that when there are duplicate sources, i.e. sources with the same name,
         // then the source specified in one Settings with the highest priority is used.
@@ -1087,10 +1211,12 @@ namespace NuGet.Test
             ISettings settings = null,
             IEnumerable<PackageSource> providerDefaultSources = null,
             IDictionary<PackageSource, PackageSource> migratePackageSources = null,
-            IEnumerable<PackageSource> configurationDefaultSources = null)
+            IEnumerable<PackageSource> configurationDefaultSources = null,
+            IEnvironmentVariableReader environment = null)
         {
             settings = settings ?? new Mock<ISettings>().Object;
-            return new PackageSourceProvider(settings, providerDefaultSources, migratePackageSources, configurationDefaultSources);
+            environment = environment ?? new Mock<IEnvironmentVariableReader>().Object;
+            return new PackageSourceProvider(settings, providerDefaultSources, migratePackageSources, configurationDefaultSources, environment);
         }
 
         private static void AssertKVP(KeyValuePair<string, string> expected, KeyValuePair<string, string> actual)
