@@ -1,17 +1,19 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <version>2.5</version>
-    <authors>Outercurve Foundation</authors>
-    <owners>Outercurve Foundation</owners>
-    <id>NuGetPackageManager</id>
-    <title />
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
-This is the extension for NuGet Package Manager</description>
-    <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
-    <summary />
-  </metadata>
+    <metadata>
+        <id>NuGetPackageManager</id>
+        <version>2.5</version>
+        <authors>Outercurve Foundation</authors>
+        <owners>Outercurve Foundation</owners>
+        <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
+        <projectUrl>http://nuget.codeplex.com</projectUrl>
+        <copyright>&#169; Outercurve Foundation. All rights reserved.</copyright>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+            This is the extension for NuGet Package Manager
+        </description>
+        <summary />
+    </metadata>
   <files>
     <file src="NuGetExtension.dll" target="content\NuGetPackageManager\NuGetExtension.dll" />
     <file src="NuGet.Core.dll" target="content\NuGetPackageManager\NuGet.Core.dll" />
