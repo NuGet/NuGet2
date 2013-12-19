@@ -3,12 +3,13 @@
   <metadata>
     <version>2.5</version>
     <authors>Outercurve Foundation</authors>
-    <owners>outercurve</owners>
+    <owners>Outercurve Foundation</owners>
     <id>NuGetPackageManager</id>
     <title />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
 This is the extension for NuGet Package Manager</description>
+    <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
     <summary />
   </metadata>
   <files>
