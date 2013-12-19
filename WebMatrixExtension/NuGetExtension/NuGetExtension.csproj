@@ -10,10 +10,12 @@
     <Reference Include="Microsoft.WebMatrix.Core, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.WebMatrix.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.WebMatrix.Extensibility, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.WebMatrix.Extensibility.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="NuGet.Core, Version=1.6.30117.9648, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -149,6 +151,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
   <!-- Build package out of nuspec -->
   <PropertyGroup>
     <MajorVersion>2</MajorVersion>
@@ -162,10 +165,16 @@
     <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
   </PropertyGroup>
   <Target Name="BeforeBuild">
+    <PropertyGroup>
+      <NuGetExe>..\lib\NuGet.exe</NuGetExe>
+      <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
+    </PropertyGroup>
+    <Message Text="Restoring NuGet packages for all the projects in NuGetExtension.sln" Importance="High" />
+    <Exec Command="$(NuGetExe) restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="..\" />
   </Target>
   <Target Name="AfterBuild">
     <PropertyGroup>
-      <NuGetExe>..\..\..\..\NuGet.exe</NuGetExe>
+      <NuGetExe>..\..\..\..\lib\NuGet.exe</NuGetExe>
     </PropertyGroup>
     <Exec Command="$(NuGetExe) pack NuGetPackageManager.NuSpec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(OutputPath)" />
   </Target>

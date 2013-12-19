@@ -19,10 +19,12 @@
     <Reference Include="Microsoft.WebMatrix.Core, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.WebMatrix.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.WebMatrix.Extensibility, Version=8.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.WebMatrix.Extensibility.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.1.1309.1617\lib\net40\Moq.dll</HintPath>
@@ -85,4 +87,5 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
 </Project>
