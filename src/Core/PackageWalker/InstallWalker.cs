@@ -82,12 +82,29 @@ namespace NuGet
             _operations = new OperationLookup();
             _allowPrereleaseVersions = allowPrereleaseVersions;
             DependencyVersion = dependencyVersion;
+            CheckDowngrade = true;
         }
 
         internal bool DisableWalkInfo
         { 
             get; 
             set; 
+        }
+        
+        /// <summary>
+        /// Indicates if this object checks the downgrade case. 
+        /// </summary>
+        /// <remarks>
+        /// Currently there is a concurrent issue: if there are multiple "nuget.exe install" running
+        /// concurrently, then checking local repository for existing packages to see
+        /// if current install is downgrade can generate file in use exception.
+        /// This property is a temporary workaround: it is set to false when 
+        /// this object is called by "nuget.exe install/restore".
+        /// </remarks>        
+        internal bool CheckDowngrade
+        {
+            get;
+            set;
         }
 
         protected override bool IgnoreWalkInfo
@@ -410,11 +427,22 @@ namespace NuGet
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package)
         {
-            //Check if the package is installed. This is necessary to know if this is a fresh-install or a downgrade operation
-            IPackage packageUnderInstallation = Repository.FindPackage(package.Id);
-            if (packageUnderInstallation != null && packageUnderInstallation.Version > package.Version)
+            // The cases when we don't check downgrade is when this object is 
+            // called to restore packages, e.g. by nuget.exe restore command.
+            // Otherwise, check downgrade is true, e.g. when user installs a package
+            // inside VS.
+            if (CheckDowngrade)
             {
-                _isDowngrade = true;
+                //Check if the package is installed. This is necessary to know if this is a fresh-install or a downgrade operation
+                IPackage packageUnderInstallation = Repository.FindPackage(package.Id);
+                if (packageUnderInstallation != null && packageUnderInstallation.Version > package.Version)
+                {
+                    _isDowngrade = true;
+                }
+            }
+            else
+            {
+                _isDowngrade = false;
             }
 
             _operations.Clear();

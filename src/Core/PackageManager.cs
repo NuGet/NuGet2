@@ -49,6 +49,7 @@ namespace NuGet
             FileSystem = fileSystem;
             LocalRepository = localRepository;
             DependencyVersion = DependencyVersion.Lowest;
+            CheckDowngrade = true;
         }
 
         public IFileSystem FileSystem
@@ -145,7 +146,8 @@ namespace NuGet
                 ignoreDependencies, allowPrereleaseVersions,
                 DependencyVersion)
             {
-                DisableWalkInfo = ignoreWalkInfo
+                DisableWalkInfo = ignoreWalkInfo,
+                CheckDowngrade = CheckDowngrade
             };
             Execute(package, installerWalker);
         }
@@ -468,5 +470,7 @@ namespace NuGet
                                                 updateDependencies: updateDependencies,
                                                 allowPrereleaseVersions: allowPrereleaseVersions));
         }
+
+        public bool CheckDowngrade { get; set; }
     }
 }
