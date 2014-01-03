@@ -11,6 +11,7 @@ namespace NuGet.Common
             ".csproj",
             ".vbproj",
             ".fsproj",
+            ".btproj"
         };
 
         public static HashSet<string> SupportedProjectExtensions
