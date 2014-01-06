@@ -141,14 +141,8 @@ namespace NuGet.Common
 
             var targetRelativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetFullPath);
 
-            // adds an <Import> element to this project file.
-            if (Project.Xml.Imports == null ||
-                Project.Xml.Imports.All(import => !targetRelativePath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
-            {
-                Project.Xml.AddImport(targetRelativePath);
-                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(Project, targetRelativePath);
-                Project.Save();
-            }
+            NuGet.MSBuildProjectUtility.AddImportStatement(Project, targetRelativePath, location);
+            Project.Save();
         }
 
         public void RemoveImport(string targetFullPath)
@@ -157,22 +151,10 @@ namespace NuGet.Common
             {
                 throw new ArgumentNullException("targetFullPath");
             }
-
-            if (Project.Xml.Imports != null)
-            {
-                var targetRelativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetFullPath);
-
-                // search for this import statement and remove it
-                var importElement = Project.Xml.Imports.FirstOrDefault(
-                    import => targetRelativePath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
-
-                if (importElement != null)
-                {
-                    Project.Xml.RemoveChild(importElement);
-                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(Project, targetRelativePath);
-                    Project.Save();
-                }
-            }
+            
+            var targetRelativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetFullPath);
+            NuGet.MSBuildProjectUtility.RemoveImportStatement(Project, targetRelativePath);
+            Project.Save();
         }
 
         public bool Equals(MSBuildProjectSystem other)

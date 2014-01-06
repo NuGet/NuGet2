@@ -850,50 +850,12 @@ namespace NuGet.VisualStudio
 
         public static void AddImportStatement(this Project project, string targetsPath, ProjectImportLocation location)
         {
-            AddImportStatement(project.AsMSBuildProject(), targetsPath, location);
-        }
-
-        public static void AddImportStatement(this MsBuildProject buildProject, string targetsPath, ProjectImportLocation location)
-        {
-            // adds an <Import> element to this project file if it doesn't already exist.
-            if (buildProject.Xml.Imports == null ||
-                buildProject.Xml.Imports.All(import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
-            {
-                ProjectImportElement pie = buildProject.Xml.AddImport(targetsPath);
-                pie.Condition = "Exists('" + targetsPath + "')";
-                if (location == ProjectImportLocation.Top)
-                {
-                    // There's no public constructor to create a ProjectImportElement directly.
-                    // So we have to cheat by adding Import at the end, then remove it and insert at the beginning
-                    pie.Parent.RemoveChild(pie);
-                    buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
-                }
-
-                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(buildProject, targetsPath);
-                buildProject.ReevaluateIfNecessary();
-            }
+            NuGet.MSBuildProjectUtility.AddImportStatement(project.AsMSBuildProject(), targetsPath, location);
         }
 
         public static void RemoveImportStatement(this Project project, string targetsPath)
         {
-            RemoveImportStatement(project.AsMSBuildProject(), targetsPath);
-        }
-
-        public static void RemoveImportStatement(this MsBuildProject buildProject, string targetsPath)
-        {
-            if (buildProject.Xml.Imports != null)
-            {
-                // search for this import statement and remove it
-                var importElement = buildProject.Xml.Imports.FirstOrDefault(
-                    import => targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
-
-                if (importElement != null)
-                {
-                    importElement.Parent.RemoveChild(importElement);
-                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(buildProject, targetsPath);
-                    buildProject.ReevaluateIfNecessary();
-                }
-            }
+            NuGet.MSBuildProjectUtility.RemoveImportStatement(project.AsMSBuildProject(), targetsPath);
         }
 
         /// <summary>

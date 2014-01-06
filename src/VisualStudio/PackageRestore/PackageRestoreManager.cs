@@ -336,7 +336,7 @@ namespace NuGet.VisualStudio
         private void AddNuGetTargets(MsBuildProject buildProject)
         {
             string targetsPath = Path.Combine(@"$(SolutionDir)", NuGetTargetsFile);
-            buildProject.AddImportStatement(targetsPath, ProjectImportLocation.Bottom);
+            NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, targetsPath, ProjectImportLocation.Bottom);
         }
 
         private void AddSolutionDirProperty(MsBuildProject buildProject)
