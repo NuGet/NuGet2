@@ -30,8 +30,4 @@
     <MefComponent>|VisualStudio|</MefComponent>
     <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
   </Content>
-<<<<<<< HEAD:src/VsExtension/vs10.vsixmanifest
 </Vsix>
-=======
-</Vsix>
->>>>>>> master:src/VsExtension/vs10.vsixmanifest
