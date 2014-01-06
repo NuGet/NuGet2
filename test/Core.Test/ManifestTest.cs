@@ -331,7 +331,6 @@ namespace NuGet.Test
     <authors>Luan</authors>
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
     <description>Descriptions</description>
     
     <extra>This element is not defined in schema.</extra>
@@ -350,6 +349,40 @@ namespace NuGet.Test
             Assert.Equal("Luan", manifest.Metadata.Authors);
             Assert.False(manifest.Metadata.RequireLicenseAcceptance);
             Assert.False(manifest.Metadata.DevelopmentDependency);
+            Assert.Equal("Descriptions", manifest.Metadata.Description);
+        }
+
+        [Fact]
+        public void ReadDevelopmentDependency()
+        {
+            // Arrange
+            string content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
+  <metadata hello=""world"">
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
+    <description>Descriptions</description>
+    
+    <extra>This element is not defined in schema.</extra>
+  </metadata>
+  <clark>meko</clark>
+  <files>
+      <file src=""my.txt"" destination=""outdir"" />
+  </files>
+</package>";
+            // Act
+            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: false);
+
+            // Assert
+            Assert.Equal("A", manifest.Metadata.Id);
+            Assert.Equal("1.0", manifest.Metadata.Version);
+            Assert.Equal("Luan", manifest.Metadata.Authors);
+            Assert.False(manifest.Metadata.RequireLicenseAcceptance);
+            Assert.True(manifest.Metadata.DevelopmentDependency);
             Assert.Equal("Descriptions", manifest.Metadata.Description);
         }
 

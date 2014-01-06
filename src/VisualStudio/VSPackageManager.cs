@@ -353,7 +353,7 @@ namespace NuGet.VisualStudio
                     {
                         foreach (var package in packages)
                         {
-                            UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions);
+                            UpdatePackageReference(projectManager, package, updateDependencies, allowPrereleaseVersions);
                         }
                     },
                     logger);
@@ -436,7 +436,7 @@ namespace NuGet.VisualStudio
                                 var localPackage = projectManager.LocalRepository.FindPackage(package.Id);
                                 if (localPackage != null && localPackage.Version < package.Version)
                                 {
-                                    UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies: true, allowPrereleaseVersions: allowPrereleaseVersions);
+                                    UpdatePackageReference(projectManager, package, updateDependencies, allowPrereleaseVersions);
                                 }
                             }
                             ClearLogger(projectManager);
@@ -497,15 +497,70 @@ namespace NuGet.VisualStudio
             ILogger logger,
             IPackageOperationEventListener eventListener)
         {
-            UpdatePackages(
-                LocalRepository,
-                package => ReinstallPackage(
-                    package.Id,
-                    updateDependencies: updateDependencies,
-                    allowPrereleaseVersions: allowPrereleaseVersions,
-                    logger: logger,
-                    eventListener: eventListener),
-                logger);
+            //1) Reinstall solution packages first
+            //2) On Each Project, call UninstallAllPackages(IProjectManager, Dictionary<Tuple<string, SemanticVersion>, bool>, out packagesInSourceRepository). And, create a dictionary <projectManager, packages>
+            //3) Append all packagesInSourceRepository into allPackagesInSourceRepository
+            //4) Call InstallWalker.ResolveOperations(allPackagesInSourceRepository, out IList<IPackage> packagesByDependencyOrder)
+            //5) Call for each entry in Dictionary<projectManager, packages>
+            //    InitializeLogger, RunSolutionAction( call projectManager.AddPackageReference(IPackage, ..., ...)
+
+            // Change it to array so that the enumeration is not modified during enumeration to reinstall solution packages
+            var packages = LocalRepository.GetPackages().ToArray();
+
+            foreach (var package in packages)
+            {
+                if (!IsProjectLevel(package))
+                {
+                    ReinstallSolutionPackage(package, updateDependencies, allowPrereleaseVersions, logger);
+                }
+            }
+
+            // Now, take care of project-level packages
+            var packagesInProject = new Dictionary<IProjectManager, HashSet<IPackage>>();
+            var verifiedPackagesInSourceRepository = new Dictionary<PackageName, IPackage>();
+            HashSet<IPackage> allPackagesToBeReinstalled = new HashSet<IPackage>();
+
+            // first uninstall all the packages from each project
+            RunActionOnProjects(
+                _solutionManager.GetProjects(),
+                project =>
+                    {
+                        IProjectManager projectManager = GetProjectManager(project);
+                        HashSet<IPackage> packagesToBeReinstalled;
+                        UninstallPackagesForReinstall(projectManager, updateDependencies, logger, verifiedPackagesInSourceRepository, out packagesToBeReinstalled);
+
+                        Debug.Assert(!packagesInProject.ContainsKey(projectManager));
+                        packagesInProject[projectManager] = packagesToBeReinstalled;
+                        allPackagesToBeReinstalled.AddRange(packagesToBeReinstalled);
+                    },
+                logger,
+                eventListener ?? NullPackageOperationEventListener.Instance);
+
+            // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
+            // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
+            var installWalker = new InstallWalker(LocalRepository, SourceRepository, null, logger ?? NullLogger.Instance,
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+
+            IList<IPackage> packagesUninstalledInDependencyOrder;
+            var operations = installWalker.ResolveOperations(allPackagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);
+
+            ExecuteOperationsWithPackage(
+                _solutionManager.GetProjects(),
+                null,
+                operations,
+                projectManager =>
+                {
+                    foreach (var package in packagesUninstalledInDependencyOrder)
+                    {
+                        HashSet<IPackage> packagesToBeReinstalled;
+                        if (packagesInProject.TryGetValue(projectManager, out packagesToBeReinstalled) && packagesToBeReinstalled.Contains(package))
+                        {
+                            AddPackageReference(projectManager, package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
+                        }
+                    }
+                },
+                logger,
+                eventListener);
         }
 
         // Reinstall all packages in the specified project
@@ -515,9 +570,32 @@ namespace NuGet.VisualStudio
             bool allowPrereleaseVersions,
             ILogger logger)
         {
-            UpdatePackages(
-                projectManager.LocalRepository,
-                package => ReinstallPackageInProject(projectManager, package, updateDependencies, allowPrereleaseVersions, logger),
+            //1) Call UninstallPackagesForReinstall(IProjectManager, Empty Dictionary, out packagesUninstalledForReinstallation)
+            //2) Call InstallWalker.ResolveOperations(packagesInSourceRepository, out IList<IPackage> packagesByDependencyOrder)
+            //3) Call ExecuteOperationsWithPackage( call projectManager.AddPackageReference(IPackage, ..., ...)
+
+            HashSet<IPackage> packagesToBeReinstalled;
+            UninstallPackagesForReinstall(projectManager, updateDependencies, logger, new Dictionary<PackageName, IPackage>(), out packagesToBeReinstalled);
+
+            // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
+            // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
+            var installWalker = new InstallWalker(projectManager.LocalRepository, SourceRepository, projectManager.Project.TargetFramework, logger ?? NullLogger.Instance,
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+
+            IList<IPackage> packagesUninstalledInDependencyOrder;
+            var operations = installWalker.ResolveOperations(packagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);
+
+            ExecuteOperationsWithPackage(
+                projectManager,
+                null,
+                operations,
+                () =>
+                {
+                    foreach (var package in packagesUninstalledInDependencyOrder)
+                    {
+                        AddPackageReference(projectManager, package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
+                    }
+                },
                 logger);
         }
 
@@ -714,6 +792,83 @@ namespace NuGet.VisualStudio
                logger,
                eventListener);
 
+        }
+
+        private void UninstallPackagesForReinstall(
+            IProjectManager projectManager,
+            bool updateDependencies,
+            ILogger logger,
+            Dictionary<PackageName, IPackage> verifiedPackagesInSourceRepository,
+            out HashSet<IPackage> packagesToBeReinstalled)
+        {
+            packagesToBeReinstalled = new HashSet<IPackage>();
+            logger = logger ?? NullLogger.Instance;
+
+            try
+            {
+                InitializeLogger(logger, projectManager);
+                var packages = projectManager.LocalRepository.GetPackages().ToArray();
+
+                foreach(IPackage package in packages)
+                {
+                    IDisposable disposableAction = StartReinstallOperation(package.Id, package.Version.ToString());
+                    try
+                    {
+                        logger.Log(MessageLevel.Info, VsResources.ReinstallProjectPackage, package, projectManager.Project.ProjectName);
+
+                        IPackage packageInSourceRepository; 
+                        PackageName packageName = new PackageName(package.Id, package.Version);
+
+                        if (!verifiedPackagesInSourceRepository.TryGetValue(packageName, out packageInSourceRepository))
+                        {
+                            packageInSourceRepository = SourceRepository.FindPackage(package.Id, package.Version);
+                            verifiedPackagesInSourceRepository[packageName] = packageInSourceRepository;
+                        }
+
+                        if (packageInSourceRepository != null)
+                        {
+                            packagesToBeReinstalled.Add(packageInSourceRepository);
+                            RunSolutionAction(
+                                () =>
+                                {
+                                    // We set remove dependencies to false since we will remove all the packages anyways
+                                    UninstallPackage(
+                                        projectManager,
+                                        package.Id,
+                                        package.Version,
+                                        forceRemove: true,
+                                        removeDependencies: false,
+                                        logger: logger);
+                                });
+                        }
+                        else
+                        {
+                            logger.Log(
+                                MessageLevel.Warning,
+                                VsResources.PackageRestoreSkipForProject,
+                                package.GetFullName(),
+                                projectManager.Project.ProjectName);
+                        }
+                    }
+                    catch (PackageNotInstalledException e)
+                    {
+                        logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(e).Message);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
+                    }
+                    finally
+                    {
+                        ClearLogger(projectManager);
+                        disposableAction.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                ClearLogger(projectManager);
+            }
         }
 
         private static PackageAction ReverseAction(PackageAction packageAction)
@@ -981,6 +1136,8 @@ namespace NuGet.VisualStudio
             RunProjectAction(projectManager, () => projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies));
         }
 
+        // If the remote package is already determined, consider using the overload which directly takes in the remote package
+        // Can avoid calls FindPackage calls to source repository
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
             string versionString = version == null ? null : version.ToString();
@@ -995,6 +1152,14 @@ namespace NuGet.VisualStudio
             using (StartUpdateOperation(packageId, packageVersion: null))
             {
                 RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, versionSpec, updateDependencies, allowPrereleaseVersions));
+            }
+        }
+
+        private void UpdatePackageReference(IProjectManager projectManager, IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
+        {
+            using (StartUpdateOperation(package.Id, package.Version.ToString()))
+            {
+                RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions));
             }
         }
 
@@ -1476,6 +1641,7 @@ namespace NuGet.VisualStudio
 
         private void UpdatePackages(IPackageRepository localRepository, Action<IPackage> updateAction, ILogger logger)
         {
+            // BUGBUG: TargetFramework should be passed for more efficient package walking
             var packageSorter = new PackageSorter(targetFramework: null);
             // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
             var packages = packageSorter.GetPackagesByDependencyOrder(localRepository).Reverse();

@@ -5744,4 +5744,8 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="Warning_UnspecifiedDependencyVersionTitle" xml:space="preserve">
     <value>Specify version of dependencies.</value>
   </data>
+  <data name="HelpCommandForMoreInfo" xml:space="preserve">
+    <value>For more information, visit {0}</value>
+    <comment>{0} will be replaced with a url.</comment>
+  </data>
 </root>

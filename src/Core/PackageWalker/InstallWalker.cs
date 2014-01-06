@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -11,12 +12,14 @@ namespace NuGet
     public class InstallWalker : PackageWalker, IPackageOperationResolver
     {
         private readonly bool _ignoreDependencies;
-        private readonly bool _allowPrereleaseVersions;
+        private bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
+        private bool _isDowngrade;
 
         // This acts as a "retainment" queue. It contains packages that are already installed but need to be kept during 
         // a package walk. This is to prevent those from being uninstalled in subsequent encounters.
         private readonly HashSet<IPackage> _packagesToKeep = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+        private IDictionary<string, IList<IPackage>> _packagesByDependencyOrder;
 
         // this ctor is used for unit tests
         internal InstallWalker(IPackageRepository localRepository,
@@ -74,12 +77,29 @@ namespace NuGet
             ConstraintProvider = constraintProvider;
             _operations = new OperationLookup();
             _allowPrereleaseVersions = allowPrereleaseVersions;
+            CheckDowngrade = true;
         }
 
         internal bool DisableWalkInfo
         { 
             get; 
             set; 
+        }
+        
+        /// <summary>
+        /// Indicates if this object checks the downgrade case. 
+        /// </summary>
+        /// <remarks>
+        /// Currently there is a concurrent issue: if there are multiple "nuget.exe install" running
+        /// concurrently, then checking local repository for existing packages to see
+        /// if current install is downgrade can generate file in use exception.
+        /// This property is a temporary workaround: it is set to false when 
+        /// this object is called by "nuget.exe install/restore".
+        /// </remarks>        
+        internal bool CheckDowngrade
+        {
+            get;
+            set;
         }
 
         protected override bool IgnoreWalkInfo
@@ -179,7 +199,12 @@ namespace NuGet
             }
             else 
             {
-                Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
+                if (!_isDowngrade && (package.Version < conflictResult.Package.Version))
+                {
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
+                       NuGetResources.NewerVersionAlreadyReferenced, package.Id));
+                }
+               Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
             }
         }
 
@@ -245,7 +270,7 @@ namespace NuGet
                            {
                                OldPackage = oldPackage,
                                NewPackage = SelectDependency(g.Where(p => p.Version > oldPackage.Version)
-                                   .OrderBy(p => package.Version))
+                                   .OrderBy(p => p.Version))
                            };
 
             foreach (var p in packages)
@@ -292,6 +317,14 @@ namespace NuGet
                 {
                     try
                     {
+                        //
+                        // BUGBUG: What if the new package required license acceptance but the new dependency package did not?!
+                        //         When a dependency package that does not require license acceptance, like jQuery 1.7.1.1,
+                        //         is being updated to a version incompatible with its dependents, like jQuery 2.0.3 and its dependent Microsoft.jQuery.Unobtrusive.Ajax 2.0.20710.0
+                        //         Then, the dependent package is updated such that the new dependent package is compatible with the new dependency package
+                        //         In the example above, Microsoft.jQuery.Unobtrusive.Ajax 2.0.20710.0 will be updated to 2.0.30506.0. 2.0.30506.0 requires license acceptance
+                        //         But, the update happens anyways, just because, the user chose to update jQuery
+                        //
                         // Remove the old package
                         Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
 
@@ -336,6 +369,17 @@ namespace NuGet
                 // and mark the package as being "retained".
                 _packagesToKeep.Add(package);
             }
+
+            if (_packagesByDependencyOrder != null)
+            {
+                IList<IPackage> packages;
+                if (!_packagesByDependencyOrder.TryGetValue(package.Id, out packages))
+                {
+                    _packagesByDependencyOrder[package.Id] = packages = new List<IPackage>();
+                }
+
+                packages.Add(package);
+            }
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency)
@@ -344,10 +388,16 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
-            if (package != null)
+            //Prerelease is included when we try to look at the local repository. 
+            //In case of downgrade, we are going to look only at source repo and not local. 
+            //That way we will downgrade dependencies when parent package is downgraded.
+            if (!_isDowngrade)
             {
-                return package;
+                IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
+                if (package != null)
+                {
+                    return package;
+                } 
             }
 
             // Next, query the source repo for the same dependency
@@ -372,11 +422,87 @@ namespace NuGet
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package)
         {
+            // The cases when we don't check downgrade is when this object is 
+            // called to restore packages, e.g. by nuget.exe restore command.
+            // Otherwise, check downgrade is true, e.g. when user installs a package
+            // inside VS.
+            if (CheckDowngrade)
+            {
+                //Check if the package is installed. This is necessary to know if this is a fresh-install or a downgrade operation
+                IPackage packageUnderInstallation = Repository.FindPackage(package.Id);
+                if (packageUnderInstallation != null && packageUnderInstallation.Version > package.Version)
+                {
+                    _isDowngrade = true;
+                }
+            }
+            else
+            {
+                _isDowngrade = false;
+            }
+
+            _operations.Clear();
+            Marker.Clear();
+            _packagesToKeep.Clear();
+            
+            Walk(package);
+            return Operations.Reduce();
+        }
+
+        /// <summary>
+        /// Resolve operations for a list of packages clearing the package marker only once at the beginning. When the packages are interdependent, this method performs efficiently
+        /// Also, sets the packagesByDependencyOrder to the input packages, but in dependency order
+        /// NOTE: If package A 1.0 depends on package B 1.0 and A 2.0 does not depend on B 2.0; and, A 2.0 and B 2.0 are the input packages (likely from the updates tab in dialog)
+        ///       then, the packagesbyDependencyOrder will have A followed by B. Since, A 2.0 does not depend on B 2.0. This is also true because GetConflict in this class
+        ///       would only the PackageMarker and not the installed packages for information
+        /// </summary>
+        /// <param name="packages">The list of packages to resolve operations for. If from the dialog node, the list may be sorted, mostly, alphabetically</param>
+        /// <param name="packagesByDependencyOrder">Same set of packages returned in the dependency order</param>
+        /// <param name="allowPrereleaseVersionsBasedOnPackage">If true, allowPrereleaseVersion is determined based on package before walking that package. Otherwise, existing value is used</param>
+        /// <returns>
+        /// Returns a list of Package Operations to be performed for the installation of the packages passed
+        /// Also, the out parameter packagesByDependencyOrder would returned the packages passed in the dependency order
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "In addition to operations, need to return packagesByDependencyOrder.")]
+        public IList<PackageOperation> ResolveOperations(IEnumerable<IPackage> packages, out IList<IPackage> packagesByDependencyOrder, bool allowPrereleaseVersionsBasedOnPackage = false)
+        {
+            _packagesByDependencyOrder = new Dictionary<string, IList<IPackage>>();
             _operations.Clear();
             Marker.Clear();
             _packagesToKeep.Clear();
 
-            Walk(package);
+            Debug.Assert(Operations is List<PackageOperation>);
+            foreach (var package in packages)
+            {
+                if (!_operations.Contains(package, PackageAction.Install))
+                {
+                    var allowPrereleaseVersions = _allowPrereleaseVersions;
+                    try
+                    {
+                        if (allowPrereleaseVersionsBasedOnPackage)
+                        {
+                            // Update _allowPrereleaseVersions before walking a package if allowPrereleaseVersionsBasedOnPackage is set to true
+                            // This is mainly used when bulk resolving operations for reinstalling packages
+                            _allowPrereleaseVersions = _allowPrereleaseVersions || !package.IsReleaseVersion();
+                        }
+                        Walk(package);
+                    }
+                    finally
+                    {
+                        _allowPrereleaseVersions = allowPrereleaseVersions;
+                    }
+                }
+            }
+
+            // Flatten the dictionary to create a list of all the packages. Only this item the packages visited first during the walk will appear on the list. Also, only retain distinct elements
+            IEnumerable<IPackage> allPackagesByDependencyOrder = _packagesByDependencyOrder.SelectMany(p => p.Value).Distinct();
+
+            // Only retain the packages for which the operations are being resolved for
+            packagesByDependencyOrder = allPackagesByDependencyOrder.Where(p => packages.Any(q => p.Id == q.Id && p.Version == q.Version)).ToList();
+            Debug.Assert(packagesByDependencyOrder.Count == packages.Count());
+
+            _packagesByDependencyOrder.Clear();
+            _packagesByDependencyOrder = null;
+
             return Operations.Reduce();
         }
 

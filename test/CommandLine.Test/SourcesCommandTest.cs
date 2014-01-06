@@ -13,7 +13,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
     public class SourcesCommandTest
     {
         [Fact]
-        public void ProvidingNoArgumentListsPackages()
+        public void ProvidingNoArgumentListsPackageSources()
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
@@ -41,7 +41,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void ProvidingListArgumentListsPackages()
+        public void ProvidingListArgumentListsPackageSources()
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
@@ -58,6 +58,45 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 @"Registered Sources:
   1.  FirstName [Disabled]
       FirstSource
+";
+
+            sourceCommand.Console = console;
+
+            // Act
+            sourceCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(expectedText, console.Output);
+        }
+
+        [Fact]
+        public void SpecifyingFormatShortSwitchesNugetSourcesListOutputToScriptParsableOutput()
+        {
+            // Arrange
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(new[]
+                {
+                    new PackageSource("DisabledSourceUri", "FirstName", isEnabled: false),
+                    new PackageSource("FirstEnabledSourceUri", "SecondName", isEnabled: true),
+                    new PackageSource("SecondEnabledSourceUri", "ThirdName", isEnabled: true),
+                    new PackageSource("OfficialDisabledSourceUri", "FourthName", isEnabled: false, isOfficial: true), 
+                    new PackageSource("OfficialEnabledSourceUri", "FifthName", isEnabled: true, isOfficial: true), 
+                });
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
+            sourceCommand.Arguments.Add("list");
+            sourceCommand.Format = SourcesListFormat.Short;
+
+            var console = new MockConsole();
+
+            string expectedText =
+@"D DisabledSourceUri
+E FirstEnabledSourceUri
+E SecondEnabledSourceUri
+DO OfficialDisabledSourceUri
+EO OfficialEnabledSourceUri
 ";
 
             sourceCommand.Console = console;

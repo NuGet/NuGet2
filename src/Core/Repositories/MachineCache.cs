@@ -127,7 +127,15 @@ namespace NuGet
                             return false;
                         }
                         action(stream);
+
+                        // After downloading a package, check if it is an empty package
+                        // If so, do not store it in the machine cache
+                        if (stream == null || stream.Length == 0)
+                        {
+                            return false;
+                        }
                     }
+                    FileSystem.DeleteFile(packagePath);
                     FileSystem.MoveFile(tmp, packagePath);
                     return true;
                 }, packagePath);

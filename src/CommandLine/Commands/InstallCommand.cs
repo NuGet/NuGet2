@@ -209,7 +209,7 @@ namespace NuGet.Commands
             bool packageRestoreConsent,
             List<IPackage> satellitePackages)
         {
-            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions, checkDowngrade: false);
             if (IsPackageInstalled(packageManager.LocalRepository, fileSystem, packageId, version))
             {
                 return false;

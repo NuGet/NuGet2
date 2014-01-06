@@ -8,6 +8,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
 using EnvDTE;
+using NuGet.Resources;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
@@ -281,10 +282,11 @@ namespace NuGet.PowerShell.Commands
             FrameworkName targetFramework,
             Project project)
         {
-            string scriptPath, fullPath;
-            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptPath))
+            string fullPath;
+            IPackageFile scriptFile;
+            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptFile))
             {
-                fullPath = Path.Combine(rootPath, scriptPath);
+                fullPath = Path.Combine(rootPath, scriptFile.Path);
             }
             else
             {
@@ -293,6 +295,15 @@ namespace NuGet.PowerShell.Commands
             
             if (File.Exists(fullPath))
             {
+                if (project != null && scriptFile != null)
+                {
+                    WriteVerbose(String.Format(CultureInfo.CurrentCulture, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), project.Name,
+                            VersionUtility.GetShortFrameworkName(targetFramework)));
+
+                    WriteVerbose(String.Format(CultureInfo.CurrentCulture, NuGetResources.Debug_TargetFrameworkInfo_PowershellScripts,
+                        Path.GetDirectoryName(scriptFile.Path), VersionUtility.GetTargetFrameworkLogString(scriptFile.TargetFramework)));
+                }
+
                 var psVariable = SessionState.PSVariable;
                 string toolsPath = Path.GetDirectoryName(fullPath);
 
@@ -304,6 +315,7 @@ namespace NuGet.PowerShell.Commands
 
                 string command = "& " + PathHelper.EscapePSPath(fullPath) + " $__rootPath $__toolsPath $__package $__project";
                 WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath));
+
                 InvokeCommand.InvokeScript(command, false, PipelineResultTypes.Error, null, null);
 
                 // clear temp variables

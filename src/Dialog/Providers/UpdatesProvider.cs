@@ -138,8 +138,9 @@ namespace NuGet.Dialog.Providers
             IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
             IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
 
-            List<PackageOperation> allOperations;
-            bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager, out allOperations);
+            IList<PackageOperation> allOperations;
+            IList<IPackage> allUpdatePackagesByDependencyOrder;
+            bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager, out allOperations, out allUpdatePackagesByDependencyOrder);
             if (!accepted)
             {
                 return false;
@@ -149,14 +150,12 @@ namespace NuGet.Dialog.Providers
             {
                 RegisterPackageOperationEvents(activePackageManager, projectManager);
 
-                var allUpdatePackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
-
                 activePackageManager.UpdatePackages(
-                    projectManager, 
-                    allUpdatePackages, 
-                    allOperations, 
-                    updateDependencies: true, 
-                    allowPrereleaseVersions: IncludePrerelease, 
+                    projectManager,
+                    allUpdatePackagesByDependencyOrder,
+                    allOperations,
+                    updateDependencies: true,
+                    allowPrereleaseVersions: IncludePrerelease,
                     logger: this);
 
                 return true;
@@ -168,7 +167,7 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager, out List<PackageOperation> allOperations)
+        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager, out IList<PackageOperation> allOperations, out IList<IPackage> packagesByDependencyOrder)
         {
             allOperations = new List<PackageOperation>();
 
@@ -181,19 +180,7 @@ namespace NuGet.Dialog.Providers
                 allowPrereleaseVersions: IncludePrerelease);
 
             var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
-            foreach (var package in allPackages)
-            {
-                if (allOperations.FindIndex(
-                        operation => operation.Action == PackageAction.Install &&
-                                     operation.Package.Id == package.Id &&
-                                     operation.Package.Version == package.Version) == -1)
-                {
-                    var operations = installWalker.ResolveOperations(package);
-                    allOperations.AddRange(operations);
-                }
-            }
-
-            allOperations = (List<PackageOperation>)allOperations.Reduce();
+            allOperations = installWalker.ResolveOperations(allPackages, out packagesByDependencyOrder);
             return ShowLicenseAgreement(activePackageManager, allOperations);
         }
 
@@ -224,22 +211,31 @@ namespace NuGet.Dialog.Providers
 
         private void UpdateNumberOfPackages(PackagesTreeNodeBase selectedNode)
         {
-            if (selectedNode != null && !selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
+            // OnPackageLoadCompleted(selectedNode), which calls this method, is called by QueryExecutionCompleted
+            // QueryExecutionCompleted is called when an asynchronous query execution completes
+            // And, queries are executed from several places including SortSelectionChanged on the node which is always 
+            // called by default on the first node, not necessarily, the selected node by VsExtensionsProvider
+            // This means the selectedNode, here, may not actually be THE selectedNode at this point
+            // So, check if it is indeed selected before doing anything. Note that similar check is performed on QueryExecutionCompleted too
+            if (selectedNode != null && selectedNode.IsSelected)
             {
-                // After performing Update All, if user switches to another page, we don't want to show 
-                // the Update All button again. Here we check to make sure there's at least one enabled package.
-                if (selectedNode.Extensions.OfType<PackageItem>().Any(p => p.IsEnabled))
+                if (!selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
                 {
-                    _updateAllUIService.Show();
+                    // After performing Update All, if user switches to another page, we don't want to show 
+                    // the Update All button again. Here we check to make sure there's at least one enabled package.
+                    if (selectedNode.Extensions.OfType<PackageItem>().Any(p => p.IsEnabled))
+                    {
+                        _updateAllUIService.Show();
+                    }
+                    else
+                    {
+                        _updateAllUIService.Hide();
+                    }
                 }
                 else
                 {
                     _updateAllUIService.Hide();
                 }
-            }
-            else
-            {
-                _updateAllUIService.Hide();
             }
         }
 

@@ -370,6 +370,9 @@ nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/
   <data name="SourcesCommandSourceDescription" xml:space="preserve">
     <value>Path to the package(s) source.</value>
   </data>
+  <data name="SourcesCommandFormatDescription" xml:space="preserve">
+    <value>Applies to the list action. Accepts two values: Detailed (the default) and Short.</value>
+  </data>
   <data name="SourcesCommandUsageSummary" xml:space="preserve">
     <value>&lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source]</value>
     <comment>Only localize "[name]" and "[source]"</comment>
@@ -489,7 +492,7 @@ nuget update -Self</value>
     <value>Získá nebo nastaví konfigurační hodnoty NuGet.</value>
   </data>
   <data name="ConfigCommandDesc_deu" xml:space="preserve">
-    <value>Gets or sets NuGet config values.</value>
+    <value>Ruft NuGet-Konfigurationswerte ab oder legt sie fest.</value>
   </data>
   <data name="ConfigCommandDesc_esp" xml:space="preserve">
     <value>Obtiene o establece valores de configuración de NuGet.</value>

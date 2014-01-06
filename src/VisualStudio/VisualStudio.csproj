@@ -40,6 +40,7 @@
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="DeleteOnRestart\IDeleteOnRestartManager.cs" />
+    <Compile Include="FrameworkAssemblyResolver.cs" />
     <Compile Include="IRegistryKey.cs" />
     <Compile Include="ISourceControlFileSystem.cs" />
     <Compile Include="IVsCommonOperations.cs" />
@@ -160,6 +161,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="$(ComponentHostAssembly)" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -182,7 +184,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
       <Private>False</Private>
       <HintPath>..\..\lib\Microsoft.VisualStudio.Shell.Interop.11.0.dll</HintPath>
     </Reference>
@@ -193,7 +195,7 @@
     </Reference>
     <Reference Include="$(VCProjectEngineAssembly)">
       <HintPath>$(VCProjectEngineAssemblyHintPath)</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

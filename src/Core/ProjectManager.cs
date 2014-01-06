@@ -117,11 +117,14 @@ namespace NuGet
             set;
         }
 
+        /// <summary>
+        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
+        /// </summary>
         public virtual void AddPackageReference(string packageId)
         {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
-
+        
         public virtual void AddPackageReference(string packageId, SemanticVersion version)
         {
             AddPackageReference(packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -135,6 +138,12 @@ namespace NuGet
 
         public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
+            // In case of a scenario like UpdateAll, the graph has already been walked once for all the packages as a bulk operation
+            // But, we walk here again, just for a single package, since, we need to use UpdateWalker for project installs
+            // unlike simple package installs for which InstallWalker is used
+            // Also, it is noteworthy that the DependentsWalker has the same TargetFramework as the package in PackageReferenceRepository
+            // unlike the UpdateWalker whose TargetFramework is the same as that of the Project
+            // This makes it harder to perform a bulk operation for AddPackageReference and we have to go package by package
             var dependentsWalker = new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id))
             {
                 DependencyVersion = DependencyVersion
@@ -260,6 +269,29 @@ namespace NuGet
 
             try
             {
+                if (assemblyReferences.Count > 0 || contentFiles.Count > 0 || buildFiles.Count > 0)
+                {
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), Project.ProjectName, VersionUtility.GetShortFrameworkName(Project.TargetFramework));
+
+                    if (assemblyReferences.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_AssemblyReferences,
+                            Path.GetDirectoryName(assemblyReferences[0].Path), VersionUtility.GetTargetFrameworkLogString(assemblyReferences[0].TargetFramework));
+                    }
+
+                    if (contentFiles.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_ContentFiles,
+                            Path.GetDirectoryName(contentFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(contentFiles[0].TargetFramework));
+                    }
+
+                    if (buildFiles.Count > 0)
+                    {
+                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_BuildFiles,
+                            Path.GetDirectoryName(buildFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(buildFiles[0].TargetFramework));
+                    }
+                }
+
                 // Add content files
                 Project.AddFiles(contentFiles, _fileTransformers);
 
@@ -466,12 +498,18 @@ namespace NuGet
             return assemblyReferences;
         }
 
-        public void UpdatePackageReference(string packageId)
+        /// <summary>
+        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
+        /// </summary>
+        internal void UpdatePackageReference(string packageId)
         {
             UpdatePackageReference(packageId, version: null, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, SemanticVersion version)
+        /// <summary>
+        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
+        /// </summary>
+        internal void UpdatePackageReference(string packageId, SemanticVersion version)
         {
             UpdatePackageReference(packageId, version: version, updateDependencies: true, allowPrereleaseVersions: false);
         }
@@ -486,8 +524,14 @@ namespace NuGet
                 targetVersionSetExplicitly: versionSpec != null);
         }
 
+        /// <summary>
+        /// If the remote package is already determined, consider using the overload which directly takes in the remote package
+        /// Can avoid calls FindPackage calls to source repository. However, it should also be remembered that SourceRepository of ProjectManager
+        /// is an aggregate of "SharedPackageRepository" and the selected repository. So, if the package is present on the repository path (by default, the packages folder)
+        /// It would not result in a call to the server
+        /// </summary>
         public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
-        {
+        {            
             UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions, allowUnlisted: false), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
         }
 
@@ -521,7 +565,7 @@ namespace NuGet
                 (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version))
             {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
-                UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions);
+                UpdatePackageReferenceCore(package, updateDependencies, allowPrereleaseVersions);
             }
             else
             {
@@ -535,12 +579,18 @@ namespace NuGet
             }
         }
 
-        protected void UpdatePackageReference(IPackage package)
+        public virtual void UpdatePackageReference(IPackage remotePackage, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(package, updateDependencies: true, allowPrereleaseVersions: false);
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackagesWithoutOldVersion, remotePackage.Id, remotePackage.Version, Project.ProjectName);
+            UpdatePackageReferenceCore(remotePackage, updateDependencies, allowPrereleaseVersions);
         }
 
-        protected void UpdatePackageReference(IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
+        protected void UpdatePackageReference(IPackage package)
+        {
+            UpdatePackageReferenceCore(package, updateDependencies: true, allowPrereleaseVersions: false);
+        }
+
+        private void UpdatePackageReferenceCore(IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
         {
             AddPackageReference(package, !updateDependencies, allowPrereleaseVersions);
         }

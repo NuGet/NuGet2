@@ -45,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A
 		test\EndToEnd\tests\PackTest.ps1 = test\EndToEnd\tests\PackTest.ps1
 		test\EndToEnd\tests\ProjectRetargeting.ps1 = test\EndToEnd\tests\ProjectRetargeting.ps1
 		test\EndToEnd\tests\ServicesTest.ps1 = test\EndToEnd\tests\ServicesTest.ps1
+		test\EndToEnd\tests\Settings.ps1 = test\EndToEnd\tests\Settings.ps1
 		test\EndToEnd\tests\TabExpansionTest.ps1 = test\EndToEnd\tests\TabExpansionTest.ps1
 		test\EndToEnd\tests\uninstall.ps1 = test\EndToEnd\tests\uninstall.ps1
 		test\EndToEnd\tests\update.ps1 = test\EndToEnd\tests\update.ps1
@@ -129,6 +130,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsEvents", "src\VsEvents\Vs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsEvents.Test", "test\VsEvents.Test\VsEvents.Test.csproj", "{61C7D2E8-79A2-4645-AA84-3C81C89588E9}"
 EndProject
+<<<<<<< HEAD
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog14", "src\Dialog14\Dialog14.csproj", "{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio14", "src\VisualStudio14\VisualStudio14.csproj", "{EEA49A74-6EFC-410E-9745-BAD367AC151D}"
@@ -136,6 +138,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio11.Test", "test\VisualStudio11.Test\VisualStudio11.Test.csproj", "{25A2D439-B045-4059-9E1F-738362B72554}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer14", "src\TeamFoundationServer14\TeamFoundationServer14.csproj", "{7DD28CAC-D7B8-4053-B820-9DA44565D40C}"
+EndProject
+=======
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio11.Test", "test\VisualStudio11.Test\VisualStudio11.Test.csproj", "{25A2D439-B045-4059-9E1F-738362B72554}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

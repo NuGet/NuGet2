@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 #if VS12
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Designers;
+using NuGet;
 #endif
 using Microsoft.VisualStudio.Shell.Interop;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
@@ -16,6 +18,8 @@ namespace NuGet.VisualStudio12
         public static async void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
             await DoWorkInWriterLock((IVsProject)hierarchy, action);
+            var fileSystem = new PhysicalFileSystem(@"c:\");
+            fileSystem.MakeFileWritable(project.FullName);
             project.Save();
         }
 

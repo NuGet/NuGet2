@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio
             IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(_packageRepository, useFallbackForDependencies: false);
             IProjectManager projectManager = packageManager.GetProjectManager(project);
 
-            EventHandler<PackageOperationEventArgs> uninstalledHandler = (sender, e) =>
+            EventHandler<PackageOperationEventArgs> packageReferenceRemovingHandler = (sender, e) =>
             {
                 _scriptExecutor.Execute(
                     e.InstallPath, 
@@ -49,12 +49,12 @@ namespace NuGet.VisualStudio
 
             try
             {
-                packageManager.PackageUninstalled += uninstalledHandler;
+                projectManager.PackageReferenceRemoving += packageReferenceRemovingHandler;
                 packageManager.UninstallPackage(projectManager, packageId, version: null, forceRemove: false, removeDependencies: removeDependencies);
             }
             finally
             {
-                packageManager.PackageUninstalled -= uninstalledHandler;
+                projectManager.PackageReferenceRemoving -= packageReferenceRemovingHandler;
             }
         }
     }

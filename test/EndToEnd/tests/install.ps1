@@ -592,6 +592,26 @@ function Test-BindingRedirectDoesNotAddToSilverlightProject {
     Assert-NoBindingRedirect $c app.config HostSL '0.0.0.0-1.0.1.0' '1.0.1.0'
 }
 
+function Test-SimpleBindingRedirectsClassLibraryUpdatePackage {
+    # Arrange
+    $a = New-ClassLibrary
+      
+    # Act
+    $a | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $a E
+    Assert-Reference $a E 1.0.0.0
+    Assert-Reference $a F 1.0.0.0
+    Assert-Null (Get-ProjectItem $a app.config)
+
+    $a | Update-Package F -Safe -Source $context.RepositoryPath
+
+    Assert-NotNull (Get-ProjectItem $a app.config)
+    Assert-Reference $a F 1.0.5.0
+    Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
 function Test-SimpleBindingRedirectsClassLibraryReference {
     param(
         $context
@@ -618,9 +638,9 @@ function Test-SimpleBindingRedirectsClassLibraryReference {
     Assert-Reference $e E 1.0.0.0
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-BindingRedirect $b web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
-    Assert-Null (Get-ProjectItem $d app.config)
+    Assert-BindingRedirect $d app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $e app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-Null (Get-ProjectItem $d web.config)
-    Assert-Null (Get-ProjectItem $e app.config)
     Assert-Null (Get-ProjectItem $e web.config)
 }
 
@@ -641,11 +661,11 @@ function Test-SimpleBindingRedirectsIndirectReference {
     $c | Update-Package F -Safe -Source $context.RepositoryPath
 
     # Assert
-    Assert-Null (Get-ProjectItem $b app.config)
     Assert-Null (Get-ProjectItem $b web.config)
-    Assert-Null (Get-ProjectItem $c app.config)
     Assert-Null (Get-ProjectItem $c web.config)
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $c app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
 function Test-SimpleBindingRedirectsNonWeb {
@@ -1407,28 +1427,6 @@ function Test-InstallPackageWithValuesFromPipe {
     #Assert-Package $p Microsoft-web-helpers
 }
 
-function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary {
-    # Arrange
-    $a = New-ClassLibrary
-      
-    # Act
-    $a | Install-Package E -Source $context.RepositoryPath
-    $a | Update-Package F -Safe -Source $context.RepositoryPath
-
-    # Assert
-    Assert-Package $a E
-    Assert-Reference $a E 1.0.0.0
-    Assert-Null (Get-ProjectItem $a app.config)
-
-    $redirect = $a | Add-BindingRedirect
-
-    Assert-AreEqual F $redirect.Name
-    Assert-AreEqual '0.0.0.0-1.0.5.0' $redirect.OldVersion
-    Assert-AreEqual '1.0.5.0' $redirect.NewVersion
-    Assert-NotNull (Get-ProjectItem $a app.config)
-    Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
-}
-
 function Test-InstallPackageInstallsHighestReleasedPackageIfPreReleaseFlagIsNotSet {
     # Arrange
     $a = New-ClassLibrary
@@ -1951,7 +1949,8 @@ function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 function Test-InstallFailCleansUpSatellitePackageFiles 
 {
     # Verification for work item 2311
-    param ($context)
+	# This also verifies "Fresh Install Of Parent Package Throws When Dependency Package Already Has A Newer Version Installed"
+	param ($context)
 
     # Arrange
     $p = New-ClassLibrary
@@ -1959,9 +1958,9 @@ function Test-InstallFailCleansUpSatellitePackageFiles
     # Act 
     $p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
     try {
-        $p | Install-Package A.fr -Source $context.RepositoryPath
+    $p | Install-Package A.fr -Source $context.RepositoryPath
     } catch {}
-
+    
     # Assert
     Assert-Package $p A 1.2.0
 
@@ -2202,7 +2201,7 @@ function Test-InstallMetadataPackageAddPackageToProject
     Assert-Package $p DependencyPackage
 }
 
-function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
+function Test-FrameworkAssemblyReferenceShouldNotHaveBindingRedirect
 {
     # This test uses a particular profile which is available only in VS 2012.
     if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
@@ -2235,6 +2234,34 @@ function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
     # Assert
     Assert-BindingRedirect $p1 app.config System.Net.Http.Primitives '0.0.0.0-4.2.3.0' '4.2.3.0'
     Assert-NoBindingRedirect $p1 app.config System.Runtime '0.0.0.0-1.5.11.0' '1.5.11.0'
+}
+
+function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
+{
+    # This test uses a particular profile which is available only in VS 2012.
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-ConsoleApplication -ProjectName Hello
+
+    # Change it to v4.5
+    $p.Properties.Item("TargetFrameworkMoniker").Value = ".NETFramework,Version=v4.5"
+
+    # after project retargetting, the $p reference is no longer valid. Need to find it again
+
+    $p = Get-Project -Name Hello
+
+    Assert-NotNull $p
+
+    # Act
+    $p | Install-Package Microsoft.AspNet.Mvc -Version 4.0.30506
+	$p | Update-Package Microsoft.AspNet.Razor
+
+    # Assert
+    Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
 function Test-InstallPackageIntoJavascriptApplication
@@ -2476,13 +2503,21 @@ function Test-InstallPackagePreservesProjectConfigFile
 function Test-InstallPackageToWebsitePreservesProjectConfigFile
 {
     param($context)
-
-    # Arrange
+    
+	# Arrange
     $p = New-Website "CoolProject"
+	$packagesConfigFileName = "packages.CoolProject.config"
+	if ($dte.Version -gt '10.0')
+	{
+		# on dev 11.0 etc, the project name could be something lkie
+		# "CoolProject(12)". So we need to get the project name
+		# to construct the packages config file name.
+	    $packagesConfigFileName = "packages.$($p.Name).config"
+	}
 
     $projectPath = $p.Properties.Item("FullPath").Value
-    $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
-    
+    $packagesConfigPath = Join-Path $projectPath $packagesConfigFileName    
+	
     # create file and add to project
     $newFile = New-Item $packagesConfigPath -ItemType File
     '<packages></packages>' > $newFile
@@ -2493,7 +2528,7 @@ function Test-InstallPackageToWebsitePreservesProjectConfigFile
 
     # Assert
     Assert-Package $p PackageWithFolder
-    Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
+    Assert-NotNull (Get-ProjectItem $p $packagesConfigFileName)
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 

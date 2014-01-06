@@ -139,7 +139,7 @@
                     x:Name="ExecuteButton"
                     Command="{x:Static self:PackageManagerWindowCommands.PackageOperationCommand}"
                     Content="{Binding CommandName}"
-                    IsDefault="True"
+                    IsDefault="False"
                     Visibility="Collapsed"
                     Style="{StaticResource DetailButtonStyle}" />
             </StackPanel>

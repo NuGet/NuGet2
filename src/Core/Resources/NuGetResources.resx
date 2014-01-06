@@ -431,9 +431,33 @@
     <value>&amp;Allow NuGet to download missing packages</value>
   </data>
   <data name="Error_PackageAlreadyExists" xml:space="preserve">
-    <value>Package {0} already exists.</value>
+    <value>Package '{0}' already exists.</value>
   </data>
   <data name="Log_PackageOperation" xml:space="preserve">
     <value>{0} {1}</value>
+  </data>
+  <data name="Log_UpdatingPackagesWithoutOldVersion" xml:space="preserve">
+    <value>Updating '{0}' to version '{1}' in project '{2}'.</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo" xml:space="preserve">
+    <value>&gt;&gt; {0} are being added from '{1}'{2}</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfoPrefix" xml:space="preserve">
+    <value>For adding package '{0}' to project '{1}' that targets '{2}',</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo_AssemblyReferences" xml:space="preserve">
+    <value>Assembly references</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo_BuildFiles" xml:space="preserve">
+    <value>Build files</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo_ContentFiles" xml:space="preserve">
+    <value>Content files</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo_NotFrameworkSpecific" xml:space="preserve">
+    <value> (not framework-specific)</value>
+  </data>
+  <data name="Debug_TargetFrameworkInfo_PowershellScripts" xml:space="preserve">
+    <value>&gt;&gt; PowerShell scripts are being executed from '{0}'{1}</value>
   </data>
 </root>

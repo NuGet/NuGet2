@@ -166,8 +166,9 @@ namespace NuGet.Dialog.Providers
 
             try
             {
-                List<PackageOperation> allOperations;
-                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager, out allOperations);
+                IList<PackageOperation> allOperations;
+                IList<IPackage> allUpdatePackagesByDependencyOrder;
+                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager, out allOperations, out allUpdatePackagesByDependencyOrder);
                 if (!accepted)
                 {
                     return false;
@@ -175,9 +176,8 @@ namespace NuGet.Dialog.Providers
 
                 RegisterPackageOperationEvents(_activePackageManager, null);
 
-                var allUpdatePackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
                 _activePackageManager.UpdateSolutionPackages(
-                    allUpdatePackages,
+                    allUpdatePackagesByDependencyOrder,
                     allOperations,
                     updateDependencies: true,
                     allowPrereleaseVersions: IncludePrerelease,

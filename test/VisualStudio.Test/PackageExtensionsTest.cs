@@ -5,7 +5,7 @@ using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
-    class PackageExtensionsTest
+    public class PackageExtensionsTest
     {
         [Theory]
         [InlineData("Init.ps1")]
@@ -18,12 +18,13 @@ namespace NuGet.VisualStudio.Test
             var package = NuGet.Test.PackageUtility.CreatePackage("A", "1.0", tools: new[] { scriptName });
 
             // Act
-            string scriptPath;
-            bool result = package.FindCompatibleToolFiles(scriptName, targetFramework, out scriptPath);
+            IPackageFile scriptFile;
+            bool result = package.FindCompatibleToolFiles(scriptName, targetFramework, out scriptFile);
 
             // Assert
             Assert.True(result);
-            Assert.Equal("tools\\" + scriptName, scriptPath, StringComparer.OrdinalIgnoreCase);
+            Assert.Null(scriptFile.TargetFramework);
+            Assert.Equal("tools\\" + scriptName, scriptFile.Path, StringComparer.OrdinalIgnoreCase);
         }
 
         [Theory]
@@ -37,11 +38,12 @@ namespace NuGet.VisualStudio.Test
             var package = NuGet.Test.PackageUtility.CreatePackage("A", "1.0", content: new[] { scriptName });
 
             // Act
-            string scriptPath;
-            bool result = package.FindCompatibleToolFiles(scriptName, targetFramework, out scriptPath);
+            IPackageFile scriptFile;
+            bool result = package.FindCompatibleToolFiles(scriptName, targetFramework, out scriptFile);
 
             // Assert
             Assert.False(result);
+            Assert.Null(scriptFile);
         }
 
         [Fact]
@@ -54,12 +56,13 @@ namespace NuGet.VisualStudio.Test
                                                        tools: new[] { "sl3\\install.ps1", "net35\\install.ps1", "[sl40]\\uninstall.ps1" });
 
             // Act
-            string scriptPath;
-            bool result = package.FindCompatibleToolFiles("install.ps1", targetFramework, out scriptPath);
+            IPackageFile scriptFile;
+            bool result = package.FindCompatibleToolFiles("install.ps1", targetFramework, out scriptFile);
 
             // Assert
             Assert.True(result);
-            Assert.Equal("tools\\sl3\\install.ps1", scriptPath);
+            Assert.Equal("tools\\sl3\\install.ps1", scriptFile.Path);
+            Assert.Equal(scriptFile.TargetFramework, new FrameworkName("Silverlight", new Version("3.0")));
         }
 
         [Fact]
@@ -72,11 +75,12 @@ namespace NuGet.VisualStudio.Test
                                                        tools: new[] { "[netmf]\\install.ps1", "[net35]\\install.ps1", "[sl40]\\install.ps1" });
 
             // Act
-            string scriptPath;
-            bool result = package.FindCompatibleToolFiles("install.ps1", targetFramework, out scriptPath);
+            IPackageFile scriptFile;
+            bool result = package.FindCompatibleToolFiles("install.ps1", targetFramework, out scriptFile);
 
             // Assert
             Assert.False(result);
+            Assert.Null(scriptFile);
         }
     }
 }

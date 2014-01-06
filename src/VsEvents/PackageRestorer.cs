@@ -113,7 +113,16 @@ namespace NuGet.VsEvents
             }
             catch (Exception ex)
             {
-                var message = string.Format(CultureInfo.CurrentCulture, Resources.ErrorOccurredRestoringPackages, ex.ToString());
+                string message;
+                if (_msBuildOutputVerbosity < 3)
+                {
+                    message = string.Format(CultureInfo.CurrentCulture, Resources.ErrorOccurredRestoringPackages, ex.Message);
+                }
+                else
+                {
+                    // output exception detail when _msBuildOutputVerbosity is >= Detailed.
+                    message = string.Format(CultureInfo.CurrentCulture, Resources.ErrorOccurredRestoringPackages, ex.ToString());
+                }
                 WriteLine(VerbosityLevel.Quiet, message);
                 ActivityLog.LogError(LogEntrySource, message);
             }

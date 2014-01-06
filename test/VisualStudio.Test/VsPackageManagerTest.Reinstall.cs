@@ -859,6 +859,7 @@ namespace NuGet.VisualStudio.Test
             var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
 
             var projectSystem2 = new MockProjectSystem(new FrameworkName(".NETCore, Version=v4.5"));
+            projectSystem2.ProjectName = "Project2";
             var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
             var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, projectName: null, sourceRepository: localRepository);
             var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);

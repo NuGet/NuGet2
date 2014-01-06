@@ -1,4 +1,4 @@
-﻿﻿#if VS11 || VS10
+#if VS11 || VS10
 extern alias dialog10;
 extern alias dialog11;
 #endif

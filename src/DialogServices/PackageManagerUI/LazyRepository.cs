@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository, ILatestPackageLookup
+    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository, ILatestPackageLookup, IPackageLookup
     {
         private readonly Lazy<IPackageRepository> _repository;
 
@@ -109,6 +109,21 @@ namespace NuGet.Dialog.Providers
         {
             // Starting an operation is an action that should materialize the repository
             return Repository.StartOperation(operation, mainPackageId, mainPackageVersion);
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return Repository.Exists(packageId, version);
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            return Repository.FindPackage(packageId, version);
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            return Repository.FindPackagesById(packageId);
         }
     }
 }

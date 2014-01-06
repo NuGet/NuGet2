@@ -887,9 +887,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 return _fileSystem;
             }
 
-            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useSideBySidePaths)
+            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useSideBySidePaths, bool checkDowngrade)
             {
-                return _packageManager ?? base.CreatePackageManager(fileSystem, useSideBySidePaths);
+                return _packageManager ?? base.CreatePackageManager(fileSystem, useSideBySidePaths, checkDowngrade);
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path)

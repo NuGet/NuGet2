@@ -53,6 +53,7 @@ namespace NuGet.Server.DataServices
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
             MinClientVersion = package.MinClientVersion == null ? null : package.MinClientVersion.ToString();
+            Listed = package.Listed;
         }
 
         internal string FullPath

@@ -97,7 +97,9 @@ namespace NuGet.Commands
 
             if (_helpUrl != null)
             {
-                Console.WriteLine("For more information, visit {0}", _helpUrl);
+                Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                    LocalizedResourceManager.GetString("HelpCommandForMoreInfo"),
+                    _helpUrl));
             }
         }
 
@@ -164,7 +166,9 @@ namespace NuGet.Commands
                 if (_helpUrl != null)
                 {
                     Console.WriteLine();
-                    Console.WriteLine("For more information, visit {0}", _helpUrl);
+                    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                        LocalizedResourceManager.GetString("HelpCommandForMoreInfo"),
+                        _helpUrl));
                 }
 
                 Console.WriteLine();

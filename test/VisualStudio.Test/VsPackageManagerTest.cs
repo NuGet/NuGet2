@@ -13,6 +13,7 @@ using Xunit.Extensions;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
+    using System.Collections.Generic;
 
     public partial class VsPackageManagerTest
     {
@@ -736,6 +737,86 @@ namespace NuGet.VisualStudio.Test
 
             Assert.True(projectRepository.Exists("A", new SemanticVersion("3.0")));
             Assert.True(projectRepository.Exists("B", new SemanticVersion("2.0")));
+        }
+
+        [Fact]
+        public void UpdatePackagesEndToEndWhereNewerVersionPackageDoesNotHaveDependencyLikeOlderVersion()
+        {
+            // Arrange            
+            var localRepository = new MockSharedPackageRepository();
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var A1 = PackageUtility.CreatePackage("A", "1.0", new[] { "hello1" }, dependencies: new[] { PackageDependency.CreateDependency("B", "1.0") });
+            var A2 = PackageUtility.CreatePackage("A", "2.0", new[] { "hello2" }, dependencies: new[] { PackageDependency.CreateDependency("C", "1.0") });
+
+            var B1 = PackageUtility.CreatePackage("B", "1.0", new[] { "world1" });
+            var B2 = PackageUtility.CreatePackage("B", "2.0", new[] { "world2" });
+
+            var C1 = PackageUtility.CreatePackage("C", "1.0", new[] { "galaxy1" });
+            var C2 = PackageUtility.CreatePackage("C", "2.0", new[] { "galaxy2" });
+
+            sourceRepository.AddPackage(A1);
+            sourceRepository.AddPackage(A2);
+            sourceRepository.AddPackage(B1);
+            sourceRepository.AddPackage(B2);
+            sourceRepository.AddPackage(C1);
+            sourceRepository.AddPackage(C2);
+
+            localRepository.AddPackage(A1);
+            localRepository.AddPackage(B1);
+            localRepository.AddPackage(C1);
+
+            projectRepository.Add(A1);
+            projectRepository.Add(B1);
+            projectRepository.Add(C1);
+
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), projectRepository);
+
+            var installWalker = new InstallWalker(
+                localRepository,
+                sourceRepository,
+                null,
+                logger: NullLogger.Instance,
+                ignoreDependencies: false,
+                allowPrereleaseVersions: true);
+
+            IList<IPackage> updatePackagesByDependencyOrder;
+            var updatePackages = new List<IPackage> { A2, B2, C2 };
+            var operationsForShowingLicense = installWalker.ResolveOperations(updatePackages, out updatePackagesByDependencyOrder);
+
+            // Act
+            packageManager.UpdatePackages(projectManager, updatePackagesByDependencyOrder, operationsForShowingLicense, updateDependencies: true, allowPrereleaseVersions: true, logger: NullLogger.Instance);
+
+            // Assert
+            // NOTE THAT BELOW, there is no uninstall operation for B1 but only for C1. Because A2 depends on C1 only where A1 depends on B1 only
+            // And, the operations are resolved for A2 NOT A1
+            Assert.True(operationsForShowingLicense.Count == 4);
+            Assert.True(operationsForShowingLicense[0].Package == A2 && operationsForShowingLicense[0].Action == PackageAction.Install);
+            Assert.True(operationsForShowingLicense[1].Package == B2 && operationsForShowingLicense[1].Action == PackageAction.Install);
+            Assert.True(operationsForShowingLicense[2].Package == C1 && operationsForShowingLicense[2].Action == PackageAction.Uninstall);
+            Assert.True(operationsForShowingLicense[3].Package == C2 && operationsForShowingLicense[3].Action == PackageAction.Install);
+
+            Assert.True(updatePackagesByDependencyOrder.Count == 3);
+            Assert.True(updatePackagesByDependencyOrder[0] == C2);
+            Assert.True(updatePackagesByDependencyOrder[1] == A2);
+            Assert.True(updatePackagesByDependencyOrder[2] == B2);
+
+            Assert.True(localRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Exists("A", new SemanticVersion("1.0")));
+
+            Assert.True(localRepository.Exists("B", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Exists("B", new SemanticVersion("1.0")));
+
+            Assert.True(localRepository.Exists("C", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Exists("C", new SemanticVersion("1.0")));
+
+            Assert.True(projectRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectRepository.Exists("B", new SemanticVersion("2.0")));
+            Assert.True(projectRepository.Exists("C", new SemanticVersion("2.0")));
         }
 
         [Fact]

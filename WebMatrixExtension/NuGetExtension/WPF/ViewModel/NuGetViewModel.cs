@@ -921,13 +921,40 @@ namespace NuGet.WebMatrix
             Task<IEnumerable<IPackage>> dependenciesTask = Task.Factory.StartNew<IEnumerable<IPackage>>(() => _nuGetModel.PackageManager.GetPackagesToBeInstalledForUpdateAll(), 
                 CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
-            var packagesToDisplay = dependenciesTask.Result;
-            foreach (IPackage package in packagesToDisplay)
-            {
-                PackagesToDisplayForUpdateAll.Add(new PackageViewModel(_nuGetModel, package, PackageViewModelAction.Update));
-            }
+            _primaryTask = dependenciesTask.ContinueWith(EndShowLicensePageForAll, this.Scheduler);
+        }
 
-            _primaryTask = dependenciesTask.ContinueWith(EndShowLicensePage, this.Scheduler);
+        private void EndShowLicensePageForAll(Task<IEnumerable<IPackage>> task)
+        {
+            try
+            {
+                Exception exception = task.Exception;
+                if (task.IsCanceled)
+                {
+                    // If the task has been cancelled, simply return
+                    return;
+                }
+                else if (task.IsFaulted)
+                {
+                    this.ShowError(task.Exception.Flatten().InnerException);
+                }
+                else
+                {
+                    var packagesToDisplay = task.Result;
+                    foreach (IPackage package in packagesToDisplay)
+                    {
+                        PackagesToDisplayForUpdateAll.Add(new PackageViewModel(_nuGetModel, package, PackageViewModelAction.Update));
+                    }
+                    IsLicensePageVisible = true;
+                    OnPropertyChanged("IsUpdatingAll");
+                    OnPropertyChanged("NotUpdatingAll");
+                }
+            }
+            finally
+            {
+                Loading = false;
+                LoadingMessage = null;
+            }
         }
 
         internal ICommand ShowUninstallPageCommand
