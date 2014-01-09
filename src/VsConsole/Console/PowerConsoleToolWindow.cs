@@ -124,6 +124,10 @@ namespace NuGetConsole.Implementation
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "We really don't want exceptions from the console to bring down VS")]
         public override void OnToolWindowCreated()
         {
             // Register key bindings to use in the editor
@@ -137,7 +141,19 @@ namespace NuGetConsole.Implementation
             timer.Tick += (o, e) =>
             {
                 timer.Stop();
-                LoadConsoleEditor();
+
+                // all exceptions from the timer thread should be caught to avoid crashing VS
+                try
+                {
+                    LoadConsoleEditor();
+                }
+                catch (Exception x)
+                {
+                    // hide the text "initialize host" when an error occurs.
+                    ConsoleParentPane.NotifyInitializationCompleted();
+
+                    ExceptionHelper.WriteToActivityLog(x);
+                }
             };
             timer.Start();
 
@@ -148,7 +164,10 @@ namespace NuGetConsole.Implementation
         {
             base.OnClose();
 
-            WpfConsole.Dispose();
+            if (_wpfConsole != null)
+            {
+                _wpfConsole.Dispose();
+            }
         }
 
         /// <summary>
