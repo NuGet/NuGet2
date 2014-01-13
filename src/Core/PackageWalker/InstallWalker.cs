@@ -26,8 +26,9 @@ namespace NuGet
                                IPackageRepository sourceRepository,
                                ILogger logger,
                                bool ignoreDependencies,
-                               bool allowPrereleaseVersions)
-            : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions)
+                               bool allowPrereleaseVersions,
+                               DependencyVersion dependencyVersion)
+            : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions, dependencyVersion)
         {
         }
 
@@ -36,14 +37,16 @@ namespace NuGet
                              FrameworkName targetFramework,
                              ILogger logger,
                              bool ignoreDependencies,
-                             bool allowPrereleaseVersions) :
+                             bool allowPrereleaseVersions,
+                             DependencyVersion dependencyVersion) :
             this(localRepository,
                  sourceRepository,
                  constraintProvider: NullConstraintProvider.Instance,
                  targetFramework: targetFramework,
                  logger: logger,
                  ignoreDependencies: ignoreDependencies,
-                 allowPrereleaseVersions: allowPrereleaseVersions)
+                 allowPrereleaseVersions: allowPrereleaseVersions,
+                 dependencyVersion: dependencyVersion)
         {
         }
         
@@ -53,7 +56,8 @@ namespace NuGet
                              FrameworkName targetFramework,
                              ILogger logger,
                              bool ignoreDependencies,
-                             bool allowPrereleaseVersions)
+                             bool allowPrereleaseVersions,
+                             DependencyVersion dependencyVersion)
             : base(targetFramework)
         {
 
@@ -77,6 +81,7 @@ namespace NuGet
             ConstraintProvider = constraintProvider;
             _operations = new OperationLookup();
             _allowPrereleaseVersions = allowPrereleaseVersions;
+            DependencyVersion = dependencyVersion;
         }
 
         internal bool DisableWalkInfo

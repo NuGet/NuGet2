@@ -47,8 +47,7 @@ namespace NuGet.PowerShell.Commands
             _productUpdateService = productUpdateService;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
-            DependencyVersion = DependencyVersion.Lowest;
-
+            
             if (networkAvailable)
             {
                 _isNetworkAvailable = isNetworkAvailable();
@@ -85,7 +84,7 @@ namespace NuGet.PowerShell.Commands
         public SwitchParameter WhatIf { get; set; }
 
         [Parameter]
-        public DependencyVersion DependencyVersion { get; set; }
+        public DependencyVersion? DependencyVersion { get; set; }
 
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
         private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
@@ -174,10 +173,14 @@ namespace NuGet.PowerShell.Commands
                     return;
                 }
                 PackageManager.WhatIf = WhatIf;
-                
+                if (DependencyVersion.HasValue)
+                {
+                    PackageManager.DependencyVersion = DependencyVersion.Value;
+                }
+
                 if (ProjectManager != null)
                 {
-                    ProjectManager.DependencyVersion = DependencyVersion;
+                    ProjectManager.DependencyVersion = PackageManager.DependencyVersion;
                     ProjectManager.WhatIf = WhatIf;
                 }
 
@@ -274,7 +277,6 @@ namespace NuGet.PowerShell.Commands
                 return;
             }
 
-            packageManager.DependencyVersion = DependencyVersion;
             packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
         }
     }

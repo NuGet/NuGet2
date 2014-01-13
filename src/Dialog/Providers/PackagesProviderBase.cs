@@ -672,7 +672,8 @@ namespace NuGet.Dialog.Providers
                     project.GetTargetFrameworkName(),
                     this,
                     ignoreDependencies: false,
-                    allowPrereleaseVersions: IncludePrerelease);
+                    allowPrereleaseVersions: IncludePrerelease,
+                    dependencyVersion: packageManager.DependencyVersion);
 
                 allOperations.AddRange(walker.ResolveOperations(package));
             }
@@ -693,8 +694,8 @@ namespace NuGet.Dialog.Providers
                 targetFramework,
                 this,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: IncludePrerelease);
-
+                allowPrereleaseVersions: IncludePrerelease,
+                dependencyVersion: packageManager.DependencyVersion);
             operations = walker.ResolveOperations(package).ToList();
             return ShowLicenseAgreement(packageManager, operations);
         }

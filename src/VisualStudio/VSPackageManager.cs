@@ -193,6 +193,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
+            projectManager.DependencyVersion = DependencyVersion;            
             using (StartInstallOperation(package.Id, package.Version.ToString()))
             {
                 ExecuteOperationsWithPackage(
@@ -537,7 +538,8 @@ namespace NuGet.VisualStudio
             // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
             // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
             var installWalker = new InstallWalker(LocalRepository, SourceRepository, null, logger ?? NullLogger.Instance,
-                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions,
+                dependencyVersion: DependencyVersion);
 
             IList<IPackage> packagesUninstalledInDependencyOrder;
             var operations = installWalker.ResolveOperations(allPackagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);
@@ -578,7 +580,8 @@ namespace NuGet.VisualStudio
             // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
             // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
             var installWalker = new InstallWalker(projectManager.LocalRepository, SourceRepository, projectManager.Project.TargetFramework, logger ?? NullLogger.Instance,
-                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions,
+                dependencyVersion: DependencyVersion);
 
             IList<IPackage> packagesUninstalledInDependencyOrder;
             var operations = installWalker.ResolveOperations(packagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);

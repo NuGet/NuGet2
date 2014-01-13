@@ -2654,6 +2654,29 @@ function Test-InstallPackageWithoutDependencyVersion
     Assert-Package $p B 1.0.0
 }
 
+# Tests the case when DependencyVersion is specified in nuget.config
+function Test-InstallPackageWithDependencyVersionHighestInNuGetConfig
+{
+    param($context)
+
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('DependencyVersion', 'HighestPatch')
+
+        # Arrange
+        $p = New-ClassLibrary
+        
+        # Act
+        $p | Install-Package jquery.validation -version 1.10
+        
+        # Assert
+        Assert-Package $p jquery.validation 1.10
+        Assert-Package $p jquery 1.4.4
+    }
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('DependencyVersion', $null)
+    }    
+}
+
 # Tests that when -DependencyVersion is not specified, the dependency with
 # the smallest patch number is installed
 function Test-InstallPackageWithoutDependencyVersion

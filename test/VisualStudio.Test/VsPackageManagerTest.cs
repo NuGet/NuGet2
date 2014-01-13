@@ -782,7 +782,8 @@ namespace NuGet.VisualStudio.Test
                 null,
                 logger: NullLogger.Instance,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: true);
+                allowPrereleaseVersions: true,
+                dependencyVersion: DependencyVersion.Lowest);
 
             IList<IPackage> updatePackagesByDependencyOrder;
             var updatePackages = new List<IPackage> { A2, B2, C2 };

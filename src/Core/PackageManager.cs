@@ -142,10 +142,10 @@ namespace NuGet
             var installerWalker = new InstallWalker(
                 LocalRepository, SourceRepository,
                 targetFramework, Logger,
-                ignoreDependencies, allowPrereleaseVersions)
+                ignoreDependencies, allowPrereleaseVersions,
+                DependencyVersion)
             {
-                DisableWalkInfo = ignoreWalkInfo,
-                DependencyVersion = DependencyVersion
+                DisableWalkInfo = ignoreWalkInfo
             };
             Execute(package, installerWalker);
         }

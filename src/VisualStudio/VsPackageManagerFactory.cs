@@ -132,7 +132,7 @@ namespace NuGet.VisualStudio
                 repository = CreateFallbackRepository(repository);
             }
             RepositoryInfo info = GetRepositoryInfo();
-            return new VsPackageManager(_solutionManager,
+            var packageManager = new VsPackageManager(_solutionManager,
                                         repository,
                                         _fileSystemProvider,
                                         info.FileSystem,
@@ -142,6 +142,8 @@ namespace NuGet.VisualStudio
                                         new DeleteOnRestartManager(() => new PhysicalFileSystem(info.FileSystem.Root)),
                                         _packageEvents,
                                         _frameworkMultiTargeting);
+            packageManager.DependencyVersion = GetDependencyVersion();
+            return packageManager;
         }
 
         public IVsPackageManager CreatePackageManagerWithAllPackageSources()
@@ -225,6 +227,30 @@ namespace NuGet.VisualStudio
             }
 
             return _repositoryInfo;
+        }
+
+        /// <summary>
+        /// Returns the user specified DependencyVersion in nuget.config.
+        /// </summary>
+        /// <returns>The user specified DependencyVersion value in nuget.config.</returns>
+        private DependencyVersion GetDependencyVersion()
+        {
+            string configFolderPath = _repositorySettings.ConfigFolderPath;
+            IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
+            var settings = Settings.LoadDefaultSettings(
+                    configSettingsFileSystem,
+                    configFileName: null,
+                    machineWideSettings: _machineWideSettings);
+            string dependencyVersionValue = settings.GetConfigValue("DependencyVersion");
+            DependencyVersion dependencyVersion;
+            if (Enum.TryParse(dependencyVersionValue, out dependencyVersion))
+            {
+                return dependencyVersion;
+            }
+            else
+            {
+                return DependencyVersion.Lowest;
+            }
         }
 
         private PackageSaveModes CalculatePackageSaveMode(ISettings settings)

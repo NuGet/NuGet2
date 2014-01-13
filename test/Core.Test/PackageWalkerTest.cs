@@ -60,7 +60,8 @@ namespace NuGet.Test
                                                              new MockPackageRepository(),
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'.");
@@ -87,7 +88,8 @@ namespace NuGet.Test
                                                              repository.Object,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
 
             // Act
@@ -122,7 +124,8 @@ namespace NuGet.Test
                                                              repository.Object,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
 
             // Act
@@ -163,7 +166,8 @@ namespace NuGet.Test
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'.");
@@ -212,7 +216,8 @@ namespace NuGet.Test
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
             // Act
             var packages = resolver.ResolveOperations(packageA).ToList();
@@ -278,7 +283,8 @@ namespace NuGet.Test
                                                                    sourceRepository,
                                                                    NullLogger.Instance,
                                                                    ignoreDependencies: false,
-                                                                   allowPrereleaseVersions: false);
+                                                                   allowPrereleaseVersions: false,
+                                                                   dependencyVersion: DependencyVersion.Lowest);
 
             // Act
             var operations = resolver.ResolveOperations(packageA).ToList();
@@ -436,7 +442,8 @@ namespace NuGet.Test
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
 
             // Act & Assert
@@ -526,7 +533,8 @@ namespace NuGet.Test
                                                                    null,
                                                                    NullLogger.Instance,
                                                                    ignoreDependencies: false,
-                                                                   allowPrereleaseVersions: false);
+                                                                   allowPrereleaseVersions: false,
+                                                                   dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(A20), "Unable to resolve dependency 'B (\u2265 2.0)'.'B' has an additional constraint (= 1.4) defined in foo.");
@@ -551,7 +559,8 @@ namespace NuGet.Test
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'.");
@@ -578,7 +587,8 @@ namespace NuGet.Test
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false,
-                                                             allowPrereleaseVersions: false);
+                                                             allowPrereleaseVersions: false,
+                                                             dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'.");
@@ -625,7 +635,8 @@ namespace NuGet.Test
                                                                    sourceRepository,
                                                                    NullLogger.Instance,
                                                                    ignoreDependencies: false,
-                                                                   allowPrereleaseVersions: false);
+                                                                   allowPrereleaseVersions: false,
+                                                                   dependencyVersion: DependencyVersion.Lowest);
 
             // Act & Assert
             var packages = resolver.ResolveOperations(packageA).ToList();
@@ -1118,10 +1129,8 @@ namespace NuGet.Test
                 repository,
                 NullLogger.Instance,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: false)
-                {
-                    DependencyVersion = DependencyVersion.HighestPatch
-                };
+                allowPrereleaseVersions: false,
+                dependencyVersion: DependencyVersion.HighestPatch);
 
             // Act
             var packages = resolver.ResolveOperations(A10).ToList();
@@ -1171,10 +1180,8 @@ namespace NuGet.Test
                 logger: NullLogger.Instance,
                 targetFramework: null,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: false)
-                {
-                    DependencyVersion = DependencyVersion.Lowest
-                };
+                allowPrereleaseVersions: false,
+                dependencyVersion: DependencyVersion.Lowest);
 
             // Act
             var packages = resolver.ResolveOperations(A10).ToList();
@@ -1220,10 +1227,8 @@ namespace NuGet.Test
                 logger: NullLogger.Instance,
                 targetFramework: null,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: false)
-                {
-                    DependencyVersion = DependencyVersion.HighestPatch
-                };
+                allowPrereleaseVersions: false,
+                dependencyVersion: DependencyVersion.HighestPatch);
 
             // Act
             var packages = resolver.ResolveOperations(A10).ToList();
@@ -1280,7 +1285,8 @@ namespace NuGet.Test
                 logger: NullLogger.Instance,
                 targetFramework: null,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: false);
+                allowPrereleaseVersions: false,
+                dependencyVersion: DependencyVersion.Lowest);
 
             var updatePackages = new List<IPackage> { A20, B20, C20 };
             IList<IPackage> allUpdatePackagesByDependencyOrder;
