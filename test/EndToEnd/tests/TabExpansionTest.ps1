@@ -419,9 +419,6 @@ function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesIfPreRel
     Assert-AreEqual 1 $suggestions.Count
 
     Assert-AreEqual 'MyPackage' $suggestions[0]
-<<<<<<< HEAD
-}
-=======
 }
 
 function Test-InstallPackageCommandShowTabExpansionForDependencyVersion {
@@ -457,4 +454,4 @@ function Test-UpdatePackageCommandShowTabExpansionForFileConflictAction {
 	Assert-AreEqual 'None' $suggestions[1]
 	Assert-AreEqual 'Overwrite' $suggestions[2]
 }
->>>>>>> ef4cfff... TabExpansion for DependencyVersion and FileConfictAction
+

@@ -60,15 +60,12 @@ Register-TabExpansion 'Install-Package' @{
     'Source' = {
         GetPackageSources
     }
-<<<<<<< HEAD
-=======
 	'DependencyVersion' = {
 		GetEnumNames 'NuGet.DependencyVersion'
 	}
 	'FileConflictAction' = {
 		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
 	}
->>>>>>> ef4cfff... TabExpansion for DependencyVersion and FileConfictAction
 }
 
 Register-TabExpansion 'Uninstall-Package' @{
@@ -116,12 +113,9 @@ Register-TabExpansion 'Update-Package' @{
     'Source' = {
         GetPackageSources
     }
-<<<<<<< HEAD
-=======
 	'FileConflictAction' = {
 		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
 	}
->>>>>>> ef4cfff... TabExpansion for DependencyVersion and FileConfictAction
 }
 
 Register-TabExpansion 'Open-PackagePage' @{
@@ -202,14 +196,11 @@ function GetPackageSources() {
     $allSources | Select-Object -ExpandProperty Name
 }
 
-<<<<<<< HEAD
-=======
 function GetEnumNames($typeName) {
 	# Sort the enumerations in alphabetical order to make it consistent with TabExpansion2
     return [System.Enum]::GetNames($typeName) | Sort-Object
 }
 
->>>>>>> ef4cfff... TabExpansion for DependencyVersion and FileConfictAction
 function GetInstalledPackageVersions($context) {
     $parameters = @{}
     if ($context.id) { $parameters.filter = $context.id }
