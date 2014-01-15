@@ -173,17 +173,19 @@ namespace NuGet.PowerShell.Commands
                 {
                     return;
                 }
+                PackageManager.WhatIf = WhatIf;
                 
                 if (ProjectManager != null)
                 {
                     ProjectManager.DependencyVersion = DependencyVersion;
+                    ProjectManager.WhatIf = WhatIf;
                 }
 
                 if (!String.IsNullOrEmpty(_cacheStatusMessage))
                 {
                     this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
-                }
-
+                }                
+            
                 if (IsDowngradePackage())
                 {
                     PackageManager.UpdatePackage(ProjectManager, Id, Version, !IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
@@ -273,7 +275,6 @@ namespace NuGet.PowerShell.Commands
             }
 
             packageManager.DependencyVersion = DependencyVersion;
-            packageManager.WhatIf = WhatIf;
             packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
         }
     }

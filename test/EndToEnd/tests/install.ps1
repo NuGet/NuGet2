@@ -25,6 +25,22 @@ function Test-PackageInstallWhatIf {
 	Assert-Null (Get-ProjectPackage $project FakeItEasy)
 }
 
+# Test install-package -WhatIf to downgrade an installed package.
+function Test-PackageInstallDowngradeWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication    
+    
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot    
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+
+	# Act
+	Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot -WhatIf
+
+	# Assert
+	# that the installed package is not touched.
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+}
+
 function Test-WebsiteSimpleInstall {
     param(
         $context

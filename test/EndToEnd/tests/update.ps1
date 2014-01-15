@@ -1574,3 +1574,19 @@ function Test-UpdatePackagePreservesProjectConfigFile
     Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
+
+# Test update-package -WhatIf to downgrade an installed package.
+function Test-UpdatePackageDowngradeWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication    
+    
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot    
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+
+	# Act
+	Update-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot -WhatIf
+
+	# Assert
+	# that the installed package is not touched.
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+}

@@ -170,10 +170,7 @@ namespace NuGet.VisualStudio
                             ignoreDependencies,
                             allowPrereleaseVersions);
 
-                        if (!WhatIf)
-                        {
-                            AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-                        }
+                        AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
                     });
                 }
             }
