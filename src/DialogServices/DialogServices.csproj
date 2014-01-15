@@ -48,6 +48,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="PackageManagerUI\Controls\TextBlockControl.cs" />
+    <Compile Include="PackageManagerUI\Converters\DateTimeOffsetToLocalConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\DescriptionLabelConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\MultiNullToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\FileConflictDialog.xaml.cs">

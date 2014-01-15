@@ -72,6 +72,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DateTimeOffsetToLocalConverterTest.cs" />
     <Compile Include="EmptyTreeNodeTest.cs" />
     <Compile Include="InstalledProviderTest.cs" />
     <Compile Include="Mocks\MockOutputConsoleProvider.cs" />

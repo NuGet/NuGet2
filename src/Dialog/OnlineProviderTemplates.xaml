@@ -161,6 +161,7 @@
         <DataTemplate.Resources>
             <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
+            <self:DateTimeOffsetToLocalConverter x:Key="dateTimeOffsetToLocalConverter" />
         </DataTemplate.Resources>
         
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">                
@@ -168,7 +169,7 @@
                 <!-- Authors -->
                 <DockPanel>
                     <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                    <self:TextBlockControl Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </DockPanel>
 
                 <!-- Id -->
@@ -179,32 +180,32 @@
                             <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
                     </self:TextBlockControl>
-                    <self:TextBlockControl x:Name="IdTextOnlyBlock" Text="{Binding Id, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" Visibility="Collapsed" />
+                    <self:TextBlockControl x:Name="IdTextOnlyBlock" Text="{Binding Id, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" Visibility="Collapsed" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </StackPanel>
 
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <self:TextBlockControl AutomationProperties.AutomationId="PrereleaseText" Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
+                    <self:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
+                    <self:TextBlockControl AutomationProperties.AutomationId="PrereleaseText" Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </StackPanel>
 
                 <!-- Current Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding OldVersion, Converter={StaticResource NullToVisibilityConverter}}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CurrentVersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl AutomationProperties.AutomationId="CurrentVersionText" Text="{Binding OldVersion, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
+                    <self:TextBlockControl AutomationProperties.AutomationId="CurrentVersionText" Text="{Binding OldVersion, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </StackPanel>
 
                 <!-- Last Published -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Published, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastPublishedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl AutomationProperties.AutomationId="LastPublishedDate" Text="{Binding PackageIdentity.Published, StringFormat='{}{0:d}', ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl AutomationProperties.AutomationId="LastPublishedDate" Text="{Binding PackageIdentity.Published, Converter={StaticResource dateTimeOffsetToLocalConverter}, Mode=OneWay, StringFormat='{}{0:d}', ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Style="{StaticResource DetailMetadataValueStyle}" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </StackPanel>
 
                 <!-- Download count -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.DownloadCount, Converter={StaticResource countConverter}, ConverterParameter=-1}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DownloadsLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl  AutomationProperties.AutomationId="DownloadCount" Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl  AutomationProperties.AutomationId="DownloadCount" Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}" ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}" />
                 </StackPanel>
 
                 <!-- License header -->
