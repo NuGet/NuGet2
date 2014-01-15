@@ -2574,21 +2574,84 @@ function Test-InstallPackageAddMoreEntriesToProjectConfigFile
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 
-# Tests that when -DependencyVersion HighestPath is specified, the dependency with
+# Tests that when -DependencyVersion HighestPatch is specified, the dependency with
 # the largest patch number is installed
-function Test-InstallPackageWithDependencyVersionHighest
+function Test-InstallPackageWithDependencyVersionHighestPatch
 {
     param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
 
     # Arrange
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package jquery.validation -version 1.10 -DependencyVersion HighestPatch
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion HighestPatch
 
     # Assert
-    Assert-Package $p jquery.validation 1.10
-    Assert-Package $p jquery 1.4.4
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.1
+}
+
+# Tests that when -DependencyVersion HighestPatch is specified, the dependency with
+# the lowest major, highest minor, highest patch is installed
+function Test-InstallPackageWithDependencyVersionHighestMinor
+{
+    param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion HighestMinor
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.2.1
+}
+
+# Tests that when -DependencyVersion Highest is specified, the dependency with
+# the highest version installed
+function Test-InstallPackageWithDependencyVersionHighest
+{
+    param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion Highest
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 2.0.1
+}
+
+# Tests that when -DependencyVersion is lowest, the dependency with
+# the smallest patch number is installed
+function Test-InstallPackageWithoutDependencyVersion
+{
+    param($context)
+
+   # A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion Lowest
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.0
 }
 
 # Tests that when -DependencyVersion is not specified, the dependency with
@@ -2597,13 +2660,16 @@ function Test-InstallPackageWithoutDependencyVersion
 {
     param($context)
 
+   # A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
     # Arrange
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package jquery.validation -version 1.10
+    $p | Install-Package A -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p jquery.validation 1.10
-    Assert-Package $p jquery 1.4.1
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.0
 }
