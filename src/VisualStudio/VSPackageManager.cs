@@ -420,11 +420,11 @@ namespace NuGet.VisualStudio
 
                     foreach (Project project in _solutionManager.GetProjects())
                     {
+                        IProjectManager projectManager = GetProjectManager(project);
+                        var oldWhatIfValue = projectManager.WhatIf;
                         try
                         {
                             eventListener.OnBeforeAddPackageReference(project);
-
-                            IProjectManager projectManager = GetProjectManager(project);
                             InitializeLogger(logger, projectManager);
 
                             foreach (var package in packages)
@@ -444,6 +444,7 @@ namespace NuGet.VisualStudio
                         }
                         finally
                         {
+                            projectManager.WhatIf = oldWhatIfValue;
                             eventListener.OnAfterAddPackageReference(project);
                         }
                     }
@@ -1547,9 +1548,11 @@ namespace NuGet.VisualStudio
                 foreach (var project in _solutionManager.GetProjects())
                 {
                     IProjectManager projectManager = GetProjectManager(project);
+                    var oldWhatIfValue = projectManager.WhatIf;
                     try
                     {
                         InitializeLogger(logger, projectManager);
+                        projectManager.WhatIf = WhatIf;
 
                         if (projectManager.LocalRepository.Exists(packageId))
                         {
@@ -1571,6 +1574,7 @@ namespace NuGet.VisualStudio
                     }
                     finally
                     {
+                        projectManager.WhatIf = oldWhatIfValue;
                         ClearLogger(projectManager);
                     }
                 }
