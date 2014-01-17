@@ -433,9 +433,6 @@
   <data name="Error_PackageAlreadyExists" xml:space="preserve">
     <value>Package '{0}' already exists.</value>
   </data>
-  <data name="Log_PackageOperation" xml:space="preserve">
-    <value>{0} {1}</value>
-  </data>
   <data name="Log_UpdatingPackagesWithoutOldVersion" xml:space="preserve">
     <value>Updating '{0}' to version '{1}' in project '{2}'.</value>
   </data>
@@ -459,5 +456,17 @@
   </data>
   <data name="Debug_TargetFrameworkInfo_PowershellScripts" xml:space="preserve">
     <value>&gt;&gt; PowerShell scripts are being executed from '{0}'{1}</value>
+  </data>
+  <data name="Log_InstallPackage" xml:space="preserve">
+    <value>Install '{0}'</value>
+  </data>
+  <data name="Log_InstallPackageIntoProject" xml:space="preserve">
+    <value>Add '{0}' to project {1}.</value>
+  </data>
+  <data name="Log_UninstallPackage" xml:space="preserve">
+    <value>Uninstall '{0}'.</value>
+  </data>
+  <data name="Log_UninstallPackageFromProject" xml:space="preserve">
+    <value>Remove '{0}' from project {1}.</value>
   </data>
 </root>

@@ -1421,7 +1421,14 @@ namespace NuGet.VisualStudio
                 // then we need to install it.
                 if (!LocalRepository.Exists(e.Package))
                 {
-                    ExecuteInstall(e.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_InstallPackage, e.Package);
+                    }
+                    else
+                    {
+                        ExecuteInstall(e.Package);
+                    }
                 }
             };
 
@@ -1521,8 +1528,9 @@ namespace NuGet.VisualStudio
             {
                 if (WhatIf)
                 {
-                    Logger.Log(MessageLevel.Info, NuGet.Resources.NuGetResources.Log_PackageOperation,
-                        operation.Action,
+                    Logger.Log(
+                        MessageLevel.Info, 
+                        NuGet.Resources.NuGetResources.Log_UninstallPackage,
                         operation.Package);
                 }
                 else

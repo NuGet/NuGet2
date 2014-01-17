@@ -466,6 +466,24 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install &apos;{0}&apos;.
+        /// </summary>
+        public static string Log_InstallPackage {
+            get {
+                return ResourceManager.GetString("Log_InstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add &apos;{0}&apos; to project {1}..
+        /// </summary>
+        public static string Log_InstallPackageIntoProject {
+            get {
+                return ResourceManager.GetString("Log_InstallPackageIntoProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
         /// </summary>
         public static string Log_NoUpdatesAvailable {
@@ -502,15 +520,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1}.
-        /// </summary>
-        public static string Log_PackageOperation {
-            get {
-                return ResourceManager.GetString("Log_PackageOperation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} already has a reference to &apos;{1}&apos;..
         /// </summary>
         public static string Log_ProjectAlreadyReferencesPackage {
@@ -543,6 +552,24 @@ namespace NuGet.Resources {
         public static string Log_SuccessfullyUninstalledPackage {
             get {
                 return ResourceManager.GetString("Log_SuccessfullyUninstalledPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall &apos;{0}&apos;..
+        /// </summary>
+        public static string Log_UninstallPackage {
+            get {
+                return ResourceManager.GetString("Log_UninstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove &apos;{0}&apos; from project {1}..
+        /// </summary>
+        public static string Log_UninstallPackageFromProject {
+            get {
+                return ResourceManager.GetString("Log_UninstallPackageFromProject", resourceCulture);
             }
         }
         

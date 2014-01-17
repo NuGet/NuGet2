@@ -194,7 +194,14 @@ namespace NuGet
                 {
                     if (WhatIf)
                     {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                        Logger.Log(
+                            MessageLevel.Info, 
+                            NuGetResources.Log_InstallPackageIntoProject, 
+                            operation.Package, 
+                            Project.ProjectName);
+
+                        PackageOperationEventArgs args = CreateOperation(operation.Package);
+                        OnPackageReferenceAdding(args);
                     }
                     else
                     {
@@ -208,7 +215,14 @@ namespace NuGet
                 {
                     if (WhatIf)
                     {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                        Logger.Log(
+                            MessageLevel.Info, 
+                            NuGetResources.Log_UninstallPackageFromProject, 
+                            operation.Package, 
+                            Project.ProjectName);
+
+                        PackageOperationEventArgs args = CreateOperation(operation.Package);
+                        OnPackageReferenceRemoved(args);
                     }
                     else
                     {
