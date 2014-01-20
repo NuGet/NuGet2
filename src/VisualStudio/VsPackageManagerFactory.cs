@@ -243,7 +243,7 @@ namespace NuGet.VisualStudio
                     machineWideSettings: _machineWideSettings);
             string dependencyVersionValue = settings.GetConfigValue("DependencyVersion");
             DependencyVersion dependencyVersion;
-            if (Enum.TryParse(dependencyVersionValue, out dependencyVersion))
+            if (Enum.TryParse(dependencyVersionValue, ignoreCase: true, result:out dependencyVersion))
             {
                 return dependencyVersion;
             }
