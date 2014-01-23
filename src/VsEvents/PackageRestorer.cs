@@ -90,6 +90,11 @@ namespace NuGet.VsEvents
             {
                 _errorListProvider.Tasks.Clear();
 
+                if (Action == vsBuildAction.vsBuildActionClean)
+                {
+                    return;
+                }
+
                 if (UsingOldPackageRestore(_dte.Solution))
                 {
                     return;
