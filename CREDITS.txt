@@ -1,6 +1,6 @@
 NuGet Project
 ASP.NET Open Source Gallery at Outercurve Foundation
-Copyright 2010 Outercurve Foundation
+Copyright 2010-2014 Outercurve Foundation
 
 This product includes software developed at
 The Outercurve Foundation (http://www.outercurve.org/).
