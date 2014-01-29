@@ -904,6 +904,7 @@ namespace NuGet.Test
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
             FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
             FrameworkName wp8 = new FrameworkName("WindowsPhone, Version=v8.0");
+            FrameworkName wp81 = new FrameworkName("WindowsPhone, Version=v8.1");
 
             // Act
             bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
@@ -915,6 +916,8 @@ namespace NuGet.Test
             bool wp8CompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp8);
             bool wp8CompatbielWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp8);
 
+            bool wp81CompatibleWithwp8 = VersionUtility.IsCompatible(wp81, wp8);
+
             // Assert
             Assert.False(wp7MangoCompatibleWithwp7);
             Assert.True(wp7CompatibleWithwp7Mango);
@@ -924,6 +927,8 @@ namespace NuGet.Test
 
             Assert.False(wp8CompatibleWithwp7);
             Assert.False(wp8CompatbielWithwp7Mango);
+
+            Assert.True(wp81CompatibleWithwp8);
         }
 
         [Theory]
