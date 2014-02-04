@@ -63,7 +63,7 @@ namespace NuGet
             { "MonoMac", "MonoMac" },
             { "native", "native"},
             { "WindowsPhoneApp", "WindowsPhoneApp"},
-            { "wpa", "WindowsPhoneAppa"}
+            { "wpa", "WindowsPhoneApp"}
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
