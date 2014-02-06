@@ -3,9 +3,9 @@
     <metadata>
         <id>Java</id>
         <version>1.0.0</version>
-        <authors>kinhln</authors>
+        <authors>juste</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>My package description.</description>
+        <description>Contains content files for both WindowsPhoneApp 8.1 and Windows 8.1 projects.</description>
     </metadata>
     <files>
         <file src="content\windowsphoneapp81\phone.txt" target="content\windowsphoneapp81\phone.txt" />

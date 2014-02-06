@@ -2280,7 +2280,7 @@ function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
     Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
-function Test-InstallPackageIntoJavascriptApplication
+function Test-InstallPackageIntoJavaScriptApplication
 {
     if ($dte.Version -eq "10.0")
     {
@@ -2297,7 +2297,7 @@ function Test-InstallPackageIntoJavascriptApplication
     Assert-Package $p "jQuery"
 }
 
-function Test-InstallPackageIntoJavascriptWindowsPhoneApp
+function Test-InstallPackageIntoJavaScriptWindowsPhoneApp
 {
     # this test is only applicable to VS 2013 on Windows 8.1
     if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
