@@ -87,7 +87,7 @@ function New-Project {
     if (!$ProjectName) {
         $ProjectName = $TemplateName + "_$id"
     }
-    
+
     # Make sure there is a solution
     Ensure-Solution
     
@@ -283,6 +283,24 @@ function New-JavaScriptApplication81
     catch {
         # If we're unable to create the project that means we probably don't have some SDK installed
         # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
+}
+
+function New-JavaScriptWindowsPhoneApp81 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try 
+    {
+        $SolutionFolder | New-Project WindowsPhoneApp81JS $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test
         throw "SKIP: $($_)"
     }
 }

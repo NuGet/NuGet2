@@ -2297,6 +2297,24 @@ function Test-InstallPackageIntoJavascriptApplication
     Assert-Package $p "jQuery"
 }
 
+function Test-InstallPackageIntoJavascriptWindowsPhoneApp
+{
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return;
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
+
+    # Act
+    Install-Package jQuery -ProjectName $p.Name 
+
+    # Assert
+    Assert-Package $p "jQuery"
+}
+
 function Test-InstallPackageIntoNativeWinStoreApplication
 {
     if ($dte.Version -eq "10.0")
@@ -2335,6 +2353,31 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
     
     Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
     Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}
+
+
+function Test-InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
+
+    # Act
+    Install-Package Java -ProjectName $p.Name -source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p Java
+    
+    Assert-NotNull (Get-ProjectItem $p 'phone.txt')
+    Assert-NotNull (Get-ProjectItem $p 'phone2.txt')
+    Assert-Null (Get-ProjectItem $p 'store.txt')
 }
 
 function Test-SpecifyDifferentVersionThenServerVersion
