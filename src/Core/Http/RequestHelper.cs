@@ -24,6 +24,8 @@ namespace NuGet
             bool continueIfFailed = true;
             int proxyCredentialsRetryCount = 0;
             int credentialsRetryCount = 0;
+            int failureCount = 0;            
+            const int MaxFailureCount = 10;
 
             while (true)
             {
@@ -96,6 +98,12 @@ namespace NuGet
                 }
                 catch (WebException ex)
                 {
+                    ++failureCount;
+                    if (failureCount >= MaxFailureCount)
+                    {
+                        throw;
+                    }
+
                     using (IHttpWebResponse response = GetResponse(ex.Response))
                     {
                         if (response == null &&
