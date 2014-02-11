@@ -430,6 +430,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
         }
 
+        // Test that when installing a specific version, if NoCache is false, then 
+        // local cache will be used to locate the package.
         [Fact]
         public void InstallCommandUsesLocalCacheIfNoCacheIsFalse()
         {
@@ -439,7 +441,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             localCache.Setup(c => c.GetPackages()).Returns(new[] { PackageUtility.CreatePackage("Gamma") }.AsQueryable()).Verifiable();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, machineCacheRepository: localCache.Object)
             {
-                NoCache = false
+                NoCache = false,
+                Version = "1.0"
             };
             installCommand.Arguments.Add("Gamma");
             installCommand.Source.Add("Some Source name");
@@ -451,6 +454,30 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal(@"Gamma.1.0\Gamma.1.0.nupkg", fileSystem.Paths.Single().Key);
             localCache.Verify();
+        }
+
+        // Test that if version is not specified, then local cache will not be used 
+        // even if NoCache if false.
+        [Fact]
+        public void InstallCommandNotUseLocalCacheIfVersionNotSpecified()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, machineCacheRepository: localCache.Object)
+            {
+                NoCache = false
+            };
+            installCommand.Arguments.Add("Baz");
+            installCommand.Source.Add("Some Source name");
+            installCommand.Source.Add("Some other Source");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
+            localCache.Verify(c => c.GetPackages(), Times.Never());
         }
 
         [Fact]

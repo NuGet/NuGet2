@@ -245,6 +245,10 @@ namespace NuGet.Commands
             string packageId,
             SemanticVersion version)
         {
+            if (version == null)
+            {
+                NoCache = true;
+            }
             var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
 
             if (!PackageInstallNeeded(packageManager, packageId, version))
