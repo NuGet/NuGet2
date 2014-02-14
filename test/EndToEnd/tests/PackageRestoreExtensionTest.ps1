@@ -254,6 +254,55 @@ function Test-PackageRestore-IsAutomaticIsFalse {
     }
 }
 
+# Test that during package restore, all sources are used.
+function Test-PackageRestore-AllSourcesAreUsed {
+    param($context)
+    
+    $tempDirectory = $Env:temp
+    $source1 = Join-Path $tempDirectory ([System.IO.Path]::GetRandomFileName())
+    $source2 = Join-Path $tempDirectory ([System.IO.Path]::GetRandomFileName())
+
+    try {
+        # Arrange		
+        New-Item $source1 -ItemType directory
+        New-Item $source2 -ItemType directory
+        [NuGet.VisualStudio.SettingsHelper]::AddSource('testSource1', $source1);
+        [NuGet.VisualStudio.SettingsHelper]::AddSource('testSource2', $source2);	
+        [NuGet.VisualStudio.PackageCreator]::CreatePackage('p1', '1.0', $source1)
+        [NuGet.VisualStudio.PackageCreator]::CreatePackage('p2', '1.0', $source2)
+        
+        # Arrange
+        # create project and install packages
+        $proj = New-ClassLibrary
+        $proj | Install-Package p1 -source testSource1
+        $proj | Install-Package p2 -source testSource2
+        Assert-Package $proj p1
+        Assert-Package $proj p2
+
+        # Arrange
+        # delete the packages folder
+        $packagesDir = Get-PackagesDir
+        RemoveDirectory $packagesDir
+        Assert-False (Test-Path $packagesDir)
+
+        # Act
+        Build-Solution
+
+        # Assert
+        # both p1 and p2 are restored
+        Assert-True (Test-Path (Join-Path $packagesDir 'p1.1.0' ))
+        Assert-True (Test-Path (Join-Path $packagesDir 'p2.1.0' ))
+    }
+    finally
+    {
+        [NuGet.VisualStudio.SettingsHelper]::RemoveSource('testSource1')
+        [NuGet.VisualStudio.SettingsHelper]::RemoveSource('testSource2')		
+        RemoveDirectory $source1
+        RemoveDirectory $source2
+    }
+}
+
+
 function GetBuildOutput { 
     $dte2 = Get-Interface $dte ([EnvDTE80.DTE2])
     $buildPane = $dte2.ToolWindows.OutputWindow.OutputWindowPanes.Item("Build")
@@ -272,7 +321,7 @@ function RemoveDirectory {
     {
         if (Test-Path $dir)
         {
-            Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
+            Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue
         }
         else 
         {
