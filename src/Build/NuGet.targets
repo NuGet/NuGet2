@@ -36,7 +36,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <PackagesProjectConfig>packages.$(MSBuildProjectName.Replace(' ', '_')).config</PackagesProjectConfig>
+        <PackagesProjectConfig>$(MSBuildProjectDirectory)\packages.$(MSBuildProjectName.Replace(' ', '_')).config</PackagesProjectConfig>
     </PropertyGroup>
 
     <Choose>
@@ -45,9 +45,9 @@
                 <PackagesConfig>$(PackagesProjectConfig)</PackagesConfig>
             </PropertyGroup>
         </When>
-        <When Condition="Exists('packages.config')">
+        <When Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">
             <PropertyGroup>
-                <PackagesConfig>packages.config</PackagesConfig>
+                <PackagesConfig>$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
             </PropertyGroup>
         </When>
     </Choose>
