@@ -283,28 +283,8 @@ namespace NuGet
 
             try
             {
-                if (assemblyReferences.Count > 0 || contentFiles.Count > 0 || buildFiles.Count > 0)
-                {
-                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), Project.ProjectName, VersionUtility.GetShortFrameworkName(Project.TargetFramework));
-
-                    if (assemblyReferences.Count > 0)
-                    {
-                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_AssemblyReferences,
-                            Path.GetDirectoryName(assemblyReferences[0].Path), VersionUtility.GetTargetFrameworkLogString(assemblyReferences[0].TargetFramework));
-                    }
-
-                    if (contentFiles.Count > 0)
-                    {
-                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_ContentFiles,
-                            Path.GetDirectoryName(contentFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(contentFiles[0].TargetFramework));
-                    }
-
-                    if (buildFiles.Count > 0)
-                    {
-                        Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_BuildFiles,
-                            Path.GetDirectoryName(buildFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(buildFiles[0].TargetFramework));
-                    }
-                }
+                // Log target framework info for debugging
+                LogTargetFrameworkInfo(package, assemblyReferences, contentFiles, buildFiles);
 
                 // Add content files
                 Project.AddFiles(contentFiles, _fileTransformers);
@@ -362,6 +342,35 @@ namespace NuGet
                     // manually uninstall things that may have failed.
                     // If this fails then the user is out of luck.
                     LocalRepository.AddPackage(package);
+                }
+            }
+        }
+
+        private void LogTargetFrameworkInfo(IPackage package, List<IPackageAssemblyReference> assemblyReferences, List<IPackageFile> contentFiles, List<IPackageFile> buildFiles)
+        {
+            if (assemblyReferences.Count > 0 || contentFiles.Count > 0 || buildFiles.Count > 0)
+            {
+                // targetFramework can be null for unknown project types
+                string shortFramework = Project.TargetFramework == null ? string.Empty : VersionUtility.GetShortFrameworkName(Project.TargetFramework);
+
+                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), Project.ProjectName, shortFramework);
+
+                if (assemblyReferences.Count > 0)
+                {
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_AssemblyReferences,
+                        Path.GetDirectoryName(assemblyReferences[0].Path), VersionUtility.GetTargetFrameworkLogString(assemblyReferences[0].TargetFramework));
+                }
+
+                if (contentFiles.Count > 0)
+                {
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_ContentFiles,
+                        Path.GetDirectoryName(contentFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(contentFiles[0].TargetFramework));
+                }
+
+                if (buildFiles.Count > 0)
+                {
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo, NuGetResources.Debug_TargetFrameworkInfo_BuildFiles,
+                        Path.GetDirectoryName(buildFiles[0].Path), VersionUtility.GetTargetFrameworkLogString(buildFiles[0].TargetFramework));
                 }
             }
         }
