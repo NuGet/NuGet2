@@ -26,7 +26,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Description"
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
             var ms = new MemoryStream();
 
             // Act
@@ -39,8 +39,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
-    <owners>David</owners>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Description</description>
   </metadata>
@@ -58,7 +58,7 @@ namespace NuGet.Test
                 Description = "Description",
                 ReleaseNotes = "Release Notes"
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
             var ms = new MemoryStream();
 
             // Act
@@ -71,8 +71,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
-    <owners>David</owners>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Description</description>
     <releaseNotes>Release Notes</releaseNotes>
@@ -90,7 +90,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
             builder.FrameworkReferences.Add(new FrameworkAssemblyReference("System.Web"));
             var ms = new MemoryStream();
 
@@ -104,8 +104,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
-    <owners>David</owners>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <frameworkAssemblies>
@@ -126,7 +126,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
             };
             builder.PackageAssemblyReferences.Add(new PackageReferenceSet(null, new string[] { "foo.dll" }));
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
             var ms = new MemoryStream();
 
             // Act
@@ -139,8 +139,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
-    <owners>David</owners>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <references>
@@ -160,7 +160,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
 
             var dependencies = new PackageDependency[] { 
                 new PackageDependency("B")
@@ -179,8 +179,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -200,7 +200,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
 
             var fx = new FrameworkName("Silverlight", new Version("4.0"));
             var dependencies = new PackageDependency[] { 
@@ -220,8 +220,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -243,7 +243,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("content\\winrt53\\one.txt"));
 
             using (var ms = new MemoryStream())
@@ -260,8 +260,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -279,7 +279,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("content\\bar\\one.txt"));
 
             using (var ms = new MemoryStream())
@@ -296,8 +296,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -315,7 +315,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("tools\\sl4\\one.dll"));
 
             using (var ms = new MemoryStream())
@@ -332,8 +332,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -351,7 +351,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("tools\\foo\\one.dll"));
 
             using (var ms = new MemoryStream())
@@ -368,8 +368,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -390,7 +390,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -407,8 +407,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -430,7 +430,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -447,8 +447,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -466,7 +466,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("content\\web.config.install.xdt"));
             builder.Files.Add(CreatePackageFile("content\\app.config.uninstall.xdt"));
 
@@ -484,8 +484,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -507,7 +507,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -524,8 +524,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -548,7 +548,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -565,8 +565,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -584,7 +584,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     new FrameworkName(".NET, Version=3.0"),
@@ -605,8 +605,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <references>
@@ -630,7 +630,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 DevelopmentDependency = true
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     new FrameworkName(".NET, Version=3.0"),
@@ -651,8 +651,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
     <description>Descriptions</description>
@@ -676,7 +676,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     null,
@@ -697,8 +697,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <references>
@@ -720,7 +720,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 MinClientVersion = new Version("2.0")
             };
-            builder.Authors.Add("Luan");
+            builder.Authors.Add("JaneDoe");
             builder.Files.Add(CreatePackageFile("a.txt"));
 
             using (var ms = new MemoryStream())
@@ -737,8 +737,8 @@ namespace NuGet.Test
   <metadata minClientVersion=""2.0"">
     <id>A</id>
     <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -759,7 +759,7 @@ namespace NuGet.Test
                 Language = "     en-us   ",
                 Copyright = "            Copyright 2012                "
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
             builder.Owners.Add("John");
             builder.Tags.Add("t1");
             builder.Tags.Add("t2");
@@ -780,7 +780,7 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
+    <authors>JohnDoe</authors>
     <owners>John</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
@@ -806,7 +806,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 Summary = "Summary",
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
 
             var dependencySet = new PackageDependencySet(null, new[] {
                 new PackageDependency("B", new VersionSpec
@@ -836,8 +836,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>David</authors>
-    <owners>David</owners>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <summary>Summary</summary>
@@ -861,7 +861,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 Summary = "Summary",
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
 
             var dependencySet = new PackageDependencySet(null, new[] {
                 new PackageDependency("B", new VersionSpec
@@ -896,7 +896,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 Summary = "Summary",
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
 
             var dependencySet = new PackageDependencySet(null, new[] {
                 new PackageDependency("B", new VersionSpec
@@ -943,7 +943,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 Summary = "Summary",
             };
-            builder.Authors.Add("David");
+            builder.Authors.Add("JohnDoe");
 
             var dependencySet = new PackageDependencySet(null, new[] {
                 new PackageDependency("B", new VersionSpec
@@ -1017,7 +1017,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
@@ -1037,7 +1037,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
   </metadata></package>";
 
             // Act & Assert
@@ -1054,7 +1054,7 @@ Description is required.");
     <version>2.5.0-vvvvvvvvvvvvvvvvvvvvv</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <dependencies>
        <dependency id=""A"" />
     </dependencies>
@@ -1078,7 +1078,7 @@ Description is required.");
     <id>Artem.XmlProviders</id>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>    
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
@@ -1097,7 +1097,7 @@ Description is required.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
@@ -1136,7 +1136,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <dependencies>
         <dependency />
     </dependencies>
@@ -1159,7 +1159,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <references>
         <reference file=""a.dll"" />
         <group>
@@ -1182,7 +1182,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <dependencies>
         <dependency id=""foo"" />
     </dependencies>
@@ -1209,7 +1209,7 @@ Description is required.");
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <dependencies>
         <dependency id=""foo"" />
     </dependencies>
@@ -1233,13 +1233,13 @@ Description is required.");
     <id>Artem.XmlProviders  </id>
     <version>2.5</version>
     <title>Some awesome package       </title>
-    <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <authors>These are the authors</authors>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>t1      t2    foo-bar</tags>
-    <copyright>David Fowler 2011</copyright>
+    <copyright>Copyright 2011</copyright>
   </metadata>
 </package>";
 
@@ -1254,15 +1254,15 @@ Description is required.");
             Assert.Equal(new SemanticVersion(2, 5, 0, 0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
-            Assert.Equal("Velio Ivanov", authors[0]);
-            Assert.Equal("Velio Ivanov", owners[0]);
+            Assert.Equal("These are the authors", authors[0]);
+            Assert.Equal("These are the authors", owners[0]);
             Assert.Equal(3, builder.Tags.Count);
             Assert.Equal("t1", tags[0]);
             Assert.Equal("t2", tags[1]);
             Assert.Equal("foo-bar", tags[2]);
             Assert.Equal("en-US", builder.Language);
-            Assert.Equal("David Fowler 2011", builder.Copyright);
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal("Copyright 2011", builder.Copyright);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", builder.Description);
             Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.True(builder.RequireLicenseAcceptance);
         }
@@ -1279,7 +1279,7 @@ Description is required.");
     <title>Some awesome package</title>
     <authors>Velio Ivanov</authors>
     <owners>John Doe</owners>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -1300,7 +1300,7 @@ Description is required.");
             Assert.Equal(1, builder.Owners.Count);
             Assert.Equal("John Doe", owners[0]);
             Assert.Equal("en-US", builder.Language);
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", builder.Description);
             Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.True(builder.RequireLicenseAcceptance);
         }
@@ -1317,7 +1317,7 @@ Description is required.");
     <title>Some awesome package</title>
     <authors>Velio Ivanov</authors>
     <owners>John Doe</owners>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -1338,7 +1338,7 @@ Description is required.");
             Assert.Equal(1, builder.Owners.Count);
             Assert.Equal("John Doe", owners[0]);
             Assert.Equal("en-US", builder.Language);
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", builder.Description);
             Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.True(builder.RequireLicenseAcceptance);
         }
@@ -1354,7 +1354,7 @@ Description is required.");
     <version>2.5</version>
     <title>Some awesome package</title>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -1378,7 +1378,7 @@ Description is required.");
             Assert.Equal("Velio Ivanov", authors[0]);
             Assert.Equal("en-US", builder.Language);
             Assert.Equal("2010", builder.Copyright);
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", builder.Description);
             Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.True(builder.RequireLicenseAcceptance);
 
@@ -1407,7 +1407,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>Luan</authors>
+    <authors>JaneDoe</authors>
     <description>description</description>
     <dependencies>
         <group targetFramework=""sl4"">
@@ -1440,7 +1440,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>Luan</authors>
+    <authors>JaneDoe</authors>
     <description>description</description>
     <dependencies>
         <group targetFramework=""sl4"">
@@ -1493,7 +1493,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>Luan</authors>
+    <authors>JaneDoe</authors>
     <description>description</description>
     <dependencies>
         <dependency id=""A"" />
@@ -1519,7 +1519,7 @@ Description is required.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl></licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -1540,7 +1540,7 @@ Description is required.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>    </licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -1677,7 +1677,7 @@ Description is required.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl></licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -1699,7 +1699,7 @@ Enabling license acceptance requires a license url.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <licenseUrl>this-is-a-malformed-url</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -1794,7 +1794,7 @@ Enabling license acceptance requires a license url.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
   </metadata>
 </package>";
@@ -1812,7 +1812,7 @@ Enabling license acceptance requires a license url.");
   <metadata>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
   </metadata>
 </package>";
@@ -1831,7 +1831,7 @@ Enabling license acceptance requires a license url.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
   </metadata>
 </package>";
@@ -1843,7 +1843,7 @@ Enabling license acceptance requires a license url.");
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
             Assert.Equal(new SemanticVersion("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
         }
 
@@ -1857,7 +1857,7 @@ Enabling license acceptance requires a license url.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
     <references>
         <reference file=""foo.dll"" />
@@ -1872,7 +1872,7 @@ Enabling license acceptance requires a license url.");
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
             Assert.Equal(new SemanticVersion("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
 
             var packageReferenceSet = packageBuilder.PackageAssemblyReferences.Single();
@@ -1890,7 +1890,7 @@ Enabling license acceptance requires a license url.");
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
     <language>en-US</language>
   </metadata>
 </package>";
@@ -1902,7 +1902,7 @@ Enabling license acceptance requires a license url.");
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
             Assert.Equal(new SemanticVersion("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("This is the Description (With, Comma-Separated, Words, in Parentheses).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
         }
 
