@@ -61,7 +61,6 @@
     <Compile Include="Settings\ISettingsManager.cs" />
     <Compile Include="Settings\ISettingsStore.cs" />
     <Compile Include="Settings\IWritableSettingsStore.cs" />
-    <Compile Include="Utility\PackageCreator.cs" />
     <Compile Include="Utility\SettingsHelper.cs" />
     <Compile Include="VisualStudioUIWrapper.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
