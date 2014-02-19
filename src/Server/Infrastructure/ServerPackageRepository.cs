@@ -44,6 +44,17 @@ namespace NuGet.Server.Infrastructure
             {
                 throw new InvalidOperationException(String.Format(NuGetResources.Error_PackageAlreadyExists, package));
             }
+
+            _cacheLock.EnterWriteLock();
+            try
+            {
+                _derivedDataLookup.Remove(package);
+            }
+            finally
+            {
+                _cacheLock.ExitWriteLock();
+            }
+
             using (Stream stream = package.GetStream())
             {
                 FileSystem.AddFile(fileName, stream);
