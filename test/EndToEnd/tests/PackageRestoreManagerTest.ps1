@@ -86,3 +86,38 @@ function NoTest-EnablePackageRestoreOnCspProjects
     Assert-AreEqual "true" (Get-MsBuildPropertyValue $p1 "RestorePackages")
     Assert-AreEqual "true" (Get-MsBuildPropertyValue $p2 "RestorePackages")
 }
+
+# Tests that package restore works correctly with Visual Basic projects
+function Test-PackageRestoreVisualBasicProject
+{
+    param($context)
+
+    # Arrange
+    $p1 = New-VBConsoleApplication
+    
+    $p1 | Install-Package ninject
+    $p1.Save()
+
+    Enable-PackageRestore
+
+    $packagesDir = Get-PackagesDir
+    Assert-True (Test-Path $packagesDir)
+
+    $solutionDir = $dte.Solution.FullName    
+    $dte.Solution.SaveAs($solutionDir)
+    Close-Solution
+
+    # delete the packages folder
+    Remove-Item -Recurse -Force $packagesDir
+    Assert-False (Test-Path $packagesDir)
+
+    # reopen the solution.
+    Open-Solution $solutionDir
+
+    # Act
+    Build-Solution
+
+    # Assert
+    # the packages folder is restored
+    Assert-True (Test-Path $packagesDir)
+}

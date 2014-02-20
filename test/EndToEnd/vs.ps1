@@ -348,6 +348,15 @@ function New-WebApplication {
     $SolutionFolder | New-Project EmptyWebApplicationProject40 $ProjectName
 }
 
+function New-VBConsoleApplication {
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project VBConsoleApplication $ProjectName
+}
+
 function New-MvcApplication { 
     param(        
         [string]$ProjectName,
