@@ -66,6 +66,41 @@ namespace NuGet.Test
 ", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
+        // Regression test for the bug that XDT won't work when xml nodes have
+        // attributes.
+        [Fact]
+        public void XdtTransformOnXmlNodeWithAttributes()
+        {
+            // Arrange
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            mockProjectSystem.AddFile("test.xml",
+@"<a attrib=""b""/>".AsStream());
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
+
+            var package = new Mock<IPackage>();
+            package.Setup(m => m.Id).Returns("A");
+            package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
+            package.Setup(m => m.Listed).Returns(true);
+
+            var file = new Mock<IPackageFile>();
+            file.Setup(m => m.Path).Returns(@"content\test.xml.install.xdt");
+            file.Setup(m => m.EffectivePath).Returns("test.xml.install.xdt");
+            file.Setup(m => m.GetStream()).Returns(() =>
+@"<a xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><test xdt:Transform=""InsertIfMissing""/></a>".AsStream());            
+
+            package.Setup(m => m.GetFiles()).Returns(new[] { file.Object });
+            mockRepository.AddPackage(package.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(mockProjectSystem.FileExists("test.xml"));
+            var actual = mockProjectSystem.OpenFile("test.xml").ReadToEnd();
+            Assert.Equal("<a attrib=\"b\">\t<test/></a>", actual);
+        }
+
         [Fact]
         public void ReThrowWithMeaningfulErrorMessageWhenXdtFileHasSyntaxError()
         {
