@@ -59,7 +59,9 @@
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
+    <Compile Include="NuGetAwareProjectPackageRepository.cs" Condition="$(VisualStudioVersion)=='14.0'" />
     <Compile Include="ProjectSystems\CpsProjectSystem.cs" />
+    <Compile Include="ProjectSystems\NuGetAwareProjectSystem.cs" Condition="$(VisualStudioVersion)=='14.0'" />
     <Compile Include="QuickSearch\NugetSearchProvider.cs" />
     <Compile Include="QuickSearch\NugetSearchTask.cs" />
     <Compile Include="QuickSearch\NuGetStaticSearchResult.cs" />
@@ -166,7 +168,6 @@
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="$(ComponentHostAssembly)" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="$(VisualStudioShellAssembly)">
@@ -197,6 +198,11 @@
     <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.ProjectSystem.Interop">
+      <HintPath>..\..\lib\Microsoft.VisualStudio.ProjectSystem.Interop.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="$(VCProjectEngineAssembly)">
       <HintPath>$(VCProjectEngineAssemblyHintPath)</HintPath>
       <SpecificVersion>True</SpecificVersion>

@@ -96,17 +96,23 @@ namespace NuGet.Client.VisualStudio.UI
                     _list.SelectedIndex = 0;
                 }
             }
-            catch (OperationCanceledException)
-            {
-            }
             catch (Exception ex)
             {
-                var message = String.Format(
-                    CultureInfo.CurrentCulture,
-                    Resx.Resources.Text_ErrorOccurred,
-                    ex);
-                _loadingStatusIndicator.Status = LoadingStatus.ErrorOccured;
-                _loadingStatusIndicator.ErrorMessage = message;
+                if (ex is OperationCanceledException ||
+                    (ex is AggregateException &&
+                    ex.GetBaseException() is OperationCanceledException))
+                {
+                    // do nothing
+                }
+                else
+                {
+                    var message = String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resx.Resources.Text_ErrorOccurred,
+                        ex);
+                    _loadingStatusIndicator.Status = LoadingStatus.ErrorOccured;
+                    _loadingStatusIndicator.ErrorMessage = message;
+                }
             }
 
             // When the process is complete, signal that another process can proceed.

@@ -11,7 +11,7 @@ namespace NuGet
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
+    public class PackageReferenceRepository : IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup, IPackageReferenceRepository2
     {
         private readonly PackageReferenceFile _packageReferenceFile;
 
@@ -246,5 +246,13 @@ namespace NuGet
         {
             return !String.IsNullOrEmpty(reference.Id) && reference.Version != null;
         }
+    }
+
+    // TODO: This is a temporary interface that should be deleted.
+    public interface IPackageReferenceRepository2 : IPackageRepository
+    {
+        PackageReference GetPackageReference(string packageId);
+
+        IEnumerable<PackageReference> GetPackageReferences(string packageId);
     }
 }

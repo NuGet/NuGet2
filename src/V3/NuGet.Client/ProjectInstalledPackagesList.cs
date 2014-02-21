@@ -13,9 +13,9 @@ namespace NuGet.Client
 {
     public class ProjectInstalledPackagesList : InstalledPackagesList
     {
-        private PackageReferenceRepository _localRepository;
+        private IPackageReferenceRepository2 _localRepository;
 
-        public ProjectInstalledPackagesList(PackageReferenceRepository localRepository)
+        public ProjectInstalledPackagesList(IPackageReferenceRepository2 localRepository)
         {
             _localRepository = localRepository;
         }

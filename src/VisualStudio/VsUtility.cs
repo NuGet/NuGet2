@@ -93,6 +93,11 @@ namespace NuGet.VisualStudio
         {
             Debug.Assert(project != null);
 
+            if (project.SupportsINuGetProjectSystem())
+            {
+                return true;
+            }
+
             return project.Kind != null && _supportedProjectTypes.Contains(project.Kind) && !project.IsSharedProject();
         }
 

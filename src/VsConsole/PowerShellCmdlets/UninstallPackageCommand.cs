@@ -1,10 +1,12 @@
-using System.Management.Automation;
+using Microsoft.VisualStudio.ProjectSystem.Interop;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
+using System.Management.Automation;
+using System.Threading;
 
 namespace NuGet.PowerShell.Commands
 {
-
     /// <summary>
     /// This command uninstalls the specified package from the specified project.
     /// </summary>
@@ -55,6 +57,33 @@ namespace NuGet.PowerShell.Commands
                 ProjectManager,
                 Id,
                 Version);
+
+#if VS14
+            var nugetAwareProject = ProjectManager == null ?
+                null :
+                ProjectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                var args = new Dictionary<string, object>();
+                args["WhatIf"] = WhatIf;
+                args["SourceRepository"] = PackageManager.SourceRepository; ;
+                args["SharedRepository"] = PackageManager.LocalRepository; ;
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var task = nugetAwareProject.UninstallPackageAsync(
+                    new NuGetPackageMoniker
+                    {
+                        Id = package.Id,
+                        Version = package.Version.ToString()
+                    },
+                    args,
+                    logger: null,
+                    progress: null,
+                    cancellationToken: cts.Token);
+                task.Wait();
+                return;
+            }
+#endif
 
             // resolve actions
             var resolver = new ActionResolver()

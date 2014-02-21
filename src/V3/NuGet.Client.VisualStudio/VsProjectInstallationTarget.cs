@@ -36,7 +36,7 @@ namespace NuGet.Client.VisualStudio
             {
                 VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
                 return ProjectManager.PackageManager.LocalRepository.LoadProjectRepositories()
-                        .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((PackageReferenceRepository)r));
+                        .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((IPackageReferenceRepository2)r));
             }
         }
 
@@ -56,7 +56,7 @@ namespace NuGet.Client.VisualStudio
             TargetProject = new VsTargetProject(
                 Project,
                 ProjectManager,
-                (PackageReferenceRepository)ProjectManager.LocalRepository);
+                (IPackageReferenceRepository2)ProjectManager.LocalRepository);
         }
 
         public static VsProjectInstallationTarget Create(Project project)

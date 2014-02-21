@@ -246,7 +246,7 @@ namespace NuGet.Dialog.Test
                 packageManager.Verify(p => p.UninstallPackage(
                     projectManager1.Object,
                     packageB.Id,
-                    null,
+                    packageB.Version,
                     false,
                     false,
                     provider),
@@ -255,7 +255,7 @@ namespace NuGet.Dialog.Test
                 packageManager.Verify(p => p.UninstallPackage(
                     projectManager2.Object,
                     packageB.Id,
-                    null,
+                    packageB.Version,
                     false,
                     false,
                     provider),

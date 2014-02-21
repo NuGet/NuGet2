@@ -39,7 +39,7 @@ namespace NuGet.Client.VisualStudio
             get {
                 return _solution.GetAllProjects()
                     .Select(p => (InstalledPackagesList)new ProjectInstalledPackagesList(
-                        (PackageReferenceRepository)_packageManager.GetProjectManager(p).LocalRepository));
+                        (IPackageReferenceRepository2)_packageManager.GetProjectManager(p).LocalRepository));
             }
         }
 

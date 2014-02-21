@@ -40,11 +40,11 @@ namespace NuGet.Client.VisualStudio
         }
 
         public VsTargetProject(Project project, IProjectManager projectManager)
-            : this(project, projectManager, (PackageReferenceRepository)projectManager.LocalRepository)
+            : this(project, projectManager, (IPackageReferenceRepository2)projectManager.LocalRepository)
         {
         }
 
-        public VsTargetProject(Project project, IProjectManager projectManager, PackageReferenceRepository localRepository)
+        public VsTargetProject(Project project, IProjectManager projectManager, IPackageReferenceRepository2 localRepository)
         {
             Project = project;
             _projectManager = projectManager;

@@ -6,6 +6,12 @@ using System.Net.NetworkInformation;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
 
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+using System.Collections.Generic;
+using System.Threading;
+#endif
+
 namespace NuGet.PowerShell.Commands
 {
     /// <summary>
@@ -256,6 +262,33 @@ namespace NuGet.PowerShell.Commands
                 Version,
                 IncludePrerelease.IsPresent);
 
+#if VS14
+            var nugetAwareProject = ProjectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                var args = new Dictionary<string, object>();
+                args["DependencyVersion"] = DependencyVersion;
+                args["IgnoreDependencies"] = IgnoreDependencies;
+                args["WhatIf"] = WhatIf;
+                args["SourceRepository"] = packageManager.SourceRepository;
+                args["SharedRepository"] = packageManager.LocalRepository;
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var task = nugetAwareProject.InstallPackageAsync(
+                    new NuGetPackageMoniker
+                    {
+                        Id = package.Id,
+                        Version = package.Version.ToString()
+                    },
+                    args,
+                    logger: null,
+                    progress: null,
+                    cancellationToken: cts.Token);
+                task.Wait();
+
+                return;
+            }
+#endif
             // Resolve actions
             var resolver = new ActionResolver()
             {
