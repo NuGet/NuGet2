@@ -139,23 +139,33 @@ namespace NuGet.Dialog.Providers
 
         protected override bool ExecuteCore(PackageItem item)
         {
-            CheckDependentPackages(item.PackageIdentity, LocalRepository, _targetFramework);
-
-            bool? removeDependencies = AskRemoveDependency(
-                item.PackageIdentity,
-                new [] { LocalRepository },
-                new [] { _targetFramework });
-
-            if (removeDependencies == null)
+            if (_project.SupportsINuGetProjectSystem())
             {
-                // user presses Cancel
-                return false;
+                ShowProgressWindow();
+                UninstallPackageFromProject(_project, item, (bool)false);
+                HideProgressWindow();
+                return true;
             }
+            else
+            {
+                CheckDependentPackages(item.PackageIdentity, LocalRepository, _targetFramework);
 
-            ShowProgressWindow();
-            UninstallPackageFromProject(_project, item, (bool)removeDependencies);
-            HideProgressWindow();
-            return true;
+                bool? removeDependencies = AskRemoveDependency(
+                    item.PackageIdentity,
+                    new[] { LocalRepository },
+                    new[] { _targetFramework });
+
+                if (removeDependencies == null)
+                {
+                    // user presses Cancel
+                    return false;
+                }
+
+                ShowProgressWindow();
+                UninstallPackageFromProject(_project, item, (bool)removeDependencies);
+                HideProgressWindow();
+                return true;
+            }
         }
 
         protected void CheckDependentPackages(
@@ -263,7 +273,7 @@ namespace NuGet.Dialog.Providers
                 if (projectManager.IsInstalled(item.PackageIdentity))
                 {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: removeDependencies, logger: this);
+                    PackageManager.UninstallPackage(projectManager, item.Id, version: item.PackageIdentity.Version, forceRemove: false, removeDependencies: removeDependencies, logger: this);
                 }
             }
             finally

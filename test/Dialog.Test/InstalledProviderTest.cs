@@ -186,7 +186,7 @@ namespace NuGet.Dialog.Test
             provider.ExecuteCompletedCallback = () =>
             {
                 // Assert
-                packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false, provider), Times.Once());
+                packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", packageA.Version, false, false, provider), Times.Once());
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
 
                 mre.Set();

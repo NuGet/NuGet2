@@ -4,9 +4,16 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using EnvDTE;
+
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
+
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Resources;
+using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -73,18 +80,30 @@ namespace NuGet.VisualStudio
             // Create the project system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
 
-            var repository = new PackageReferenceRepository(projectSystem, project.GetProperName(), _sharedRepository);
+            // The source repository of the project is an aggregate since it might need to look for all
+            // available packages to perform updates on dependent packages
+            var sourceRepository = CreateProjectManagerSourceRepository();
+
+#if VS14
+            if (projectSystem is INuGetPackageManager)
+            {
+                var nugetAwareRepo = new NuGetAwareProjectPackageRepository((INuGetPackageManager)projectSystem, _sharedRepository);
+                return new ProjectManager(
+                    sourceRepository, PathResolver, projectSystem, nugetAwareRepo);
+            }
+#endif
+
+            PackageReferenceRepository repository = new PackageReferenceRepository(projectSystem, project.GetProperName(), _sharedRepository);
 
             // Ensure the logger is null while registering the repository
             FileSystem.Logger = null;
             Logger = null;
 
             // Ensure that this repository is registered with the shared repository if it needs to be
-            repository.RegisterIfNecessary();
-
-            // The source repository of the project is an aggregate since it might need to look for all
-            // available packages to perform updates on dependent packages
-            var sourceRepository = CreateProjectManagerSourceRepository();
+            if (repository != null)
+            {
+                repository.RegisterIfNecessary();
+            }
 
             var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);
 
@@ -155,6 +174,34 @@ namespace NuGet.VisualStudio
                 InitializeLogger(logger, projectManager);
 
                 IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+
+#if VS14
+                var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+                if (nugetAwareProject != null)
+                {
+                    var args = new Dictionary<string, object>();
+                    args["DependencyVersion"] = DependencyVersion;
+                    args["IgnoreDependencies"] = ignoreDependencies;
+                    args["WhatIf"] = WhatIf;
+                    args["SourceRepository"] = SourceRepository;
+                    args["SharedRepository"] = _sharedRepository;
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    var task = nugetAwareProject.InstallPackageAsync(
+                        new NuGetPackageMoniker
+                        {
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+
+                    return;
+                }
+#endif
                 using (StartInstallOperation(packageId, package.Version.ToString()))
                 {
                     if (skipAssemblyReferences)
@@ -193,6 +240,43 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
+#if VS14
+            var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                var args = new Dictionary<string, object>();
+                args["DependencyVersion"] = DependencyVersion;
+                args["IgnoreDependencies"] = ignoreDependencies;
+                args["AllowPrereleaseVersions"] = allowPrereleaseVersions;
+                args["SourceRepository"] = SourceRepository;
+                args["SharedRepository"] = _sharedRepository;
+                args["WhatIf"] = WhatIf;
+
+                try
+                {
+                    InitializeLogger(logger, projectManager);
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    var task = nugetAwareProject.InstallPackageAsync(
+                        new NuGetPackageMoniker{
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+                }
+                finally
+                {
+                    ClearLogger(projectManager);
+                }
+
+                return;
+            }
+#endif
+
             projectManager.DependencyVersion = DependencyVersion;            
             using (StartInstallOperation(package.Id, package.Version.ToString()))
             {
@@ -223,11 +307,36 @@ namespace NuGet.VisualStudio
                 InitializeLogger(logger, projectManager);
 
                 bool appliesToProject;
-                IPackage package = FindLocalPackage(projectManager,
-                                                    packageId,
-                                                    version,
-                                                    CreateAmbiguousUninstallException,
-                                                    out appliesToProject);
+                IPackage package = FindLocalPackage(
+                    projectManager,
+                    packageId,
+                    version,
+                    CreateAmbiguousUninstallException,
+                    out appliesToProject);
+
+#if VS14
+                var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+                if (nugetAwareProject != null)
+                {
+                    var args = new Dictionary<string, object>();
+                    args["WhatIf"] = WhatIf;
+                    args["SourceRepository"] = SourceRepository;
+                    args["SharedRepository"] = _sharedRepository;
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    var task = nugetAwareProject.UninstallPackageAsync(
+                        new NuGetPackageMoniker{
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+                    return;
+                }
+#endif
 
                 PackageUninstalling += uninstallingHandler;
                 PackageUninstalled += uninstalledHandler;
@@ -282,6 +391,49 @@ namespace NuGet.VisualStudio
 
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
         {
+#if VS14
+            var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                try
+                {
+                    InitializeLogger(logger, projectManager);
+
+                    var package = SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions, allowUnlisted: false);
+                    if (package == null)
+                    {
+                        throw new InvalidOperationException(
+                            String.Format(CultureInfo.CurrentCulture,
+                            VsResources.UnknownPackage, packageId));
+                    }
+
+                    var args = new Dictionary<string, object>();
+                    args["DependencyVersion"] = DependencyVersion;
+                    args["WhatIf"] = WhatIf;
+                    args["SourceRepository"] = SourceRepository;
+                    args["SharedRepository"] = _sharedRepository;
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    var task = nugetAwareProject.InstallPackageAsync(
+                        new NuGetPackageMoniker
+                        {
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+                }
+                finally
+                {
+                    ClearLogger(projectManager);
+                }
+
+                return;
+            }
+#endif
             UpdatePackage(projectManager,
                             packageId,
                             () => UpdatePackageReference(projectManager, packageId, version, updateDependencies, allowPrereleaseVersions),
@@ -340,6 +492,44 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException("operations");
             }
+
+#if VS14
+            var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                var args = new Dictionary<string, object>();
+                args["DependencyVersion"] = DependencyVersion;
+                args["UpdateDependencies"] = updateDependencies;
+                args["AllowPrereleaseVersions"] = allowPrereleaseVersions;
+                args["SharedRepository"] = _sharedRepository;
+
+                try
+                {
+                    InitializeLogger(logger, projectManager);
+                    foreach (var package in packages)
+                    {
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        var task = nugetAwareProject.InstallPackageAsync(
+                            new NuGetPackageMoniker
+                            {
+                                Id = package.Id,
+                                Version = package.Version.ToString()
+                            },
+                            args,
+                            logger: null,
+                            progress: null,
+                            cancellationToken: cts.Token);
+                        task.Wait();
+                    }
+                }
+                finally
+                {
+                    ClearLogger(projectManager);
+                }
+
+                return;
+            }
+#endif
 
             using (StartUpdateOperation(packageId: null, packageVersion: null))
             {
@@ -983,7 +1173,12 @@ namespace NuGet.VisualStudio
                     VsResources.UnknownPackage, packageId));
             }
 
-            appliesToProject = IsProjectLevel(package);
+#if VS14
+            bool isNuGetAwareProjectSystem = (projectManager != null && projectManager.Project is NuGetAwareProjectSystem);
+#else
+            bool isNuGetAwareProjectSystem = false;
+#endif
+            appliesToProject = isNuGetAwareProjectSystem || IsProjectLevel(package);
 
             if (appliesToProject)
             {
@@ -1745,5 +1940,30 @@ namespace NuGet.VisualStudio
                 SourceRepository.StartOperation(operation, packageId, mainPackageVersion),
                 new DisposableAction(() => _repositoryOperationPending = false));
         }
+
+        public void WriteLine(string format, params object[] args)
+        {
+            if (Logger != null)
+            {
+                Logger.Log(MessageLevel.Info, format, args);
+            }
+        }
     }
+
+#if VS14
+    public class NuGetPackageMoniker : INuGetPackageMoniker
+    {
+        public string Id
+        {
+            get;
+            set;
+        }
+
+        public string Version
+        {
+            get;
+            set;
+        }
+    }
+#endif
 }

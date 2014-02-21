@@ -33,6 +33,13 @@ namespace NuGet.VisualStudio
                     VsResources.DTE_ProjectUnsupported, project.GetName()));
             }
 
+#if VS14
+            if (project.SupportsINuGetProjectSystem())
+            {
+                return new NuGetAwareProjectSystem(project);
+            }
+#endif
+
             // Try to get a factory for the project type guid            
             foreach (var guid in project.GetProjectTypeGuids())
             {

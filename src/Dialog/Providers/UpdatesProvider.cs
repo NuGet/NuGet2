@@ -170,18 +170,28 @@ namespace NuGet.Dialog.Providers
         protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager, out IList<PackageOperation> allOperations, out IList<IPackage> packagesByDependencyOrder)
         {
             allOperations = new List<PackageOperation>();
-
-            var installWalker = new InstallWalker(
-                LocalRepository,
-                activePackageManager.SourceRepository,
-                _project.GetTargetFrameworkName(),
-                logger: this,
-                ignoreDependencies: false,
-                allowPrereleaseVersions: IncludePrerelease,
-                dependencyVersion: activePackageManager.DependencyVersion);
-
             var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
-            allOperations = installWalker.ResolveOperations(allPackages, out packagesByDependencyOrder);
+            if (_project.SupportsINuGetProjectSystem())
+            {
+                packagesByDependencyOrder = allPackages.ToList();
+                foreach (var package in allPackages)
+                {
+                    allOperations.Add(new PackageOperation(package, PackageAction.Install));
+                }
+            }
+            else
+            {
+                var installWalker = new InstallWalker(
+                    LocalRepository,
+                    activePackageManager.SourceRepository,
+                    _project.GetTargetFrameworkName(),
+                    logger: this,
+                    ignoreDependencies: false,
+                    allowPrereleaseVersions: IncludePrerelease,
+                    dependencyVersion: activePackageManager.DependencyVersion);
+                allOperations = installWalker.ResolveOperations(allPackages, out packagesByDependencyOrder);
+            }
+
             return ShowLicenseAgreement(activePackageManager, allOperations);
         }
 

@@ -150,11 +150,21 @@ namespace NuGet.Dialog.Providers
                 ShowProgressWindow();
 
                 IList<PackageOperation> operations;
-                bool acceptLicense = ShowLicenseAgreement(
-                    item.PackageIdentity,
-                    activePackageManager,
-                    _project.GetTargetFrameworkName(),
-                    out operations);
+                bool acceptLicense;
+                if (_project.SupportsINuGetProjectSystem())
+                {
+                    operations = new List<PackageOperation>();
+                    operations.Add(new PackageOperation(item.PackageIdentity, PackageAction.Install));
+                    acceptLicense = ShowLicenseAgreement(activePackageManager, operations);
+                }
+                else
+                {
+                    acceptLicense = ShowLicenseAgreement(
+                        item.PackageIdentity,
+                        activePackageManager,
+                        _project.GetTargetFrameworkName(),
+                        out operations);
+                }
 
                 if (!acceptLicense)
                 {

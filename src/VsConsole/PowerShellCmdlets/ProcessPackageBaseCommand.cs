@@ -246,7 +246,10 @@ namespace NuGet.PowerShell.Commands
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
 
-            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project.GetTargetFrameworkName(), project);
+            if (!project.SupportsINuGetProjectSystem())
+            {
+                ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project.GetTargetFrameworkName(), project);
+            }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -262,12 +265,15 @@ namespace NuGet.PowerShell.Commands
 
             try
             {
-                ExecuteScript(
-                    e.InstallPath, 
-                    PowerShellScripts.Uninstall, 
-                    e.Package, 
-                    projectManager.GetTargetFrameworkForPackage(e.Package.Id), 
-                    project);
+                if (!project.SupportsINuGetProjectSystem())
+                {
+                    ExecuteScript(
+                        e.InstallPath,
+                        PowerShellScripts.Uninstall,
+                        e.Package,
+                        projectManager.GetTargetFrameworkForPackage(e.Package.Id),
+                        project);
+                }
             }
             catch (Exception ex)
             {

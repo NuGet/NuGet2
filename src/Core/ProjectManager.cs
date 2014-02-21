@@ -244,7 +244,7 @@ namespace NuGet
             {
                 return;
             }
-
+            
             ExtractPackageFilesToProject(package);
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, packageFullName, Project.ProjectName);
@@ -447,6 +447,7 @@ namespace NuGet
                 return;
             }
 
+
             // Get other packages
             IEnumerable<IPackage> otherPackages = from p in LocalRepository.GetPackages()
                                                   where p.Id != package.Id
@@ -462,7 +463,7 @@ namespace NuGet
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
                                     from file in GetCompatibleInstalledItemsForPackage(p.Id, p.GetContentFiles())
-                                    where !IsTransformFile(file.Path) 
+                                    where !IsTransformFile(file.Path)
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
@@ -492,6 +493,7 @@ namespace NuGet
 
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
+
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceRemoved(args);
