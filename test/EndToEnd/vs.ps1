@@ -756,6 +756,11 @@ function Enable-PackageRestore {
     }
 
     $componentService = Get-VSComponentModel
+    
+    # change active package source to "All"
+    $packageSourceProvider = $componentService.GetService([NuGet.VisualStudio.IVsPackageSourceProvider])
+    $packageSourceProvider.ActivePackageSource = [NuGet.VisualStudio.AggregatePackageSource]::Instance
+    
     $packageRestoreManager = $componentService.GetService([NuGet.VisualStudio.IPackageRestoreManager])
     $packageRestoreManager.EnableCurrentSolutionForRestore($false)
 }
