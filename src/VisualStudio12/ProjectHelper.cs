@@ -1,36 +1,44 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Shell.Interop;
+using MsBuildProject = Microsoft.Build.Evaluation.Project;
+using EnvDTE;
+
 #if VS12
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Designers;
 using NuGet;
+using System.Threading;
 #endif
-using Microsoft.VisualStudio.Shell.Interop;
-using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
 namespace NuGet.VisualStudio12
 {
     public static class ProjectHelper
     {
 #if VS12
-        public static async void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
+
+        /// <summary>
+        /// Performs an action inside a VS internal writer lock. This method runs synchronously but uses several different
+        /// threads to avoid deadlocks with the project system.
+        /// </summary>
+        public static void DoWorkInWriterLock(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
-            await DoWorkInWriterLock((IVsProject)hierarchy, action);
-            var fileSystem = new PhysicalFileSystem(@"c:\");
-            fileSystem.MakeFileWritable(project.FullName);
-            project.Save();
+            // peform this work on a new thread to avoid moving our current thread
+            var task = Task.Run(() => DoWorkInWriterLockInternal(project, hierarchy, action));
+            task.Wait();
         }
 
-        private static async Task DoWorkInWriterLock(IVsProject project, Action<MsBuildProject> action)
+        private static async Task DoWorkInWriterLockInternal(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
-            UnconfiguredProject unconfiguredProject = GetUnconfiguredProject(project);
+            UnconfiguredProject unconfiguredProject = GetUnconfiguredProject((IVsProject)hierarchy);
             if (unconfiguredProject != null)
             {
                 var service = unconfiguredProject.ProjectService.Services.ProjectLockService;
                 if (service != null)
                 {
+                    // WriteLockAsync will move us to a background thread.
                     using (ProjectWriteLockReleaser x = await service.WriteLockAsync())
                     {
                         await x.CheckoutAsync(unconfiguredProject.FullPath);
@@ -45,7 +53,17 @@ namespace NuGet.VisualStudio12
                         await x.ReleaseAsync();
                     }
 
-                    await unconfiguredProject.ProjectService.Services.ThreadingPolicy.SwitchToUIThread();
+                    // perform the save synchronously
+                    await Task.Run(() =>
+                    {
+                        // move to the UI thread for the rest of this method
+                        unconfiguredProject.ProjectService.Services.ThreadingPolicy.SwitchToUIThread();
+
+                        var fileSystem = new PhysicalFileSystem(@"c:\");
+                        fileSystem.MakeFileWritable(project.FullName);
+                        project.Save();
+                    }
+                    );
                 }
             }
         }
@@ -61,7 +79,7 @@ namespace NuGet.VisualStudio12
                     object extObject;
                     if (ErrorHandler.Succeeded(hierarchy.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_ExtObject, out extObject)))
                     {
-                        EnvDTE.Project dteProject = extObject as EnvDTE.Project;
+                        Project dteProject = extObject as Project;
                         if (dteProject != null)
                         {
                             context = dteProject.Object as IVsBrowseObjectContext;
@@ -73,7 +91,7 @@ namespace NuGet.VisualStudio12
             return context != null ? context.UnconfiguredProject : null;
         }
 #else
-        public static void DoWorkInWriterLock(EnvDTE.Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
+        public static void DoWorkInWriterLock(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
         }
 #endif
