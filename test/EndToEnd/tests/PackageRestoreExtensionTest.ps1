@@ -299,6 +299,11 @@ function Test-PackageRestore-AllSourcesAreUsed {
         [NuGet.VisualStudio.SettingsHelper]::RemoveSource('testSource2')		
         RemoveDirectory $source1
         RemoveDirectory $source2
+
+        # change active package source to "All"
+        $componentService = Get-VSComponentModel
+        $packageSourceProvider = $componentService.GetService([NuGet.VisualStudio.IVsPackageSourceProvider])
+        $packageSourceProvider.ActivePackageSource = [NuGet.VisualStudio.AggregatePackageSource]::Instance
     }
 }
 
