@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
@@ -433,7 +434,17 @@ namespace NuGet.Tools
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
-            _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
+            if (VsVersionHelper.IsVisualStudio2013)
+            {
+                // This method is called by the UI thread when the user clicks the menu item. To avoid
+                // hangs on CPS project systems this needs to be done on a background thread.
+                ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
+                    _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true)));
+            }
+            else
+            {
+                _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
+            }
         }
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
