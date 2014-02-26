@@ -20,14 +20,22 @@ namespace NuGet.VisualStudio12
 #if VS12
 
         /// <summary>
-        /// Performs an action inside a VS internal writer lock. This method runs synchronously but uses several different
-        /// threads to avoid deadlocks with the project system.
+        /// Performs an action inside a VS internal writer lock. If called from the UI thread this method will
+        /// run async to avoid deadlocks.
         /// </summary>
         public static void DoWorkInWriterLock(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
-            // peform this work on a new thread to avoid moving our current thread
+            // Perform this work on a new thread to avoid moving our current thread, and so it can be done async if needed.
             var task = Task.Run(() => DoWorkInWriterLockInternal(project, hierarchy, action));
-            task.Wait();
+
+            // Check if we are running on the UI thread. If we are we cannot risk blocking and holding the lock.
+            // Ideally all calls involving the lock should be done on a background thread from the start to
+            // keep the call as synchronous as possible within NuGet.
+            if (!Microsoft.VisualStudio.Shell.ThreadHelper.CheckAccess())
+            {
+                // If we are on a background thread we can safely run synchronously.
+                task.Wait();
+            }
         }
 
         private static async Task DoWorkInWriterLockInternal(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
