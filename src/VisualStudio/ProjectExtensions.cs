@@ -1009,5 +1009,29 @@ namespace NuGet.VisualStudio
                 return Path.GetFileName(obj).GetHashCode();
             }
         }
+
+        /// <summary>
+        /// Check if the project has the SharedAssetsProject capability. This is true
+        /// for shared projects in universal apps.
+        /// </summary>
+        public static bool IsSharedProject(this Project project)
+        {
+            bool isShared = false;
+            var hier = project.ToVsHierarchy();
+
+            // VSHPROPID_ProjectCapabilities is a space delimited list of capabilities (Dev11+)
+            object capObj;
+            if (ErrorHandler.Succeeded(hier.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID5.VSHPROPID_ProjectCapabilities, out capObj)) && capObj != null)
+            {
+                string cap = capObj as string;
+
+                if (!String.IsNullOrEmpty(cap))
+                {
+                    isShared = cap.IndexOf("SharedAssetsProject", StringComparison.OrdinalIgnoreCase) > -1;
+                }
+            }
+
+            return isShared;
+        }
     }
 }

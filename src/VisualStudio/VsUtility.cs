@@ -91,7 +91,8 @@ namespace NuGet.VisualStudio
         public static bool IsSupported(Project project)
         {
             Debug.Assert(project != null);
-            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
+
+            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind) && !project.IsSharedProject();
         }
 
         public static T GetPropertyValue<T>(Project project, string propertyName)
