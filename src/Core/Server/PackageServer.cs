@@ -10,8 +10,9 @@ namespace NuGet
     {
         private const string ServiceEndpoint = "/api/v2/package";
         private const string ApiKeyHeader = "X-NuGet-ApiKey";
+        private const int MaxRediretionCount = 20;
 
-        private readonly Lazy<Uri> _baseUri;
+        private Lazy<Uri> _baseUri;
         private readonly string _source;
         private readonly string _userAgent;
 
@@ -79,34 +80,50 @@ namespace NuGet
             long packageSize,
             int timeout) 
         {
-            HttpClient client = GetClient("", "PUT", "application/octet-stream");
-            
-            client.SendingRequest += (sender, e) =>
+            int redirectionCount = 0;
+            while (true)
             {
-                SendingRequest(this, e);
-                var request = (HttpWebRequest)e.Request;
-                request.AllowWriteStreamBuffering = false;
+                HttpClient client = GetClient("", "PUT", "application/octet-stream");
 
-                // Set the timeout
-                if (timeout <= 0)
+                client.SendingRequest += (sender, e) =>
                 {
-                    timeout = request.ReadWriteTimeout; // Default to 5 minutes if the value is invalid.
+                    SendingRequest(this, e);
+                    var request = (HttpWebRequest)e.Request;
+                    request.AllowWriteStreamBuffering = false;
+
+                    // Set the timeout
+                    if (timeout <= 0)
+                    {
+                        timeout = request.ReadWriteTimeout; // Default to 5 minutes if the value is invalid.
+                    }
+
+                    request.Timeout = timeout;
+                    request.ReadWriteTimeout = timeout;
+                    if (!String.IsNullOrEmpty(apiKey))
+                    {
+                        request.Headers.Add(ApiKeyHeader, apiKey);
+                    }
+
+                    var multiPartRequest = new MultipartWebRequest();
+                    multiPartRequest.AddFile(packageStreamFactory, "package", packageSize);
+
+                    multiPartRequest.CreateMultipartRequest(request);
+                };
+
+                // Since AllowWriteStreamBuffering is set to false, redirection will not be handled
+                // automatically by HttpWebRequest. So we need to check redirect status code and
+                // update _baseUri and retry if redirection happens.
+                if (EnsureSuccessfulResponse(client))
+                {
+                    return;
                 }
 
-                request.Timeout = timeout;
-                request.ReadWriteTimeout = timeout;
-                if (!String.IsNullOrEmpty(apiKey))
+                ++redirectionCount;
+                if (redirectionCount > MaxRediretionCount)
                 {
-                    request.Headers.Add(ApiKeyHeader, apiKey);
+                    throw new WebException(NuGetResources.Error_TooManyRedirections);
                 }
-
-                var multiPartRequest = new MultipartWebRequest();
-                multiPartRequest.AddFile(packageStreamFactory, "package", packageSize);
-
-                multiPartRequest.CreateMultipartRequest(request);
-            };
-
-            EnsureSuccessfulResponse(client);
+            }
         }
 
         /// <summary>
@@ -214,7 +231,15 @@ namespace NuGet
             return requestUri;
         }
 
-        private static void EnsureSuccessfulResponse(HttpClient client, HttpStatusCode? expectedStatusCode = null)
+        /// <summary>
+        /// Ensures that success response is received. 
+        /// </summary>
+        /// <param name="client">The client that is making the request.</param>
+        /// <param name="expectedStatusCode">The exected status code.</param>
+        /// <returns>True if success response is received; false if redirection response is received. 
+        /// In this case, _baseUri will be updated to be the new redirected Uri and the requrest 
+        /// should be retried.</returns>
+        private bool EnsureSuccessfulResponse(HttpClient client, HttpStatusCode? expectedStatusCode = null)
         {
             HttpWebResponse response = null;
             try
@@ -229,6 +254,8 @@ namespace NuGet
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, String.Empty));
                 }
+
+                return true;
             }
             catch (WebException e)
             {
@@ -237,10 +264,31 @@ namespace NuGet
                     throw;
                 }
                 response = (HttpWebResponse)e.Response;
+
+                // Check if the error is caused by redirection
+                if (response.StatusCode == HttpStatusCode.MultipleChoices ||
+                    response.StatusCode == HttpStatusCode.MovedPermanently ||
+                    response.StatusCode == HttpStatusCode.Found ||
+                    response.StatusCode == HttpStatusCode.SeeOther || 
+                    response.StatusCode == HttpStatusCode.TemporaryRedirect)
+                {
+                    var location = response.Headers["Location"];
+                    Uri newUri;
+                    if (!Uri.TryCreate(client.Uri, location, out newUri))
+                    {
+                        throw;
+                    }
+                    
+                    _baseUri = new Lazy<Uri>(() => newUri);
+                    return false;
+                } 
+
                 if (expectedStatusCode != response.StatusCode)
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, e.Message), e);
                 }
+
+                return true;
             }
             finally
             {
