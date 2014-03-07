@@ -469,4 +469,7 @@
   <data name="Log_UninstallPackageFromProject" xml:space="preserve">
     <value>Remove '{0}' from project {1}.</value>
   </data>
+  <data name="Error_TooManyRedirections" xml:space="preserve">
+    <value>Too many automatic redirections were attempted.</value>
+  </data>
 </root>
