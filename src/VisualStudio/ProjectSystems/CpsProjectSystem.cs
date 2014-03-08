@@ -60,6 +60,9 @@ namespace NuGet.VisualStudio
                 Project,
                 Project.ToVsHierarchy(),
                 buildProject => NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, relativeTargetPath, location));
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
 
         public override void RemoveImport(string targetPath)
@@ -98,6 +101,9 @@ namespace NuGet.VisualStudio
                 Project,
                 Project.ToVsHierarchy(),
                 buildProject => NuGet.MSBuildProjectUtility.RemoveImportStatement(buildProject, relativeTargetPath));
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
     }
 }
