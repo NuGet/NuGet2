@@ -17,9 +17,9 @@
       <HintPath>..\..\lib\Microsoft.WebMatrix.Extensibility.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NuGet.Core, Version=2.5.40416.9020, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="NuGet.Core, Version=2.5.50311.292, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NuGet.Core.2.5.0\lib\net40-Client\NuGet.Core.dll</HintPath>
+      <HintPath>..\packages\Nuget.Core.2.5.1\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -167,7 +167,7 @@
     <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
     <Revision>$(BUILD_NUMBER)</Revision>
     <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-    <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
+    <PackageVersion>$(MajorVersion).$(MinorVersion).1</PackageVersion>
   </PropertyGroup>
   <Target Name="BeforeBuild">
     <PropertyGroup>
