@@ -246,9 +246,9 @@ namespace NuGet
                         Project.RemoveReference(assemblyReference.Name);
                     }
 
-                    // The current implementation of all ProjectSystem does not use the Stream parameter at all.
-                    // We can't change the API now, so just pass in a null stream.
-                    Project.AddReference(relativeReferencePath, Stream.Null);
+                    // While none of the VS project systems use the Stream parameter, the WebMatrix extension does
+                    // Getting this stream adds overhead for all VS scenarios too, so this needs to be changed before the next VS extension release
+                    Project.AddReference(relativeReferencePath, assemblyReference.GetStream());
                 }
 
                 // Add GAC/Framework references
