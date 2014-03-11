@@ -242,6 +242,8 @@ namespace NuGet
                         Project.RemoveReference(assemblyReference.Name);
                     }
 
+                    // While none of the VS project systems use the Stream parameter, the WebMatrix extension does
+                    // Getting this stream adds overhead for all VS scenarios too, so this needs to be changed before the next VS extension release
                     Project.AddReference(relativeReferencePath, assemblyReference.GetStream());
                 }
 
