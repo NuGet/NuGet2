@@ -3,16 +3,15 @@
     <metadata>
         <id>NuGetPackageManager</id>
         <version>2.5.1</version>
+        <title>NuGet Package Manager</title>
         <authors>Outercurve Foundation</authors>
         <owners>Outercurve Foundation</owners>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
         <copyright>&#169; Outercurve Foundation. All rights reserved.</copyright>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>
-            This is the extension for NuGet Package Manager
-        </description>
-        <summary />
+        <description>NuGet Package Manager for WebMatrix.</description>
+        <tags>nuget</tags>
     </metadata>
   <files>
     <file src="NuGetExtension.dll" target="content\NuGetPackageManager\NuGetExtension.dll" />
