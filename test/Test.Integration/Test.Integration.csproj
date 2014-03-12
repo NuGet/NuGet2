@@ -47,6 +47,7 @@
     </Compile>
     <Compile Include="CommandRunner.cs" />
     <Compile Include="Core\LocalPackageRepositoryTest.cs" />
+    <Compile Include="MockServer.cs" />
     <Compile Include="NuGetCommandLine\DefaultConfigurationFilePreserver.cs" />
     <Compile Include="NuGetCommandLine\NuGetConfigCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
