@@ -1027,7 +1027,7 @@ namespace NuGet.VisualStudio
 
                 if (!String.IsNullOrEmpty(cap))
                 {
-                    isShared = cap.IndexOf("SharedAssetsProject", StringComparison.OrdinalIgnoreCase) > -1;
+                    isShared = cap.Split(' ').Any(s => StringComparer.OrdinalIgnoreCase.Equals("SharedAssetsProject", s));
                 }
             }
 
