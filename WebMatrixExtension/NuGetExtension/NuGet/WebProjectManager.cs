@@ -6,14 +6,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.WebMatrix.Core;
+using Microsoft.WebMatrix.Extensibility;
+using Microsoft.WebMatrix.SourceControl;
 using NuGet;
 using NuGet.Runtime;
-using Microsoft.WebMatrix.Extensibility;
-using Microsoft.WebMatrix.Core;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.WebMatrix.SourceControl;
 
 namespace NuGet.WebMatrix
 {
@@ -267,7 +268,7 @@ namespace NuGet.WebMatrix
             {
                 return;
             }
-
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(appDomain_AssemblyResolve);
             // We can't use HttpRuntime.BinDirectory since there is no runtime when installing via WebMatrix.
             var binDirectory = Path.Combine(_siteRoot, "bin");
             var assemblies = RemoteAssembly.GetAssembliesForBindingRedirect(appDomain, binDirectory);
@@ -279,6 +280,29 @@ namespace NuGet.WebMatrix
                 var bindingRedirectManager = new BindingRedirectManager(_projectManager.Project, "web.config");
                 bindingRedirectManager.AddBindingRedirects(bindingRedirects);
             }
+            AppDomain.CurrentDomain.AssemblyResolve -= appDomain_AssemblyResolve;
+        }
+
+        /// <summary>
+        /// WebMatrix extensions folder is not on the ApplicationBase of an AppDomain
+        /// This means NuGet.Core.dll and NuGetExtension.dll cannot be loaded and might result in FileLoadException
+        /// This ResolveEventHandler helps solve this issue
+        /// </summary>
+        private static Assembly appDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            AssemblyName assemblyName = new AssemblyName(args.Name);
+            if (assemblyName.Name.Equals("NuGet.Core"))
+            {
+                return typeof(IAssembly).Assembly;
+            }
+            if (assemblyName.Name.Contains("NuGetExtension"))
+            {
+                return typeof(RemoteAssembly).Assembly;
+            }
+
+            // THIS SHOULD NEVER HAPPEN. Because, only NuGetExtension.dll and NuGet.Core.dll
+            // are not on the application base of the ApplicationDomain
+            return Assembly.Load(assemblyName);
         }
 
         private IEnumerable<string> PerformLoggedAction(Action action)

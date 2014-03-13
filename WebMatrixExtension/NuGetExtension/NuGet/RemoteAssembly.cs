@@ -86,9 +86,10 @@ namespace NuGet.WebMatrix
         {
             if (domain != AppDomain.CurrentDomain)
             {
-                var crossDomainAssembly = domain.CreateInstance<RemoteAssembly>();
+                var pathToDLL = Assembly.GetExecutingAssembly().CodeBase;
+                var typeName = typeof(RemoteAssembly).FullName;
+                var crossDomainAssembly = (RemoteAssembly)domain.CreateInstanceFromAndUnwrap(pathToDLL, typeName);
                 crossDomainAssembly.Load(assemblyString, isPath);
-
                 return crossDomainAssembly;
             }
 
