@@ -302,7 +302,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Assert
                 var output = Encoding.Default.GetString(memoryStream.ToArray());
                 Assert.NotEqual(0, ret);
-                Assert.Contains("The remote server returned an error: (302) Redirect.", output);
+                Assert.Contains("The remote server returned an error: (302)", output);
             }
             finally
             {
