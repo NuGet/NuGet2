@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -303,6 +304,60 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var output = Encoding.Default.GetString(memoryStream.ToArray());
                 Assert.NotEqual(0, ret);
                 Assert.Contains("The remote server returned an error: (302)", output);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Regression test for the bug that "nuget.exe push" will retry forever instead of asking for 
+        // user's password when NuGet.Server uses Windows Authentication.
+        [Fact]
+        public void PushCommand_PushToServerWontRetryForever()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                MemoryStream memoryStream = new MemoryStream();
+                TextWriter writer = new StreamWriter(memoryStream);
+                Console.SetOut(writer);
+                string outputFileName = Path.Combine(packageDirectory, "t1.nupkg");
+
+                var server = new MockServer(mockServerEndPoint);
+                server.Get.Add("/push", r => "OK");
+                server.Put.Add("/push", r => new Action<HttpListenerResponse>(
+                    response =>
+                    {
+                        response.AddHeader("WWW-Authenticate", "NTLM");
+                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    }));
+                server.Start();
+
+                // Act
+                var args = "push " + packageFileName + 
+                    " -Source " + mockServerEndPoint + "push -NonInteractive";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    packageDirectory,
+                    args,
+                    waitForExit: true,
+                    timeOutInMilliseconds: 1000);                
+                server.Stop();
+
+                // Assert
+                Assert.Equal(1, r1.Item1);
+                Assert.Contains("Please provide credentials for:", r1.Item2);
+                Assert.Contains("UserName:", r1.Item2);
             }
             finally
             {
