@@ -355,7 +355,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 server.Stop();
 
                 // Assert
-                Assert.Equal(1, r1.Item1);
+                Assert.NotEqual(0, r1.Item1);
                 Assert.Contains("Please provide credentials for:", r1.Item2);
                 Assert.Contains("UserName:", r1.Item2);
             }
