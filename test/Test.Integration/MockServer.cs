@@ -53,7 +53,7 @@ namespace NuGet.Test.Integration
         /// </summary>
         public void Stop()
         {
-            _listener.Stop();
+            _listener.Abort();
         }
 
         /// <summary>
