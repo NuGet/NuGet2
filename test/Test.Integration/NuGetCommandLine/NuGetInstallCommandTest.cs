@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Text;
 using Xunit;
 using Xunit.Extensions;
@@ -380,6 +381,164 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 Directory.SetCurrentDirectory(currentDirectory);
                 Util.DeleteDirectory(workingPath);
+            }
+        }
+
+        // Tests that when no version is specified, nuget will query the server to get
+        // the latest version number first.
+        [Fact]
+        public void InstallCommand_GetLastestReleaseVersion()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                var server = new MockServer(mockServerEndPoint);
+                string findPackagesByIdRequest = string.Empty;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/FindPackagesById()", r => 
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        findPackagesByIdRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package }, "FindPackagesById");
+                        MockServer.SetResponseContent(response,  feed);
+                    }));
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var p1 = server.ToOData(package);
+                        MockServer.SetResponseContent(response, p1);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.Contains("$filter=IsLatestVersion", findPackagesByIdRequest);
+                Assert.True(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Tests that when no version is specified, and -Prerelease is specified,
+        // nuget will query the server to get the latest prerelease version number first.
+        [Fact]
+        public void InstallCommand_GetLastestPrereleaseVersion()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                var server = new MockServer(mockServerEndPoint);
+                string findPackagesByIdRequest = string.Empty;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/FindPackagesById()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        findPackagesByIdRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package }, "FindPackagesById");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var p1 = server.ToOData(package);
+                        MockServer.SetResponseContent(response, p1);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Prerelease -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.Contains("$filter=IsAbsoluteLatestVersion", findPackagesByIdRequest);
+                Assert.True(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
             }
         }
     }
