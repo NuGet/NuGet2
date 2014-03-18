@@ -351,7 +351,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     packageDirectory,
                     args,
                     waitForExit: true,
-                    timeOutInMilliseconds: 1000);                
+                    timeOutInMilliseconds: 10000);                
                 server.Stop();
 
                 // Assert
