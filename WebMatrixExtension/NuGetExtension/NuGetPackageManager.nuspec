@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>NuGetPackageManager</id>
-        <version>2.5.1</version>
+        <version>2.6.1</version>
         <title>NuGet Package Manager</title>
         <authors>Outercurve Foundation</authors>
         <owners>Outercurve Foundation</owners>
@@ -16,6 +16,7 @@
   <files>
     <file src="NuGetExtension.dll" target="content\NuGetPackageManager\NuGetExtension.dll" />
     <file src="NuGet.Core.dll" target="content\NuGetPackageManager\NuGet.Core.dll" />
+    <file src="Microsoft.Web.XmlTransform.dll" target="content\NuGetPackageManager\Microsoft.Web.XmlTransform.dll" />
     <!-- =LOCALIZE= The resource assemblies below are added during a localized build. Please do not remove or edit this line.
     <file src="cs-CZ\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\cs\NuGetExtension.resources.dll" />
     <file src="de-DE\managed\NuGetExtension.resources.dll" target="content\NuGetPackageManager\de\NuGetExtension.resources.dll" />

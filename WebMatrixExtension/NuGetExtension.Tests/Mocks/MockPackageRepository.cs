@@ -180,7 +180,7 @@ namespace NuGet.WebMatrix.DependentTests
             return false;
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId)
         {
             LastOperation = null;
             return new DisposableAction(() =>

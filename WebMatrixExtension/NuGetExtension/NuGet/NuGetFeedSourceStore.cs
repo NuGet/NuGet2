@@ -13,7 +13,9 @@ namespace NuGet.WebMatrix
             : base(preferences)
         {
             _packageSourceProvider = new PackageSourceProvider(
-                Settings.LoadDefaultSettings(null),
+                // Do not load user settings or machine wide settings for WebMatrix 'nuget.org' feed
+                // In other words, pass all null to LoadDefaultSettings
+                Settings.LoadDefaultSettings(null, null, null),
                 defaultSources: new[] { new PackageSource("https://www.nuget.org/api/v2", Resources.NuGet_PackageSourceName) });
         }
 
