@@ -16,7 +16,7 @@ namespace NuGet.Test.Integration
     class MockServer
     {
         HttpListener _listener;
-        RouteTable _get, _put;
+        RouteTable _get, _put, _delete;
         string _endPoint;
         Task _listenerTask;
         
@@ -32,6 +32,7 @@ namespace NuGet.Test.Integration
 
             _get = new RouteTable();
             _put = new RouteTable();
+            _delete = new RouteTable();
         }
 
         public RouteTable Get
@@ -42,6 +43,11 @@ namespace NuGet.Test.Integration
         public RouteTable Put
         {
             get { return _put; }
+        }
+
+        public RouteTable Delete
+        {
+            get { return _delete; }
         }
 
         /// <summary>
@@ -184,6 +190,10 @@ namespace NuGet.Test.Integration
                 {
                     m = _put;
                 }
+                else if (request.HttpMethod == "DELETE")
+                {
+                    m = _delete;
+                }
 
                 if (m == null)
                 {
@@ -298,7 +308,9 @@ namespace NuGet.Test.Integration
                 new XElement(XName.Get("properties", nsMetadata),
                     new XElement(nsDataService + "Version", package.Version),
                     new XElement(nsDataService + "PackageHash", package.GetHash("SHA512")),
-                    new XElement(nsDataService + "PackageHashAlgorithm", "SHA512")));
+                    new XElement(nsDataService + "PackageHashAlgorithm", "SHA512"),
+                    new XElement(nsDataService + "Description", package.Description),
+                    new XElement(nsDataService + "Listed", package.Listed)));
             return entry;
         }
         

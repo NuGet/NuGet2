@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
@@ -460,6 +461,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 // Cleanup
                 Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
             }
         }
 
@@ -539,6 +541,314 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 // Cleanup
                 Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
+            }
+        }
+
+        // Tests that when -Version is specified, nuget will use request 
+        // Packages(Id='id',Version='version') to get the specified version
+        [Fact]
+        public void InstallCommand_WithVersionSpecified()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                var server = new MockServer(mockServerEndPoint);
+                bool getPackageByVersionIsCalled = false;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        getPackageByVersionIsCalled = true;
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var p1 = server.ToOData(package);
+                        MockServer.SetResponseContent(response, p1);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Version 1.1.0 -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.True(getPackageByVersionIsCalled);
+                Assert.True(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
+            }
+        }
+
+        // Tests that when -Version is specified, if the specified version cannot be found,
+        // nuget will retry with new version numbers by appending 0's to the specified version.
+        [Fact]
+        public void InstallCommand_WillTryNewVersionsByAppendingZeros()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(workingDirectory);
+
+                // deleting testPackage1 from machine cache
+                var packages = MachineCache.Default.FindPackagesById("testPackage1");
+                foreach (var p in packages)
+                {
+                    MachineCache.Default.RemovePackage(p);
+                }
+                
+                var server = new MockServer(mockServerEndPoint);
+                List<string> requests = new List<string>();
+                server.Get.Add("/nuget/Packages", r =>
+                    {
+                        requests.Add(r.Url.ToString());
+                        return HttpStatusCode.NotFound;
+                    });
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Version 1.1 -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(1, r1.Item1);
+
+                Assert.Equal(3, requests.Count);
+                Assert.True(requests[0].EndsWith("Packages(Id='testPackage1',Version='1.1')"));
+                Assert.True(requests[1].EndsWith("Packages(Id='testPackage1',Version='1.1.0')"));
+                Assert.True(requests[2].EndsWith("Packages(Id='testPackage1',Version='1.1.0.0')"));
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(workingDirectory);
+            }
+        }
+
+        // Tests that nuget will NOT download package from http source if the package on the server
+        // has the same hash value as the cached version.
+        [Fact]
+        public void InstallCommand_WillUseCachedFile()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                // add the package to machine cache
+                MachineCache.Default.AddPackage(package);
+
+                var server = new MockServer(mockServerEndPoint);
+                string findPackagesByIdRequest = string.Empty;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/FindPackagesById()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        findPackagesByIdRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package }, "FindPackagesById");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var p1 = server.ToOData(package);
+                        MockServer.SetResponseContent(response, p1);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.Contains("$filter=IsLatestVersion", findPackagesByIdRequest);
+
+                // verifies that package is NOT downloaded from server since nuget uses
+                // the file in machine cache.
+                Assert.False(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
+            }
+        }
+
+        // Tests that nuget will download package from http source if the package on the server
+        // has a different hash value from the cached version.
+        [Fact]
+        public void InstallCommand_DownloadPackageWhenHashChanges()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                // add the package to machine cache
+                MachineCache.Default.AddPackage(package);
+
+                // create a new package. Now this package has different hash value from the package in
+                // the machine cache.
+                packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                package = new ZipPackage(packageFileName);
+
+                var server = new MockServer(mockServerEndPoint);
+                string findPackagesByIdRequest = string.Empty;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/FindPackagesById()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        findPackagesByIdRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package }, "FindPackagesById");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var p1 = server.ToOData(package);
+                        MockServer.SetResponseContent(response, p1);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "install testPackage1 -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.Contains("$filter=IsLatestVersion", findPackagesByIdRequest);
+
+                // verifies that package is downloaded from server since the cached version has
+                // a different hash from the package on the server.
+                Assert.True(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
             }
         }
     }
