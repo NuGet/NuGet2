@@ -276,7 +276,7 @@ namespace NuGet.WebMatrix
         {
             get
             {
-                return PackageAction != PackageViewModelAction.UpdateAll;
+                return !IsUpdatingAll;
             }
         }
 
@@ -538,6 +538,9 @@ namespace NuGet.WebMatrix
             {
                 _isLicencePageVisible = value;
                 OnPropertyChanged("IsLicensePageVisible");
+                OnPropertyChanged("IsUpdatingAll");
+                OnPropertyChanged("NotUpdatingAll");
+
             }
         }
 
@@ -886,8 +889,6 @@ namespace NuGet.WebMatrix
                 else
                 {
                     IsLicensePageVisible = true;
-                    OnPropertyChanged("IsUpdatingAll");
-                    OnPropertyChanged("NotUpdatingAll");
                 }
             }
             finally
@@ -946,8 +947,6 @@ namespace NuGet.WebMatrix
                         PackagesToDisplayForUpdateAll.Add(new PackageViewModel(_nuGetModel, package, PackageViewModelAction.Update));
                     }
                     IsLicensePageVisible = true;
-                    OnPropertyChanged("IsUpdatingAll");
-                    OnPropertyChanged("NotUpdatingAll");
                 }
             }
             finally

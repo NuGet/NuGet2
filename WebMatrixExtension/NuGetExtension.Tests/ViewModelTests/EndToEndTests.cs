@@ -297,6 +297,62 @@ namespace NuGet.WebMatrix.Tests.ViewModelTests
         }
 
         /// <summary>
+        /// Select a package from the 'updates' view and click 'updateall' to update all packages
+        /// And, then install another package to ensure that it is installed properly
+        /// </summary>
+        [Fact]
+        public void UpdateAllPackagesFromUpdatesAndInstallAnotherPackage()
+        {
+            using (var thread = new TemporaryDispatcherThread())
+            {
+                var installed1 = PackageFactory.Create("update1", new Version(1, 0));
+                var installed2 = PackageFactory.Create("update2", new Version(1, 0));
+                this.PackageManager.InstalledPackages.Add(installed1);
+                this.PackageManager.InstalledPackages.Add(installed2);
+
+                var remote1 = PackageFactory.Create("update1", new Version(2, 0));
+                var remote2 = PackageFactory.Create("update2", new Version(2, 0));
+                var remote3 = PackageFactory.Create("install1", new Version(1, 0));
+                this.PackageManager.RemotePackages.Add(remote1);
+                this.PackageManager.RemotePackages.Add(remote2);
+                this.PackageManager.RemotePackages.Add(remote3);
+
+                // Perform UpdateAll now
+
+                ButtonBarViewModel buttonBarViewModel = this.CreateViewModel(thread);
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_Updated, installed1.Id);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.UpdateAllButton, PackageViewModelAction.UpdateAll);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsLicensePageVisible, "The license page should be shown.");
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsUpdatingAll, "Updating all should be true");
+                Assert.False(buttonBarViewModel.NuGetViewModel.NotUpdatingAll, "Not Updating all should be false");
+                Assert.Equal<PackageViewModelAction>(PackageViewModelAction.UpdateAll, buttonBarViewModel.NuGetViewModel.PackageAction);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.AcceptButton);
+
+                // Perform Install Now
+                this.SelectPackage(thread, buttonBarViewModel.NuGetViewModel, Resources.Filter_All, remote3.Id);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.InstallButton, PackageViewModelAction.InstallOrUninstall);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsDetailsPaneVisible, "The details page should be shown.");
+                Assert.Equal<PackageViewModelAction>(PackageViewModelAction.InstallOrUninstall, buttonBarViewModel.NuGetViewModel.PackageAction);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.YesButton);
+                Assert.True(buttonBarViewModel.NuGetViewModel.IsLicensePageVisible, "The license page should be shown.");
+                Assert.False(buttonBarViewModel.NuGetViewModel.IsUpdatingAll, "Updating all should be false");
+                Assert.True(buttonBarViewModel.NuGetViewModel.NotUpdatingAll, "Not Updating all should be true");
+                Assert.Equal<PackageViewModelAction>(PackageViewModelAction.InstallOrUninstall, buttonBarViewModel.NuGetViewModel.PackageAction);
+
+                this.ClickButton(thread, buttonBarViewModel, buttonBarViewModel.AcceptButton);
+
+                var installedPackages = this.PackageManager.InstalledPackages.ToArray();
+                Assert.Equal(remote1, installedPackages[0]);
+                Assert.Equal(remote2, installedPackages[1]);
+                Assert.Equal(remote3, installedPackages[2]);
+            }
+        }
+
+        /// <summary>
         /// Enables a package and checks that it's no longer shown as disabled
         /// </summary>
         [Fact]
