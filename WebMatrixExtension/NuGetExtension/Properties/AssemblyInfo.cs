@@ -5,5 +5,5 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("NuGetExtension.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
-[assembly: AssemblyVersionAttribute("2.5.0.0")]
-[assembly: AssemblyFileVersionAttribute("2.5.0.0")]
+[assembly: AssemblyVersionAttribute("2.6.1.0")]
+[assembly: AssemblyFileVersionAttribute("2.6.1.0")]
