@@ -2636,7 +2636,7 @@ function Test-InstallPackageWithDependencyVersionHighest
 
 # Tests that when -DependencyVersion is lowest, the dependency with
 # the smallest patch number is installed
-function Test-InstallPackageWithoutDependencyVersion
+function Test-InstallPackageWithDependencyVersionLowest
 {
     param($context)
 
