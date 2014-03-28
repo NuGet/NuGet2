@@ -234,6 +234,8 @@ namespace NuGet.Test.Integration
         void HandleRequest()
         {
             const int ERROR_OPERATION_ABORTED = 995;
+            const int ERROR_INVALID_HANDLE = 6;
+            const int ERROR_INVALID_FUNCTION = 1;
 
             while (true)
             {
@@ -244,12 +246,15 @@ namespace NuGet.Test.Integration
                 }
                 catch (HttpListenerException ex)
                 {
-                    if (ex.ErrorCode == ERROR_OPERATION_ABORTED)
+                    if (ex.ErrorCode == ERROR_OPERATION_ABORTED || 
+                        ex.ErrorCode == ERROR_INVALID_HANDLE ||
+                        ex.ErrorCode == ERROR_INVALID_FUNCTION)
                     {
                         return;
                     }
                     else
                     {
+                        Console.WriteLine("Unexpected error code: {0}. Ex: {1}", ex.ErrorCode, ex);
                         throw;
                     }
                 }
