@@ -2280,7 +2280,7 @@ function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
     Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
-function Test-InstallPackageIntoJavascriptApplication
+function Test-InstallPackageIntoJavaScriptApplication
 {
     if ($dte.Version -eq "10.0")
     {
@@ -2289,6 +2289,24 @@ function Test-InstallPackageIntoJavascriptApplication
 
     # Arrange
     $p = New-JavaScriptApplication
+
+    # Act
+    Install-Package jQuery -ProjectName $p.Name 
+
+    # Assert
+    Assert-Package $p "jQuery"
+}
+
+function Test-InstallPackageIntoJavaScriptWindowsPhoneApp
+{
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return;
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
 
     # Act
     Install-Package jQuery -ProjectName $p.Name 
@@ -2335,6 +2353,31 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
     
     Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
     Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}
+
+
+function Test-InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
+
+    # Act
+    Install-Package Java -ProjectName $p.Name -source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p Java
+    
+    Assert-NotNull (Get-ProjectItem $p 'phone.txt')
+    Assert-NotNull (Get-ProjectItem $p 'phone2.txt')
+    Assert-Null (Get-ProjectItem $p 'store.txt')
 }
 
 function Test-SpecifyDifferentVersionThenServerVersion

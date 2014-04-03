@@ -237,6 +237,9 @@
   <data name="Warning_FileDoesNotExist" xml:space="preserve">
     <value>'{0}' was included in the project but doesn't exist. Skipping...</value>
   </data>
+  <data name="Warning_UnresolvedFilePath" xml:space="preserve">
+    <value>'{0}' was included in the project but the path could not be resolved. Skipping...</value>
+  </data>
   <data name="Warning_UnspecifiedField" xml:space="preserve">
     <value>{0} was not specified. Using '{1}'.</value>
   </data>

@@ -866,6 +866,14 @@ namespace NuGet.Commands
                     continue;
                 }
 
+                // Skip target file paths containing msbuild variables since we do not offer a way to install files with variable paths.
+                // These are show up in shared files found in universal apps.
+                if (targetFilePath.IndexOf("$(MSBuild", StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_UnresolvedFilePath"), targetFilePath);
+                    continue;
+                }
+
                 // if IncludeReferencedProjects is true and we are adding source files,
                 // add projectName as part of the target to avoid file conflicts.
                 string targetPath = IncludeReferencedProjects && itemType == SourcesItemType ?               

@@ -12,6 +12,8 @@ namespace NuGet
 {
     public static class NetPortableProfileTable
     {
+        private const string PortableReferenceAssemblyPathEnvironmentVariableName = "NuGetPortableReferenceAssemblyPath";
+
         // This collection is the original indexed collection where profiles are indexed by 
         // the full "ProfileXXX" naming. 
         private static NetPortableProfileCollection _portableProfiles;
@@ -133,10 +135,21 @@ namespace NuGet
         private static NetPortableProfileCollection BuildPortableProfileCollection()
         {
             var profileCollection = new NetPortableProfileCollection();
-            string portableRootDirectory =
+            
+            string portableRootDirectory;
+
+            string portableReferencePathOverride = Environment.GetEnvironmentVariable(PortableReferenceAssemblyPathEnvironmentVariableName);
+            if (!string.IsNullOrEmpty(portableReferencePathOverride))
+            {
+                portableRootDirectory = portableReferencePathOverride;
+            }
+            else
+            {
+                portableRootDirectory =
                     Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify),
                         @"Reference Assemblies\Microsoft\Framework\.NETPortable");
+            }
 
             if (Directory.Exists(portableRootDirectory))
             {

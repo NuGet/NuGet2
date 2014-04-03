@@ -61,7 +61,9 @@ namespace NuGet
             { "MonoAndroid", "MonoAndroid" },
             { "MonoTouch", "MonoTouch" },
             { "MonoMac", "MonoMac" },
-            { "native", "native"}
+            { "native", "native"},
+            { "WindowsPhoneApp", "WindowsPhoneApp"},
+            { "wpa", "WindowsPhoneApp"}
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -79,7 +81,8 @@ namespace NuGet
             { ".NETCore", "win"},
             { "Windows", "win"},
             { ".NETPortable", "portable" },
-            { "WindowsPhone", "wp"}
+            { "WindowsPhone", "wp"},
+            { "WindowsPhoneApp", "wpa"}
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -111,6 +114,7 @@ namespace NuGet
             { new FrameworkName("WindowsPhone, Version=v7.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
             { new FrameworkName("WindowsPhone, Version=v7.1"), new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71") },
             { new FrameworkName("WindowsPhone, Version=v8.0"), new FrameworkName("Silverlight, Version=v8.0, Profile=WindowsPhone") },
+            { new FrameworkName("WindowsPhone, Version=v8.1"), new FrameworkName("Silverlight, Version=v8.1, Profile=WindowsPhone") },
 
             { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
             { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") },
