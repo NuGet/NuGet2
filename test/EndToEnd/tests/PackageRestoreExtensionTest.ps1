@@ -254,6 +254,94 @@ function Test-PackageRestore-IsAutomaticIsFalse {
     }
 }
 
+# Test that during package restore, all sources are used.
+function Test-PackageRestore-AllSourcesAreUsed {
+    param($context)
+    
+    $tempDirectory = $Env:temp
+    $source1 = Join-Path $tempDirectory ([System.IO.Path]::GetRandomFileName())
+    $source2 = Join-Path $tempDirectory ([System.IO.Path]::GetRandomFileName())
+
+    try {
+        # Arrange		
+        New-Item $source1 -ItemType directory
+        New-Item $source2 -ItemType directory
+        [NuGet.VisualStudio.SettingsHelper]::AddSource('testSource1', $source1);
+        [NuGet.VisualStudio.SettingsHelper]::AddSource('testSource2', $source2);	
+        CreateTestPackage 'p1' '1.0' $source1
+        CreateTestPackage 'p2' '1.0' $source2
+        
+        # Arrange
+        # create project and install packages
+        $proj = New-ClassLibrary
+        $proj | Install-Package p1 -source testSource1
+        $proj | Install-Package p2 -source testSource2
+        Assert-Package $proj p1
+        Assert-Package $proj p2
+
+        # Arrange
+        # delete the packages folder
+        $packagesDir = Get-PackagesDir
+        RemoveDirectory $packagesDir
+        Assert-False (Test-Path $packagesDir)
+
+        # Act
+        Build-Solution
+
+        # Assert
+        # both p1 and p2 are restored
+        Assert-True (Test-Path (Join-Path $packagesDir 'p1.1.0' ))
+        Assert-True (Test-Path (Join-Path $packagesDir 'p2.1.0' ))
+    }
+    finally
+    {
+        [NuGet.VisualStudio.SettingsHelper]::RemoveSource('testSource1')
+        [NuGet.VisualStudio.SettingsHelper]::RemoveSource('testSource2')		
+        RemoveDirectory $source1
+        RemoveDirectory $source2
+
+        # change active package source to "All"
+        $componentService = Get-VSComponentModel
+        $packageSourceProvider = $componentService.GetService([NuGet.VisualStudio.IVsPackageSourceProvider])
+        $packageSourceProvider.ActivePackageSource = [NuGet.VisualStudio.AggregatePackageSource]::Instance
+    }
+}
+
+# Create a test package 
+function CreateTestPackage {
+    param(
+        [string]$id,
+        [string]$version,
+        [string]$outputDirectory
+    )
+
+    $builder = New-Object NuGet.PackageBuilder
+    $builder.Authors.Add("test_author")
+    $builder.Id = $id
+    $builder.Version = New-Object NuGet.SemanticVersion($version)
+    $builder.Description = "description" 
+
+    # add one content file
+    $tempFile = [IO.Path]::GetTempFileName()
+    "test" >> $tempFile
+    $packageFile = New-Object NuGet.PhysicalPackageFile
+    $packageFile.SourcePath = $tempFile
+    $packageFile.TargetPath = "content\$id-test1.txt"
+    $builder.Files.Add($packageFile)
+
+    # create the package file
+    $outputFileName = Join-Path $outputDirectory "$id.$version.nupkg"
+    $outputStream = New-Object IO.FileStream($outputFileName, [System.IO.FileMode]::Create)
+    try {
+        $builder.Save($outputStream)
+    }
+    finally
+    {
+        $outputStream.Dispose()
+        Remove-Item $tempFile
+    }
+}
+
 function GetBuildOutput { 
     $dte2 = Get-Interface $dte ([EnvDTE80.DTE2])
     $buildPane = $dte2.ToolWindows.OutputWindow.OutputWindowPanes.Item("Build")
@@ -272,7 +360,7 @@ function RemoveDirectory {
     {
         if (Test-Path $dir)
         {
-            Remove-Item -Recurse -Force $packagesDir -ErrorAction SilentlyContinue
+            Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue
         }
         else 
         {

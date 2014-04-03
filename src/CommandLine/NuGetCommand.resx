@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2854,45 +2854,6 @@ nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
 
 nuget pack foo.nuspec -Version 2.1.0</value>
   </data>
-  <data name="PushCommandDescription_csy" xml:space="preserve">
-    <value>Předá balíček na server a volitelně jej publikuje.</value>
-  </data>
-  <data name="PushCommandDescription_deu" xml:space="preserve">
-    <value>Sendet ein Paket mittels Push an den Server und veröffentlicht es optional.</value>
-  </data>
-  <data name="PushCommandDescription_esp" xml:space="preserve">
-    <value>Inserta un paquete al servidor y lo publica de forma opcional.</value>
-  </data>
-  <data name="PushCommandDescription_fra" xml:space="preserve">
-    <value>Transmet un package vers le serveur et le publie éventuellement.</value>
-  </data>
-  <data name="PushCommandDescription_ita" xml:space="preserve">
-    <value>Esegue il push al serve e lo pubblica.</value>
-  </data>
-  <data name="PushCommandDescription_jpn" xml:space="preserve">
-    <value>パッケージをサーバーにプッシュし、必要に応じて発行します。</value>
-  </data>
-  <data name="PushCommandDescription_kor" xml:space="preserve">
-    <value>서버에 패키지를 푸시하고 선택적으로 게시합니다.</value>
-  </data>
-  <data name="PushCommandDescription_plk" xml:space="preserve">
-    <value>Wypycha pakiet na serwer i opcjonalnie go publikuje.</value>
-  </data>
-  <data name="PushCommandDescription_ptb" xml:space="preserve">
-    <value>Envia um pacote para o servidor e, opcionalmente, o publica.</value>
-  </data>
-  <data name="PushCommandDescription_rus" xml:space="preserve">
-    <value>Отправляет пакет на сервер и публикует его (необязательно).</value>
-  </data>
-  <data name="PushCommandDescription_trk" xml:space="preserve">
-    <value>Paketi sürücüye iletir ve isteğe bağlı olarak bunu yayımlar.</value>
-  </data>
-  <data name="PushCommandDescription_chs" xml:space="preserve">
-    <value>将程序包推送到服务器并可以选择发布它。</value>
-  </data>
-  <data name="PushCommandDescription_cht" xml:space="preserve">
-    <value>將封裝推入伺服器並選擇性地發行。</value>
-  </data>
   <data name="PushCommandSourceDescription_csy" xml:space="preserve">
     <value>Určuje adresu URL serveru. Není-li zadána, použije se adresa nuget.org, pokud v konfiguračním souboru NuGet není nastavena konfigurační hodnota DefaultPushSource.</value>
   </data>
@@ -5037,5 +4998,239 @@ nuget update -Self</value>
   </data>
   <data name="RestoreCommandUsageSummary_cht" xml:space="preserve">
     <value>[&lt;方案&gt; | &lt;packages.config 檔案&gt;] [選項]</value>
+  </data>
+  <data name="CommandNoCache_csy" xml:space="preserve">
+    <value>Zakáže použití mezipaměti počítače jako prvního zdroje balíčků.</value>
+  </data>
+  <data name="CommandNoCache_deu" xml:space="preserve">
+    <value>Deaktivieren der Verwendung des Computercaches als erste Paketquelle.</value>
+  </data>
+  <data name="CommandNoCache_esp" xml:space="preserve">
+    <value>Deshabilitar el uso de la caché del equipo como primer origen del paquete.</value>
+  </data>
+  <data name="CommandNoCache_fra" xml:space="preserve">
+    <value>Désactivez l'utilisation du cache de l'ordinateur comme première source de package.</value>
+  </data>
+  <data name="CommandNoCache_ita" xml:space="preserve">
+    <value>Disabilitare utilizzando la cache del computer come prima origine pacchetto.</value>
+  </data>
+  <data name="CommandNoCache_jpn" xml:space="preserve">
+    <value>最初のパッケージ ソースとしてマシン キャッシュを使用して無効にします。</value>
+  </data>
+  <data name="CommandNoCache_kor" xml:space="preserve">
+    <value>시스템 캐시를 첫 번째 패키지 소스로 사용하지 않도록 설정합니다.</value>
+  </data>
+  <data name="CommandNoCache_plk" xml:space="preserve">
+    <value>Wyłącz, używając pamięci podręcznej komputera jako pierwszego źródła pakietu.</value>
+  </data>
+  <data name="CommandNoCache_ptb" xml:space="preserve">
+    <value>Desativar usando o cache da máquina como a primeira origem de pacotes.</value>
+  </data>
+  <data name="CommandNoCache_rus" xml:space="preserve">
+    <value>Отключает использование кэша компьютера в качестве первого источника пакетов.</value>
+  </data>
+  <data name="CommandNoCache_trk" xml:space="preserve">
+    <value>Makine önbelleğini ilk paket kaynağı olarak kullanarak devre dışı bırakın.</value>
+  </data>
+  <data name="CommandNoCache_chs" xml:space="preserve">
+    <value>禁止使用计算机缓存作为第一个程序包源。</value>
+  </data>
+  <data name="CommandNoCache_cht" xml:space="preserve">
+    <value>停用使用機器快取做為第一個套件</value>
+  </data>
+  <data name="CommandSourceDescription_csy" xml:space="preserve">
+    <value>Seznam zdrojů balíčků použitých tímto příkazem</value>
+  </data>
+  <data name="CommandSourceDescription_deu" xml:space="preserve">
+    <value>Eine Liste der Paketquellen, die für diesen Befehl verwendet werden sollen.</value>
+  </data>
+  <data name="CommandSourceDescription_esp" xml:space="preserve">
+    <value>Lista de orígenes de paquetes para usar para este comando.</value>
+  </data>
+  <data name="CommandSourceDescription_fra" xml:space="preserve">
+    <value>Liste de sources de packages à utiliser pour cette commande.</value>
+  </data>
+  <data name="CommandSourceDescription_ita" xml:space="preserve">
+    <value>Elenco di origini pacchetti da utilizzare per questo comando.</value>
+  </data>
+  <data name="CommandSourceDescription_jpn" xml:space="preserve">
+    <value>このコマンドで使用するパッケージ ソースの一覧。</value>
+  </data>
+  <data name="CommandSourceDescription_kor" xml:space="preserve">
+    <value>이 명령에 사용할 패키지 소스 목록입니다.</value>
+  </data>
+  <data name="CommandSourceDescription_plk" xml:space="preserve">
+    <value>Lista źródeł pakietów do użycia na potrzeby tego polecenia.</value>
+  </data>
+  <data name="CommandSourceDescription_ptb" xml:space="preserve">
+    <value>Uma lista de origens de pacotes para usar para esse comando.</value>
+  </data>
+  <data name="CommandSourceDescription_rus" xml:space="preserve">
+    <value>Список источников пакетов, используемых для этой команды.</value>
+  </data>
+  <data name="CommandSourceDescription_trk" xml:space="preserve">
+    <value>Bu komut için kullanılacak paket kaynaklarının listesi.</value>
+  </data>
+  <data name="CommandSourceDescription_chs" xml:space="preserve">
+    <value>要用于此命令的程序包源列表。</value>
+  </data>
+  <data name="CommandSourceDescription_cht" xml:space="preserve">
+    <value>此命令使用的套件來源清單。</value>
+  </data>
+  <data name="PushCommandDescription_csy" xml:space="preserve">
+    <value>Předá balíček na server a publikuje jej.</value>
+  </data>
+  <data name="PushCommandDescription_deu" xml:space="preserve">
+    <value>Übertragen eines Paket mithilfe von Push auf den Server und Veröffentlichen des Pakets.</value>
+  </data>
+  <data name="PushCommandDescription_esp" xml:space="preserve">
+    <value>Inserta un paquete en el servidor y lo publica.</value>
+  </data>
+  <data name="PushCommandDescription_fra" xml:space="preserve">
+    <value>Applique au package un Push vers le serveur et le publie.</value>
+  </data>
+  <data name="PushCommandDescription_ita" xml:space="preserve">
+    <value>Effettua il push di un pacchetto verso il server e lo pubblica.</value>
+  </data>
+  <data name="PushCommandDescription_jpn" xml:space="preserve">
+    <value>サーバーにパッケージをプッシュして、公開します。</value>
+  </data>
+  <data name="PushCommandDescription_kor" xml:space="preserve">
+    <value>서버에 패키지를 푸시하고 게시합니다.</value>
+  </data>
+  <data name="PushCommandDescription_plk" xml:space="preserve">
+    <value>Wypycha pakiet na serwer i go publikuje.</value>
+  </data>
+  <data name="PushCommandDescription_ptb" xml:space="preserve">
+    <value>Envia um pacote para o servidor e publica-o.</value>
+  </data>
+  <data name="PushCommandDescription_rus" xml:space="preserve">
+    <value>Отправляет пакет на сервер и публикует его.</value>
+  </data>
+  <data name="PushCommandDescription_trk" xml:space="preserve">
+    <value>Paketi sunucuya gönderir ve yayımlar.</value>
+  </data>
+  <data name="PushCommandDescription_chs" xml:space="preserve">
+    <value>将程序包推送到服务器并进行发布。</value>
+  </data>
+  <data name="PushCommandDescription_cht" xml:space="preserve">
+    <value>將套件推向伺服器並發佈。</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_csy" xml:space="preserve">
+    <value>Použije se na akce se seznamem. Přijímá dvě hodnoty: Podrobné (výchozí hodnota) a Krátké.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_deu" xml:space="preserve">
+    <value>Gilt für die Listenaktion. Nimmt zwei Werte an: "Detailed" (Standardwert) und "Short".</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_esp" xml:space="preserve">
+    <value>Se aplica a la acción de la lista. Acepta dos valores: Detallado (predeterminado) y Breve.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_fra" xml:space="preserve">
+    <value>S'applique à l'action de la liste. Accepte deux valeurs : Détaillé (valeur par défaut) et Bref.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_ita" xml:space="preserve">
+    <value>Si applica all'azione list. Accetta due valori: Detailed (impostazione predefinita) e Short.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_jpn" xml:space="preserve">
+    <value>リストの操作に適用します。Detailed (既定) および Short の 2 つの値を受け入れます。</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_kor" xml:space="preserve">
+    <value>목록 동작에 적용합니다. [자세히](기본값) 및 [짧게]의 두 가지 값을 사용할 수 있습니다.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_plk" xml:space="preserve">
+    <value>Jest stosowany do akcji z listy. Akceptuje dwie wartości: Szczegółowe (wartość domyślna) i Krótkie.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_ptb" xml:space="preserve">
+    <value>Aplica à ação da lista. Aceita dois valores: Detalhada (a padrão) e Curta.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_rus" xml:space="preserve">
+    <value>Применяется к действию со списком. Принимает два значения: "Detailed" (по умолчанию) и "Short".</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_trk" xml:space="preserve">
+    <value>Liste eylemi için geçerlidir. Ayrıntılı (varsayılan) ve Kısa olmak üzere iki değer kabul eder.</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_chs" xml:space="preserve">
+    <value>适用于列表操作。接受两个值:“详细”(默认值)和“简短”。</value>
+  </data>
+  <data name="SourcesCommandFormatDescription_cht" xml:space="preserve">
+    <value>套用至清單動作。接受兩種值: 詳細 (預設) 及簡短。</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_csy" xml:space="preserve">
+    <value>Zakáže pro tento příkaz paralelní zpracování balíčků.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_deu" xml:space="preserve">
+    <value>Deaktivieren paralleler Verarbeitung von Pakten für diesen Befehl.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_esp" xml:space="preserve">
+    <value>Deshabilitar el procesamiento paralelo de paquetes para este comando.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_fra" xml:space="preserve">
+    <value>Désactive le traitement parallèle des packages pour cette commande.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_ita" xml:space="preserve">
+    <value>Disabilitare l'elaborazione parallela dei pacchetti per questo comando.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_jpn" xml:space="preserve">
+    <value>このコマンドのために、パッケージの並列処理を無効にします。</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_kor" xml:space="preserve">
+    <value>이 명령에 대한 패키지 병렬 처리를 사용하지 않도록 설정합니다.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_plk" xml:space="preserve">
+    <value>Wyłącz równoległe przetwarzanie pakietów dla tego polecenia.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_ptb" xml:space="preserve">
+    <value>Desativar processamento paralelo de pacotes para esse comando.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_rus" xml:space="preserve">
+    <value>Отключает параллельную обработку пакетов для этой команды.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_trk" xml:space="preserve">
+    <value>Bu komut için paketlerin paralel işlenmesini devre dışı bırak.</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_chs" xml:space="preserve">
+    <value>禁止为此命令并行处理程序包。</value>
+  </data>
+  <data name="CommandDisableParallelProcessing_cht" xml:space="preserve">
+    <value>停用此項目的套件平行處理</value>
+  </data>
+  <data name="CommandPackageSaveMode_csy" xml:space="preserve">
+    <value>Určuje typy souborů, které se mají po instalaci balíčku uložit: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_deu" xml:space="preserve">
+    <value>Angeben von Dateitypen, die nach der Paketinstallation gespeichert werden sollen: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_esp" xml:space="preserve">
+    <value>Especifica los tipos de archivo que se guardarán después de la instalación del paquete: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_fra" xml:space="preserve">
+    <value>Spécifie les types de fichiers à enregistrer après l'installation du package : nuspec, nupkg, nuspec, nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_ita" xml:space="preserve">
+    <value>Specifica i tipi di file per il salvataggio dopo l'installazione del pacchetto: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_jpn" xml:space="preserve">
+    <value>パッケージのインストール後に保存するファイルの種類を指定します: nuspec、nupkg、nuspec;nupkg。</value>
+  </data>
+  <data name="CommandPackageSaveMode_kor" xml:space="preserve">
+    <value>패키지 설치 후에 저장할 파일 형식을 지정합니다. nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_plk" xml:space="preserve">
+    <value>Określa typy plików do zapisania po zainstalowaniu pakietów: nuspec, nupkg, nuspec, nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_ptb" xml:space="preserve">
+    <value>Especifica tipos de arquivos para salvar após instalação de pacote: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_rus" xml:space="preserve">
+    <value>Задает типы файлов, сохраняемых после установки пакета: nuspec, nupkg, nuspec, nupkg.</value>
+  </data>
+  <data name="CommandPackageSaveMode_trk" xml:space="preserve">
+    <value>Paket kurulumundan sonra kaydedilecek dosya türlerini belirtir: nuspec, nupkg, nuspec;nupkg</value>
+  </data>
+  <data name="CommandPackageSaveMode_chs" xml:space="preserve">
+    <value>指定要在安装程序包后保存的文件类型: nuspec、nupkg、nuspec;nupkg。</value>
+  </data>
+  <data name="CommandPackageSaveMode_cht" xml:space="preserve">
+    <value>指定套件安裝之後要儲存的檔案類型: nuspec, nupkg, nuspec;nupkg。</value>
   </data>
 </root>

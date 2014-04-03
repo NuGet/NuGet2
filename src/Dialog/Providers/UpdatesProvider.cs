@@ -177,7 +177,8 @@ namespace NuGet.Dialog.Providers
                 _project.GetTargetFrameworkName(),
                 logger: this,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: IncludePrerelease);
+                allowPrereleaseVersions: IncludePrerelease,
+                dependencyVersion: activePackageManager.DependencyVersion);
 
             var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
             allOperations = installWalker.ResolveOperations(allPackages, out packagesByDependencyOrder);

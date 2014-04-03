@@ -420,3 +420,38 @@ function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesIfPreRel
 
     Assert-AreEqual 'MyPackage' $suggestions[0]
 }
+
+function Test-InstallPackageCommandShowTabExpansionForDependencyVersion {
+    # Act
+    $suggestions = @(TabExpansion 'Install-Package -DependencyVersion ')
+
+    # Assert
+    Assert-AreEqual 4 $suggestions.Count
+    Assert-AreEqual 'Highest' $suggestions[0]
+	Assert-AreEqual 'HighestMinor' $suggestions[1]
+	Assert-AreEqual 'HighestPatch' $suggestions[2]
+	Assert-AreEqual 'Lowest' $suggestions[3]
+}
+
+function Test-InstallPackageCommandShowTabExpansionForFileConflictAction {
+    # Act
+    $suggestions = @(TabExpansion 'Install-Package -FileConflictAction ')
+
+    # Assert
+    Assert-AreEqual 3 $suggestions.Count
+    Assert-AreEqual 'Ignore' $suggestions[0]
+	Assert-AreEqual 'None' $suggestions[1]
+	Assert-AreEqual 'Overwrite' $suggestions[2]
+}
+
+function Test-UpdatePackageCommandShowTabExpansionForFileConflictAction {
+    # Act
+    $suggestions = @(TabExpansion 'Update-Package -FileConflictAction ')
+
+    # Assert
+    Assert-AreEqual 3 $suggestions.Count
+    Assert-AreEqual 'Ignore' $suggestions[0]
+	Assert-AreEqual 'None' $suggestions[1]
+	Assert-AreEqual 'Overwrite' $suggestions[2]
+}
+

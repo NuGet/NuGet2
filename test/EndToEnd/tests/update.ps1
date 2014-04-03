@@ -33,20 +33,20 @@ function Test-UpdatingPackageInProjectDoesntRemoveFromSolutionIfInUse {
 }
 
 function Test-UpdatingPackageWithPackageSaveModeNuspec {
-	# Arrange
-	try {
-		[NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', 'nuspec')
-		
-		$p = New-ClassLibrary
-		Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
-		Assert-Package $p Castle.Core 1.2.0
+    # Arrange
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', 'nuspec')
+        
+        $p = New-ClassLibrary
+        Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
+        Assert-Package $p Castle.Core 1.2.0
     
-		# Act
-		Update-Package Castle.Core
+        # Act
+        Update-Package Castle.Core
 
-		# Assert
-		# Assert-Package $p Castle.Core 2.5.1
-	}
+        # Assert
+        # Assert-Package $p Castle.Core 2.5.1
+    }
     finally {
         [NuGet.VisualStudio.SettingsHelper]::Set('PackageSaveMode', $null)
     }
@@ -61,7 +61,7 @@ function Test-UpdatingPackageWithSharedDependency {
     $p = New-ClassLibrary
 
     # Act
-	Install-Package D -Version 1.0 -Source $context.RepositoryPath
+    Install-Package D -Version 1.0 -Source $context.RepositoryPath
     Assert-Package $p D 1.0
     Assert-Package $p B 1.0
     Assert-Package $p C 1.0
@@ -104,15 +104,15 @@ function Test-UpdatingPackageDependentPackageVersion {
     
     # Arrange
     $p = New-ClassLibrary
-	Install-Package jquery.validation -Version 1.8
+    Install-Package jquery.validation -Version 1.8
     Assert-Package $p jquery.validation 1.8
     Assert-Package $p jquery 1.4.1
     
-	# Act
-	Update-Package jquery -version 2.0.3
+    # Act
+    Update-Package jquery -version 2.0.3
 
-	# Assert: jquery.validation is updated to 1.8.0.1
-	Assert-Package $p jquery 2.0.3
+    # Assert: jquery.validation is updated to 1.8.0.1
+    Assert-Package $p jquery 2.0.3
     Assert-Package $p jquery.validation 1.8.0.1
 }
 
@@ -124,17 +124,17 @@ function Test-UpdatingPackageWhatIf {
     
     # Arrange
     $p = New-ClassLibrary
-	Install-Package D -Version 1.0 -Source $context.RepositoryPath
+    Install-Package D -Version 1.0 -Source $context.RepositoryPath
     Assert-Package $p D 1.0
     Assert-Package $p B 1.0
     Assert-Package $p C 1.0
     Assert-Package $p A 2.0
 
-	# Act
-	Update-Package D -Source $context.RepositoryPath -WhatIf
+    # Act
+    Update-Package D -Source $context.RepositoryPath -WhatIf
 
-	# Assert: no packages are touched
-	Assert-Package $p D 1.0
+    # Assert: no packages are touched
+    Assert-Package $p D 1.0
     Assert-Package $p B 1.0
     Assert-Package $p C 1.0
     Assert-Package $p A 2.0
@@ -147,11 +147,11 @@ function Test-UpdatingPackageWhatIfCannotBeUsedWithReinstall {
     
     # Arrange
     $p = New-ClassLibrary
-	Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
+    Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
     Assert-Package $p Castle.Core 1.2.0
 
-	# Act & Assert
-	Assert-Throws { Update-Package Castle.Core -Reinstall -WhatIf } "Specifying both -Reinstall and -WhatIf is not supported for now."
+    # Act & Assert
+    Assert-Throws { Update-Package Castle.Core -Reinstall -WhatIf } "Specifying both -Reinstall and -WhatIf is not supported for now."
 }
 
 function Test-UpdatingPackageWithSharedDependencySimple {
@@ -540,11 +540,11 @@ function Test-UpdatePackageInAllProjects {
     Update-Package Ninject
 
     # Assert
-    Assert-SolutionPackage Ninject 3.0.1.10
-    Assert-Package $p1 Ninject 3.0.1.10
-    Assert-Package $p2 Ninject 3.0.1.10
-    Assert-Package $p3 Ninject 3.0.1.10
-    Assert-Package $p4 Ninject 3.0.1.10
+    Assert-SolutionPackage Ninject 3.2.2.0
+    Assert-Package $p1 Ninject 3.2.2.0
+    Assert-Package $p2 Ninject 3.2.2.0
+    Assert-Package $p3 Ninject 3.2.2.0
+    Assert-Package $p4 Ninject 3.2.2.0
     Assert-Null (Get-SolutionPackage Ninject 2.0.1.0)
     Assert-Null (Get-SolutionPackage Ninject 2.1.0.76)
     Assert-Null (Get-SolutionPackage Ninject 2.2.0.0)
@@ -1000,7 +1000,7 @@ function Test-UpdatePackageDowngradesIfNewVersionLessThanInstalledPrereleaseVers
     $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.1-a -Prerelease
     Assert-Package $p 'PreReleaseTestPackage' 1.0.1-a
 
-	$p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0
+    $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0
     Assert-Package $p 'PreReleaseTestPackage' 1.0
 }
 
@@ -1518,36 +1518,36 @@ function Test-UpdatePackageThrowsWhenOnlyUnusedVersionsOfAPackageIsPresentInPack
 
 function Test-UpdatePackageWithContentInLicenseBlocks
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	$name = 'PackageWithTextFile'
+    $name = 'PackageWithTextFile'
 
-	Install-Package $name -Version 1.0 -Source $context.RepositoryRoot 
-	
-	$packages = Get-PackagesDir
-	$fooFilePath = Join-Path $packages "$name.1.0\content\text"
+    Install-Package $name -Version 1.0 -Source $context.RepositoryRoot 
+    
+    $packages = Get-PackagesDir
+    $fooFilePath = Join-Path $packages "$name.1.0\content\text"
 
-	Assert-True (Test-Path $fooFilePath)
+    Assert-True (Test-Path $fooFilePath)
 
-	'***************NUget: Begin License Text ---------dsafdsafdas
+    '***************NUget: Begin License Text ---------dsafdsafdas
 sdaflkjdsal;fj;ldsafdsa
 dsaflkjdsa;lkfj;ldsafas
 dsafdsafdsafsdaNuGet: End License Text-------------
 This is a text file 1.0' > $fooFilePath
 
-	# Act
-	Update-Package $name -Source $context.RepositoryRoot
+    # Act
+    Update-Package $name -Source $context.RepositoryRoot
 
-	# Assert
-	Assert-Package $p $name '2.0'
-	
-	$textFilePathInProject = Join-Path (Get-ProjectDir $p) 'text'
-	Assert-True (Test-Path $textFilePathInProject)
+    # Assert
+    Assert-Package $p $name '2.0'
+    
+    $textFilePathInProject = Join-Path (Get-ProjectDir $p) 'text'
+    Assert-True (Test-Path $textFilePathInProject)
 
-	Assert-AreEqual 'This is a text file 2.0' (Get-Content $textFilePathInProject)
+    Assert-AreEqual 'This is a text file 2.0' (Get-Content $textFilePathInProject)
 }
 
 function Test-UpdatePackagePreservesProjectConfigFile
@@ -1573,4 +1573,40 @@ function Test-UpdatePackagePreservesProjectConfigFile
 
     Assert-NotNull (Get-ProjectItem $p 'packages.CoolProject.config')
     Assert-Null (Get-ProjectItem $p 'packages.config')
+}
+
+# Test update-package -WhatIf to downgrade an installed package.
+function Test-UpdatePackageDowngradeWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication    
+    
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot    
+    Assert-Package $project TestUpdatePackage '2.0.0.0'
+
+    # Act
+    Update-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot -WhatIf
+
+    # Assert
+    # that the installed package is not touched.
+    Assert-Package $project TestUpdatePackage '2.0.0.0'
+}
+
+# Test update-package -WhatIf when there are multiple projects
+function Test-UpdatePackageWhatIfMultipleProjects {
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ConsoleApplication
+    
+    $p1 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+    $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+    Assert-Package $p1 TestUpdatePackage '1.0.0.0'
+    Assert-Package $p2 TestUpdatePackage '1.0.0.0'
+
+    # Act
+    Update-Package TestUpdatePackage -Source $context.RepositoryRoot -WhatIf
+
+    # Assert
+    # that the installed packages are not touched in either projects
+    Assert-Package $p1 TestUpdatePackage '1.0.0.0'
+    Assert-Package $p2 TestUpdatePackage '1.0.0.0'
 }

@@ -25,6 +25,22 @@ function Test-PackageInstallWhatIf {
 	Assert-Null (Get-ProjectPackage $project FakeItEasy)
 }
 
+# Test install-package -WhatIf to downgrade an installed package.
+function Test-PackageInstallDowngradeWhatIf {
+    # Arrange
+    $project = New-ConsoleApplication    
+    
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot    
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+
+	# Act
+	Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot -WhatIf
+
+	# Assert
+	# that the installed package is not touched.
+	Assert-Package $project TestUpdatePackage '2.0.0.0'
+}
+
 function Test-WebsiteSimpleInstall {
     param(
         $context
@@ -2264,7 +2280,7 @@ function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
     Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
-function Test-InstallPackageIntoJavascriptApplication
+function Test-InstallPackageIntoJavaScriptApplication
 {
     if ($dte.Version -eq "10.0")
     {
@@ -2273,6 +2289,24 @@ function Test-InstallPackageIntoJavascriptApplication
 
     # Arrange
     $p = New-JavaScriptApplication
+
+    # Act
+    Install-Package jQuery -ProjectName $p.Name 
+
+    # Assert
+    Assert-Package $p "jQuery"
+}
+
+function Test-InstallPackageIntoJavaScriptWindowsPhoneApp
+{
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return;
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
 
     # Act
     Install-Package jQuery -ProjectName $p.Name 
@@ -2319,6 +2353,31 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
     
     Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
     Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}
+
+
+function Test-InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptWindowsPhoneApp81
+
+    # Act
+    Install-Package Java -ProjectName $p.Name -source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p Java
+    
+    Assert-NotNull (Get-ProjectItem $p 'phone.txt')
+    Assert-NotNull (Get-ProjectItem $p 'phone2.txt')
+    Assert-Null (Get-ProjectItem $p 'store.txt')
 }
 
 function Test-SpecifyDifferentVersionThenServerVersion
@@ -2558,21 +2617,107 @@ function Test-InstallPackageAddMoreEntriesToProjectConfigFile
     Assert-Null (Get-ProjectItem $p 'packages.config')
 }
 
-# Tests that when -DependencyVersion HighestPath is specified, the dependency with
+# Tests that when -DependencyVersion HighestPatch is specified, the dependency with
 # the largest patch number is installed
-function Test-InstallPackageWithDependencyVersionHighest
+function Test-InstallPackageWithDependencyVersionHighestPatch
 {
     param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
 
     # Arrange
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package jquery.validation -version 1.10 -DependencyVersion HighestPatch
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion HighestPatch
 
     # Assert
-    Assert-Package $p jquery.validation 1.10
-    Assert-Package $p jquery 1.4.4
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.1
+}
+
+# Tests that when -DependencyVersion HighestPatch is specified, the dependency with
+# the lowest major, highest minor, highest patch is installed
+function Test-InstallPackageWithDependencyVersionHighestMinor
+{
+    param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion HighestMinor
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.2.1
+}
+
+# Tests that when -DependencyVersion Highest is specified, the dependency with
+# the highest version installed
+function Test-InstallPackageWithDependencyVersionHighest
+{
+    param($context)
+
+	# A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion Highest
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 2.0.1
+}
+
+# Tests that when -DependencyVersion is lowest, the dependency with
+# the smallest patch number is installed
+function Test-InstallPackageWithDependencyVersionLowest
+{
+    param($context)
+
+   # A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath -DependencyVersion Lowest
+
+    # Assert
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.0
+}
+
+# Tests the case when DependencyVersion is specified in nuget.config
+function Test-InstallPackageWithDependencyVersionHighestInNuGetConfig
+{
+    param($context)
+
+    try {
+        [NuGet.VisualStudio.SettingsHelper]::Set('DependencyVersion', 'HighestPatch')
+
+        # Arrange
+        $p = New-ClassLibrary
+        
+        # Act
+        $p | Install-Package jquery.validation -version 1.10
+        
+        # Assert
+        Assert-Package $p jquery.validation 1.10
+        Assert-Package $p jquery 1.4.4
+    }
+    finally {
+        [NuGet.VisualStudio.SettingsHelper]::Set('DependencyVersion', $null)
+    }    
 }
 
 # Tests that when -DependencyVersion is not specified, the dependency with
@@ -2581,13 +2726,16 @@ function Test-InstallPackageWithoutDependencyVersion
 {
     param($context)
 
+   # A depends on B >= 1.0.0
+	# Available versions of B are: 1.0.0, 1.0.1, 1.2.0, 1.2.1, 2.0.0, 2.0.1
+
     # Arrange
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package jquery.validation -version 1.10
+    $p | Install-Package A -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p jquery.validation 1.10
-    Assert-Package $p jquery 1.4.1
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0.0
 }

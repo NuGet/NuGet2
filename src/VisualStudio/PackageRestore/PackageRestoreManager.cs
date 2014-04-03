@@ -8,6 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+
 using EnvDTE;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
@@ -133,15 +136,17 @@ namespace NuGet.VisualStudio
             _waitDialogFactory.CreateInstance(out waitDialog);
             try
             {
-                waitDialog.StartWaitDialog(
-                    VsResources.DialogTitle,
-                    VsResources.PackageRestoreWaitMessage,
-                    String.Empty,
-                    varStatusBmpAnim: null,
-                    szStatusBarText: null,
-                    iDelayToShowDialog: 0,
-                    fIsCancelable: false,
-                    fShowMarqueeProgress: true);
+                // Start the wait dialog on the UI thread
+                InvokeOnUIThread(() =>
+                    waitDialog.StartWaitDialog(
+                        VsResources.DialogTitle,
+                        VsResources.PackageRestoreWaitMessage,
+                        String.Empty,
+                        varStatusBmpAnim: null,
+                        szStatusBarText: null,
+                        iDelayToShowDialog: 0,
+                        fIsCancelable: false,
+                        fShowMarqueeProgress: true));
 
                 if (fromActivation)
                 {
@@ -159,7 +164,8 @@ namespace NuGet.VisualStudio
             finally
             {
                 int canceled;
-                waitDialog.EndWaitDialog(out canceled);
+
+                InvokeOnUIThread(() => waitDialog.EndWaitDialog(out canceled));
             }
 
             if (fromActivation)
@@ -283,7 +289,7 @@ namespace NuGet.VisualStudio
                 return;
             }
 
-            if (!VsVersionHelper.IsVisualStudio2010 && 
+            if (!VsVersionHelper.IsVisualStudio2010 &&
                 (project.IsJavaScriptProject() ||  project.IsNativeProject()))
             {
                 if (VsVersionHelper.IsVisualStudio2012)
@@ -336,7 +342,7 @@ namespace NuGet.VisualStudio
         private void AddNuGetTargets(MsBuildProject buildProject)
         {
             string targetsPath = Path.Combine(@"$(SolutionDir)", NuGetTargetsFile);
-            buildProject.AddImportStatement(targetsPath, ProjectImportLocation.Bottom);
+            NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, targetsPath, ProjectImportLocation.Bottom);
         }
 
         private void AddSolutionDirProperty(MsBuildProject buildProject)
@@ -350,7 +356,7 @@ namespace NuGet.VisualStudio
                     buildProject.FullPath,
                     PathUtility.EnsureTrailingSlash(_solutionManager.SolutionDirectory));
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
-                
+
                 var solutionDirProperty = buildProject.Xml.AddProperty(solutiondir, relativeSolutionPath);
                 solutionDirProperty.Condition =
                     String.Format(
@@ -381,7 +387,7 @@ namespace NuGet.VisualStudio
             {
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder,
                 // using the active package source first and fall back to other enabled package sources.
-                IPackageRepository repository = CreatePackageRestoreRepository(); 
+                IPackageRepository repository = CreatePackageRestoreRepository();
 
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
@@ -607,6 +613,21 @@ namespace NuGet.VisualStudio
             }
 
             return new PackageReference[0];
+        }
+
+        /// <summary>
+        /// Invokes the action on the UI thread if one exists.
+        /// </summary>
+        private void InvokeOnUIThread(Action action)
+        {
+            if (Application.Current != null)
+            {
+                Application.Current.Dispatcher.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
         }
     }
 }

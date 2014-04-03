@@ -60,6 +60,12 @@ Register-TabExpansion 'Install-Package' @{
     'Source' = {
         GetPackageSources
     }
+	'DependencyVersion' = {
+		GetEnumNames 'NuGet.DependencyVersion'
+	}
+	'FileConflictAction' = {
+		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
+	}
 }
 
 Register-TabExpansion 'Uninstall-Package' @{
@@ -107,6 +113,9 @@ Register-TabExpansion 'Update-Package' @{
     'Source' = {
         GetPackageSources
     }
+	'FileConflictAction' = {
+		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
+	}
 }
 
 Register-TabExpansion 'Open-PackagePage' @{
@@ -185,6 +194,11 @@ function GetRemotePackageIds($context) {
 function GetPackageSources() {
     $allSources = [NuGet.VisualStudio.AggregatePackageSource]::GetEnabledPackageSourcesWithAggregate()
     $allSources | Select-Object -ExpandProperty Name
+}
+
+function GetEnumNames($typeName) {
+	# Sort the enumerations in alphabetical order to make it consistent with TabExpansion2
+    return [System.Enum]::GetNames($typeName) | Sort-Object
 }
 
 function GetInstalledPackageVersions($context) {

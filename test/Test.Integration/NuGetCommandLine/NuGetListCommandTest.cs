@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using Xunit;
 using Xunit.Extensions;
@@ -61,7 +63,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Assert.Equal(4, lines.Length);
             Assert.Equal("testPackage1", lines[0]);
             Assert.Equal(" 1.1.0", lines[1]);
-            Assert.Equal(" Test desc", lines[2]);
+            Assert.Equal(" desc of testPackage1 1.1.0", lines[2]);
             Assert.Equal(" License url: http://kaka", lines[3]);
         }
 
@@ -106,6 +108,391 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Assert.Equal(0, r);
             var output = Encoding.Default.GetString(memoryStream.ToArray());
             Assert.Equal("testPackage1 1.1.0\r\ntestPackage2 2.0.0\r\n", output);
+        }
+
+        // Tests list command, with no other switches
+        [Fact]
+        public void ListCommand_Simple()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+                
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+                
+                server.Get.Add("/nuget/$metadata", r => 
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                
+                // verify that only package id & version is displayed
+                var expectedOutput = "testPackage1 1.1.0" + Environment.NewLine +
+                    "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+                                
+                Assert.Contains("$filter=IsLatestVersion", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=false", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Tests that list command only show listed packages
+        [Fact]
+        public void ListCommand_OnlyShowListed()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+                package1.Listed = false;
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that only testPackage2 is listed since the package testPackage1
+                // is not listed.
+                var expectedOutput = "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+
+                Assert.Contains("$filter=IsLatestVersion", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=false", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Tests that list command displays detailed package info when -Verbosity is detailed.
+        [Fact]
+        public void ListCommand_VerboseOutput()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -Verbosity detailed -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that the output is detailed
+                Assert.Contains(package1.Description, r1.Item2);
+                Assert.Contains(package2.Description, r1.Item2);
+
+                Assert.Contains("$filter=IsLatestVersion", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=false", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Tests that when -AllVersions is specified, list command sends request 
+        // without $filter
+        [Fact]
+        public void ListCommand_AllVersions()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -AllVersions -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that the output is detailed
+                var expectedOutput = "testPackage1 1.1.0" + Environment.NewLine +
+                    "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+
+                Assert.DoesNotContain("$filter", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=false", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Test case when switch -Prerelease is specified
+        [Fact]
+        public void ListCommand_Prerelease()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -Prerelease -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that the output is detailed
+                var expectedOutput = "testPackage1 1.1.0" + Environment.NewLine +
+                    "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+
+                Assert.Contains("$filter=IsAbsoluteLatestVersion", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=true", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Test case when both switches -Prerelease and -AllVersions are specified
+        [Fact]
+        public void ListCommand_AllVersionsPrerelease()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -AllVersions -Prerelease -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that the output is detailed
+                var expectedOutput = "testPackage1 1.1.0" + Environment.NewLine +
+                    "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+
+                Assert.DoesNotContain("$filter", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=true", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
         }
     }
 }

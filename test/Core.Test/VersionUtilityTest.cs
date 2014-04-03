@@ -209,6 +209,24 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneAppNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "WindowsPhoneApp", "wpa" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("WindowsPhoneApp", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames()
         {
             // Arrange
@@ -904,6 +922,8 @@ namespace NuGet.Test
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
             FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
             FrameworkName wp8 = new FrameworkName("WindowsPhone, Version=v8.0");
+            FrameworkName wp81 = new FrameworkName("WindowsPhone, Version=v8.1");
+            FrameworkName wpa81 = VersionUtility.ParseFrameworkName("wpa81");
 
             // Act
             bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
@@ -915,6 +935,10 @@ namespace NuGet.Test
             bool wp8CompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp8);
             bool wp8CompatbielWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp8);
 
+            bool wp81CompatibleWithwp8 = VersionUtility.IsCompatible(wp81, wp8);
+
+            bool wpa81CompatibleWithwp81 = VersionUtility.IsCompatible(wpa81, wp81);
+
             // Assert
             Assert.False(wp7MangoCompatibleWithwp7);
             Assert.True(wp7CompatibleWithwp7Mango);
@@ -924,6 +948,10 @@ namespace NuGet.Test
 
             Assert.False(wp8CompatibleWithwp7);
             Assert.False(wp8CompatbielWithwp7Mango);
+
+            Assert.True(wp81CompatibleWithwp8);
+
+            Assert.False(wpa81CompatibleWithwp81);
         }
 
         [Theory]
@@ -1298,15 +1326,17 @@ namespace NuGet.Test
             Assert.Equal("wp71", shortName);
         }
 
-        [Fact]
-        public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework()
+        [Theory]
+        [InlineData("portable-netcore45+sl4", "silverlight45")]
+        [InlineData("portable-net40+win8+sl4+wp71+wpa81", "wp81")]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework(string packageFramework, string projectFramework)
         {
             // Arrange
-            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
-            var normalFramework = VersionUtility.ParseFrameworkName("silverlight45");
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
 
             // Act
-            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
 
             // Assert
             Assert.True(isCompatible);
@@ -1363,6 +1393,10 @@ namespace NuGet.Test
         [InlineData("portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
         [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
         [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7")]
+        [InlineData("portable-net40+win8+sl4+wp71+wpa81", "portable-wpa81+wp81")]
+        [InlineData("portable-wp8+wpa81", "portable-wpa81+wp81")]
+        [InlineData("portable-wp81+wpa81", "portable-wpa81+wp81")]
+        [InlineData("portable-wpa81+wp81", "portable-wpa81+wp81")]
         public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
         {
             // Arrange
@@ -1381,6 +1415,7 @@ namespace NuGet.Test
         [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
         [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
         [InlineData("portable-netcore45+sl4", "portable-net4+wp7")]
+        [InlineData("portable-net40+win8+sl4+wp71", "portable-wpa81+wp81")]
         public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
         {
             // Arrange

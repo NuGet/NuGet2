@@ -23,21 +23,32 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Theory]
-        [InlineData("", "Windows, Version=0.0")]
-        [InlineData(null, "Windows, Version=0.0")]
-        [InlineData("8.0", "Windows, Version=8.0")]
-        [InlineData("8.1", "Windows, Version=8.1")]
-        public void GetTargetFrameworkForJSProjectReturnsCorrectPlatformVersion(string platformVersion, string exptectedTargetFramework)
+        [InlineData("", "", "Windows, Version=0.0")]
+        [InlineData(null, null, "Windows, Version=0.0")]
+        [InlineData("", "Windows", "Windows, Version=0.0")]
+        [InlineData(null, "Windows", "Windows, Version=0.0")]
+        [InlineData("8.0", "Windows", "Windows, Version=8.0")]
+        [InlineData("8.1", "Windows", "Windows, Version=8.1")]
+        [InlineData("", "WindowsPhoneApp", "WindowsPhoneApp, Version=0.0")]
+        [InlineData("8.1", "WindowsPhoneApp", "WindowsPhoneApp, Version=8.1")]
+        [InlineData("10", "vNextJSApp", "vNextJSApp, Version=10")]
+        public void GetTargetFrameworkForJSProjectReturnsCorrectPlatformVersion(string platformVersion, string platformIdentifier, string exptectedTargetFramework)
         {
             // Arrange
             var project = new Mock<Project>();
             project.Setup(p => p.Kind).Returns(VsConstants.JsProjectTypeGuid);
 
-            var fxProperty = new Mock<Property>();
-            fxProperty.Setup(x => x.Value).Returns(platformVersion);
+            var verProp = new Mock<Property>();
+            verProp.Setup(x => x.Value).Returns(platformVersion);
+
+            var idProp = new Mock<Property>();
+            idProp.Setup(x => x.Value).Returns(platformIdentifier);
 
             project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetPlatformVersion".Equals(v))))
-                   .Returns(fxProperty.Object);
+                   .Returns(verProp.Object);
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetPlatformIdentifier".Equals(v))))
+                   .Returns(idProp.Object);
 
             // Act
             string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);

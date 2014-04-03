@@ -75,13 +75,14 @@ namespace NuGet.ServerExtensions
 
         public int MirrorPackage(IPackage package, FrameworkName targetFramework, bool allowPrereleaseVersions, MirrorDependenciesMode mirrorDependenciesMode)
         {
-
-            return Execute(package, new InstallWalker(TargetRepository,
-                                               sourceRepository: mirrorDependenciesMode == MirrorDependenciesMode.Fail ? TargetRepository : SourceRepository,
-                                               targetFramework: targetFramework,
-                                               logger: Logger,
-                                               ignoreDependencies: mirrorDependenciesMode == MirrorDependenciesMode.Ignore,
-                                               allowPrereleaseVersions: allowPrereleaseVersions));
+            return Execute(package, new InstallWalker(
+                TargetRepository,
+                sourceRepository: mirrorDependenciesMode == MirrorDependenciesMode.Fail ? TargetRepository : SourceRepository,
+                targetFramework: targetFramework,
+                logger: Logger,
+                ignoreDependencies: mirrorDependenciesMode == MirrorDependenciesMode.Ignore,
+                allowPrereleaseVersions: allowPrereleaseVersions,
+                dependencyVersion: DependencyVersion.Lowest));
         }
 
         private int Execute(IPackage package, IPackageOperationResolver resolver)

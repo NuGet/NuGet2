@@ -53,5 +53,30 @@ namespace NuGet.VisualStudio
         {
             return ServiceLocator.GetInstance<ISettings>();
         }
+
+        /// <summary>
+        /// Adds a new package source.
+        /// </summary>
+        /// <param name="name">Name of the new source.</param>
+        /// <param name="source">Value (uri) of the new source.</param>
+        public static void AddSource(string name, string source)
+        {
+            var packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
+            var sources = packageSourceProvider.LoadPackageSources().ToList();
+            sources.Add(new PackageSource(source, name));
+            packageSourceProvider.SavePackageSources(sources);
+        }
+
+        /// <summary>
+        /// Removes a new package source.
+        /// </summary>
+        /// <param name="name">Name of the source.</param>
+        public static void RemoveSource(string name)
+        {
+            var packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
+            var sources = packageSourceProvider.LoadPackageSources();
+            sources = sources.Where(s => s.Name != name).ToList();
+            packageSourceProvider.SavePackageSources(sources);
+        }
     }
 }

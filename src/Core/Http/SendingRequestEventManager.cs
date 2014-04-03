@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 
@@ -12,11 +13,17 @@ namespace NuGet
 
         public static void AddListener(IHttpClientEvents source, IWeakEventListener listener)
         {
+            // weak event pattern cannot be used if we're running from command line.
+            Debug.Assert(!EnvironmentUtility.RunningFromCommandLine);
+
             SendingRequestEventManager.CurrentManager.ProtectedAddListener(source, listener);
         }
 
         public static void RemoveListener(IHttpClientEvents source, IWeakEventListener listener)
         {
+            // weak event pattern cannot be used if we're running from command line.
+            Debug.Assert(!EnvironmentUtility.RunningFromCommandLine);
+
             SendingRequestEventManager.CurrentManager.ProtectedRemoveListener(source, listener);
         }
 

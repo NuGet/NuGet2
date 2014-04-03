@@ -47,9 +47,16 @@ namespace NuGet
                             bool succeeded = transformation.Apply(document);
                             if (succeeded)
                             {
-                                using (var fileStream = projectSystem.CreateFile(targetPath))
+                                using (var memoryStream = new MemoryStream())
                                 {
-                                    document.Save(fileStream);
+                                    // save the result into a memoryStream first so that if there is any
+                                    // exception during document.Save(), the original file won't be truncated.
+                                    document.Save(memoryStream);
+                                    memoryStream.Seek(0, SeekOrigin.Begin);
+                                    using (var fileStream = projectSystem.CreateFile(targetPath))
+                                    {
+                                        memoryStream.CopyTo(fileStream);
+                                    }
                                 }
                             }
                         }

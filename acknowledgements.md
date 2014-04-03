@@ -2,18 +2,25 @@ NuGet Hall of Fame
 ==================
 
 ## NuGet 2.8
-1. [leppie](https://www.codeplex.com/site/users/view/leppie)
+1. [Llewellyn Pritchard](https://www.codeplex.com/site/users/view/leppie) ([@leppie](https://twitter.com/leppie))
     - [#3466](https://nuget.codeplex.com/workitem/3466) - When packing packages, verifying Id of dependency packages.
-1. [maartenba](https://www.codeplex.com/site/users/view/maartenba) ([@Maarten Balliauw](https://twitter.com/maartenballiauw))
+1. [Maarten Balliauw](https://www.codeplex.com/site/users/view/maartenba) ([@maartenballiauw](https://twitter.com/maartenballiauw))
     - [#2379](https://nuget.codeplex.com/workitem/2379) - Remove the $metadata suffix when persistening feed credentials.
-1. [FilipDeVos](https://www.codeplex.com/site/users/view/FilipDeVos) ([@Filip De Vos](https://twitter.com/foxtricks))
+1. [Filip De Vos](https://www.codeplex.com/site/users/view/FilipDeVos) ([@foxtricks](https://twitter.com/foxtricks))
     - [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
-1. [jjgonzalez](https://www.codeplex.com/site/users/view/jjgonzalez)
+1. [Juan Gonzalez](https://www.codeplex.com/site/users/view/jjgonzalez)
     - [#3536](http://nuget.codeplex.com/workitem/3536) - Replacement tokens not passed with -IncludeReferencedProjects.
-1. [Sarkie](https://www.codeplex.com/site/users/view/Sarkie)
+1. [David Poole](https://www.codeplex.com/site/users/view/Sarkie) ([@Sarkie_Dave](https://twitter.com/Sarkie_Dave))
     - [#3677](http://nuget.codeplex.com/workitem/3677) - Fix nuget.push throwing OutOfMemoryException when pushing large package.
-1. [Despostes](https://www.codeplex.com/site/users/view/Despostes)
+1. [Wouter Ouwens](https://www.codeplex.com/site/users/view/Despotes)
 	- [#3666](http://nuget.codeplex.com/workitem/3666) - Fix incorrect target path when project references another CLI/C++ project.
+1. [Adam Ralph](http://www.codeplex.com/site/users/view/adamralph) ([@adamralph](https://twitter.com/adamralph))
+    - [#3639](https://nuget.codeplex.com/workitem/3639) - Allow packages to be installed as development dependencies by default
+1. [David Fowler](https://www.codeplex.com/site/users/view/dfowler) ([@davidfowl](https://twitter.com/davidfowl))
+    - [#3717](https://nuget.codeplex.com/workitem/3717) - Remove implicit upgrades to the latest patch version
+1. [Gregory Vandenbrouck](https://www.codeplex.com/site/users/view/vdbg)
+    - Several bug fixes and improvements for NuGet.Server, the nuget.exe mirror command, and others.
+    - This work was done over several months, with Gregory working with us on the right timing to integrate into master for 2.8.
  
 ## NuGet 2.7
 
@@ -47,6 +54,8 @@ NuGet Hall of Fame
     - [#3460](https://nuget.codeplex.com/workitem/3460) - Fix bug NullReferenceException if requireApiKey = true, but the header X-NUGET-APIKEY isn't present
 1. [Michael Friis](https://www.codeplex.com/site/users/view/friism) ([@friism](https://twitter.com/friism))
     - [#3278](https://nuget.codeplex.com/workitem/3278) - Fixes NuGet.Build targets file to so that it works correctly on MonoDevelop
+1. [Pranav Krishnamoorthy](https://www.codeplex.com/site/users/view/pranavkm) ([@pranav_km](https://twitter.com/pranav_km))
+    - Improve Restore command performance by increasing parallelization
 
 ## NuGet 2.5
 

@@ -1,19 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Text.RegularExpressions;
 using EnvDTE;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 using VSLangProj;
 using VsWebSite;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
@@ -357,10 +357,20 @@ namespace NuGet.VisualStudio
 
             if (project.IsJavaScriptProject())
             {
-                // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
-                // We read the TargetPlatformVersion instead
+                // JavaScript apps do not have a TargetFrameworkMoniker property set.
+                // We read the TargetPlatformIdentifier and TargetPlatformVersion instead
+
+                string platformIdentifier = project.GetPropertyValue<string>("TargetPlatformIdentifier");
                 string platformVersion = project.GetPropertyValue<string>("TargetPlatformVersion");
-                return String.IsNullOrEmpty(platformVersion) ? "Windows, Version=0.0" : "Windows, Version=" + platformVersion;
+
+                // use the default values for JS if they were not given
+                if (String.IsNullOrEmpty(platformVersion))
+                    platformVersion = "0.0";
+
+                if (String.IsNullOrEmpty(platformIdentifier))
+                    platformIdentifier = "Windows";
+
+                return String.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", platformIdentifier, platformVersion);
             }
 
             if (project.IsNativeProject())
@@ -850,62 +860,12 @@ namespace NuGet.VisualStudio
 
         public static void AddImportStatement(this Project project, string targetsPath, ProjectImportLocation location)
         {
-            AddImportStatement(project.AsMSBuildProject(), targetsPath, location);
-        }
-
-        public static void AddImportStatement(this MsBuildProject buildProject, string targetsPath, ProjectImportLocation location)
-        {
-            // adds an <Import> element to this project file if it doesn't already exist.
-            if (buildProject.Xml.Imports == null ||
-                buildProject.Xml.Imports.All(import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
-            {
-                ProjectImportElement pie = buildProject.Xml.AddImport(targetsPath);
-                pie.Condition = "Exists('" + targetsPath + "')";
-
-                if (location == ProjectImportLocation.Top)
-                {
-                    // There's no public constructor to create a ProjectImportElement directly.
-                    // So we have to cheat by adding Import at the end, then remove it and insert at the beginning
-                    pie.Parent.RemoveChild(pie);
-                    buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
-                }
-                else
-                {
-                    // the import might get added into an ImportGroup. In this case, 
-                    // we remove it from the ImportGroup and add it at the end of the 
-                    // project.
-                    if (pie.Parent.GetType() == typeof(ProjectImportGroupElement))
-                    {
-                        pie.Parent.RemoveChild(pie);
-                        buildProject.Xml.AppendChild(pie);
-                    }
-                }
-
-                NuGet.MSBuildProjectUtility.AddEnsureImportedTarget(buildProject, targetsPath);
-                buildProject.ReevaluateIfNecessary();
-            }
+            NuGet.MSBuildProjectUtility.AddImportStatement(project.AsMSBuildProject(), targetsPath, location);
         }
 
         public static void RemoveImportStatement(this Project project, string targetsPath)
         {
-            RemoveImportStatement(project.AsMSBuildProject(), targetsPath);
-        }
-
-        public static void RemoveImportStatement(this MsBuildProject buildProject, string targetsPath)
-        {
-            if (buildProject.Xml.Imports != null)
-            {
-                // search for this import statement and remove it
-                var importElement = buildProject.Xml.Imports.FirstOrDefault(
-                    import => targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
-
-                if (importElement != null)
-                {
-                    importElement.Parent.RemoveChild(importElement);
-                    NuGet.MSBuildProjectUtility.RemoveEnsureImportedTarget(buildProject, targetsPath);
-                    buildProject.ReevaluateIfNecessary();
-                }
-            }
+            NuGet.MSBuildProjectUtility.RemoveImportStatement(project.AsMSBuildProject(), targetsPath);
         }
 
         /// <summary>
@@ -1048,6 +1008,30 @@ namespace NuGet.VisualStudio
             {
                 return Path.GetFileName(obj).GetHashCode();
             }
+        }
+
+        /// <summary>
+        /// Check if the project has the SharedAssetsProject capability. This is true
+        /// for shared projects in universal apps.
+        /// </summary>
+        public static bool IsSharedProject(this Project project)
+        {
+            bool isShared = false;
+            var hier = project.ToVsHierarchy();
+
+            // VSHPROPID_ProjectCapabilities is a space delimited list of capabilities (Dev11+)
+            object capObj;
+            if (ErrorHandler.Succeeded(hier.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID5.VSHPROPID_ProjectCapabilities, out capObj)) && capObj != null)
+            {
+                string cap = capObj as string;
+
+                if (!String.IsNullOrEmpty(cap))
+                {
+                    isShared = cap.Split(' ').Any(s => StringComparer.OrdinalIgnoreCase.Equals("SharedAssetsProject", s));
+                }
+            }
+
+            return isShared;
         }
     }
 }

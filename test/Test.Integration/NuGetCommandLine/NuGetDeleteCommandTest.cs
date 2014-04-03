@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Xunit;
 using Xunit.Extensions;
 
@@ -70,6 +71,35 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Cleanup
                 Util.DeleteDirectory(source);
             }
+        }
+
+        [Fact]
+        public void DeleteCommand_DeleteFromHttpSource()
+        {
+            var tempPath = Path.GetTempPath();
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            // Arrange
+            var server = new MockServer(mockServerEndPoint);
+            server.Start();
+            bool deleteRequestIsCalled = false;
+
+            server.Delete.Add("/nuget/testPackage1/1.1", request =>
+            {
+                deleteRequestIsCalled = true;
+                return HttpStatusCode.OK;
+            });
+
+            // Act
+            string[] args = new string[] { 
+                    "delete", "testPackage1", "1.1.0", 
+                    "-Source", mockServerEndPoint + "nuget", "-NonInteractive" };
+            int r = Program.Main(args);
+            server.Stop();
+
+            // Assert
+            Assert.Equal(0, r);
+            Assert.True(deleteRequestIsCalled);
         }
     }
 }

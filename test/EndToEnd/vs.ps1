@@ -87,7 +87,7 @@ function New-Project {
     if (!$ProjectName) {
         $ProjectName = $TemplateName + "_$id"
     }
-    
+
     # Make sure there is a solution
     Ensure-Solution
     
@@ -287,6 +287,24 @@ function New-JavaScriptApplication81
     }
 }
 
+function New-JavaScriptWindowsPhoneApp81 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try 
+    {
+        $SolutionFolder | New-Project WindowsPhoneApp81JS $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test
+        throw "SKIP: $($_)"
+    }
+}
+
 function New-NativeWinStoreApplication
 {
     param(
@@ -328,6 +346,15 @@ function New-WebApplication {
     )
 
     $SolutionFolder | New-Project EmptyWebApplicationProject40 $ProjectName
+}
+
+function New-VBConsoleApplication {
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project VBConsoleApplication $ProjectName
 }
 
 function New-MvcApplication { 
@@ -729,6 +756,11 @@ function Enable-PackageRestore {
     }
 
     $componentService = Get-VSComponentModel
+    
+    # change active package source to "All"
+    $packageSourceProvider = $componentService.GetService([NuGet.VisualStudio.IVsPackageSourceProvider])
+    $packageSourceProvider.ActivePackageSource = [NuGet.VisualStudio.AggregatePackageSource]::Instance
+    
     $packageRestoreManager = $componentService.GetService([NuGet.VisualStudio.IPackageRestoreManager])
     $packageRestoreManager.EnableCurrentSolutionForRestore($false)
 }
