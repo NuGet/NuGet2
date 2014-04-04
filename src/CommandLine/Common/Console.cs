@@ -223,7 +223,7 @@ namespace NuGet.Common
 
                 int leftPadding = startIndex + content.Length - CursorLeft;
                 // Print it with the correct padding
-                Out.WriteLine(content.PadLeft(leftPadding));
+                Out.WriteLine((leftPadding > 0) ? content.PadLeft(leftPadding) : content);
                 // Get the next substring to be printed
                 text = text.Substring(content.Length);
             }
