@@ -523,32 +523,32 @@ function Test-UpdatePackageInAllProjects {
     $p4 = New-WebSite
 
     # Act
-    $p1 | Install-Package Ninject -Version 2.0.1.0
-    $p2 | Install-Package Ninject -Version 2.1.0.76
-    $p3 | Install-Package Ninject -Version 2.2.0.0
-    $p4 | Install-Package Ninject -Version 2.2.1.0
+    $p1 | Install-Package A -Version 2.0.1.0 -Source $context.RepositoryPath
+    $p2 | Install-Package A -Version 2.1.0.76 -Source $context.RepositoryPath
+    $p3 | Install-Package A -Version 2.2.0.0 -Source $context.RepositoryPath
+    $p4 | Install-Package A -Version 2.2.1.0 -Source $context.RepositoryPath
 
-    Assert-SolutionPackage Ninject 2.0.1.0
-    Assert-SolutionPackage Ninject 2.1.0.76
-    Assert-SolutionPackage Ninject 2.2.0.0
-    Assert-SolutionPackage Ninject 2.2.1.0
-    Assert-Package $p1 Ninject 2.0.1.0
-    Assert-Package $p2 Ninject 2.1.0.76
-    Assert-Package $p3 Ninject 2.2.0.0
-    Assert-Package $p4 Ninject 2.2.1.0
+    Assert-SolutionPackage A 2.0.1.0
+    Assert-SolutionPackage A 2.1.0.76
+    Assert-SolutionPackage A 2.2.0.0
+    Assert-SolutionPackage A 2.2.1.0
+    Assert-Package $p1 A 2.0.1.0
+    Assert-Package $p2 A 2.1.0.76
+    Assert-Package $p3 A 2.2.0.0
+    Assert-Package $p4 A 2.2.1.0
 
-    Update-Package Ninject
+    Update-Package A -Source $context.RepositoryPath
 
     # Assert
-    Assert-SolutionPackage Ninject 3.2.2.0
-    Assert-Package $p1 Ninject 3.2.2.0
-    Assert-Package $p2 Ninject 3.2.2.0
-    Assert-Package $p3 Ninject 3.2.2.0
-    Assert-Package $p4 Ninject 3.2.2.0
-    Assert-Null (Get-SolutionPackage Ninject 2.0.1.0)
-    Assert-Null (Get-SolutionPackage Ninject 2.1.0.76)
-    Assert-Null (Get-SolutionPackage Ninject 2.2.0.0)
-    Assert-Null (Get-SolutionPackage Ninject 2.2.1.0)
+    Assert-SolutionPackage A 3.2.2.0
+    Assert-Package $p1 A 3.2.2.0
+    Assert-Package $p2 A 3.2.2.0
+    Assert-Package $p3 A 3.2.2.0
+    Assert-Package $p4 A 3.2.2.0
+    Assert-Null (Get-SolutionPackage A 2.0.1.0)
+    Assert-Null (Get-SolutionPackage A 2.1.0.76)
+    Assert-Null (Get-SolutionPackage A 2.2.0.0)
+    Assert-Null (Get-SolutionPackage A 2.2.1.0)
 }
 
 function Test-UpdateAllPackagesInSolution {
