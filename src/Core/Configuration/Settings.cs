@@ -264,6 +264,24 @@ namespace NuGet
             return ret;
         }
 
+        private static string ResolvePath(string configDirectory, string value)
+        {
+            // Three cases for when Path.IsRooted(value) is true:
+            // 1- C:\folder\file
+            // 2- \\share\folder\file
+            // 3- \folder\file
+            // In the first two cases, we want to honor the fully qualified path
+            // In the last case, we want to return X:\folder\file with X: drive where config file is located.
+            // However, Path.Combine(path1, path2) always returns path2 when Path.IsRooted(path2) == true (which is current case)
+            var root = Path.GetPathRoot(value);
+            // this corresponds to 3rd case
+            if (root != null && root.Length == 1 && (root[0] == Path.DirectorySeparatorChar || value[0] == Path.AltDirectorySeparatorChar))
+            {
+                return Path.Combine(Path.GetPathRoot(configDirectory), value.Substring(1));
+            }
+            return Path.Combine(configDirectory, value);
+        }
+
         private string ElementToValue(XElement element, bool isPath)
         {
             if (element == null)
@@ -277,10 +295,7 @@ namespace NuGet
             {
                 return value;
             }
-            // if value represents a path and relative to this file path was specified, 
-            // append location of file
-            string configDirectory = Path.GetDirectoryName(ConfigFilePath);
-            return _fileSystem.GetFullPath(Path.Combine(configDirectory, value));
+            return _fileSystem.GetFullPath(ResolvePath(Path.GetDirectoryName(ConfigFilePath), value));
         }
 
         private XElement GetValueInternal(string section, string key, XElement curr)

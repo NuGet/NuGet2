@@ -12,7 +12,7 @@ namespace NuGet.Test
     public class SettingsTests
     {
         [Fact]
-        public void CallingCtroWithNullFileSystemWithThrowException()
+        public void CallingCtorWithNullFileSystemWithThrowException()
         {
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => new Settings(null));
@@ -1310,6 +1310,7 @@ namespace NuGet.Test
         [Theory]
         [InlineData(@"z:\foo")]
         [InlineData(@"x:\foo\bar\qux")]
+        [InlineData(@"\\share\folder\subfolder")]
         public void GetValueReturnsPathWhenPathIsRooted(string value)
         {
             // Arrange
@@ -1328,6 +1329,27 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void GetValueReturnsPathRelativeToRootOfConfig()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<MockFileSystem>(@"x:\mock-directory\") { CallBase = true };
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""path-key"" value=""\Blah"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.Object.AddFile("nuget.config", config);
+            var settings = new Settings(mockFileSystem.Object, "nuget.config");
+
+            // Act
+            string result = settings.GetValue("SectionName", "path-key", isPath: true);
+
+            // Assert
+            Assert.Equal(@"x:\Blah", result);
         }
 
         [Fact]
