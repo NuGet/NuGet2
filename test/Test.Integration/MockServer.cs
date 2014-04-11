@@ -244,9 +244,13 @@ namespace NuGet.Test.Integration
                     var context = _listener.GetContext();
                     GenerateResponse(context);
                 }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
                 catch (HttpListenerException ex)
                 {
-                    if (ex.ErrorCode == ERROR_OPERATION_ABORTED || 
+                    if (ex.ErrorCode == ERROR_OPERATION_ABORTED ||
                         ex.ErrorCode == ERROR_INVALID_HANDLE ||
                         ex.ErrorCode == ERROR_INVALID_FUNCTION)
                     {
