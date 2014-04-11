@@ -29,7 +29,8 @@ namespace NuGet.VisualStudio
             VsConstants.NemerleProjectTypeGuid,
             VsConstants.WixProjectTypeGuid,
             VsConstants.SynergexProjectTypeGuid,
-            VsConstants.NomadForVisualStudioProjectTypeGuid 
+            VsConstants.NomadForVisualStudioProjectTypeGuid, 
+            VsConstants.DxJsProjectTypeGuid
         };
 
         /// <summary>
