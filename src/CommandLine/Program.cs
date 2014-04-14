@@ -36,11 +36,8 @@ namespace NuGet
             // This is to avoid applying weak event pattern usage, which breaks under Mono or restricted environments, e.g. Windows Azure Web Sites.
             EnvironmentUtility.SetRunningFromCommandLine();
 
-            // Set output encoding to UTF8 if running on Unices. This is not needed on Windows.
-            if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                System.Console.OutputEncoding = System.Text.Encoding.UTF8;
-            }
+            var oldOutputEncoding = System.Console.OutputEncoding;
+            System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
 
@@ -116,6 +113,7 @@ namespace NuGet
             finally
             {
                 OptimizedZipPackage.PurgeCache();
+                System.Console.OutputEncoding = oldOutputEncoding;
             }
 
             return 0;
