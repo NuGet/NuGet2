@@ -132,9 +132,15 @@ namespace NuGet.Commands
                 // Populate the package builder with initial metadata from the assembly/exe
                 AssemblyMetadataExtractor.ExtractMetadata(builder, TargetPath);
             }
-            catch
+            catch (Exception ex)
             {
                 Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("UnableToExtractAssemblyMetadata"), Path.GetFileName(TargetPath));
+                IConsole console = Logger as IConsole;
+                if (console != null && console.Verbosity == Verbosity.Detailed)
+                {
+                    console.Log(MessageLevel.Warning, ex.ToString());
+                }
+
                 ExtractMetadataFromProject(builder);
             }
 
