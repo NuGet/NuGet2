@@ -303,7 +303,7 @@ namespace NuGet
                 {
                     // Store the entry
                     _packageCache[packagePath] = cacheEntry;
-                    _packagePathLookup[new PackageName(package.Id, package.Version)] = path;
+                    _packagePathLookup.GetOrAdd(new PackageName(package.Id, package.Version), path);
                 }
             }
 

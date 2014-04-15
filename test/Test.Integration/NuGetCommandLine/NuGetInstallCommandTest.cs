@@ -851,5 +851,53 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Util.DeleteDirectory(workingDirectory);
             }
         }
+
+
+        // Tests that when both the normal package and the symbol package exist in a local repository,
+        // nuget install should pick the normal package.
+        [Fact]
+        public void InstallCommand_PreferNonSymbolPackage()
+        {
+            var tempPath = Path.GetTempPath();
+            var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var outputDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+
+            try
+            {
+                // Arrange            
+                Util.CreateDirectory(source);
+                Util.CreateDirectory(outputDirectory);
+
+                var packageFileName = PackageCreater.CreatePackage(
+                    "testPackage1", "1.1.0", source);
+                var symbolPackageFileName = PackageCreater.CreateSymbolPackage(
+                    "testPackage1", "1.1.0", source);
+
+                // Act
+                string[] args = new string[] { 
+                    "install", "testPackage1", 
+                    "-OutputDirectory", outputDirectory,
+                    "-Source", source };
+                int r = Program.Main(args);
+
+                // Assert
+                Assert.Equal(0, r);
+                var testTxtFile = Path.Combine(
+                    outputDirectory,
+                    @"testPackage1.1.1.0\content\test1.txt");
+                Assert.True(File.Exists(testTxtFile));
+
+                var symbolTxtFile = Path.Combine(
+                    outputDirectory,
+                    @"testPackage1.1.1.0\symbol.txt");
+                Assert.False(File.Exists(symbolTxtFile));
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(outputDirectory);
+                Util.DeleteDirectory(source);
+            }
+        }
     }
 }

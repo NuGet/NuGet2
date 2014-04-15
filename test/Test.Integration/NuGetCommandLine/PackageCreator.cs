@@ -25,6 +25,27 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             return packageFileName;
         }
 
+        public static string CreateSymbolPackage(string id, string version, string outputDirectory)
+        {
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = id,
+                Version = new SemanticVersion(version),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("test");
+            builder.Files.Add(CreatePackageFile(@"content\symbol_test1.txt"));
+            builder.Files.Add(CreatePackageFile(@"symbol.txt"));
+
+            var packageFileName = Path.Combine(outputDirectory, id + "." + version + ".symbol.nupkg");
+            using (var stream = new FileStream(packageFileName, FileMode.CreateNew))
+            {
+                builder.Save(stream);
+            }
+
+            return packageFileName;
+        }
+
         private static IPackageFile CreatePackageFile(string name)
         {
             var file = new Mock<IPackageFile>();
