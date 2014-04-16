@@ -37,7 +37,8 @@ namespace NuGet
             EnvironmentUtility.SetRunningFromCommandLine();
 
             var oldOutputEncoding = System.Console.OutputEncoding;
-            System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+            SetConsoleOutputEncoding(System.Text.Encoding.UTF8);
+
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
 
@@ -113,10 +114,21 @@ namespace NuGet
             finally
             {
                 OptimizedZipPackage.PurgeCache();
-                System.Console.OutputEncoding = oldOutputEncoding;
+                SetConsoleOutputEncoding(oldOutputEncoding);
             }
 
             return 0;
+        }
+
+        private static void SetConsoleOutputEncoding(System.Text.Encoding encoding)
+        {
+            try
+            {
+                System.Console.OutputEncoding = encoding;
+            }
+            catch (IOException)
+            {
+            }
         }
 
         private void Initialize(IFileSystem fileSystem, IConsole console)
