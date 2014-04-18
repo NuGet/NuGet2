@@ -2073,7 +2073,7 @@ nuget list -verbose -allversions</value>
     <value>Bez monitów o dane wejściowe użytkownika i potwierdzenia.</value>
   </data>
   <data name="Option_NonInteractive_ptb" xml:space="preserve">
-    <value></value>
+    <value />
   </data>
   <data name="Option_NonInteractive_rus" xml:space="preserve">
     <value>Отключение запросов ввода или подтверждения пользователя.</value>
@@ -2685,7 +2685,7 @@ nuget list -verbose -allversions</value>
     <value>Remplace le numéro de version provenant du fichier .nuspec.</value>
   </data>
   <data name="PackageCommandVersionDescription_ita" xml:space="preserve">
-    <value></value>
+    <value />
   </data>
   <data name="PackageCommandVersionDescription_jpn" xml:space="preserve">
     <value>nuspec ファイルのバージョン番号を上書きします。</value>
@@ -5232,5 +5232,14 @@ nuget update -Self</value>
   </data>
   <data name="CommandPackageSaveMode_cht" xml:space="preserve">
     <value>指定套件安裝之後要儲存的檔案類型: nuspec, nupkg, nuspec;nupkg。</value>
+  </data>
+  <data name="PushSymbolCommandDescription" xml:space="preserve">
+    <value>Push symbols and sources to symbol server and source server. This command requires that executables pdbstr.exe, srctools.exe and symstore.exe (included in Debugging Tools for Windows) are available in PATH.</value>
+  </data>
+  <data name="PushSymbolSourceServerDescription" xml:space="preserve">
+    <value>The source server. Currently only UNC / directory is supported.</value>
+  </data>
+  <data name="PushSymbolSymbolServerDescription" xml:space="preserve">
+    <value>The symbol server. Currently only UNC / directory is supported.</value>
   </data>
 </root>

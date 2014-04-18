@@ -59,6 +59,7 @@
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
+    <Compile Include="Commands\PushSymbolCommand.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SourcesCommand.cs" />

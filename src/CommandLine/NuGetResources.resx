@@ -6024,4 +6024,16 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="HelpCommandForMoreInfo_cht" xml:space="preserve">
     <value>如需詳細資訊，請造訪 {0}</value>
   </data>
+  <data name="Error_SourceServerIsRequired" xml:space="preserve">
+    <value>Option -SourceServer is required</value>
+  </data>
+  <data name="Error_SymbolServerIsRequired" xml:space="preserve">
+    <value>Option -SymbolServer is required</value>
+  </data>
+  <data name="Warning_SourceFileNotFoundInSymbolPackage" xml:space="preserve">
+    <value>Source file '{0}' referenced by pdb file '{1}' cannot be found in the symbol package.</value>
+  </data>
+  <data name="RunningCommand" xml:space="preserve">
+    <value>Running command: {0} {1}</value>
+  </data>
 </root>
