@@ -18,7 +18,7 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "UninstallCommandProject")]
         public string Project { get; set; }
 
-        [Option(typeof(NuGetCommand), "UninstallCommandSolutionDirectory")]
+        [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
         [Option(typeof(NuGetCommand), "InstallCommandExcludeVersionDescription", AltName = "x")]
@@ -54,7 +54,7 @@ namespace NuGet.Commands
                 packageId,
                 version == null ? null : version.ToString()))
             {
-                packageManager.UninstallPackage(packageId, version, forceRemove: false, removeDependencies: true);
+                packageManager.UninstallPackage(packageId, version, forceRemove: false, removeDependencies: false);
             }
         }
 
