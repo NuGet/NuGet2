@@ -85,11 +85,13 @@ namespace NuGet
                 return request;
             };
 
-            return RequestHelper.GetResponse(webRequestFactory,
-                                             RaiseSendingRequest,
-                                             ProxyCache.Instance,
-                                             CredentialStore.Instance,
-                                             DefaultCredentialProvider);
+            var requestHelper = new RequestHelper(
+                webRequestFactory,
+                RaiseSendingRequest,
+                ProxyCache.Instance,
+                CredentialStore.Instance,
+                DefaultCredentialProvider);
+            return requestHelper.GetResponse();
         }
 
         public void InitializeRequest(WebRequest request)

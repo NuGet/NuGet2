@@ -238,6 +238,12 @@ namespace NuGet
                                        !String.IsNullOrEmpty(vsSwitch) ||
                                        (command != null && command.NonInteractive);
 
+            string forceInteractive = Environment.GetEnvironmentVariable("FORCE_NUGET_EXE_INTERACTIVE");
+            if (!String.IsNullOrEmpty(forceInteractive))
+            {
+                console.IsNonInteractive = false;
+            }
+
             if (command != null)
             {
                 console.Verbosity = command.Verbosity;

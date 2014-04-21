@@ -6,7 +6,8 @@ namespace NuGet.Test.Integration
 {
     public class CommandRunner
     {
-        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit, int timeOutInMilliseconds = 60000)
+        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit, int timeOutInMilliseconds = 60000,
+           Action<StreamWriter> inputAction = null)
         {
             string result = String.Empty;
 
@@ -17,6 +18,7 @@ namespace NuGet.Test.Integration
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                RedirectStandardInput = inputAction != null
             };
 
             StreamReader standardOutput;
@@ -30,6 +32,11 @@ namespace NuGet.Test.Integration
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
+                if (inputAction != null)
+                {
+                    inputAction(p.StandardInput);
+                }
+                
                 if (waitForExit)
                 {
                     bool processExited = p.WaitForExit(timeOutInMilliseconds);

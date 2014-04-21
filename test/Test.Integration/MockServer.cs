@@ -50,6 +50,11 @@ namespace NuGet.Test.Integration
             get { return _delete; }
         }
 
+        public HttpListener Listener
+        {
+            get { return _listener; }
+        }
+
         /// <summary>
         /// Starts the mock server.
         /// </summary>

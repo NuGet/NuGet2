@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -328,9 +329,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Arrange
                 Util.CreateDirectory(packageDirectory);
                 var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
-                MemoryStream memoryStream = new MemoryStream();
-                TextWriter writer = new StreamWriter(memoryStream);
-                Console.SetOut(writer);
                 string outputFileName = Path.Combine(packageDirectory, "t1.nupkg");
 
                 var server = new MockServer(mockServerEndPoint);
@@ -362,6 +360,97 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             finally
             {
                 // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Test push command to a server using basic authentication.
+        [Fact]
+        public void PushCommand_PushToServerBasicAuth()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            List<string> credentialForGetRequest = new List<string>();
+            List<string> credentialForPutRequest = new List<string>();
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                string outputFileName = Path.Combine(packageDirectory, "t1.nupkg");
+
+                var server = new MockServer(mockServerEndPoint);
+                server.Listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+                server.Get.Add("/nuget", r =>
+                {
+                    var h = r.Headers["Authorization"];
+                    var credential = System.Text.Encoding.Default.GetString(Convert.FromBase64String(h.Substring(6)));
+                    credentialForGetRequest.Add(credential);
+                    return HttpStatusCode.OK;
+                });
+                server.Put.Add("/nuget", r =>
+                {
+                    var h = r.Headers["Authorization"];
+                    var credential = System.Text.Encoding.Default.GetString(Convert.FromBase64String(h.Substring(6)));
+                    credentialForPutRequest.Add(credential);
+
+                    if (credential.Equals("testuser:testpassword", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return HttpStatusCode.OK;
+                    }
+                    else
+                    {
+                        return HttpStatusCode.Unauthorized;
+                    }
+                });
+                server.Start();
+
+                // Act
+                Environment.SetEnvironmentVariable("FORCE_NUGET_EXE_INTERACTIVE", "true");                
+                var args = "push " + packageFileName +
+                    " -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    packageDirectory,
+                    args,
+                    waitForExit: true,
+                    timeOutInMilliseconds: 10000,
+                    inputAction: (w) => 
+                    {
+                        // This user/password pair is first sent to 
+                        // GET /nuget, then PUT /nuget
+                        w.WriteLine("a");
+                        w.WriteLine("b");
+
+                        // Send another user/password pair to PUT
+                        w.WriteLine("c");
+                        w.WriteLine("d");
+
+                        // Now send the right user/password to PUT
+                        w.WriteLine("testuser");
+                        w.WriteLine("testpassword");
+                    }); 
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                Assert.Equal(1, credentialForGetRequest.Count);
+                Assert.Equal("a:b", credentialForGetRequest[0]);
+
+                Assert.Equal(3, credentialForPutRequest.Count);
+                Assert.Equal("a:b", credentialForPutRequest[0]);
+                Assert.Equal("c:d", credentialForPutRequest[1]);
+                Assert.Equal("testuser:testpassword", credentialForPutRequest[2]);
+            }
+            finally
+            {
+                // Cleanup
+                Environment.SetEnvironmentVariable("FORCE_NUGET_EXE_INTERACTIVE", String.Empty);
                 Util.DeleteDirectory(packageDirectory);
             }
         }
