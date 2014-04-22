@@ -143,18 +143,7 @@ namespace NuGet
                 request.Proxy.Credentials = CredentialCache.DefaultCredentials;
             }
 
-            if (_previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired)
-            {
-                request.Proxy.Credentials = _credentialProvider.GetCredentials(
-                    request, CredentialType.ProxyCredentials, retrying: _proxyCredentialsRetryCount > 0);
-                _continueIfFailed = request.Proxy.Credentials != null;
-                _proxyCredentialsRetryCount++;
-            }
-            else if (_previousStatusCode == HttpStatusCode.Unauthorized)
-            {
-                SetCredentialsOnAuthorizationError(request);
-            }
-            else if (_previousResponse == null || ShouldKeepAliveBeUsedInRequest(_previousRequest, _previousResponse))
+            if (_previousResponse == null || ShouldKeepAliveBeUsedInRequest(_previousRequest, _previousResponse))
             {
                 // Try to use the cached credentials (if any, for the first request)
                 request.Credentials = _credentialCache.GetCredentials(request.RequestUri);
@@ -165,6 +154,17 @@ namespace NuGet
                     request.UseDefaultCredentials = true;
                 }
             }
+            else if (_previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired)
+            {
+                request.Proxy.Credentials = _credentialProvider.GetCredentials(
+                    request, CredentialType.ProxyCredentials, retrying: _proxyCredentialsRetryCount > 0);
+                _continueIfFailed = request.Proxy.Credentials != null;
+                _proxyCredentialsRetryCount++;
+            }
+            else if (_previousStatusCode == HttpStatusCode.Unauthorized)
+            {
+                SetCredentialsOnAuthorizationError(request);
+            }            
 
             SetKeepAliveHeaders(request, _previousResponse);
             if (_usingSTSAuth)
