@@ -49,7 +49,7 @@ namespace NuGet.VisualStudio
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                    Project.DoWorkInWriterLock(buildProject => NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, relativeTargetPath, location));
                     Project.Save(this);
                 }
                 else
@@ -67,7 +67,10 @@ namespace NuGet.VisualStudio
             NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 Project,
                 Project.ToVsHierarchy(),
-                buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                buildProject => NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, relativeTargetPath, location));
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
 
         public override void RemoveImport(string targetPath)
@@ -87,7 +90,7 @@ namespace NuGet.VisualStudio
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
-                    Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                    Project.DoWorkInWriterLock(buildProject => NuGet.MSBuildProjectUtility.RemoveImportStatement(buildProject, relativeTargetPath));
                     Project.Save(this);
                 }
                 else
@@ -105,7 +108,10 @@ namespace NuGet.VisualStudio
             NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 Project,
                 Project.ToVsHierarchy(),
-                buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                buildProject => NuGet.MSBuildProjectUtility.RemoveImportStatement(buildProject, relativeTargetPath));
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
     }
 }

@@ -136,7 +136,14 @@ namespace NuGet.Commands
                 }
                 catch (Exception e)
                 {
-                    Console.WriteWarning(e.Message);
+                    if (Console.Verbosity == NuGet.Verbosity.Detailed)
+                    {
+                        Console.WriteWarning(e.ToString());
+                    }
+                    else
+                    {
+                        Console.WriteWarning(e.Message);
+                    }
                 }
             }
         }
@@ -335,7 +342,14 @@ namespace NuGet.Commands
                         }
                         catch (InvalidOperationException e)
                         {
-                            Console.WriteWarning(e.Message);
+                            if (Console.Verbosity == NuGet.Verbosity.Detailed)
+                            {
+                                Console.WriteWarning(e.ToString());
+                            }
+                            else
+                            {
+                                Console.WriteWarning(e.Message);
+                            }
                         }
                     }
                 }

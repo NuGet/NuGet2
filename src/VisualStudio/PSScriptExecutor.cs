@@ -57,8 +57,11 @@ namespace NuGet.VisualStudio
             {
                 if (project != null && scriptFile != null)
                 {
-                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), project.Name,
-                        VersionUtility.GetShortFrameworkName(targetFramework));
+                    // targetFramework can be null for unknown project types
+                    string shortFramework = targetFramework == null ? string.Empty : VersionUtility.GetShortFrameworkName(targetFramework);
+
+                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), 
+                        project.Name, shortFramework);
 
                     logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo_PowershellScripts,
                         Path.GetDirectoryName(scriptFile.Path), VersionUtility.GetTargetFrameworkLogString(scriptFile.TargetFramework));

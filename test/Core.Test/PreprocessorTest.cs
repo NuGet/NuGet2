@@ -28,28 +28,6 @@ namespace NuGet.Test
             Assert.Equal("test token value", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
         }
 
-        // Tests that the generated file contains byte order mark for UTF-8.
-        [Fact]
-        public void TransformFileGeneratedFileContainsBom()
-        {
-            // Arrange
-            var processor = new Preprocessor();
-            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
-            mockProjectSystem.Setup(m => m.GetPropertyValue("token")).Returns("token value");
-            var mockFile = new Mock<IPackageFile>();
-            mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
-            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
-
-            // Act
-            processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object);
-
-            // Assert
-            var bytes = mockProjectSystem.Object.OpenFile("foo.bar").ReadAllBytes();
-            Assert.Equal(0xEF, bytes[0]);
-            Assert.Equal(0xBB, bytes[1]);
-            Assert.Equal(0xBF, bytes[2]);
-        }
-
         [Fact]
         public void TransformFileDoesNothingIfFileExists()
         {

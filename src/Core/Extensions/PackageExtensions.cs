@@ -260,6 +260,14 @@ namespace NuGet
         }
 
         /// <summary>
+        /// Returns a find query that is further restricted to just the latest package version.
+        /// </summary>
+        public static IQueryable<T> FindLatestVersion<T>(this IQueryable<T> packages) where T : IPackage
+        {
+            return from p in packages where p.IsLatestVersion select p;
+        }
+        
+        /// <summary>
         /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
         /// </summary>
         private static Expression<Func<T, bool>> BuildSearchExpression<T>(IEnumerable<string> propertiesToSearch, IEnumerable<string> searchTerms) where T : IPackage

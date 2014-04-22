@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -900,6 +901,85 @@ EndProject");
             {
                 Directory.SetCurrentDirectory(currentDirectory);
                 Util.DeleteDirectory(workingPath);
+            }
+        }
+
+        // Tests restore from an http source.
+        [Fact]
+        public void RestoreCommand_FromHttpSource()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                Util.CreateDirectory(workingDirectory);
+                var packageFileName = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var package = new ZipPackage(packageFileName);
+                MachineCache.Default.RemovePackage(package);
+
+                Util.CreateFile(
+                    workingDirectory,
+                    "packages.config",
+                    @"
+<packages>
+  <package id=""testPackage1"" version=""1.1.0"" />
+</packages>");
+
+                var server = new MockServer(mockServerEndPoint);
+                bool getPackageByVersionIsCalled = false;
+                bool packageDownloadIsCalled = false;
+
+                server.Get.Add("/nuget/Packages(Id='testPackage1',Version='1.1.0')", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        getPackageByVersionIsCalled = true;
+                        response.ContentType = "application/atom+xml;type=entry;charset=utf-8";
+                        var odata = server.ToOData(package);
+                        MockServer.SetResponseContent(response, odata);
+                    }));
+
+                server.Get.Add("/package/testPackage1", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        packageDownloadIsCalled = true;
+                        response.ContentType = "application/zip";
+                        using (var stream = package.GetStream())
+                        {
+                            var content = stream.ReadAllBytes();
+                            MockServer.SetResponseContent(response, content);
+                        }
+                    }));
+
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "restore packages.config -PackagesDirectory . -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    workingDirectory,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+                Assert.True(getPackageByVersionIsCalled);
+                Assert.True(packageDownloadIsCalled);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+                Util.DeleteDirectory(workingDirectory);
             }
         }
     }

@@ -50,6 +50,7 @@ namespace NuGet.VsEvents
         {
             // Arrange
             Mock<Project> mockProject = new Mock<Project>();
+            mockProject.SetupGet(p => p.FullName).Returns(@"c:\a\b\c.csproj");
             MockPackageRepository localRepository = new MockPackageRepository();
 
             // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
@@ -403,6 +404,7 @@ namespace NuGet.VsEvents
         {
             // Arrange
             Mock<Project> mockProject = new Mock<Project>();
+            mockProject.SetupGet(p => p.FullName).Returns(@"c:\a\b\c.csproj");
 
             // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
             mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);

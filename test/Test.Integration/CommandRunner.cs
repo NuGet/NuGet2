@@ -6,9 +6,7 @@ namespace NuGet.Test.Integration
 {
     public class CommandRunner
     {
-        private static readonly int Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
-
-        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit)
+        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit, int timeOutInMilliseconds = 60000)
         {
             string result = String.Empty;
 
@@ -32,16 +30,21 @@ namespace NuGet.Test.Integration
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
+                if (waitForExit)
+                {
+                    bool processExited = p.WaitForExit(timeOutInMilliseconds);
+                    if (!processExited)
+                    {
+                        p.Kill();
+                    }
+                }
+
                 result = standardOutput.ReadToEnd();
                 if (string.IsNullOrEmpty(result))
                 {
                     result = errorOutput.ReadToEnd();
                 }
-
-                if (waitForExit)
-                {
-                    p.WaitForExit(Timeout);
-                }
+                
                 if (p.HasExited)
                 {
                     exitCode = p.ExitCode;

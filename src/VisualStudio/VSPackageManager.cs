@@ -170,10 +170,7 @@ namespace NuGet.VisualStudio
                             ignoreDependencies,
                             allowPrereleaseVersions);
 
-                        if (!WhatIf)
-                        {
-                            AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-                        }
+                        AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
                     });
                 }
             }
@@ -196,6 +193,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
+            projectManager.DependencyVersion = DependencyVersion;            
             using (StartInstallOperation(package.Id, package.Version.ToString()))
             {
                 ExecuteOperationsWithPackage(
@@ -423,11 +421,11 @@ namespace NuGet.VisualStudio
 
                     foreach (Project project in _solutionManager.GetProjects())
                     {
+                        IProjectManager projectManager = GetProjectManager(project);
+                        var oldWhatIfValue = projectManager.WhatIf;
                         try
                         {
                             eventListener.OnBeforeAddPackageReference(project);
-
-                            IProjectManager projectManager = GetProjectManager(project);
                             InitializeLogger(logger, projectManager);
 
                             foreach (var package in packages)
@@ -447,6 +445,7 @@ namespace NuGet.VisualStudio
                         }
                         finally
                         {
+                            projectManager.WhatIf = oldWhatIfValue;
                             eventListener.OnAfterAddPackageReference(project);
                         }
                     }
@@ -539,7 +538,8 @@ namespace NuGet.VisualStudio
             // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
             // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
             var installWalker = new InstallWalker(LocalRepository, SourceRepository, null, logger ?? NullLogger.Instance,
-                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions,
+                dependencyVersion: DependencyVersion);
 
             IList<IPackage> packagesUninstalledInDependencyOrder;
             var operations = installWalker.ResolveOperations(allPackagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);
@@ -580,7 +580,8 @@ namespace NuGet.VisualStudio
             // NOTE THAT allowPrereleaseVersions should be true for pre-release packages alone, even if the user did not specify it
             // since we are trying to reinstall packages here. However, ResolveOperations below will take care of this problem via allowPrereleaseVersionsBasedOnPackage parameter
             var installWalker = new InstallWalker(projectManager.LocalRepository, SourceRepository, projectManager.Project.TargetFramework, logger ?? NullLogger.Instance,
-                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions,
+                dependencyVersion: DependencyVersion);
 
             IList<IPackage> packagesUninstalledInDependencyOrder;
             var operations = installWalker.ResolveOperations(packagesToBeReinstalled, out packagesUninstalledInDependencyOrder, allowPrereleaseVersionsBasedOnPackage: true);
@@ -1420,7 +1421,14 @@ namespace NuGet.VisualStudio
                 // then we need to install it.
                 if (!LocalRepository.Exists(e.Package))
                 {
-                    ExecuteInstall(e.Package);
+                    if (WhatIf)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_InstallPackage, e.Package);
+                    }
+                    else
+                    {
+                        ExecuteInstall(e.Package);
+                    }
                 }
             };
 
@@ -1520,8 +1528,9 @@ namespace NuGet.VisualStudio
             {
                 if (WhatIf)
                 {
-                    Logger.Log(MessageLevel.Info, NuGet.Resources.NuGetResources.Log_PackageOperation,
-                        operation.Action,
+                    Logger.Log(
+                        MessageLevel.Info, 
+                        NuGet.Resources.NuGetResources.Log_UninstallPackage,
                         operation.Package);
                 }
                 else
@@ -1550,9 +1559,11 @@ namespace NuGet.VisualStudio
                 foreach (var project in _solutionManager.GetProjects())
                 {
                     IProjectManager projectManager = GetProjectManager(project);
+                    var oldWhatIfValue = projectManager.WhatIf;
                     try
                     {
                         InitializeLogger(logger, projectManager);
+                        projectManager.WhatIf = WhatIf;
 
                         if (projectManager.LocalRepository.Exists(packageId))
                         {
@@ -1574,6 +1585,7 @@ namespace NuGet.VisualStudio
                     }
                     finally
                     {
+                        projectManager.WhatIf = oldWhatIfValue;
                         ClearLogger(projectManager);
                     }
                 }

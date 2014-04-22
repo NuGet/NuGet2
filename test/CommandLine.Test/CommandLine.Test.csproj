@@ -71,6 +71,7 @@
     <Compile Include="PackCommandTest.cs" />
     <Compile Include="ProgramTest.cs" />
     <Compile Include="ProjectFactoryTest.cs" />
+    <Compile Include="ProjectHelperTest.cs" />
     <Compile Include="PushCommandTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
     <Compile Include="RestoreCommandTest.cs" />

@@ -2,6 +2,7 @@
 using System.IO;
 using Moq;
 using Xunit;
+using System.Globalization;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
@@ -19,9 +20,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             var packageBuilder = new PackageBuilder
             {
                 Id = packageId,
-                Version = new SemanticVersion(version),
-                Description = "Test desc"
+                Version = new SemanticVersion(version)
             };
+            packageBuilder.Description = string.Format(
+                CultureInfo.InvariantCulture, 
+                "desc of {0} {1}", 
+                packageId, version);
 
             if (licenseUrl != null)
             {

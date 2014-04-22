@@ -49,29 +49,50 @@ namespace NuGet.VisualStudio
                 return Path.GetDirectoryName(projectFileFullPath);
             }
 
+            // Attempt to determine the project path using the available EnvDTE.Project properties.
+            // Project systems using async load such as CPS may not have all properties populated 
+            // for start up scenarios such as VS Templates. In these cases we need to fallback 
+            // until we can find one containing the full path.
+
+            // FullPath
             string fullPath = GetPropertyValue<string>(project, "FullPath");
+
             if (!String.IsNullOrEmpty(fullPath))
             {
                 // Some Project System implementations (JS metro app) return the project 
                 // file as FullPath. We only need the parent directory
                 if (File.Exists(fullPath))
                 {
-                    fullPath = Path.GetDirectoryName(fullPath);
+                    return Path.GetDirectoryName(fullPath);
                 }
-            }
-            else
-            {
-                // C++ projects do not have FullPath property, but do have ProjectDirectory one.
-                fullPath = GetPropertyValue<string>(project, "ProjectDirectory");
+
+                return fullPath;
             }
 
-            return fullPath;
+            // C++ projects do not have FullPath property, but do have ProjectDirectory one.
+            string projectDirectory = GetPropertyValue<string>(project, "ProjectDirectory");
+
+            if (!String.IsNullOrEmpty(projectDirectory))
+            {
+                return projectDirectory;
+            }
+
+            // FullName
+            if (!String.IsNullOrEmpty(project.FullName))
+            {
+                return Path.GetDirectoryName(project.FullName);
+            }
+
+            Debug.Fail("Unable to find the project path");
+
+            return null;
         }
 
         public static bool IsSupported(Project project)
         {
             Debug.Assert(project != null);
-            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
+
+            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind) && !project.IsSharedProject();
         }
 
         public static T GetPropertyValue<T>(Project project, string propertyName)

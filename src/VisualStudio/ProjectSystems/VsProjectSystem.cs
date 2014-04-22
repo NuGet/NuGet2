@@ -8,7 +8,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
@@ -391,8 +393,12 @@ namespace NuGet.VisualStudio
             }
 
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-            Project.AddImportStatement(relativeTargetPath, location);            
+            Project.AddImportStatement(relativeTargetPath, location);
+
             Project.Save(this);
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
 
         public virtual void RemoveImport(string targetPath)
@@ -404,6 +410,9 @@ namespace NuGet.VisualStudio
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
             Project.RemoveImportStatement(relativeTargetPath);
             Project.Save(this);
+
+            // notify the project system of the change
+            UpdateImportStamp(Project);
         }
 
         public virtual bool IsSupportedFile(string path)
@@ -468,6 +477,25 @@ namespace NuGet.VisualStudio
             }
 
             return y.Path.CompareTo(x.Path);
+        }
+
+        /// <summary>
+        /// Sets NuGetPackageImportStamp to a new random guid. This is a hack to let the project system know it is out of date.
+        /// The value does not matter, it just needs to change.
+        /// </summary>
+        protected static void UpdateImportStamp(Project project)
+        {
+            // There is no reason to call this for pre-Dev12 project systems.
+            if (VsVersionHelper.IsVisualStudio2013)
+            {
+                IVsBuildPropertyStorage propStore = project.ToVsHierarchy() as IVsBuildPropertyStorage;
+                if (propStore != null)
+                {
+                    // <NuGetPackageImportStamp>af617720</NuGetPackageImportStamp>
+                    string stamp = Guid.NewGuid().ToString().Split('-')[0];
+                    ErrorHandler.ThrowOnFailure(propStore.SetPropertyValue("NuGetPackageImportStamp", string.Empty, (uint)_PersistStorageType.PST_PROJECT_FILE, stamp));
+                }
+            }
         }
 
         private static void TrySetCopyLocal(dynamic reference)

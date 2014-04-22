@@ -143,10 +143,10 @@ namespace NuGet
             var installerWalker = new InstallWalker(
                 LocalRepository, SourceRepository,
                 targetFramework, Logger,
-                ignoreDependencies, allowPrereleaseVersions)
+                ignoreDependencies, allowPrereleaseVersions,
+                DependencyVersion)
             {
                 DisableWalkInfo = ignoreWalkInfo,
-                DependencyVersion = DependencyVersion,
                 CheckDowngrade = CheckDowngrade
             };
             Execute(package, installerWalker);
@@ -184,7 +184,7 @@ namespace NuGet
                 {
                     if (WhatIf)
                     {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_InstallPackage, operation.Package);
                     }
                     else
                     {
@@ -198,7 +198,7 @@ namespace NuGet
                 {
                     if (WhatIf)
                     {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageOperation, operation.Action, operation.Package);
+                        Logger.Log(MessageLevel.Info, NuGetResources.Log_UninstallPackage, operation.Package);
                     }
                     else
                     {

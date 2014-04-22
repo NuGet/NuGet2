@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
@@ -215,7 +216,17 @@ namespace NuGet.Tools
             // the <Import> element added.
             if (PackageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
-                PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
+                if (VsVersionHelper.IsVisualStudio2013)
+                {
+                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block 
+                    // until this completes.
+                    ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
+                    PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false)));
+                }
+                else
+                {
+                    PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
+                }
             }
 
             // when NuGet loads, if the current solution has some package 
@@ -443,7 +454,17 @@ namespace NuGet.Tools
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
-            _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
+            if (VsVersionHelper.IsVisualStudio2013)
+            {
+                // This method is called by the UI thread when the user clicks the menu item. To avoid
+                // hangs on CPS project systems this needs to be done on a background thread.
+                ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
+                    _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true)));
+            }
+            else
+            {
+                _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
+            }
         }
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)

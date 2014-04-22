@@ -237,6 +237,9 @@
   <data name="Warning_FileDoesNotExist" xml:space="preserve">
     <value>'{0}' was included in the project but doesn't exist. Skipping...</value>
   </data>
+  <data name="Warning_UnresolvedFilePath" xml:space="preserve">
+    <value>'{0}' was included in the project but the path could not be resolved. Skipping...</value>
+  </data>
   <data name="Warning_UnspecifiedField" xml:space="preserve">
     <value>{0} was not specified. Using '{1}'.</value>
   </data>
@@ -2437,45 +2440,6 @@ To prevent NuGet from downloading packages during build, open the Visual Studio 
   </data>
   <data name="UnableToFindBuildOutput_cht" xml:space="preserve">
     <value>找不到 '{0}'。確定已建置專案。</value>
-  </data>
-  <data name="InvalidFile_csy" xml:space="preserve">
-    <value>Nebyl zadán žádný soubor packages.config ani soubor řešení. K aktualizaci souboru NuGet.exe použijte přepínač -self.</value>
-  </data>
-  <data name="InvalidFile_deu" xml:space="preserve">
-    <value>Es wurde keine Datei "packages.config" oder Projektdatei angegeben. Verwenden Sie den Schalter "-self", um "NuGet.exe" zu aktualisieren.</value>
-  </data>
-  <data name="InvalidFile_esp" xml:space="preserve">
-    <value>No se ha especificado ningún archivo de soluciones ni packages.config. Use el conmutador automático para actualizar NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_fra" xml:space="preserve">
-    <value>Aucun fichier packages.config ou solution spécifié. Utilisez le commutateur @@@-self pour mettre à jour NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_ita" xml:space="preserve">
-    <value>Nessun packages.config o solution file specificati. Usare il self switch per aggiornare a NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_jpn" xml:space="preserve">
-    <value>packages.config またはソリューション ファイルが指定されていません。NuGet.exe を更新するには、-self スイッチを使用してください。</value>
-  </data>
-  <data name="InvalidFile_kor" xml:space="preserve">
-    <value>packages.config 또는 솔루션 파일이 지정되지 않았습니다. -self 스위치를 사용하여 NuGet.exe를 업데이트하십시오.</value>
-  </data>
-  <data name="InvalidFile_plk" xml:space="preserve">
-    <value>Nie określono pliku packages.config ani pliku rozwiązania. Użyj przełącznika -self, aby zaktualizować pakiet NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_ptb" xml:space="preserve">
-    <value>Nenhum arquivo packages.config ou de solução especificada. Use o botão automático para atualizar o NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_rus" xml:space="preserve">
-    <value>Не указан файл packages.config или файл решения. Используйте параметр -self для обновления NuGet.exe.</value>
-  </data>
-  <data name="InvalidFile_trk" xml:space="preserve">
-    <value>Herhangi bir packages.config veya çözüm dosyası belirtilmedi. NuGet.exe öğesini güncellemek için -self anahtarını kullanın .</value>
-  </data>
-  <data name="InvalidFile_chs" xml:space="preserve">
-    <value>未指定 packages.config 或解决方案文件。请使用 -self 开关更新 NuGet.exe。</value>
-  </data>
-  <data name="InvalidFile_cht" xml:space="preserve">
-    <value>未指定 packages.config 或方案檔案。使用 -self 切換以更新 NuGet.exe。</value>
   </data>
   <data name="PackageDoesNotExist_csy" xml:space="preserve">
     <value>Nelze vyhledat {0} {1}. Před spuštěním aktualizace ověřte, zda jsou k dispozici všechny balíčky ve složce balíčků.</value>
@@ -5747,5 +5711,317 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="HelpCommandForMoreInfo" xml:space="preserve">
     <value>For more information, visit {0}</value>
     <comment>{0} will be replaced with a url.</comment>
+  </data>
+  <data name="InvalidFile_csy" xml:space="preserve">
+    <value>Nebyl určen žádný soubor packages.config, soubor projektu nebo balíčku. Použijte přepínač -self a aktualizujte soubor NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_deu" xml:space="preserve">
+    <value>Es wurde keine packages.config-, Projekt- oder Lösungsdatei angegeben. Verwenden Sie den Schalter "-self", um "NuGet.exe" zu aktualisieren.</value>
+  </data>
+  <data name="InvalidFile_esp" xml:space="preserve">
+    <value>No se ha especificado ningún archivo de solución, proyecto o packages.config. Use el modificador -self para actualizar NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_fra" xml:space="preserve">
+    <value>Aucun packages.config, projet ou fichier de solution spécifié. Utilisez le commutateur -self pour mettre à jour NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_ita" xml:space="preserve">
+    <value>Nessun file packages.config, di progetto o di soluzione specificato. Utilizzare l'opzione -self per aggiornare NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_jpn" xml:space="preserve">
+    <value>packages.config、プロジェクトまたはソリューション ファイルが指定されていません。-self スイッチ使用して、NuGet.exe を更新してください。</value>
+  </data>
+  <data name="InvalidFile_kor" xml:space="preserve">
+    <value>packages.config, 프로젝트 또는 솔루션 파일이 지정되지 않았습니다. -self 스위치를 사용하여 NuGet.exe를 업데이트하십시오.</value>
+  </data>
+  <data name="InvalidFile_plk" xml:space="preserve">
+    <value>Nie określono pliku packages.config, pliku projektu ani pliku rozwiązania. Użyj przełącznika -self, aby zaktualizować pakiet NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_ptb" xml:space="preserve">
+    <value>Nenhum arquivo de solução, projeto ou packages.config especificado. Use a chave -self para atualizar o NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_rus" xml:space="preserve">
+    <value>Не указан файл packages.config, файл проекта или решения. Используйте переключатель -self, чтобы обновить NuGet.exe.</value>
+  </data>
+  <data name="InvalidFile_trk" xml:space="preserve">
+    <value>packages.config, proje veya çözüm dosyası belirtilmemiş. NuGet.exe'yi güncelleştirmek için -self anahtarını kullanın.</value>
+  </data>
+  <data name="InvalidFile_chs" xml:space="preserve">
+    <value>未指定 packages.config、项目或解决方案文件。请使用 -self 开关更新 NuGet.exe。</value>
+  </data>
+  <data name="InvalidFile_cht" xml:space="preserve">
+    <value>未指定 packages.config、專案或方案。使用 -self 切換以更新 NuGet.exe。</value>
+  </data>
+  <data name="MultipleProjectFilesFound_csy" xml:space="preserve">
+    <value>Bylo nalezeno více souborů projektu pro {0}.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_deu" xml:space="preserve">
+    <value>Es wurden mehrere Projektdateien für "{0}" gefunden.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_esp" xml:space="preserve">
+    <value>Se encontraron varios archivos de proyecto para '{0}'.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_fra" xml:space="preserve">
+    <value>Plusieurs fichiers de projet trouvés pour '{0}'.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_ita" xml:space="preserve">
+    <value>Trovati più file di progetto per '{0}'.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_jpn" xml:space="preserve">
+    <value>{0}' に複数のプロジェクト ファイルが見つかりました。</value>
+  </data>
+  <data name="MultipleProjectFilesFound_kor" xml:space="preserve">
+    <value>'{0}'에 대한 프로젝트 파일이 여러 개 있습니다.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_plk" xml:space="preserve">
+    <value>Znaleziono wiele plików projektów dla elementu „{0}”.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_ptb" xml:space="preserve">
+    <value>Encontrados diversos arquivos de projeto para '{0}'.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_rus" xml:space="preserve">
+    <value>Обнаружено несколько файлов проектов для "{0}".</value>
+  </data>
+  <data name="MultipleProjectFilesFound_trk" xml:space="preserve">
+    <value>{0} için birden çok proje dosyası bulundu.</value>
+  </data>
+  <data name="MultipleProjectFilesFound_chs" xml:space="preserve">
+    <value>发现了“{0}”的多个项目文件。</value>
+  </data>
+  <data name="MultipleProjectFilesFound_cht" xml:space="preserve">
+    <value>找到 '{0}' 的多個專案檔案。</value>
+  </data>
+  <data name="UnableToFindProject_csy" xml:space="preserve">
+    <value>Projekt {0} nebyl nalezen.</value>
+  </data>
+  <data name="UnableToFindProject_deu" xml:space="preserve">
+    <value>Das Projekt "{0}" wurde nicht gefunden.</value>
+  </data>
+  <data name="UnableToFindProject_esp" xml:space="preserve">
+    <value>No se encuentra el proyecto '{0}'.</value>
+  </data>
+  <data name="UnableToFindProject_fra" xml:space="preserve">
+    <value>Impossible de trouver le projet '{0}'.</value>
+  </data>
+  <data name="UnableToFindProject_ita" xml:space="preserve">
+    <value>Impossibile trovare il progetto '{0}'.</value>
+  </data>
+  <data name="UnableToFindProject_jpn" xml:space="preserve">
+    <value>プロジェクト '{0}' が見つかりません。</value>
+  </data>
+  <data name="UnableToFindProject_kor" xml:space="preserve">
+    <value>'{0}' 프로젝트를 찾을 수 없습니다.</value>
+  </data>
+  <data name="UnableToFindProject_plk" xml:space="preserve">
+    <value>Nie można odnaleźć projektu „{0}”.</value>
+  </data>
+  <data name="UnableToFindProject_ptb" xml:space="preserve">
+    <value>Não é possível encontrar o projeto '{0}'.</value>
+  </data>
+  <data name="UnableToFindProject_rus" xml:space="preserve">
+    <value>Не удалось найти проект "{0}".</value>
+  </data>
+  <data name="UnableToFindProject_trk" xml:space="preserve">
+    <value>{0}' projesi bulunamadı.</value>
+  </data>
+  <data name="UnableToFindProject_chs" xml:space="preserve">
+    <value>找不到项目“{0}”。</value>
+  </data>
+  <data name="UnableToFindProject_cht" xml:space="preserve">
+    <value>找不到專案 '{0}'。</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_csy" xml:space="preserve">
+    <value>Hodnota PackageSaveMode {0} je neplatná.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_deu" xml:space="preserve">
+    <value>Ungültiger PackageSaveMode-Wert "{0}".</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_esp" xml:space="preserve">
+    <value>El valor de PackageSaveMode '{0}' no es válido.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_fra" xml:space="preserve">
+    <value>valeur PackageSaveMode non valide : '{0}'.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_ita" xml:space="preserve">
+    <value>Valore '{0}' di PackageSaveMode non valido.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_jpn" xml:space="preserve">
+    <value>無効な PackageSaveMode 値  '{0}' です。</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_kor" xml:space="preserve">
+    <value>잘못된 PackageSaveMode 값 '{0}'입니다.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_plk" xml:space="preserve">
+    <value>Nieprawidłowa wartość opcji PackageSaveMode („{0}”).</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_ptb" xml:space="preserve">
+    <value>Valor PackageSaveMode inválido '{0}'.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_rus" xml:space="preserve">
+    <value>Недопустимое значение PackageSaveMode: "{0}".</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_trk" xml:space="preserve">
+    <value>PackageSaveMode değeri '{0}' geçersiz.</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_chs" xml:space="preserve">
+    <value>PackageSaveMode 值“{0}”无效。</value>
+  </data>
+  <data name="Warning_InvalidPackageSaveMode_cht" xml:space="preserve">
+    <value>無效的 PackageSaveMode 值 '{0}'。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_csy" xml:space="preserve">
+    <value>Verze závislosti {0} není určena.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_deu" xml:space="preserve">
+    <value>Die Version der Abhängigkeit "{0}" wurde nicht angegeben.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_esp" xml:space="preserve">
+    <value>No se ha especificado la versión de la dependencia '{0}'.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_fra" xml:space="preserve">
+    <value>La version de dépendance '{0}' n'est pas spécifiée.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_ita" xml:space="preserve">
+    <value>Versione della dipendenza '{0}' non specificata.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_jpn" xml:space="preserve">
+    <value>依存関係のバージョン '{0}' が指定されていません。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_kor" xml:space="preserve">
+    <value>'{0}' 종속성 버전이 지정되지 않았습니다.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_plk" xml:space="preserve">
+    <value>Nie określono wersji zależności „{0}”.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_ptb" xml:space="preserve">
+    <value>A versão de dependência '{0}' não é especificada.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_rus" xml:space="preserve">
+    <value>Не указана версия зависимости "{0}".</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_trk" xml:space="preserve">
+    <value>{0}' bağımlılığının sürümü belirtilmemiş.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_chs" xml:space="preserve">
+    <value>未指定依赖项“{0}”的版本。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersion_cht" xml:space="preserve">
+    <value>未指定相依項 '{0}' 版本。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_csy" xml:space="preserve">
+    <value>Určete verzi závislosti a sestavte balíček znovu.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_deu" xml:space="preserve">
+    <value>Angeben der Version der Abhängigkeit und erneutes Erstellen des Pakets.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_esp" xml:space="preserve">
+    <value>Especifique la versión de la dependencia y recompile el paquete.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_fra" xml:space="preserve">
+    <value>Spécifiez la version de dépendance et regénérez votre package.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_ita" xml:space="preserve">
+    <value>Specificare la versione della dipendenza e ricompilare il pacchetto.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_jpn" xml:space="preserve">
+    <value>依存関係のバージョンを指定して、パッケージを再構築してください。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_kor" xml:space="preserve">
+    <value>종속성 버전을 지정하고 패키지를 다시 빌드하십시오.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_plk" xml:space="preserve">
+    <value>Określ wersję zależności i ponownie skompiluj pakiet.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_ptb" xml:space="preserve">
+    <value>Especifique a versão de dependência e reconstrua seu pacote.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_rus" xml:space="preserve">
+    <value>Укажите версию зависимости и повторите построение проекта.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_trk" xml:space="preserve">
+    <value>Bağımlılığın sürümünü belirtin ve paketinizi tekrar oluşturun.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_chs" xml:space="preserve">
+    <value>指定依赖项的版本并重新生成你的程序包。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionSolution_cht" xml:space="preserve">
+    <value>指定相依相版本並重新建置您的套件。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_csy" xml:space="preserve">
+    <value>Určete verzi závislostí.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_deu" xml:space="preserve">
+    <value>Angeben der Version der Abhängigkeiten.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_esp" xml:space="preserve">
+    <value>Especifique la versión de las dependencias.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_fra" xml:space="preserve">
+    <value>Spécifiez la version des dépendances.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_ita" xml:space="preserve">
+    <value>Specificare la versione delle dipendenze.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_jpn" xml:space="preserve">
+    <value>依存関係のバージョンを指定してください。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_kor" xml:space="preserve">
+    <value>종속성 버전을 지정하십시오.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_plk" xml:space="preserve">
+    <value>Określ wersję zależności.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_ptb" xml:space="preserve">
+    <value>Especifique uma versão de dependências.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_rus" xml:space="preserve">
+    <value>Укажите версию зависимостей.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_trk" xml:space="preserve">
+    <value>Bağımlılıkların sürümlerini belirtin.</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_chs" xml:space="preserve">
+    <value>指定依赖项的版本。</value>
+  </data>
+  <data name="Warning_UnspecifiedDependencyVersionTitle_cht" xml:space="preserve">
+    <value>指定相依項版本。</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_csy" xml:space="preserve">
+    <value>Další informace naleznete na adrese {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_deu" xml:space="preserve">
+    <value>Besuchen Sie "{0}", um weitere Informationen zu erhalten.</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_esp" xml:space="preserve">
+    <value>Para obtener más información, visite {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_fra" xml:space="preserve">
+    <value>Pour plus d'informations, consultez {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_ita" xml:space="preserve">
+    <value>Per ulteriori informazioni, visitare {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_jpn" xml:space="preserve">
+    <value>詳細については、{0} を参照してください</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_kor" xml:space="preserve">
+    <value>자세한 내용은 {0}을(를) 참조하십시오.</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_plk" xml:space="preserve">
+    <value>Aby uzyskać więcej informacji, odwiedź stronę {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_ptb" xml:space="preserve">
+    <value>Para obter mais informações, visite {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_rus" xml:space="preserve">
+    <value>Дополнительные сведения см. на веб-сайте {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_trk" xml:space="preserve">
+    <value>Daha fazla bilgi için {0} adresini ziyaret edin.</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_chs" xml:space="preserve">
+    <value>有关详细信息，请访问 {0}</value>
+  </data>
+  <data name="HelpCommandForMoreInfo_cht" xml:space="preserve">
+    <value>如需詳細資訊，請造訪 {0}</value>
   </data>
 </root>

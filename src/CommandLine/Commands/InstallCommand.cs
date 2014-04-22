@@ -245,12 +245,28 @@ namespace NuGet.Commands
             string packageId,
             SemanticVersion version)
         {
+            if (version == null)
+            {
+                NoCache = true;
+            }
             var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
 
             if (!PackageInstallNeeded(packageManager, packageId, version))
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandPackageAlreadyExists"), packageId);
                 return;
+            }
+
+            if (version == null)
+            {
+                var latestVersion = GetLastestPackageVersion(
+                    packageManager.SourceRepository, 
+                    packageId, 
+                    allowPrereleaseVersions: Prerelease);
+                if (latestVersion != null)
+                {
+                    version = latestVersion.Version;
+                }
             }
 
             using (packageManager.SourceRepository.StartOperation(
@@ -261,6 +277,84 @@ namespace NuGet.Commands
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
             }
         }
+
+        /// <summary>
+        /// Find the latest version of a package in the given repo.
+        /// </summary>
+        /// <param name="repo">The repository where to find the latest version of the package.</param>
+        /// <param name="id">The id of the package.</param>
+        /// <param name="allowPrereleaseVersions">Indicates if prerelease version is allowed.</param>
+        /// <returns>the latest version of the package; or null if the package doesn't exist
+        /// in the repo.</returns>
+        private static IPackage GetLastestPackageVersion(IPackageRepository repo, string id, bool allowPrereleaseVersions)
+        {
+            IPackage latestVersion = null;
+            var latestPackageLookup = repo as ILatestPackageLookup;
+            if (latestPackageLookup != null &&
+                latestPackageLookup.TryFindLatestPackageById(id, allowPrereleaseVersions, out latestVersion))
+            {
+                return latestVersion;
+            }
+
+            var aggregateRepository = repo as AggregateRepository;
+            if (aggregateRepository != null)
+            {
+                return GetLatestVersionPackageByIdFromAggregateRepository(
+                    aggregateRepository, id, allowPrereleaseVersions);
+            }
+
+            IEnumerable<IPackage> packages = repo.FindPackagesById(id).OrderByDescending(p => p.Version);
+            if (!allowPrereleaseVersions)
+            {
+                packages = packages.Where(p => p.IsReleaseVersion());
+            }
+
+            latestVersion = packages.FirstOrDefault();
+            return latestVersion;
+        }
+
+        /// <summary>
+        /// Find the latest version of a package in the given aggregate repository.
+        /// </summary>
+        /// <param name="repo">The aggregate repository where to find the latest version of the package.</param>
+        /// <param name="id">The id of the package.</param>
+        /// <param name="allowPrereleaseVersions">Indicates if prerelease version is allowed.</param>
+        /// <returns>the latest version of the package; or null if the package doesn't exist
+        /// in the repo.</returns>
+        private static IPackage GetLatestVersionPackageByIdFromAggregateRepository(
+            AggregateRepository repo, string id,
+            bool allowPrereleaseVersions)
+        {
+            var tasks = repo.Repositories.Select(p => Task.Factory.StartNew(
+                state => GetLastestPackageVersion(p, id, allowPrereleaseVersions), p)).ToArray();
+
+            try
+            {
+                Task.WaitAll(tasks);
+            }
+            catch (AggregateException)
+            {
+                if (!repo.IgnoreFailingRepositories)
+                {
+                    throw;
+                }
+            }
+
+            var versions = new List<IPackage>();
+            foreach (var task in tasks)
+            {
+                if (task.IsFaulted)
+                {
+                    repo.LogRepository((IPackageRepository)task.AsyncState, task.Exception);
+                }
+                else if (task.Result != null)
+                {
+                    versions.Add(task.Result);
+                }
+            }
+
+            return versions.OrderByDescending(v => v.Version).FirstOrDefault();
+        }        
 
         /// <summary>
         /// Returns true if package install is needed.

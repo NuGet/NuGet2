@@ -297,8 +297,11 @@ namespace NuGet.PowerShell.Commands
             {
                 if (project != null && scriptFile != null)
                 {
-                    WriteVerbose(String.Format(CultureInfo.CurrentCulture, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), project.Name,
-                            VersionUtility.GetShortFrameworkName(targetFramework)));
+                    // targetFramework can be null for unknown project types
+                    string shortFramework = targetFramework == null ? string.Empty : VersionUtility.GetShortFrameworkName(targetFramework);
+
+                    WriteVerbose(String.Format(CultureInfo.CurrentCulture, NuGetResources.Debug_TargetFrameworkInfoPrefix, 
+                        package.GetFullName(), project.Name, shortFramework));
 
                     WriteVerbose(String.Format(CultureInfo.CurrentCulture, NuGetResources.Debug_TargetFrameworkInfo_PowershellScripts,
                         Path.GetDirectoryName(scriptFile.Path), VersionUtility.GetTargetFrameworkLogString(scriptFile.TargetFramework)));
