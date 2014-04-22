@@ -6,10 +6,11 @@ namespace NuGet.Test.Integration
 {
     public class CommandRunner
     {
-        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit, int timeOutInMilliseconds = 60000,
+        public static Tuple<int, string, string> Run(string process, string workingDirectory, string arguments, bool waitForExit, int timeOutInMilliseconds = 60000,
            Action<StreamWriter> inputAction = null)
         {
             string result = String.Empty;
+            string error = String.Empty;
 
             ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments)
             {
@@ -47,10 +48,7 @@ namespace NuGet.Test.Integration
                 }
 
                 result = standardOutput.ReadToEnd();
-                if (string.IsNullOrEmpty(result))
-                {
-                    result = errorOutput.ReadToEnd();
-                }
+                error = errorOutput.ReadToEnd();
                 
                 if (p.HasExited)
                 {
@@ -59,8 +57,9 @@ namespace NuGet.Test.Integration
             }           
 
             Console.WriteLine(result);
+            Console.WriteLine(errorOutput);
 
-            return Tuple.Create<int, string>(exitCode, result);
+            return Tuple.Create(exitCode, result, error);
         }
     }
 }

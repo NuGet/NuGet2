@@ -2073,7 +2073,7 @@ nuget list -verbose -allversions</value>
     <value>Bez monitów o dane wejściowe użytkownika i potwierdzenia.</value>
   </data>
   <data name="Option_NonInteractive_ptb" xml:space="preserve">
-    <value></value>
+    <value />
   </data>
   <data name="Option_NonInteractive_rus" xml:space="preserve">
     <value>Отключение запросов ввода или подтверждения пользователя.</value>
@@ -2685,7 +2685,7 @@ nuget list -verbose -allversions</value>
     <value>Remplace le numéro de version provenant du fichier .nuspec.</value>
   </data>
   <data name="PackageCommandVersionDescription_ita" xml:space="preserve">
-    <value></value>
+    <value />
   </data>
   <data name="PackageCommandVersionDescription_jpn" xml:space="preserve">
     <value>nuspec ファイルのバージョン番号を上書きします。</value>
@@ -5232,5 +5232,8 @@ nuget update -Self</value>
   </data>
   <data name="CommandPackageSaveMode_cht" xml:space="preserve">
     <value>指定套件安裝之後要儲存的檔案類型: nuspec, nupkg, nuspec;nupkg。</value>
+  </data>
+  <data name="PushCommandDisableBufferingDescription" xml:space="preserve">
+    <value>Disable buffering when pushing to an HTTP(S) server to decrease memory usage. Note that when this option is enabled, integrated windows authentication might not work.</value>
   </data>
 </root>

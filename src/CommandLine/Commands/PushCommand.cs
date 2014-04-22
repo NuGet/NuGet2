@@ -21,7 +21,10 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "PushCommandTimeoutDescription")]
         public int Timeout { get; set; }
-        
+
+        [Option(typeof(NuGetCommand), "PushCommandDisableBufferingDescription")]
+        public bool DisableBuffering { get; set; }
+
         public override void ExecuteCommand()
         {
             // First argument should be the package
@@ -141,7 +144,8 @@ namespace NuGet.Commands
                 apiKey, 
                 package, 
                 new FileInfo(packageToPush).Length,
-                Convert.ToInt32(timeout.TotalMilliseconds));
+                Convert.ToInt32(timeout.TotalMilliseconds),
+                DisableBuffering);
             Console.WriteLine(LocalizedResourceManager.GetString("PushCommandPackagePushed"));
         }
 

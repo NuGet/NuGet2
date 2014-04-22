@@ -35,24 +35,13 @@ namespace NuGet
         }
 
         /// <summary>
-        /// Pushes a package to the server that is represented by the stream.
-        /// </summary>
-        /// <param name="apiKey">API key to be used to push the package.</param>
-        /// <param name="packageStream">Stream representing the package.</param>
-        /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
-        [Obsolete("This overload is obsolete, please use the overload which takes a Func<Stream>")]
-        public void PushPackage(string apiKey, Stream packageStream, long packageSize, int timeout)
-        {
-            PushPackageToServer(apiKey, () => packageStream, packageSize, timeout);
-        }
-
-        /// <summary>
         /// Pushes a package to the Source.
         /// </summary>
         /// <param name="apiKey">API key to be used to push the package.</param>
         /// <param name="package">The package to be pushed.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
-        public void PushPackage(string apiKey, IPackage package, long packageSize, int timeout) 
+        /// <param name="disableBuffering">Indicates if HttpWebRequest buffering should be disabled.</param>
+        public void PushPackage(string apiKey, IPackage package, long packageSize, int timeout, bool disableBuffering) 
         {
             var sourceUri = new Uri(Source);
             if (sourceUri.IsFile)
@@ -63,7 +52,7 @@ namespace NuGet
             }
             else
             {
-                PushPackageToServer(apiKey, package.GetStream, packageSize, timeout);
+                PushPackageToServer(apiKey, package.GetStream, packageSize, timeout, disableBuffering);
             }
         }
 
@@ -74,23 +63,26 @@ namespace NuGet
         /// <param name="packageStreamFactory">A delegate which can be used to open a stream for the package file.</param>
         /// <param name="contentLength">Size of the package to be pushed.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
+        /// <param name="disableBuffering">Disable buffering.</param>
         private void PushPackageToServer(
             string apiKey, 
             Func<Stream> packageStreamFactory, 
             long packageSize,
-            int timeout) 
+            int timeout,
+            bool disableBuffering) 
         {
             int redirectionCount = 0;
+
             while (true)
             {
                 HttpClient client = GetClient("", "PUT", "application/octet-stream");
+                client.DisableBuffering = disableBuffering;
 
                 client.SendingRequest += (sender, e) =>
                 {
                     SendingRequest(this, e);
                     var request = (HttpWebRequest)e.Request;
-                    request.AllowWriteStreamBuffering = false;
-
+                    
                     // Set the timeout
                     if (timeout <= 0)
                     {
@@ -110,7 +102,7 @@ namespace NuGet
                     multiPartRequest.CreateMultipartRequest(request);
                 };
 
-                // Since AllowWriteStreamBuffering is set to false, redirection will not be handled
+                // When AllowWriteStreamBuffering is set to false, redirection will not be handled
                 // automatically by HttpWebRequest. So we need to check redirect status code and
                 // update _baseUri and retry if redirection happens.
                 if (EnsureSuccessfulResponse(client))

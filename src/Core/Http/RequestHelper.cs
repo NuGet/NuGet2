@@ -25,18 +25,21 @@ namespace NuGet
         bool _continueIfFailed;
         int _proxyCredentialsRetryCount;
         bool _basicAuthIsUsedInPreviousRequest;
+        bool _disableBuffering;
 
         public RequestHelper(Func<WebRequest> createRequest,
             Action<WebRequest> prepareRequest,
             IProxyCache proxyCache,
             ICredentialCache credentialCache,
-            ICredentialProvider credentialProvider)
+            ICredentialProvider credentialProvider,
+            bool disableBuffering)
         {
             _createRequest = createRequest;
             _prepareRequest = prepareRequest;
             _proxyCache = proxyCache;
             _credentialCache = credentialCache;
             _credentialProvider = credentialProvider;
+            _disableBuffering = disableBuffering;
         }
 
         public WebResponse GetResponse()
@@ -59,13 +62,28 @@ namespace NuGet
 
                 try
                 {
-                    var auth = request.Headers["Authorization"];
-                    _basicAuthIsUsedInPreviousRequest = (auth != null)
-                        && auth.StartsWith("Basic ", StringComparison.Ordinal);
+                    if (_disableBuffering)
+                    {
+                        request.AllowWriteStreamBuffering = false;
+
+                        // When buffering is disabled, we need to add the Authorization header 
+                        // for basic authentication by ourselves.
+                        bool basicAuth = _previousResponse != null &&
+                            _previousResponse.AuthType != null &&
+                            _previousResponse.AuthType.IndexOf("Basic", StringComparison.OrdinalIgnoreCase) != -1;
+                        var networkCredentials = request.Credentials.GetCredential(request.RequestUri, "Basic");
+                        if (networkCredentials != null && basicAuth)
+                        {
+                            string authInfo = networkCredentials.UserName + ":" + networkCredentials.Password;
+                            authInfo = Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(authInfo));
+                            request.Headers["Authorization"] = "Basic " + authInfo;
+                            _basicAuthIsUsedInPreviousRequest = true;
+                        }
+                    }
 
                     // Prepare the request, we do something like write to the request stream
                     // which needs to happen last before the request goes out
-                    _prepareRequest(request);
+                    _prepareRequest(request);                    
 
                     WebResponse response = request.GetResponse();                    
 
@@ -124,6 +142,16 @@ namespace NuGet
 
                         if (!IsAuthenticationResponse(response) || !_continueIfFailed)
                         {
+                            throw;
+                        }
+
+                        if (!EnvironmentUtility.IsNet45Installed &&
+                            request.AllowWriteStreamBuffering == false &&
+                            response.AuthType != null &&
+                            IsNtlmOrKerberos(response.AuthType))
+                        {
+                            // integrated windows authentication does not work when buffering is 
+                            // disabled on .net 4.0.
                             throw;
                         }
 
@@ -187,31 +215,20 @@ namespace NuGet
                 return;
             }
 
+            // When buffering is disabled, we need to handle basic auth ourselves.
             bool basicAuth = _previousResponse.AuthType != null &&
                 _previousResponse.AuthType.IndexOf("Basic", StringComparison.OrdinalIgnoreCase) != -1;
-            if (basicAuth && !_basicAuthIsUsedInPreviousRequest)
+            if (_disableBuffering && basicAuth && !_basicAuthIsUsedInPreviousRequest)
             {
                 // The basic auth credentials were not sent in the last request. 
                 // We need to try with cached credentials in this request.        
                 request.Credentials = _credentialCache.GetCredentials(request.RequestUri);
-            }
+            }            
 
             if (request.Credentials == null)
             {
                 request.Credentials = _credentialProvider.GetCredentials(
                     request, CredentialType.RequestCredentials, retrying: _credentialsRetryCount > 0);
-            }
-            
-            if (basicAuth)
-            {
-                // Add the Authorization header for basic authentication.
-                var networkCredentials = request.Credentials.GetCredential(request.RequestUri, "Basic");
-                if (networkCredentials != null)
-                {
-                    string authInfo = networkCredentials.UserName + ":" + networkCredentials.Password;
-                    authInfo = Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(authInfo));
-                    request.Headers["Authorization"] = "Basic " + authInfo;                    
-                }
             }
 
             _continueIfFailed = request.Credentials != null;

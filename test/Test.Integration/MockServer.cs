@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -218,6 +219,11 @@ namespace NuGet.Test.Integration
                         {
                             var action = (Action<HttpListenerResponse>)r;
                             action(response);
+                        }
+                        else if (r is Action<HttpListenerResponse, IPrincipal>)
+                        {
+                            var action = (Action<HttpListenerResponse, IPrincipal>)r;
+                            action(response, context.User);
                         }
                         else if (r is int || r is HttpStatusCode)
                         {

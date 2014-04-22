@@ -63,6 +63,12 @@ namespace NuGet
             set;
         }
 
+        public bool DisableBuffering
+        {
+            get;
+            set;
+        }
+
         // TODO: Get rid of this. Horrid to have static properties like this especially in a code path that does not look thread safe.
         public static ICredentialProvider DefaultCredentialProvider
         {
@@ -90,7 +96,8 @@ namespace NuGet
                 RaiseSendingRequest,
                 ProxyCache.Instance,
                 CredentialStore.Instance,
-                DefaultCredentialProvider);
+                DefaultCredentialProvider,
+                DisableBuffering);
             return requestHelper.GetResponse();
         }
 

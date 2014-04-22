@@ -643,7 +643,7 @@ EndProject");
 
                 // Assert
                 Assert.Equal(1, r.Item1);
-                Assert.Contains("This folder contains more than one solution file.", r.Item2);
+                Assert.Contains("This folder contains more than one solution file.", r.Item3);
                 var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
                 var packageFileB = Path.Combine(workingPath, @"packages\packageB.2.2.0\packageB.2.2.0.nupkg");
                 Assert.False(File.Exists(packageFileA));
@@ -724,7 +724,7 @@ EndProject");
 
                 // Assert
                 Assert.Equal(1, r.Item1);
-                Assert.Contains("Cannot locate a solution file.", r.Item2);
+                Assert.Contains("Cannot locate a solution file.", r.Item3);
                 var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
                 var packageFileB = Path.Combine(workingPath, @"packages\packageB.2.2.0\packageB.2.2.0.nupkg");
                 Assert.False(File.Exists(packageFileA));
