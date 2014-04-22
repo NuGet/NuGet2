@@ -187,7 +187,8 @@ namespace NuGet
                 return;
             }
 
-            bool basicAuth = _previousResponse.AuthType.IndexOf("Basic", StringComparison.OrdinalIgnoreCase) != -1;
+            bool basicAuth = _previousResponse.AuthType != null &&
+                _previousResponse.AuthType.IndexOf("Basic", StringComparison.OrdinalIgnoreCase) != -1;
             if (basicAuth && !_basicAuthIsUsedInPreviousRequest)
             {
                 // The basic auth credentials were not sent in the last request. 

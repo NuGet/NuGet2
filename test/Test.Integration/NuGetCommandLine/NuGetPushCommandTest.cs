@@ -392,7 +392,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     credentialForGetRequest.Add(credential);
                     return HttpStatusCode.OK;
                 });
-                server.Put.Add("/nuget", r =>
+                server.Put.Add("/nuget", r => new Action<HttpListenerResponse>(res =>
                 {
                     var h = r.Headers["Authorization"];
                     var credential = System.Text.Encoding.Default.GetString(Convert.FromBase64String(h.Substring(6)));
@@ -400,13 +400,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
                     if (credential.Equals("testuser:testpassword", StringComparison.OrdinalIgnoreCase))
                     {
-                        return HttpStatusCode.OK;
+                        res.StatusCode = (int)HttpStatusCode.OK;
                     }
                     else
                     {
-                        return HttpStatusCode.Unauthorized;
+                        res.AddHeader("WWW-Authenticate", "Basic ");
+                        res.StatusCode = (int)HttpStatusCode.Unauthorized;
                     }
-                });
+                }));
                 server.Start();
 
                 // Act
