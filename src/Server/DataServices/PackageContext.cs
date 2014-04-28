@@ -15,9 +15,11 @@ namespace NuGet.Server.DataServices
         {
             get
             {
-                var packages = from p in _repository.GetPackages()
-                               select _repository.GetMetadataPackage(p);
-                return packages.InterceptWith(new PackageIdComparisonVisitor());
+                return _repository.GetPackages()
+                            .Select(_repository.GetMetadataPackage)
+                            .Where(p => p != null)
+                            .AsQueryable()
+                            .InterceptWith(new PackageIdComparisonVisitor());
             }
         }
     }

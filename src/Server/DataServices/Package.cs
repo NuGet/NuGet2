@@ -48,12 +48,14 @@ namespace NuGet.Server.DataServices
             PackageSize = derivedData.PackageSize;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
-            IsAbsoluteLatestVersion = package.IsAbsoluteLatestVersion;
-            IsLatestVersion = package.IsLatestVersion;
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
             MinClientVersion = package.MinClientVersion == null ? null : package.MinClientVersion.ToString();
             Listed = package.Listed;
+
+            // set the latest flags based on the derived data
+            IsAbsoluteLatestVersion = derivedData.IsAbsoluteLatestVersion;
+            IsLatestVersion = derivedData.IsLatestVersion;
         }
 
         internal string FullPath

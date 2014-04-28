@@ -13,5 +13,7 @@ namespace NuGet.Server.Infrastructure
         public string Path { get; set; }
         public string FullPath { get; set; }
         public IEnumerable<FrameworkName> SupportedFrameworks { get; set; }
+        public bool IsAbsoluteLatestVersion { get; set; }
+        public bool IsLatestVersion { get; set; }
     }
 }
