@@ -502,41 +502,34 @@ namespace NuGet.Dialog.Providers
             // Only process the result if this node is still selected.
             if (IsSelected)
             {
-                if (task.IsFaulted)
+                if (!task.IsCanceled && !cancellationSource.IsCancellationRequested)
                 {
-                    if (cancellationSource.IsCancellationRequested)
-                    {
-                        HideProgressPane();
-                    }
-                    else
+                    if (task.IsFaulted)
                     {
                         // show error message in the Message pane
                         ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
                     }
-                }
-                else if (task.IsCanceled)
-                {
-                    HideProgressPane();
-                }
-                else
-                {
-                    LoadPageResult result = task.Result;
+                    else
+                    {
+                        // completed successfully - display the results
+                        LoadPageResult result = task.Result;
 
-                    UpdateNewPackages(result.Packages.ToList());
+                        UpdateNewPackages(result.Packages.ToList());
 
-                    int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
-                    TotalPages = Math.Max(1, totalPages);
-                    CurrentPage = Math.Max(1, result.PageNumber);
-
-                    HideProgressPane();
+                        int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
+                        TotalPages = Math.Max(1, totalPages);
+                        CurrentPage = Math.Max(1, result.PageNumber);
+                    }
                 }
+
+                HideProgressPane();
             }
 
             Provider.OnPackageLoadCompleted(this);
 
             // for unit tests
             PackageLoadCompleted(this, EventArgs.Empty);
-            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);            
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);
         }
 
         private void UpdateNewPackages(IList<IPackage> packages)
