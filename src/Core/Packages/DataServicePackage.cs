@@ -1,8 +1,10 @@
+using NuGet.Resources;
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Common;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -360,48 +362,70 @@ namespace NuGet
             // When using MachineCache, once we've verified that the hashes match (which happens the first time around),
             // we'll simply verify the file exists between successive calls.
             IPackageMetadata packageMetadata = this;
-            bool refreshPackage = _package == null || 
-                                  (_package is OptimizedZipPackage && !((OptimizedZipPackage)_package).IsValid) ||
-                                  !String.Equals(OldHash, PackageHash, StringComparison.OrdinalIgnoreCase) || 
-                                  (_usingMachineCache && !cacheRepository.Exists(Id, packageMetadata.Version));
-            if (refreshPackage && 
-                TryGetPackage(cacheRepository, packageMetadata, out _package) && 
-                _package.GetHash(HashProvider).Equals(PackageHash, StringComparison.OrdinalIgnoreCase))
+            if (_package == null ||
+                    (_package is OptimizedZipPackage && !((OptimizedZipPackage)_package).IsValid) ||
+                    !String.Equals(OldHash, PackageHash, StringComparison.OrdinalIgnoreCase) ||
+                    (_usingMachineCache && !cacheRepository.Exists(Id, packageMetadata.Version)))
             {
-                OldHash = PackageHash;
+                IPackage newPackage = null;
+                bool inMemOnly = false;
+                bool isValid = false;
 
-                // Reset the flag so that we no longer need to download the package since it exists and is valid.
-                refreshPackage = false;
-
-                // Make a note that the backing store for the ZipPackage is the machine cache.
-                _usingMachineCache = true;
-            }
-
-            if (refreshPackage)
-            {
-                // We either do not have a package available locally or they are invalid. Download the package from the server.
-                _usingMachineCache = cacheRepository.InvokeOnPackage(packageMetadata.Id, packageMetadata.Version,
-                    (stream) => Downloader.DownloadPackage(DownloadUrl, this, stream)
-                    );
-
-                if (_usingMachineCache)
+                // If the package exists in the cache and has the correct hash then use it. Otherwise download it.
+                if (TryGetPackage(cacheRepository, packageMetadata, out newPackage) && MatchPackageHash(newPackage))
                 {
-                    _package = cacheRepository.FindPackage(packageMetadata.Id, packageMetadata.Version);
-                    Debug.Assert(_package != null);
+                    isValid = true;
                 }
                 else
                 {
-                    // this can happen when access to the %LocalAppData% directory is blocked, e.g. on Windows Azure Web Site build
-                    using (var targetStream = new MemoryStream())
+                    // We either do not have a package available locally or they are invalid. Download the package from the server.
+                    if (cacheRepository.InvokeOnPackage(packageMetadata.Id, packageMetadata.Version,
+                        (stream) => Downloader.DownloadPackage(DownloadUrl, this, stream)))
                     {
-                        Downloader.DownloadPackage(DownloadUrl, this, targetStream);
-                        targetStream.Seek(0, SeekOrigin.Begin);
-                        _package = new ZipPackage(targetStream);
+                        newPackage = cacheRepository.FindPackage(packageMetadata.Id, packageMetadata.Version);
+                        Debug.Assert(newPackage != null);
                     }
+                    else
+                    {
+                        // this can happen when access to the %LocalAppData% directory is blocked, e.g. on Windows Azure Web Site build
+                        using (var targetStream = new MemoryStream())
+                        {
+                            Downloader.DownloadPackage(DownloadUrl, this, targetStream);
+                            targetStream.Seek(0, SeekOrigin.Begin);
+                            newPackage = new ZipPackage(targetStream);
+                        }
+
+                        inMemOnly = true;
+                    }
+
+                    isValid = MatchPackageHash(newPackage);
                 }
 
-                OldHash = PackageHash;
+                // apply the changes if the package hash was valid
+                if (isValid)
+                {
+                    _package = newPackage;
+
+                    // Make a note that the backing store for the ZipPackage is the machine cache.
+                    _usingMachineCache = !inMemOnly;
+
+                    OldHash = PackageHash;
+                }
+                else
+                {
+                    // ensure package must end with a valid package, since we cannot load one we must throw.
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.Error_InvalidPackage, Version, Id));
+                }
             }
+        }
+
+        /// <summary>
+        /// True if the given package matches PackageHash
+        /// </summary>
+        private bool MatchPackageHash(IPackage package)
+        {
+            return package != null && package.GetHash(HashProvider).Equals(PackageHash, StringComparison.OrdinalIgnoreCase);
         }
 
         private static List<PackageDependencySet> ParseDependencySet(string value)
