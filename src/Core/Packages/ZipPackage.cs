@@ -175,8 +175,10 @@ namespace NuGet
         internal static bool IsPackageFile(PackagePart part)
         {
             string path = UriUtility.GetPath(part.Uri);
+            string directory = Path.GetDirectoryName(path);
+
             // We exclude any opc files and the manifest file (.nuspec)
-            return !ExcludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
+            return !ExcludePaths.Any(p => directory.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
                    !PackageHelper.IsManifest(path);
         }
 
