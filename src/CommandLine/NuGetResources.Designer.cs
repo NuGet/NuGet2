@@ -2860,6 +2860,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are no pdb files in the package..
+        /// </summary>
+        internal static string Error_NoPdbFilesInPackage {
+            get {
+                return ResourceManager.GetString("Error_NoPdbFilesInPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This folder contains no solution files, nor packages.config files..
         /// </summary>
         internal static string Error_NoSolutionFileNorePackagesConfigFile {

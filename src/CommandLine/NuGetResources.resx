@@ -6036,4 +6036,7 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="RunningCommand" xml:space="preserve">
     <value>Running command: {0} {1}</value>
   </data>
+  <data name="Error_NoPdbFilesInPackage" xml:space="preserve">
+    <value>There are no pdb files in the package.</value>
+  </data>
 </root>

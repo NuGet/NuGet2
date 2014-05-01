@@ -38,6 +38,14 @@ namespace NuGet.Commands
             string symbolPackage = Arguments[0];
 
             _package = new ZipPackage(symbolPackage);
+            var pdbFiles = _package.GetFiles().Where(
+                f => f.Path.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase));
+            if (pdbFiles.IsEmpty())
+            {
+                string errorMessage = LocalizedResourceManager.GetString("Error_NoPdbFilesInPackage");
+                throw new InvalidOperationException(errorMessage);
+            }
+
             ProcessSourceFilesInPackage();
             ProcessPdbFilesInPackage();
         }
@@ -96,7 +104,7 @@ namespace NuGet.Commands
         {
             var pdbFiles = _package.GetFiles().Where(
                 f => f.Path.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase));
-
+            
             foreach (var f in pdbFiles)
             {
                 SourceIndexAndPushPdbFile(f);
