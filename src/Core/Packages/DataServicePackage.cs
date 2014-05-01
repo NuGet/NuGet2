@@ -398,7 +398,11 @@ namespace NuGet
                         inMemOnly = true;
                     }
 
-                    isValid = MatchPackageHash(newPackage);
+                    // Because of CDN caching, the hash returned in odata feed
+                    // can be out of sync with the hash of the file itself.
+                    // So for now, we cannot call MatchPackageHash(newPackage) to 
+                    // validate that the file downloaded has the right hash.
+                    isValid = true;
                 }
 
                 // apply the changes if the package hash was valid
