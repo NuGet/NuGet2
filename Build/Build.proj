@@ -53,7 +53,7 @@
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
         <MinorVersion>8</MinorVersion>
-        <Patch>1</Patch>
+        <Patch>2</Patch>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -62,7 +62,12 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+
+	<!-- This is the version number of all DLLs produced -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
+
+	<!-- This is the version number of nupkg files produced -->
+        <NuGetPackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)-beta$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</NuGetPackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -323,10 +328,10 @@
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>
 
-        <Exec Command="&quot;$(NuGetExe)&quot; pack NuGet.CommandLine.nuspec -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetBuildDropDirectory)&quot;" WorkingDirectory="$(NuGetSrcRoot)\Build" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -exclude **\NuGet.Core.*" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack NuGet.CommandLine.nuspec -NoPackageAnalysis -Version $(NuGetPackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(NuGetPackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(NuGetPackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(NuGetPackageVersion) -o &quot;$(NuGetBuildDropDirectory)&quot;" WorkingDirectory="$(NuGetSrcRoot)\Build" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(NuGetPackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -exclude **\NuGet.Core.*" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />
     </Target>
 </Project>
