@@ -241,7 +241,7 @@ namespace NuGet.Dialog.Providers
                 else
                 {
                     var provider = GetSearchProvider();
-                    if (provider.Name == "Online")
+                    if (provider.Name == Resources.Dialog_OnlineProvider)
                     {
                         _searchNode = new PagedPackagesSearchNode(provider, RootNode, SelectedNode, searchText);
                     }
