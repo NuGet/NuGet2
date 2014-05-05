@@ -9,6 +9,7 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
     <ProjectGuid>{52EA04DC-1DA5-4E45-B13C-0A10F4B71662}</ProjectGuid>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <NuGetExeHintPath Condition="'$(NuGetExeHintPath)'==''">..\CommandLine\bin\$(Configuration)\Merged\NuGet.exe</NuGetExeHintPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -38,7 +39,7 @@
   <ItemGroup Condition=" '$(CIBuild)' == 'true' ">
     <Reference Include="NuGet">
       <Private>False</Private>
-      <HintPath>..\CommandLine\bin\$(Configuration)\Merged\NuGet.exe</HintPath>
+      <HintPath>$(NuGetExeHintPath)</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup Condition=" '$(CIBuild)' != 'true' ">
