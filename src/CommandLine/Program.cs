@@ -36,8 +36,12 @@ namespace NuGet
             // This is to avoid applying weak event pattern usage, which breaks under Mono or restricted environments, e.g. Windows Azure Web Sites.
             EnvironmentUtility.SetRunningFromCommandLine();
 
+            // set output encoding to UTF8 if -utf8 is specified
             var oldOutputEncoding = System.Console.OutputEncoding;
-            SetConsoleOutputEncoding(System.Text.Encoding.UTF8);
+            if (args.Any(arg => String.Equals(arg, "-utf8", StringComparison.OrdinalIgnoreCase)))
+            {   
+                SetConsoleOutputEncoding(System.Text.Encoding.UTF8);
+            }
 
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
