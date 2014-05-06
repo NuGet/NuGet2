@@ -40,6 +40,7 @@ namespace NuGet
             var oldOutputEncoding = System.Console.OutputEncoding;
             if (args.Any(arg => String.Equals(arg, "-utf8", StringComparison.OrdinalIgnoreCase)))
             {   
+                args = args.Where(arg => !String.Equals(arg, "-utf8", StringComparison.OrdinalIgnoreCase)).ToArray();
                 SetConsoleOutputEncoding(System.Text.Encoding.UTF8);
             }
 
