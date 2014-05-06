@@ -144,8 +144,8 @@ EndProject");
             }
         }
 
-        // Tests that if the project file cannot be loaded, i.e. InvalidProjectFileException is thrown,
-        // Then packages listed in packages.config file will be restored.
+        // Tests that if the project file cannot be loaded, e.g. because of missing import targets
+        // file, nuget can still restore packages listed in packages.config file.
         [Fact]
         public void RestoreCommand_ProjectCannotBeLoaded()
         {
@@ -189,6 +189,70 @@ EndProject");
 @"<packages>
   <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
 </packages>");  
+                string[] args = new string[] { "restore", "-Source", repositoryPath };
+
+                // Act 
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    workingPath,
+                    "restore -Source " + repositoryPath,
+                    waitForExit: true);
+
+                // Assert
+                Assert.Equal(0, r.Item1);
+                var packageFileA = Path.Combine(workingPath, @"packages\packageA.1.1.0\packageA.1.1.0.nupkg");
+                Assert.True(File.Exists(packageFileA));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+                Util.DeleteDirectory(workingPath);
+            }
+        }
+
+        // Tests that if the project file or solution file is invalid, nuget will use the
+        // fallback of walking the directory tree and restore packages listed in 
+        // packages.config files it can find.
+        [Fact]
+        public void RestoreCommand_InvalidProject()
+        {
+            // Arrange
+            var tempPath = Path.GetTempPath();
+            var workingPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var repositoryPath = Path.Combine(workingPath, Guid.NewGuid().ToString());
+            var proj1Directory = Path.Combine(workingPath, "proj1");
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+
+            try
+            {
+                Util.CreateDirectory(workingPath);
+                Util.CreateDirectory(repositoryPath);
+                Util.CreateDirectory(proj1Directory);
+
+                Util.CreateTestPackage("packageA", "1.1.0", repositoryPath);
+
+                Util.CreateFile(workingPath, "a.sln",
+                    @"Invalid solution");
+
+                Util.CreateFile(proj1Directory, "proj1.csproj",
+                    @"Invalid Project
+<Project ToolsVersion='4.0' DefaultTargets='Build' 
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <OutputPath>out</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project='..\packages\a.targets' />
+</Project>");
+                Util.CreateFile(proj1Directory, "packages.proj1.config",
+@"<packages>
+  <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
+</packages>");
+                Util.CreateFile(proj1Directory, "packages.proj2.config",
+@"Not a valid packages.config file");
                 string[] args = new string[] { "restore", "-Source", repositoryPath };
 
                 // Act 

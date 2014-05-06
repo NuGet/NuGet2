@@ -6,8 +6,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Exceptions;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -374,15 +374,6 @@ namespace NuGet.Commands
 
         private void RestorePackagesForSolution(IFileSystem packagesFolderFileSystem, string solutionFileFullPath)
         {
-            ISolutionParser solutionParser;
-            if (EnvironmentUtility.IsMonoRuntime)
-            {
-                solutionParser = new XBuildSolutionParser();
-            }
-            else
-            {
-                solutionParser = new MSBuildSolutionParser();
-            }
             var solutionDirectory = Path.GetDirectoryName(solutionFileFullPath);
 
             // restore packages for the solution
@@ -393,8 +384,39 @@ namespace NuGet.Commands
             RestorePackagesFromConfigFile(solutionConfigFilePath, packagesFolderFileSystem);
 
             // restore packages for projects
+            var packageReferences = GetPackageReferencesFromSolutionFile(solutionFileFullPath);
+            InstallPackages(packagesFolderFileSystem, packageReferences);
+        }
+
+        private ICollection<PackageReference> GetPackageReferencesFromSolutionFile(string solutionFileFullPath)
+        {
+            ISolutionParser solutionParser;
+            if (EnvironmentUtility.IsMonoRuntime)
+            {
+                solutionParser = new XBuildSolutionParser();
+            }
+            else
+            {
+                solutionParser = new MSBuildSolutionParser();
+            }
+            
             var packageReferences = new HashSet<PackageReference>();
-            foreach (var projectFile in solutionParser.GetAllProjectFileNames(FileSystem, solutionFileFullPath))
+            IEnumerable<string> projectFiles = Enumerable.Empty<string>();
+            try
+            {
+                projectFiles = solutionParser.GetAllProjectFileNames(FileSystem, solutionFileFullPath);
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                if (ex.InnerException is InvalidProjectFileException)
+                {
+                    return GetPackageReferencesInDirectory(Path.GetDirectoryName(solutionFileFullPath));
+                }
+
+                throw;
+            }
+
+            foreach (var projectFile in projectFiles)
             {
                 if (!FileSystem.FileExists(projectFile))
                 {
@@ -411,7 +433,28 @@ namespace NuGet.Commands
                 packageReferences.AddRange(GetPackageReferences(projectConfigFilePath, projectName));
             }
 
-            InstallPackages(packagesFolderFileSystem, packageReferences);
+            return packageReferences;
+        }
+
+        private static ICollection<PackageReference> GetPackageReferencesInDirectory(string directory)
+        {
+            var packageReferences = new HashSet<PackageReference>();
+            var configFiles = Directory.GetFiles(directory, "packages*.config", SearchOption.AllDirectories)
+                .Where(f => Path.GetFileName(f).StartsWith("packages.", StringComparison.OrdinalIgnoreCase));
+            foreach (var configFile in configFiles)
+            {   
+                PackageReferenceFile file = new PackageReferenceFile(configFile);
+                try
+                {
+                    packageReferences.AddRange(CommandLineUtility.GetPackageReferences(file, requireVersion: true));
+                }
+                catch (InvalidOperationException)
+                {
+                    // Skip the file if it is not a valid xml file.
+                }
+            }
+
+            return packageReferences;
         }
 
         private static ICollection<PackageReference> GetPackageReferences(string fullConfigFilePath, string projectName)
