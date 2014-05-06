@@ -263,7 +263,7 @@ namespace NuGet.Dialog.Providers
 
         protected internal virtual void RemoveSearchNode()
         {
-            if (_searchNode != null)
+            if (_searchNode != null && RootNode.Nodes.Contains(_searchNode))
             {
                 // When remove the search node, the dialog will automatically select the first node (All node)
                 // Since we are going to restore the previously selected node anyway, we don't want the first node
