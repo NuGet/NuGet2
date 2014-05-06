@@ -67,7 +67,7 @@
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
 
 	<!-- This is the version number of nupkg files produced -->
-        <NuGetPackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)-beta$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</NuGetPackageVersion>
+        <NuGetPackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)-beta</NuGetPackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
