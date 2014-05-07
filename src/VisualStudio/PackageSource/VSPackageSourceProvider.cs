@@ -80,6 +80,7 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _settings = settings;
             _vsShellInfo = vsShellInfo;
+            _packageSources = new List<PackageSource>();
 
             if (null != _solutionManager)
             {
@@ -170,9 +171,18 @@ namespace NuGet.VisualStudio
 
         private void EnsureInitialized()
         {
-            while (!_initialized)
+            if (_initialized)
             {
-                _initialized = true;
+                return;
+            }
+
+            lock (this)
+            {
+                if (_initialized)
+                {
+                    return;
+                }
+
                 _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
 
                 // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
@@ -191,6 +201,7 @@ namespace NuGet.VisualStudio
                 }
 
                 InitializeActivePackageSource();
+                _initialized = true;
             }
         }
 
