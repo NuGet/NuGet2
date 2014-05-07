@@ -137,21 +137,17 @@ namespace NuGetConsole.Implementation
 
             // pause for a tiny moment to let the tool window open before initializing the host
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(0);
+            timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += (o, e) =>
             {
-                timer.Stop();
-
                 // all exceptions from the timer thread should be caught to avoid crashing VS
                 try
                 {
                     LoadConsoleEditor();
+                    timer.Stop();
                 }
                 catch (Exception x)
                 {
-                    // hide the text "initialize host" when an error occurs.
-                    ConsoleParentPane.NotifyInitializationCompleted();
-
                     ExceptionHelper.WriteToActivityLog(x);
                 }
             };
@@ -521,17 +517,7 @@ namespace NuGetConsole.Implementation
             {
                 if (_wpfConsole == null)
                 {
-                    Debug.Assert(ActiveHostInfo != null);
-
-                    try
-                    {
-                        _wpfConsole = ActiveHostInfo.WpfConsole;
-                    }
-                    catch (Exception x)
-                    {
-                        _wpfConsole = ActiveHostInfo.WpfConsole;
-                        _wpfConsole.Write(x.ToString());
-                    }
+                    _wpfConsole = ActiveHostInfo.WpfConsole;
                 }
 
                 return _wpfConsole;
