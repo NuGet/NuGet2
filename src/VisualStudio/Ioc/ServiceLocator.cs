@@ -1,11 +1,12 @@
-﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using EnvDTE;
+﻿using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace NuGet.VisualStudio
@@ -80,8 +81,23 @@ namespace NuGet.VisualStudio
             return GetServiceProvider(dte);
         }
 
+        /// <summary>
+        /// Internal test hook for adding services
+        /// </summary>
+        internal static IDictionary<Type, object> TestServiceCache { private get; set; }
+
         private static object QueryService(_DTE dte, Type serviceType)
         {
+            // internal test hook for unit tests
+            if (TestServiceCache != null)
+            {
+                object testService = null;
+                if (TestServiceCache.TryGetValue(serviceType, out testService))
+                {
+                    return testService;
+                }
+            }
+
             Guid guidService = serviceType.GUID;
             Guid riid = guidService;
             var serviceProvider = dte as VsServiceProvider;            

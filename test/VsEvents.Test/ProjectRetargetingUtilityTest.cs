@@ -1,18 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Versioning;
-using EnvDTE;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Versioning;
 using Xunit;
 
 namespace NuGet.VsEvents
 {
     public static class ProjectRetargetingUtilityTest
     {
+        internal const string CsharpProjectTypeGuid = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";
+
         [Fact]
         public static void GetPackagesToBeReinstalledWhenProjectKindIsNull()
         {
@@ -54,7 +57,15 @@ namespace NuGet.VsEvents
             MockPackageRepository localRepository = new MockPackageRepository();
 
             // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
-            mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);
+            mockProject.Setup(p => p.Kind).Returns(CsharpProjectTypeGuid);
+
+            var mockServices = new Dictionary<Type, object>();
+            Mock<IVsSolution> mockSolution = new Mock<IVsSolution>();
+            mockServices.Add(typeof(IVsSolution), mockSolution.Object);
+            Mock<IVsHierarchy> mockHier = new Mock<IVsHierarchy>();
+            IVsHierarchy hier = mockHier.Object;
+            mockSolution.Setup(m => m.GetProjectOfUniqueName(It.IsAny<string>(), out hier)).Returns(0);
+            ServiceLocator.TestServiceCache = mockServices;
 
             // Act
             var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(mockProject.Object, localRepository);
@@ -70,7 +81,7 @@ namespace NuGet.VsEvents
             Mock<Project> mockProject = new Mock<Project>();
 
             // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
-            mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);
+            mockProject.Setup(p => p.Kind).Returns(CsharpProjectTypeGuid);
 
             // Act
             var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(mockProject.Object, null);
@@ -407,7 +418,15 @@ namespace NuGet.VsEvents
             mockProject.SetupGet(p => p.FullName).Returns(@"c:\a\b\c.csproj");
 
             // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
-            mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);
+            mockProject.Setup(p => p.Kind).Returns(CsharpProjectTypeGuid);
+
+            var mockServices = new Dictionary<Type, object>();
+            Mock<IVsSolution> mockSolution = new Mock<IVsSolution>();
+            mockServices.Add(typeof(IVsSolution), mockSolution.Object);
+            Mock<IVsHierarchy> mockHier = new Mock<IVsHierarchy>();
+            IVsHierarchy hier = mockHier.Object;
+            mockSolution.Setup(m => m.GetProjectOfUniqueName(It.IsAny<string>(), out hier)).Returns(0);
+            ServiceLocator.TestServiceCache = mockServices;
 
             // Act
             var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(mockProject.Object);

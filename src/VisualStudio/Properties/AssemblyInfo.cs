@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]
 [assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]
+[assembly: InternalsVisibleTo("NuGet.VsEvents.Test")]
 
 // We're not really importing anything from a type library. This is just to make VS happy so we can embed interop types when 
 // referencing this assembly

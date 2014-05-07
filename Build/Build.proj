@@ -114,6 +114,7 @@
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\VsEvents.Test\VsEvents.Test.csproj" Condition="'$(MonoBuild)' == ''" />
     </ItemGroup>
 
     <ItemGroup>
