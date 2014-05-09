@@ -109,7 +109,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
                 Assert.Equal(
                     files,
                     new string[] 
@@ -220,7 +220,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.symbols.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
                 Assert.Equal(
                     files,
                     new string[] 
@@ -329,7 +329,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
                 // proj3 and proj7 are included in the package.
                 Assert.Equal(
@@ -514,7 +514,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
                 Assert.Equal(
                     files,
@@ -580,7 +580,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
                 Assert.Equal(
                     files,
@@ -630,7 +630,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
                 Assert.Equal(
                     files,
@@ -764,7 +764,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
                 Assert.Equal(
                     files,
                     new string[] 
@@ -891,7 +891,7 @@ namespace Proj2
 
                 var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
                 Assert.Equal(
                     files,
                     new string[] 
@@ -958,7 +958,7 @@ namespace Proj2
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(projDirectory, "ExcludeBug.0.1.0.0.nupkg"));
                 var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
                 Assert.Equal(
                     files,
@@ -1170,6 +1170,80 @@ namespace Proj1
                 Assert.Contains("Issue: Specify version of dependencies.", r.Item2);
                 Assert.Contains("Description: The version of dependency 'json' is not specified.", r.Item2);
                 Assert.Contains("Solution: Specifiy the version of dependency and rebuild your package.", r.Item2);
+            }
+            finally
+            {
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
+        // Test that pack command correctly include source files whose names contain ".." in
+        // the middle.
+        [Fact]
+        public void PackCommand_IncludeFilesWithNamesContainingDots()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var workingDirectoryName = Guid.NewGuid().ToString();
+            var workingDirectory = Path.Combine(Path.GetTempPath(), workingDirectoryName);
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(workingDirectory);
+
+                // create test project
+                CreateTestProject(workingDirectory, "proj1", null);
+
+                Util.CreateFile(
+                    Path.Combine(workingDirectory, "proj1"),
+                    "testFile.txt",
+                    "test");
+                var srcPath = Path.Combine(workingDirectory, "..", workingDirectoryName, @"proj1\testFile.txt");
+
+                Util.CreateFile(
+                    Path.Combine(workingDirectory, "proj1"),
+                    "proj1.nuspec",
+                    String.Format(
+@"<package xmlns='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd'>
+  <metadata>
+    <id>proj1</id>
+    <version>1.0.0.0</version>
+    <title>Proj1</title>
+    <authors>test</authors>
+    <owners>test</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Description</description>
+    <copyright>Copyright ©  2013</copyright>
+    <dependencies>
+      <dependency id='p1' version='1.5.11' />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src=""{0}"" target="""" />
+  </files>
+</package>", srcPath));                
+
+                // Act
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    proj1Directory,
+                    "pack proj1.csproj -build",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
+                // Assert
+                var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.1.0.0.0.nupkg"));
+                var files = package.GetFiles().Select(f => f.Path).ToArray();
+                Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+                Assert.Equal(
+                    files,
+                    new string[] 
+                    { 
+                        @"lib\net40\proj1.dll",
+                        @"testFile.txt"
+                    });
             }
             finally
             {

@@ -756,7 +756,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack", "-Exclude", @"content\sl*" };
+            string[] args = new string[] { "pack", "-Exclude", @"content\sl**" };
             Directory.SetCurrentDirectory("pam");
 
             // Act

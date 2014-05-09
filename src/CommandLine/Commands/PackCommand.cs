@@ -229,27 +229,7 @@ namespace NuGet.Commands
                 // The user has not explicitly disabled default filtering.
                 wildCards = wildCards.Concat(_defaultExcludes);
             }
-            PathResolver.FilterPackageFiles(packageFiles, ResolvePath, wildCards);
-        }
-
-        private string ResolvePath(IPackageFile packageFile)
-        {
-            var physicalPackageFile = packageFile as PhysicalPackageFile;
-            // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
-            if (physicalPackageFile == null)
-            {
-                return packageFile.Path;
-            }
-            var path = physicalPackageFile.SourcePath;
-            // Make sure that the basepath has a directory separator
-            int index = path.IndexOf(BasePath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-            if (index != -1)
-            {
-                // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
-                // Also remove any leading path separator slashes
-                path = path.Substring(index + BasePath.Length).TrimStart(Path.DirectorySeparatorChar);
-            }
-            return path;
+            PathResolver.FilterPackageFiles(packageFiles, file => file.Path, wildCards);
         }
 
         private string GetOutputPath(PackageBuilder builder, bool symbols = false)
