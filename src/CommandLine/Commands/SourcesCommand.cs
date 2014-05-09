@@ -31,7 +31,22 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "SourcesCommandFormatDescription")]
         public SourcesListFormat Format { get; set; }
-        
+
+        protected override bool ShouldCreateConfigFile
+        {
+            get
+            {
+                var action = Arguments.FirstOrDefault();
+                if (action.Equals("List", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
         public override void ExecuteCommand()
         {
             if (SourceProvider == null)

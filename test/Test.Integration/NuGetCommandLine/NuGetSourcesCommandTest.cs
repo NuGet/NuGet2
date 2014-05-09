@@ -129,46 +129,55 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         {
             // Arrange
             var configFile = Path.GetTempFileName();
-            Util.CreateFile(Path.GetDirectoryName(configFile), Path.GetFileName(configFile), "<configuration/>");
+            File.Delete(configFile);
+            try
+            {
+                string[] args = new string[] { 
+                    "sources",
+                    "Add",
+                    "-Name",
+                    "test_source",
+                    "-Source",
+                    "http://test_source",
+                    "-UserName",
+                    "test_user_name",
+                    "-Password",
+                    "test_password",
+                    "-ConfigFile",
+                    configFile
+                };
 
-            string[] args = new string[] { 
-                "sources",
-                "Add",
-                "-Name",
-                "test_source",
-                "-Source",
-                "http://test_source",
-                "-UserName",
-                "test_user_name",
-                "-Password",
-                "test_password",
-                "-ConfigFile",
-                configFile
-            };
+                // Act
+                int result = Program.Main(args);
 
-            // Act
-            int result = Program.Main(args);
+                // Assert
+                Assert.Equal(0, result);
 
-            // Assert
-            Assert.Equal(0, result);
+                var settings = Settings.LoadDefaultSettings(
+                    new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
+                    Path.GetFileName(configFile),
+                    null);
+                var source = settings.GetValue("packageSources", "test_source");
+                Assert.Equal("http://test_source", source);
 
-            var settings = Settings.LoadDefaultSettings(
-                new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
-                Path.GetFileName(configFile),
-                null);
-            var source = settings.GetValue("packageSources", "test_source");
-            Assert.Equal("http://test_source", source);
+                var credentials = settings.GetNestedValues(
+                    "packageSourceCredentials", "test_source");
+                Assert.Equal(2, credentials.Count);
 
-            var credentials = settings.GetNestedValues(
-                "packageSourceCredentials", "test_source");
-            Assert.Equal(2, credentials.Count);
+                Assert.Equal("Username", credentials[0].Key);
+                Assert.Equal("test_user_name", credentials[0].Value);
 
-            Assert.Equal("Username", credentials[0].Key);
-            Assert.Equal("test_user_name", credentials[0].Value);
-
-            Assert.Equal("Password", credentials[1].Key);
-            var password = EncryptionUtility.DecryptString(credentials[1].Value);
-            Assert.Equal("test_password", password);
+                Assert.Equal("Password", credentials[1].Key);
+                var password = EncryptionUtility.DecryptString(credentials[1].Value);
+                Assert.Equal("test_password", password);
+            }
+            finally
+            {
+                if (File.Exists(configFile))
+                {
+                    File.Delete(configFile);
+                }
+            }
         }
     }
 }

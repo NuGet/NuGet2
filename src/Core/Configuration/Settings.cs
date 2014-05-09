@@ -89,7 +89,7 @@ namespace NuGet
         /// <param name="configFileName">The user specified configuration file.</param>
         /// <param name="machineWideSettings">The machine wide settings. If it's not null, the
         /// settings files in the machine wide settings are added after the user sepcific 
-        /// config file.</param>
+        /// config file.</param>        
         /// <returns>The settings object loaded.</returns>
         public static ISettings LoadDefaultSettings(
             IFileSystem fileSystem,

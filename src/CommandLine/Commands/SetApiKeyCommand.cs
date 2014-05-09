@@ -11,7 +11,14 @@ namespace NuGet.Commands
     {
         [Option(typeof(NuGetCommand), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-        
+
+        protected override bool ShouldCreateConfigFile
+        {
+            get
+            {
+                return true;
+            }
+        }
         public override void ExecuteCommand()
         {
             if (SourceProvider == null)

@@ -86,10 +86,18 @@ namespace NuGet.Commands
                         machineWideSettings: MachineWideSettings);
                 }
                 else
-                {
+                {                    
                     var directory = Path.GetDirectoryName(Path.GetFullPath(ConfigFile));
                     var configFileName = Path.GetFileName(ConfigFile);
                     var configFileSystem = new PhysicalFileSystem(directory);
+
+                    // Create the config file when neccessary
+                    if (!configFileSystem.FileExists(configFileName) &&
+                        ShouldCreateConfigFile)
+                    {
+                        XmlUtility.CreateDocument("configuration", configFileSystem, configFileName);
+                    }
+
                     Settings = NuGet.Settings.LoadDefaultSettings(
                         configFileSystem,
                         configFileName,
@@ -112,6 +120,17 @@ namespace NuGet.Commands
         }
 
         public abstract void ExecuteCommand();
+
+        /// <summary>
+        /// Indicates if the config file should be created if it does not exist.
+        /// </summary>
+        protected virtual bool ShouldCreateConfigFile
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method does quite a bit of processing.")]
         public virtual CommandAttribute GetCommandAttribute()

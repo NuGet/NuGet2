@@ -64,7 +64,7 @@ namespace NuGet
             return CreateDocument(rootName, fileSystem, path);
         }
 
-        private static XDocument CreateDocument(XName rootName, IFileSystem fileSystem, string path)
+        public static XDocument CreateDocument(XName rootName, IFileSystem fileSystem, string path)
         {
             XDocument document = new XDocument(new XElement(rootName));
             // Add it to the file system
