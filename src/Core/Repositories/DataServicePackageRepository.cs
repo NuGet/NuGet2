@@ -12,6 +12,7 @@ using NuGet.Resources;
 
 namespace NuGet
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]    
     public class DataServicePackageRepository : 
         PackageRepositoryBase, 
         IHttpClientEvents, 
@@ -196,9 +197,9 @@ namespace NuGet
         {
             var package = (DataServicePackage)e.Entity;
 
-            // REVIEW: This is the only way (I know) to download the package on demand
-            // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
-            package.Context = Context;
+            var downloadUri = e.Data.Element(e.Data.Name.Namespace.GetName("content"))
+                .Attribute(System.Xml.Linq.XName.Get("src")).Value;
+            package.DownloadUrl = new Uri(downloadUri);
             package.Downloader = _packageDownloader;
         }
 

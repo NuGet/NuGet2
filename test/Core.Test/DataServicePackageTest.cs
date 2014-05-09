@@ -137,9 +137,6 @@ namespace NuGet.Test
                              .Callback(() => mockRepository.AddPackage(zipPackage))
                              .Verifiable();
 
-            var context = new Mock<IDataServiceContext>();
-            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
-
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
             hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => new byte[] { 1, 2, 3, 4 });
 
@@ -150,14 +147,13 @@ namespace NuGet.Test
                 PackageHash = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }),
                 Downloader = packageDownloader.Object,
                 HashProvider = hashProvider.Object,
-                Context = context.Object,
+                DownloadUrl = uri
             };
 
             // Act
             servicePackage.EnsurePackage(mockRepository);
 
             // Assert
-            context.Verify();
             packageDownloader.Verify();
             Assert.True(mockRepository.Exists(zipPackage));
         }
@@ -179,9 +175,6 @@ namespace NuGet.Test
             byte[] hash1 = new byte[] { 1, 2, 3, 4 };
             hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => hash1);
 
-            var context = new Mock<IDataServiceContext>();
-            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
-
             var servicePackage = new DataServicePackage
             {
                 Id = "A",
@@ -189,14 +182,13 @@ namespace NuGet.Test
                 PackageHash = Convert.ToBase64String(hash1),
                 Downloader = packageDownloader.Object,
                 HashProvider = hashProvider.Object,
-                Context = context.Object
+                DownloadUrl = uri
             };
 
             // Act
             servicePackage.EnsurePackage(mockRepository.Object);
 
             // Assert
-            context.Verify();
             packageDownloader.Verify();
 
             var foundPackage = servicePackage._package;
@@ -218,9 +210,6 @@ namespace NuGet.Test
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
             hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => new byte[] { 1, 2, 3, 4 });
             
-            var context = new Mock<IDataServiceContext>();
-            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
-
             var servicePackage = new DataServicePackage
             {
                 Id = "A",
@@ -228,7 +217,7 @@ namespace NuGet.Test
                 PackageHash = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }),
                 Downloader = packageDownloader.Object,
                 HashProvider = hashProvider.Object,
-                Context = context.Object
+                DownloadUrl = uri
             };
 
             // Act
@@ -238,7 +227,6 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(zipPackage, servicePackage._package);
-            context.Verify(s => s.GetReadStreamUri(It.IsAny<object>()), Times.Once());
             packageDownloader.Verify(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()), Times.Once());
             Assert.True(mockRepository.Exists(zipPackage));
         }
@@ -331,9 +319,6 @@ namespace NuGet.Test
                                 })
                              .Verifiable();
 
-            var context = new Mock<IDataServiceContext>();
-            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
-
             var servicePackage = new DataServicePackage
             {
                 Id = "A",
@@ -342,7 +327,7 @@ namespace NuGet.Test
                 PackageHashAlgorithm = "SHA512",
                 HashProvider = hashProvider.Object,
                 Downloader = packageDownloader.Object,
-                Context = context.Object
+                DownloadUrl = uri
             };
 
             mockRepository.Setup(s => s.InvokeOnPackage("A", new SemanticVersion("1.2"), It.IsAny<Action<Stream>>()))
@@ -360,15 +345,13 @@ namespace NuGet.Test
 
             // Assert 1
             Assert.Equal(zipPackage1, servicePackage._package);
-            context.Verify(c => c.GetReadStreamUri(It.IsAny<object>()), Times.Never());
-
+            
             // Act 2
             servicePackage.PackageHash = hash2;
             servicePackage.EnsurePackage(mockRepository.Object);
 
             // Assert 2
             Assert.Equal(zipPackage2, servicePackage._package);
-            context.Verify();
             packageDownloader.Verify();
         }
 
@@ -408,9 +391,6 @@ namespace NuGet.Test
                                 })
                              .Verifiable();
 
-            var context = new Mock<IDataServiceContext>();
-            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
-
             var servicePackage = new DataServicePackage
             {
                 Id = "A",
@@ -419,7 +399,7 @@ namespace NuGet.Test
                 PackageHashAlgorithm = "SHA512",
                 HashProvider = hashProvider.Object,
                 Downloader = packageDownloader.Object,
-                Context = context.Object
+                DownloadUrl = uri
             };
 
             mockRepository.Setup(s => s.InvokeOnPackage("A", new SemanticVersion("1.2"), It.IsAny<Action<Stream>>()))

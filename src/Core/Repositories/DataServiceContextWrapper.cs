@@ -26,7 +26,7 @@ namespace NuGet
             }
             _context = new DataServiceContext(serviceRoot)
                        {
-                           MergeOption = MergeOption.OverwriteChanges
+                           MergeOption = MergeOption.NoTracking
                        };
             _metadataUri = _context.GetMetadataUri();
         }
@@ -112,12 +112,6 @@ namespace NuGet
             return _context.ExecuteBatch(request)
                            .Cast<QueryOperationResponse>()
                            .SelectMany(o => o.Cast<T>());
-        }
-
-
-        public Uri GetReadStreamUri(object entity)
-        {
-            return _context.GetReadStreamUri(entity);
         }
 
         public bool SupportsServiceMethod(string methodName)

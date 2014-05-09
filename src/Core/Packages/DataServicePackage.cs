@@ -101,10 +101,8 @@ namespace NuGet
 
         public Uri DownloadUrl
         {
-            get
-            {
-                return Context.GetReadStreamUri(this);
-            }
+            get;
+            set;
         }
 
         public bool Listed
@@ -224,12 +222,6 @@ namespace NuGet
                 EnsurePackage(MachineCache.Default);
                 return _package;
             }
-        }
-
-        internal IDataServiceContext Context
-        {
-            get;
-            set;
         }
 
         internal PackageDownloader Downloader { get; set; }
