@@ -2415,10 +2415,10 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters -IncludePrerelease -ProjectName $p.Name
+    Install-Package A -IncludePrerelease -ProjectName $p.Name -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p XamlConverters 0.6-beta
+    Assert-Package $p A 0.6-beta
 }
 
 function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
