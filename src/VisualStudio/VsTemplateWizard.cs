@@ -126,8 +126,7 @@ namespace NuGet.VisualStudio
                    select new PreinstalledPackageInfo(
                        declaration.id,
                        declaration.version,
-                       (declaration.skipAssemblyReferences != null && 
-                       Boolean.Parse(declaration.skipAssemblyReferences) == false) ? false : true,
+                       skipAssemblyReferences: declaration.skipAssemblyReferences != null && Boolean.Parse(declaration.skipAssemblyReferences),
 
                        // Note that the declaration uses "includeDependencies" but we need to invert it to become ignoreDependencies
                        // The declaration uses includeDependencies so that the default value can be 'false'
