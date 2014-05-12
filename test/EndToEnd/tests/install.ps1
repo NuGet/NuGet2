@@ -2403,10 +2403,10 @@ function Test-InstallLatestVersionWorksCorrectly
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters -ProjectName $p.Name
+    Install-Package A -ProjectName $p.Name -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p XamlConverters 0.5
+    Assert-Package $p A 0.5
 }
 
 function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
