@@ -984,7 +984,7 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
     }
-    elseif ($dte.Version -eq "12.0")
+    elseif ($dte.Version -eq "12.0" -or $dte.Version -eq "14.0")
     {
         $profile = "WindowsPhone,Version=v8.0"
     }
@@ -2220,7 +2220,7 @@ function Test-InstallMetadataPackageAddPackageToProject
 function Test-FrameworkAssemblyReferenceShouldNotHaveBindingRedirect
 {
     # This test uses a particular profile which is available only in VS 2012.
-    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
+    if ($dte.Version -ne "13.0")
     {
         return
     }
@@ -2467,7 +2467,7 @@ function Test-InstallPackageIntoLightSwitchApplication
     param($context)
 
     # this test is only applicable to VS 2013 because it has the latest LightSwitch template
-    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    if ($dte.Version -ne "12.0")
     {
         return
     }

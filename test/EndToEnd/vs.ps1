@@ -257,6 +257,10 @@ function New-JavaScriptApplication
         {
             $SolutionFolder | New-Project WinJSBlue $ProjectName
         }
+        elseif ($dte.Version -eq '14.0')
+        {
+            $SolutionFolder | New-Project WinJS_Dev14 $ProjectName
+        }
         else 
         {
             $SolutionFolder | New-Project WinJS $ProjectName
@@ -317,6 +321,10 @@ function New-NativeWinStoreApplication
         if ($dte.Version -eq '12.0')
         {
             $SolutionFolder | New-Project CppWinStoreApplicationBlue $ProjectName
+        }
+        elseif ($dte.Version -eq '14.0')
+        {
+            $SolutionFolder | New-Project CppWinStoreApplication_Dev14 $ProjectName
         }
         else 
         {
