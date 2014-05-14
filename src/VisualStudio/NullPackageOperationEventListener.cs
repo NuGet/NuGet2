@@ -10,15 +10,15 @@ namespace NuGet.VisualStudio
         {
         }
 
-        public void OnBeforeAddPackageReference(EnvDTE.Project project)
+        public void OnBeforeAddPackageReference(IProjectManager projectManager)
         {
         }
 
-        public void OnAfterAddPackageReference(EnvDTE.Project project)
+        public void OnAfterAddPackageReference(IProjectManager projectManager)
         {
         }
 
-        public void OnAddPackageReferenceError(EnvDTE.Project project, Exception exception)
+        public void OnAddPackageReferenceError(IProjectManager projectManager, Exception exception)
         {
         }
 

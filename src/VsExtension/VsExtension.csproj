@@ -198,6 +198,10 @@
       <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
       <Name>VisualStudio12</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VisualStudioResources\VisualStudioResources.csproj">
+      <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+      <Name>VisualStudioResources</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
       <Name>Console.Types</Name>

@@ -17,8 +17,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
 
             // Act
@@ -35,8 +35,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
             IPackage package = PackageUtility.CreatePackage("A");
             sharedRepository.Object.AddPackage(package);
@@ -56,8 +56,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
             var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             var package = PackageUtility.CreatePackage("A");
@@ -80,8 +80,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
             var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             //var package = PackageUtility.CreatePackage("A");
@@ -104,8 +104,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
             var referenceRepository = new PackageReferenceRepository(fileSystem, projectName: null, sourceRepository: sharedRepository.Object);
             //var package = PackageUtility.CreatePackage("A");
@@ -229,8 +229,8 @@ namespace NuGet.Test
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
-            sharedRepository.Setup(m => m.UnregisterRepository(It.IsAny<string>()))
-                            .Callback<string>(p => path = p);
+            sharedRepository.Setup(m => m.UnregisterRepository(It.IsAny<PackageReferenceFile>()))
+                            .Callback<PackageReferenceFile>(p => path = p.FullPath);
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>

@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void AddReference(string referencePath, System.IO.Stream stream)
+        public override void AddReference(string referencePath)
         {
             // References aren't allowed for WiX projects
         }

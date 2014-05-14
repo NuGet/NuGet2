@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using EnvDTE;
+using NuGet.Resolver;
 using NuGetConsole;
 
 namespace NuGet.VisualStudio
@@ -150,14 +151,34 @@ namespace NuGet.VisualStudio
                     packageManager.PackageInstalled += installedHandler;
                     // if skipping assembly references, disable binding redirects too.
                     packageManager.BindingRedirectEnabled = !skipAssemblyReferences;
-                    packageManager.InstallPackage(
-                        projectManager,
+
+                    // locate the package to install
+                    IPackage package = PackageRepositoryHelper.ResolvePackage(
+                        packageManager.SourceRepository,
+                        packageManager.LocalRepository,
                         packageId,
                         version,
-                        ignoreDependencies,
-                        allowPrereleaseVersions: true,
-                        skipAssemblyReferences: skipAssemblyReferences,
-                        logger: NullLogger.Instance);
+                        allowPrereleaseVersions: true);
+
+                    if (skipAssemblyReferences)
+                    {
+                        package = new SkipAssemblyReferencesPackage(package);
+                    }
+
+                    // resolve actions
+                    var resolver = new ActionResolver()
+                    {
+                        Logger = NullLogger.Instance,
+                        DependencyVersion = packageManager.DependencyVersion,
+                        IgnoreDependencies = ignoreDependencies,
+                        AllowPrereleaseVersions = true
+                    };
+                    resolver.AddOperation(PackageAction.Install, package, projectManager);
+                    var actions = resolver.ResolveActions();
+
+                    // execute actions
+                    var actionExecutor = new ActionExecutor();
+                    actionExecutor.Execute(actions);
                 }
                 finally
                 {

@@ -33,6 +33,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\xunit.extensions.1.9.2\lib\net20\xunit.extensions.dll</HintPath>
     </Reference>
+    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mocks\EventMemoryStream.cs" />
@@ -52,6 +58,10 @@
     <ProjectReference Include="..\..\src\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\VisualStudio\VisualStudio.csproj">
+      <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>
+      <Name>VisualStudio</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

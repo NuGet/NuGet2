@@ -20,7 +20,7 @@ namespace NuGet
         
         private ILogger _logger;
         private IPackageConstraintProvider _constraintProvider;
-        private readonly IPackageReferenceRepository _packageReferenceRepository;
+        private readonly IPackageReferenceRepository _packageReferenceRepository;        
 
         private readonly IDictionary<FileTransformExtensions, IPackageFileTransformer> _fileTransformers = 
             new Dictionary<FileTransformExtensions, IPackageFileTransformer>() 
@@ -30,12 +30,10 @@ namespace NuGet
             { new FileTransformExtensions(".install.xdt", ".uninstall.xdt"), new XdtTransformer() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
+        public ProjectManager(IPackageManager packageManager, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
         {
-            if (sourceRepository == null)
-            {
-                throw new ArgumentNullException("sourceRepository");
-            }
+            // !!! TODO: we should get rid of the parameter pathResolver. Use packageManager's path resolver
+            // instead.
             if (pathResolver == null)
             {
                 throw new ArgumentNullException("pathResolver");
@@ -49,12 +47,17 @@ namespace NuGet
                 throw new ArgumentNullException("localRepository");
             }
 
-            SourceRepository = sourceRepository;
+            PackageManager = packageManager;
             Project = project;
             PathResolver = pathResolver;
             LocalRepository = localRepository;
             _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
-            DependencyVersion = DependencyVersion.Lowest;
+        }
+
+        public IPackageManager PackageManager
+        {
+            get;
+            private set;
         }
 
         public IPackagePathResolver PathResolver
@@ -64,12 +67,6 @@ namespace NuGet
         }
 
         public IPackageRepository LocalRepository
-        {
-            get;
-            private set;
-        }
-
-        public IPackageRepository SourceRepository
         {
             get;
             private set;
@@ -104,82 +101,8 @@ namespace NuGet
                 _logger = value;
             }
         }
-
-        public DependencyVersion DependencyVersion
-        {
-            get;
-            set;
-        }
-
-        public bool WhatIf
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
-        /// </summary>
-        public virtual void AddPackageReference(string packageId)
-        {
-            AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
-        }
-        
-        public virtual void AddPackageReference(string packageId, SemanticVersion version)
-        {
-            AddPackageReference(packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
-        }
-
-        public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
-        {
-            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
-            AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
-        }
-
-        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
-        {
-            // In case of a scenario like UpdateAll, the graph has already been walked once for all the packages as a bulk operation
-            // But, we walk here again, just for a single package, since, we need to use UpdateWalker for project installs
-            // unlike simple package installs for which InstallWalker is used
-            // Also, it is noteworthy that the DependentsWalker has the same TargetFramework as the package in PackageReferenceRepository
-            // unlike the UpdateWalker whose TargetFramework is the same as that of the Project
-            // This makes it harder to perform a bulk operation for AddPackageReference and we have to go package by package
-            var dependentsWalker = new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id))
-            {
-                DependencyVersion = DependencyVersion
-            };
-            Execute(package, new UpdateWalker(LocalRepository,
-                                              SourceRepository,
-                                              dependentsWalker,
-                                              ConstraintProvider,
-                                              Project.TargetFramework,
-                                              NullLogger.Instance,
-                                              !ignoreDependencies,
-                                              allowPrereleaseVersions)
-                                              {
-                                                  DisableWalkInfo = WhatIf,
-                                                  AcceptedTargets = PackageTargets.Project,
-                                                  DependencyVersion = DependencyVersion
-                                              });
-        }
-
-        private void Execute(IPackage package, IPackageOperationResolver resolver)
-        {
-            IEnumerable<PackageOperation> operations = resolver.ResolveOperations(package);
-            if (operations.Any())
-            {
-                foreach (PackageOperation operation in operations)
-                {
-                    Execute(operation);
-                }
-            }
-            else if (LocalRepository.Exists(package))
-            {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package.GetFullName());
-            }
-        }
-
-        protected void Execute(PackageOperation operation)
+       
+        public virtual void Execute(PackageOperation operation)
         {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
@@ -192,42 +115,14 @@ namespace NuGet
                 }
                 else
                 {
-                    if (WhatIf)
-                    {
-                        Logger.Log(
-                            MessageLevel.Info, 
-                            NuGetResources.Log_InstallPackageIntoProject, 
-                            operation.Package, 
-                            Project.ProjectName);
-
-                        PackageOperationEventArgs args = CreateOperation(operation.Package);
-                        OnPackageReferenceAdding(args);
-                    }
-                    else
-                    {
-                        AddPackageReferenceToProject(operation.Package);
-                    }
+                    AddPackageReferenceToProject(operation.Package);
                 }
             }
             else
             {
                 if (packageExists)
                 {
-                    if (WhatIf)
-                    {
-                        Logger.Log(
-                            MessageLevel.Info, 
-                            NuGetResources.Log_UninstallPackageFromProject, 
-                            operation.Package, 
-                            Project.ProjectName);
-
-                        PackageOperationEventArgs args = CreateOperation(operation.Package);
-                        OnPackageReferenceRemoved(args);
-                    }
-                    else
-                    {
-                        RemovePackageReferenceFromProject(operation.Package);
-                    }
+                    RemovePackageReferenceFromProject(operation.Package);
                 }
             }
         }
@@ -306,9 +201,7 @@ namespace NuGet
                         Project.RemoveReference(assemblyReference.Name);
                     }
 
-                    // The current implementation of all ProjectSystem does not use the Stream parameter at all.
-                    // We can't change the API now, so just pass in a null stream.
-                    Project.AddReference(relativeReferencePath, Stream.Null);
+                    Project.AddReference(relativeReferencePath);
                 }
 
                 // Add GAC/Framework references
@@ -386,51 +279,6 @@ namespace NuGet
                     assemblyReferences.RemoveAll(assembly => !packageReferences.References.Contains(assembly.Name, StringComparer.OrdinalIgnoreCase));
                 }
             }
-        }
-
-        public bool IsInstalled(IPackage package)
-        {
-            return LocalRepository.Exists(package);
-        }
-
-        public void RemovePackageReference(string packageId)
-        {
-            RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
-        }
-
-        public void RemovePackageReference(string packageId, bool forceRemove)
-        {
-            RemovePackageReference(packageId, forceRemove: forceRemove, removeDependencies: false);
-        }
-
-        public virtual void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies)
-        {
-            if (String.IsNullOrEmpty(packageId))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
-
-            IPackage package = LocalRepository.FindPackage(packageId);
-
-            if (package == null)
-            {
-                throw new InvalidOperationException(String.Format(
-                    CultureInfo.CurrentCulture,
-                    NuGetResources.UnknownPackage, packageId));
-            }
-
-            RemovePackageReference(package, forceRemove, removeDependencies);
-        }
-
-        public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies)
-        {
-            FrameworkName targetFramework = GetPackageTargetFramework(package.Id);
-            Execute(package, new UninstallWalker(LocalRepository,
-                                                 new DependentsWalker(LocalRepository, targetFramework),
-                                                 targetFramework,
-                                                 NullLogger.Instance,
-                                                 removeDependencies,
-                                                 forceRemove));
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
@@ -521,103 +369,6 @@ namespace NuGet
             return assemblyReferences;
         }
 
-        /// <summary>
-        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
-        /// </summary>
-        internal void UpdatePackageReference(string packageId)
-        {
-            UpdatePackageReference(packageId, version: null, updateDependencies: true, allowPrereleaseVersions: false);
-        }
-
-        /// <summary>
-        /// Seems to be used by unit tests only. Perhaps, consumers of NuGet.Core may be using this overload
-        /// </summary>
-        internal void UpdatePackageReference(string packageId, SemanticVersion version)
-        {
-            UpdatePackageReference(packageId, version: version, updateDependencies: true, allowPrereleaseVersions: false);
-        }
-
-        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            UpdatePackageReference(
-                packageId, 
-                () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions, allowUnlisted: false),
-                updateDependencies, 
-                allowPrereleaseVersions, 
-                targetVersionSetExplicitly: versionSpec != null);
-        }
-
-        /// <summary>
-        /// If the remote package is already determined, consider using the overload which directly takes in the remote package
-        /// Can avoid calls FindPackage calls to source repository. However, it should also be remembered that SourceRepository of ProjectManager
-        /// is an aggregate of "SharedPackageRepository" and the selected repository. So, if the package is present on the repository path (by default, the packages folder)
-        /// It would not result in a call to the server
-        /// </summary>
-        public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
-        {            
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions, allowUnlisted: false), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
-        }
-
-        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions, bool targetVersionSetExplicitly)
-        {
-            if (String.IsNullOrEmpty(packageId))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
-
-            IPackage oldPackage = LocalRepository.FindPackage(packageId);
-
-            // Check to see if this package is installed
-            if (oldPackage == null)
-            {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
-            }
-
-            Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
-
-            IPackage package = resolvePackage();
-
-            // the condition (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version)
-            // is to fix bug 1574. We want to do nothing if, let's say, you have package 2.0alpha installed, and you do:
-            //      update-package
-            // without specifying a version explicitly, and the feed only has version 1.0 as the latest stable version.
-            if (package != null &&
-                oldPackage.Version != package.Version &&
-                (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version))
-            {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
-                UpdatePackageReferenceCore(package, updateDependencies, allowPrereleaseVersions);
-            }
-            else
-            {
-                IVersionSpec constraint = ConstraintProvider.GetConstraint(packageId);
-                if (constraint != null)
-                {
-                    Logger.Log(MessageLevel.Info, NuGetResources.Log_ApplyingConstraints, packageId, VersionUtility.PrettyPrint(constraint), ConstraintProvider.Source);
-                }
-
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailableForProject, packageId, Project.ProjectName);
-            }
-        }
-
-        public virtual void UpdatePackageReference(IPackage remotePackage, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackagesWithoutOldVersion, remotePackage.Id, remotePackage.Version, Project.ProjectName);
-            UpdatePackageReferenceCore(remotePackage, updateDependencies, allowPrereleaseVersions);
-        }
-
-        protected void UpdatePackageReference(IPackage package)
-        {
-            UpdatePackageReferenceCore(package, updateDependencies: true, allowPrereleaseVersions: false);
-        }
-
-        private void UpdatePackageReferenceCore(IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            AddPackageReference(package, !updateDependencies, allowPrereleaseVersions);
-        }
-
         private void OnPackageReferenceAdding(PackageOperationEventArgs e)
         {
             if (PackageReferenceAdding != null)
@@ -650,23 +401,13 @@ namespace NuGet
             }
         }
 
-        private FrameworkName GetPackageTargetFramework(string packageId)
-        {
-            if (_packageReferenceRepository != null)
-            {
-                return _packageReferenceRepository.GetPackageTargetFramework(packageId) ?? Project.TargetFramework;
-            }
-
-            return Project.TargetFramework;
-        }
-
         /// <summary>
         /// This method uses the 'targetFramework' attribute in the packages.config to determine compatible items.
         /// Hence, it's only good for uninstall operations.
         /// </summary>
         private IEnumerable<T> GetCompatibleInstalledItemsForPackage<T>(string packageId, IEnumerable<T> items) where T : IFrameworkTargetable
         {
-            FrameworkName packageFramework = GetPackageTargetFramework(packageId);
+            FrameworkName packageFramework = ProjectManagerExtensions.GetTargetFrameworkForPackage(this, packageId);
             if (packageFramework == null)
             {
                 return items;
@@ -680,7 +421,7 @@ namespace NuGet
             return Enumerable.Empty<T>();
         }
        
-        private PackageOperationEventArgs CreateOperation(IPackage package)
+        public PackageOperationEventArgs CreateOperation(IPackage package)
         {
             return new PackageOperationEventArgs(package, Project, PathResolver.GetInstallPath(package));
         }

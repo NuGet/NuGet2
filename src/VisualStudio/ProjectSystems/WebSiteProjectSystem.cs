@@ -37,7 +37,7 @@ namespace NuGet.VisualStudio
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public override void AddReference(string referencePath, Stream stream)
+        public override void AddReference(string referencePath)
         {
             string name = Path.GetFileNameWithoutExtension(referencePath);
             try

@@ -42,7 +42,7 @@ namespace NuGet.Test
         {
             // Arrange
             var repository = new MockPackageRepository();
-            var package = PackageUtility.CreatePackage(".fr-fr", language: "fr-fr");
+            var package = PackageUtility.CreatePackage(".fr-fr", language: "fr-fr", createRealStream: false);
 
             // Act
             IPackage runtimePackage;

@@ -10,11 +10,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-
 using EnvDTE;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Resolver;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
@@ -222,7 +222,31 @@ namespace NuGet.VisualStudio
                 {
                     if (!localRepository.Exists(reference.Id, reference.Version))
                     {
-                        packageManager.InstallPackage(reference.Id, reference.Version, ignoreDependencies: true, allowPrereleaseVersions: true);
+                        // Resolve the package to install
+                        IPackage package = PackageRepositoryHelper.ResolvePackage(
+                            packageManager.SourceRepository,
+                            packageManager.LocalRepository,
+                            reference.Id,
+                            reference.Version,
+                            allowPrereleaseVersions: true);
+
+                        // Resolve actions
+                        var resolver = new ActionResolver()
+                        {
+                            Logger = packageManager.Logger,
+                            DependencyVersion = packageManager.DependencyVersion,
+                            IgnoreDependencies = true,
+                            AllowPrereleaseVersions = true
+                        };
+                        resolver.AddOperation(PackageAction.Install, package, new NullProjectManager(packageManager));
+                        var actions = resolver.ResolveActions();
+
+                        // Execute actions
+                        var actionExecutor = new ActionExecutor()
+                        {
+                            Logger = packageManager.Logger
+                        };
+                        actionExecutor.Execute(actions);
                     }
                 }
             });

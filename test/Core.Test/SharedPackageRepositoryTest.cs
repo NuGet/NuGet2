@@ -406,7 +406,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", tools: new[] { "Install.ps1" });
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", content: Enumerable.Empty<string>(), tools: new[] { "Install.ps1" });
 
             // Act
             repository.AddPackage(solutionPackage);
@@ -424,8 +424,8 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-            var solutionPackage1 = PackageUtility.CreatePackage("SolutionLevel1", tools: new[] { "Install.ps1" });
-            var solutionPackage2 = PackageUtility.CreatePackage("SolutionLevel2", tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("SolutionLevel1")});            
+            var solutionPackage1 = PackageUtility.CreatePackage("SolutionLevel1", content: Enumerable.Empty<string>(), tools: new[] { "Install.ps1" });
+            var solutionPackage2 = PackageUtility.CreatePackage("SolutionLevel2", content: Enumerable.Empty<string>(), tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("SolutionLevel1")});            
             // Act
             repository.AddPackage(solutionPackage1);
             repository.AddPackage(solutionPackage2);
@@ -578,7 +578,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
-            repository.RegisterRepository(@"x:\foo\packages\packages.config");
+            repository.RegisterRepository(new PackageReferenceFile(new MockFileSystem(), @"x:\foo\packages\packages.config"));
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -599,9 +599,10 @@ namespace NuGet.Test
 </repositories>");
             fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
+            var packageReferenceFile = new PackageReferenceFile(new MockFileSystem(), @"x:\foo\A\packages.config");
 
             // Act
-            repository.RegisterRepository(@"x:\foo\A\packages.config");
+            repository.RegisterRepository(packageReferenceFile);
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -654,9 +655,12 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
-            repository.RegisterRepository(@"x:\foo\z\packages\packages.config");
-            repository.RegisterRepository(@"x:\foo\X\packages\packages.config");
-            repository.RegisterRepository(@"x:\foo\a\packages\packages.config");
+            repository.RegisterRepository(
+                new PackageReferenceFile(new MockFileSystem(), @"x:\foo\z\packages\packages.config"));
+            repository.RegisterRepository(
+                new PackageReferenceFile(new MockFileSystem(), @"x:\foo\X\packages\packages.config"));
+            repository.RegisterRepository(
+                new PackageReferenceFile(new MockFileSystem(), @"x:\foo\a\packages\packages.config"));
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -741,7 +745,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
 
             // Act
-            repository.RegisterRepository("x:\\project1\\path");
+            repository.RegisterRepository(new PackageReferenceFile(new MockFileSystem(), "x:\\project1\\path"));
 
             // Assert
             Assert.True(storeFileSystem.FileExists("repositories.config"));
@@ -770,7 +774,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
 
             // Act
-            repository.UnregisterRepository("x:\\project1\\path");
+            repository.UnregisterRepository(new PackageReferenceFile(new MockFileSystem(), "x:\\project1\\path"));
 
             // Assert
             Assert.True(storeFileSystem.FileExists("repositories.config"));
@@ -798,7 +802,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
 
             // Act
-            repository.UnregisterRepository("x:\\project1\\path");
+            repository.UnregisterRepository(new PackageReferenceFile(new MockFileSystem(), "x:\\project1\\path"));
 
             // Assert
             Assert.False(storeFileSystem.FileExists("repositories.config"));

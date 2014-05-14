@@ -19,7 +19,7 @@ namespace NuGet
                 targetFramework = packageReferenceRepository.GetPackageTargetFramework(packageId);
             }
 
-            if (targetFramework == null)
+            if (targetFramework == null && projectManager.Project != null)
             {
                 targetFramework = projectManager.Project.TargetFramework;
             }

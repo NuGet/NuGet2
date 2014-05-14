@@ -5,21 +5,21 @@ namespace NuGet
     public interface IPackageManager
     {
         /// <summary>
-        /// File system used to perform local operations in.
+        /// File system that represents the packages folder.
         /// </summary>
         IFileSystem FileSystem { get; set; }
 
         /// <summary>
         /// Local repository to install and reference packages.
         /// </summary>
-        IPackageRepository LocalRepository { get; }
+        ISharedPackageRepository LocalRepository { get; }
 
         ILogger Logger { get; set; }
 
+        // !!! This property should be deleted. It's applicable to OperationResolver, 
+        // not to this interface.
         DependencyVersion DependencyVersion { get; set; }
 
-        bool WhatIf { get; set; }
-        
         /// <summary>
         /// Remote repository to install packages from.
         /// </summary>
@@ -35,13 +35,16 @@ namespace NuGet
         event EventHandler<PackageOperationEventArgs> PackageUninstalled;
         event EventHandler<PackageOperationEventArgs> PackageUninstalling;
 
-        void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions);
-        void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions, bool ignoreWalkInfo);
-        void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions);
-        void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions);
-        void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions);
-        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions);
-        void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies);
-        void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies);
+        void Execute(PackageOperation operation);
+
+        bool IsProjectLevel(IPackage package);
+        bool BindingRedirectEnabled { get; set; }        
+        void AddBindingRedirects(IProjectManager projectManager);
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#")]
+        IPackage LocatePackageToUninstall(
+            IProjectManager projectManager, 
+            string id, 
+            SemanticVersion version);
     }
 }

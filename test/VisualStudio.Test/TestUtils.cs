@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Castle.DynamicProxy.Generators;
@@ -13,14 +14,16 @@ namespace NuGet.VisualStudio.Test
         private static readonly Func<bool> actionWrapper = () => { AttributesToAvoidReplicating.Add<TypeIdentifierAttribute>(); return true; };
         private static readonly Lazy<bool> lazyAction = new Lazy<bool>(actionWrapper);
 
-        public static Project GetProject(string name,
+        // projectDirectory is the directory of the project. E.g. "C:\solution\proj1".
+        // In this case, the project name is set to "proj1".
+        public static Project GetProject(string projectDirectory,
                                          string kind = VsConstants.CsharpProjectTypeGuid,
                                          IEnumerable<string> projectFiles = null,
                                          Func<string, Property> propertyGetter = null)
         {
             EnsureTypeIdentifierAttribute();
 
-
+            var name = Path.GetFileName(projectDirectory);
             Mock<Project> project = new Mock<Project>();
             Mock<DTE> dte = new Mock<DTE>();
             project.SetupGet(p => p.Name).Returns(name);
@@ -37,7 +40,7 @@ namespace NuGet.VisualStudio.Test
             }
 
             Mock<Property> fullName = new Mock<Property>();
-            fullName.Setup(c => c.Value).Returns(name);
+            fullName.Setup(c => c.Value).Returns(projectDirectory);
             properties.Setup(p => p.Item("FullPath")).Returns(fullName.Object);
             project.SetupGet(p => p.Properties).Returns(properties.Object);
             if (projectFiles != null)
@@ -61,9 +64,15 @@ namespace NuGet.VisualStudio.Test
 
         public static ISolutionManager GetSolutionManagerWithProjects(params string[] projects)
         {
-            return GetSolutionManager(isSolutionOpen: true, defaultProjectName: null, projects: projects.Select(p => GetProject(p)));
+            var dteProjects = projects.Select(p => GetProject(p));
+            var defaultProjectName = dteProjects.First().Name;
+            return GetSolutionManager(
+                isSolutionOpen: true, 
+                defaultProjectName: defaultProjectName, 
+                projects: dteProjects);
         }
 
+        // !!! This should be deleted
         public static ISolutionManager GetSolutionManager(bool isSolutionOpen = true, string defaultProjectName = null, IEnumerable<Project> projects = null)
         {
             var solutionManager = new Mock<ISolutionManager>();

@@ -154,6 +154,10 @@
           <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
           <Name>VisualStudio</Name>
         </ProjectReference>
+        <ProjectReference Include="..\VisualStudioResources\VisualStudioResources.csproj">
+          <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+          <Name>VisualStudioResources</Name>
+        </ProjectReference>
         <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
           <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
           <Name>Console.Types</Name>

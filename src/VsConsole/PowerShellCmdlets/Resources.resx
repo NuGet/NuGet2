@@ -216,4 +216,7 @@
   <data name="Cmdlet_WhatIfReinstallUnsupported" xml:space="preserve">
     <value>Specifying both -Reinstall and -WhatIf is not supported for now.</value>
   </data>
+  <data name="Log_OperationWhatIf" xml:space="preserve">
+    <value>What if: {0}</value>
+  </data>
 </root>

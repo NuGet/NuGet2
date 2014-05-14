@@ -1,12 +1,20 @@
 using System;
+using System.Globalization;
 namespace NuGet
 {
+    public enum PackageOperationTarget
+    {
+        PackagesFolder,
+        Project
+    }
+
     public class PackageOperation
     {
         public PackageOperation(IPackage package, PackageAction action)
         {
             Package = package;
             Action = action;
+            Target = PackageOperationTarget.Project;
         }
 
         public IPackage Package
@@ -21,9 +29,20 @@ namespace NuGet
             private set;
         }
 
+        public PackageOperationTarget Target
+        {
+            get;
+            set;
+        }
+
         public override string ToString()
         {
-            return (Action == PackageAction.Install ? "+ " : "- ") + Package.Id + " " + Package.Version;
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} {1} {2}",
+                Action == PackageAction.Install ? "+" : "-",
+                Package.Id,
+                Package.Version);
         }
 
         public override bool Equals(object obj)
