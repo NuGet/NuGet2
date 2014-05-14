@@ -50,6 +50,32 @@ namespace NuGet
             LocalRepository = localRepository;
             DependencyVersion = DependencyVersion.Lowest;
             CheckDowngrade = true;
+
+            CreateGlobalInstallRepositoryIfConfigured();
+        }
+
+        private void CreateGlobalInstallRepositoryIfConfigured()
+        {
+            string global = Environment.ExpandEnvironmentVariables("%NuGetGlobalInstallFolder%");
+
+            if (System.IO.Directory.Exists(global))
+            {
+                CreateGlobalInstallRepository(global);
+            }
+            else
+            {
+                global = Environment.ExpandEnvironmentVariables(@"%LocalAppData%\NuGet\Global");
+
+                if (System.IO.Directory.Exists(global))
+                {
+                    CreateGlobalInstallRepository(global);
+                }
+            }
+        }
+
+        private void CreateGlobalInstallRepository(string global)
+        {
+            this.GlobalInstallRepository = new LocalPackageRepository(global);
         }
 
         public IFileSystem FileSystem
@@ -65,6 +91,12 @@ namespace NuGet
         }
 
         public IPackageRepository LocalRepository
+        {
+            get;
+            private set;
+        }
+
+        public LocalPackageRepository GlobalInstallRepository
         {
             get;
             private set;
@@ -112,9 +144,31 @@ namespace NuGet
 
         public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+            bool isGlobalInstall = false;
 
-            InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
+            if (GlobalInstallRepository != null)
+            {
+                var globalInstall = (from path in GlobalInstallRepository.GetPackageLookupPaths(packageId, version)
+                                     let globalPath = System.IO.Path.Combine(GlobalInstallRepository.Source, path)
+                                     where System.IO.File.Exists(globalPath)
+                                     let packageFolder = System.IO.Path.GetDirectoryName(path)
+                                     let globalDirectory = System.IO.Path.GetDirectoryName(globalPath)
+                                     select new { packageFolder, globalDirectory }).FirstOrDefault();
+
+                if (globalInstall != null)
+                {
+                    string targetFolder = System.IO.Path.Combine(LocalRepository.Source, globalInstall.packageFolder);
+                    JunctionPoint.Create(targetFolder, globalInstall.globalDirectory, true);
+
+                    isGlobalInstall = true;
+                }
+            }
+
+            if (!isGlobalInstall)
+            {
+                IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+                InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
+            }
         }
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)

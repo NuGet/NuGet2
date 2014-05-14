@@ -113,6 +113,14 @@ namespace NuGet
 
         public override void RemovePackage(IPackage package)
         {
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
+
+            if (JunctionPoint.Exists(packageDirectory))
+            {
+                JunctionPoint.Delete(packageDirectory);
+                return;
+            }
+
             string manifestFilePath = GetManifestFilePath(package.Id, package.Version);
             if (FileSystem.FileExists(manifestFilePath))
             {
@@ -125,7 +133,7 @@ namespace NuGet
             FileSystem.DeleteFileSafe(packageFilePath);
 
             // Delete the package directory if any
-            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: false);
+            FileSystem.DeleteDirectorySafe(packageDirectory, recursive: false);
 
             // If this is the last package delete the package directory
             if (!FileSystem.GetFilesSafe(String.Empty).Any() &&

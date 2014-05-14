@@ -267,7 +267,7 @@ namespace NuGet.Commands
                 {
                     version = latestVersion.Version;
                 }
-            }
+            }                       
 
             using (packageManager.SourceRepository.StartOperation(
                 RepositoryOperationNames.Install, 
