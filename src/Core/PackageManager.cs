@@ -21,11 +21,11 @@ namespace NuGet
         }
 
         public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem) :
-            this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem))
+            this(sourceRepository, pathResolver, fileSystem, new SharedPackageRepository(pathResolver, fileSystem, fileSystem))
         {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository)
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, ISharedPackageRepository localRepository)
         {
             if (sourceRepository == null)
             {
@@ -64,7 +64,7 @@ namespace NuGet
             private set;
         }
 
-        public IPackageRepository LocalRepository
+        public ISharedPackageRepository LocalRepository
         {
             get;
             private set;
@@ -94,82 +94,7 @@ namespace NuGet
             set;
         }
 
-        public bool WhatIf
-        {
-            get;
-            set;
-        }
-
-        public void InstallPackage(string packageId)
-        {
-            InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
-        }
-
-        public void InstallPackage(string packageId, SemanticVersion version)
-        {
-            InstallPackage(packageId: packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
-        }
-
-        public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
-        {
-            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
-
-            InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
-        }
-
-        public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
-        {
-            InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
-        }
-
-        public void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions, bool ignoreWalkInfo)
-        {
-            InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions, ignoreWalkInfo: ignoreWalkInfo);
-        }
-
-        protected void InstallPackage(
-            IPackage package,
-            FrameworkName targetFramework,
-            bool ignoreDependencies,
-            bool allowPrereleaseVersions,
-            bool ignoreWalkInfo = false)
-        {
-            if (WhatIf)
-            {
-                // This prevents InstallWalker from downloading the packages
-                ignoreWalkInfo = true;
-            }
-
-            var installerWalker = new InstallWalker(
-                LocalRepository, SourceRepository,
-                targetFramework, Logger,
-                ignoreDependencies, allowPrereleaseVersions,
-                DependencyVersion)
-            {
-                DisableWalkInfo = ignoreWalkInfo,
-                CheckDowngrade = CheckDowngrade
-            };
-            Execute(package, installerWalker);
-        }
-
-        private void Execute(IPackage package, IPackageOperationResolver resolver)
-        {
-            var operations = resolver.ResolveOperations(package);
-            if (operations.Any())
-            {
-                foreach (PackageOperation operation in operations)
-                {
-                    Execute(operation);
-                }
-            }
-            else if (LocalRepository.Exists(package))
-            {
-                // If the package wasn't installed by our set of operations, notify the user.
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, package.GetFullName());
-            }
-        }
-
-        protected void Execute(PackageOperation operation)
+        public void Execute(PackageOperation operation)
         {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
@@ -182,28 +107,14 @@ namespace NuGet
                 }
                 else
                 {
-                    if (WhatIf)
-                    {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_InstallPackage, operation.Package);
-                    }
-                    else
-                    {
-                        ExecuteInstall(operation.Package);
-                    }
+                    ExecuteInstall(operation.Package);
                 }
             }
             else
             {
                 if (packageExists)
                 {
-                    if (WhatIf)
-                    {
-                        Logger.Log(MessageLevel.Info, NuGetResources.Log_UninstallPackage, operation.Package);
-                    }
-                    else
-                    {
-                        ExecuteUninstall(operation.Package);
-                    }
+                    ExecuteUninstall(operation.Package);
                 }
             }
         }
@@ -264,63 +175,6 @@ namespace NuGet
                     batchProcessor.EndProcessing();
                 }
             }
-        }
-
-        public void UninstallPackage(string packageId)
-        {
-            UninstallPackage(packageId, version: null, forceRemove: false, removeDependencies: false);
-        }
-
-        public void UninstallPackage(string packageId, SemanticVersion version)
-        {
-            UninstallPackage(packageId, version: version, forceRemove: false, removeDependencies: false);
-        }
-
-        public void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove)
-        {
-            UninstallPackage(packageId, version: version, forceRemove: forceRemove, removeDependencies: false);
-        }
-
-        public virtual void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies)
-        {
-            if (String.IsNullOrEmpty(packageId))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
-
-            IPackage package = LocalRepository.FindPackage(packageId, version: version);
-
-            if (package == null)
-            {
-                throw new InvalidOperationException(String.Format(
-                    CultureInfo.CurrentCulture,
-                    NuGetResources.UnknownPackage, packageId));
-            }
-
-            UninstallPackage(package, forceRemove, removeDependencies);
-        }
-
-        public void UninstallPackage(IPackage package)
-        {
-            UninstallPackage(package, forceRemove: false, removeDependencies: false);
-        }
-
-        public void UninstallPackage(IPackage package, bool forceRemove)
-        {
-            UninstallPackage(package, forceRemove: forceRemove, removeDependencies: false);
-        }
-
-        public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies)
-        {
-            Execute(package, new UninstallWalker(LocalRepository,
-                                                 new DependentsWalker(LocalRepository, targetFramework: null),
-                                                 targetFramework: null,
-                                                 logger: Logger,
-                                                 removeDependencies: removeDependencies,
-                                                 forceRemove: forceRemove)
-                                                 {
-                                                     DisableWalkInfo = WhatIf
-                                                 });
         }
 
         protected virtual void ExecuteUninstall(IPackage package)
@@ -406,71 +260,59 @@ namespace NuGet
             }
         }
 
-        private PackageOperationEventArgs CreateOperation(IPackage package)
+        public PackageOperationEventArgs CreateOperation(IPackage package)
         {
             return new PackageOperationEventArgs(package, FileSystem, PathResolver.GetInstallPath(package));
         }
 
-        public void UpdatePackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            UpdatePackage(packageId, version: null, updateDependencies: updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
-        }
-
-        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, allowPrereleaseVersions, allowUnlisted: false),
-                updateDependencies, allowPrereleaseVersions);
-        }
-
-        public void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions, allowUnlisted: false),
-                updateDependencies, allowPrereleaseVersions);
-        }
-
-        internal void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            if (String.IsNullOrEmpty(packageId))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
-
-            IPackage oldPackage = LocalRepository.FindPackage(packageId);
-
-            // Check to see if this package is installed
-            if (oldPackage == null)
-            {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.UnknownPackage, packageId));
-            }
-
-            Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
-
-            IPackage newPackage = resolvePackage();
-
-            if (newPackage != null && oldPackage.Version != newPackage.Version)
-            {
-                UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
-            }
-            else
-            {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
-            }
-        }
-
-        public void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions)
-        {
-            Execute(newPackage, new UpdateWalker(LocalRepository,
-                                                SourceRepository,
-                                                new DependentsWalker(LocalRepository, targetFramework: null),
-                                                NullConstraintProvider.Instance,
-                                                targetFramework: null,
-                                                logger: Logger,
-                                                updateDependencies: updateDependencies,
-                                                allowPrereleaseVersions: allowPrereleaseVersions));
-        }
-
         public bool CheckDowngrade { get; set; }
+
+        /// <summary>
+        /// Check to see if this package applies to a project based on 2 criteria:
+        /// 1. The package has project content (i.e. content that can be applied to a project lib or content files)
+        /// 2. The package is referenced by any other project
+        /// 3. The package has at least one dependecy
+        /// 
+        /// This logic will probably fail in one edge case. If there is a meta package that applies to a project
+        /// that ended up not being installed in any of the projects and it only exists at solution level.
+        /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
+        /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
+        /// 
+        /// Technically, the third condition is not totally accurate because a solution-level package can depend on another 
+        /// solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
+        /// This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+        /// as solution-level ones.
+        /// </summary>
+        public bool IsProjectLevel(IPackage package)
+        {
+            return package.HasProjectContent() ||
+                 package.DependencySets.SelectMany(p => p.Dependencies).Any() ||
+                LocalRepository.IsReferenced(package.Id, package.Version);
+        }
+
+        private bool _bindingRedirectEnabled = true;        
+
+        public bool BindingRedirectEnabled
+        {
+            get { return _bindingRedirectEnabled; }
+            set { _bindingRedirectEnabled = value; }
+        }
+
+        public virtual void AddBindingRedirects(IProjectManager projectManager)
+        {
+            // no-op
+        }
+
+        public virtual IPackage LocatePackageToUninstall(IProjectManager projectManager, string id, SemanticVersion version, out bool appliesToProject)
+        {
+            var package = LocalRepository.FindPackagesById(id).SingleOrDefault();
+            if (package == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            appliesToProject = IsProjectLevel(package);
+            return package;
+        }
     }
 }

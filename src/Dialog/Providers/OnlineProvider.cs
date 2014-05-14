@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers
@@ -149,44 +150,46 @@ namespace NuGet.Dialog.Providers
             {
                 ShowProgressWindow();
 
-                IList<PackageOperation> operations;
-                bool acceptLicense = ShowLicenseAgreement(
-                    item.PackageIdentity,
-                    activePackageManager,
-                    _project.GetTargetFrameworkName(),
-                    out operations);
+                // Resolve operations
+                var resolver = new OperationResolver(activePackageManager)
+                {
+                    Logger = this,
+                    DependencyVersion = activePackageManager.DependencyVersion,
+                    IgnoreDependencies = false,
+                    AllowPrereleaseVersions = IncludePrerelease
+                };
 
+                var projectManager = activePackageManager.GetProjectManager(_project);
+                projectManager.Logger = this;
+                var projectOperations = resolver.ResolveProjectOperations(
+                    UserOperation.Install,
+                    item.PackageIdentity, 
+                    new VirtualProjectManager(projectManager));                
+                var operations = resolver.ResolveFinalOperations(projectOperations);
+
+                // show license agreeement
+                bool acceptLicense = ShowLicenseAgreement(operations);
                 if (!acceptLicense)
                 {
                     return false;
                 }
 
-                ExecuteCommandOnProject(_project, item, activePackageManager, operations);
-                return true;
-            }
-        }
+                // execute operations
+                try
+                {
+                    RegisterPackageOperationEvents(activePackageManager, projectManager);
 
-        protected void ExecuteCommandOnProject(Project activeProject, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
-        {
-            IProjectManager projectManager = null;
-            try
-            {
-                projectManager = activePackageManager.GetProjectManager(activeProject);
-                RegisterPackageOperationEvents(activePackageManager, projectManager);
-                ExecuteCommand(projectManager, item, activePackageManager, operations);
-            }
-            finally
-            {
-                if (projectManager != null)
+                    var userOperationExecutor = new OperationExecutor();
+                    userOperationExecutor.Logger = this;
+                    userOperationExecutor.Execute(operations);
+                }
+                finally
                 {
                     UnregisterPackageOperationEvents(activePackageManager, projectManager);
                 }
-            }
-        }
 
-        protected virtual void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
-        {
-            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, allowPrereleaseVersions: IncludePrerelease, logger: this);
+                return true;
+            }
         }
 
         public override bool CanExecute(PackageItem item)

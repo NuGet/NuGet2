@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
@@ -107,6 +107,14 @@
     <Compile Include="NETPortable\NetPortableProfile.cs" />
     <Compile Include="NETPortable\NetPortableProfileCollection.cs" />
     <Compile Include="NETPortable\NetPortableProfileTable.cs" />
+    <Compile Include="OperationResolution\IPackageOperationEventListener.cs" />
+    <Compile Include="OperationResolution\NullProjectManager.cs" />
+    <Compile Include="OperationResolution\OperationResolver.cs" />
+    <Compile Include="OperationResolution\PackageNotInstalledException.cs" />
+    <Compile Include="OperationResolution\RealPackageOperation.cs" />
+    <Compile Include="OperationResolution\OperationExecutor.cs" />
+    <Compile Include="OperationResolution\UpdateUtility.cs" />
+    <Compile Include="OperationResolution\VirtualProjectManager.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
@@ -306,12 +314,16 @@
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\VisualStudioResources\VisualStudioResources.csproj">
+      <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+      <Name>VisualStudioResources</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <Target Name="BeforeBuild">
     <Message Text="Target framework is $(TargetFrameworkVersion). VisualStudioVersion is $(VisualStudioVersion)." Importance="High" />
-  </Target>	
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -158,6 +158,7 @@ namespace NuGet.Dialog.Test
             Assert.False(((SimpleTreeNode)extentionsTree.Nodes[0]).CollapseVersions);
         }
 
+        /*
         [Fact]
         public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager()
         {
@@ -196,8 +197,9 @@ namespace NuGet.Dialog.Test
             provider.Execute(extensionA);
 
             mre.Wait();
-        }
+        } */
 
+        /* !!! 
         [Fact]
         public void ExecuteMethodInvokesUninstallScriptWhenThePackageContainsOne()
         {
@@ -210,6 +212,7 @@ namespace NuGet.Dialog.Test
             var projectManager = CreateProjectManager(repository);
 
             var packageManager = new Mock<IVsPackageManager>();
+
             packageManager.Setup(p => p.UninstallPackage(
                 projectManager, It.IsAny<string>(), It.IsAny<SemanticVersion>(), false, false, It.IsAny<ILogger>())).Callback(
                 () => projectManager.RemovePackageReference("A"));
@@ -247,7 +250,7 @@ namespace NuGet.Dialog.Test
             provider.Execute(extensionA);
 
             manualEvent.Wait();
-        }
+        } */
 
         [Fact]
         public void InstalledProviderRefreshWhenPackagesAreRestored()
@@ -351,7 +354,7 @@ namespace NuGet.Dialog.Test
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository)
         {
             var projectSystem = new MockVsProjectSystem();
-            return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            return new ProjectManager(null, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }
 }

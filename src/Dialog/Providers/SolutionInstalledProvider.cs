@@ -6,6 +6,7 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers
@@ -16,8 +17,6 @@ namespace NuGet.Dialog.Providers
     /// </summary>
     internal class SolutionInstalledProvider : InstalledProvider
     {
-
-        private readonly ISolutionManager _solutionManager;
         private readonly IUserNotifierServices _userNotifierServices;
         private PackageItem _lastExecutionItem;
 
@@ -31,8 +30,6 @@ namespace NuGet.Dialog.Providers
             IPackageRestoreManager packageRestoreManager)
             : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager, packageRestoreManager)
         {
-
-            _solutionManager = solutionManager;
             _userNotifierServices = providerServices.UserNotifierServices;
         }
 
@@ -47,7 +44,7 @@ namespace NuGet.Dialog.Providers
             RootNode.Nodes.Add(allNode);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
         protected override bool ExecuteCore(PackageItem item)
         {
             IPackage package = item.PackageIdentity;
@@ -64,7 +61,7 @@ namespace NuGet.Dialog.Providers
                 item.PackageIdentity,
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
-                project => PackageManager.GetProjectManager(project).IsInstalled(package),
+                project => PackageManager.GetProjectManager(project).LocalRepository.Exists(package),
                 ignored => true);
 
             if (selectedProjects == null)
@@ -160,31 +157,40 @@ namespace NuGet.Dialog.Providers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
         private bool InstallPackageIntoProjects(IPackage package, IList<Project> allProjects, HashSet<string> selectedProjectsSet)
         {
+            // resolve operations
             var selectedProjects = allProjects.Where(p => selectedProjectsSet.Contains(p.GetUniqueName()));
-
-            IList<PackageOperation> operations;
-            bool accepted = ShowLicenseAgreement(package, PackageManager, selectedProjects, out operations);
-            if (!accepted)
+            var resolveResult = ResolveOperationsForInstall(package, PackageManager, selectedProjects);
+            var operations = resolveResult.Item1;
+            var resolver = resolveResult.Item2;
+            bool acceptLicense = ShowLicenseAgreement(operations);
+            if (!acceptLicense)
             {
                 return false;
             }
 
-            // now install the packages that are checked
-            // Bug 1357: It's crucial that we perform all installs before uninstalls
-            // to avoid the package file being deleted before an install.
-            foreach (Project project in allProjects)
+            // execute operations by project
+            var userOperationExecutor = new OperationExecutor();
+            userOperationExecutor.Logger = this;
+
+            var operationsByProject = operations.Where(p => p.ProjectManager != null)
+                .GroupBy(p => p.ProjectManager);
+            foreach (var operationsInOneProject in operationsByProject)
             {
-                if (selectedProjectsSet.Contains(project.GetUniqueName()))
+                var projectManager = operationsInOneProject.Key;
+                var project = ((VsProjectSystem)(projectManager.Project)).Project;
+                try
                 {
-                    try
-                    {
-                        // if the project is checked, install package into it  
-                        InstallPackageToProject(project, package, includePrerelease: true);
-                    }
-                    catch (Exception ex)
-                    {
-                        AddFailedProject(project, ex);
-                    }
+                    RegisterPackageOperationEvents(PackageManager, projectManager);
+                    var ops = resolver.ResolveFinalOperations(operationsInOneProject);
+                    userOperationExecutor.Execute(ops);
+                }
+                catch (Exception ex)
+                {
+                    AddFailedProject(project, ex);
+                }
+                finally
+                {
+                    UnregisterPackageOperationEvents(PackageManager, projectManager);
                 }
             }
 
@@ -209,13 +215,26 @@ namespace NuGet.Dialog.Providers
             try
             {
                 RegisterPackageOperationEvents(PackageManager, null);
-                PackageManager.UninstallPackage(
-                    null,
-                    package.Id,
-                    package.Version,
-                    forceRemove: false,
-                    removeDependencies: (bool)result,
-                    logger: this);
+                
+                // resolve operations
+                var resolver = new OperationResolver(PackageManager)
+                {
+                    Logger = this,
+                    ForceRemove = false,
+                    RemoveDependencies = (bool)result
+                };
+                var projectOperations = resolver.ResolveProjectOperations(
+                    UserOperation.Uninstall,
+                    package,
+                    projectManager: null);
+                var operations = resolver.ResolveFinalOperations(projectOperations);
+
+                // execute operations
+                var operationExecutor = new OperationExecutor()
+                {
+                    Logger = this
+                };
+                operationExecutor.Execute(operations);
             }
             finally
             {
@@ -227,7 +246,7 @@ namespace NuGet.Dialog.Providers
         private bool IsPackageInstalledInProject(Project project, IPackage package)
         {
             IProjectManager projectManager = PackageManager.GetProjectManager(project);
-            return projectManager != null && projectManager.IsInstalled(package);
+            return projectManager != null && projectManager.LocalRepository.Exists(package);
         }
 
         public override IVsExtension CreateExtension(IPackage package)
@@ -317,7 +336,7 @@ namespace NuGet.Dialog.Providers
         {
             return from project in _solutionManager.GetProjects()
                    let projectManager = PackageManager.GetProjectManager(project)
-                   where projectManager.IsInstalled(package)
+                   where projectManager.LocalRepository.Exists(package)
                    orderby project.Name
                    select project;
         }

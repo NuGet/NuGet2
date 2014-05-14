@@ -91,8 +91,7 @@ namespace NuGet.Dialog.Test
             // Arrange
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
-            projectManager.Setup(p => p.SourceRepository).Returns(new MockPackageRepository());
-
+            
             var provider = CreateUpdatesProvider();
 
             // Act
@@ -205,6 +204,7 @@ namespace NuGet.Dialog.Test
             Assert.Equal(newVersion, packageItem.Version);
         }
 
+        /* !!!
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -266,7 +266,9 @@ namespace NuGet.Dialog.Test
             // do not allow the method to return
             manualEvent.WaitOne();
         }
+        */
 
+        /* !!!
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -324,13 +326,14 @@ namespace NuGet.Dialog.Test
                     Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
 
                     mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+
                     packageManager.Verify(p => p.UpdatePackages(
                         projectManager.Object, 
                         It.IsAny<IEnumerable<IPackage>>(),
                         It.IsAny<IEnumerable<PackageOperation>>(), 
                         true, 
                         includePrerelease, 
-                        provider), Times.Once());
+                        provider), Times.Once()); 
                 }
                 catch (Exception ex)
                 {
@@ -349,8 +352,9 @@ namespace NuGet.Dialog.Test
             manualEvent.WaitOne();
 
             Assert.Null(exception);
-        }
+        } */
 
+        /* !!!
         [Fact]
         public void ExecuteMethodInvokeInstallScriptAndUninstallScript()
         {
@@ -416,7 +420,7 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.WaitOne();
-        }
+        } */
 
         private static UpdatesProvider CreateUpdatesProvider(
             IVsPackageManager packageManager = null,
@@ -513,7 +517,7 @@ namespace NuGet.Dialog.Test
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository)
         {
             var projectSystem = new MockVsProjectSystem();
-            return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            return new ProjectManager(null, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }
 }

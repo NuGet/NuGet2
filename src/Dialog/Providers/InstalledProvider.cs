@@ -10,6 +10,7 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers
@@ -231,28 +232,6 @@ namespace NuGet.Dialog.Providers
             return removeDependencies;
         }
 
-        protected void InstallPackageToProject(Project project, IPackage package, bool includePrerelease)
-        {
-            IProjectManager projectManager = null;
-            try
-            {
-                projectManager = PackageManager.GetProjectManager(project);
-                // make sure the package is not installed in this project before proceeding
-                if (!projectManager.IsInstalled(package))
-                {
-                    RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.InstallPackage(projectManager, package.Id, package.Version, ignoreDependencies: false, allowPrereleaseVersions: includePrerelease, logger: this);
-                }
-            }
-            finally
-            {
-                if (projectManager != null)
-                {
-                    UnregisterPackageOperationEvents(PackageManager, projectManager);
-                }
-            }
-        }
-
         protected void UninstallPackageFromProject(Project project, PackageItem item, bool removeDependencies)
         {
             IProjectManager projectManager = null;
@@ -260,10 +239,37 @@ namespace NuGet.Dialog.Providers
             {
                 projectManager = PackageManager.GetProjectManager(project);
                 // make sure the package is installed in this project before proceeding
-                if (projectManager.IsInstalled(item.PackageIdentity))
+                if (projectManager.LocalRepository.Exists(item.PackageIdentity))
                 {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: removeDependencies, logger: this);
+                    
+                    // Locate the package to uninstall
+                    bool appliesToProject;
+                    IPackage package = PackageManager.LocatePackageToUninstall(
+                        projectManager,
+                        item.Id,
+                        null,
+                        out appliesToProject);
+
+                    // resolve operations
+                    var resolver = new OperationResolver(PackageManager)
+                    {
+                        Logger = this,
+                        ForceRemove = false,
+                        RemoveDependencies = removeDependencies
+                    };
+                    var projectOperations = resolver.ResolveProjectOperations(
+                        UserOperation.Uninstall,
+                        package,
+                        appliesToProject ? new VirtualProjectManager(projectManager) : null);
+                    var operations = resolver.ResolveFinalOperations(projectOperations);
+
+                    // execute operations
+                    var operationExecutor = new OperationExecutor()
+                    {
+                        Logger = this
+                    };
+                    operationExecutor.Execute(operations);
                 }
             }
             finally

@@ -10,11 +10,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-
 using EnvDTE;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Resolver;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
@@ -214,7 +214,34 @@ namespace NuGet.VisualStudio
                 {
                     if (!localRepository.Exists(reference.Id, reference.Version))
                     {
-                        packageManager.InstallPackage(reference.Id, reference.Version, ignoreDependencies: true, allowPrereleaseVersions: true);
+                        // Resolve the package to install
+                        IPackage package = PackageRepositoryHelper.ResolvePackage(
+                            packageManager.SourceRepository,
+                            packageManager.LocalRepository,
+                            reference.Id,
+                            reference.Version,
+                            allowPrereleaseVersions: true);
+
+                        // Resolve operations
+                        var resolver = new OperationResolver(packageManager)
+                        {
+                            Logger = packageManager.Logger,
+                            DependencyVersion = packageManager.DependencyVersion,
+                            IgnoreDependencies = true,
+                            AllowPrereleaseVersions = true
+                        };
+                        var projectOps = resolver.ResolveProjectOperations(
+                            UserOperation.Install,
+                            package, 
+                            new VirtualProjectManager(new NullProjectManager()));
+                        var operations = resolver.ResolveFinalOperations(projectOps);
+
+                        // Execute operations
+                        var operationExecutor = new OperationExecutor()
+                        {
+                            Logger = packageManager.Logger
+                        };
+                        operationExecutor.Execute(operations);
                     }
                 }
             });

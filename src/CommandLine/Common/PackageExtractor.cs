@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using NuGet.Resolver;
 
 namespace NuGet.Common
 {
@@ -11,8 +12,22 @@ namespace NuGet.Common
         public static void InstallPackage(IPackageManager packageManager, IPackage package)
         {
             var uniqueToken = GenerateUniqueToken(packageManager, package.Id, package.Version);
-            // Prerelease flag does not matter since we already have the package to install and we ignore dependencies and walk info
-            ExecuteLocked(uniqueToken, () => packageManager.InstallPackage(package: package, ignoreDependencies: true, allowPrereleaseVersions: true, ignoreWalkInfo: true));
+            ExecuteLocked(
+                uniqueToken, 
+                () =>
+                {
+                    var userOperationExecutor = new OperationExecutor();
+                    userOperationExecutor.Execute(
+                        new[] {
+                            new Operation(
+                                new PackageOperation(package, PackageAction.Install) 
+                                {
+                                    Target = PackageOperationTarget.PackagesFolder
+                                },
+                                projectManager: null,
+                                packageManager: packageManager)
+                        });
+                });
         }
 
         /// <summary>

@@ -249,7 +249,7 @@ namespace NuGet
             return info;
         }
 
-        private static PackageTargets GetPackageTarget(IPackage package)
+        protected static PackageTargets GetPackageTarget(IPackage package)
         {
             if (package.HasProjectContent())
             {

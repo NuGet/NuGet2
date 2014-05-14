@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using NuGet.Common;
+using NuGet.Resolver;
 
 namespace NuGet.Commands
 {
@@ -194,11 +195,18 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
-            foreach (var package in satellitePackages)
-            {
-                packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: Prerelease);
-            }
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);            
+            var userOperationExecutor = new OperationExecutor();
+            var operations = satellitePackages.Select(package => 
+                new Operation(
+                    new PackageOperation(package, PackageAction.Install)
+                    {
+                        Target = PackageOperationTarget.PackagesFolder
+                    },
+                    projectManager: null,
+                    packageManager: packageManager));
+            userOperationExecutor.Execute(operations);
+            
             return true;
         }
 
@@ -274,7 +282,32 @@ namespace NuGet.Commands
                 packageId, 
                 version == null ? null : version.ToString()))
             {
-                packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+                var resolver = new OperationResolver(packageManager)
+                {
+                    Logger = Console,
+                    AllowPrereleaseVersions = Prerelease
+                };
+
+                // Resolve the package to install
+                IPackage package = PackageRepositoryHelper.ResolvePackage(
+                    packageManager.SourceRepository,
+                    packageManager.LocalRepository,
+                    packageId,
+                    version,
+                    Prerelease);
+
+                // Resolve operations
+                var projectOps = resolver.ResolveProjectOperations(
+                    UserOperation.Install,
+                    package, 
+                    new VirtualProjectManager(new NullProjectManager()));
+                var operations = resolver.ResolveFinalOperations(projectOps);
+
+                var operationExecutor = new OperationExecutor()
+                {
+                    Logger = Console
+                };
+                operationExecutor.Execute(operations);
             }
         }
 
@@ -407,7 +440,35 @@ namespace NuGet.Commands
             }
 
             // install is needed. In this case, uninstall the existing pacakge.
-            packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
+            var resolver = new OperationResolver(packageManager)
+            {
+                Logger = packageManager.Logger,
+                RemoveDependencies = true,
+                ForceRemove = false
+            };
+
+            var projectManager = new VirtualProjectManager(new NullProjectManager());
+            foreach (var package in packageManager.LocalRepository.GetPackages())
+            {
+                projectManager.LocalRepository.AddPackage(package);
+            }
+            var projectOperations = resolver.ResolveProjectOperations(
+                UserOperation.Uninstall,
+                installedPackage, 
+                projectManager);
+
+            // convert those project operations into packages folder operations
+            var operations = projectOperations.Select(op => 
+                new Operation(
+                    new PackageOperation(op.Package, op.Action) {
+                        Target = PackageOperationTarget.PackagesFolder
+                    },
+                    projectManager: null,
+                    packageManager: packageManager));
+            
+            var userOperationExecutor = new OperationExecutor();
+            userOperationExecutor.Logger = packageManager.Logger;
+            userOperationExecutor.Execute(operations);
             return true;
         }
 

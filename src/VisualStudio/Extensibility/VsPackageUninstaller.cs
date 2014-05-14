@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Globalization;
 using EnvDTE;
+using NuGet.Resolver;
 
 namespace NuGet.VisualStudio
 {
@@ -39,18 +40,40 @@ namespace NuGet.VisualStudio
             EventHandler<PackageOperationEventArgs> packageReferenceRemovingHandler = (sender, e) =>
             {
                 _scriptExecutor.Execute(
-                    e.InstallPath, 
-                    PowerShellScripts.Uninstall, 
-                    e.Package, 
-                    project, 
-                    projectManager.GetTargetFrameworkForPackage(packageId), 
+                    e.InstallPath,
+                    PowerShellScripts.Uninstall,
+                    e.Package,
+                    project,
+                    projectManager.GetTargetFrameworkForPackage(packageId),
                     NullLogger.Instance);
             };
 
             try
             {
-                projectManager.PackageReferenceRemoving += packageReferenceRemovingHandler;
-                packageManager.UninstallPackage(projectManager, packageId, version: null, forceRemove: false, removeDependencies: removeDependencies);
+                projectManager.PackageReferenceRemoving += packageReferenceRemovingHandler;                
+
+                // Locate the package to uninstall
+                bool appliesToProject;
+                IPackage package = packageManager.LocatePackageToUninstall(
+                    projectManager,
+                    packageId,
+                    null,
+                    out appliesToProject);
+
+                // resolve operations
+                var resolver = new OperationResolver(packageManager)
+                {
+                    RemoveDependencies = removeDependencies
+                };
+                var projectOperations = resolver.ResolveProjectOperations(
+                    UserOperation.Uninstall,
+                    package,
+                    appliesToProject ? new VirtualProjectManager(projectManager) : null);
+                var operations = resolver.ResolveFinalOperations(projectOperations);
+
+                // execute operations
+                var operationExecutor = new OperationExecutor();
+                operationExecutor.Execute(operations);
             }
             finally
             {

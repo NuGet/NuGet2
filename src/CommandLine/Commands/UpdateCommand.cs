@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
+using NuGet.Resolver;
 
 namespace NuGet.Commands
 {
@@ -308,7 +309,7 @@ namespace NuGet.Commands
         {
             var packageManager = new PackageManager(sourceRepository, pathResolver, sharedRepositoryFileSystem, sharedPackageRepository);
 
-            var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository)
+            var projectManager = new ProjectManager(packageManager, pathResolver, project, localRepository)
                                  {
                                      ConstraintProvider = constraintProvider
                                  };
@@ -334,15 +335,19 @@ namespace NuGet.Commands
                             // If the user explicitly allows prerelease or if the package being updated is prerelease we'll include prerelease versions in our list of packages
                             // being considered for an update.
                             bool allowPrerelease = Prerelease || !package.IsReleaseVersion();
-                            if (Safe)
+                            var resolver = new OperationResolver(packageManager)
                             {
-                                IVersionSpec safeRange = VersionUtility.GetSafeRange(package.Version);
-                                projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true, allowPrereleaseVersions: allowPrerelease);
-                            }
-                            else
+                                AllowPrereleaseVersions = allowPrerelease
+                            };
+                            var updateUtility = new UpdateUtility(resolver)
                             {
-                                projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true, allowPrereleaseVersions: allowPrerelease);
-                            }
+                                AllowPrereleaseVersions = allowPrerelease,
+                                Safe = Safe
+                            };
+
+                            var operations = updateUtility.ResolveOperationsForUpdate(package.Id, null, new[] { projectManager }, false);
+                            var userOperationExecutor = new OperationExecutor();
+                            userOperationExecutor.Execute(operations);
                         }
                         catch (InvalidOperationException e)
                         {
@@ -358,7 +363,6 @@ namespace NuGet.Commands
                     }
                 }
             }
-
         }
 
         private IEnumerable<IPackage> GetPackages(IPackageRepository repository)

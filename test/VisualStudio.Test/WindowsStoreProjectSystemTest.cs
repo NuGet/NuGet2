@@ -91,6 +91,7 @@ namespace NuGet.VisualStudio.Test
             Assert.True(isFileSupported);
         }
 
+        /* !!!
         [Fact]
         public void InstallPackageIntoWindowsStoreProjectIgnoreAppConfigFile()
         {
@@ -120,7 +121,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.True(projectSystem.FileExists("readme.txt"));
             Assert.False(projectSystem.FileExists("app.config"));
-        }
+        } */
 
         private class TestableWindowsStoreProjectSystem : WindowsStoreProjectSystem
         {

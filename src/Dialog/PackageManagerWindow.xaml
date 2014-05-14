@@ -7,7 +7,7 @@
     xmlns:dialogServices="clr-namespace:NuGet.Dialog;assembly=NuGet.DialogServices"
     xmlns:dialogCommands="clr-namespace:NuGet.Dialog.PackageManagerUI;assembly=NuGet.DialogServices"
     xmlns:local="clr-namespace:NuGet.Dialog"
-    xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio"
+    xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio.Resources"
     xmlns:pfui="clr-namespace:NuGet.VisualStudio;assembly=NuGet.VisualStudio"
     xmlns:vsfx="clr-namespace:NuGet.VisualStudio;assembly=NuGet.VisualStudio" 
     Background="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundGradientKey}}"

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Moq;
+using NuGet.Resolver;
 using NuGet.Test.Mocks;
 using Xunit;
 
@@ -13,17 +15,18 @@ namespace NuGet.Test
         public void CtorThrowsIfDependenciesAreNull()
         {
             // Act & Assert
-            ExceptionAssert.ThrowsArgNull(() => new PackageManager(null, new DefaultPackagePathResolver("foo"), new MockProjectSystem(), new MockPackageRepository()), "sourceRepository");
-            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), null, new MockProjectSystem(), new MockPackageRepository()), "pathResolver");
-            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), null, new MockPackageRepository()), "fileSystem");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(null, new DefaultPackagePathResolver("foo"), new MockProjectSystem(), new MockSharedPackageRepository()), "sourceRepository");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), null, new MockProjectSystem(), new MockSharedPackageRepository()), "pathResolver");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), null, new MockSharedPackageRepository()), "fileSystem");
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), new MockProjectSystem(), null), "localRepository");
         }
 
+        /* !!!
         [Fact]
         public void InstallingPackageWithUnknownDependencyAndIgnoreDepencenciesInstallsPackageWithoutDependencies()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -43,47 +46,9 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.False(localRepository.Exists(packageC));
-        }
+        } */
 
-        [Fact]
-        public void UninstallingUnknownPackageThrows()
-        {
-            // Arrange
-            PackageManager packageManager = CreatePackageManager();
-
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage("foo"), "Unable to find package 'foo'.");
-        }
-
-        [Fact]
-        public void UninstallingUnknownNullOrEmptyPackageIdThrows()
-        {
-            // Arrange
-            PackageManager packageManager = CreatePackageManager();
-
-            // Act & Assert
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.UninstallPackage((string)null), "packageId");
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.UninstallPackage(String.Empty), "packageId");
-        }
-
-        [Fact]
-        public void UninstallingPackageWithNoDependents()
-        {
-            // Arrange
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var package = PackageUtility.CreatePackage("foo", "1.2.33");
-            localRepository.AddPackage(package);
-
-            // Act
-            packageManager.UninstallPackage("foo");
-
-            // Assert
-            Assert.False(packageManager.LocalRepository.Exists(package));
-        }
-
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void InstallingUnknownPackageThrows()
         {
@@ -105,6 +70,7 @@ namespace NuGet.Test
             ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.InstallPackage((string)null), "packageId");
             ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.InstallPackage(String.Empty), "packageId");
         }
+        */
 
         [Fact]
         public void InstallPackageAddsAllFilesToFileSystem()
@@ -113,7 +79,8 @@ namespace NuGet.Test
             var projectSystem = new MockProjectSystem();
             var sourceRepository = new MockPackageRepository();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new PackageManager(sourceRepository, pathResolver, projectSystem, new LocalPackageRepository(pathResolver, projectSystem));
+            var packageManager = new PackageManager(sourceRepository, pathResolver, projectSystem, 
+                new SharedPackageRepository(pathResolver, projectSystem, projectSystem));
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "contentFile", @"sub\contentFile" },
@@ -123,7 +90,7 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageA);
 
             // Act
-            packageManager.InstallPackage("A");
+            Install("A", packageManager, new NullProjectManager());
 
             // Assert
             Assert.Equal(0, projectSystem.References.Count);
@@ -133,6 +100,32 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
             Assert.True(projectSystem.FileExists(@"A.1.0\tools\readme.txt"));
             Assert.True(projectSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
+        }
+
+        static void Install(
+           string id, 
+           IPackageManager packageManager,
+           IProjectManager projectManager)
+        {
+            var resolver = new OperationResolver(packageManager);
+
+            // Resolve the package to install
+            IPackage package = PackageRepositoryHelper.ResolvePackage(
+                packageManager.SourceRepository,
+                packageManager.LocalRepository,
+                id,
+                null,
+                resolver.AllowPrereleaseVersions);
+
+            // Resolve operations
+            var projectOps = resolver.ResolveProjectOperations(
+                UserOperation.Install,
+                package, 
+                new VirtualProjectManager(projectManager));
+            var operations = resolver.ResolveFinalOperations(projectOps);
+
+            var operationExecutor = new OperationExecutor();
+            operationExecutor.Execute(operations);
         }
 
         [Fact]
@@ -148,17 +141,16 @@ namespace NuGet.Test
                                                     dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
             // Act
-            packageManager.InstallPackage("foo.ja-jp");
+            Install("foo.ja-jp", packageManager, new NullProjectManager());
 
             // Assert
-            Assert.Equal(5, projectSystem.Paths.Count);
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
@@ -179,18 +171,17 @@ namespace NuGet.Test
                                                     dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
             // Act
-            packageManager.InstallPackage("foo");
-            packageManager.InstallPackage("foo.ja-jp");
+            Install("foo", packageManager, new NullProjectManager());
+            Install("foo.ja-jp", packageManager, new NullProjectManager());
 
             // Assert
-            Assert.Equal(5, projectSystem.Paths.Count);
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
@@ -221,15 +212,15 @@ namespace NuGet.Test
                                                     dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
             // Act
-            packageManager.InstallPackage("foo");
-            packageManager.InstallPackage("foo.ja-jp");
+            Install("foo", packageManager, new NullProjectManager());
+            Install("foo.ja-jp", packageManager, new NullProjectManager());
 
             // Assert
             Assert.Equal(9, projectSystem.Paths.Count);
@@ -248,6 +239,29 @@ namespace NuGet.Test
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\japanese.txt"));
         }
 
+        private void Uninstall(string id, IPackageManager packageManager, IProjectManager projectManager)
+        {
+            // Locate the package to uninstall
+            bool appliesToProject;
+            IPackage package = packageManager.LocatePackageToUninstall(
+                projectManager,
+                id,
+                null,
+                out appliesToProject);
+
+            // resolve operations
+            var resolver = new OperationResolver(packageManager);
+            var projectOps = resolver.ResolveProjectOperations(
+                UserOperation.Uninstall,
+                package,
+                appliesToProject ? new VirtualProjectManager(projectManager) : null);
+            var operations = resolver.ResolveFinalOperations(projectOps);
+
+            // execute operations
+            var userOperationExecutor = new OperationExecutor();
+            userOperationExecutor.Execute(operations);
+        }
+
         [Fact]
         public void UninstallingSatellitePackageRemovesFilesFromRuntimePackageFolder()
         {
@@ -260,44 +274,57 @@ namespace NuGet.Test
                                                     content: new[] {
                                                         @"english.txt" });
 
-            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
-                                                    satelliteAssemblies: new[] {
-                                                        @"lib\ja-jp\foo.resources.dll",
-                                                        @"lib\ja-jp\foo.xml",
-                                                        @"lib\japanese.xml" },
-                                                    content: new[] {
-                                                        @"english.txt",
-                                                        @"japanese.txt" },
-                                                    dependencies: new[] { new PackageDependency("foo") });
+            var satellitePackage = PackageUtility.CreatePackage(
+                "foo.ja-jp", "1.0.0", language: "ja-jp",
+                satelliteAssemblies: new[] {
+                    @"lib\ja-jp\foo.resources.dll",
+                    @"lib\ja-jp\foo.xml",
+                    @"lib\japanese.xml" },
+                content: new[] {
+                    @"english.txt",
+                    @"japanese.txt" },
+                dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0]")) });
 
-            var projectSystem = new MockProjectSystem();
-            var localRepository = new MockPackageRepository();
+            var packagesFolder = new MockFileSystem(@"c:\packagesFolder");
+            var sharedRepository = new MockSharedPackageRepository2();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(packagesFolder), packagesFolder, sharedRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
-            // Act
-            packageManager.InstallPackage("foo");
-            packageManager.InstallPackage("foo.ja-jp");
+            var projectSystem = new MockProjectSystem();
+            var projectLocalRepo = new PackageReferenceRepository(
+                new MockFileSystem(@"c:\project"),
+                "projectName",
+                sharedRepository);
+            var projectManager = new ProjectManager(
+                packageManager,
+                packageManager.PathResolver,
+                projectSystem,
+                projectLocalRepo);
 
-            packageManager.UninstallPackage("foo.ja-jp");
+            // Act            
+            Install("foo", packageManager, projectManager);
+            Install("foo.ja-jp", packageManager, projectManager);
+
+            Uninstall("foo.ja-jp", packageManager, projectManager);
 
             // Assert
-            Assert.Equal(2, projectSystem.Paths.Count);
-            Assert.True(projectSystem.FileExists(@"foo.1.0.0\content\english.txt"));
-            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.Equal(2, packagesFolder.Paths.Count);
+            Assert.True(packagesFolder.FileExists(@"foo.1.0.0\content\english.txt"));
+            Assert.True(packagesFolder.FileExists(@"foo.1.0.0\lib\foo.dll"));
+            Assert.False(packagesFolder.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.False(packagesFolder.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
 
-            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\english.txt"));
-            Assert.False (projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\japanese.txt"));
-            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\japanese.xml"));
-            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
-            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.False(packagesFolder.FileExists(@"foo.ja-jp.1.0.0\content\english.txt"));
+            Assert.False (packagesFolder.FileExists(@"foo.ja-jp.1.0.0\content\japanese.txt"));
+            Assert.False(packagesFolder.FileExists(@"foo.ja-jp.1.0.0\lib\japanese.xml"));
+            Assert.False(packagesFolder.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.False(packagesFolder.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
 
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\japanese.xml"));
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\japanese.txt"));
+            Assert.False(packagesFolder.FileExists(@"foo.1.0.0\lib\japanese.xml"));
+            Assert.False(packagesFolder.FileExists(@"foo.1.0.0\content\japanese.txt"));
         }
 
         /// <summary>
@@ -321,63 +348,55 @@ namespace NuGet.Test
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
             // local suffix convention.
-            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0",
-                                                    assemblyReferences: new[] { @"lib\ja-jp\collision.txt" });
+            var runtimePackage = PackageUtility.CreatePackage(
+                "foo", "1.0.0",
+                content: Enumerable.Empty<string>(),
+                assemblyReferences: new[] { @"lib\ja-jp\collision.txt" });
 
-            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
-                                                    satelliteAssemblies: new[] { @"lib\ja-jp\collision.txt" },
-                                                    dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
+            var satellitePackage = PackageUtility.CreatePackage(
+                "foo.ja-jp", "1.0.0", language: "ja-jp",
+                content: Enumerable.Empty<string>(),
+                satelliteAssemblies: new[] { @"lib\ja-jp\collision.txt" },
+                dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
-            var projectSystem = new MockProjectSystem();
-            var localRepository = new MockPackageRepository();
+            var packagesFolder = new MockFileSystem(@"c:\packagesFolder");
+            var sharedRepository = new MockSharedPackageRepository2();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(packagesFolder), packagesFolder, sharedRepository);
+
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
-            // Act
-            packageManager.InstallPackage("foo");
-            packageManager.InstallPackage("foo.ja-jp");
+            var projectSystem = new MockProjectSystem();
+            var projectLocalRepo = new PackageReferenceRepository(
+                new MockFileSystem(@"c:\project"),
+                "projectName",
+                sharedRepository);
+            var projectManager = new ProjectManager(
+                packageManager,
+                packageManager.PathResolver,
+                projectSystem,
+                projectLocalRepo);
 
-            packageManager.UninstallPackage("foo.ja-jp");
+            // Act
+            var resolver = new OperationResolver(packageManager);
+            var userOperationExecutor = new OperationExecutor();
+            Install("foo", packageManager, projectManager);
+            Install("foo.ja-jp", packageManager, projectManager);
+
+            Uninstall("foo.ja-jp", packageManager, projectManager);
 
             // Assert
-            Assert.Equal(0, projectSystem.Paths.Count);
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\collision.txt"));
+            Assert.Equal(0, packagesFolder.Paths.Count);
+            Assert.False(packagesFolder.FileExists(@"foo.1.0.0\lib\ja-jp\collision.txt"));
         }
 
-        [Fact]
-        public void UninstallingPackageUninstallsPackageButNotDependencies()
-        {
-            // Arrange
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                new PackageDependency("B")
-                                                            });
-
-            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
-
-            localRepository.AddPackage(packageA);
-            localRepository.AddPackage(packageB);
-
-            // Act
-            packageManager.UninstallPackage("A");
-
-            // Assert            
-            Assert.False(localRepository.Exists(packageA));
-            Assert.True(localRepository.Exists(packageB));
-        }
-
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void ReInstallingPackageAfterUninstallingDependencyShouldReinstallAllDependencies()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -408,13 +427,14 @@ namespace NuGet.Test
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageB));
             Assert.True(localRepository.Exists(packageC));
-        }
+        } */
 
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void InstallPackageThrowsExceptionPackageIsNotInstalled()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new Mock<IProjectSystem>();
             projectSystem.Setup(m => m.AddFiles(It.IsAny<IEnumerable<IPackageFile>>(), "A.1.0"))
@@ -431,52 +451,14 @@ namespace NuGet.Test
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(packageA));
-        }
+        } */
 
-        [Fact]
-        public void UpdatePackageUninstallsPackageAndInstallsNewPackage()
-        {
-            // Arrange
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-
-            IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
-            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
-            localRepository.Add(A10);
-            sourceRepository.Add(A20);
-
-            // Act
-            packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
-
-            // Assert
-            Assert.False(localRepository.Exists("A", new SemanticVersion("1.0")));
-            Assert.True(localRepository.Exists("A", new SemanticVersion("2.0")));
-        }
-
-        [Fact]
-        public void UpdatePackageThrowsIfPackageNotInstalled()
-        {
-            // Arrange
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-
-            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
-            sourceRepository.Add(A20);
-
-            // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false),
-                "Unable to find package 'A'.");
-        }
-
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void UpdatePackageDoesNothingIfNoUpdatesAvailable()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -489,13 +471,13 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(localRepository.Exists("A", new SemanticVersion("1.0")));
-        }
+        } 
 
         [Fact]
         public void InstallPackageInstallsPrereleasePackages()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -515,13 +497,13 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageC));
-        }
+        } 
 
         [Fact]
         public void InstallPackageDisregardTargetFrameworkOfDependencies()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(
@@ -546,12 +528,12 @@ namespace NuGet.Test
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageC));
         }
-
+        
         [Fact]
         public void InstallPackageInstallsPackagesWithPrereleaseDependenciesIfFlagIsSet()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -577,7 +559,7 @@ namespace NuGet.Test
         public void InstallPackageThrowsIfDependencyIsPrereleaseAndFlagIsNotSet()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -601,7 +583,7 @@ namespace NuGet.Test
         public void InstallPackageInstallsLowerReleaseVersionIfPrereleaseFlagIsNotSet()
         {
             // Arrange
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -623,8 +605,9 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageC));
-        }
+        } */
 
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void InstallPackageConsidersAlreadyInstalledPrereleasePackagesWhenResolvingDependencies()
         {
@@ -634,7 +617,7 @@ namespace NuGet.Test
             var packageA = PackageUtility.CreatePackage("A",
                                 dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("[0.5.0, 2.0.0)")) });
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -654,15 +637,16 @@ namespace NuGet.Test
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageB_10a));
 
-        }
+        } */
 
+        /* !!! Should be changed to a test using Install-Package cmdlet
         [Fact]
         public void InstallPackageNotifiesBatchProcessorWhenExpandingPackageFiles()
         {
             // Arrange
             var package = PackageUtility.CreatePackage("B", "0.5.0", content: new[] { "content.txt" }, assemblyReferences: new[] { "Ref.dll" });
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new Mock<MockFileSystem> { CallBase = true };
             var batchProcessor = fileSystem.As<IBatchProcessor<string>>();
@@ -680,7 +664,7 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(package));
             batchProcessor.Verify();
-        }
+        } 
 
         [Fact]
         public void InstallPackageDoesNotPerformWalkInfoCheckWhenPassingTheFlag()
@@ -691,7 +675,7 @@ namespace NuGet.Test
             // NuGet will happily accept that. Hence the installation will succeed.
             // This is used by the package restore mode.
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new MockSharedPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
@@ -713,7 +697,7 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageC));
-        }
+        } */
 
         private PackageManager CreatePackageManager()
         {
@@ -722,7 +706,7 @@ namespace NuGet.Test
                 new MockPackageRepository(),
                 new DefaultPackagePathResolver(projectSystem),
                 projectSystem,
-                new MockPackageRepository());
+                new MockSharedPackageRepository());
         }
     }
 }

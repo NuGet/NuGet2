@@ -29,11 +29,12 @@ namespace NuGet.Test
                                               string tags = "",
                                               string language = null,
                                               IEnumerable<string> satelliteAssemblies = null,
-                                              string minClientVersion = null)
+                                              string minClientVersion = null,
+                                              bool createRealStream = true)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
-
+            
             return CreatePackage(id,
                                  version,
                                  content,
@@ -47,7 +48,8 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  CreateAssemblyReferences(satelliteAssemblies),
-                                 minClientVersion);
+                                 minClientVersion,
+                                 createRealStream);
         }
 
         public static IPackage CreatePackage(string id,
@@ -92,7 +94,8 @@ namespace NuGet.Test
                                               string tags = "",
                                               string language = null,
                                               IEnumerable<string> satelliteAssemblies = null,
-                                              string minClientVersion = null)
+                                              string minClientVersion = null,
+                                              bool createRealStream = true)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
@@ -110,7 +113,8 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  CreateAssemblyReferences(satelliteAssemblies),
-                                 minClientVersion);
+                                 minClientVersion,
+                                 createRealStream);
         }
 
         public static IPackage CreatePackage(string id,
@@ -126,7 +130,8 @@ namespace NuGet.Test
                                               string tags,
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
-                                              string minClientVersion = null)
+                                              string minClientVersion = null,
+                                              bool createRealStream = true)
         {
             var dependencySets = new List<PackageDependencySet>
             {
@@ -146,9 +151,11 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  satelliteAssemblies,
-                                 minClientVersion);
+                                 minClientVersion,
+                                 createRealStream);
         }
 
+        // If content is null, "file1.txt" is used added as a content file.
         public static IPackage CreatePackage(string id,
                                               string version,
                                               IEnumerable<string> content,
@@ -162,9 +169,10 @@ namespace NuGet.Test
                                               string tags,
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
-                                              string minClientVersion = null)
+                                              string minClientVersion = null,
+                                              bool createRealStream = true)
         {
-            content = content ?? Enumerable.Empty<string>();
+            content = content ?? new[] { "file1.txt" };
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencySets = dependencySets ?? Enumerable.Empty<PackageDependencySet>();
@@ -189,7 +197,6 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Description).Returns(description);
             mockPackage.Setup(m => m.Language).Returns("en-US");
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
-            mockPackage.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             mockPackage.Setup(m => m.Summary).Returns(summary);
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(Enumerable.Empty<FrameworkAssemblyReference>());
@@ -214,7 +221,30 @@ namespace NuGet.Test
             var targetFramework = allFiles.Select(f => f.TargetFramework).Where(f => f != null);
             mockPackage.Setup(m => m.GetSupportedFrameworks()).Returns(targetFramework);
 
-            return mockPackage.Object;
+            // Create the package's stream
+            if (createRealStream)
+            {
+                PackageBuilder builder = new PackageBuilder();
+                builder.Id = id;
+                builder.Version = new SemanticVersion(version);
+                builder.Description = description;
+                builder.Authors.Add("Tester");
+
+                foreach (var f in allFiles)
+                {
+                    builder.Files.Add(f);
+                }
+                var packageStream = new MemoryStream();
+                builder.Save(packageStream);
+                packageStream.Seek(0, SeekOrigin.Begin);
+                mockPackage.Setup(m => m.GetStream()).Returns(packageStream);
+            }
+            else
+            {
+                mockPackage.Setup(m => m.GetStream()).Returns(new MemoryStream());
+            }
+
+            return mockPackage.Object; 
         }
 
         private static List<IPackageAssemblyReference> CreateAssemblyReferences(IEnumerable<string> fileNames)

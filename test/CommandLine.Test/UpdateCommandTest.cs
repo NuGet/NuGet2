@@ -12,6 +12,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 {
     public class UpdateCommandTest
     {
+        /*!!! These tests should be moved to Test.Intergration and be replaced with tests
+         that execute nuget.exe instead of using UpdateCommand class.
+         
         [Fact]
         public void UpdatePackageAddsPackagesToSharedPackageRepositoryWhenReferencesAreAdded()
         {
@@ -366,6 +369,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert
             sharedRepository.Verify();
-        }
+        } */
     }
 }

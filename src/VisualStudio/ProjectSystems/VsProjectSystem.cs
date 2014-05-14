@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio
             Debug.Assert(_baseFileSystem != null);
         }
 
-        protected Project Project
+        public Project Project
         {
             get;
             private set;
@@ -176,7 +176,7 @@ namespace NuGet.VisualStudio
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public virtual void AddReference(string referencePath, Stream stream)
+        public virtual void AddReference(string referencePath)
         {
             string name = Path.GetFileNameWithoutExtension(referencePath);
 

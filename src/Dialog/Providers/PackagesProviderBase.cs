@@ -10,6 +10,7 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 using NuGetConsole;
 
@@ -35,7 +36,7 @@ namespace NuGet.Dialog.Providers
         private IList<IVsSortDescriptor> _sortDescriptors;
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
-        private readonly ISolutionManager _solutionManager;
+        protected readonly ISolutionManager _solutionManager;
         private IDisposable _expandedNodesDisposable;
         private bool _overwriteAll, _ignoreAll;
 
@@ -656,57 +657,48 @@ namespace NuGet.Dialog.Providers
             return _solutionManager.GetProject(projectSystem.UniqueName);
         }
 
-        protected bool ShowLicenseAgreement(
-            IPackage package,
+        protected Tuple<IList<Operation>, OperationResolver> ResolveOperationsForInstall(
+            IPackage package, 
             IVsPackageManager packageManager,
-            IEnumerable<Project> projects,
-            out IList<PackageOperation> operations)
+            IEnumerable<Project> selectedProjectsList)
         {
-            var allOperations = new List<PackageOperation>();
-
-            foreach (Project project in projects)
+            // Resolve operations
+            var resolver = new OperationResolver(packageManager)
             {
-                var walker = new InstallWalker(
-                    packageManager.GetProjectManager(project).LocalRepository,
-                    packageManager.SourceRepository,
-                    project.GetTargetFrameworkName(),
-                    this,
-                    ignoreDependencies: false,
-                    allowPrereleaseVersions: IncludePrerelease,
-                    dependencyVersion: packageManager.DependencyVersion);
+                Logger = this,
+                DependencyVersion = packageManager.DependencyVersion,
+                AllowPrereleaseVersions = IncludePrerelease
+            };
 
-                allOperations.AddRange(walker.ResolveOperations(package));
+            var projectManagers = selectedProjectsList.Select(
+                p =>
+                {
+                    var pm = packageManager.GetProjectManager(p);
+                    pm.Logger = this;
+                    return pm;
+                })
+                .ToList();
+
+            var allProjectOperations = new List<Operation>();
+            foreach (var projectManager in projectManagers)
+            {
+                var projectOperations = resolver.ResolveProjectOperations(
+                    UserOperation.Install,
+                    package, 
+                    new VirtualProjectManager(projectManager));
+                allProjectOperations.AddRange(projectOperations);
             }
-
-            operations = allOperations.Reduce();
-            return ShowLicenseAgreement(packageManager, operations);
+            var operations = resolver.ResolveFinalOperations(allProjectOperations);
+            return Tuple.Create(operations, resolver);
         }
 
-        protected bool ShowLicenseAgreement(
-            IPackage package,
-            IVsPackageManager packageManager,
-            FrameworkName targetFramework,
-            out IList<PackageOperation> operations)   
+        protected bool ShowLicenseAgreement(IEnumerable<Operation> operations)
         {
-            var walker = new InstallWalker(
-                LocalRepository,
-                packageManager.SourceRepository,
-                targetFramework,
-                this,
-                ignoreDependencies: false,
-                allowPrereleaseVersions: IncludePrerelease,
-                dependencyVersion: packageManager.DependencyVersion);
-            operations = walker.ResolveOperations(package).ToList();
-            return ShowLicenseAgreement(packageManager, operations);
-        }
-
-        protected bool ShowLicenseAgreement(IVsPackageManager packageManager, IEnumerable<PackageOperation> operations)
-        {
-            var licensePackages = from o in operations
-                                  where o.Action == PackageAction.Install &&
-                                        o.Package.RequireLicenseAcceptance &&
-                                        !packageManager.LocalRepository.Exists(o.Package)
-                                  select o.Package;
+            var licensePackages = operations.Where(
+                    op => op.Action == PackageAction.Install &&
+                        op.Target == PackageOperationTarget.PackagesFolder &&
+                        op.Package.RequireLicenseAcceptance)
+                    .Select(op => op.Package);
 
             // display license window if necessary
             if (licensePackages.Any())

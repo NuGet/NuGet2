@@ -38,6 +38,8 @@ namespace NuGet.Dialog.Providers
             _userNotifierServices = providerServices.UserNotifierServices;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
         protected override bool ExecuteCore(PackageItem item)
         {
             _activePackageManager = GetActivePackageManager();
@@ -55,20 +57,20 @@ namespace NuGet.Dialog.Providers
                         // Selector function to return the initial checkbox state for a Project.
                         // We check a project if it has the current package installed by Id, but not version
                         project =>
-                            {
-                                var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
-                                return localRepository.Exists(item.Id) && IsVersionConstraintSatisfied(item, localRepository);
-                            },
+                        {
+                            var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
+                            return localRepository.Exists(item.Id) && IsVersionConstraintSatisfied(item, localRepository);
+                        },
                         project =>
-                            {
-                                var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
+                        {
+                            var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
-                                // for the Updates solution dialog, we only enable a project if it has an old version of
-                                // the package installed.
-                                return localRepository.Exists(item.Id) &&
-                                       !localRepository.Exists(item.Id, item.PackageIdentity.Version) &&
-                                       IsVersionConstraintSatisfied(item, localRepository);
-                            }
+                            // for the Updates solution dialog, we only enable a project if it has an old version of
+                            // the package installed.
+                            return localRepository.Exists(item.Id) &&
+                                   !localRepository.Exists(item.Id, item.PackageIdentity.Version) &&
+                                   IsVersionConstraintSatisfied(item, localRepository);
+                        }
                     );
 
                     if (selectedProjects == null)
@@ -87,43 +89,57 @@ namespace NuGet.Dialog.Providers
                 }
                 else
                 {
-                    // solution package. just update into the solution
-                    selectedProjectsList = new Project[0];
+                    // solution package. just install into the active project.
+                    selectedProjectsList = new Project[] { _solutionManager.DefaultProject };
                 }
 
-                IList<PackageOperation> operations;
-                bool acceptLicense = isProjectLevel ? ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, selectedProjectsList, out operations)
-                                                    : ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, targetFramework: null, operations: out operations);
-
+                // resolve operations
+                var resolveResult = ResolveOperationsForInstall(
+                    item.PackageIdentity,
+                    _activePackageManager,
+                    selectedProjectsList);
+                var operations = resolveResult.Item1;
+                var resolver = resolveResult.Item2;
+                bool acceptLicense = ShowLicenseAgreement(operations);
                 if (!acceptLicense)
                 {
                     return false;
                 }
 
-                if (!isProjectLevel && operations.Any())
+                var userOperationExecutor = new OperationExecutor();
+                userOperationExecutor.Logger = this;
+                userOperationExecutor.PackageOperationEventListener = this;
+                userOperationExecutor.CatchProjectOperationException = true;
+
+                // execute operations by project
+                var operationsByProject = operations.Where(p => p.ProjectManager != null)
+                    .GroupBy(p => p.ProjectManager);
+                foreach (var operationsInOneProject in operationsByProject)
                 {
-                    // When dealing with solution level packages, only the set of actions specified under operations are executed.
-                    // In such a case, no operation to uninstall the current package is specified. We'll identify the package that is being updated and
-                    // explicitly add a uninstall operation.
-                    var packageToUpdate = _activePackageManager.LocalRepository.FindPackage(item.Id);
-                    if (packageToUpdate != null)
+                    var projectManager = operationsInOneProject.Key;
+                    var project = ((VsProjectSystem)(projectManager.Project)).Project;
+                    try
                     {
-                        operations.Insert(0, new PackageOperation(packageToUpdate, PackageAction.Uninstall));
+                        RegisterPackageOperationEvents(_activePackageManager, projectManager);
+                        var ops = resolver.ResolveFinalOperations(operationsInOneProject);
+                        userOperationExecutor.Execute(ops);
+                    }
+                    catch (Exception ex)
+                    {
+                        AddFailedProject(project, ex);
+                    }
+                    finally
+                    {
+                        UnregisterPackageOperationEvents(_activePackageManager, projectManager);
                     }
                 }
 
+                // execute operations in packages folder
+                var solutionLevelOperations = operations.Where(p => p.Target == PackageOperationTarget.PackagesFolder);
                 try
                 {
                     RegisterPackageOperationEvents(_activePackageManager, null);
-
-                    _activePackageManager.UpdatePackage(
-                        selectedProjectsList,
-                        item.PackageIdentity,
-                        operations,
-                        updateDependencies: true,
-                        allowPrereleaseVersions: IncludePrerelease,
-                        logger: this,
-                        eventListener: this);
+                    userOperationExecutor.Execute(solutionLevelOperations);
                 }
                 finally
                 {
@@ -150,49 +166,6 @@ namespace NuGet.Dialog.Providers
             return true;
         }
 
-        protected override bool ExecuteAllCore()
-        {
-            if (SelectedNode == null || SelectedNode.Extensions == null || SelectedNode.Extensions.Count == 0)
-            {
-                return false;
-            }
-
-            ShowProgressWindow();
-
-            _activePackageManager = GetActivePackageManager();
-            Debug.Assert(_activePackageManager != null);
-
-            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
-
-            try
-            {
-                IList<PackageOperation> allOperations;
-                IList<IPackage> allUpdatePackagesByDependencyOrder;
-                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager, out allOperations, out allUpdatePackagesByDependencyOrder);
-                if (!accepted)
-                {
-                    return false;
-                }
-
-                RegisterPackageOperationEvents(_activePackageManager, null);
-
-                _activePackageManager.UpdateSolutionPackages(
-                    allUpdatePackagesByDependencyOrder,
-                    allOperations,
-                    updateDependencies: true,
-                    allowPrereleaseVersions: IncludePrerelease,
-                    logger: this,
-                    eventListener: this);
-
-                return true;
-            }
-            finally
-            {
-                UnregisterPackageOperationEvents(_activePackageManager, null);
-                action.Dispose();
-            }
-        }
-
         public override IVsExtension CreateExtension(IPackage package)
         {
             return new PackageItem(this, package)
@@ -201,19 +174,23 @@ namespace NuGet.Dialog.Providers
             };
         }
 
-        public void OnBeforeAddPackageReference(Project project)
+        public void OnBeforeAddPackageReference(IProjectManager projectManager)
         {
-            RegisterPackageOperationEvents(null, _activePackageManager.GetProjectManager(project));
+            RegisterPackageOperationEvents(null, projectManager);
         }
 
-        public void OnAfterAddPackageReference(Project project)
+        public void OnAfterAddPackageReference(IProjectManager projectManager)
         {
-            UnregisterPackageOperationEvents(null, _activePackageManager.GetProjectManager(project));
+            UnregisterPackageOperationEvents(null, projectManager);
         }
 
-        public void OnAddPackageReferenceError(Project project, Exception exception)
+        public void OnAddPackageReferenceError(IProjectManager projectManager, Exception exception)
         {
-            AddFailedProject(project, exception);
+            var projectSystem = projectManager.Project as VsProjectSystem;
+            if (projectSystem != null)
+            {
+                AddFailedProject(projectSystem.Project, exception);
+            }
         }
     }
 }

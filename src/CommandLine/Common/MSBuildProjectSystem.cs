@@ -35,7 +35,7 @@ namespace NuGet.Common
             // No-op
         }
 
-        public void AddReference(string referencePath, Stream stream)
+        public void AddReference(string referencePath)
         {
             string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
             string relativePath = PathUtility.GetRelativePath(Project.FullPath, fullPath);

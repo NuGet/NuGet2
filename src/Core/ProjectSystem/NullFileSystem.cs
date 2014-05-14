@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NuGet
 {
-    internal class NullFileSystem : IFileSystem
+    public class NullFileSystem : IFileSystem
     {
         private static readonly NullFileSystem _instance = new NullFileSystem();
 

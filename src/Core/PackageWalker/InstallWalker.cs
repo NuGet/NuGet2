@@ -359,11 +359,17 @@ namespace NuGet
         }
 
         protected override void OnAfterPackageWalk(IPackage package)
-        {
+        {   
             if (!Repository.Exists(package))
             {
                 // Don't add the package for installation if it already exists in the repository
-                _operations.AddOperation(new PackageOperation(package, PackageAction.Install));
+                var operation = new PackageOperation(package, PackageAction.Install);
+                var packageTarget = GetPackageTarget(package);
+                if (packageTarget == PackageTargets.External)
+                {
+                    operation.Target = PackageOperationTarget.PackagesFolder;
+                };
+                _operations.AddOperation(operation);
             }
             else
             {

@@ -140,20 +140,6 @@ function Test-UpdatingPackageWhatIf {
     Assert-Package $p A 2.0
 }
 
-function Test-UpdatingPackageWhatIfCannotBeUsedWithReinstall {
-    param(
-        $context
-    )
-    
-    # Arrange
-    $p = New-ClassLibrary
-    Install-Package Castle.Core -Version 1.2.0 -Project $p.Name
-    Assert-Package $p Castle.Core 1.2.0
-
-    # Act & Assert
-    Assert-Throws { Update-Package Castle.Core -Reinstall -WhatIf } "Specifying both -Reinstall and -WhatIf is not supported for now."
-}
-
 function Test-UpdatingPackageWithSharedDependencySimple {
     param(
         $context
@@ -937,17 +923,20 @@ function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     # The install.ps1 in the TestUpdatePackage package will add the project name to $global:InstallPackageMessages collection
     # The install.ps1 in the TestUpdateSecondPackage package will add the (project name + ' second') to $global:InstallPackageMessages collection
 
+	$global:InstallPackageMessages = $global:InstallPackageMessages | Sort-Object 
     Assert-AreEqual 4 $global:InstallPackageMessages.Count
-    Assert-AreEqual 'Project1second' $global:InstallPackageMessages[0]
-    Assert-AreEqual 'Project2second' $global:InstallPackageMessages[1]
-    Assert-AreEqual 'Project1' $global:InstallPackageMessages[2]
-    Assert-AreEqual 'Project2' $global:InstallPackageMessages[3]
+    Assert-AreEqual 'Project1' $global:InstallPackageMessages[0]
+	Assert-AreEqual 'Project1second' $global:InstallPackageMessages[1]    
+    Assert-AreEqual 'Project2' $global:InstallPackageMessages[2]
+	Assert-AreEqual 'Project2second' $global:InstallPackageMessages[3]
+    
 
+	$global:UninstallPackageMessages = $global:UninstallPackageMessages | Sort-Object
     Assert-AreEqual 4 $global:UninstallPackageMessages.Count
-    Assert-AreEqual 'uninstallProject1second' $global:UnInstallPackageMessages[0]
-    Assert-AreEqual 'uninstallProject2second' $global:UnInstallPackageMessages[1]
-    Assert-AreEqual 'uninstallProject1' $global:UnInstallPackageMessages[2]
-    Assert-AreEqual 'uninstallProject2' $global:UnInstallPackageMessages[3]
+    Assert-AreEqual 'uninstallProject1' $global:UnInstallPackageMessages[0]
+	Assert-AreEqual 'uninstallProject1second' $global:UnInstallPackageMessages[1]
+    Assert-AreEqual 'uninstallProject2' $global:UnInstallPackageMessages[2]
+	Assert-AreEqual 'uninstallProject2second' $global:UnInstallPackageMessages[3]
 
     #clean up
     Remove-Variable InstallPackageMessages -Scope Global

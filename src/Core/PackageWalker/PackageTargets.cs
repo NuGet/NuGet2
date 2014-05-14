@@ -7,7 +7,10 @@ namespace NuGet
     {
         None = 0,
         Project = 1,
-        External = 2,
+
+        // Indicates that the package is a solution level package
+        External = 2, 
+
         All = Project | External
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
@@ -173,6 +173,10 @@
     <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj" Condition="$(VisualStudioVersion)=='12.0'">
       <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
       <Name>VisualStudio12</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VisualStudioResources\VisualStudioResources.csproj">
+      <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+      <Name>VisualStudioResources</Name>
     </ProjectReference>
     <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
