@@ -27,6 +27,7 @@ namespace NuGet.Common
         }
 
         public IConsole Console { get; set; }
+        public bool IncludePrerelease { get; set; }
 
         public void UpdateSelf()
         {
@@ -43,7 +44,7 @@ namespace NuGet.Common
             IPackageRepository packageRepository = _repositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
             IPackage package = packageRepository.GetUpdates(
                 new [] { new PackageName(NuGetCommandLinePackageId, version) },
-                includePrerelease: true, 
+                includePrerelease: IncludePrerelease, 
                 includeAllVersions: false, 
                 targetFrameworks: null,
                 versionConstraints: null).FirstOrDefault();
