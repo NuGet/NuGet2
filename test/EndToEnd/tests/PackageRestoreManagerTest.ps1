@@ -65,7 +65,7 @@ function Test-EnablePackageRestoreModifyProjectThatInstallNewPackages
 
 function Test-EnablePackageRestoreOnCpsProjects
 {
-    if ($dte.Version -eq "10.0")
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "14.0")
     {
         return
     }
