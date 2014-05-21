@@ -154,9 +154,10 @@ function global:Run-Test {
     {
     }
     
+	$startTime = Get-Date
     try {
         # Run all tests        
-        $testIndex = 0
+        $testIndex = 0		
 
         $tests | %{ 
             $testIndex++
@@ -167,7 +168,7 @@ function global:Run-Test {
             "Running Test $name..."
 
             # Write to log file as we run tests
-            "$(Get-Date -format u) Running Test $name... ($testIndex / $($tests.Count))" >> $testLogFile
+            "$(Get-Date -format o) Running Test $name... ($testIndex / $($tests.Count))" >> $testLogFile
             
             $repositoryPath = Join-Path $testRepositoryPath $name
 
@@ -263,6 +264,10 @@ function global:Run-Test {
         }
     }
     finally {        
+		$endTime = Get-Date
+		$totalTimeUsed = ($endTime - $startTime).TotalSeconds
+		"Total time used $totalTimeUsed seconds" >> $testLogFile
+
         # Deleting tests
         rm function:\Test*
         
