@@ -40,23 +40,29 @@ namespace NuGet.Options
         {
             InitializeComponent();
 
-            if (!VsVersionHelper.IsVisualStudio2010)
-            {
-                // update the button icons to use grayscale versions
-                foreach (Control child in tableLayoutPanel2.Controls)
-                {
-                    var button = child as Button;
-                    if (button != null)
-                    {
-                        button.ImageList = imageList2;
-                        button.Padding = new Padding(3);
-                    }
-                }
-            }
-
             _serviceProvider = serviceProvider;
             _packageSourceProvider = packageSourceProvider;
             SetupEventHandlers();
+
+            UpdateDPI();
+        }
+
+        private void UpdateDPI()
+        {
+            var imgs = images16px;
+            if (addButton.Height > 72)
+            {
+                imgs = images64px;
+            }
+            else if (addButton.Height > 40)
+            {
+                imgs = images32px;
+            }
+
+            addButton.ImageList = imgs;
+            removeButton.ImageList = imgs;
+            MoveUpButton.ImageList = imgs;
+            MoveDownButton.ImageList = imgs;
         }
 
         private void SetupEventHandlers()
@@ -134,6 +140,7 @@ namespace NuGet.Options
             }
 
             _initialized = true;
+
             // get packages sources
             IList<PackageSource> allPackageSources = _packageSourceProvider.LoadPackageSources().ToList();
             IList<PackageSource> packageSources = allPackageSources.Where(ps => !ps.IsMachineWide).ToList();

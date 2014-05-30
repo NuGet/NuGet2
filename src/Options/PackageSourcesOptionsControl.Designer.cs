@@ -35,7 +35,7 @@ namespace NuGet.Options
             this.PackageSourcesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.CopyPackageSourceStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeButton = new System.Windows.Forms.Button();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.images16px = new System.Windows.Forms.ImageList(this.components);
             this.MoveUpButton = new System.Windows.Forms.Button();
             this.MoveDownButton = new System.Windows.Forms.Button();
             this.packageListToolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -51,7 +51,8 @@ namespace NuGet.Options
             this.addButton = new System.Windows.Forms.Button();
             this.MachineWideSourcesLabel = new System.Windows.Forms.Label();
             this.MachineWidePackageSourcesListBox = new System.Windows.Forms.ListBox();
-            this.imageList2 = new System.Windows.Forms.ImageList(this.components);
+            this.images32px = new System.Windows.Forms.ImageList(this.components);
+            this.images64px = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -78,31 +79,31 @@ namespace NuGet.Options
             // removeButton
             // 
             resources.ApplyResources(this.removeButton, "removeButton");
-            this.removeButton.ImageList = this.imageList1;
+            this.removeButton.ImageList = this.images16px;
             this.removeButton.Name = "removeButton";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.OnRemoveButtonClick);
             // 
-            // imageList1
+            // images16px
             // 
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "uparrow.png");
-            this.imageList1.Images.SetKeyName(1, "downarrow.png");
-            this.imageList1.Images.SetKeyName(2, "Delete.png");
-            this.imageList1.Images.SetKeyName(3, "add.png");
+            this.images16px.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("images16px.ImageStream")));
+            this.images16px.TransparentColor = System.Drawing.Color.Transparent;
+            this.images16px.Images.SetKeyName(0, "up_512.png");
+            this.images16px.Images.SetKeyName(1, "down_512.png");
+            this.images16px.Images.SetKeyName(2, "cancel_512.png");
+            this.images16px.Images.SetKeyName(3, "add_512.png");
             // 
             // MoveUpButton
             // 
             resources.ApplyResources(this.MoveUpButton, "MoveUpButton");
-            this.MoveUpButton.ImageList = this.imageList1;
+            this.MoveUpButton.ImageList = this.images16px;
             this.MoveUpButton.Name = "MoveUpButton";
             this.MoveUpButton.UseVisualStyleBackColor = true;
             // 
             // MoveDownButton
             // 
             resources.ApplyResources(this.MoveDownButton, "MoveDownButton");
-            this.MoveDownButton.ImageList = this.imageList1;
+            this.MoveDownButton.ImageList = this.images16px;
             this.MoveDownButton.Name = "MoveDownButton";
             this.MoveDownButton.UseVisualStyleBackColor = true;
             // 
@@ -185,7 +186,7 @@ namespace NuGet.Options
             // addButton
             // 
             resources.ApplyResources(this.addButton, "addButton");
-            this.addButton.ImageList = this.imageList1;
+            this.addButton.ImageList = this.images16px;
             this.addButton.Name = "addButton";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
@@ -198,12 +199,12 @@ namespace NuGet.Options
             // 
             // MachineWidePackageSourcesListBox
             // 
+            resources.ApplyResources(this.MachineWidePackageSourcesListBox, "MachineWidePackageSourcesListBox");
             this.MachineWidePackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tableLayoutPanel1.SetColumnSpan(this.MachineWidePackageSourcesListBox, 4);
             this.MachineWidePackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.MachineWidePackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
             this.MachineWidePackageSourcesListBox.FormattingEnabled = true;
-            resources.ApplyResources(this.MachineWidePackageSourcesListBox, "MachineWidePackageSourcesListBox");
             this.MachineWidePackageSourcesListBox.Name = "MachineWidePackageSourcesListBox";
             this.MachineWidePackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.PackageSourcesListBox_DrawItem);
             this.MachineWidePackageSourcesListBox.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.PackageSourcesListBox_MeasureItem);
@@ -211,14 +212,23 @@ namespace NuGet.Options
             this.MachineWidePackageSourcesListBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseMove);
             this.MachineWidePackageSourcesListBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseUp);
             // 
-            // imageList2
+            // images32px
             // 
-            this.imageList2.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList2.ImageStream")));
-            this.imageList2.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList2.Images.SetKeyName(0, "uparrow.png");
-            this.imageList2.Images.SetKeyName(1, "downarrow.png");
-            this.imageList2.Images.SetKeyName(2, "delete.png");
-            this.imageList2.Images.SetKeyName(3, "addgrayscale.png");
+            this.images32px.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("images32px.ImageStream")));
+            this.images32px.TransparentColor = System.Drawing.Color.Transparent;
+            this.images32px.Images.SetKeyName(0, "up_512.png");
+            this.images32px.Images.SetKeyName(1, "down_512.png");
+            this.images32px.Images.SetKeyName(2, "cancel_512.png");
+            this.images32px.Images.SetKeyName(3, "add_512.png");
+            // 
+            // images64px
+            // 
+            this.images64px.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("images64px.ImageStream")));
+            this.images64px.TransparentColor = System.Drawing.Color.Transparent;
+            this.images64px.Images.SetKeyName(0, "up_512.png");
+            this.images64px.Images.SetKeyName(1, "down_512.png");
+            this.images64px.Images.SetKeyName(2, "cancel_512.png");
+            this.images64px.Images.SetKeyName(3, "add_512.png");
             // 
             // PackageSourcesOptionsControl
             // 
@@ -254,10 +264,11 @@ namespace NuGet.Options
         private ListBox PackageSourcesListBox;
         private Label NewPackageNameLabel;
         private TableLayoutPanel tableLayoutPanel2;
-        private ImageList imageList1;
-        private ImageList imageList2;
+        private ImageList images16px;
         private Button addButton;
         private Label MachineWideSourcesLabel;
         private ListBox MachineWidePackageSourcesListBox;
+        private ImageList images32px;
+        private ImageList images64px;
     }
 }
