@@ -63,7 +63,24 @@ namespace NuGet
             { "MonoMac", "MonoMac" },
             { "native", "native"},
             { "WindowsPhoneApp", "WindowsPhoneApp"},
-            { "wpa", "WindowsPhoneApp"}
+            { "wpa", "WindowsPhoneApp"},
+            { "Xamarin.iOS", "Xamarin.iOS" },
+            { "XamariniOS", "Xamarin.iOS" },
+            { "Xamarin.Mac", "Xamarin.Mac" },
+            { "XamarinMac", "Xamarin.Mac" },
+            { "Xamarin.PlayStationThree", "Xamarin.PlayStation3" },
+            { "XamarinPlayStationThree", "Xamarin.PlayStation3" },
+            { "XamarinPSThree", "Xamarin.PlayStation3" },
+            { "Xamarin.PlayStationFour", "Xamarin.PlayStation4" },
+            { "XamarinPlayStationFour", "Xamarin.PlayStation4" },
+            { "XamarinPSFour", "Xamarin.PlayStation4" },
+            { "Xamarin.PlayStationVita", "Xamarin.PlayStationVita" },
+            { "XamarinPlayStationVita", "Xamarin.PlayStationVita" },
+            { "XamarinPSVita", "Xamarin.PlayStationVita" },
+            { "Xamarin.XboxThreeSixty", "Xamarin.Xbox360" },
+            { "XamarinXboxThreeSixty", "Xamarin.Xbox360" },
+            { "Xamarin.XboxOne", "Xamarin.XboxOne" },
+            { "XamarinXboxOne", "Xamarin.XboxOne" }
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -82,7 +99,14 @@ namespace NuGet
             { "Windows", "win"},
             { ".NETPortable", "portable" },
             { "WindowsPhone", "wp"},
-            { "WindowsPhoneApp", "wpa"}
+            { "WindowsPhoneApp", "wpa"},
+            { "Xamarin.iOS", "xamarinios" },
+            { "Xamarin.Mac", "xamarinmac" },
+            { "Xamarin.PlayStation3", "xamarinpsthree" },
+            { "Xamarin.PlayStation4", "xamarinpsfour" },
+            { "Xamarin.PlayStationVita", "xamarinpsvita" },
+            { "Xamarin.Xbox360", "xamarinxboxthreesixty" },
+            { "Xamarin.XboxOne", "xamarinxboxone" }
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

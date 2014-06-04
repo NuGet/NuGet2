@@ -352,6 +352,40 @@ namespace NuGet.Test
             }
         }
 
+        [Theory]
+        [InlineData(new[] { "XamarinIOS", "xamarinios", "XAMARINIOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(new[] { "Xamarin.iOS", "xamarin.ios", "XAMARIN.IOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(new[] { "XamarinMac", "xamarinmac", "XAMARINMAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(new[] { "Xamarin.Mac", "xamarin.mac", "XAMARIN.MAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(new[] { "XamarinPlayStationThree", "xamarinplaystationthree", "XAMARINPLAYSTATIONthree " }, "0.0","Xamarin.PlayStation3")]
+        [InlineData(new[] { "Xamarin.PlayStationThree", "xamarin.playstationthree", "XAMARIN.PLAYSTATIONTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(new[] { "XamarinPSThree", "xamarinpsthree", "XAMARINPSTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(new[] { "XamarinPlayStationFour", "xamarinplaystationfour", "XAMARINPLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(new[] { "Xamarin.PlayStationFour", "xamarin.playstationfour", "XAMARIN.PLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(new[] { "XamarinPSFour", "xamarinpsfour", "XAMARINPSFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(new[] { "XamarinXboxOne", "xamarinxboxone", "XAMARINXBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        [InlineData(new[] { "Xamarin.XboxOne", "xamarin.xboxone", "XAMARIN.XBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        public void ParseFrameworkNameNormalizesSupportedXamarinFrameworkNames(string[] knownNameFormats, string version, string expectedIdentifier)
+        {
+            // Arrange
+            Version defaultVersion = new Version(version);
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal(expectedIdentifier, frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
         [Fact]
         public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
         {
@@ -1324,6 +1358,72 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal("wp71", shortName);
+        }
+
+        [Theory]
+        [InlineData("Xamarin.Mac, Version=v1.0", "xamarinmac10")]
+        [InlineData("Xamarin.iOS, Version=v1.0", "xamarinios10")]
+        [InlineData("Xamarin.PlayStation3, Version=v1.0", "xamarinpsthree10")]
+        [InlineData("Xamarin.PlayStation4, Version=v1.0", "xamarinpsfour10")]
+        [InlineData("Xamarin.PlayStationVita, Version=v1.0", "xamarinpsvita10")]
+        [InlineData("Xamarin.Xbox360, Version=v1.0", "xamarinxboxthreesixty10")]
+        [InlineData("Xamarin.XboxOne, Version=v1.0", "xamarinxboxone10")]
+        public void GetShortNameForXamarinFrameworks(string frameworkIdentifier, string expectedShortName)
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName(frameworkIdentifier));
+
+            // Assert
+            Assert.Equal(expectedShortName, shortName);
+        }
+
+        [Theory]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile1", "portable-net45+xamarinmac10+xamarinios10")]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile2", "portable-net40+win+xamarinpsthree10+xamarinpsfour10+xamarinpsvita10")]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile3", "portable-net40+xamarinxboxthreesixty10+xamarinxboxone10")]
+        public void TestGetShortNameForPortableXamarinFrameworks(string frameworkIdentifier, string expectedShortName)
+        {
+            // Arrange
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Xamarin.Mac, Version=1.0"), 
+                           new FrameworkName("Xamarin.iOS, Version=1.0"), 
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Xamarin.PlayStation3, Version=1.0"), 
+                           new FrameworkName("Xamarin.PlayStation4, Version=1.0"), 
+                           new FrameworkName("Xamarin.PlayStationVita, Version=1.0"), 
+                      });
+
+            var profile3 = new NetPortableProfile(
+               "Profile3",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Xamarin.Xbox360, Version=1.0"), 
+                           new FrameworkName("Xamarin.XboxOne, Version=1.0"), 
+                      });
+
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+            profileCollection.Add(profile3);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            var framework = new FrameworkName(frameworkIdentifier);
+
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(framework);
+
+            // Assert
+            Assert.Equal(expectedShortName, shortName);
         }
 
         [Theory]
