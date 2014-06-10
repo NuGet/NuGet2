@@ -240,11 +240,24 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private static PackageSource DeserializeActivePackageSource(
+        private PackageSource DeserializeActivePackageSource(
             ISettings settings,
             IVsShellInfo vsShellInfo)
         {
+            var enabledSources = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+            foreach (var source in _packageSources.Where(p => p.IsEnabled))
+            {
+                enabledSources.Add(source.Name);
+            }
+
+            // The special aggregate source, i.e. "All", is always enabled.
+            enabledSources.Add(Resources.VsResources.AggregateSourceName);
+
             var settingValues = settings.GetValues(ActivePackageSourceSectionName);
+            if (settingValues != null)
+            {
+                settingValues = settingValues.Where(s => enabledSources.Contains(s.Key)).ToList();
+            }
 
             PackageSource packageSource = null;
             if (settingValues != null && settingValues.Any())

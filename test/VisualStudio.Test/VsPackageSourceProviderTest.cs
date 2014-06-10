@@ -277,6 +277,33 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void ActivePackageSourceShouldBeEnabled()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>(MockBehavior.Strict);            
+            userSettings.Setup(_ => _.GetValues("activePackageSource")).Returns(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("s1", "http://s1"),
+                new KeyValuePair<string, string>("s2", "http://s2")
+            });
+
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(
+                new[] { 
+                    new PackageSource("http://s1", "s1", isEnabled: false),
+                    new PackageSource("http://s2", "s2", isEnabled: true)
+                });
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            var source = provider.ActivePackageSource;
+
+            // Assert
+            AssertPackageSource(source, "s2", "http://s2");
+        }
+
+        [Fact]
         public void SettingActivePackageSourceToNonExistantSourceThrows()
         {
             // Arrange
@@ -309,7 +336,7 @@ namespace NuGet.VisualStudio.Test
         public void GetActivePackageSourceWillPreserveWindows8ExpressSourceWhenRunningWindows8Express()
         {
             // Arrange
-            var userSettings = new Mock<ISettings>(MockBehavior.Strict);
+            var userSettings = new Mock<ISettings>();
             userSettings.Setup(_ => _.GetSettingValues("packageSources", true)).Returns(new[]
             {
                 new SettingValue(NuGetOfficialFeedName, NuGetOfficialFeedUrl, false)
@@ -320,6 +347,8 @@ namespace NuGet.VisualStudio.Test
             });
 
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.IsPackageSourceEnabled(
+                It.Is<PackageSource>(s => s.Name == "Windows 8 Packages"))).Returns(true);
             var vsShellInfo = new Mock<IVsShellInfo>();
             vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
             var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
