@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="NuGet.67e54e40-0ae3-42c5-a949-fddf5739e6a5">
+  <Identifier Id="NuGet.0d421874-a3b2-4f67-b53a-ecfce878063b">
     <Name>NuGet Package Manager for Visual Studio vNext</Name>
     <Author>Outercurve Foundation</Author>
     <Version>2.8.0.0</Version>
