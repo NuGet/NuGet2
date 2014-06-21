@@ -142,6 +142,6 @@
     <value>Value cannot be an empty string. It must either be null or a non-empty string.</value>
   </data>
   <data name="EnsureImportedMessage" xml:space="preserve">
-    <value>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</value>
+    <value>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</value>
   </data>
 </root>

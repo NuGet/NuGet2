@@ -157,7 +157,7 @@ namespace NuGet
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.
+        ///   Looks up a localized string similar to This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
         internal static string EnsureImportedMessage

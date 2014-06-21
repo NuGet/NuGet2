@@ -274,11 +274,6 @@ namespace NuGet.Tools
                 CommandID visualizerCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, PkgCmdIDList.cmdIdVisualizer);
                 OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
                 _mcs.AddCommand(visualizerCommand);
-
-                // menu command for Package Restore command
-                CommandID restorePackagesCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidRestorePackages);
-                var restorePackagesCommand = new OleMenuCommand(EnablePackagesRestore, null, QueryStatusEnablePackagesRestore, restorePackagesCommandID);
-                _mcs.AddCommand(restorePackagesCommand);
             }
         }
 
