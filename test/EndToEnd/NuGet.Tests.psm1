@@ -121,6 +121,11 @@ function global:Run-Test {
         $File = "*.ps1"
     }
 
+    if ($SourceNuGet -eq $null) 
+    {
+        $SourceNuGet = "nuget.org"
+    }
+
     # Load all of the test scripts
     Get-ChildItem $testPath -Filter $File | %{ 
         . $_.FullName
