@@ -427,12 +427,12 @@ function Test-UpdatePackageWithOlderVersionOfSharedDependencyInUse {
 function Test-UpdatePackageAcceptsSourceName {
     # Arrange
     $p = New-ConsoleApplication
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET.ORG'
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source $SourceNuGet
 
     Assert-Package $p Antlr 3.1.1
 
     # Act
-    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'nuget.org'
+    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source $SourceNuGet
 
     # Assert
     Assert-Package $p Antlr 3.1.3.42154
