@@ -27,7 +27,8 @@ function Test-OpenPackagePageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     $p = Open-PackagePage elmah -Report -WhatIf -PassThru -Version 1.1
 
     # Assert
-    Assert-AreEqual 'https://www.nuget.org/Package/ReportAbuse/elmah/1.1.0' $p.OriginalString
+	$expectedString = $SourceNuGet.Replace('api/v2', '') + '/Package/ReportAbuse/elmah/1.1.0'
+    Assert-AreEqual $expectedString $p.OriginalString
 }
 
 function Test-OpenPackagePageFailsIfIdIsSetToTheWrongValue {
