@@ -123,7 +123,7 @@ function global:Run-Test {
 
     if ($SourceNuGet -eq $null) 
     {
-        $SourceNuGet = "nuget.org"
+        $SourceNuGet = "https://www.nuget.org"
     }
 
     # Load all of the test scripts
