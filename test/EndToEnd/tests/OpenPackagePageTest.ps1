@@ -93,13 +93,13 @@ function Test-OpenPackagePageFailsIfLicenseUrlIsNotAvailable {
 
 function Test-OpenPackagePageAcceptSourceName {
     # Act
-    $p = Open-PackagePage 'elmah' -Source 'nUGet.OrG' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -Source $SourceNuGet -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
 
     # Act
-    $p = Open-PackagePage 'elmah' -License -Source 'nuGEt.oRG' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -License -Source $SourceNuGet -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString
