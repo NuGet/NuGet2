@@ -2280,7 +2280,7 @@ function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
     Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
-function Test-InstallPackageIntoJavaScriptApplication
+function InstallPackageIntoJavaScriptApplication
 {
     if ($dte.Version -eq "10.0")
     {
