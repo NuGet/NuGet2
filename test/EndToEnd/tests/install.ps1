@@ -2315,7 +2315,7 @@ function Test-InstallPackageIntoJavaScriptWindowsPhoneApp
     Assert-Package $p "jQuery"
 }
 
-function Test-InstallPackageIntoNativeWinStoreApplication
+function InstallPackageIntoNativeWinStoreApplication
 {
     if ($dte.Version -eq "10.0")
     {
