@@ -9,6 +9,9 @@ namespace NuGet.VisualStudio.Test
 {
     public class VsPackageSourceProviderTest
     {
+        private const string NuGetOfficialFeedUrlV3 = "http://nuget3.blob.core.windows.net/preview/";
+        private const string NuGetOfficialFeedNameV3 = "nuget.org v3.0.0 preview";
+
         private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
         private const string NuGetOfficialFeedName = "nuget.org";
         private const string NuGetLegacyOfficialFeedName = "NuGet official package source";
@@ -25,8 +28,8 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
-            Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
+            Assert.Equal(2, sources.Count);
+            Assert.Equal(NuGetOfficialFeedUrl, sources[1].Source);
         }
 
         [Fact]
@@ -43,7 +46,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
+            Assert.Equal(2, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
         }
 
@@ -61,7 +64,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
+            Assert.Equal(2, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
         }
 
@@ -79,7 +82,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
+            Assert.Equal(2, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
             Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
         }
@@ -98,7 +101,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
+            Assert.Equal(2, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
             Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
         }
@@ -123,14 +126,14 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(3, sources.Count);
+            Assert.Equal(4, sources.Count);
 
             Assert.Equal("https://test2", sources[0].Source);
 
-            Assert.Equal(NuGetOfficialFeedUrl, sources[1].Source);
-            Assert.False(sources[1].IsEnabled);
+            Assert.Equal(NuGetOfficialFeedUrl, sources[2].Source);
+            Assert.False(sources[2].IsEnabled);
 
-            Assert.Equal("https://test1", sources[2].Source);
+            Assert.Equal("https://test1", sources[3].Source);
         }
 
         // Test that when there are machine wide user specified sources, but no non-machine
@@ -152,9 +155,9 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(3, sources.Count);
-            Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
-            Assert.True(sources[0].IsEnabled);
+            Assert.Equal(4, sources.Count);
+            Assert.Equal(NuGetOfficialFeedUrl, sources[1].Source);
+            Assert.True(sources[1].IsEnabled);
         }
 
         [Fact]
@@ -171,9 +174,9 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(2, sources.Count);
+            Assert.Equal(3, sources.Count);
             AssertPackageSource(sources[0], "my source", "http://www.nuget.org");
-            AssertPackageSource(sources[1], NuGetOfficialFeedName, NuGetOfficialFeedUrl);
+            AssertPackageSource(sources[2], NuGetOfficialFeedName, NuGetOfficialFeedUrl);
             Assert.False(sources[1].IsEnabled);
             Assert.True(sources[1].IsOfficial);
         }
@@ -196,7 +199,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
+            Assert.Equal(2, sources.Count);
             Assert.Equal(NuGetOfficialFeedUrl, sources[0].Source);
             Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
             Assert.False(sources[0].IsEnabled);
@@ -237,8 +240,8 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
-            Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
+            Assert.Equal(2, sources.Count);
+            Assert.Equal(NuGetOfficialFeedName, sources[1].Name);
         }
 
         [Fact]
@@ -254,7 +257,7 @@ namespace NuGet.VisualStudio.Test
             PackageSource activePackageSource = provider.ActivePackageSource;
 
             // Assert
-            AssertPackageSource(activePackageSource, NuGetOfficialFeedName, NuGetOfficialFeedUrl);
+            AssertPackageSource(activePackageSource, NuGetOfficialFeedNameV3, NuGetOfficialFeedUrlV3);
         }
 
         [Fact]
@@ -328,8 +331,8 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(1, sources.Count);
-            Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
+            Assert.Equal(2, sources.Count);
+            Assert.Equal(NuGetOfficialFeedName, sources[1].Name);
         }
 
         [Fact]

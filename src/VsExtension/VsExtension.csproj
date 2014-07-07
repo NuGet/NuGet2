@@ -155,6 +155,10 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\ShimV3\ShimV3.csproj">
+      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
+      <Name>ShimV3</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
       <Name>TeamFoundationServer10</Name>

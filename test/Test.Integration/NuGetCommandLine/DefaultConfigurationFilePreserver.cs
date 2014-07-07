@@ -7,6 +7,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     /// <summary>
     /// Helps ensuring only one unit-test can backup/restore the global nuget.config at a time.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class DefaultConfigurationFilePreserver: IDisposable
     {
         private const string MutexName = "DefaultConfigurationFilePreserver";
@@ -23,10 +24,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             BackupAndDeleteDefaultConfigurationFile();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             RestoreDefaultConfigurationFile();
             _mutex.ReleaseMutex();
+            _mutex.Dispose();
         }
 
         private static void BackupAndDeleteDefaultConfigurationFile()

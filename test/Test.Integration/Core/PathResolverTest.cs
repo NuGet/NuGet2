@@ -10,6 +10,7 @@ namespace NuGet.Test.Integration.PathResolver
     /// <summary>
     /// Tests based on scenarios specified in http://nuget.codeplex.com/wikipage?title=File%20Element%20Specification
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class PathResolverTest : IDisposable
     {
         private static readonly string _root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -1129,6 +1130,7 @@ namespace NuGet.Test.Integration.PathResolver
             Assert.Equal(@"lib\MyProject.dll", package.Files[0].Path);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             try

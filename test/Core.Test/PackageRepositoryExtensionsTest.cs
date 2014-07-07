@@ -46,37 +46,37 @@ namespace NuGet.Test
             repository.Verify();
         }
 
-        [Fact]
-        public void SearchUsesOptimalDataServiceCodePathIfServerDoesSupportServiceMethod()
-        {
-            // Arrange
-            var client = new Mock<IHttpClient>();
-            var context = new Mock<IDataServiceContext>();
-            var query = new Mock<IDataServiceQuery<DataServicePackage>>();
-            var repository = new Mock<DataServicePackageRepository>(MockBehavior.Strict, client.Object);
-            repository.Object.Context = context.Object;
-            context.Setup(m => m.SupportsServiceMethod(It.IsAny<string>())).Returns(true);
-            context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<Dictionary<string,object>>())).Returns(query.Object);
-            query.Setup(q => q.GetRequest(It.IsAny<Expression>())).Returns((System.Data.Services.Client.DataServiceRequest)null);
-            query.Setup(q => q.RequiresBatch(It.IsAny<Expression>())).Returns(false);
-            query.Setup(q => q.CreateQuery<DataServicePackage>(It.IsAny<Expression>())).Returns(query.Object);
-            query.Setup(q => q.GetEnumerator()).Returns(
-                new List<DataServicePackage> { 
-                    new DataServicePackage
-                    {
-                        Id = "B",
-                        Description = "old and bad",
-                    }
-                }.GetEnumerator());
+        //[Fact]
+        //public void SearchUsesOptimalDataServiceCodePathIfServerDoesSupportServiceMethod()
+        //{
+        //    // Arrange
+        //    var client = new Mock<IHttpClient>();
+        //    var context = new Mock<IDataServiceContext>();
+        //    var query = new Mock<IDataServiceQuery<DataServicePackage>>();
+        //    var repository = new Mock<DataServicePackageRepository>(MockBehavior.Strict, client.Object);
+        //    repository.Object.Context = context.Object;
+        //    context.Setup(m => m.SupportsServiceMethod(It.IsAny<string>())).Returns(true);
+        //    context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<Dictionary<string,object>>())).Returns(query.Object);
+        //    query.Setup(q => q.GetRequest(It.IsAny<Expression>())).Returns((System.Data.Services.Client.DataServiceRequest)null);
+        //    query.Setup(q => q.RequiresBatch(It.IsAny<Expression>())).Returns(false);
+        //    query.Setup(q => q.CreateQuery<DataServicePackage>(It.IsAny<Expression>())).Returns(query.Object);
+        //    query.Setup(q => q.GetEnumerator()).Returns(
+        //        new List<DataServicePackage> { 
+        //            new DataServicePackage
+        //            {
+        //                Id = "B",
+        //                Description = "old and bad",
+        //            }
+        //        }.GetEnumerator());
 
-            // Act
-            var abstractedRepository = (IPackageRepository)repository.Object;
-            var results = abstractedRepository.FindPackagesById("B").ToList();
+        //    // Act
+        //    var abstractedRepository = (IPackageRepository)repository.Object;
+        //    var results = abstractedRepository.FindPackagesById("B").ToList();
 
-            // Assert
-            Assert.Equal(1, results.Count);
-            Assert.Equal("B", results[0].Id);
-        }
+        //    // Assert
+        //    Assert.Equal(1, results.Count);
+        //    Assert.Equal("B", results[0].Id);
+        //}
 
         [Fact]
         public void FindPackagesByIdRecognizeICultureAwareRepositoryInterface()

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -201,6 +201,9 @@
   <data name="NuGetOfficialSourceName" xml:space="preserve">
     <value>nuget.org</value>
   </data>
+  <data name="NuGetOfficialPreviewSourceName" xml:space="preserve">
+    <value>nuget.org v3.0.0 preview</value>
+  </data>
   <data name="FailedToAddGacReference" xml:space="preserve">
     <value>Failed to add reference to '{0}'. Please make sure that it is in the Global Assembly Cache.</value>
   </data>
@@ -388,6 +391,9 @@ Packages installed into Website projects will not be restored during build. Cons
   </data>
   <data name="NuGetStaticResult_DisplayText" xml:space="preserve">
     <value>Search Online for NuGet Packages matching '{0}'</value>
+  </data>
+  <data name="Error_UnsupportedVSVersion" xml:space="preserve">
+    <value>This version of VisualStudio is not supported: {0}</value>
   </data>
   <data name="NuGetSearchProvider_CategoryShortcut" xml:space="preserve">
     <value>nuget</value>

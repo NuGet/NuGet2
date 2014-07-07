@@ -207,6 +207,9 @@ namespace NuGet.Options
             packageSources.AddRange(MachineWidePackageSourcesListBox.Items.Cast<PackageSource>().ToList());
             _packageSourceProvider.SavePackageSources(packageSources);
 
+            // Update the shim
+            UpdateShimControllerSources();
+
             // find the enabled package source 
             var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
 
@@ -670,6 +673,16 @@ namespace NuGet.Options
             // Check to make sure path does not contain any invalid chars.
             // Otherwise, Path.IsPathRooted() will throw an ArgumentException.
             return path.IndexOfAny(Path.GetInvalidPathChars()) == -1 && Path.IsPathRooted(path);
+        }
+
+        private static void UpdateShimControllerSources()
+        {
+            var shimController = ServiceLocator.GetInstance<IShimControllerProvider>();
+            Debug.Assert(shimController != null);
+            if (shimController != null)
+            {
+                shimController.Controller.UpdateSources();
+            }
         }
     }
 

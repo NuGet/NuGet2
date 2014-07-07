@@ -8,6 +8,7 @@ using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
     {
         private static readonly string _testRootDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -40,10 +41,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             startingDirectory = Directory.GetCurrentDirectory();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             System.Console.SetOut(originalConsoleOutput);
             System.Console.SetError(originalErrorConsoleOutput);
+            consoleOutput.Dispose();
             Directory.SetCurrentDirectory(startingDirectory);
             try
             {

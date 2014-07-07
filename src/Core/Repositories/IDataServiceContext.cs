@@ -12,7 +12,7 @@ namespace NuGet
         bool SupportsServiceMethod(string methodName);
         bool SupportsProperty(string propertyName);
 
-        event EventHandler<SendingRequestEventArgs> SendingRequest;
+        event EventHandler<SendingRequest2EventArgs> SendingRequest;
         event EventHandler<ReadingWritingEntityEventArgs> ReadingEntity;
 
         IDataServiceQuery<T> CreateQuery<T>(string entitySetName);

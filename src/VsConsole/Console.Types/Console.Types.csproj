@@ -23,6 +23,7 @@
     <Compile Include="..\..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DebugConsoleMessageEventArgs.cs" />
     <Compile Include="DisplayNameAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HostNameAttribute.cs" />
@@ -33,6 +34,7 @@
     <Compile Include="IConsole.cs" />
     <Compile Include="IConsoleDispatcher.cs" />
     <Compile Include="IConsoleInitializer.cs" />
+    <Compile Include="IDebugConsoleController.cs" />
     <Compile Include="IHost.cs" />
     <Compile Include="IHostMetadata.cs" />
     <Compile Include="IHostProvider.cs" />

@@ -21,6 +21,7 @@
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
+		<NuGetLibRoot>$(NuGetRoot)\lib</NuGetLibRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
@@ -52,8 +53,8 @@
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>8</MinorVersion>
-        <Patch>1</Patch>
+        <MinorVersion>9</MinorVersion>
+        <Patch>0</Patch>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -145,17 +146,13 @@
     </Target>
 
     <Target Name="RestorePackages">
-        <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
-                 Targets="Build"
-                 Properties="DefineConstants=CODE_ANALYSIS" />
-
         <PropertyGroup>
             <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
         </PropertyGroup>
         
         <Message Text="Restoring NuGet packages" Importance="High" />
-        <Exec Command="&quot;$(ExeBuildDirectory)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
-        <Exec Command="mono $(ExeBuildDirectory)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
+        <Exec Command="&quot;$(NuGetLibRoot)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
+        <Exec Command="mono $(NuGetLibRoot)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
     </Target>
 
     <Target Name="Build">

@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+
 using EnvDTE;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
@@ -478,7 +479,8 @@ namespace NuGet.VisualStudio
                 // if we can't find the package from the remote repositories, look for it
                 // from nuget.org feed, provided that it's not already specified in one of the remote repositories
                 if (!ContainsSource(_packageSourceProvider, NuGetConstants.DefaultFeedUrl) &&
-                    !ContainsSource(_packageSourceProvider, NuGetConstants.V2LegacyFeedUrl))
+                    !ContainsSource(_packageSourceProvider, NuGetConstants.V2LegacyFeedUrl) &&
+                    !ContainsSource(_packageSourceProvider, NuGetConstants.V3FeedUrl))
                 {
                     if (_officialNuGetRepository == null)
                     {

@@ -203,12 +203,14 @@ namespace NuGet
             package.Downloader = _packageDownloader;
         }
 
-        private void OnSendingRequest(object sender, SendingRequestEventArgs e)
+        private void OnSendingRequest(object sender, SendingRequest2EventArgs e)
         {
-            // Initialize the request
-            _httpClient.InitializeRequest(e.Request);
+            var shimRequest = new ShimDataRequestMessage(e);
 
-            RaiseSendingRequest(new WebRequestEventArgs(e.Request));
+            // Initialize the request
+            _httpClient.InitializeRequest(shimRequest.WebRequest);
+
+            RaiseSendingRequest(new WebRequestEventArgs(shimRequest.WebRequest));
         }
 
         private void RaiseSendingRequest(WebRequestEventArgs e)

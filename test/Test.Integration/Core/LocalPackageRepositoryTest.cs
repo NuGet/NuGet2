@@ -8,6 +8,7 @@ using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.Core
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class LocalPackageRepositoryTest : IDisposable
     {
         private static readonly string _testRunDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -299,6 +300,7 @@ namespace NuGet.Test.Integration.Core
             return rootDir;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             try

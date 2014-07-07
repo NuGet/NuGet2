@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using NuGet.VisualStudio.Resources;
+using System.Globalization;
 
 namespace NuGet.VisualStudio
 {
@@ -12,9 +13,11 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider
     {
+        private static readonly string NuGetOfficialFeedNameV3 = VsResources.NuGetOfficialPreviewSourceName;
         private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
+        private static readonly PackageSource NuGetV3Source = new PackageSource(NuGetConstants.V3FeedUrl, NuGetOfficialFeedNameV3);
         
         private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
                                                                                  VsResources.VisualStudioExpressForWindows8SourceName,
@@ -43,7 +46,7 @@ namespace NuGet.VisualStudio
             ISettings settings,            
             IVsShellInfo vsShellInfo,
             ISolutionManager solutionManager) :
-            this(settings, new PackageSourceProvider(settings, new[] { NuGetDefaultSource}, _feedsToMigrate), vsShellInfo, solutionManager)
+            this(settings, new PackageSourceProvider(settings, new[] { NuGetV3Source, NuGetDefaultSource }, _feedsToMigrate), vsShellInfo, solutionManager)
         {
         }
 
@@ -122,7 +125,7 @@ namespace NuGet.VisualStudio
 
         internal static IEnumerable<PackageSource> DefaultSources
         {
-            get { return new[] { NuGetDefaultSource}; }
+            get { return new[] { NuGetV3Source, NuGetDefaultSource }; }
         }
 
         internal static Dictionary<PackageSource, PackageSource> FeedsToMigrate

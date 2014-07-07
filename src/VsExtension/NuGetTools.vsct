@@ -44,6 +44,14 @@
         </Strings>
       </Button>
 
+      <Button guid="guidNuGetDebugConsoleCmdSet" id="cmdidDebugConsole" priority="0x0900" type="Button">
+        <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
+        <CommandFlag>AllowParams</CommandFlag>
+        <Strings>
+          <ButtonText>Package Manager D&amp;ebug Console</ButtonText>
+        </Strings>
+      </Button>
+
       <Button guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0x1020" type="Button">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup"/>
         <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
@@ -150,6 +158,10 @@
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
 
+    <CommandPlacement guid="guidNuGetDebugConsoleCmdSet" id="cmdidDebugConsole" priority="0x0900">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+
     <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" priority="0xF100">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
@@ -216,6 +228,9 @@
       <IdSymbol name="cmdAddReferenceGroup" value="0x450" />
     </GuidSymbol>
     <GuidSymbol name="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" value="{D0E4DEEC-1B53-4CDA-8559-D454583AD23B}" />
+    <GuidSymbol name="guidNuGetDebugConsoleCmdSet" value="{DDC61543-6CA7-4A6F-A5B7-984BE723C52F}">
+      <IDSymbol name="cmdidDebugConsole" value="0x0900" />
+    </GuidSymbol>
   </Symbols>
 
 </CommandTable>

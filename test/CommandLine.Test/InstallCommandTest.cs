@@ -12,6 +12,7 @@ using Xunit.Extensions;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class InstallCommandTest : IDisposable
     {
         private static readonly string _environmentVariableValue = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore");
@@ -881,6 +882,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             throw new InvalidOperationException("Boom");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", _environmentVariableValue, EnvironmentVariableTarget.Process);

@@ -14,6 +14,7 @@ namespace NuGet.Test.Integration
     /// <summary>
     /// A Mock Server that is used to mimic a NuGet Server.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     class MockServer
     {
         HttpListener _listener;

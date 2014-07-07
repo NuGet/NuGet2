@@ -13,6 +13,7 @@ namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class PackageRestoreManagerTest : IDisposable
     {
         private static readonly string _testRoot = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -900,6 +901,7 @@ namespace NuGet.VisualStudio.Test
             File.WriteAllBytes(path, new byte[0]);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             try

@@ -114,6 +114,14 @@
       <DependentUpon>ConsoleContainer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Console\IPrivateConsoleStatus.cs" />
+    <Compile Include="DebugConsole\DebugConsoleClassifer.cs" />
+    <Compile Include="DebugConsole\DebugConsoleController.cs" />
+    <Compile Include="DebugConsole\DebugConsoleToolWindow.cs" />
+    <Compile Include="DebugConsole\DebugLogger.cs" />
+    <Compile Include="DebugConsole\DebugWindow.xaml.cs">
+      <DependentUpon>DebugWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DebugConsole\IDebugLogger.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="IHostInitializer.cs" />
     <Compile Include="IPowerConsoleService.cs" />
@@ -179,6 +187,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="ConsoleContainer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DebugConsole\DebugWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
