@@ -2421,7 +2421,7 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
     Assert-Package $p A 0.6-beta
 }
 
-function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
+function InstallPackageIntoJSAppOnWin81AcceptWinmdFile
 {
     param($context)
 
