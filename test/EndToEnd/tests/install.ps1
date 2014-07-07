@@ -2332,7 +2332,7 @@ function InstallPackageIntoNativeWinStoreApplication
     Assert-Package $p "zlib"
 }
 
-function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
+function InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
@@ -2356,7 +2356,7 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 }
 
 
-function Test-InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
+function InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
