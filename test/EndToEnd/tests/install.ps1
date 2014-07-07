@@ -2441,7 +2441,7 @@ function InstallPackageIntoJSAppOnWin81AcceptWinmdFile
     Assert-Package $p MarkedUp
 }
 
-function Test-PackageWithConfigTransformInstallToWinJsProject
+function PackageWithConfigTransformInstallToWinJsProject
 {
     param($context)
 
