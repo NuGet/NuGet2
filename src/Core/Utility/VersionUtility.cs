@@ -211,10 +211,12 @@ namespace NuGet
 
             if (!String.IsNullOrEmpty(identifierPart))
             {
-                // Try to normalize the identifier to a known identifier
-                if (!_knownIdentifiers.TryGetValue(identifierPart, out identifierPart))
+                // Try to normalize the identifier to a known identifier, but if it's an unrecognized
+                // framework, keep its identifier part as-is (don't return 'Unsupported')
+                string recognizedIdentifier;
+                if (_knownIdentifiers.TryGetValue(identifierPart, out recognizedIdentifier))
                 {
-                    return UnsupportedFrameworkName;
+                    identifierPart = recognizedIdentifier;
                 }
             }
 

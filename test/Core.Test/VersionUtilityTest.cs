@@ -33,7 +33,7 @@ namespace NuGet.Test
         [InlineData("content\\netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
         [InlineData("tools\\winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
         [InlineData("tools\\winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        [InlineData("tools\\winkt10\\uninstall.ps1", null, null, "winkt10\\uninstall.ps1")]
+        [InlineData("tools\\winkt10\\uninstall.ps1", "1.0", "winkt", "winkt10\\uninstall.ps1")]
         [InlineData("tools\\init.ps1", null, null, "init.ps1")]
         [InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
         public void TestParseFrameworkFolderNameFromFilePath(
@@ -60,17 +60,17 @@ namespace NuGet.Test
 
         [Theory]
         [InlineData("net40\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
-        [InlineData("netmu40\\sub\\foo.dll", "0.0", "Unsupported", "sub\\foo.dll")]
+        [InlineData("netmu40\\sub\\foo.dll", "4.0", "netmu", "sub\\foo.dll")]
         [InlineData("foo.dll", null, null, "foo.dll")]
         [InlineData("sl35\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
         [InlineData("netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
         [InlineData("CSS\\jQuery.css", "0.0", "Unsupported", "jQuery.css")]
         [InlineData("winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
         [InlineData("winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        [InlineData("winkt10\\uninstall.ps1", "0.0", "Unsupported", "uninstall.ps1")]
+        [InlineData("winkt10\\uninstall.ps1", "1.0", "winkt", "uninstall.ps1")]
         [InlineData("init.ps1", null, null, "init.ps1")]
         [InlineData("random\\foo.txt", "0.0", "Unsupported", "foo.txt")]
-        public void TestParseFrameworkFolderNameWithStrickParsing(
+        public void TestParseFrameworkFolderNameWithStrictParsing(
             string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
         {
             // Act
@@ -386,18 +386,33 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
+        [Theory]
+        [InlineData("NETCF20", "NETCF", "2.0", "")]
+        [InlineData("F", "F", "1.0", "")]
+        [InlineData("G6", "G", "6.0", "")]
+        [InlineData("H20", "H", "2.0", "")]
+        [InlineData("K10-IJ", "K", "1.0", "IJ")]
+        public void ParseFrameworkNameReturnsFrameworkNameAsIsIfUnrecognized(string frameworkName, string identifier, string version, string profile)
         {
             // Act
-            var frameworkName1 = VersionUtility.ParseFrameworkName("NETCF20");
-            var frameworkName2 = VersionUtility.ParseFrameworkName("NET40ClientProfile");
-            var frameworkName3 = VersionUtility.ParseFrameworkName("NET40Foo");
+            var parsed = VersionUtility.ParseFrameworkName(frameworkName);
 
             // Assert
-            Assert.Equal("Unsupported", frameworkName1.Identifier);
-            Assert.Equal("Unsupported", frameworkName2.Identifier);
-            Assert.Equal("Unsupported", frameworkName3.Identifier);
+            Assert.Equal(identifier, parsed.Identifier);
+            Assert.Equal(new Version(version), parsed.Version);
+            Assert.Equal(profile, parsed.Profile);
+        }
+
+        [Theory]
+        [InlineData("NET40ClientProfile")]
+        [InlineData("NET40Foo")]
+        public void ParseFrameworkNameReturnsUnsupportedFrameworkForBadlyFormattedNames(string frameworkName)
+        {
+            // Act
+            var parsed = VersionUtility.ParseFrameworkName(frameworkName);
+
+            // Assert
+            Assert.Equal("Unsupported", parsed.Identifier);
         }
 
         [Fact]
