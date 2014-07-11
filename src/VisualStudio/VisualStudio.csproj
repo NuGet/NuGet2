@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762, 1591, 1573</NoWarn>
@@ -18,6 +18,10 @@
     <AssemblyName>NuGet.VisualStudio</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <DefineConstants Condition="'$(VisualStudioVersion)'=='10.0'">$(DefineConstants);VS10</DefineConstants>
+    <DefineConstants Condition="'$(VisualStudioVersion)'=='11.0'">$(DefineConstants);VS11</DefineConstants>
+    <DefineConstants Condition="'$(VisualStudioVersion)'=='12.0'">$(DefineConstants);VS12</DefineConstants>
+    <DefineConstants Condition="'$(VisualStudioVersion)'=='14.0'">$(DefineConstants);VS14</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\MsBuildProjectUtility.cs">
@@ -280,9 +284,14 @@
       <Project>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</Project>
       <Name>VisualStudio10</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj">
+    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj"> 
       <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
       <Name>VisualStudio12</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\VisualStudio14\VisualStudio14.csproj">
+      <Project>{EEA49A74-6EFC-410E-9745-BAD367AC151D}</Project>
+      <Name>VisualStudio14</Name>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">

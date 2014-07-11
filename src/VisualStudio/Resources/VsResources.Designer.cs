@@ -250,15 +250,6 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This version of VisualStudio is not supported: {0}.
-        /// </summary>
-        public static string Error_UnsupportedVSVersion {
-            get {
-                return ResourceManager.GetString("Error_UnsupportedVSVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
         /// </summary>
         public static string ErrorReadingFile {

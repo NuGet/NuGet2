@@ -1067,7 +1067,7 @@ function Test-UninstallPackageFromNativeWinStoreApplication
     Assert-Null $scriptFolder
 }
 
-function Test-UninstallPackageFromJsWinStoreApplication
+function UninstallPackageFromJsWinStoreApplication
 {
     if ($dte.Version -eq "10.0")
     {

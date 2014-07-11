@@ -25,26 +25,26 @@ namespace NuGet.VisualStudio
             if (_cachedTfsFileSystemProvider == null)
             {
                 string assemblyName;
+
+#if VS10 || VS11
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
                     assemblyName = "NuGet.TeamFoundationServer10";
                 }
-                else if (VsVersionHelper.IsVisualStudio2012)
+                else 
                 {
+                    // VS 2012
                     assemblyName = "NuGet.TeamFoundationServer11";
                 }
-                else if (VsVersionHelper.IsVisualStudio2013)
-                {
-                    assemblyName = "NuGet.TeamFoundationServer12";
-                }
-                else
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        VsResources.Error_UnsupportedVSVersion,
-                        VsVersionHelper.FullVsEdition);
-                    throw new InvalidOperationException(message);
-                }
+#endif
+
+#if VS12
+                assemblyName = "NuGet.TeamFoundationServer12";
+#endif
+
+#if VS14
+                assemblyName = "NuGet.TeamFoundationServer14";
+#endif
 
                 try
                 {
