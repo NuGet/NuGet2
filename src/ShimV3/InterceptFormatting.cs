@@ -45,7 +45,6 @@ namespace NuGet.ShimV3
             return feed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static XElement MakeEntry(string feedBaseAddress, string id, JToken package)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
@@ -75,7 +74,6 @@ namespace NuGet.ShimV3
             properties.Add(new XElement(d + "IsAbsoluteLatestVersion", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "isAbsoluteLatestVersion", "false")));
             properties.Add(new XElement(d + "IsPrerelease", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "isPrerelease", "false")));
             properties.Add(new XElement(d + "ReportAbuseUrl", FieldOrDefault(package, "reportAbuseUrl", "http://www.nuget.org/")));
-            properties.Add(new XElement(d + "LicenseNames", FieldOrDefault(package, "licenseNames", string.Empty)));
 
             JObject jObjPackage = package as JObject;
 
@@ -85,23 +83,38 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Title", title.ToString()));
             }
 
-            JToken dependencies;
-            if (jObjPackage.TryGetValue("http://schema.nuget.org/schema#dependencies", out dependencies))
+            JToken dependencyGroups;
+            if (jObjPackage.TryGetValue("dependencyGroups", out dependencyGroups))
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (JToken group in dependencies["groups"])
+                foreach (JToken group in dependencyGroups)
                 {
+                    JObject groupObj = group as JObject;
+
+                    // is this ever populated?
                     string targetFramework = string.Empty;
                     JToken tf;
-                    if (((JObject)group).TryGetValue("targetFramework", out tf))
+                    if (groupObj.TryGetValue("targetFramework", out tf))
                     {
                         targetFramework = tf.ToString();
                     }
 
-                    foreach (JToken dependency in group["dependencies"])
+                    JToken dependencies = null;
+
+                    if (groupObj.TryGetValue("dependencies", out dependencies))
                     {
-                        sb.AppendFormat("{0}:{1}:{2}|", dependency["packageId"].ToString().ToLowerInvariant(), dependency["range"], targetFramework);
+                        foreach (var dependency in dependencies)
+                        {
+                            string range = string.Empty;
+                            JToken rt = null;
+                            if (((JObject)dependency).TryGetValue("range", out rt))
+                            {
+                                range = rt.ToString();
+                            }
+
+                            sb.AppendFormat("{0}:{1}:{2}|", dependency["id"].ToString().ToLowerInvariant(), range, targetFramework);
+                        }
                     }
 
                     if (sb.Length > 0)
@@ -113,14 +126,18 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Dependencies", sb.ToString()));
             }
 
-            // license information should come from the json
-            bool license = false;
+            JToken licenseNamesToken = null;
+            if (jObjPackage.TryGetValue("licenseNames", out licenseNamesToken))
+            {
+                properties.Add(new XElement(d + "LicenseNames", String.Join(", ", licenseNamesToken.Select(e => e.ToString()))));
+            }
 
             properties.Add(new XElement(d + "RequireLicenseAcceptance", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "requireLicenseAcceptance", "false")));
 
-            if (license)
+            JToken licenseUrlToken = null;
+            if (jObjPackage.TryGetValue("licenseUrl", out licenseUrlToken))
             {
-                properties.Add(new XElement(d + "LicenseUrl", FieldOrDefault(package, "licenseUrl", string.Empty)));
+                properties.Add(new XElement(d + "LicenseUrl", licenseUrlToken.ToString()));
             }
 
             // the following properties required for GetUpdates (from the UI)
@@ -156,8 +173,6 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Tags", strTags));
             }
 
-            // title is optional, if it is not there the UI uses the Id
-            //properties.Add(new XElement(d + "Title", "SHIM.Title"));
             properties.Add(new XElement(d + "ReleaseNotes", FieldOrDefault(package, "releaseNotes", string.Empty)));
 
             return entry;
