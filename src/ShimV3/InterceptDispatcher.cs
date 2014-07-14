@@ -199,21 +199,18 @@ namespace NuGet.ShimV3
 
         private async Task CountImpl(InterceptCallContext context, string feed = null)
         {
-            await _channel.Count(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, feed);
+            int skip = context.Args.Skip ?? 0;
+            int take = context.Args.Top ?? 30;
+
+            await _channel.SearchCount(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed);
         }
 
         private async Task SearchImpl(InterceptCallContext context, string feed = null)
         {
-            IDictionary<string, string> arguments = context.Args.Arguments;
-
-            string searchTerm = context.Args.SearchTerm;
-            bool isLatestVersion = context.Args.IsLatestVersion;
-            string targetFramework = context.Args.TargetFramework;
-            bool includePrerelease = context.Args.IncludePrerelease;
-            int skip = context.Args.Skip ?? 30;
+            int skip = context.Args.Skip ?? 0;
             int take = context.Args.Top ?? 30;
 
-            await _channel.Search(context, searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feed);
+            await _channel.Search(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed);
         }
 
         private async Task FindPackagesById(InterceptCallContext context)

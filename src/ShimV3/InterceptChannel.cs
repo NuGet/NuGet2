@@ -3,6 +3,7 @@ using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -58,6 +59,7 @@ namespace NuGet.ShimV3
             return false;
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public async Task Root(InterceptCallContext context, string feedName = null)
         {
             context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Root: {0}", feedName ?? string.Empty), ConsoleColor.Magenta);
@@ -78,6 +80,7 @@ namespace NuGet.ShimV3
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public async Task Metadata(InterceptCallContext context, string feed = null)
         {
             context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Metadata: {0}", feed ?? string.Empty), ConsoleColor.Magenta);
@@ -87,11 +90,11 @@ namespace NuGet.ShimV3
             await context.WriteResponse(xml);
         }
 
-        public async Task Count(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, string feedName)
+        public async Task SearchCount(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Count: {0}", searchTerm), ConsoleColor.Magenta);
+            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] SearchCount: {0}", searchTerm), ConsoleColor.Magenta);
 
-            JObject obj = await FetchJson(context, MakeCountAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, feedName));
+            JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName));
 
             string count = obj != null ? count = obj["totalHits"].ToString() : "0";
 
@@ -454,6 +457,7 @@ namespace NuGet.ShimV3
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "includeAllVersions"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetFrameworks"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "versions")]
         public async Task<List<JObject>> GetUpdatesCore(InterceptCallContext context, string[] packageIds, string[] versions, string[] versionConstraints, string[] targetFrameworks, bool includePrerelease, bool includeAllVersions)
         {
             List<JObject> packages = new List<JObject>();
@@ -563,16 +567,6 @@ namespace NuGet.ShimV3
             id = id.ToLowerInvariant();
             Uri resolverBlobAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}.json", _resolverBaseAddress, id));
             return resolverBlobAddress;
-        }
-
-        private Uri MakeCountAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, string feedName)
-        {
-            string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
-
-            Uri searchAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}?q={1}&targetFramework={2}&includePrerelease={3}&countOnly=true{4}",
-                _searchAddress, searchTerm, targetFramework, includePrerelease, feedArg));
-
-            return searchAddress;
         }
 
         private Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
