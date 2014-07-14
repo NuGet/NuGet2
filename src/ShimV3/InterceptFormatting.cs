@@ -85,24 +85,24 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Title", title.ToString()));
             }
 
-            JToken dependencies;
-            if (jObjPackage.TryGetValue("http://schema.nuget.org/schema#dependencies", out dependencies))
+            JToken dependencyGroups;
+            if (jObjPackage.TryGetValue("dependencyGroups", out dependencyGroups))
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (JToken group in dependencies["groups"])
+                foreach (JToken group in dependencyGroups["dependencies"])
                 {
+                    JObject groupObj = group as JObject;
+
+                    // is this ever populated?
                     string targetFramework = string.Empty;
                     JToken tf;
-                    if (((JObject)group).TryGetValue("targetFramework", out tf))
+                    if (groupObj.TryGetValue("targetFramework", out tf))
                     {
                         targetFramework = tf.ToString();
                     }
 
-                    foreach (JToken dependency in group["dependencies"])
-                    {
-                        sb.AppendFormat("{0}:{1}:{2}|", dependency["packageId"].ToString().ToLowerInvariant(), dependency["range"], targetFramework);
-                    }
+                    sb.AppendFormat("{0}:{1}:{2}|", group["id"].ToString().ToLowerInvariant(), group["range"], targetFramework);
 
                     if (sb.Length > 0)
                     {
