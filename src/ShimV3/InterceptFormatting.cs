@@ -90,7 +90,7 @@ namespace NuGet.ShimV3
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (JToken group in dependencyGroups["dependencies"])
+                foreach (JToken group in dependencyGroups)
                 {
                     JObject groupObj = group as JObject;
 
@@ -102,7 +102,22 @@ namespace NuGet.ShimV3
                         targetFramework = tf.ToString();
                     }
 
-                    sb.AppendFormat("{0}:{1}:{2}|", group["id"].ToString().ToLowerInvariant(), group["range"], targetFramework);
+                    JToken dependencies = null;
+
+                    if (groupObj.TryGetValue("dependencies", out dependencies))
+                    {
+                        foreach (var dependency in dependencies)
+                        {
+                            string range = string.Empty;
+                            JToken rt = null;
+                            if (((JObject)dependency).TryGetValue("range", out rt))
+                            {
+                                range = rt.ToString();
+                            }
+
+                            sb.AppendFormat("{0}:{1}:{2}|", dependency["id"].ToString().ToLowerInvariant(), range, targetFramework);
+                        }
+                    }
 
                     if (sb.Length > 0)
                     {

@@ -476,19 +476,18 @@ namespace NuGet.ShimV3
                 // TODO: handle this error
                 if (resolverBlob != null)
                 {
+                    // this can be null if all packages are prerelease
                     JObject latest = ExtractLatestVersion(resolverBlob, includePrerelease, range) as JObject;
-                    if (latest == null)
+                    if (latest != null)
                     {
-                        throw new InvalidOperationException(string.Format("package {0} not found", packageIds[i]));
-                    }
+                        // add the id if it isn't there
+                        if (latest["id"] == null)
+                        {
+                            latest.Add("id", JToken.Parse("'" + packageIds[i] + "'"));
+                        }
 
-                    // add the id if it isn't there
-                    if (latest["id"] == null)
-                    {
-                        latest.Add("id", JToken.Parse("'" + packageIds[i] + "'"));
+                        packages.Add(latest);
                     }
-
-                    packages.Add(latest);
                 }
             }
 
@@ -497,67 +496,12 @@ namespace NuGet.ShimV3
 
         private static JToken ExtractLatestVersion(JObject resolverBlob, bool includePrerelease, VersionRange range = null)
         {
-            //  firstly just pick the first one (or the first in range)
-
-            JToken candidateLatest = null;
-
-            if (range == null)
-            {
-                candidateLatest = resolverBlob["packages"].FirstOrDefault();
-            }
-            else
-            {
-                foreach (JToken package in resolverBlob["packages"])
-                {
-                    NuGetVersion currentVersion = NuGetVersion.Parse(package["version"].ToString());
-                    if (range.Satisfies(currentVersion))
-                    {
-                        candidateLatest = package;
-                        break;
-                    }
-                }
-            }
-
-            if (candidateLatest == null)
-            {
-                return null;
-            }
-
-            //  secondly iterate through package to see if we have a later package
-
-            NuGetVersion candidateLatestVersion = NuGetVersion.Parse(candidateLatest["version"].ToString());
-
-            foreach (JToken package in resolverBlob["packages"])
-            {
-                NuGetVersion currentVersion = NuGetVersion.Parse(package["version"].ToString());
-
-                if (range != null && !range.Satisfies(currentVersion))
-                {
-                    continue;
-                }
-
-                if (includePrerelease)
-                {
-                    if (currentVersion > candidateLatestVersion)
-                    {
-                        candidateLatest = package;
-                        candidateLatestVersion = currentVersion;
-                    }
-                }
-                else
-                {
-                    if (!currentVersion.IsPrerelease && currentVersion > candidateLatestVersion)
-                    {
-                        candidateLatest = package;
-                        candidateLatestVersion = currentVersion;
-                    }
-                }
-            }
-
-            if (candidateLatestVersion.IsPrerelease && !includePrerelease)
-            {
-                return null;
-            }
+            // sort by version
+            JToken candidateLatest = resolverBlob["packages"]
+                .Where(p => includePrerelease || (new NuGetVersion(p["version"].ToString()).IsPrerelease == false))
+                .Where(p => range == null || range.Satisfies(new NuGetVersion(p["version"].ToString())))
+                .OrderByDescending(p => new NuGetVersion(p["version"].ToString()), VersionComparer.VersionRelease)
+                .FirstOrDefault();
 
             return candidateLatest;
         }
