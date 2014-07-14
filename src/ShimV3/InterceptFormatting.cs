@@ -45,7 +45,6 @@ namespace NuGet.ShimV3
             return feed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static XElement MakeEntry(string feedBaseAddress, string id, JToken package)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
@@ -75,7 +74,6 @@ namespace NuGet.ShimV3
             properties.Add(new XElement(d + "IsAbsoluteLatestVersion", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "isAbsoluteLatestVersion", "false")));
             properties.Add(new XElement(d + "IsPrerelease", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "isPrerelease", "false")));
             properties.Add(new XElement(d + "ReportAbuseUrl", FieldOrDefault(package, "reportAbuseUrl", "http://www.nuget.org/")));
-            properties.Add(new XElement(d + "LicenseNames", FieldOrDefault(package, "licenseNames", string.Empty)));
 
             JObject jObjPackage = package as JObject;
 
@@ -128,14 +126,18 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Dependencies", sb.ToString()));
             }
 
-            // license information should come from the json
-            bool license = false;
+            JToken licenseNamesToken = null;
+            if (jObjPackage.TryGetValue("licenseNames", out licenseNamesToken))
+            {
+                properties.Add(new XElement(d + "LicenseNames", String.Join(", ", licenseNamesToken.Select(e => e.ToString()))));
+            }
 
             properties.Add(new XElement(d + "RequireLicenseAcceptance", new XAttribute(m + "type", "Edm.Boolean"), FieldOrDefault(package, "requireLicenseAcceptance", "false")));
 
-            if (license)
+            JToken licenseUrlToken = null;
+            if (jObjPackage.TryGetValue("licenseUrl", out licenseUrlToken))
             {
-                properties.Add(new XElement(d + "LicenseUrl", FieldOrDefault(package, "licenseUrl", string.Empty)));
+                properties.Add(new XElement(d + "LicenseUrl", licenseUrlToken.ToString()));
             }
 
             // the following properties required for GetUpdates (from the UI)
@@ -171,8 +173,6 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "Tags", strTags));
             }
 
-            // title is optional, if it is not there the UI uses the Id
-            //properties.Add(new XElement(d + "Title", "SHIM.Title"));
             properties.Add(new XElement(d + "ReleaseNotes", FieldOrDefault(package, "releaseNotes", string.Empty)));
 
             return entry;
