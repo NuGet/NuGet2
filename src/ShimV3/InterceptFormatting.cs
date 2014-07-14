@@ -77,14 +77,16 @@ namespace NuGet.ShimV3
             properties.Add(new XElement(d + "ReportAbuseUrl", FieldOrDefault(package, "reportAbuseUrl", "http://www.nuget.org/")));
             properties.Add(new XElement(d + "LicenseNames", FieldOrDefault(package, "licenseNames", string.Empty)));
 
+            JObject jObjPackage = package as JObject;
+
             JToken title = null;
-            if (((JObject)package).TryGetValue("title", out title))
+            if (jObjPackage.TryGetValue("title", out title))
             {
                 properties.Add(new XElement(d + "Title", title.ToString()));
             }
 
             JToken dependencies;
-            if (((JObject)package).TryGetValue("http://schema.nuget.org/schema#dependencies", out dependencies))
+            if (jObjPackage.TryGetValue("http://schema.nuget.org/schema#dependencies", out dependencies))
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -124,10 +126,9 @@ namespace NuGet.ShimV3
             // the following properties required for GetUpdates (from the UI)
 
             // the following properties should come from the json
-            bool iconUrl = false;
-            if (iconUrl)
+            if (package["iconUrl"] != null)
             {
-                properties.Add(new XElement(d + "IconUrl", FieldOrDefault(package, "IconUrl", string.Empty)));
+                properties.Add(new XElement(d + "IconUrl", package["iconUrl"].ToString()));
             }
 
             properties.Add(new XElement(d + "DownloadCount", new XAttribute(m + "type", "Edm.Int32"), FieldOrDefault(package, "downloadCount", "0")));
@@ -149,7 +150,7 @@ namespace NuGet.ShimV3
 
             string strTags = string.Empty;
             JToken tags = null;
-            if (((JObject)package).TryGetValue("tags", out tags))
+            if (jObjPackage.TryGetValue("tags", out tags))
             {
                 strTags = String.Join(", ", ((JArray)tags).Select(t => t.ToString()));
                 properties.Add(new XElement(d + "Tags", strTags));

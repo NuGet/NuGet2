@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,20 +9,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace NuGet.ShimV3
 {
     internal class InterceptChannel
     {
-        string _resolverBaseAddress;
-        string _searchAddress;
-        string _passThroughAddress;
-        string _listAvailableLatestStableIndex;
-        string _listAvailableAllIndex;
-        string _listAvailableLatestPrereleaseIndex;
-        IShimCache _cache;
+        private readonly string _resolverBaseAddress;
+        private readonly string _searchAddress;
+        private readonly string _passThroughAddress;
+        private readonly string _listAvailableLatestStableIndex;
+        private readonly string _listAvailableAllIndex;
+        private readonly string _listAvailableLatestPrereleaseIndex;
+        private readonly IShimCache _cache;
 
         internal InterceptChannel(JObject interceptBlob, IShimCache cache)
         {
@@ -190,15 +188,21 @@ namespace NuGet.ShimV3
                     throw new InvalidOperationException(string.Format("package {0} not found", curId));
                 }
 
-                foreach(var p in resolverBlob["packages"])
+                foreach (var p in resolverBlob["packages"])
                 {
-                    p["id"] = resolverBlob["id"];
+                    NuGetVersion version = NuGetVersion.Parse(p["version"].ToString());
 
-                    packages.Add(p);
+                    // all versions are returned, filter to only stable if needed
+                    if (context.Args.IncludePrerelease || !version.IsPrerelease)
+                    {
+                        p["id"] = resolverBlob["id"];
+
+                        packages.Add(p);
+                    }
                 }
             }
 
-            var data = packages.OrderBy(p => p["id"].ToString()).ThenByDescending(p => p["version"].ToString());
+            var data = packages.OrderBy(p => p["id"].ToString()).ThenByDescending(p => NuGetVersion.Parse(p["version"].ToString()), VersionComparer.VersionRelease);
 
             XElement feed = InterceptFormatting.MakeFeed(_passThroughAddress, "Packages", data, data.Select(p => p["id"].ToString()).ToArray());
             await context.WriteResponse(feed);
@@ -210,23 +214,58 @@ namespace NuGet.ShimV3
 
             JObject resolverBlob = await FetchJson(context, MakeResolverAddress(id));
 
-            if (resolverBlob == null)
+            JArray array = new JArray();
+
+            // the package may not exist, in that case return an empty array
+            if (resolverBlob != null)
             {
-                throw new InvalidOperationException(string.Format("package {0} not found", id));
+                List<NuGetVersion> versions = new List<NuGetVersion>();
+                foreach (JToken package in resolverBlob["packages"])
+                {
+                    NuGetVersion version = NuGetVersion.Parse(package["version"].ToString());
+
+                    // all versions are returned, filter to only stable if needed
+                    if (context.Args.IncludePrerelease || !version.IsPrerelease)
+                    {
+                        versions.Add(version);
+                    }
+                }
+
+                versions.Sort();
+
+                foreach (NuGetVersion version in versions)
+                {
+                    array.Add(version.ToString());
+                }
             }
 
-            List<NuGetVersion> versions = new List<NuGetVersion>();
-            foreach (JToken package in resolverBlob["packages"])
+            await context.WriteResponse(array);
+        }
+
+        public async Task GetListOfPackages(InterceptCallContext context)
+        {
+            context.Log("[V3 CALL] GetListOfPackages", ConsoleColor.Magenta);
+
+            var index = await FetchJson(context, context.Args.IncludePrerelease ? new Uri(_listAvailableLatestPrereleaseIndex) : new Uri(_listAvailableLatestStableIndex));
+            var data = GetListAvailableDataStart(context, index);
+
+            // apply startswith if needed
+            if (context.Args.PartialId != null)
             {
-                versions.Add(NuGetVersion.Parse(package["version"].ToString()));
+                data = data.Where(e => e["id"].ToString().StartsWith(context.Args.PartialId, StringComparison.OrdinalIgnoreCase));
+
+                data = data.TakeWhile(e => e["id"].ToString().StartsWith(context.Args.PartialId, StringComparison.OrdinalIgnoreCase));
             }
 
-            versions.Sort();
+            // take only 30
+            var ids = data.Take(30).Select(p => p["id"].ToString()).ToList();
+
+            ids.Sort(StringComparer.InvariantCultureIgnoreCase);
 
             JArray array = new JArray();
-            foreach (NuGetVersion version in versions)
+            foreach (var id in ids)
             {
-                array.Add(version.ToString());
+                array.Add(id);
             }
 
             await context.WriteResponse(array);
@@ -234,16 +273,26 @@ namespace NuGet.ShimV3
 
         public async Task ListAvailable(InterceptCallContext context)
         {
-            string indexUrl = _listAvailableAllIndex;
+            string indexUrl = _listAvailableLatestStableIndex;
 
-            if (context.Args.IsLatestVersion)
+            if (!context.Args.IsLatestVersion)
             {
-                indexUrl = context.Args.IncludePrerelease ? _listAvailableLatestPrereleaseIndex : _listAvailableLatestStableIndex;
+                indexUrl = _listAvailableAllIndex;
+            }
+            else if (context.Args.IncludePrerelease)
+            {
+                indexUrl = _listAvailableLatestPrereleaseIndex;
             }
 
             var index = await FetchJson(context, new Uri(indexUrl));
 
             var data = GetListAvailableData(context, index);
+
+            // all versions with no pre
+            if (!context.Args.IsLatestVersion && !context.Args.IncludePrerelease)
+            {
+                data = data.Where(p => (new NuGetVersion(p["version"].ToString())).IsPrerelease == false);
+            }
 
             string nextUrl = null;
 
@@ -263,10 +312,14 @@ namespace NuGet.ShimV3
 
                     if (last != null)
                     {
-                        nextUrl = String.Format(CultureInfo.InvariantCulture, "{0}?$orderby=Id&$filter=IsLatestVersion&$skiptoken='{1}','{1}','{2}'",
-                        context.RequestUri.AbsoluteUri.Split('?')[0],
-                        last["id"],
-                        last["version"]);
+                        string argsWithoutSkipToken = String.Join("&", context.Args.Arguments.Where(a => a.Key.ToLowerInvariant() != "$skiptoken")
+                            .Select(a => String.Format(CultureInfo.InvariantCulture, "{0}={1}", a.Key, a.Value)));
+
+                        nextUrl = String.Format(CultureInfo.InvariantCulture, "{0}?{1}&$skiptoken='{2}','{2}','{3}'",
+                                                context.RequestUri.AbsoluteUri.Split('?')[0],
+                                                argsWithoutSkipToken,
+                                                last["id"],
+                                                last["version"]);
                     }
                 }
             }
@@ -320,6 +373,10 @@ namespace NuGet.ShimV3
             else if (context.Args.FilterStartsWithId != null)
             {
                 skipTo = context.Args.FilterStartsWithId;
+            }
+            if (context.Args.PartialId != null) // intellisense
+            {
+                skipTo = context.Args.PartialId;
             }
 
             var segments = GetListAvailableSegmentsIncludingAndAfter(context, index, skipTo);
@@ -380,16 +437,26 @@ namespace NuGet.ShimV3
             return needed;
         }
 
-        private static void ThrowNotImplemented()
+        public async Task GetUpdates(InterceptCallContext context, string[] packageIds, string[] versions, string[] versionConstraints, string[] targetFrameworks, bool includePrerelease, bool includeAllVersions, bool count = false)
         {
-            throw new NotImplementedException();
+            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetUpdates{1}: {0}", string.Join("|", packageIds), count ? "Count" : string.Empty), ConsoleColor.Magenta);
+
+            var packages = await GetUpdatesCore(context, packageIds, versions, versionConstraints, targetFrameworks, includePrerelease, includeAllVersions);
+
+            if (count)
+            {
+                await context.WriteResponse(packages.Count);
+            }
+            else
+            {
+                XElement feed = InterceptFormatting.MakeFeed(_passThroughAddress, "GetUpdates", packages, packages.Select(p => p["id"].ToString()).ToArray());
+                await context.WriteResponse(feed);
+            }
         }
 
-        public async Task GetUpdates(InterceptCallContext context, string[] packageIds, string[] versions, string[] versionConstraints, string[] targetFrameworks, bool includePrerelease, bool includeAllVersions)
+        public async Task<List<JObject>> GetUpdatesCore(InterceptCallContext context, string[] packageIds, string[] versions, string[] versionConstraints, string[] targetFrameworks, bool includePrerelease, bool includeAllVersions)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetUpdates: {0}", string.Join("|", packageIds)), ConsoleColor.Magenta);
-
-            List<JToken> packages = new List<JToken>();
+            List<JObject> packages = new List<JObject>();
 
             for (int i = 0; i < packageIds.Length; i++)
             {
@@ -405,20 +472,26 @@ namespace NuGet.ShimV3
                 // TODO: handle this error
                 if (resolverBlob != null)
                 {
-                    JToken latest = ExtractLatestVersion(resolverBlob, includePrerelease, range);
+                    JObject latest = ExtractLatestVersion(resolverBlob, includePrerelease, range) as JObject;
                     if (latest == null)
                     {
-                        throw new Exception(string.Format("package {0} not found", packageIds[i]));
+                        throw new InvalidOperationException(string.Format("package {0} not found", packageIds[i]));
                     }
+
+                    // add the id if it isn't there
+                    if (latest["id"] == null)
+                    {
+                        latest.Add("id", JToken.Parse("'" + packageIds[i] + "'"));
+                    }
+
                     packages.Add(latest);
                 }
             }
 
-            XElement feed = InterceptFormatting.MakeFeed(_passThroughAddress, "GetUpdates", packages, packageIds);
-            await context.WriteResponse(feed);
+            return packages;
         }
 
-        static JToken ExtractLatestVersion(JObject resolverBlob, bool includePrerelease, VersionRange range = null)
+        private static JToken ExtractLatestVersion(JObject resolverBlob, bool includePrerelease, VersionRange range = null)
         {
             //  firstly just pick the first one (or the first in range)
 
@@ -485,14 +558,14 @@ namespace NuGet.ShimV3
             return candidateLatest;
         }
 
-        Uri MakeResolverAddress(string id)
+        private Uri MakeResolverAddress(string id)
         {
             id = id.ToLowerInvariant();
             Uri resolverBlobAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}.json", _resolverBaseAddress, id));
             return resolverBlobAddress;
         }
 
-        Uri MakeCountAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, string feedName)
+        private Uri MakeCountAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, string feedName)
         {
             string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
 
@@ -502,7 +575,7 @@ namespace NuGet.ShimV3
             return searchAddress;
         }
 
-        Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
+        private Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
         {
             string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
 
@@ -511,7 +584,7 @@ namespace NuGet.ShimV3
             return searchAddress;
         }
 
-        async Task<JObject> FetchJson(InterceptCallContext context, Uri address)
+        private async Task<JObject> FetchJson(InterceptCallContext context, Uri address)
         {
             string url = address.ToString().ToLowerInvariant();
 

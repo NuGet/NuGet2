@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace NuGet.ShimV3
 {
@@ -13,14 +14,15 @@ namespace NuGet.ShimV3
     /// </summary>
     internal class ShimController : IShimController
     {
-        private List<Tuple<string, InterceptDispatcher>> _dispatchers;
+        private readonly List<InterceptDispatcher> _dispatchers;
+        private readonly IDebugConsoleController _debugLogger;
         private IPackageSourceProvider _sourceProvider;
-        private IDebugConsoleController _debugLogger;
         private IShimCache _cache;
 
         public ShimController(IDebugConsoleController debugLogger)
         {
             _debugLogger = debugLogger;
+            _dispatchers = new List<InterceptDispatcher>();
         }
 
         public void Enable(IPackageSourceProvider sourceProvider)
@@ -44,19 +46,13 @@ namespace NuGet.ShimV3
             if (_sourceProvider != null)
             {
                 CreateDispatchers();
-
-                // these need to be manually initialized
-                foreach(var d in _dispatchers)
-                {
-                    d.Item2.TryInit();
-                }
             }
         }
 
         public void Disable()
         {
             _sourceProvider = null;
-            _dispatchers = null;
+            _dispatchers.Clear();
 
             // remove all handlers
             HttpShim.Instance.ClearHandlers();
@@ -69,21 +65,58 @@ namespace NuGet.ShimV3
         }
 
         /// <summary>
+        /// Main entry point. All requests pass through here except for ones skipped in ShimDataService().
+        /// </summary>
+        public WebResponse ShimResponse(WebRequest request)
+        {
+            Debug.Assert(request != null);
+            WebResponse response = null;
+
+            if (!TryGetInterceptorResponse(request, out response))
+            {
+                // Not handled by an interceptor, allow V2 to continue
+                response = CallV2(request);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Entry point for requests from OData.
+        /// </summary>
+        public DataServiceClientRequestMessage ShimDataService(DataServiceClientRequestMessageArgs args)
+        {
+            DataServiceClientRequestMessage message = null;
+
+            InterceptDispatcher dispatcher = GetDispatcher(args.RequestUri);
+
+            if (dispatcher != null && dispatcher.Initialized == true)
+            {
+                // Let the interceptor handle this
+                message = new ShimDataServiceClientRequestMessage(this, args);
+            }
+
+            // If no interceptors want the message create a normal HttpWebRequestMessage
+            if (message == null)
+            {
+                Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", args.RequestUri.AbsoluteUri), ConsoleColor.Gray);
+                message = new HttpWebRequestMessage(args);
+            }
+
+            return message;
+        }
+
+        /// <summary>
         /// Create the dispatchers for v3 urls
         /// </summary>
         private void CreateDispatchers()
         {
-            _dispatchers = new List<Tuple<string, InterceptDispatcher>>(1);
+            // add only new sources, old interceptors will stay around but not be used
+            var newSources = _sourceProvider.LoadPackageSources().Where(s => s.IsEnabled && !_dispatchers.Any(d => AreSourcesEqual(d.Source, s.Source)));
 
-            foreach(var source in _sourceProvider.LoadPackageSources())
+            foreach (var newSource in newSources)
             {
-                // add all enabled sources, we will check if they are really v3 later
-                if (source.IsEnabled)
-                {
-                    var dispatcher = new InterceptDispatcher(source.Source, Cache);
-
-                    _dispatchers.Add(new Tuple<string, InterceptDispatcher>(source.Source, dispatcher));
-                }
+                _dispatchers.Add(new InterceptDispatcher(newSource.Source, Cache));
             }
         }
 
@@ -100,78 +133,126 @@ namespace NuGet.ShimV3
             }
         }
 
-        public WebResponse ShimResponse(WebRequest request)
+        private ShimWebResponse CallDispatcher(InterceptDispatcher dispatcher, WebRequest request)
         {
-            Debug.Assert(request != null);
+            ShimWebResponse response = null;
+
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
-            foreach (var dispatcher in _dispatchers)
-            {
-                // find the correct dispatcher, only use it if it is initialized
-                if (dispatcher.Item2.Initialized == true && request.RequestUri.AbsoluteUri.StartsWith(dispatcher.Item1, StringComparison.OrdinalIgnoreCase))
-                {
-                    using (var context = new ShimCallContext(request, _debugLogger))
-                    {
-                        Log(String.Format(CultureInfo.InvariantCulture, "[V3 RUN] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
-
-                        Task t = dispatcher.Item2.Invoke(context);
-                        t.Wait();
-                        var stream = context.Data;
-
-                        timer.Stop();
-
-                        Log(String.Format(CultureInfo.InvariantCulture, "[V3 END] {0}ms", timer.ElapsedMilliseconds), ConsoleColor.Yellow);
-
-                        return new ShimWebResponse(stream, request.RequestUri, context.ResponseContentType);
-                    }
-                }
-            }
-
-            // Not handled by an interceptor, allow V2 to continue
-
-            Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
-
-            WebResponse response = null;
-
             try
             {
-                response = request.GetResponse();
-            }
-            catch (WebException ex)
-            {
-                bool rethrow = true;
-
-                // Dispatchers are initialized in two parts in an attempt to optimize this.
-                // 1. Detect a 505 WebException from the root page (azure blobs)
-                // 2. Check for intercept.json at the source url
-                if (ex.Status == WebExceptionStatus.ProtocolError)
+                using (var context = new ShimCallContext(request, _debugLogger))
                 {
-                    foreach (var dispatcher in _dispatchers)
-                    {
-                        if (dispatcher.Item2.Initialized == null && request.RequestUri.AbsoluteUri.TrimEnd('/').Equals(dispatcher.Item1.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (dispatcher.Item2.TryInit())
-                            {
-                                Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] PASSED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
-                                rethrow = false;
+                    Log(String.Format(CultureInfo.InvariantCulture, "[V3 RUN] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
+                    Task t = dispatcher.Invoke(context);
+                    t.Wait();
+                    var stream = context.Data;
 
-                                // let's try that again and use the fake root
-                                response = ShimResponse(request);
-                            }
-                            else
-                            {
-                                Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] FAILED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
-                            }
+                    timer.Stop();
+
+                    Log(String.Format(CultureInfo.InvariantCulture, "[V3 END] {0}ms", timer.ElapsedMilliseconds), ConsoleColor.Yellow);
+
+                    response = new ShimWebResponse(stream, request.RequestUri, context.ResponseContentType);
+                }
+            }
+            catch (AggregateException ex)
+            {
+                // unwrap the exception to get a useful error
+                var innerException = ExceptionUtility.Unwrap(ex);
+
+                // TODO: throw a DataServiceQueryException with the correct xml
+                throw innerException;
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Pass the request to the interceptors. Interceptors will be initialized as needed.
+        /// </summary>
+        private bool TryGetInterceptorResponse(WebRequest request, out WebResponse response)
+        {
+            response = null;
+
+            // find the correct dispatcher, only use it if it is initialized
+            var dispatcher = GetDispatcher(request.RequestUri);
+
+            if (dispatcher != null)
+            {
+                if (dispatcher.Initialized == true)
+                {
+                    response = CallDispatcher(dispatcher, request);
+                }
+                else if(dispatcher.Initialized == null && AreSourcesEqual(dispatcher.Source, request.RequestUri.AbsoluteUri))
+                {
+                    // root request, this is the first call to the source
+                    try
+                    {
+                        response = request.GetResponse();
+
+                        HttpWebResponse webResponse = response as HttpWebResponse;
+
+                        if (webResponse != null && webResponse.StatusCode == HttpStatusCode.OK)
+                        {
+                            // this is a v2 source, do not use the shim
+                            dispatcher.Initialized = false;
+                        }
+                    }
+                    catch (WebException)
+                    {
+                        // expected
+                        response = null;
+                    }
+
+                    // if the root document failed to load try to init
+                    if (dispatcher.Initialized == null)
+                    {
+                        if (dispatcher.TryInit())
+                        {
+                            Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] PASSED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
+
+                            // init was successful, try again using the shim
+                            response = CallDispatcher(dispatcher, request);
+                        }
+                        else
+                        {
+                            Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] FAILED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
                         }
                     }
                 }
+            }
 
-                if (rethrow)
+            // intellisense scenario
+            if (request.RequestUri.AbsoluteUri.IndexOf("/package-ids", StringComparison.OrdinalIgnoreCase) > -1 
+                || request.RequestUri.AbsoluteUri.IndexOf("/package-versions", StringComparison.OrdinalIgnoreCase) > -1)
+            {
+                var host = request.RequestUri.Host;
+
+                var dispatchers = _dispatchers.Where(u => StringComparer.OrdinalIgnoreCase.Equals((new Uri(u.Source)).Host, host));
+
+                // if v2 exists on this host, do not shim
+                if (dispatchers.All(d => d.Initialized != false))
                 {
-                    throw;
+                    var disp = dispatchers.Where(d => d.Initialized == true).FirstOrDefault();
+                    response = CallDispatcher(disp, request);
                 }
             }
+
+            return response != null;
+        }
+
+        /// <summary>
+        /// Get the response directly without the interceptor.
+        /// </summary>
+        private WebResponse CallV2(WebRequest request)
+        {
+            Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
+
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            WebResponse response = request.GetResponse();
 
             timer.Stop();
 
@@ -191,35 +272,27 @@ namespace NuGet.ShimV3
             return response;
         }
 
-        public DataServiceClientRequestMessage ShimDataService(DataServiceClientRequestMessageArgs args)
-        {
-            DataServiceClientRequestMessage message = null;
-
-            // Check if an interceptor wants the message
-            foreach (var dispatcher in _dispatchers)
-            {
-                if (dispatcher.Item2.Initialized == true && args.RequestUri.AbsoluteUri.StartsWith(dispatcher.Item1, StringComparison.OrdinalIgnoreCase))
-                {
-                    message = new ShimDataServiceClientRequestMessage(this, args);
-                }
-            }
-
-            // If no interceptors want the message create a normal HttpWebRequestMessage
-            if (message == null)
-            {
-                Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", args.RequestUri.AbsoluteUri), ConsoleColor.Gray);
-                message = new HttpWebRequestMessage(args);
-            }
-
-            return message;
-        }
-
         private void Log(string message, ConsoleColor color)
         {
             if (_debugLogger != null)
             {
                 _debugLogger.Log(message, color);
             }
+        }
+
+        private InterceptDispatcher GetDispatcher(Uri uri)
+        {
+            return _dispatchers.Where(d => MatchesSource(d.Source, uri.AbsoluteUri)).FirstOrDefault();
+        }
+
+        private static bool AreSourcesEqual(string x, string y)
+        {
+            return StringComparer.InvariantCultureIgnoreCase.Equals(x.TrimEnd('/'), y.TrimEnd('/'));
+        }
+
+        private static bool MatchesSource(string source, string requestUrl)
+        {
+            return requestUrl.StartsWith(source, StringComparison.OrdinalIgnoreCase);
         }
 
         public void Dispose()

@@ -63,6 +63,7 @@
     <Compile Include="ShimController.cs" />
     <Compile Include="ShimControllerProvider.cs" />
     <Compile Include="ShimDataServiceClientRequestMessage.cs" />
+    <Compile Include="ShimException.cs" />
     <Compile Include="ShimWebResponse.cs" />
     <Compile Include="ShimResponseMessage.cs" />
   </ItemGroup>

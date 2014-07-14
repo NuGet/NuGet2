@@ -36,6 +36,12 @@ namespace NuGet.ShimV3
 
         public string OrderBy { get; private set; }
 
+        public string SearchTerm { get; private set; }
+
+        public string PartialId { get; private set; }
+
+        public bool Count { get; private set; }
+
         public bool HasFilter
         {
             get
@@ -50,11 +56,15 @@ namespace NuGet.ShimV3
             string[] args = uri.Query.TrimStart('?').Split('&');
             foreach (var arg in args)
             {
-                string[] val = arg.Split('=');
-                arguments[val[0]] = Uri.UnescapeDataString(val[1]);
+                if (arg.IndexOf("=", StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    string[] val = arg.Split('=');
+                    arguments[val[0]] = Uri.UnescapeDataString(val.Length > 0 ? val[1] : string.Empty);
+                }
             }
             Arguments = arguments;
 
+            Count = uri.AbsoluteUri.IndexOf("/$count", StringComparison.OrdinalIgnoreCase) > -1;
 
             foreach(string key in arguments.Keys)
             {
@@ -84,10 +94,16 @@ namespace NuGet.ShimV3
                         OrderBy = Uri.UnescapeDataString(value);
                         break;
                     case "id":
-                        Id = Uri.UnescapeDataString(value);
+                        Id = Uri.UnescapeDataString(value).Trim('\'');
+                        break;
+                    case "searchterm":
+                        SearchTerm = Uri.UnescapeDataString(value).Trim('\'');
+                        break;
+                    case "partialid":
+                        PartialId = Uri.UnescapeDataString(value).Trim('\'');
                         break;
                     default:
-                        Debug.Fail("Unhandled arg: " + key);
+                        // Debug.Fail("Unhandled arg: " + key);
                         break;
                 }
             }
@@ -105,7 +121,7 @@ namespace NuGet.ShimV3
                 {
                     IsLatestVersion = true;
                 }
-                else if (StringComparer.InvariantCultureIgnoreCase.Equals(filter, "IsLatestAbsoluteVersion"))
+                else if (StringComparer.InvariantCultureIgnoreCase.Equals(filter, "IsAbsoluteLatestVersion"))
                 {
                     IsLatestVersion = true;
                     IncludePrerelease = true;

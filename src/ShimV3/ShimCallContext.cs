@@ -10,7 +10,7 @@ namespace NuGet.ShimV3
     internal class ShimCallContext : InterceptCallContext, IDisposable
     {
         private WebRequest _request;
-        private ManualResetEvent _sem;
+        private ManualResetEventSlim _sem;
         private MemoryStream _data;
         private string _contentType;
         private IDebugConsoleController _logger;
@@ -21,7 +21,7 @@ namespace NuGet.ShimV3
         {
             _logger = logger;
             _request = request;
-            _sem = new ManualResetEvent(false);
+            _sem = new ManualResetEventSlim(false);
         }
 
         public override Uri RequestUri
@@ -48,7 +48,7 @@ namespace NuGet.ShimV3
         {
             get
             {
-                _sem.WaitOne();
+                _sem.Wait();
                 return _data;
             }
         }
@@ -85,7 +85,11 @@ namespace NuGet.ShimV3
 
         public void Dispose()
         {
-            _sem.Dispose();
+            if (_sem != null)
+            {
+                _sem.Dispose();
+                _sem = null;
+            }
         }
     }
 }

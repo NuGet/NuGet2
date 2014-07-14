@@ -52,8 +52,8 @@
         <!-- Specifiy the NuGet release version. When make changes here, please also change the version numbers 
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
-        <MajorVersion>2</MajorVersion>
-        <MinorVersion>9</MinorVersion>
+        <MajorVersion>3</MajorVersion>
+        <MinorVersion>0</MinorVersion>
         <Patch>0</Patch>
 
         <!-- Ensure that we come up with a new version every 65535 years -->

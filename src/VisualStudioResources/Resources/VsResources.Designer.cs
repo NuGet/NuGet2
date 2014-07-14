@@ -367,7 +367,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to nuget.org v3.0.0 preview.
+        ///   Looks up a localized string similar to nuget.org (3.0.0-ctp1) preview.
         /// </summary>
         public static string NuGetOfficialPreviewSourceName {
             get {
