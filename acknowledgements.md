@@ -1,6 +1,10 @@
 NuGet Hall of Fame
 ==================
 
+## NuGet 3.0
+1. [Matt Ward](https://www.codeplex.com/site/users/view/MattWard) ([@sharpdevelop](https://twitter.com/sharpdevelop))
+    - Added support for Xamarin target frameworks
+
 ## NuGet 2.8
 1. [Llewellyn Pritchard](https://www.codeplex.com/site/users/view/leppie) ([@leppie](https://twitter.com/leppie))
     - [#3466](https://nuget.codeplex.com/workitem/3466) - When packing packages, verifying Id of dependency packages.
