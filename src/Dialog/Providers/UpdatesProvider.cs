@@ -7,6 +7,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGet.Resolver;
 
 namespace NuGet.Dialog.Providers
 {
@@ -110,6 +111,76 @@ namespace NuGet.Dialog.Providers
             
             return LocalRepository.GetPackages().Any(
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
+        }
+
+        /*
+        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
+        {
+            activePackageManager.UpdatePackages(
+                projectManager,
+                new[] { item.PackageIdentity },
+                operations,
+                updateDependencies: true,
+                allowPrereleaseVersions: IncludePrerelease,
+                logger: this); 
+        } */
+
+        private IEnumerable<Resolver.PackageAction> ResolveActionsForUpdateAll(IVsPackageManager activePackageManager, IProjectManager projectManager)
+        {
+            var resolver = new ActionResolver()
+            {
+                Logger = this,
+                AllowPrereleaseVersions = IncludePrerelease,
+                DependencyVersion = activePackageManager.DependencyVersion
+            };
+            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
+            foreach (var package in allPackages)
+            {
+                resolver.AddOperation(PackageAction.Install, package, projectManager);
+            }
+            var actions = resolver.ResolveActions();
+            return actions;
+        }
+
+        protected override bool ExecuteAllCore()
+        {
+            if (SelectedNode == null || SelectedNode.Extensions == null || SelectedNode.Extensions.Count == 0)
+            {
+                return false;
+            }
+
+            ShowProgressWindow();
+
+            IVsPackageManager activePackageManager = GetActivePackageManager();
+            Debug.Assert(activePackageManager != null);
+
+            IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
+            IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
+
+            var actions = ResolveActionsForUpdateAll(activePackageManager, projectManager);
+            bool accepted = this.ShowLicenseAgreement(actions);
+            if (!accepted)
+            {
+                return false;
+            }
+
+            try
+            {
+                RegisterPackageOperationEvents(activePackageManager, projectManager);
+
+                var actionExecutor = new ActionExecutor()
+                {
+                    Logger = this
+                };
+                actionExecutor.Execute(actions);
+
+                return true;
+            }
+            finally
+            {
+                UnregisterPackageOperationEvents(activePackageManager, projectManager);
+                action.Dispose();
+            }
         }
 
         protected override void OnExecuteCompleted(PackageItem item)
