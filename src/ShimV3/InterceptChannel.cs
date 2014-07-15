@@ -525,7 +525,21 @@ namespace NuGet.ShimV3
                             latest.Add("id", JToken.Parse("'" + packageIds[i] + "'"));
                         }
 
-                        packages.Add(latest);
+                        if (i < versions.Length && !String.IsNullOrEmpty(versions[i]))
+                        {
+                            NuGetVersion latestVersion = NuGetVersion.Parse(latest["version"].ToString());
+                            NuGetVersion currentVersion = NuGetVersion.Parse(versions[i]);
+
+                            // only add the package if it is not the latest version
+                            if (VersionComparer.VersionRelease.Compare(latestVersion, currentVersion) > 0)
+                            {
+                                packages.Add(latest);
+                            }
+                        }
+                        else
+                        {
+                            packages.Add(latest);
+                        }
                     }
                 }
             }
