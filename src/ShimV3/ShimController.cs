@@ -145,8 +145,10 @@ namespace NuGet.ShimV3
                 using (var context = new ShimCallContext(request, _debugLogger))
                 {
                     Log(String.Format(CultureInfo.InvariantCulture, "[V3 RUN] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
-                    Task t = dispatcher.Invoke(context);
+
+                    var t = Task.Run(async () => await dispatcher.Invoke(context));
                     t.Wait();
+
                     var stream = context.Data;
 
                     timer.Stop();
