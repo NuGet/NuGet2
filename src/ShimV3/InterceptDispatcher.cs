@@ -30,7 +30,8 @@ namespace NuGet.ShimV3
                 new Tuple<string, Func<InterceptCallContext, Task>>("Packages", Packages),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-ids", PackageIds),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-versions", PackageVersions),
-                new Tuple<string, Func<InterceptCallContext, Task>>("$metadata", Metadata)
+                new Tuple<string, Func<InterceptCallContext, Task>>("$metadata", Metadata),
+                new Tuple<string, Func<InterceptCallContext, Task>>("package", DownloadPackage)
             };
 
             _feedFuncs = new Tuple<string, Func<InterceptCallContext, Task>>[]
@@ -167,6 +168,23 @@ namespace NuGet.ShimV3
             {
                 context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 ERR] (exception:{0}) {1}", ex.GetType().ToString(), context.RequestUri.AbsoluteUri), ConsoleColor.Red);
                 throw;
+            }
+        }
+
+        private async Task DownloadPackage(InterceptCallContext context)
+        {
+            context.Log("[V3 CALL] DownloadPackage", ConsoleColor.Green);
+
+            var urlParts = new List<string>(context.RequestUri.AbsoluteUri.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries));
+            urlParts.Reverse();
+
+            if (urlParts.Count > 3 && StringComparer.OrdinalIgnoreCase.Equals("package", urlParts[2]))
+            {
+                await _channel.DownloadPackage(context, urlParts[1], urlParts[0]);
+            }
+            else
+            {
+                throw new ShimException("Invalid download url: " + context.RequestUri.ToString());
             }
         }
 

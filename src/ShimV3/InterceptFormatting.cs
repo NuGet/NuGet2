@@ -185,7 +185,7 @@ namespace NuGet.ShimV3
 
         //  The search service currently returns a slightly different JSON format (this will be fixed)
 
-        public static XElement MakeFeedFromSearch(string feedBaseAddress, string method, IEnumerable<JToken> packages, string id)
+        public static XElement MakeFeedFromSearch(string source, string feedBaseAddress, string method, IEnumerable<JToken> packages, string id)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
             XElement feed = new XElement(atom + "feed");
@@ -193,12 +193,12 @@ namespace NuGet.ShimV3
             feed.Add(new XElement(atom + "title", method));
             foreach (JToken package in packages)
             {
-                feed.Add(MakeEntrySearch(feedBaseAddress, "", package));
+                feed.Add(MakeEntrySearch(source, feedBaseAddress, "", package));
             }
             return feed;
         }
 
-        static XElement MakeEntrySearch(string feedBaseAddress, string id, JToken package)
+        static XElement MakeEntrySearch(string source, string feedBaseAddress, string id, JToken package)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
             XNamespace d = XNamespace.Get(@"http://schemas.microsoft.com/ado/2007/08/dataservices");
@@ -216,7 +216,7 @@ namespace NuGet.ShimV3
             // the content URL should come from the json
             entry.Add(new XElement(atom + "content",
                 new XAttribute("type", "application/zip"),
-                new XAttribute("src", string.Format("http://www.nuget.org/api/v2/package/{0}/{1}", registrationId, version))));
+                new XAttribute("src", string.Format(CultureInfo.InvariantCulture, "{0}/package/{1}/{2}", source, registrationId, version))));
 
             XElement properties = new XElement(m + "properties");
             entry.Add(properties);
@@ -248,8 +248,10 @@ namespace NuGet.ShimV3
                 properties.Add(new XElement(d + "LicenseUrl", package["LicenseUrl"].ToString()));
             }
 
+            JObject jObjPackage = (JObject)package;
+
             JToken iconUrl;
-            if (((JObject)package).TryGetValue("IconUrl", out iconUrl))
+            if (jObjPackage.TryGetValue("IconUrl", out iconUrl))
             {
                 properties.Add(new XElement(d + "IconUrl", iconUrl.ToString()));
             }
@@ -260,20 +262,20 @@ namespace NuGet.ShimV3
 
             properties.Add(new XElement(d + "DownloadCount", new XAttribute(m + "type", "Edm.Int32"), downloadCount));
             properties.Add(new XElement(d + "GalleryDetailsUrl", FieldOrDefault(package, "GalleryDetailsUrl", "http://tempuri.org/")));
-            properties.Add(new XElement(d + "Published", new XAttribute(m + "type", "Edm.DateTime"), published.ToString("O")));
+            properties.Add(new XElement(d + "Published", new XAttribute(m + "type", "Edm.DateTime"), published.ToString("O", CultureInfo.InvariantCulture)));
             properties.Add(new XElement(d + "Tags", package["Tags"].ToString()));
 
             // title is optional, if it is not there the UI uses the Id
 
             JToken title;
-            if (((JObject)package).TryGetValue("Title", out title))
+            if (jObjPackage.TryGetValue("Title", out title))
             {
                 properties.Add(new XElement(d + "Title", title.ToString()));
             }
 
             string releaseNotes = package["ReleaseNotes"].ToString();
 
-            if (releaseNotes == "null")
+            if (String.IsNullOrEmpty(releaseNotes) || releaseNotes == "null")
             {
                 properties.Add(new XElement(d + "ReleaseNotes", string.Empty));
             }
