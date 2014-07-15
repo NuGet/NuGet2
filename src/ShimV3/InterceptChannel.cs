@@ -22,9 +22,10 @@ namespace NuGet.ShimV3
         private readonly string _listAvailableLatestStableIndex;
         private readonly string _listAvailableAllIndex;
         private readonly string _listAvailableLatestPrereleaseIndex;
+        private readonly string _source;
         private readonly IShimCache _cache;
 
-        internal InterceptChannel(JObject interceptBlob, IShimCache cache)
+        internal InterceptChannel(string source, JObject interceptBlob, IShimCache cache)
         {
             _resolverBaseAddress = interceptBlob["resolverBaseAddress"].ToString().TrimEnd('/');
             _searchAddress = interceptBlob["searchAddress"].ToString().TrimEnd('/');
@@ -32,6 +33,7 @@ namespace NuGet.ShimV3
             _listAvailableLatestStableIndex = interceptBlob["isLatestStable"].ToString();
             _listAvailableAllIndex = interceptBlob["allVersions"].ToString();
             _listAvailableLatestPrereleaseIndex = interceptBlob["isLatest"].ToString();
+            _source = source.TrimEnd('/');
             _cache = cache;
         }
 
@@ -51,7 +53,7 @@ namespace NuGet.ShimV3
                 resTask.Wait();
                 JObject obj = JObject.Parse(resTask.Result);
 
-                channel = new InterceptChannel(obj, cache);
+                channel = new InterceptChannel(source, obj, cache);
                 return true;
             }
 
@@ -78,6 +80,34 @@ namespace NuGet.ShimV3
                 XElement xml = XElement.Load(new StringReader(t), LoadOptions.SetBaseUri);
                 await context.WriteResponse(xml);
             }
+        }
+
+        public async Task DownloadPackage(InterceptCallContext context, string id, string version)
+        {
+            JToken package = await GetPackageCore(context, id, version);
+
+            if (package == null)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "unable to find version {0} of package {1}", version, id));
+            }
+
+            string address = package["nupkgUrl"].ToString();
+
+            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 PKG] {0}", address.ToString()), ConsoleColor.Cyan);
+
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            System.Net.Http.HttpClient client = new System.Net.Http.HttpClient();
+            HttpResponseMessage response = await client.GetAsync(address);
+            byte[] data = await response.Content.ReadAsByteArrayAsync();
+
+            timer.Stop();
+
+            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 PKG] (status:{0}) (time:{1}ms) {2}", response.StatusCode, timer.ElapsedMilliseconds, address.ToString()),
+                response.StatusCode == System.Net.HttpStatusCode.OK ? ConsoleColor.Cyan : ConsoleColor.Red);
+
+            await context.WriteResponse(data, "application/zip");
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
@@ -109,7 +139,7 @@ namespace NuGet.ShimV3
 
             IEnumerable<JToken> data = (obj != null) ? data = obj["data"] : Enumerable.Empty<JToken>();
 
-            XElement feed = InterceptFormatting.MakeFeedFromSearch(_passThroughAddress, "Packages", data, "");
+            XElement feed = InterceptFormatting.MakeFeedFromSearch(_source, _passThroughAddress, "Packages", data, "");
             await context.WriteResponse(feed);
         }
 
@@ -117,8 +147,22 @@ namespace NuGet.ShimV3
         {
             context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetPackage: {0} {1}", id, version), ConsoleColor.Magenta);
 
-            JObject resolverBlob = await FetchJson(context, MakeResolverAddress(id));
+            var desiredPackage = await GetPackageCore(context, id, version);
+
+            if (desiredPackage == null)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "unable to find version {0} of package {1}", version, id));
+            }
+
+            XElement feed = InterceptFormatting.MakeFeed(_passThroughAddress, "Packages", new List<JToken> { desiredPackage }, id);
+            await context.WriteResponse(feed);
+        }
+
+        private async Task<JToken> GetPackageCore(InterceptCallContext context, string id, string version)
+        {
             JToken desiredPackage = null;
+            JObject resolverBlob = await FetchJson(context, MakeResolverAddress(id));
+
 
             if (resolverBlob != null)
             {
@@ -135,14 +179,9 @@ namespace NuGet.ShimV3
                 }
             }
 
-            if (desiredPackage == null)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "unable to find version {0} of package {1}", version, id));
-            }
-
-            XElement feed = InterceptFormatting.MakeFeed(_passThroughAddress, "Packages", new List<JToken> { desiredPackage }, id);
-            await context.WriteResponse(feed);
+            return desiredPackage;
         }
+
 
         public async Task GetLatestVersionPackage(InterceptCallContext context, string id, bool includePrerelease)
         {
@@ -466,7 +505,7 @@ namespace NuGet.ShimV3
             {
                 VersionRange range = null;
 
-                if (versionConstraints.Length < i && !String.IsNullOrEmpty(versionConstraints[i]))
+                if (i < versionConstraints.Length && !String.IsNullOrEmpty(versionConstraints[i]))
                 {
                     VersionRange.TryParse(versionConstraints[i], out range);
                 }

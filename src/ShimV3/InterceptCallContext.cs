@@ -61,5 +61,12 @@ namespace NuGet.ShimV3
 
             await WriteResponseAsync(data);
         }
+
+        public async Task WriteResponse(byte[] data, string contextType)
+        {
+            ResponseContentType = contextType;
+
+            await WriteResponseAsync(data);
+        }
     }
 }
