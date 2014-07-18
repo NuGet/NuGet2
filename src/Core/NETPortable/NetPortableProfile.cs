@@ -135,21 +135,27 @@ namespace NuGet
 
         public bool IsCompatibleWith(FrameworkName projectFramework)
         {
+            return IsCompatibleWith(projectFramework, NetPortableProfileTable.Default);
+        }
+        public bool IsCompatibleWith(FrameworkName projectFramework, NetPortableProfileTable portableProfileTable)
+        {
             if (projectFramework == null)
             {
                 throw new ArgumentNullException("projectFramework");
             }
 
             return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
-                || NetPortableProfileTable.HasCompatibleProfileWith(this, projectFramework);
+                || portableProfileTable.HasCompatibleProfileWith(this, projectFramework);
         }
 
         /// <summary>
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
+        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false, NetPortableProfileTable portableProfileTable = null)
         {
+            portableProfileTable = portableProfileTable ?? NetPortableProfileTable.Default;
+
             if (String.IsNullOrEmpty(profileValue))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "profileValue");
@@ -160,7 +166,7 @@ namespace NuGet
             // was supported in other places. By fixing the way the profile table indexes the cached 
             // profiles, we can now indeed access by either naming, so we don't need the old check 
             // for the string starting with "Profile".
-            var result = NetPortableProfileTable.GetProfile(profileValue);
+            var result = portableProfileTable.GetProfile(profileValue);
             if (result != null)
             {
                 if (treatOptionalFrameworksAsSupportedFrameworks)

@@ -1281,7 +1281,7 @@ namespace NuGet.Test
         public void TestGetShortNameForPortableFramework()
         {
             // Arrange
-            NetPortableProfileTable.Profiles = BuildProfileCollection();
+            var portableProfiles = BuildTestProfileTable();
 
             var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
 
@@ -1415,12 +1415,12 @@ namespace NuGet.Test
             profileCollection.Add(profile2);
             profileCollection.Add(profile3);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             var framework = new FrameworkName(frameworkIdentifier);
 
             // Act
-            string shortName = VersionUtility.GetShortFrameworkName(framework);
+            string shortName = VersionUtility.GetShortFrameworkName(framework, portableProfileTable);
 
             // Assert
             Assert.Equal(expectedShortName, shortName);
@@ -1577,7 +1577,7 @@ namespace NuGet.Test
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
             profileCollection.Add(profile1);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(frameworkName);
@@ -1613,14 +1613,14 @@ namespace NuGet.Test
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
             profileCollection.Add(profile1);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(frameworkName);
             var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
 
             // Act
-            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
+            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework, portableProfileTable);
 
             // Assert
             Assert.Equal(expectedScore, score);
@@ -1677,20 +1677,20 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(projectFrameworkName);
             var targetFramework = VersionUtility.ParseFrameworkName(packageTargetFrameworkName);
 
             // Act
-            long score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(framework, targetFramework);
+            long score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(framework, targetFramework, portableProfileTable);
 
             // Assert
             Assert.Equal(expectedScore, score);
         }
 
-        private NetPortableProfileCollection BuildProfileCollection()
+        private NetPortableProfileTable BuildTestProfileTable()
         {
             var profileCollection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
@@ -1728,7 +1728,7 @@ namespace NuGet.Test
             profileCollection.Add(profile3);
             profileCollection.Add(profile4);
 
-            return profileCollection;
+            return new NetPortableProfileTable(profileCollection);
         }
     }
 }

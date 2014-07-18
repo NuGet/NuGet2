@@ -10,22 +10,39 @@ using VersionStringISetTuple = System.Tuple<System.Version, System.Collections.G
 
 namespace NuGet
 {
-    public static class NetPortableProfileTable
+    /// <summary>
+    /// Represents a table of .NET Portable profile data.
+    /// </summary>
+    public class NetPortableProfileTable
     {
         private const string PortableReferenceAssemblyPathEnvironmentVariableName = "NuGetPortableReferenceAssemblyPath";
+        private static readonly Lazy<NetPortableProfileTable> _defaultTable = new Lazy<NetPortableProfileTable>(LoadDefaultTable);
+        public static NetPortableProfileTable Default
+        {
+            get { return _defaultTable.Value; }
+        }
 
-        // This collection is the original indexed collection where profiles are indexed by 
-        // the full "ProfileXXX" naming. 
-        private static NetPortableProfileCollection _portableProfiles;
         // In order to make the NetPortableProfile.Parse capable of also parsing so-called 
         // "custom profile string" version (i.e. "net40-client"), we need an alternate index
         // by this key. I used dictionary here since I saw no value in creating a custom collection 
         // like it's done already for the _portableProfiles. Not sure why it's done that way there.
-        private static IDictionary<string, NetPortableProfile> _portableProfilesByCustomProfileString;
+        private IDictionary<string, NetPortableProfile> _portableProfilesByCustomProfileString;
         // key is the identifier of the optional framework and value is the list of tuple of (optional Framework Version, set of profiles in which they are optional)
-        private static IDictionary<string, List<VersionStringISetTuple>> _portableProfilesSetByOptionalFrameworks;
+        private IDictionary<string, List<VersionStringISetTuple>> _portableProfilesSetByOptionalFrameworks;
 
-        public static NetPortableProfile GetProfile(string profileName)
+        public NetPortableProfileTable(IEnumerable<NetPortableProfile> profiles)
+        {
+            Profiles = new NetPortableProfileCollection();
+            Profiles.AddRange(profiles);
+
+            // Index profiles
+            _portableProfilesByCustomProfileString = Profiles.ToDictionary(p => p.CustomProfileString);
+            CreateOptionalFrameworksDictionary();
+        }
+
+        public NetPortableProfileCollection Profiles { get; private set; }
+
+        public NetPortableProfile GetProfile(string profileName)
         {
             if (String.IsNullOrEmpty(profileName))
             {
@@ -47,62 +64,35 @@ namespace NuGet
             return result;
         }
 
-        internal static NetPortableProfileCollection Profiles
+        private void CreateOptionalFrameworksDictionary()
         {
-            get
+            _portableProfilesSetByOptionalFrameworks = new Dictionary<string, List<VersionStringISetTuple>>();
+            foreach (var portableProfile in Profiles)
             {
-                if (_portableProfiles == null)
+                foreach (var optionalFramework in portableProfile.OptionalFrameworks)
                 {
-                    // We use the setter so that we can consistently set both the 
-                    // existing collection as well as the CustomProfileString-indexed one.
-                    // This keeps both in sync.
-                    Profiles = BuildPortableProfileCollection();
-                    CreateOptionalFrameworksDictionary();
-                }
-
-                return _portableProfiles;
-            }
-            set
-            {
-                // This setter is only for Unit Tests.
-                _portableProfiles = value;
-                _portableProfilesByCustomProfileString = _portableProfiles.ToDictionary(x => x.CustomProfileString);
-                CreateOptionalFrameworksDictionary();
-            }
-        }
-
-        private static void CreateOptionalFrameworksDictionary()
-        {            
-            if (_portableProfiles != null)
-            {
-                _portableProfilesSetByOptionalFrameworks = new Dictionary<string, List<VersionStringISetTuple>>();
-                foreach (var portableProfile in _portableProfiles)
-                {
-                    foreach (var optionalFramework in portableProfile.OptionalFrameworks)
+                    // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
+                    if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
                     {
-                        // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
-                        if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
-                        {
-                            _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
-                        }
+                        _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
+                    }
 
-                        List<VersionStringISetTuple> listVersionStringISetTuple = _portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
-                        if (listVersionStringISetTuple != null)
+                    List<VersionStringISetTuple> listVersionStringISetTuple = _portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
+                    if (listVersionStringISetTuple != null)
+                    {
+                        VersionStringISetTuple versionStringITuple = listVersionStringISetTuple.Where(tuple => tuple.Item1.Equals(optionalFramework.Version)).FirstOrDefault();
+                        if (versionStringITuple == null)
                         {
-                            VersionStringISetTuple versionStringITuple = listVersionStringISetTuple.Where(tuple => tuple.Item1.Equals(optionalFramework.Version)).FirstOrDefault();
-                            if (versionStringITuple == null)
-                            {
-                                versionStringITuple = new VersionStringISetTuple(optionalFramework.Version, new HashSet<string>());
-                                listVersionStringISetTuple.Add(versionStringITuple);
-                            }
-                            versionStringITuple.Item2.Add(portableProfile.Name);
+                            versionStringITuple = new VersionStringISetTuple(optionalFramework.Version, new HashSet<string>());
+                            listVersionStringISetTuple.Add(versionStringITuple);
                         }
+                        versionStringITuple.Item2.Add(portableProfile.Name);
                     }
                 }
             }
         }
 
-        internal static bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
+        internal bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
         {
             List<VersionStringISetTuple> versionProfileISetTupleList = null;
 
@@ -132,10 +122,18 @@ namespace NuGet
             return false;
         }
 
-        private static NetPortableProfileCollection BuildPortableProfileCollection()
+        // Loading from other sources
+        public static NetPortableProfileTable LoadFromProfileDirectory(string portableRootDirectory)
+        {
+            var profiles = LoadPortableProfiles(portableRootDirectory);
+            return new NetPortableProfileTable(profiles);
+        }
+
+        // Default table loading logic.
+        private static NetPortableProfileTable LoadDefaultTable()
         {
             var profileCollection = new NetPortableProfileCollection();
-            
+
             string portableRootDirectory;
 
             string portableReferencePathOverride = Environment.GetEnvironmentVariable(PortableReferenceAssemblyPathEnvironmentVariableName);
@@ -150,17 +148,17 @@ namespace NuGet
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify),
                         @"Reference Assemblies\Microsoft\Framework\.NETPortable");
             }
+            return LoadFromProfileDirectory(portableRootDirectory);
+        }
 
+        private static IEnumerable<NetPortableProfile> LoadPortableProfiles(string portableRootDirectory)
+        {
             if (Directory.Exists(portableRootDirectory))
             {
-                foreach (string versionDir in Directory.EnumerateDirectories(portableRootDirectory, "v*", SearchOption.TopDirectoryOnly))
-                {
-                    string profileFilesPath = versionDir + @"\Profile\";
-                    profileCollection.AddRange(LoadProfilesFromFramework(versionDir, profileFilesPath));
-                }
+                return Directory.EnumerateDirectories(portableRootDirectory, "v*", SearchOption.TopDirectoryOnly)
+                    .SelectMany(versionDir => LoadProfilesFromFramework(versionDir, versionDir + @"\Profile\"));
             }
-
-            return profileCollection;
+            return Enumerable.Empty<NetPortableProfile>();
         }
 
         private static IEnumerable<NetPortableProfile> LoadProfilesFromFramework(string version, string profileFilesPath)
