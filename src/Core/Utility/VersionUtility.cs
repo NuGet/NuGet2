@@ -567,6 +567,10 @@ namespace NuGet
             string profile;
             if (name.Equals("portable", StringComparison.OrdinalIgnoreCase))
             {
+                if (portableProfileTable == null)
+                {
+                    throw new ArgumentException("portableProfileTable");
+                }
                 NetPortableProfile portableProfile = NetPortableProfile.Parse(frameworkName.Profile, portableProfileTable: portableProfileTable);
                 if (portableProfile != null)
                 {

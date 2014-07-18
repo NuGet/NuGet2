@@ -114,7 +114,13 @@ namespace NuGet
                 if (_customProfile == null)
                 {
                     var frameworks = SupportedFrameworks.Concat(OptionalFrameworks);
-                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f)));
+                    
+                    // We pass a null portableProfileTable in here because:
+                    //  1) We don't expect to see portable frameworks in our Supported/Optional Frameworks.
+                    //  2) Using NetPortableProfileTable.Default may be incorrect or throw exceptions (if, for example, we're in the middle of initializing the default table).
+                    //  3) We don't have the table instance the user to use wants available here.
+                    // Using 'null' just disables shortening of portable frameworks, which is totally fine here due to #1 and prevents issues due to #2 and #3
+                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f, portableProfileTable: null)));
                 }
 
                 return _customProfile;

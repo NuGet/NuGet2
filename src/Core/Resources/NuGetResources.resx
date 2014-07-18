@@ -475,4 +475,7 @@
   <data name="Error_InvalidPackage" xml:space="preserve">
     <value>Unable to load version '{0}' of package '{1}'.</value>
   </data>
+  <data name="PortableProfileTableRequiresForGetShortFrameworkName" xml:space="preserve">
+    <value>The 'portableProfileTable' parameter must be provided when getting the short name for a Portable target framework</value>
+  </data>
 </root>

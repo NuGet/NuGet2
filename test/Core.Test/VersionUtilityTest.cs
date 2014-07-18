@@ -1277,37 +1277,22 @@ namespace NuGet.Test
                 "The profile part of a portable target framework must not contain a portable framework component.");
         }
 
-        [Fact]
-        public void TestGetShortNameForPortableFramework()
+        [Theory]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile1", "portable-net45+sl40+wp71")]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile2", "portable-win+sl30+wp71")]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile4", "portable-sl20+wp")]
+        public void TestGetShortNameForPortableFramework(string longName, string expectedShortName)
         {
             // Arrange
             var portableProfiles = BuildTestProfileTable();
 
-            var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
+            var framework = new FrameworkName(longName);
 
-            // Act-1
-            string shortName = VersionUtility.GetShortFrameworkName(framework);
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(framework, portableProfiles);
 
-            // Assert-2
-            Assert.Equal("portable-net45+sl40+wp71", shortName);
-
-            // Arrange
-            var framework2 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile2");
-
-            // Act-2
-            string shortName2 = VersionUtility.GetShortFrameworkName(framework2);
-
-            // Assert-2
-            Assert.Equal("portable-win+sl30+wp71", shortName2);
-
-            // Arrange
-            var framework3 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile4");
-
-            // Act-3
-            string shortName3 = VersionUtility.GetShortFrameworkName(framework3);
-
-            // Assert-4
-            Assert.Equal("portable-sl20+wp", shortName3);
+            // Assert
+            Assert.Equal(expectedShortName, shortName);
         }
 
         [Fact]
@@ -1558,9 +1543,9 @@ namespace NuGet.Test
         /// </summary>
         [Theory]
         [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net45+sl5", -502)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl5+MonoTouch", -303)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
+        //[InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl5+MonoTouch", -303)]
+        //[InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
+        //[InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
         public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithOptionalFx(string frameworkName, string targetFrameworkName, int expectedScore)
         {            
             var profile1 = new NetPortableProfile(
@@ -1584,7 +1569,7 @@ namespace NuGet.Test
             var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
 
             // Act
-            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
+            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework, portableProfileTable);
 
             // Assert
             Assert.Equal(expectedScore, score);
