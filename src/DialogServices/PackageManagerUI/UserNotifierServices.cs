@@ -9,7 +9,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
-    internal class UserNotifierServices : IUserNotifierServices
+    public class UserNotifierServices : IUserNotifierServices
     {
         private readonly Dispatcher _uiDispatcher;
 

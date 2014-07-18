@@ -52,8 +52,33 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="EditorFactory.cs" />
     <Compile Include="FontAndColorsRegistrationAttribute.cs" />
     <Compile Include="Guids.cs" />
+    <Compile Include="PackageManagerWindowPane.cs" />
+    <Compile Include="UiSearchResultPackage.cs" />
+    <Compile Include="UI\BusyControl.xaml.cs">
+      <DependentUpon>BusyControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\DropdownButton.xaml.cs">
+      <DependentUpon>DropdownButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\InfiniteScrollList.xaml.cs">
+      <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\NullToVisibilityConverter.cs" />
+    <Compile Include="UI\PackageDetailControlModel.cs" />
+    <Compile Include="UI\PackageManagerDocData.cs" />
+    <Compile Include="UI\PackageStatusToInstallImageConverter.cs" />
+    <Compile Include="UI\PreviewWindow.xaml.cs">
+      <DependentUpon>PreviewWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\PackageDetail.xaml.cs">
+      <DependentUpon>PackageDetail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\PackageManagerControl.xaml.cs">
+      <DependentUpon>PackageManagerControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="NuGetVSEventsPackage.cs" />
     <Compile Include="NuGetPackage.cs" />
@@ -80,6 +105,9 @@
       <Link>Modules\NuGet\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="UI\CheckMark.png" />
+    <Resource Include="UI\UpwardsArrow.png" />
+    <Resource Include="UI\packageicon.png" />
     <Content Include="Resources\nuget_32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -173,8 +201,7 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-	<ProjectReference Include="..\TeamFoundationServer14\TeamFoundationServer14.csproj"
-		      Condition="$(VisualStudioVersion)=='14.0'">
+    <ProjectReference Include="..\TeamFoundationServer14\TeamFoundationServer14.csproj" Condition="$(VisualStudioVersion)=='14.0'">
       <Project>{7dd28cac-d7b8-4053-b820-9da44565d40c}</Project>
       <Name>TeamFoundationServer14</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
@@ -278,9 +305,12 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -295,7 +325,32 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Page Include="UI\BusyControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\DropdownButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\InfiniteScrollList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\PreviewWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\PackageDetail.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\PackageManagerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
   <Target Name="BeforeBuild">

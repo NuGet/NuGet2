@@ -12,6 +12,7 @@ extern alias dialog14;
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
@@ -70,6 +71,11 @@ namespace NuGet.Tools
         "Package Manager Console",
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
         "{" + GuidList.guidNuGetPkgString + "}")]
+    [ProvideEditorExtension(typeof(EditorFactory), ".PackageManagerDocumentWindow", 50,
+              ProjectGuid = "{D1DCDB85-C5E8-11d2-BFCA-00C04F990235}",
+              TemplateDir = "Templates",
+              NameResourceID = 300,
+              DefaultName = "PackageManagerDocumentWindow")]
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Package, IVsPackageExtensionProvider
     {
@@ -94,9 +100,12 @@ namespace NuGet.Tools
         private IMachineWideSettings _machineWideSettings;
         private IShimControllerProvider _shimControllerProvider;
 
+        private Dictionary<Project, int> _projectToToolWindowId;
+
         public NuGetPackage()
         {
             ServiceLocator.InitializePackageServiceProvider(this);
+            _projectToToolWindowId = new Dictionary<Project, int>();
         }
 
         private IVsMonitorSelection VsMonitorSelection
@@ -219,6 +228,9 @@ namespace NuGet.Tools
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
+
+            //Create Editor Factory. Note that the base Package class will call Dispose on it.
+            base.RegisterEditorFactory(new EditorFactory());
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
             // Doing so is illegal and may cause VS to hang.
@@ -395,8 +407,72 @@ namespace NuGet.Tools
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
+        private void ShowToolWindow(Project project)
+        {
+            ShowDocWindow(project);
+        }
+
+        private void ShowDocWindow(Project project)
+        {
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            var vsProject = project.ToVsHierarchy();
+            uint windowFlags =
+                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
+
+            object v2;
+            vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out v2);
+            int v3 = (int)v2;
+
+            var myDoc = new PackageManagerDocData(project);
+            var NewEditor = new PackageManagerWindowPane(myDoc);
+            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            var guidEditorType = new Guid(GuidList.guidEditorFactoryString);
+            var guidCommandUI = Guid.Empty;
+
+            var caption = "PackageManager";
+            var documentName = String.Format("PackageManager:{0}", project.FullName);
+            IVsWindowFrame windowFrame;
+            int hr = uiShell.CreateDocumentWindow(
+                windowFlags,
+                documentName,
+                (IVsUIHierarchy)vsProject,
+                (uint)v3, // !!! (uint)VSConstants.VSITEMID.Root, // !!! (uint)v3,
+                ppunkDocView,
+                ppunkDocData,
+                ref guidEditorType,
+                null,
+                ref guidCommandUI,
+                null,
+                caption,
+                string.Empty,
+                null,
+                out windowFrame);
+            ErrorHandler.ThrowOnFailure(hr);
+            windowFrame.Show();
+        }
+
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
         {
+            Project project = VsMonitorSelection.GetActiveProject();
+            if (project != null && !project.IsUnloaded() && project.IsSupported())
+            {
+                ShowToolWindow(project);
+            }
+            else
+            {
+                // show error message when no supported project is selected.
+                string projectName = project != null ? project.Name : String.Empty;
+
+                string errorMessage = String.IsNullOrEmpty(projectName)
+                    ? Resources.NoProjectSelected
+                    : String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
+
+                MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
+            }
+
+            /* !!!
             string parameterString = null;
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (null != args)
@@ -426,7 +502,7 @@ namespace NuGet.Tools
 
                     MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
                 }
-            }
+            } */
         }
 
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)

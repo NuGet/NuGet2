@@ -15,6 +15,8 @@ namespace NuGet.Tools
         // any project system that wants to load NuGet when its project opens needs to activate a UI context with this GUID
         public const string guidAutoLoadNuGetString = "65B1D035-27A5-4BBA-BAB9-5F61C1E2BC4A";
 
+        public const string guidEditorFactoryString = "EC269AD5-3EA8-4A13-AAF8-76741843B3CD";
+
         public static readonly Guid guidNuGetConsoleCmdSet = new Guid(guidNuGetConsoleCmdSetString);
         public static readonly Guid guidNuGetDialogCmdSet = new Guid(guidNuGetDialogCmdSetString);
         public static readonly Guid guidNuGetToolsGroupCmdSet = new Guid(guidNuGetToolsGroupString);

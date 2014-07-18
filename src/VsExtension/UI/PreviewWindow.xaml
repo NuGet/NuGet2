@@ -1,0 +1,7 @@
+﻿<Window x:Class="NuGet.Tools.PreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Install Preview" Height="300" Width="300">
+    <StackPanel x:Name="_list">        
+    </StackPanel>
+</Window>

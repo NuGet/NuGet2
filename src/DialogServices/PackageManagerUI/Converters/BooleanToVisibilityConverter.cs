@@ -31,5 +31,5 @@ namespace NuGet.Dialog.PackageManagerUI
         {
             throw new NotImplementedException();
         }
-    }
+    }    
 }
