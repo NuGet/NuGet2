@@ -1,9 +1,10 @@
-﻿using System;
+﻿using NuGet.Resources;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
-using System.Text;
 using System.Threading;
 
 namespace NuGet
@@ -135,10 +136,35 @@ namespace NuGet
                             return false;
                         }
                     }
+
+                    // fix up the package name if the nuspec gives the version in a different format
+                    // this allows versions to be normalized on the server while still supporting legacy formats for package restore
+                    IPackage package = OpenPackage(FileSystem.GetFullPath(tmp));
+
+                    // for legacy support the package name needs to match the nuspec
+                    // Ex: owin.1.0.0.nupkg -> Owin.1.0.nupkg
+                    packagePath = GetPackageFilePath(package.Id, package.Version);
+
                     FileSystem.DeleteFile(packagePath);
                     FileSystem.MoveFile(tmp, packagePath);
+
                     return true;
                 }, packagePath);
+        }
+
+        protected override IPackage OpenPackage(string path)
+        {
+            OptimizedZipPackage package;
+            try
+            {
+                package = new OptimizedZipPackage(FileSystem, path);
+            }
+            catch (FileFormatException ex)
+            {
+                throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingPackage, path), ex);
+            }
+
+            return package;
         }
 
         public void Clear()

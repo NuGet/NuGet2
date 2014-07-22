@@ -402,6 +402,10 @@ namespace NuGet
                 {
                     _package = newPackage;
 
+                    // Use the id and version from the nuspec incase they were different in format or casing
+                    Id = _package.Id;
+                    Version = _package.Version.ToString();
+
                     // Make a note that the backing store for the ZipPackage is the machine cache.
                     _usingMachineCache = !inMemOnly;
 

@@ -303,10 +303,16 @@ namespace NuGet.Test
                 });
 
             var mockRepository = new Mock<IPackageCacheRepository>(MockBehavior.Strict);
+            mockRepository.Setup(s => s.InvokeOnPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), It.IsAny<Action<Stream>>())).Returns(true);
+
             var lookup = mockRepository.As<IPackageLookup>();
             lookup.Setup(s => s.FindPackage("A", new SemanticVersion("1.2")))
                   .Returns(zipPackage1);
             lookup.Setup(s => s.Exists("A", new SemanticVersion("1.2")))
+                  .Returns(true);
+            lookup.Setup(s => s.FindPackage("A", new SemanticVersion("1.0")))
+                .Returns(zipPackage1);
+            lookup.Setup(s => s.Exists("A", new SemanticVersion("1.0")))
                   .Returns(true);
 
             var uri = new Uri("http://nuget.org");
@@ -344,14 +350,24 @@ namespace NuGet.Test
             servicePackage.EnsurePackage(mockRepository.Object);
 
             // Assert 1
-            Assert.Equal(zipPackage1, servicePackage._package);
+            Assert.Equal("1.0", servicePackage._package.Version.ToString());
             
             // Act 2
-            servicePackage.PackageHash = hash2;
+            servicePackage = new DataServicePackage
+            {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = hash2,
+                PackageHashAlgorithm = "SHA512",
+                HashProvider = hashProvider.Object,
+                Downloader = packageDownloader.Object,
+                DownloadUrl = uri
+            };
+
             servicePackage.EnsurePackage(mockRepository.Object);
 
             // Assert 2
-            Assert.Equal(zipPackage2, servicePackage._package);
+            Assert.Equal("1.2", servicePackage._package.Version.ToString());
             packageDownloader.Verify();
         }
 
@@ -414,6 +430,40 @@ namespace NuGet.Test
 
             // Act & Assert
             Assert.Throws(typeof(InvalidOperationException), () => servicePackage.EnsurePackage(mockRepository.Object));
+        }
+
+        [Fact]
+        public void EnsurePackageDownloadUpdatesIdAndVersion()
+        {
+            // Arrange
+            var zipPackage = PackageUtility.CreatePackage("Abc", "1.0");
+            var uri = new Uri("http://nuget.org");
+            var mockRepository = new MockPackageCacheRepository(true);
+
+            var packageDownloader = new Mock<PackageDownloader>();
+            packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
+                             .Callback(() => mockRepository.AddPackage(zipPackage))
+                             .Verifiable();
+            var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
+            hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => new byte[] { 1, 2, 3, 4 });
+
+            var servicePackage = new DataServicePackage
+            {
+                Id = "abc",
+                Version = "1.0.0",
+                PackageHash = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }),
+                Downloader = packageDownloader.Object,
+                HashProvider = hashProvider.Object,
+                DownloadUrl = uri
+            };
+
+            // Act
+            servicePackage.EnsurePackage(mockRepository);
+
+            // Assert
+            // servicePackage should have been updated to match zipPackage
+            Assert.Equal("Abc", servicePackage.Id);
+            Assert.Equal("1.0", servicePackage.Version);
         }
     }
 }
