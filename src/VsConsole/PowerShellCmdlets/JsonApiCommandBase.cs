@@ -135,13 +135,13 @@ namespace NuGet.PowerShell.Commands
                     queryParameters.Add("includePrerelease", "true");
                 }
 
-                var uriBuilder = new UriBuilder(packageRepository.Source)
+                var packageSourceUri = new Uri(string.Format("{0}/", packageRepository.Source.TrimEnd('/')));
+                var apiEndpointUri = new UriBuilder(new Uri(packageSourceUri, ApiEndpointPath))
                 {
-                    Path = ApiEndpointPath,
                     Query = BuildQueryString(queryParameters)
                 };
 
-                return GetResults(uriBuilder.Uri);
+                return GetResults(apiEndpointUri.Uri);
             }
         }
         
