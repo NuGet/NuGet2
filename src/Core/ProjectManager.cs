@@ -309,7 +309,7 @@ namespace NuGet
             // Get content files from other packages
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
-                                    from file in GetCompatibleInstalledItemsForPackage(p.Id, p.GetContentFiles())
+                                    from file in GetCompatibleInstalledItemsForPackage(p.Id, p.GetContentFiles(), NetPortableProfileTable.Default)
                                     where !IsTransformFile(file.Path) 
                                     select file;
 
@@ -317,10 +317,10 @@ namespace NuGet
             var assemblyReferencesToDelete = GetFilteredAssembliesToDelete(package)
                                              .Except(otherAssemblyReferences, PackageFileComparer.Default);
 
-            var contentFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetContentFiles())
+            var contentFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetContentFiles(), NetPortableProfileTable.Default)
                                        .Except(otherContentFiles, PackageFileComparer.Default);
 
-            var buildFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetBuildFiles());
+            var buildFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetBuildFiles(), NetPortableProfileTable.Default);
 
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
@@ -354,13 +354,13 @@ namespace NuGet
 
         private IList<IPackageAssemblyReference> GetFilteredAssembliesToDelete(IPackage package)
         {
-            List<IPackageAssemblyReference> assemblyReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.AssemblyReferences).ToList();
+            List<IPackageAssemblyReference> assemblyReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.AssemblyReferences, NetPortableProfileTable.Default).ToList();
             if (assemblyReferences.Count == 0)
             {
                 return assemblyReferences;
             }
 
-            var packageReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.PackageAssemblyReferences).FirstOrDefault();
+            var packageReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.PackageAssemblyReferences, NetPortableProfileTable.Default).FirstOrDefault();
             if (packageReferences != null) 
             {
                 assemblyReferences.RemoveAll(p => !packageReferences.References.Contains(p.Name, StringComparer.OrdinalIgnoreCase));
@@ -405,7 +405,7 @@ namespace NuGet
         /// This method uses the 'targetFramework' attribute in the packages.config to determine compatible items.
         /// Hence, it's only good for uninstall operations.
         /// </summary>
-        private IEnumerable<T> GetCompatibleInstalledItemsForPackage<T>(string packageId, IEnumerable<T> items) where T : IFrameworkTargetable
+        private IEnumerable<T> GetCompatibleInstalledItemsForPackage<T>(string packageId, IEnumerable<T> items, NetPortableProfileTable portableProfileTable) where T : IFrameworkTargetable
         {
             FrameworkName packageFramework = ProjectManagerExtensions.GetTargetFrameworkForPackage(this, packageId);
             if (packageFramework == null)
@@ -414,7 +414,7 @@ namespace NuGet
             }
 
             IEnumerable<T> compatibleItems;
-            if (VersionUtility.TryGetCompatibleItems(packageFramework, items, out compatibleItems))
+            if (VersionUtility.TryGetCompatibleItems(packageFramework, items, portableProfileTable, out compatibleItems))
             {
                 return compatibleItems;
             }

@@ -129,6 +129,11 @@ namespace NuGet
 
         public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
         {
+            return IsCompatibleWith(projectFrameworkProfile, NetPortableProfileTable.Default);
+        }
+
+        public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile, NetPortableProfileTable portableProfileTable)
+        {
             if (projectFrameworkProfile == null)
             {
                 throw new ArgumentNullException("projectFrameworkProfile");
@@ -136,7 +141,7 @@ namespace NuGet
 
             return projectFrameworkProfile.SupportedFrameworks.All(
                 projectFramework => this.SupportedFrameworks.Any(
-                    packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework)));
+                    packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework, portableProfileTable)));
         }
 
         public bool IsCompatibleWith(FrameworkName projectFramework)
@@ -150,8 +155,8 @@ namespace NuGet
                 throw new ArgumentNullException("projectFramework");
             }
 
-            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
-                || portableProfileTable.HasCompatibleProfileWith(this, projectFramework);
+            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework, portableProfileTable))
+                || portableProfileTable.HasCompatibleProfileWith(this, projectFramework, portableProfileTable);
         }
 
         /// <summary>

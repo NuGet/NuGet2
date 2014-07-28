@@ -105,7 +105,7 @@ namespace NuGet
             }
         }
 
-        internal bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
+        internal bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName, NetPortableProfileTable portableProfileTable)
         {
             List<VersionStringISetTuple> versionProfileISetTupleList = null;
 
@@ -123,7 +123,7 @@ namespace NuGet
                         foreach (var profileName in versionProfileISetTuple.Item2)
                         {
                             NetPortableProfile profile = GetProfile(profileName);
-                            if (profile != null && packageFramework.IsCompatibleWith(profile))
+                            if (profile != null && packageFramework.IsCompatibleWith(profile, portableProfileTable))
                             {
                                 return true;
                             }
