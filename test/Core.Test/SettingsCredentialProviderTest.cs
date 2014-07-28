@@ -2,6 +2,7 @@
 using System.Net;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -113,6 +114,37 @@ namespace NuGet.Test
 
             // Assert
             underlyingProvider.Verify();
+            Assert.IsType<NetworkCredential>(value);
+            var networkCredential = (NetworkCredential)value;
+            Assert.Equal(userName, networkCredential.UserName);
+            Assert.Equal(password, networkCredential.Password);
+        }
+
+        [Theory]
+        [InlineData(new object[] { "https://nuget.org/api/nuget/Download/Package/1.0.1"})]
+        [InlineData(new object[] { "https://nuget.org/api/v2"})]
+        [InlineData(new object[] { "https://nuget.org/" })]
+        public void GetCredentialQueriesReturnsCredentialsFromSourceProviderIfUriContainsAdditionalSegments(string uri)
+        {
+            // Arrange
+            const string userName = "User";
+            const string password = "My precious!";
+
+            var sourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            sourceProvider.Setup(s => s.LoadPackageSources())
+                          .Returns(new[] 
+                                  {
+                                      new PackageSource("https://nuget.org") { UserName = userName, Password = password },
+                                  })
+                          .Verifiable();
+            var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
+            var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);
+
+            // Act
+            var value = settingsCredentialProvider.GetCredentials(new Uri(uri), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials, false);
+
+            // Assert
+            sourceProvider.Verify();
             Assert.IsType<NetworkCredential>(value);
             var networkCredential = (NetworkCredential)value;
             Assert.Equal(userName, networkCredential.UserName);

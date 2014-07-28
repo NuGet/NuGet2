@@ -27,7 +27,7 @@ namespace NuGet
             {
                 throw new ArgumentNullException("packageSourceProvider");
             }
-
+            
             _credentialProvider = credentialProvider;
             _packageSourceProvider = packageSourceProvider;
             _logger = logger;
@@ -53,7 +53,7 @@ namespace NuGet
                 return !String.IsNullOrEmpty(p.UserName) 
                     && !String.IsNullOrEmpty(p.Password) 
                     && Uri.TryCreate(p.Source, UriKind.Absolute, out sourceUri) 
-                    && UriUtility.UriEquals(sourceUri, uri);
+                    && UriUtility.UriStartsWith(sourceUri, uri);
             });
             if (source == null)
             {
