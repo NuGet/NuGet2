@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace NuGet
 {
@@ -16,6 +17,7 @@ namespace NuGet
         private readonly IEnumerable<PackageSource> _providerDefaultSources;
         private readonly IDictionary<PackageSource, PackageSource> _migratePackageSources;
         private readonly IEnumerable<PackageSource> _configurationDefaultSources;
+        private IEnvironmentVariableReader _environment;
 
         public PackageSourceProvider(ISettings settingsManager)
             : this(settingsManager, providerDefaultSources: null)
@@ -37,7 +39,7 @@ namespace NuGet
             ISettings settingsManager,
             IEnumerable<PackageSource> providerDefaultSources,
             IDictionary<PackageSource, PackageSource> migratePackageSources)
-            : this(settingsManager, providerDefaultSources, migratePackageSources, ConfigurationDefaults.Instance.DefaultPackageSources)
+            : this(settingsManager, providerDefaultSources, migratePackageSources, ConfigurationDefaults.Instance.DefaultPackageSources, new EnvironmentVariableWrapper())
         {
 
         }
@@ -46,7 +48,8 @@ namespace NuGet
             ISettings settingsManager,
             IEnumerable<PackageSource> providerDefaultSources,
             IDictionary<PackageSource, PackageSource> migratePackageSources,
-            IEnumerable<PackageSource> configurationDefaultSources)
+            IEnumerable<PackageSource> configurationDefaultSources, 
+            IEnvironmentVariableReader environment)
         {
             if (settingsManager == null)
             {
@@ -56,6 +59,7 @@ namespace NuGet
             _providerDefaultSources = providerDefaultSources ?? Enumerable.Empty<PackageSource>();
             _migratePackageSources = migratePackageSources;
             _configurationDefaultSources = configurationDefaultSources ?? Enumerable.Empty<PackageSource>();
+            _environment = environment;
         }
 
         /// <summary>
@@ -139,6 +143,13 @@ namespace NuGet
 
         private PackageSourceCredential ReadCredential(string sourceName)
         {
+            PackageSourceCredential environmentCredentials = ReadCredentialFromEnvironment(sourceName);
+
+            if (environmentCredentials != null)
+            {
+                return environmentCredentials;
+            }
+
             var values = _settingsManager.GetNestedValues(CredentialsSectionName, sourceName);
             if (!values.IsEmpty())
             {
@@ -160,6 +171,23 @@ namespace NuGet
                 }
             }
             return null;
+        }
+
+        private PackageSourceCredential ReadCredentialFromEnvironment(string sourceName)
+        {
+            string rawCredentials = _environment.GetEnvironmentVariable("NuGetPackageSourceCredentials_" + sourceName);
+            if (string.IsNullOrEmpty(rawCredentials))
+            {
+                return null;
+            }
+
+            var match = Regex.Match(rawCredentials.Trim(), @"^Username=(?<user>.*?);\s*Password=(?<pass>.*?)$", RegexOptions.IgnoreCase);
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            return new PackageSourceCredential(match.Groups["user"].Value, match.Groups["pass"].Value, true);
         }
 
         private void MigrateSources(List<PackageSource> loadedPackageSources)

@@ -614,7 +614,7 @@ namespace NuGet.VisualStudio.Test
 
         private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
         {
-            return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null);
+            return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null, environment: new Mock<IEnvironmentVariableReader>().Object);
         }              
     }
 }
