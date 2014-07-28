@@ -282,10 +282,10 @@ namespace NuGet.Test
 
             var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile, portableProfileTable));
         }
 
         [Fact]
@@ -320,10 +320,10 @@ namespace NuGet.Test
 
             var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile, portableProfileTable));
         }
 
         [Fact]
@@ -358,10 +358,10 @@ namespace NuGet.Test
 
             var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Act & Assert
-            Assert.False(packageProfile.IsCompatibleWith(projectProfile));
+            Assert.False(packageProfile.IsCompatibleWith(projectProfile, portableProfileTable));
         }
 
         [Fact]
@@ -421,10 +421,10 @@ namespace NuGet.Test
 
             var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile, portableProfileTable));
         }
 
         [Fact]
@@ -500,9 +500,9 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
-            var profile = NetPortableProfile.Parse("Profile2");
+            var profile = NetPortableProfile.Parse("Profile2", portableProfileTable: portableProfileTable);
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -538,7 +538,7 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             var profile = NetPortableProfile.Parse("net45+sl40+MonoTouch+wp71+MonoAndroid20");
 
@@ -578,10 +578,10 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             // Default value of second parameter treatOptionalFrameworksAsSupportedFrameworks is false
-            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20");
+            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", portableProfileTable: portableProfileTable);
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -620,7 +620,7 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            var portableProfileTable = new NetPortableProfileTable(profileCollection);
 
             var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", treatOptionalFrameworksAsSupportedFrameworks: true);
 
