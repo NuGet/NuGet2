@@ -569,7 +569,7 @@ namespace NuGet
             {
                 if (portableProfileTable == null)
                 {
-                    throw new ArgumentException("portableProfileTable");
+                    throw new ArgumentException(NuGetResources.PortableProfileTableMustBeSpecified, "portableProfileTable");
                 }
                 NetPortableProfile portableProfile = NetPortableProfile.Parse(frameworkName.Profile, portableProfileTable: portableProfileTable);
                 if (portableProfile != null)

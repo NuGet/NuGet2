@@ -478,4 +478,7 @@
   <data name="PortableProfileTableRequiresForGetShortFrameworkName" xml:space="preserve">
     <value>The 'portableProfileTable' parameter must be provided when getting the short name for a Portable target framework</value>
   </data>
+  <data name="PortableProfileTableMustBeSpecified" xml:space="preserve">
+    <value>A Portable Profile Table must be specified when resolving the short name of a portable profile.</value>
+  </data>
 </root>

@@ -145,8 +145,6 @@ namespace NuGet
         // Default table loading logic.
         private static NetPortableProfileTable LoadDefaultTable()
         {
-            var profileCollection = new NetPortableProfileCollection();
-
             string portableRootDirectory;
 
             string portableReferencePathOverride = Environment.GetEnvironmentVariable(PortableReferenceAssemblyPathEnvironmentVariableName);
