@@ -149,6 +149,7 @@ namespace NuGet
                     container.ComposeExportedValue<IConsole>(console);
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory(console));
                     container.ComposeExportedValue<IFileSystem>(fileSystem);
+                    container.ComposeExportedValue<IShimControllerProvider>(new NuGet.ShimV3.ShimControllerProvider());
                     container.ComposeParts(this);
                 }
             }

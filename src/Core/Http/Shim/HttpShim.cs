@@ -74,15 +74,11 @@ namespace NuGet
 
         public void SetWebRequestHandler(Func<WebRequest, WebResponse> handler)
         {
-            Debug.Assert(_webHandler == null, "handler already set");
-
             _webHandler = handler;
         }
 
         public void SetDataServiceRequestHandler(Func<DataServiceClientRequestMessageArgs, DataServiceClientRequestMessage> handler)
         {
-            Debug.Assert(_dataServiceHandler == null, "handler already set");
-
             _dataServiceHandler = handler;
         }
 

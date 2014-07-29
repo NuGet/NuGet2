@@ -101,6 +101,7 @@
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="CommandLineMachineWideSettings.cs" />
     <Compile Include="Commands\DownloadCommandBase.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISolutionParser.cs" />
     <Compile Include="NuGetCommand.cs">
       <DependentUpon>NuGetCommand.resx</DependentUpon>
@@ -135,6 +136,10 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShimV3\ShimV3.csproj">
+      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
+      <Name>ShimV3</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -171,10 +176,10 @@
       <ILMergeOutputFile>NuGet.exe</ILMergeOutputFile>
       <ILMergeOutputFilePath>$(OutputPath)Merged\$(ILMergeOutputFile)</ILMergeOutputFilePath>
       <ILMergeOutputFilePathSigned>$(OutputPath)Signed\$(ILMergeOutputFile)</ILMergeOutputFilePathSigned>
-      <FrameworkPath>$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
-      <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
-      <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /ndebug /allowDup NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll</ILMergeCommandArgs>
-      <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /ndebug /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll</ILMergeCommandArgsSigned>
+      <FrameworkPath>$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5</FrameworkPath>
+      <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5</FrameworkPath>
+      <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /ndebug /allowDup NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.ShimV3.dll NuGet.Console.Types.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgs>
+      <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /ndebug /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.ShimV3.dll NuGet.Console.Types.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgsSigned>
     </PropertyGroup>
     <ItemGroup>
       <ILMergeItems Include="$(OutputPath)\*.dll;$(OutputPath)\*.exe" />
@@ -184,7 +189,7 @@
     <Delete Files="$(ILMergeOutputFilePath)" Condition="Exists($(ILMergeOutputFilePath))" />
     <Delete Files="$(ILMergeOutputFilePathSigned)" Condition="Exists($(ILMergeOutputFilePathSigned))" />
     <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
-    <Error Condition="!Exists('$(FrameworkPath)')" Text="Could not find 4.0 reference assemblies in $(FrameworkPath)" />
+    <Error Condition="!Exists('$(FrameworkPath)')" Text="Could not find 4.5 reference assemblies in $(FrameworkPath)" />
     <Exec Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgs)" WorkingDirectory="$(OutputPath)" />
     <!-- produce another signed one if signing assembly -->
     <Exec Condition=" '$(SignASsembly)' == 'true' " Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgsSigned)" WorkingDirectory="$(OutputPath)" />
