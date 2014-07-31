@@ -1048,6 +1048,32 @@ public class Baz {
                                                                   @"src\Properties\AssemblyInfo.cs",
                                                                   @"lib\net40\FakeProject.dll",
                                                                   @"lib\net40\FakeProject.pdb" });
+
+
+            args = new string[] { "pack", "-Symbols", "-Build", "-ExcludeSource" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
+            Assert.Equal("FakeProject", package.Id);
+            Assert.Equal(new SemanticVersion("1.2"), package.Version);
+            Assert.Equal("David Inc", package.Authors.First());
+            Assert.Equal("This is a test. Ignore me", package.Description);
+            Assert.True(File.Exists(expectedSymbolsPackage));
+            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
+                                                                  @"src\Runner.cs",
+                                                                  @"src\Folder\Baz.cs",
+                                                                  @"src\Bar.cs",
+                                                                  @"src\Properties\AssemblyInfo.cs",
+                                                                  @"lib\net40\FakeProject.dll",
+                                                                  @"lib\net40\FakeProject.pdb" });
+
         }
 
 

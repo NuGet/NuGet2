@@ -67,6 +67,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandSymbolsDescription")]
         public bool Symbols { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandExcludeSourceCode")]
+        public bool ExcludeSourceCode { get; set; }
+
         [Option(typeof(NuGetCommand), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
 
@@ -373,6 +376,7 @@ namespace NuGet.Commands
             Console.WriteLine(LocalizedResourceManager.GetString("PackageCommandAttemptingToBuildSymbolsPackage"), Path.GetFileName(path));
 
             factory.IncludeSymbols = true;
+            factory.ExcludeSourceCode = ExcludeSourceCode;
             PackageBuilder symbolsBuilder = factory.CreateBuilder(BasePath);
             symbolsBuilder.Version = mainPackageBuilder.Version;
 

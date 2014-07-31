@@ -98,6 +98,8 @@ namespace NuGet.Commands
 
         public bool IncludeSymbols { get; set; }
 
+        public bool ExcludeSourceCode { get; set; }
+
         public bool IncludeReferencedProjects { get; set; }
 
         public bool Build { get; set; }
@@ -166,7 +168,7 @@ namespace NuGet.Commands
             }
 
             // Add sources if this is a symbol package
-            if (IncludeSymbols)
+            if (IncludeSymbols && !ExcludeSourceCode)
             {
                 ApplyAction(p => p.AddFiles(builder, SourcesItemType, SourcesFolder));
             }
