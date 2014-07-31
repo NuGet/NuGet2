@@ -7,6 +7,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGet.Resolver;
 
 namespace NuGet.Dialog.Providers
 {
@@ -112,15 +113,33 @@ namespace NuGet.Dialog.Providers
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
+        /*
         protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
         {
             activePackageManager.UpdatePackages(
-                projectManager, 
-                new [] { item.PackageIdentity }, 
-                operations, 
-                updateDependencies: true, 
-                allowPrereleaseVersions: IncludePrerelease, 
-                logger: this);
+                projectManager,
+                new[] { item.PackageIdentity },
+                operations,
+                updateDependencies: true,
+                allowPrereleaseVersions: IncludePrerelease,
+                logger: this); 
+        } */
+
+        private IEnumerable<Resolver.PackageAction> ResolveActionsForUpdateAll(IVsPackageManager activePackageManager, IProjectManager projectManager)
+        {
+            var resolver = new ActionResolver()
+            {
+                Logger = this,
+                AllowPrereleaseVersions = IncludePrerelease,
+                DependencyVersion = activePackageManager.DependencyVersion
+            };
+            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
+            foreach (var package in allPackages)
+            {
+                resolver.AddOperation(PackageAction.Install, package, projectManager);
+            }
+            var actions = resolver.ResolveActions();
+            return actions;
         }
 
         protected override bool ExecuteAllCore()
@@ -138,9 +157,8 @@ namespace NuGet.Dialog.Providers
             IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
             IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
 
-            IList<PackageOperation> allOperations;
-            IList<IPackage> allUpdatePackagesByDependencyOrder;
-            bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager, out allOperations, out allUpdatePackagesByDependencyOrder);
+            var actions = ResolveActionsForUpdateAll(activePackageManager, projectManager);
+            bool accepted = this.ShowLicenseAgreement(actions);
             if (!accepted)
             {
                 return false;
@@ -150,13 +168,11 @@ namespace NuGet.Dialog.Providers
             {
                 RegisterPackageOperationEvents(activePackageManager, projectManager);
 
-                activePackageManager.UpdatePackages(
-                    projectManager,
-                    allUpdatePackagesByDependencyOrder,
-                    allOperations,
-                    updateDependencies: true,
-                    allowPrereleaseVersions: IncludePrerelease,
-                    logger: this);
+                var actionExecutor = new ActionExecutor()
+                {
+                    Logger = this
+                };
+                actionExecutor.Execute(actions);
 
                 return true;
             }
@@ -165,24 +181,6 @@ namespace NuGet.Dialog.Providers
                 UnregisterPackageOperationEvents(activePackageManager, projectManager);
                 action.Dispose();
             }
-        }
-
-        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager, out IList<PackageOperation> allOperations, out IList<IPackage> packagesByDependencyOrder)
-        {
-            allOperations = new List<PackageOperation>();
-
-            var installWalker = new InstallWalker(
-                LocalRepository,
-                activePackageManager.SourceRepository,
-                _project.GetTargetFrameworkName(),
-                logger: this,
-                ignoreDependencies: false,
-                allowPrereleaseVersions: IncludePrerelease,
-                dependencyVersion: activePackageManager.DependencyVersion);
-
-            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
-            allOperations = installWalker.ResolveOperations(allPackages, out packagesByDependencyOrder);
-            return ShowLicenseAgreement(activePackageManager, allOperations);
         }
 
         protected override void OnExecuteCompleted(PackageItem item)

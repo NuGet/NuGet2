@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Build.Exceptions;
 using NuGet.Common;
+using NuGet.Resolver;
 
 namespace NuGet.Commands
 {
@@ -343,10 +344,11 @@ namespace NuGet.Commands
             }
 
             var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
-            foreach (var package in satellitePackages)
-            {
-                packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: false);
-            }
+            var executor = new ActionExecutor();
+            var operations = satellitePackages.Select(package => 
+                new Resolver.PackageSolutionAction(PackageActionType.AddToPackagesFolder, package, packageManager));
+            executor.Execute(operations);
+
             return true;
         }
 

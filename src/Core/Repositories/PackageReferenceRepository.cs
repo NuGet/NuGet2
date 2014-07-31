@@ -14,7 +14,6 @@ namespace NuGet
     public class PackageReferenceRepository : IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
     {
         private readonly PackageReferenceFile _packageReferenceFile;
-        private readonly string _fullPath;
 
         public PackageReferenceRepository(
             IFileSystem fileSystem, 
@@ -33,7 +32,6 @@ namespace NuGet
             _packageReferenceFile = new PackageReferenceFile(
                 fileSystem, Constants.PackageReferenceFile, projectName);
 
-            _fullPath = _packageReferenceFile.FullPath;
             SourceRepository = sourceRepository;
         }
 
@@ -52,7 +50,6 @@ namespace NuGet
             }
 
             _packageReferenceFile = new PackageReferenceFile(configFilePath);
-            _fullPath = configFilePath;
             SourceRepository = sourceRepository;
         }
 
@@ -79,14 +76,6 @@ namespace NuGet
         {
             get;
             set;
-        }
-
-        private string PackageReferenceFileFullPath
-        {
-            get
-            {
-                return _fullPath;
-            }
         }
 
         public PackageReferenceFile ReferenceFile
@@ -119,7 +108,7 @@ namespace NuGet
             if (_packageReferenceFile.DeleteEntry(package.Id, package.Version))
             {
                 // Remove the repository from the source
-                SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
+                SourceRepository.UnregisterRepository(_packageReferenceFile);
             }
         }
 
@@ -148,7 +137,7 @@ namespace NuGet
         {
             if (GetPackages().Any())
             {
-                SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
+                SourceRepository.RegisterRepository(_packageReferenceFile);
             }
         }
 
@@ -209,7 +198,7 @@ namespace NuGet
             // This doesn't really need to happen on every package add, but this is over agressive
             // to combat scenarios where the 2 repositories get out of sync. If this repository is already 
             // registered in the source then this will be ignored
-            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
+            SourceRepository.RegisterRepository(_packageReferenceFile);
         }
 
         public FrameworkName GetPackageTargetFramework(string packageId)

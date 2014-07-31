@@ -2,6 +2,14 @@
 using System.Runtime.CompilerServices;
 using EnvDTE;
 
+#if VS10 || VS11 || VS12
+using NuGetVS = NuGet.VisualStudio12;
+#endif
+
+#if VS14
+using NuGetVS = NuGet.VisualStudio14;
+#endif
+
 namespace NuGet.VisualStudio
 {
     public abstract class CpsProjectSystem : VsProjectSystem
@@ -56,7 +64,7 @@ namespace NuGet.VisualStudio
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+            NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 Project,
                 Project.ToVsHierarchy(),
                 buildProject => NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, relativeTargetPath, location));
@@ -97,7 +105,7 @@ namespace NuGet.VisualStudio
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void RemoveImportStatementForVS2013(string relativeTargetPath)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+            NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 Project,
                 Project.ToVsHierarchy(),
                 buildProject => NuGet.MSBuildProjectUtility.RemoveImportStatement(buildProject, relativeTargetPath));

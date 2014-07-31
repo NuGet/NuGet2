@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio
             return true;
         }
 
-        public override void AddReference(string referencePath, Stream stream)
+        public override void AddReference(string referencePath)
         {
             // We disable assembly reference for native projects
         }

@@ -6,12 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows;
 using System.Xml.Linq;
 
 namespace NuGet
 {
     [CLSCompliant(false)]
-    public class DataServiceContextWrapper : IDataServiceContext
+    public class DataServiceContextWrapper : IDataServiceContext, IWeakEventListener
     {
         private const string MetadataKey = "DataServiceMetadata|";
         private static readonly MethodInfo _executeMethodInfo = typeof(DataServiceContext).GetMethod("Execute", new[] { typeof(Uri) });
@@ -28,8 +29,45 @@ namespace NuGet
                        {
                            MergeOption = MergeOption.NoTracking
                        };
+
+
             _metadataUri = _context.GetMetadataUri();
+
+            AttachEvents();
         }
+
+        private DataServiceClientRequestMessage ShimWebRequests(DataServiceClientRequestMessageArgs args)
+        {
+            // Shim the requests if needed
+            return HttpShim.Instance.ShimDataServiceRequest(args);
+        }
+
+        public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
+        {
+            if (managerType == typeof(Func<DataServiceClientRequestMessage, DataServiceClientRequestMessageArgs>))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void AttachEvents()
+        {
+            _context.Configurations.RequestPipeline.OnMessageCreating += ShimWebRequests;
+        }
+
+        //private void DetachEvents()
+        //{
+        //    _context.Configurations.RequestPipeline.OnMessageCreating -= ShimWebRequests;
+        //}
+
+        //public void Dispose()
+        //{
+        //    DetachEvents();
+        //}
 
         public Uri BaseUri
         {
@@ -39,15 +77,15 @@ namespace NuGet
             }
         }
 
-        public event EventHandler<SendingRequestEventArgs> SendingRequest
+        public event EventHandler<SendingRequest2EventArgs> SendingRequest
         {
             add
             {
-                _context.SendingRequest += value;
+                _context.SendingRequest2 += value;
             }
             remove
             {
-                _context.SendingRequest -= value;
+                _context.SendingRequest2 -= value;
             }
         }
 

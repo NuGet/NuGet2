@@ -83,9 +83,10 @@ namespace NuGet
 
                     // Prepare the request, we do something like write to the request stream
                     // which needs to happen last before the request goes out
-                    _prepareRequest(request);                    
+                    _prepareRequest(request);
 
-                    WebResponse response = request.GetResponse();                    
+                    // Shim and replace this request if needed for v3
+                    WebResponse response = HttpShim.Instance.ShimWebRequest(request);
 
                     // Cache the proxy and credentials
                     _proxyCache.Add(request.Proxy);

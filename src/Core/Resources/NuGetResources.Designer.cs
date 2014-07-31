@@ -917,6 +917,24 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A Portable Profile Table must be specified when resolving the short name of a portable profile..
+        /// </summary>
+        public static string PortableProfileTableMustBeSpecified {
+            get {
+                return ResourceManager.GetString("PortableProfileTableMustBeSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;portableProfileTable&apos; parameter must be provided when getting the short name for a Portable target framework.
+        /// </summary>
+        public static string PortableProfileTableRequiresForGetShortFrameworkName {
+            get {
+                return ResourceManager.GetString("PortableProfileTableRequiresForGetShortFrameworkName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} does not reference &apos;{1}&apos;..
         /// </summary>
         public static string ProjectDoesNotHaveReference {

@@ -231,7 +231,7 @@
     <Rule Id="CA2240" Action="Error" />
     <Rule Id="CA2241" Action="Error" />
     <Rule Id="CA2242" Action="Error" />
-    <Rule Id="CA2243" Action="Error" />
+    <Rule Id="CA2243" Action="None" />
     <Rule Id="PS1001" Action="None" />
     <Rule Id="PS1002" Action="None" />
     <Rule Id="PS1003" Action="None" />

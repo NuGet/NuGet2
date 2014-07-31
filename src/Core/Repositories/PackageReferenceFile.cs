@@ -228,6 +228,14 @@ namespace NuGet
             }
         }
 
+        public IFileSystem FileSystem
+        {
+            get
+            {
+                return _fileSystem;
+            }
+        }
+
         private void AddEntry(XDocument document, string id, SemanticVersion version, bool developmentDependency, FrameworkName targetFramework)
         {
             AddEntry(document, id, version, developmentDependency, targetFramework, requireReinstallation: false);
@@ -278,6 +286,7 @@ namespace NuGet
             SaveDocument(document);
         }
 
+        // version can be null. In this case, version is not compared.
         private static XElement FindEntry(XDocument document, string id, SemanticVersion version)
         {
             if (String.IsNullOrEmpty(id))

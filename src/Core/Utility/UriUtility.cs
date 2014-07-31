@@ -52,5 +52,20 @@ namespace NuGet
 
             return Uri.Compare(uri1, uri2, UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0;
         }
+
+        /// <summary>
+        /// This routine was implemented to assist with finding credentials in the settings file using the uri
+        /// It appears the package uri is used to find the credentials ex) https://hostname/api/nuget/Download/packagename/versionnumber  
+        /// but the settings file will more than likely only have the repository uri ex) https://hostname/api/nuget 
+        /// This routine will attempt to find the uri in settings as is
+        /// If not found, see if source Uri is base of uri
+        /// </summary>
+        /// <param name="uri1">base or source URI</param>
+        /// <param name="uri2">full URI</param>
+        /// <returns></returns>
+        public static bool UriStartsWith(Uri uri1, Uri uri2)
+        {
+            return UriUtility.UriEquals(uri1, uri2) || uri1.IsBaseOf(uri2);
+        }
     }
 }

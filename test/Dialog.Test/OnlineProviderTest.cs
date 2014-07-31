@@ -238,6 +238,7 @@ namespace NuGet.Dialog.Test
             Assert.True(canExecuteC);
         }
 
+        /* !!!
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -401,7 +402,7 @@ namespace NuGet.Dialog.Test
             var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world" }, tools: new string[] { "install.ps1", "uninstall.ps1" });
             var packageC = PackageUtility.CreatePackage("C", "3.0");
 
-            var solutionRepository = new MockPackageRepository();
+            var solutionRepository = new MockSharedPackageRepository();
             solutionRepository.AddPackage(packageA);
 
             var sourceRepository = new MockPackageRepository();
@@ -428,7 +429,7 @@ namespace NuGet.Dialog.Test
                {
                    solutionRepository.AddPackage(packageB);
                    projectManager.AddPackageReference(packageB.Id, packageB.Version);
-               });
+               }); 
 
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
@@ -465,7 +466,7 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.WaitOne();
-        }
+        } 
 
         [Fact]
         public void ExecuteMethodInstallPackagesWithInitScript()
@@ -481,7 +482,7 @@ namespace NuGet.Dialog.Test
             var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world" }, tools: new string[] { "init.ps1" });
             var packageC = PackageUtility.CreatePackage("C", "3.0");
 
-            var solutionRepository = new MockPackageRepository();
+            var solutionRepository = new MockSharedPackageRepository();
             solutionRepository.AddPackage(packageA);
 
             var sourceRepository = new MockPackageRepository();
@@ -500,7 +501,7 @@ namespace NuGet.Dialog.Test
 
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
-            packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
+            packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);            
             packageManager.Setup(p => p.InstallPackage(projectManager, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, false, It.IsAny<ILogger>())).
                 Raises(p => p.PackageInstalled += null, packageManager, new PackageOperationEventArgs(packageB, null, ""));
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
@@ -546,7 +547,7 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.WaitOne();
-        }
+        } */
 
         private static OnlineProvider CreateOnlineProvider(
             IVsPackageManager packageManager = null,
@@ -643,7 +644,7 @@ namespace NuGet.Dialog.Test
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository)
         {
             var projectSystem = new MockVsProjectSystem();
-            return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            return new ProjectManager(null, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
 
         private void AssertPackage(IPackage package, string Id, string version)

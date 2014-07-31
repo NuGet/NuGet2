@@ -30,10 +30,17 @@
 
     <PropertyGroup Condition=" $(VisualStudioVersion) == '12.0' ">        
         <ShellAssembly>Microsoft.VisualStudio.Shell.12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
-        <ShellAssemblyHintPath>..\..\lib\Microsoft.VisualStudio.Shell.12.0.dll</ShellAssemblyHintPath>
+        <ShellAssemblyHintPath>..\..\lib\VS12\Microsoft.VisualStudio.Shell.12.0.dll</ShellAssemblyHintPath>
 
         <MSBuildAssembly>Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</MSBuildAssembly>
         <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
+    </PropertyGroup>
+    <PropertyGroup Condition=" $(VisualStudioVersion) == '14.0' ">        
+        <ShellAssembly>Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
+        <ShellAssemblyHintPath>..\..\lib\VS14\Microsoft.VisualStudio.Shell.14.0.dll</ShellAssemblyHintPath>
+
+        <MSBuildAssembly>Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</MSBuildAssembly>
+        <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
     </PropertyGroup>
 
     <PropertyGroup Condition=" $(VisualStudioVersion) == '11.0' ">
@@ -58,6 +65,14 @@
         <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
         <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
         <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" $(VisualStudioVersion) == '14.0'">
+        <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->

@@ -12,8 +12,8 @@ namespace NuGet
         /// Method called when adding an assembly reference to the project.
         /// </summary>
         /// <param name="referencePath">Physical path to the assembly file relative to the project root.</param>
-        /// <param name="stream">Contents of the assembly file.</param>
-        void AddReference(string referencePath, Stream stream);
+        void AddReference(string referencePath);
+
         /// <summary>
         /// Adds an assembly reference to a framework assembly (one in the GAC).
         /// </summary>

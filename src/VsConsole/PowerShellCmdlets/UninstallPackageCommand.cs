@@ -1,4 +1,5 @@
 using System.Management.Automation;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands
@@ -49,14 +50,41 @@ namespace NuGet.PowerShell.Commands
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            IProjectManager projectManager = ProjectManager;
-            PackageManager.WhatIf = WhatIf;
-            if (projectManager != null)
+            // Locate the package to uninstall
+            IPackage package = PackageManager.LocatePackageToUninstall(
+                ProjectManager,
+                Id,
+                Version);
+
+            // resolve actions
+            var resolver = new ActionResolver()
             {
-                projectManager.WhatIf = WhatIf;
+                Logger = this,
+                ForceRemove = Force.IsPresent,
+                RemoveDependencies = RemoveDependencies.IsPresent
+            };
+            resolver.AddOperation(
+                PackageAction.Uninstall,
+                package,
+                ProjectManager);
+
+            var actions = resolver.ResolveActions();
+            if (WhatIf)
+            {
+                foreach (var operation in actions)
+                {
+                    Log(MessageLevel.Info, Resources.Log_OperationWhatIf, operation);
+                }
+
+                return;
             }
 
-            PackageManager.UninstallPackage(projectManager, Id, Version, Force.IsPresent, RemoveDependencies.IsPresent, this);
+            // execute actions
+            var actionExecutor = new ActionExecutor()
+            {
+                Logger = this
+            };
+            actionExecutor.Execute(actions);
         }
     }
 }

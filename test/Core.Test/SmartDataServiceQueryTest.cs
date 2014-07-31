@@ -9,23 +9,23 @@ namespace NuGet.Test
 {
     public class SmartDataServiceQueryTest
     {
-        [Fact]
-        public void GetEnumeratorExecutesBatchIfRequiresBatchTrue()
-        {
-            // Arrange
-            var mockContext = new Mock<IDataServiceContext>();
-            var mockQuery = new Mock<IDataServiceQuery<int>>();
-            mockQuery.Setup(m => m.RequiresBatch(It.IsAny<Expression>())).Returns(true);
-            mockContext.Setup(m => m.CreateQuery<int>("Foo")).Returns(mockQuery.Object);
-            mockContext.Setup(m => m.ExecuteBatch<int>(It.IsAny<DataServiceQuery>())).Returns(new[] { 1 }).Verifiable();
-            var query = new SmartDataServiceQuery<int>(mockContext.Object, "Foo");
+        //[Fact]
+        //public void GetEnumeratorExecutesBatchIfRequiresBatchTrue()
+        //{
+        //    // Arrange
+        //    var mockContext = new Mock<IDataServiceContext>();
+        //    var mockQuery = new Mock<IDataServiceQuery<int>>();
+        //    mockQuery.Setup(m => m.RequiresBatch(It.IsAny<Expression>())).Returns(true);
+        //    mockContext.Setup(m => m.CreateQuery<int>("Foo")).Returns(mockQuery.Object);
+        //    mockContext.Setup(m => m.ExecuteBatch<int>(It.IsAny<DataServiceQuery>())).Returns(new[] { 1 }).Verifiable();
+        //    var query = new SmartDataServiceQuery<int>(mockContext.Object, "Foo");
 
-            // Act
-            query.GetEnumerator();
+        //    // Act
+        //    query.GetEnumerator();
 
-            // Assert
-            mockContext.VerifyAll();
-        }
+        //    // Assert
+        //    mockContext.VerifyAll();
+        //}
 
         [Fact]
         public void ProjectionTest()

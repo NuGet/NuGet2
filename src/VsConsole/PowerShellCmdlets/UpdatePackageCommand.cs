@@ -1,7 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
+using NuGet.Resolver;
+using NuGet.Resources;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.PowerShell.Commands
 {
@@ -111,6 +118,9 @@ namespace NuGet.PowerShell.Commands
             }
             return base.CreatePackageManager();
         }
+        
+        private ActionResolver _resolver;
+        private ActionExecutor _actionExecutor;
 
         protected override void ProcessRecordCore()
         {
@@ -120,26 +130,30 @@ namespace NuGet.PowerShell.Commands
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            if (WhatIf && Reinstall)
-            {
-                Log(MessageLevel.Error, Resources.Cmdlet_WhatIfReinstallUnsupported);
-                return;
-            }
-
             try
             {
                 SubscribeToProgressEvents();
                 if (PackageManager != null)
                 {
-                    PackageManager.WhatIf = WhatIf;
-                    if (ProjectManager != null)
+                    _resolver = new ActionResolver()
                     {
-                        ProjectManager.WhatIf = WhatIf;
-                    }
+                        Logger = this,
+                        DependencyVersion = PackageManager.DependencyVersion,
+                        IgnoreDependencies = IgnoreDependencies,
+                        AllowPrereleaseVersions = IncludePrerelease.IsPresent,
+                        ForceRemove = true
+                    };
 
+                    _actionExecutor = new ActionExecutor()
+                    {
+                        Logger = this,
+                        PackageOperationEventListener = this,
+                        CatchProjectOperationException = true
+                    };
+            
                     if (Reinstall)
                     {
-                        PerformReinstalls(ProjectManager);
+                        PerformReinstalls();
                     }
                     else
                     {
@@ -154,88 +168,265 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        private void PerformReinstalls(IProjectManager projectManager)
+        private void PerformReinstalls()
         {
-            if (!String.IsNullOrEmpty(Id))
+            if (String.IsNullOrEmpty(ProjectName))
             {
-                // If a package id was specified, but no project was specified, then update this package in all projects
-                if (String.IsNullOrEmpty(ProjectName))
+                var projectManagers = PackageManager.SolutionManager.GetProjects()
+                    .Select(p => PackageManager.GetProjectManager(p));
+                ReinstallPackage(projectManagers);
+            }
+            else if (ProjectManager != null)
+            {
+                ReinstallPackage(new[] { ProjectManager });
+            }
+        }
+
+        /// <summary>
+        /// Reinstall package Id, Version in the list of projects.
+        /// </summary>
+        /// <param name="projectManagers">The list of project managers.</param>
+        /// <param name="projectNameSpecified">Indicates if the project name is specified when 
+        /// Update-Package -reinstall cmdlet is executed.</param>
+        private void ReinstallPackage(IEnumerable<IProjectManager> projectManagers)
+        {
+            if (String.IsNullOrEmpty(Id))
+            {
+                ReinstallAllPackages(projectManagers);
+            }
+            else
+            {
+                ReinstallOnePackage(Id, projectManagers);
+            }
+        }
+
+        private void ReinstallAllPackages(IEnumerable<IProjectManager> projectManagers)
+        {
+            var packages = PackageManager.LocalRepository.GetPackages().ToList();
+            var solutionLevelPackages = packages.Where(p => !PackageManager.IsProjectLevel(p));
+
+            var resolver = new ActionResolver()
+            {
+                ForceRemove = true
+            };
+
+            // reinstall solution level packages
+            foreach (var package in solutionLevelPackages)
+            {
+                resolver.AddOperation(PackageAction.Uninstall, package, new NullProjectManager(PackageManager));                
+                var packageFromSource = PackageManager.SourceRepository.FindPackage(
+                    package.Id,
+                    package.Version);
+                resolver.AddOperation(PackageAction.Install, packageFromSource, new NullProjectManager(PackageManager));
+            }
+
+            // Reinstall packages in projects
+            foreach (var projectManager in projectManagers)
+            {
+                ReinstallAllPackagesInProject(projectManager, resolver);
+            }
+
+            var actions = resolver.ResolveActions();
+            if (WhatIf)
+            {
+                foreach (var action in actions)
                 {
-                    PackageManager.ReinstallPackage(Id, !IgnoreDependencies, IncludePrerelease, this, this);
+                    Log(MessageLevel.Info, Resources.Log_OperationWhatIf, action);
                 }
-                else if (projectManager != null)
+
+                return;
+            }
+
+            var executor = new ActionExecutor()
+            {
+                Logger = this,
+                PackageOperationEventListener = this,
+                CatchProjectOperationException = true
+            };
+            executor.Execute(actions);
+        }
+
+        private void ReinstallAllPackagesInProject(IProjectManager projectManager, ActionResolver resolver)
+        {
+            var packages = projectManager.LocalRepository.GetPackages().ToList();
+
+            // Uninstall all packages
+            var packagesToInstall = new List<IPackage>();
+            foreach (var package in packages)
+            {
+                var packageFromSource = projectManager.PackageManager.SourceRepository.FindPackage(
+                    package.Id,
+                    package.Version);
+
+                if (packageFromSource != null)
                 {
-                    PackageManager.ReinstallPackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
+                    resolver.AddOperation(PackageAction.Uninstall, package, projectManager);
+                    packagesToInstall.Add(packageFromSource);
+                }
+                else
+                {
+                    Log(
+                        MessageLevel.Warning,
+                        VsResources.PackageRestoreSkipForProject,
+                        package.GetFullName(),
+                        projectManager.Project.ProjectName);
+                }
+            }
+
+            foreach (var package in packagesToInstall)
+            {
+                resolver.AddOperation(PackageAction.Install, package, projectManager);
+            }
+        }
+
+        private void ReinstallOnePackage(string id, IEnumerable<IProjectManager> projectManagers)
+        {
+            List<Resolver.PackageAction> actions = new List<Resolver.PackageAction>();
+            var projectNameSpecified = !String.IsNullOrEmpty(ProjectName);
+            var oldPackage = projectNameSpecified ?
+                UpdateUtility.FindPackageToUpdate(
+                    id, version: null, 
+                    packageManager: PackageManager,
+                    projectManager: projectManagers.First()) :
+                UpdateUtility.FindPackageToUpdate(
+                    id, version: null, 
+                    packageManager: PackageManager,
+                    projectManagers: projectManagers, 
+                    logger: this);
+
+            if (oldPackage.Item2 == null)
+            {
+                // we're reinstalling a solution level package
+                Log(MessageLevel.Info, VsResources.ReinstallSolutionPackage, oldPackage.Item1);
+                if (PackageManager.SourceRepository.Exists(oldPackage.Item1))
+                {
+                    var resolver = new ActionResolver()
+                    {
+                        ForceRemove = true
+                    };
+                    resolver.AddOperation(PackageAction.Uninstall, oldPackage.Item1, new NullProjectManager(PackageManager));
+
+                    var packageFromSource = PackageManager.SourceRepository.FindPackage(
+                        oldPackage.Item1.Id,
+                        oldPackage.Item1.Version);
+                    resolver.AddOperation(PackageAction.Install, packageFromSource, new NullProjectManager(PackageManager));
+                    actions.AddRange(resolver.ResolveActions());
+                }
+                else
+                {
+                    Log(
+                        MessageLevel.Warning,
+                        VsResources.PackageRestoreSkipForSolution,
+                        oldPackage.Item1.GetFullName());
                 }
             }
             else
             {
-                if (String.IsNullOrEmpty(ProjectName))
+                var reinstallInfo = new ReinstallInfo(Enumerable.Empty<VirtualProjectManager>());
+                var resolver = new ActionResolver()
                 {
-                    PackageManager.ReinstallPackages(!IgnoreDependencies, IncludePrerelease, this, this);
-                }
-                else if (projectManager != null)
+                    ForceRemove = true
+                };
+                foreach (var projectManager in projectManagers)
                 {
-                    PackageManager.ReinstallPackages(projectManager, !IgnoreDependencies, IncludePrerelease, this);
+                    ReinstallPackage(id, projectManager, reinstallInfo, resolver);
                 }
+
+                actions.AddRange(resolver.ResolveActions());
+            }
+
+            if (WhatIf)
+            {
+                foreach (var action in actions)
+                {
+                    Log(MessageLevel.Info, Resources.Log_OperationWhatIf, action);
+                }
+
+                return;
+            }
+
+            var executor = new ActionExecutor()
+            {
+                Logger = this,
+                PackageOperationEventListener = this,
+                CatchProjectOperationException = true
+            };
+            executor.Execute(actions);
+        }
+
+        private void ReinstallPackage(
+            string id, IProjectManager projectManager, 
+            ReinstallInfo reinstallInfo,
+            ActionResolver resolver)
+        {
+            // find the package version installed in this project
+            IPackage existingPackage = projectManager.LocalRepository.FindPackage(id);
+            if (existingPackage == null)
+            {
+                return;
+            }
+
+            bool packageExistInSource;
+            if (!reinstallInfo.VersionsChecked.TryGetValue(existingPackage.Version, out packageExistInSource))
+            {
+                // version has not been checked, so check it here
+                packageExistInSource = PackageManager.SourceRepository.Exists(id, existingPackage.Version);
+
+                // mark the version as checked so that we don't have to check again if we
+                // encounter another project with the same version.
+                reinstallInfo.VersionsChecked[existingPackage.Version] = packageExistInSource;
+            }
+
+            if (packageExistInSource)
+            {
+                resolver.AddOperation(PackageAction.Uninstall, existingPackage, projectManager);
+
+                var packageFromSource = PackageManager.SourceRepository.FindPackage(id, existingPackage.Version);
+                resolver.AddOperation(PackageAction.Install, packageFromSource, projectManager);
+            }
+            else
+            {
+                Log(
+                    MessageLevel.Warning,
+                    VsResources.PackageRestoreSkipForProject,
+                    existingPackage.GetFullName(),
+                    projectManager.Project.ProjectName);
             }
         }
 
         private void PerformUpdates(IProjectManager projectManager)
         {
-            if (!String.IsNullOrEmpty(Id))
+            var updateUtility = new UpdateUtility(_resolver)
             {
-                // If a package id was specified, but no project was specified, then update this package in all projects
-                if (String.IsNullOrEmpty(ProjectName))
-                {
-                    if (Safe.IsPresent)
-                    {
-                        PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                    }
-                    else
-                    {
-                        PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                    }
-                }
-                else if (projectManager != null)
-                {
-                    // If there was a project specified, then update the package in that project
-                    if (Safe.IsPresent)
-                    {
-                        PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
-                    }
-                    else
-                    {
-                        PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, this);
-                    }
-                }
-            }
-            else
+                AllowPrereleaseVersions = IncludePrerelease.IsPresent,
+                Logger = this,
+                Safe = Safe.IsPresent
+            };
+            var actions = Enumerable.Empty<Resolver.PackageAction>();
+            if (String.IsNullOrEmpty(ProjectName))
             {
-                // if no id was specified then update all packages in the solution
-                if (Safe.IsPresent)
-                {
-                    if (String.IsNullOrEmpty(ProjectName))
-                    {
-                        PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                    }
-                    else if (projectManager != null)
-                    {
-                        PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
-                    }
-                }
-                else
-                {
-                    if (String.IsNullOrEmpty(ProjectName))
-                    {
-                        PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                    }
-                    else if (projectManager != null)
-                    {
-                        PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
-                    }
-                }
+                var projectManagers = PackageManager.SolutionManager.GetProjects()
+                    .Select(p => PackageManager.GetProjectManager(p));
+                actions = updateUtility.ResolveActionsForUpdate(
+                    Id, Version, projectManagers, projectNameSpecified: false);
             }
+            else if (projectManager != null)
+            {
+                actions = updateUtility.ResolveActionsForUpdate(
+                    Id, Version, new[] { projectManager }, projectNameSpecified: true);
+            }
+
+            if (WhatIf)
+            {
+                foreach (var action in actions)
+                {
+                    Log(MessageLevel.Info, Resources.Log_OperationWhatIf, action);
+                }
+
+                return;
+            }
+
+            _actionExecutor.Execute(actions);
         }
 
         public override FileConflictResolution ResolveFileConflict(string message)
@@ -268,17 +459,21 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        public void OnBeforeAddPackageReference(Project project)
+        public void OnBeforeAddPackageReference(IProjectManager projectManager)
         {
-            RegisterProjectEvents(project);
+            var projectSystem = projectManager.Project as VsProjectSystem;
+            if (projectSystem != null)
+            {
+                RegisterProjectEvents(projectSystem.Project);
+            }
         }
 
-        public void OnAfterAddPackageReference(Project project)
+        public void OnAfterAddPackageReference(IProjectManager projectManager)
         {
             // No-op
         }
 
-        public void OnAddPackageReferenceError(Project project, Exception exception)
+        public void OnAddPackageReferenceError(IProjectManager projectManager, Exception exception)
         {
             // No-op
         }

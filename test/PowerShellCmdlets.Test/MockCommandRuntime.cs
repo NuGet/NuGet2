@@ -133,11 +133,13 @@ namespace NuGet.PowerShell.Commands.Test
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public PSTransactionContext CurrentPSTransaction
         {
             get { throw new NotImplementedException(); }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public System.Management.Automation.Host.PSHost Host
         {
             get { throw new NotImplementedException(); }

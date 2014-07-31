@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using NuGet.Common;
+using NuGet.Resolver;
 
 namespace NuGet.Commands
 {
@@ -194,11 +195,12 @@ namespace NuGet.Commands
                 return false;
             }
 
-            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);
-            foreach (var package in satellitePackages)
-            {
-                packageManager.InstallPackage(package, ignoreDependencies: true, allowPrereleaseVersions: Prerelease);
-            }
+            var packageManager = CreatePackageManager(fileSystem, AllowMultipleVersions);            
+            var executor = new ActionExecutor();
+            var operations = satellitePackages.Select(package => 
+                new Resolver.PackageSolutionAction(PackageActionType.AddToPackagesFolder, package, packageManager));
+            executor.Execute(operations);
+            
             return true;
         }
 
@@ -274,7 +276,44 @@ namespace NuGet.Commands
                 packageId, 
                 version == null ? null : version.ToString()))
             {
-                packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+                var resolver = new ActionResolver()
+                {
+                    Logger = Console,
+                    AllowPrereleaseVersions = Prerelease
+                };
+
+                // Resolve the package to install
+                IPackage package = PackageRepositoryHelper.ResolvePackage(
+                    packageManager.SourceRepository,
+                    packageManager.LocalRepository,
+                    packageId,
+                    version,
+                    Prerelease);
+
+                // Resolve operations. Note that we only care about AddToPackagesFolder actions
+                resolver.AddOperation(
+                    PackageAction.Install, 
+                    package, 
+                    new NullProjectManager(packageManager));                
+                var actions = resolver.ResolveActions()
+                    .Where(action => action.ActionType == PackageActionType.AddToPackagesFolder);
+
+                if (actions.Any())
+                {
+                    var executor = new ActionExecutor()
+                    {
+                        Logger = Console
+                    };
+                    executor.Execute(actions);
+                }
+                else if (packageManager.LocalRepository.Exists(package))
+                {
+                    // If the package wasn't installed by our set of operations, notify the user.
+                    Console.Log(
+                        MessageLevel.Info, 
+                        NuGet.Resources.NuGetResources.Log_PackageAlreadyInstalled, 
+                        package.GetFullName());
+                }
             }
         }
 
@@ -407,7 +446,51 @@ namespace NuGet.Commands
             }
 
             // install is needed. In this case, uninstall the existing pacakge.
-            packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
+            var resolver = new ActionResolver()
+            {
+                Logger = packageManager.Logger,
+                RemoveDependencies = true,
+                ForceRemove = false
+            };
+
+            var projectManager = new NullProjectManager(packageManager);
+            foreach (var package in packageManager.LocalRepository.GetPackages())
+            {
+                projectManager.LocalRepository.AddPackage(package);
+            }
+            resolver.AddOperation(
+                PackageAction.Uninstall,
+                installedPackage, 
+                projectManager);
+            var projectActions = resolver.ResolveActions();
+            
+            // because the projectManager's LocalRepository is not a PackageReferenceRepository,
+            // the packages in the packages folder are not referenced. Thus, the resolved actions
+            // are all PackageProjectActions. We need to create packages folder actions
+            // from those PackageProjectActions.
+            var solutionActions = new List<Resolver.PackageSolutionAction>();
+            foreach (var action in projectActions)
+            {
+                var projectAction = action as PackageProjectAction;
+                if (projectAction == null)
+                {
+                    continue;
+                }
+
+                var solutioAction = projectAction.ActionType == PackageActionType.Install ?
+                    PackageActionType.AddToPackagesFolder :
+                    PackageActionType.DeleteFromPackagesFolder;
+                solutionActions.Add(new PackageSolutionAction(
+                    solutioAction,                    
+                    projectAction.Package,
+                    packageManager));
+            }
+
+            var userOperationExecutor = new ActionExecutor()
+            {
+                Logger = packageManager.Logger
+            };
+            userOperationExecutor.Execute(solutionActions);
             return true;
         }
 

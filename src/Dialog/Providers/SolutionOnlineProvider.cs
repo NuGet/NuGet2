@@ -12,7 +12,6 @@ namespace NuGet.Dialog.Providers
     {
         private IVsPackageManager _activePackageManager;
         private readonly IUserNotifierServices _userNotifierServices;
-        private readonly ISolutionManager _solutionManager;
         private static readonly Dictionary<string, bool> _checkStateCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
         public SolutionOnlineProvider(
@@ -35,7 +34,6 @@ namespace NuGet.Dialog.Providers
                 solutionManager)
         {
             _userNotifierServices = providerServices.UserNotifierServices;
-            _solutionManager = solutionManager;
         }
 
         public override IEnumerable<string> SupportedFrameworks
@@ -85,30 +83,31 @@ namespace NuGet.Dialog.Providers
                 }
                 else
                 {
-                    // solution package. just install into the solution
-                    selectedProjectsList = new Project[0];
+                    // solution package. just install into the active project.
+                    selectedProjectsList = new Project[] { _solutionManager.DefaultProject };
                 }
 
-                IList<PackageOperation> operations;
-                bool acceptLicense = isProjectLevel ? ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, selectedProjectsList, out operations)
-                                                    : ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, targetFramework: null, operations: out operations);
+                // resolve operations
+                var actions = ResolveActionsForInstall(
+                    item.PackageIdentity,  
+                    _activePackageManager, 
+                    selectedProjectsList);
+                bool acceptLicense = ShowLicenseAgreement(actions);
                 if (!acceptLicense)
                 {
                     return false;
                 }
 
+                // execute operations
                 try
                 {
                     RegisterPackageOperationEvents(_activePackageManager, null);
-
-                    _activePackageManager.InstallPackage(
-                        selectedProjectsList,
-                        item.PackageIdentity,
-                        operations,
-                        ignoreDependencies: false,
-                        allowPrereleaseVersions: IncludePrerelease,
-                        logger: this,
-                        eventListener: this);
+                    var userOperationExecutor = new Resolver.ActionExecutor()
+                    {
+                        Logger = this,
+                        PackageOperationEventListener = this
+                    };
+                    userOperationExecutor.Execute(actions);
                 }
                 finally
                 {
@@ -144,23 +143,23 @@ namespace NuGet.Dialog.Providers
             return checkState;
         }
 
-        public void OnBeforeAddPackageReference(Project project)
+        public void OnBeforeAddPackageReference(IProjectManager projectManager)
         {
-            RegisterPackageOperationEvents(
-                null,
-                _activePackageManager.GetProjectManager(project));
+            RegisterPackageOperationEvents(null, projectManager);
         }
 
-        public void OnAfterAddPackageReference(Project project)
+        public void OnAfterAddPackageReference(IProjectManager projectManager)
         {
-            UnregisterPackageOperationEvents(
-                null,
-                _activePackageManager.GetProjectManager(project));
+            UnregisterPackageOperationEvents(null, projectManager);
         }
 
-        public void OnAddPackageReferenceError(Project project, Exception exception)
+        public void OnAddPackageReferenceError(IProjectManager projectManager, Exception exception)
         {
-            AddFailedProject(project, exception);
+            var projectSystem = projectManager.Project as VsProjectSystem;
+            if (projectSystem != null)
+            {
+                AddFailedProject(projectSystem.Project, exception);
+            }
         }
     }
 }

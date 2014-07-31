@@ -114,7 +114,13 @@ namespace NuGet
                 if (_customProfile == null)
                 {
                     var frameworks = SupportedFrameworks.Concat(OptionalFrameworks);
-                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f)));
+                    
+                    // We pass a null portableProfileTable in here because:
+                    //  1) We don't expect to see portable frameworks in our Supported/Optional Frameworks.
+                    //  2) Using NetPortableProfileTable.Default may be incorrect or throw exceptions (if, for example, we're in the middle of initializing the default table).
+                    //  3) We don't have the table instance the user to use wants available here.
+                    // Using 'null' just disables shortening of portable frameworks, which is totally fine here due to #1 and prevents issues due to #2 and #3
+                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f, portableProfileTable: null)));
                 }
 
                 return _customProfile;
@@ -123,6 +129,11 @@ namespace NuGet
 
         public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
         {
+            return IsCompatibleWith(projectFrameworkProfile, NetPortableProfileTable.Default);
+        }
+
+        public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile, NetPortableProfileTable portableProfileTable)
+        {
             if (projectFrameworkProfile == null)
             {
                 throw new ArgumentNullException("projectFrameworkProfile");
@@ -130,26 +141,32 @@ namespace NuGet
 
             return projectFrameworkProfile.SupportedFrameworks.All(
                 projectFramework => this.SupportedFrameworks.Any(
-                    packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework)));
+                    packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework, portableProfileTable)));
         }
 
         public bool IsCompatibleWith(FrameworkName projectFramework)
+        {
+            return IsCompatibleWith(projectFramework, NetPortableProfileTable.Default);
+        }
+        public bool IsCompatibleWith(FrameworkName projectFramework, NetPortableProfileTable portableProfileTable)
         {
             if (projectFramework == null)
             {
                 throw new ArgumentNullException("projectFramework");
             }
 
-            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
-                || NetPortableProfileTable.HasCompatibleProfileWith(this, projectFramework);
+            return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework, portableProfileTable))
+                || portableProfileTable.HasCompatibleProfileWith(this, projectFramework, portableProfileTable);
         }
 
         /// <summary>
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
+        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false, NetPortableProfileTable portableProfileTable = null)
         {
+            portableProfileTable = portableProfileTable ?? NetPortableProfileTable.Default;
+
             if (String.IsNullOrEmpty(profileValue))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "profileValue");
@@ -160,7 +177,7 @@ namespace NuGet
             // was supported in other places. By fixing the way the profile table indexes the cached 
             // profiles, we can now indeed access by either naming, so we don't need the old check 
             // for the string starting with "Profile".
-            var result = NetPortableProfileTable.GetProfile(profileValue);
+            var result = portableProfileTable.GetProfile(profileValue);
             if (result != null)
             {
                 if (treatOptionalFrameworksAsSupportedFrameworks)

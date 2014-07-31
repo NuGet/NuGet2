@@ -951,13 +951,16 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
 
             IPackage projectPackage = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                    PackageDependency.CreateDependency("B", "[1.5]")
-                                                                }, content: new[] { "content" });
+                dependencies: new List<PackageDependency> {
+                    PackageDependency.CreateDependency("B", "[1.5]")
+                }, 
+                content: new[] { "content" });
 
             sourceRepository.AddPackage(projectPackage);
 
-            IPackage toolsPackage = PackageUtility.CreatePackage("B", "1.5", tools: new[] { "init.ps1" });
+            IPackage toolsPackage = PackageUtility.CreatePackage("B", "1.5", 
+                content: Enumerable.Empty<string>(),
+                tools: new[] { "init.ps1" });
             sourceRepository.AddPackage(toolsPackage);
 
             IPackageOperationResolver resolver = new UpdateWalker(localRepository,
@@ -984,11 +987,14 @@ namespace NuGet.Test
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
 
-            IPackage metaPackage = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                    new PackageDependency("B"),
-                                                                    new PackageDependency("C")
-                                                                });
+            IPackage metaPackage = PackageUtility.CreatePackage(
+                "A", "1.0",
+                content: Enumerable.Empty<string>(),
+                dependencies: new List<PackageDependency> {
+                    new PackageDependency("B"),
+                    new PackageDependency("C")
+                },
+                createRealStream: false);
 
             IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
             IPackage projectPackageB = PackageUtility.CreatePackage("C", "1.0", content: new[] { "contentC" });
@@ -1063,13 +1069,15 @@ namespace NuGet.Test
             var walker = new TestWalker(mockRepository);
 
             IPackage metaPackage = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                    new PackageDependency("B"),
-                                                                    new PackageDependency("C")
-                                                                });
+                content: Enumerable.Empty<string>(),
+                dependencies: new List<PackageDependency> {
+                    new PackageDependency("B"),
+                    new PackageDependency("C")
+                },
+                createRealStream: false);
 
             IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
-            IPackage solutionPackage = PackageUtility.CreatePackage("C", "1.0", tools: new[] { "tools" });
+            IPackage solutionPackage = PackageUtility.CreatePackage("C", "1.0", content: Enumerable.Empty<string>(), tools: new[] { "tools" });
 
             mockRepository.AddPackage(projectPackageA);
             mockRepository.AddPackage(solutionPackage);
@@ -1085,10 +1093,13 @@ namespace NuGet.Test
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
 
-            IPackage solutionPackage = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                    new PackageDependency("B")
-                                                                }, tools: new[] { "install.ps1" });
+            IPackage solutionPackage = PackageUtility.CreatePackage(
+                "A", "1.0",
+                dependencies: new List<PackageDependency> {
+                    new PackageDependency("B")
+                }, 
+                content: Enumerable.Empty<string>(),
+                tools: new[] { "install.ps1" });
 
             IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
 

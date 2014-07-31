@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources">
+             xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio.Resources">
     <Border x:Name="UpdateBar" VerticalAlignment="Center" Visibility="Collapsed" BorderThickness="0,0,0,1">
         <DockPanel Margin="0,4,0,6" LastChildFill="False">
             <Button Click="OnDeclineUpdateLinkClick" BorderBrush="#00FFFFFF" Background="#00FFFFFF" Margin="8,0,5,0" VerticalAlignment="Center" Width="16" Height="16" DockPanel.Dock="Right" ToolTip="{x:Static resx:VsResources.IgnoreUpgrade}">

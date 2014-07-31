@@ -20,7 +20,7 @@ namespace NuGet.Tools
     /// </summary>
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideBindingPath]
     // The right UIContext to use is VSConstants.UICONTEXT.SolutionBuilding_string, which 
     // works for Dev 11 and later. Unfortunately, on Dev 10, the OnSolutionBegin event is fired 

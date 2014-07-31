@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Net.NetworkInformation;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands
@@ -141,22 +142,6 @@ namespace NuGet.PowerShell.Commands
             /**** End of Fallback to Cache logic ***/
         }
 
-        private bool IsDowngradePackage()
-        {
-            //if Version to downgrade is not specified, bail out
-            if (Version != null && ProjectManager != null)
-            {
-                //Check if the package is installed
-                IPackage packageToBeUninstalled = ProjectManager.LocalRepository.FindPackage(Id);
-                //Downgrade only if package to be installed newly is lower version than the one currently installed
-                if (packageToBeUninstalled != null && packageToBeUninstalled.Version > Version)
-                {
-                   return true;
-                }
-            }
-            return false;
-        }
-
         protected override void ProcessRecordCore()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -172,31 +157,17 @@ namespace NuGet.PowerShell.Commands
                 {
                     return;
                 }
-                PackageManager.WhatIf = WhatIf;
                 if (DependencyVersion.HasValue)
                 {
                     PackageManager.DependencyVersion = DependencyVersion.Value;
                 }
 
-                if (ProjectManager != null)
-                {
-                    ProjectManager.DependencyVersion = PackageManager.DependencyVersion;
-                    ProjectManager.WhatIf = WhatIf;
-                }
-
                 if (!String.IsNullOrEmpty(_cacheStatusMessage))
                 {
                     this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
-                }                
-            
-                if (IsDowngradePackage())
-                {
-                    PackageManager.UpdatePackage(ProjectManager, Id, Version, !IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
                 }
-                else
-                {
-                    InstallPackage(PackageManager);
-                }
+
+                InstallPackage(PackageManager);
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
             }
             //If the http source is not available, we fallback to NuGet Local Cache
@@ -268,7 +239,7 @@ namespace NuGet.PowerShell.Commands
             {
                 _cacheStatusMessage = String.Format(CultureInfo.CurrentCulture, _localCacheFailureMessage, currentSource);
             }
-        }       
+        }
 
         private void InstallPackage(IVsPackageManager packageManager)
         {
@@ -276,8 +247,41 @@ namespace NuGet.PowerShell.Commands
             {
                 return;
             }
+            
+            // Locate the package to install
+            IPackage package = PackageRepositoryHelper.ResolvePackage(
+                packageManager.SourceRepository,
+                packageManager.LocalRepository,
+                Id,
+                Version,
+                IncludePrerelease.IsPresent);
 
-            packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+            // Resolve actions
+            var resolver = new ActionResolver()
+            {
+                Logger = this,
+                IgnoreDependencies = IgnoreDependencies,
+                DependencyVersion = packageManager.DependencyVersion,
+                AllowPrereleaseVersions = IncludePrerelease.IsPresent
+            };
+            resolver.AddOperation(PackageAction.Install, package, ProjectManager);
+            var actions = resolver.ResolveActions();
+
+            if (WhatIf)
+            {
+                foreach (var action in actions)
+                {
+                    Log(MessageLevel.Info, Resources.Log_OperationWhatIf, action);
+                }
+
+                return;
+            }
+
+            var executor = new ActionExecutor()
+            {
+                Logger = this
+            };
+            executor.Execute(actions);
         }
     }
 }

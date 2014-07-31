@@ -13,6 +13,7 @@ namespace NuGet.VisualStudio.Test
 
     public partial class VsPackageManagerTest
     {
+        /*
         [Fact]
         public void ReinstallPackagesRestoresPackageWithTheSameVersion()
         {
@@ -1349,6 +1350,6 @@ namespace NuGet.VisualStudio.Test
             {
                 return _projectToManagers[project.Name];
             }
-        }
+        } */
     }
 }

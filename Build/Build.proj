@@ -11,7 +11,7 @@
         <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
     </PropertyGroup>
 
-    <!-- Set MonoBuild to true so we can distingiush building for mono -->
+    <!-- Set MonoBuild to true so we can distinguish building for mono -->
     <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
         <MonoBuild>true</MonoBuild>
     </PropertyGroup>
@@ -21,6 +21,7 @@
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
+		<NuGetLibRoot>$(NuGetRoot)\lib</NuGetLibRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
@@ -51,9 +52,9 @@
         <!-- Specifiy the NuGet release version. When make changes here, please also change the version numbers 
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
-        <MajorVersion>2</MajorVersion>
-        <MinorVersion>8</MinorVersion>
-        <Patch>1</Patch>
+        <MajorVersion>3</MajorVersion>
+        <MinorVersion>0</MinorVersion>
+        <Patch>0</Patch>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -115,6 +116,7 @@
         <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VsEvents.Test\VsEvents.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+		<TestProjects Include="$(NuGetTestRoot)\Versioning.Test\Versioning.Test.csproj" Condition="'$(MonoBuild)' == ''" />
     </ItemGroup>
 
     <ItemGroup>
@@ -136,8 +138,8 @@
 
     <Target Name="CheckFxCop">
         <Error
-            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v12.0\CodeAnalysis\fxcoptask.dll')"
-            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\[v10.0|v11.0|v12.0]\CodeAnalysis\fxcoptask.dll. Cannot proceed." />
+            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v12.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v14.0\CodeAnalysis\fxcoptask.dll')"
+            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\[v10.0|v11.0|v12.0|v14.0]\CodeAnalysis\fxcoptask.dll. Cannot proceed." />
     </Target>
 
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
@@ -145,17 +147,13 @@
     </Target>
 
     <Target Name="RestorePackages">
-        <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
-                 Targets="Build"
-                 Properties="DefineConstants=CODE_ANALYSIS" />
-
         <PropertyGroup>
             <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
         </PropertyGroup>
         
         <Message Text="Restoring NuGet packages" Importance="High" />
-        <Exec Command="&quot;$(ExeBuildDirectory)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
-        <Exec Command="mono $(ExeBuildDirectory)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
+        <Exec Command="&quot;$(NuGetLibRoot)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
+        <Exec Command="mono $(NuGetLibRoot)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
     </Target>
 
     <Target Name="Build">
@@ -187,6 +185,11 @@
         <CheckUnexpectedAssemblies Items="@(VsixAssemblies)">
             <Output TaskParameter="InvalidItems" ItemName="InvalidFiles" />
         </CheckUnexpectedAssemblies>
+
+        <ItemGroup Condition=" $(VisualStudioVersion) == '14.0' ">
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll" />
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio12.dll" />
+        </ItemGroup>
 
         <ItemGroup Condition=" $(VisualStudioVersion) == '12.0' ">
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />

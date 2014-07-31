@@ -1,6 +1,21 @@
 Change Log / Release Notes
 ==========================
 
+## NuGet 3.0 CTP1
+
+* Dependency resolution functionality refactored out into ActionResolver and ActionExecutor classes
+* Implement an intercepting shim for translating OData requests to API v3 requests for API v3 sources
+* Reduced OData memory usage
+* Several race condition issues in VS extension have been fixed
+* Added support for new Xamarin target frameworks
+* [#3635](http://nuget.codeplex.com/workitem/3635) - Remove search text in the search text box always says "Retreiving information..."
+* [#4153](http://nuget.codeplex.com/workitem/4153) - NuGet fails to include files that use MSBuild properties
+* [#4174](http://nuget.codeplex.com/workitem/4174) - Package Manager Console doesn't respect active package source from solution-specific NuGet.Config
+* [#4019](http://nuget.codeplex.com/workitem/4019) - Remove the "Enable NuGet Package Restore" context menu item
+* NuGet.exe update -self should honor the -prerelease switch
+* Fix display of images in options dialog on high-DPI displays
+* Add support for Visual Studio "14" and improve maintainability of side-by-side Visual Studio version support
+
 ## NuGet 2.8
 * [#3538](http://nuget.codeplex.com/workitem/3538) - Support specifying project file for the nuget.exe update command.
 * Load packages.<project_name>.config if it already exists.

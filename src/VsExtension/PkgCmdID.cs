@@ -8,5 +8,6 @@ namespace NuGet.Tools
         public const int cmdidSourceSettings = 0x0200;
         public const int cmdIdGeneralSettings = 0x0300;
         public const int cmdIdVisualizer = 0x0310;
+        public const int cmdidDebugConsole = 0x0900;
     }
 }

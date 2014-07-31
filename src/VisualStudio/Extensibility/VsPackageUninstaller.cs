@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Globalization;
 using EnvDTE;
+using NuGet.Resolver;
 
 namespace NuGet.VisualStudio
 {
@@ -39,18 +40,35 @@ namespace NuGet.VisualStudio
             EventHandler<PackageOperationEventArgs> packageReferenceRemovingHandler = (sender, e) =>
             {
                 _scriptExecutor.Execute(
-                    e.InstallPath, 
-                    PowerShellScripts.Uninstall, 
-                    e.Package, 
-                    project, 
-                    projectManager.GetTargetFrameworkForPackage(packageId), 
+                    e.InstallPath,
+                    PowerShellScripts.Uninstall,
+                    e.Package,
+                    project,
+                    projectManager.GetTargetFrameworkForPackage(packageId),
                     NullLogger.Instance);
             };
 
             try
             {
-                projectManager.PackageReferenceRemoving += packageReferenceRemovingHandler;
-                packageManager.UninstallPackage(projectManager, packageId, version: null, forceRemove: false, removeDependencies: removeDependencies);
+                projectManager.PackageReferenceRemoving += packageReferenceRemovingHandler;                
+
+                // Locate the package to uninstall
+                IPackage package = packageManager.LocatePackageToUninstall(
+                    projectManager,
+                    packageId,
+                    version: null);
+
+                // resolve actions
+                var resolver = new ActionResolver()
+                {
+                    RemoveDependencies = removeDependencies
+                };
+                resolver.AddOperation(PackageAction.Uninstall, package, projectManager);
+                var actions = resolver.ResolveActions();
+
+                // execute actions
+                var actionExecutor = new ActionExecutor();
+                actionExecutor.Execute(actions);
             }
             finally
             {

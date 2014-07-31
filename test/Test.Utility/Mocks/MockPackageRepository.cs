@@ -200,12 +200,8 @@ namespace NuGet.Test.Mocks
 
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
-            List<IPackage> packages;
-            if (Packages.TryGetValue(packageId, out packages))
-            {
-                return packages.Find(p => p.Version.Equals(version));
-            }
-            return null;
+            // version is only string based
+            return GetPackages().Where(p => StringComparer.OrdinalIgnoreCase.Equals(p.Id, packageId) && p.Version == version).OrderByDescending(p => p.Version).FirstOrDefault();
         }
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)

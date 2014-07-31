@@ -238,7 +238,7 @@ namespace NuGet.PowerShell.Commands
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e)
         {
-            var projectManager = (ProjectManager)sender;
+            var projectManager = (IProjectManager)sender;
 
             Project project;
             if (!_projectManagerToProject.TryGetValue(projectManager, out project))
@@ -252,7 +252,7 @@ namespace NuGet.PowerShell.Commands
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e)
         {
-            var projectManager = (ProjectManager)sender;
+            var projectManager = (IProjectManager)sender;
 
             Project project;
             if (!_projectManagerToProject.TryGetValue(projectManager, out project))

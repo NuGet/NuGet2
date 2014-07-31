@@ -15,8 +15,17 @@ using EnvDTE;
 using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Resolver;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
+
+#if VS10 || VS11 || VS12
+using NuGetVS = NuGet.VisualStudio12;
+#endif
+
+#if VS14
+using NuGetVS = NuGet.VisualStudio14;
+#endif
 
 namespace NuGet.VisualStudio
 {
@@ -214,7 +223,31 @@ namespace NuGet.VisualStudio
                 {
                     if (!localRepository.Exists(reference.Id, reference.Version))
                     {
-                        packageManager.InstallPackage(reference.Id, reference.Version, ignoreDependencies: true, allowPrereleaseVersions: true);
+                        // Resolve the package to install
+                        IPackage package = PackageRepositoryHelper.ResolvePackage(
+                            packageManager.SourceRepository,
+                            packageManager.LocalRepository,
+                            reference.Id,
+                            reference.Version,
+                            allowPrereleaseVersions: true);
+
+                        // Resolve actions
+                        var resolver = new ActionResolver()
+                        {
+                            Logger = packageManager.Logger,
+                            DependencyVersion = packageManager.DependencyVersion,
+                            IgnoreDependencies = true,
+                            AllowPrereleaseVersions = true
+                        };
+                        resolver.AddOperation(PackageAction.Install, package, new NullProjectManager(packageManager));
+                        var actions = resolver.ResolveActions();
+
+                        // Execute actions
+                        var actionExecutor = new ActionExecutor()
+                        {
+                            Logger = packageManager.Logger
+                        };
+                        actionExecutor.Execute(actions);
                     }
                 }
             });
@@ -311,7 +344,7 @@ namespace NuGet.VisualStudio
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnablePackageRestoreInVs2013(Project project)
         {
-            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+            NuGetVS.ProjectHelper.DoWorkInWriterLock(
                 project,
                 project.ToVsHierarchy(),
                 buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
@@ -446,7 +479,8 @@ namespace NuGet.VisualStudio
                 // if we can't find the package from the remote repositories, look for it
                 // from nuget.org feed, provided that it's not already specified in one of the remote repositories
                 if (!ContainsSource(_packageSourceProvider, NuGetConstants.DefaultFeedUrl) &&
-                    !ContainsSource(_packageSourceProvider, NuGetConstants.V2LegacyFeedUrl))
+                    !ContainsSource(_packageSourceProvider, NuGetConstants.V2LegacyFeedUrl) &&
+                    !ContainsSource(_packageSourceProvider, NuGetConstants.V3FeedUrl))
                 {
                     if (_officialNuGetRepository == null)
                     {

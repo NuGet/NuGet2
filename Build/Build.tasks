@@ -39,22 +39,37 @@
             <InvalidItems ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
         </ParameterGroup>
         <Task>
+			<Using Namespace="System" />
             <Using Namespace="System.IO" />
             <Using Namespace="System.Text.RegularExpressions" />
             <Using Namespace="Microsoft.Build.Framework" />
+			<Using Namespace="System.Collections.Generic" />
             <Code Type="Fragment" Language="cs">
                 <![CDATA[
+				
+			// these dependency assemblies should be included in the vsix
+			HashSet<string> includeAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+			{
+				"Microsoft.Web.XmlTransform",
+				"System.Spatial",
+				"Microsoft.Data.Edm",
+				"Microsoft.Data.OData",
+				"Microsoft.Data.Services.Client",
+				"Newtonsoft.Json"
+			};				
+				
             var outputItems = new List<ITaskItem>();
             foreach(ITaskItem item in Items) 
             {
                 string fileName = item.GetMetadata("Filename");
               
-                if(!fileName.StartsWith("NuGet") && fileName != "Microsoft.Web.XmlTransform") 
+                if(!fileName.StartsWith("NuGet") && !includeAssemblies.Contains(fileName))
                 {
                     Log.LogWarning("The assembly '{0}' is not expected to be in the VSIX.", fileName);
                     outputItems.Add(item);
                 }
             }
+			
             InvalidItems = outputItems.ToArray();
           ]]>
             </Code>

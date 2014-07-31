@@ -20,6 +20,7 @@ namespace NuGet.PowerShell.Commands.Test
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class PSPathTranslationTests : IDisposable
     {
         private string _tempFilePath;
@@ -104,6 +105,7 @@ namespace NuGet.PowerShell.Commands.Test
             Assert.Equal(win32Path, (string)result["path"], StringComparer.OrdinalIgnoreCase);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             _ps.Dispose();

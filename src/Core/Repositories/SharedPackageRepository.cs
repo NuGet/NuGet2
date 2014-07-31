@@ -26,6 +26,16 @@ namespace NuGet
         {
         }
 
+        /// <summary>
+        /// Initialize an instance of class SharedPackageRepository.
+        /// </summary>
+        /// <param name="resolver"></param>
+        /// <param name="fileSystem">The file system where the packages are stored. Normally this is
+        /// directory $(SolutionDir)/packages.</param>
+        /// <param name="storeFileSystem">The file system where the repositories.config file is stored.
+        /// Noramlly this is the same as <paramref name="fileSystem"/>.</param>
+        /// <param name="configSettingsFileSystem">The file system where the solution level 
+        /// packages.config is stored. Normally, this is directory $(SolutionDir)/.nuget.</param>
         public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem, IFileSystem storeFileSystem, IFileSystem configSettingsFileSystem)
             : base(resolver, fileSystem)
         {
@@ -48,20 +58,20 @@ namespace NuGet
             get { return true; }
         }
 
-        public void RegisterRepository(string path)
+        public void RegisterRepository(PackageReferenceFile packageReferenceFile)
         {
-            AddEntry(path);
+            AddEntry(packageReferenceFile.FullPath);
         }
 
-        public void UnregisterRepository(string path)
+        public void UnregisterRepository(PackageReferenceFile packageReferenceFile)
         {
-            DeleteEntry(path);
+            DeleteEntry(packageReferenceFile.FullPath);
         }
 
         public bool IsReferenced(string packageId, SemanticVersion version)
         {
             // See if this package exists in any other repository before we remove it
-            return GetRepositories().Any(r => r.Exists(packageId, version));
+            return LoadProjectRepositories().Any(r => r.Exists(packageId, version));
         }
 
         public override bool Exists(string packageId, SemanticVersion version)
@@ -232,7 +242,7 @@ namespace NuGet
             return null;
         }
 
-        private IEnumerable<IPackageRepository> GetRepositories()
+        public IEnumerable<IPackageRepository> LoadProjectRepositories()
         {
             return GetRepositoryPaths().Select(CreateRepository);
         }

@@ -1,4 +1,4 @@
-﻿#if VS11 || VS10
+#if VS11 || VS10
 extern alias dialog10;
 extern alias dialog11;
 #endif
@@ -7,6 +7,9 @@ extern alias dialog11;
 extern alias dialog12;
 #endif
 
+#if VS14
+extern alias dialog14;
+#endif
 
 using System;
 using System.ComponentModel.Design;
@@ -38,6 +41,10 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
 #endif
 
+#if VS14
+using VS14ManagePackageDialog = dialog14::NuGet.Dialog.PackageManagerWindow;
+#endif
+
 namespace NuGet.Tools
 {
     /// <summary>
@@ -47,6 +54,10 @@ namespace NuGet.Tools
     [InstalledProductRegistration("#110", "#112", NuGetPackage.ProductVersion, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(PowerConsoleToolWindow),
+        Style = VsDockStyle.Tabbed,
+        Window = "{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}",      // this is the guid of the Output tool window, which is present in both VS and VWD
+        Orientation = ToolWindowOrientation.Right)]
+    [ProvideToolWindow(typeof(DebugConsoleToolWindow),
         Style = VsDockStyle.Tabbed,
         Window = "{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}",      // this is the guid of the Output tool window, which is present in both VS and VWD
         Orientation = ToolWindowOrientation.Right)]
@@ -81,6 +92,7 @@ namespace NuGet.Tools
         private OleMenuCommandService _mcs;
         private bool _powerConsoleCommandExecuting;
         private IMachineWideSettings _machineWideSettings;
+        private IShimControllerProvider _shimControllerProvider;
 
         public NuGetPackage()
         {
@@ -128,6 +140,31 @@ namespace NuGet.Tools
                     Debug.Assert(_packageRestoreManager != null);
                 }
                 return _packageRestoreManager;
+            }
+        }
+
+        private IShimControllerProvider ShimControllerProvider
+        {
+            get
+            {
+                if (_shimControllerProvider == null)
+                {
+                    _shimControllerProvider = ServiceLocator.GetInstance<IShimControllerProvider>();
+                    Debug.Assert(_shimControllerProvider != null);
+                }
+
+                return _shimControllerProvider;
+            }
+        }
+
+        private IVsPackageSourceProvider VsPackageSourceProvider
+        {
+            get
+            {
+                var vsPackageSource = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
+                Debug.Assert(vsPackageSource != null);
+
+                return vsPackageSource;
             }
         }
 
@@ -202,7 +239,13 @@ namespace NuGet.Tools
                 machineWideSettings: MachineWideSettings);
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
-            
+
+            // Add the v3 shim client
+            if (ShimControllerProvider != null)
+            {
+                ShimControllerProvider.Controller.Enable(VsPackageSourceProvider);
+            }
+
             // when NuGet loads, if the current solution has package 
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
@@ -243,6 +286,14 @@ namespace NuGet.Tools
                 //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
                 powerConsoleExecuteCommand.ParametersDescription = "$";
                 _mcs.AddCommand(powerConsoleExecuteCommand);
+
+                // menu command for opening NuGet Debug Console
+                CommandID debugWndCommandID = new CommandID(GuidList.guidNuGetDebugConsoleCmdSet, PkgCmdIDList.cmdidDebugConsole);
+                OleMenuCommand debugConsoleExecuteCommand = new OleMenuCommand(ShowDebugConsole, null, null, debugWndCommandID);
+                // '$' - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
+                debugConsoleExecuteCommand.ParametersDescription = "$";
+                _mcs.AddCommand(debugConsoleExecuteCommand);
 
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
@@ -310,6 +361,21 @@ namespace NuGet.Tools
                     powerConsoleService.ExecuteEnd += PowerConsoleService_ExecuteEnd;
                 }
             }
+        }
+
+        private void ShowDebugConsole(object sender, EventArgs e)
+        {
+            // Get the instance number 0 of this tool window. This window is single instance so this instance
+            // is actually the only one.
+            // The last flag is set to true so that if the tool window does not exists it will be created.
+            ToolWindowPane window = this.FindToolWindow(typeof(DebugConsoleToolWindow), 0, true);
+            if ((null == window) || (null == window.Frame))
+            {
+                throw new NotSupportedException(Resources.CanNotCreateWindow);
+            }
+
+            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+            ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
 
         private void PowerConsoleService_ExecuteEnd(object sender, EventArgs e)
@@ -385,26 +451,21 @@ namespace NuGet.Tools
                 {
                     window = GetVS10PackageManagerWindow(project, parameterString);
                 }
-                else if (VsVersionHelper.IsVisualStudio2012)
+                else 
                 {
+                    // VS 2012
                     window = GetVS11PackageManagerWindow(project, parameterString);
                 }
 #endif
                 
 #if VS12
-                if (VsVersionHelper.IsVisualStudio2013)
-                {
-                    window = GetVS12PackageManagerWindow(project, parameterString);
-                }
+				window = GetVS12PackageManagerWindow(project, parameterString);
 #endif
-                else
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.Error_UnsupportedVSVersion,
-                        VsVersionHelper.FullVsEdition);
-                    throw new InvalidOperationException(message);
-                }
+
+#if VS14
+				window = GetVS14PackageManagerWindow(project, parameterString);
+#endif
+                
 
                 window.ShowModal();
             }
@@ -434,6 +495,14 @@ namespace NuGet.Tools
         private static DialogWindow GetVS12PackageManagerWindow(Project project, string parameterString)
         {
             return new VS12ManagePackageDialog(project, parameterString);
+        }
+#endif
+
+#if VS14
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS14PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS14ManagePackageDialog(project, parameterString);
         }
 #endif
 

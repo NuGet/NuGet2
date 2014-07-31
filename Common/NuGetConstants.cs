@@ -3,6 +3,9 @@
     public static class NuGetConstants
     {
         public static readonly string DefaultFeedUrl = "https://www.nuget.org/api/v2/";
+
+        public static readonly string V3FeedUrl = "http://preview.nuget.org/ver3-ctp1/";
+
         public static readonly string V2LegacyOfficialPackageSourceUrl = "https://nuget.org/api/v2/";
         public static readonly string V2LegacyFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=230477";
         public static readonly string V1FeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";

@@ -93,7 +93,15 @@ namespace NuGet
 
         private IEnumerable<T> GetAll()
         {
-            IEnumerable results = Execute(_query.Execute);
+            DataServiceQuery fixedQuery = _query;
+
+            // Hack for WCF 5.6.1 to avoid using the interface
+            if (typeof(T) == typeof(IPackage))
+            {
+                fixedQuery = (DataServiceQuery)_query.Provider.CreateQuery<DataServicePackage>(_query.Expression).Cast<DataServicePackage>();
+            }
+
+            IEnumerable results = Execute(fixedQuery.Execute);
 
             DataServiceQueryContinuation continuation;
             do

@@ -2,6 +2,7 @@
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class NugetProgramStatic : IDisposable
     {
         public NugetProgramStatic()
@@ -9,6 +10,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Program.IgnoreExtensions = true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
             Program.IgnoreExtensions = false;

@@ -35,6 +35,9 @@ namespace NuGet.Commands
         [Import]
         public IMachineWideSettings MachineWideSettings { get; set; }
 
+        [Import]
+        public IShimControllerProvider ShimControllerProvider { get; set; }
+
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
@@ -114,6 +117,12 @@ namespace NuGet.Commands
                     Console);
                 HttpClient.DefaultCredentialProvider = credentialProvider;
                 RepositoryFactory = new NuGet.Common.CommandLineRepositoryFactory(Console);
+
+                // enable the V3 shim
+                if (ShimControllerProvider != null)
+                {
+                    ShimControllerProvider.Controller.Enable(SourceProvider);
+                }
 
                 ExecuteCommand();
             }
