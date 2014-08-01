@@ -67,7 +67,7 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandSymbolsDescription")]
         public bool Symbols { get; set; }
 
-        [Option(typeof(NuGetCommand), "PackageCommandExcludeSourceCode")]
+        [Option(typeof(NuGetCommand), "PackageCommandExcludeSourceCodeDescription")]
         public bool ExcludeSourceCode { get; set; }
 
         [Option(typeof(NuGetCommand), "PackageCommandToolDescription")]

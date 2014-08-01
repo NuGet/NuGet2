@@ -1053,30 +1053,23 @@ public class Baz {
                                                                   @"lib\net40\FakeProject.pdb" });
 
 
-            args = new string[] { "pack", "-Symbols", "-Build", "-ExcludeSource" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+            CreateProject("FakeProject2",
+                          compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
+                          links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
+
+            expectedSymbolsPackage = "FakeProject2.1.2.0.0.symbols.nupkg";
+
+            args = new string[] { "pack", "-Symbols", "-Build", "FakeProject2.csproj", "-ExcludeSourceCode" };
 
             // Act
-            int result = Program.Main(args);
+            result = Program.Main(args);
 
             // Assert
             Assert.Equal(0, result);
             Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
-            Assert.Equal("FakeProject", package.Id);
-            Assert.Equal(new SemanticVersion("1.2"), package.Version);
-            Assert.Equal("David Inc", package.Authors.First());
-            Assert.Equal("This is a test. Ignore me", package.Description);
             Assert.True(File.Exists(expectedSymbolsPackage));
-            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
-                                                                  @"src\Runner.cs",
-                                                                  @"src\Folder\Baz.cs",
-                                                                  @"src\Bar.cs",
-                                                                  @"src\Properties\AssemblyInfo.cs",
-                                                                  @"lib\net40\FakeProject.dll",
-                                                                  @"lib\net40\FakeProject.pdb" });
-
+            VerifyPackageContents(expectedSymbolsPackage, new[] { @"lib\net40\FakeProject2.dll",
+                                                                  @"lib\net40\FakeProject2.pdb" });
         }
 
 
