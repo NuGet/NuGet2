@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace NuGet.ShimV3
         private readonly string _listAvailableLatestStableIndex;
         private readonly string _listAvailableAllIndex;
         private readonly string _listAvailableLatestPrereleaseIndex;
+        private readonly MetricService _metricService;
         private readonly string _source;
         private readonly IShimCache _cache;
 
@@ -33,6 +35,17 @@ namespace NuGet.ShimV3
             _listAvailableLatestStableIndex = interceptBlob["isLatestStable"].ToString();
             _listAvailableAllIndex = interceptBlob["allVersions"].ToString();
             _listAvailableLatestPrereleaseIndex = interceptBlob["isLatest"].ToString();
+
+            if (interceptBlob["metricAddress"] != null)
+            {
+                _metricService = new MetricService(new Uri(interceptBlob["metricAddress"].ToString()));
+            }
+            else
+            {
+                // TODO: Remove this once it has been added to intercept.json
+                _metricService = new MetricService(new Uri("http://api-metrics.nuget.org"));
+            }
+
             _source = source.TrimEnd('/');
             _cache = cache;
         }
@@ -82,6 +95,15 @@ namespace NuGet.ShimV3
             }
         }
 
+        public async Task ReportMetrics(WebRequest request)
+        {
+            // metrics
+            if (_metricService != null)
+            {
+                await _metricService.ProcessRequest(request);
+            }
+        }
+
         public async Task DownloadPackage(InterceptCallContext context, string id, string version)
         {
             JToken package = await GetPackageCore(context, id, version);
@@ -120,22 +142,22 @@ namespace NuGet.ShimV3
             await context.WriteResponse(xml);
         }
 
-        public async Task SearchCount(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
+        public async Task SearchCount(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
             context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] SearchCount: {0}", searchTerm), ConsoleColor.Magenta);
 
-            JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName));
+            JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName, sortBy));
 
             string count = obj != null ? count = obj["totalHits"].ToString() : "0";
 
             await context.WriteResponse(count);
         }
 
-        public async Task Search(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
+        public async Task Search(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
             context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Search: {0} ({1},{2})", searchTerm, skip, take), ConsoleColor.Magenta);
 
-            JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName));
+            JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName, sortBy));
 
             IEnumerable<JToken> data = (obj != null) ? data = obj["data"] : Enumerable.Empty<JToken>();
 
@@ -566,12 +588,12 @@ namespace NuGet.ShimV3
             return resolverBlobAddress;
         }
 
-        private Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName)
+        private Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
             string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
 
-            Uri searchAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}?q={1}&targetFramework={2}&includePrerelease={3}&skip={4}&take={5}{6}",
-                _searchAddress, searchTerm, targetFramework, includePrerelease, skip, take, feedArg));
+            Uri searchAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}?q={1}&targetFramework={2}&prerelease={3}&skip={4}&sortBy={5}&take={6}{7}",
+                _searchAddress, searchTerm, targetFramework, includePrerelease, skip, sortBy, take, feedArg));
             return searchAddress;
         }
 

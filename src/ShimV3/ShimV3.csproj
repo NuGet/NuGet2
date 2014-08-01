@@ -53,6 +53,7 @@
     <Compile Include="InterceptFormatting.cs" />
     <Compile Include="InterceptorArguments.cs" />
     <Compile Include="IShimCache.cs" />
+    <Compile Include="MetricService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShimCache.cs" />
     <Compile Include="ShimCallContext.cs" />

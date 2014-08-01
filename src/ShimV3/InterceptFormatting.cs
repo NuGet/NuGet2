@@ -3,8 +3,10 @@ using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace NuGet.ShimV3
@@ -285,6 +287,30 @@ namespace NuGet.ShimV3
             }
 
             return entry;
+        }
+
+        public static string MakeBatchEntry(string boundaryId, byte[] feed)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(String.Format(CultureInfo.InvariantCulture, "--batchresponse_{0}", boundaryId));
+            sb.AppendLine("Content-Type: application/http");
+            sb.AppendLine("Content-Transfer-Encoding: binary");
+            sb.AppendLine(string.Empty);
+            sb.AppendLine("HTTP/1.1 200 OK");
+            sb.AppendLine("DataServiceVersion: 2.0;");
+            sb.AppendLine("Content-Type: application/atom+xml;type=feed;charset=utf-8");
+            sb.AppendLine("X-Content-Type-Options: nosniff");
+            sb.AppendLine("Cache-Control: no-cache");
+            sb.AppendLine(string.Empty);
+
+            string xml = Encoding.UTF8.GetString(feed);
+
+            sb.AppendLine(xml);
+
+            sb.AppendLine(String.Format(CultureInfo.InvariantCulture, "--batchresponse_{0}--", boundaryId));
+
+            return sb.ToString();
         }
     }
 }

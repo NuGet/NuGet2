@@ -7,13 +7,12 @@ using System.Net;
 
 namespace NuGet.ShimV3
 {
-    internal class ShimDataServiceClientRequestMessage : DataServiceClientRequestMessage
+    internal class ShimDataServiceClientRequestMessage : DataServiceClientRequestMessage, IDisposable
     {
         public ShimDataRequestMessage ShimWebRequest { get; private set; }
         public DataServiceClientRequestMessageArgs OriginalMessageArgs { get; private set; }
-
-        private Stream _data;
         private ShimController _controller;
+        private MemoryStream _requestStream;
 
         public ShimDataServiceClientRequestMessage(ShimController controller, DataServiceClientRequestMessageArgs args)
             : base(args.Method)
@@ -71,21 +70,25 @@ namespace NuGet.ShimV3
 
         public override IODataResponseMessage GetResponse()
         {
-            var response = _controller.ShimResponse(ShimWebRequest.WebRequest);
+            var response = _controller.ShimResponse(ShimWebRequest.WebRequest, _requestStream);
 
             ShimResponseMessage shimResponse = new ShimResponseMessage(response);
+
+            // clean up the request stream
+            Dispose();
 
             return shimResponse;
         }
 
         public override Stream GetStream()
         {
-            if (_data == null)
+            // the webrequest stream is not readable, we need to create our own
+            if (_requestStream == null)
             {
-                _data = ShimWebRequest.GetStream();
+                _requestStream = new MemoryStream();
             }
 
-            return _data;
+            return _requestStream;
         }
 
         public override IEnumerable<KeyValuePair<string, string>> Headers
@@ -143,6 +146,15 @@ namespace NuGet.ShimV3
             set
             {
                 ShimWebRequest.Url = value;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_requestStream != null)
+            {
+                _requestStream.Dispose();
+                _requestStream = null;
             }
         }
     }

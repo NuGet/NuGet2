@@ -22,6 +22,10 @@ namespace NuGet
                 {
                     response.UserAgent = header.Value;
                 }
+                else if (StringComparer.OrdinalIgnoreCase.Equals(header.Key, "content-type"))
+                {
+                    response.ContentType = header.Value;
+                }
                 else
                 {
                     response.Headers.Set(header.Key, header.Value);

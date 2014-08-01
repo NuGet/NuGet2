@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -60,7 +61,14 @@ namespace NuGet
 
         public void SetHeader(string headerName, string headerValue)
         {
-            WebRequest.Headers.Set(headerName, headerValue);
+            if (StringComparer.OrdinalIgnoreCase.Equals(headerName, "Content-Length"))
+            {
+                WebRequest.ContentLength = long.Parse(headerValue, CultureInfo.InvariantCulture.NumberFormat);
+            }
+            else
+            {
+                WebRequest.Headers.Set(headerName, headerValue);
+            }
         }
 
         public Uri Url
@@ -87,23 +95,5 @@ namespace NuGet
                 WebRequest.Method = value;
             }
         }
-
-        //internal void ApplyChanges()
-        //{
-        //    _args.RequestMessage.Method = WebRequest.Method;
-        //    _args.RequestMessage.Url = WebRequest.RequestUri;
-
-        //    // Remove all headers
-        //    foreach(var header in _args.RequestMessage.Headers)
-        //    {
-        //        _args.RequestMessage.SetHeader(header.Key, null);
-        //    }
-
-        //    // Set headers according to the web request
-        //    foreach(var header in Headers)
-        //    {
-        //        _args.RequestMessage.SetHeader(header.Key, header.Value);
-        //    }            
-        //}
     }
 }

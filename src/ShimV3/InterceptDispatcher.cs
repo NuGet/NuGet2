@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace NuGet.ShimV3
@@ -31,7 +34,7 @@ namespace NuGet.ShimV3
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-ids", PackageIds),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-versions", PackageVersions),
                 new Tuple<string, Func<InterceptCallContext, Task>>("$metadata", Metadata),
-                new Tuple<string, Func<InterceptCallContext, Task>>("package", DownloadPackage)
+                new Tuple<string, Func<InterceptCallContext, Task>>("package", DownloadPackage),
             };
 
             _feedFuncs = new Tuple<string, Func<InterceptCallContext, Task>>[]
@@ -94,6 +97,17 @@ namespace NuGet.ShimV3
         }
 
         /// <summary>
+        /// Process metrics for a call that may not be passed through Invoke.
+        /// </summary>
+        public async Task ReportMetrics(WebRequest request)
+        {
+            if (_initialized == true)
+            {
+                await Task.Run(() => _channel.ReportMetrics(request));
+            }
+        }
+
+        /// <summary>
         /// Gathers the response data from the V3 source for the context uri.
         /// </summary>
         public async Task Invoke(InterceptCallContext context)
@@ -104,6 +118,9 @@ namespace NuGet.ShimV3
                 {
                     throw new InvalidOperationException("Requires Init");
                 }
+
+                // report metrics if the headers exist
+                Task metricsTask = ReportMetrics(context.Request);
 
                 string unescapedAbsolutePath = Uri.UnescapeDataString(context.RequestUri.AbsolutePath);
 
@@ -220,7 +237,9 @@ namespace NuGet.ShimV3
             int skip = context.Args.Skip ?? 0;
             int take = context.Args.Top ?? 30;
 
-            await _channel.SearchCount(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed);
+            string sortBy = string.Empty;
+
+            await _channel.SearchCount(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed, sortBy);
         }
 
         private async Task SearchImpl(InterceptCallContext context, string feed = null)
@@ -228,7 +247,9 @@ namespace NuGet.ShimV3
             int skip = context.Args.Skip ?? 0;
             int take = context.Args.Top ?? 30;
 
-            await _channel.Search(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed);
+            string sortBy = string.Empty;
+
+            await _channel.Search(context, context.Args.SearchTerm, context.Args.IsLatestVersion, context.Args.TargetFramework, context.Args.IncludePrerelease, skip, take, feed, sortBy);
         }
 
         private async Task FindPackagesById(InterceptCallContext context)

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
+using System.IO;
 
 namespace NuGet.ShimV3
 {
@@ -18,6 +19,7 @@ namespace NuGet.ShimV3
         private readonly IDebugConsoleController _debugLogger;
         private IPackageSourceProvider _sourceProvider;
         private IShimCache _cache;
+        private InterceptDispatcher _lastUsedDispatcher;
 
         public ShimController(IDebugConsoleController debugLogger)
         {
@@ -67,15 +69,28 @@ namespace NuGet.ShimV3
         /// <summary>
         /// Main entry point. All requests pass through here except for ones skipped in ShimDataService().
         /// </summary>
+        /// 
         public WebResponse ShimResponse(WebRequest request)
+        {
+            return ShimResponse(request, null);
+        }
+
+        public WebResponse ShimResponse(WebRequest request, MemoryStream requestStream)
         {
             Debug.Assert(request != null);
             WebResponse response = null;
 
-            if (!TryGetInterceptorResponse(request, out response))
+            // pass the request to the interceptors
+            if (!TryGetInterceptorResponse(request, requestStream, out response))
             {
                 // Not handled by an interceptor, allow V2 to continue
                 response = CallV2(request);
+
+                // The metrics for downloads may come through on the CDN url, which is not handled
+                // by the dispatcher. We need to give it a chance to log this info.
+                CallDispatcherForMetrics(_lastUsedDispatcher, request);
+
+                _lastUsedDispatcher = null;
             }
 
             return response;
@@ -106,6 +121,7 @@ namespace NuGet.ShimV3
             return message;
         }
 
+
         /// <summary>
         /// Create the dispatchers for v3 urls
         /// </summary>
@@ -133,17 +149,44 @@ namespace NuGet.ShimV3
             }
         }
 
-        private ShimWebResponse CallDispatcher(InterceptDispatcher dispatcher, WebRequest request)
+        private static void CallDispatcherForMetrics(InterceptDispatcher dispatcher, WebRequest request)
+        {
+            if (dispatcher != null)
+            {
+                try
+                {
+                    // do not wait for this
+                    Task.Run(async () => await dispatcher.ReportMetrics(request));
+                }
+                catch (AggregateException ex)
+                {
+                    // unwrap the exception to get a useful error
+                    var innerException = ExceptionUtility.Unwrap(ex);
+
+                    // TODO: throw a DataServiceQueryException with the correct xml
+                    throw innerException;
+                }
+            }
+        }
+
+        private ShimWebResponse CallDispatcher(InterceptDispatcher dispatcher, WebRequest request, MemoryStream requestStream)
         {
             ShimWebResponse response = null;
+            _lastUsedDispatcher = dispatcher;
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
             try
             {
-                using (var context = new ShimCallContext(request, _debugLogger))
+                using (var context = new ShimCallContext(request, requestStream, _debugLogger))
                 {
+                    if (StringComparer.OrdinalIgnoreCase.Equals(request.Method, "POST") && requestStream != null)
+                    {
+                        // convert the batched call into a regular url
+                        context.UnBatch();
+                    }
+
                     Log(String.Format(CultureInfo.InvariantCulture, "[V3 RUN] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
 
                     var t = Task.Run(async () => await dispatcher.Invoke(context));
@@ -155,7 +198,7 @@ namespace NuGet.ShimV3
 
                     Log(String.Format(CultureInfo.InvariantCulture, "[V3 END] {0}ms", timer.ElapsedMilliseconds), ConsoleColor.Yellow);
 
-                    response = new ShimWebResponse(stream, request.RequestUri, context.ResponseContentType);
+                    response = new ShimWebResponse(stream, request.RequestUri, context.ResponseContentType, context.StatusCode);
                 }
             }
             catch (AggregateException ex)
@@ -173,7 +216,7 @@ namespace NuGet.ShimV3
         /// <summary>
         /// Pass the request to the interceptors. Interceptors will be initialized as needed.
         /// </summary>
-        private bool TryGetInterceptorResponse(WebRequest request, out WebResponse response)
+        private bool TryGetInterceptorResponse(WebRequest request, MemoryStream requestStream, out WebResponse response)
         {
             response = null;
 
@@ -184,7 +227,7 @@ namespace NuGet.ShimV3
             {
                 if (dispatcher.Initialized == true)
                 {
-                    response = CallDispatcher(dispatcher, request);
+                    response = CallDispatcher(dispatcher, request, requestStream);
                 }
                 else if(dispatcher.Initialized == null && AreSourcesEqual(dispatcher.Source, request.RequestUri.AbsoluteUri))
                 {
@@ -215,7 +258,7 @@ namespace NuGet.ShimV3
                             Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] PASSED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
 
                             // init was successful, try again using the shim
-                            response = CallDispatcher(dispatcher, request);
+                            response = CallDispatcher(dispatcher, request, requestStream);
                         }
                         else
                         {
@@ -237,7 +280,7 @@ namespace NuGet.ShimV3
                 if (dispatchers.All(d => d.Initialized != false))
                 {
                     var disp = dispatchers.Where(d => d.Initialized == true).FirstOrDefault();
-                    response = CallDispatcher(disp, request);
+                    response = CallDispatcher(disp, request, requestStream);
                 }
             }
 

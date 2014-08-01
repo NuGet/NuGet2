@@ -14,14 +14,16 @@ namespace NuGet.ShimV3
         private Uri _uri;
         private string _contentType;
         private WebHeaderCollection _headers;
+        private HttpStatusCode _statusCode;
 
-        public ShimWebResponse(Stream stream, Uri uri, string contentType)
+        public ShimWebResponse(Stream stream, Uri uri, string contentType, HttpStatusCode statusCode)
             : base()
         {
             _stream = stream;
             _uri = uri;
             _contentType = contentType;
             _headers = new WebHeaderCollection();
+            _statusCode = statusCode;
 
             _headers.Add("content-type", _contentType);
         }
@@ -36,6 +38,14 @@ namespace NuGet.ShimV3
             get
             {
                 return _uri;
+            }
+        }
+
+        public HttpStatusCode StatusCode
+        {
+            get
+            {
+                return _statusCode;
             }
         }
 

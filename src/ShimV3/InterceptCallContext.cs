@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -17,11 +18,19 @@ namespace NuGet.ShimV3
 
         public abstract InterceptorArguments Args { get;}
 
+        public abstract WebRequest Request { get; }
+
+        public abstract HttpStatusCode StatusCode { get; set; }
+
         public abstract Uri RequestUri { get; }
         public abstract string ResponseContentType { get; set; }
         public abstract Task WriteResponseAsync(byte[] data);
 
         public abstract void Log(string message, ConsoleColor color);
+
+        public abstract MemoryStream RequestStream { get; }
+
+        public bool IsBatchRequest { get; set; }
 
         public async Task WriteResponse(XElement feed)
         {
@@ -65,6 +74,14 @@ namespace NuGet.ShimV3
         public async Task WriteResponse(byte[] data, string contextType)
         {
             ResponseContentType = contextType;
+
+            await WriteResponseAsync(data);
+        }
+
+        public async Task WriteResponse(byte[] data, string contextType, HttpStatusCode statusCode)
+        {
+            ResponseContentType = contextType;
+            StatusCode = statusCode;
 
             await WriteResponseAsync(data);
         }

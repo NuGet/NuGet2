@@ -75,6 +75,7 @@ namespace NuGet
 
         private void OnPackageDownloaderSendingRequest(object sender, WebRequestEventArgs e)
         {
+            // add headers for the metric service
             if (_currentOperation != null)
             {
                 string operation = _currentOperation.Item1;
@@ -87,6 +88,13 @@ namespace NuGet
                     {
                         operation = operation + "-Dependency";
                     }
+                }
+
+                // add the id and version to the headers
+                if (!String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageVersion))
+                {
+                    e.Request.Headers[RepositoryOperationNames.PackageId] = _packageDownloader.CurrentDownloadPackageId;
+                    e.Request.Headers[RepositoryOperationNames.PackageVersion] = _packageDownloader.CurrentDownloadPackageVersion;
                 }
 
                 e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;

@@ -18,6 +18,12 @@ namespace NuGet
             private set;
         }
 
+        public string CurrentDownloadPackageVersion
+        {
+            get;
+            private set;
+        }
+
         public virtual void DownloadPackage(Uri uri, IPackageMetadata package, Stream targetStream)
         {
             if (uri == null)
@@ -47,6 +53,7 @@ namespace NuGet
             // Get the operation display text
             string operation = String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, package.Id, package.Version);
             CurrentDownloadPackageId = package.Id;
+            CurrentDownloadPackageVersion = package.Version.ToString();
 
             EventHandler<ProgressEventArgs> progressAvailableHandler = (sender, e) =>
             {

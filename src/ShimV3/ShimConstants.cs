@@ -5,5 +5,6 @@ namespace NuGet.ShimV3
     {
         public static readonly string V3UrlPath = "/ver3-ctp1/";
         public static readonly string V2UrlPath = "/api/v2/";
+        public static readonly string ShimUserAgent = "Shimtastic CTP2";
     }
 }

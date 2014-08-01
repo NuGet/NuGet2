@@ -19,6 +19,14 @@ namespace NuGet.ShimV3
             }
 
             _statusCode = 200;
+
+            ShimWebResponse shimResponse = response as ShimWebResponse;
+
+            if (shimResponse != null)
+            {
+                _statusCode = (int)shimResponse.StatusCode;
+            }
+
             WebResponse = response;
         }
 
