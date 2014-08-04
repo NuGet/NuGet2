@@ -72,6 +72,7 @@
     <Compile Include="ProgramTest.cs" />
     <Compile Include="ProjectFactoryTest.cs" />
     <Compile Include="ProjectHelperTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PushCommandTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
     <Compile Include="RestoreCommandTest.cs" />
