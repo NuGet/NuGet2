@@ -218,6 +218,7 @@ namespace NuGet
             // Initialize the request
             _httpClient.InitializeRequest(shimRequest.WebRequest);
 
+
             RaiseSendingRequest(new WebRequestEventArgs(shimRequest.WebRequest));
         }
 

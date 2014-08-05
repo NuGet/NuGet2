@@ -44,6 +44,8 @@ namespace NuGet
         {
             WebResponse response = null;
 
+            InitializeRequest(request);
+
             if (_webHandler != null)
             {
                 response = _webHandler(request);
@@ -69,6 +71,9 @@ namespace NuGet
                 message = new HttpWebRequestMessage(args);
             }
 
+            // apply proxy and credential settings on the core web request
+            InitializeMessage(message);
+
             return message;
         }
 
@@ -86,6 +91,62 @@ namespace NuGet
         {
             _dataServiceHandler = null;
             _webHandler = null;
+        }
+
+        // apply proxy settings and credentials here since they can no longer be applied from the context event
+        private static void InitializeMessage(DataServiceClientRequestMessage message)
+        {
+            IShimWebRequest webRequestMessage = message as IShimWebRequest;
+            HttpWebRequestMessage httpMessage = message as HttpWebRequestMessage;
+
+            if (httpMessage != null)
+            {
+                InitializeRequest(httpMessage.HttpWebRequest);
+            }
+            else if (webRequestMessage != null)
+            {
+                InitializeRequest(webRequestMessage.Request);
+            }
+        }
+
+        private static void InitializeRequest(WebRequest request)
+        {
+            try
+            {
+                SetCredentialsAndProxy(request);
+                InitializeRequestProperties(request);
+            }
+            catch (InvalidOperationException)
+            {
+                // ignore failures here, that can be caused by GetResponse having already been called
+            }
+        }
+
+        private static void SetCredentialsAndProxy(WebRequest request)
+        {
+            // Used the cached credentials and proxy we have
+            if (request.Credentials == null)
+            {
+                request.Credentials = CredentialStore.Instance.GetCredentials(request.RequestUri);
+            }
+
+            if (request.Proxy == null)
+            {
+                request.Proxy = ProxyCache.Instance.GetProxy(request.RequestUri);
+            }
+
+            STSAuthHelper.PrepareSTSRequest(request);
+        }
+
+        private static void InitializeRequestProperties(WebRequest request)
+        {
+            var httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+            {
+                httpRequest.UserAgent = HttpUtility.CreateUserAgentString("NuGet");
+                httpRequest.CookieContainer = new CookieContainer();
+                httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+            }
         }
     }
 }

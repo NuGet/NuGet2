@@ -121,7 +121,6 @@ namespace NuGet.ShimV3
             return message;
         }
 
-
         /// <summary>
         /// Create the dispatchers for v3 urls
         /// </summary>

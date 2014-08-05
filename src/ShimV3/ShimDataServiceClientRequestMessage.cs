@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.IO;
 using System.Net;
+using NuGet;
 
 namespace NuGet.ShimV3
 {
-    internal class ShimDataServiceClientRequestMessage : DataServiceClientRequestMessage, IDisposable
+    internal class ShimDataServiceClientRequestMessage : DataServiceClientRequestMessage, IShimWebRequest, IDisposable
     {
         public ShimDataRequestMessage ShimWebRequest { get; private set; }
         public DataServiceClientRequestMessageArgs OriginalMessageArgs { get; private set; }
@@ -155,6 +156,14 @@ namespace NuGet.ShimV3
             {
                 _requestStream.Dispose();
                 _requestStream = null;
+            }
+        }
+
+        public HttpWebRequest Request
+        {
+            get
+            {
+                return ShimWebRequest.WebRequest;
             }
         }
     }

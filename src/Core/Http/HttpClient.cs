@@ -103,6 +103,8 @@ namespace NuGet
 
         public void InitializeRequest(WebRequest request)
         {
+            // TODO: Clean this up. This is no longer used with the move to WCF 5.6.1, changes to the request are not applied to the actual request.
+
             // Setup the request properties like content type and compression
             InitializeRequestProperties(request);
 

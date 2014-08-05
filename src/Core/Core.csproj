@@ -101,6 +101,7 @@
     <Compile Include="Http\SendingRequestEventManager.cs" />
     <Compile Include="Http\Shim\IShimController.cs" />
     <Compile Include="Http\Shim\IShimControllerProvider.cs" />
+    <Compile Include="Http\Shim\IShimWebRequest.cs" />
     <Compile Include="Http\Shim\ShimDataRequestMessage.cs" />
     <Compile Include="Http\Shim\ShimWebHelpers.cs" />
     <Compile Include="Http\STSAuthHelper.cs" />

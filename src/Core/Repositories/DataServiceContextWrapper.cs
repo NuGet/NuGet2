@@ -25,11 +25,11 @@ namespace NuGet
             {
                 throw new ArgumentNullException("serviceRoot");
             }
+
             _context = new DataServiceContext(serviceRoot)
                        {
                            MergeOption = MergeOption.NoTracking
                        };
-
 
             _metadataUri = _context.GetMetadataUri();
 
