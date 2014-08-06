@@ -73,12 +73,11 @@ namespace NuGet.Dialog.Test
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
 
             // Act
-            IVsExtensionsTreeNode searchNode = provider.Search("hello");
+            var searchNode = provider.Search("hello") as PackagesSearchNode;
 
             // Assert
             Assert.NotNull(searchNode);
-            Assert.IsType(typeof(PackagesSearchNode), searchNode);
-            Assert.True(provider.ExtensionsTree.Nodes.Contains(searchNode));
+            Assert.True(searchNode.BaseNode.Nodes.Contains(searchNode));
         }
 
         [Fact]

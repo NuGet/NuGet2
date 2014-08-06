@@ -264,7 +264,7 @@ namespace NuGet.Dialog.Providers
 
         protected internal virtual void RemoveSearchNode()
         {
-            if (_searchNode != null && RootNode.Nodes.Contains(_searchNode))
+            if (_searchNode != null && _searchNode.BaseNode.Nodes.Contains(_searchNode))
             {
                 // When remove the search node, the dialog will automatically select the first node (All node)
                 // Since we are going to restore the previously selected node anyway, we don't want the first node
@@ -274,7 +274,7 @@ namespace NuGet.Dialog.Providers
                 try
                 {
                     // dispose any search results
-                    RootNode.Nodes.Remove(_searchNode);
+                    _searchNode.BaseNode.Nodes.Remove(_searchNode);
                 }
                 finally
                 {
@@ -293,12 +293,13 @@ namespace NuGet.Dialog.Providers
 
         private void AddSearchNode()
         {
-            if (_searchNode != null && !RootNode.Nodes.Contains(_searchNode))
+            if (_searchNode != null && !_searchNode.BaseNode.Nodes.Contains(_searchNode))
             {
                 // remember the currently selected node so that when search term is cleared, we can restore it.
                 _lastSelectedNode = SelectedNode;
 
-                RootNode.Nodes.Add(_searchNode);
+                _searchNode.BaseNode.Nodes.Add(_searchNode);
+                _searchNode.BaseNode.IsExpanded = true;
                 SelectNode(_searchNode);
             }
         }
