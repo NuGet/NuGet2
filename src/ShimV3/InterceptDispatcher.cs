@@ -33,6 +33,8 @@ namespace NuGet.ShimV3
                 new Tuple<string, Func<InterceptCallContext, Task>>("Packages", Packages),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-ids", PackageIds),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package-versions", PackageVersions),
+                new Tuple<string, Func<InterceptCallContext, Task>>("api/v2/package-ids", PackageIds),
+                new Tuple<string, Func<InterceptCallContext, Task>>("api/v2/package-versions", PackageVersions),
                 new Tuple<string, Func<InterceptCallContext, Task>>("$metadata", Metadata),
                 new Tuple<string, Func<InterceptCallContext, Task>>("package", DownloadPackage),
             };
@@ -127,11 +129,12 @@ namespace NuGet.ShimV3
                 string path = unescapedAbsolutePath;
 
                 // v2 is still in the path for get-package
-                if (unescapedAbsolutePath.IndexOf(ShimConstants.V2UrlPath) > -1)
+                if (unescapedAbsolutePath.IndexOf(ShimConstants.V2UrlPath) == 0)
                 {
                     path = unescapedAbsolutePath.Remove(0, ShimConstants.V2UrlPath.Length);
                 }
-                else if (unescapedAbsolutePath.IndexOf(ShimConstants.V3UrlPath) > -1)
+
+                if (unescapedAbsolutePath.IndexOf(ShimConstants.V3UrlPath) == 0)
                 {
                     path = unescapedAbsolutePath.Remove(0, ShimConstants.V3UrlPath.Length);
                 }
