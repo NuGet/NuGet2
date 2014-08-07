@@ -352,6 +352,33 @@ namespace NuGet.Test
             }
         }
 
+        [Theory]
+        [InlineData("aspnet50", "5.0", "ASP.Net")]
+        [InlineData("aspnetcore50", "5.0", "ASP.NetCore")]
+        [InlineData("asp.net50", "5.0", "ASP.Net")]
+        [InlineData("asp.netcore50", "5.0", "ASP.NetCore")]
+        [InlineData("ASPNET50", "5.0", "ASP.Net")]
+        [InlineData("ASPNETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData("ASP.NET50", "5.0", "ASP.Net")]
+        [InlineData("ASP.NETCORE50", "5.0", "ASP.NetCore")]
+
+        // 5.1 doesn't exist (at least at time of writing), just verifying the logic
+        [InlineData("aspnet51", "5.1", "ASP.Net")]
+        [InlineData("aspnetcore51", "5.1", "ASP.NetCore")]
+        public void ParseFrameworkNameNormalizesSupportedASPNetFrameworkNames(string shortName, string version, string identifier)
+        {
+            // Arrange
+            Version expectedVersion = new Version(version);
+
+            // Act
+            var expanded = VersionUtility.ParseFrameworkName(shortName);
+
+            // Assert
+            Assert.Equal(expectedVersion, expanded.Version);
+            Assert.Equal(identifier, expanded.Identifier);
+            Assert.True(String.IsNullOrEmpty(expanded.Profile));
+        }
+
         [Fact]
         public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
         {
@@ -502,33 +529,33 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void ParseFrameworkFolderName()
+        public void ParseFrameworkFolderNameWithoutFramework()
         {
-            // foo.dll
-            // sub\foo.dll -> Unsupported since we can't tell if this was meant to be a framework name or not
-            // {FrameworkName}{Version}\foo.dll
-            // {FrameworkName}{Version}\sub1\foo.dll
-            // {FrameworkName}{Version}\sub1\sub2\foo.dll
-            var f1 = VersionUtility.ParseFrameworkFolderName(@"foo.dll");
-            var f2 = VersionUtility.ParseFrameworkFolderName(@"sub\foo.dll");
-            var f3 = VersionUtility.ParseFrameworkFolderName(@"SL4\foo.dll");
-            var f4 = VersionUtility.ParseFrameworkFolderName(@"SL3\sub1\foo.dll");
-            var f5 = VersionUtility.ParseFrameworkFolderName(@"SL20\sub1\sub2\foo.dll");
-            var f6 = VersionUtility.ParseFrameworkFolderName(@"net\foo.dll");
-            var f7 = VersionUtility.ParseFrameworkFolderName(@"winrt45\foo.dll");
+            Assert.Null(VersionUtility.ParseFrameworkFolderName(@"foo.dll"));
+        }
 
-            Assert.Null(f1);
-            Assert.Equal("Unsupported", f2.Identifier);
-            Assert.Equal("Silverlight", f3.Identifier);
-            Assert.Equal(new Version("4.0"), f3.Version);
-            Assert.Equal("Silverlight", f4.Identifier);
-            Assert.Equal(new Version("3.0"), f4.Version);
-            Assert.Equal("Silverlight", f5.Identifier);
-            Assert.Equal(new Version("2.0"), f5.Version);
-            Assert.Equal(".NETFramework", f6.Identifier);
-            Assert.Equal(new Version(), f6.Version);
-            Assert.Equal(".NETCore", f7.Identifier);
-            Assert.Equal(new Version("4.5"), f7.Version);
+        [Fact]
+        [InlineData(@"sub\foo.dll", "Unsupported", "0.0")]
+        [InlineData(@"SL4\foo.dll", "Silverlight", "4.0")]
+        [InlineData(@"SL3\sub1\foo.dll", "Silverlight", "3.0")]
+        [InlineData(@"SL20\sub1\sub2\foo.dll", "Silverlight", "2.0")]
+        [InlineData(@"net\foo.dll", ".NETFramework", "")]
+        [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
+        [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
+        [InlineData(@"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
+        public void ParseFrameworkFolderName(string path, string identifier, string version)
+        {
+            // Arrange
+            Version expectedVersion = String.IsNullOrEmpty(version) ?
+                new Version() :
+                new Version(version);
+
+            // Act
+            var actual = VersionUtility.ParseFrameworkFolderName(path);
+
+            // Assert
+            Assert.Equal(identifier, actual.Identifier);
+            Assert.Equal(expectedVersion, actual.Version);
         }
 
         [Fact]
@@ -1286,6 +1313,25 @@ namespace NuGet.Test
             Assert.Equal("sl", shortName);
         }
 
+        [Theory]
+        [InlineData("ASP.Net, Version=5.0", "aspnet50")]
+        [InlineData("ASP.NetCore, Version=5.0", "aspnetcore50")]
+
+        // No such thing as ASP.Net, Version=5.1 at time of writing, just testing the logic
+        [InlineData("ASP.Net, Version=5.1", "aspnet51")]
+        [InlineData("ASP.NetCore, Version=5.1", "aspnetcore51")]
+        public void GetShortNameForASPNetAndASPNetCoreWorks(string longName, string expectedShortName)
+        {
+            // Arrange
+            var fxName = new FrameworkName(longName);
+
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(fxName);
+
+            // Assert
+            Assert.Equal(expectedShortName, shortName);
+        }
+
         [Fact]
         public void GetShortNameForNetCore45ReturnsWindows()
         {
@@ -1368,6 +1414,59 @@ namespace NuGet.Test
 
             // Assert
             Assert.False(isCompatible);
+        }
+
+        [Theory]
+        
+        // COMPATIBLE: Same framework, easy first case
+        [InlineData("aspnet50", "aspnet50", true)]
+        [InlineData("aspnetcore50", "aspnetcore50", true)]
+        
+        // COMPATIBLE: Project targeting later framework
+        [InlineData("aspnet51", "aspnet50", true)]
+        [InlineData("aspnet51", "net451", true)]
+        [InlineData("aspnet51", "net40", true)]
+        [InlineData("aspnet51", "net20", true)]
+        [InlineData("aspnetcore51", "aspnetcore50", true)]
+        [InlineData("aspnetcore51", "netcore451", true)]
+        [InlineData("aspnetcore51", "netcore45", true)]
+        [InlineData("aspnetcore51", "win81", true)]
+        [InlineData("aspnetcore51", "win80", true)]
+
+        // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
+        [InlineData("aspnet50", "aspnetcore50", false)]
+        [InlineData("aspnetcore50", "aspnet50", false)]
+        
+        // NOT COMPATIBLE: Package targeting later framework
+        [InlineData("aspnet50", "aspnet51", false)]
+        [InlineData("aspnetcore50", "aspnetcore51", false)]
+        [InlineData("aspnet50", "net50", false)]
+        [InlineData("aspnetcore50", "netcore50", false)]
+        [InlineData("aspnetcore50", "win90", false)] // Don't get excited, just randomly guessing higher version numbers :)
+
+        // COMPATIBLE: Install net(core)451 into aspnet(core)50 ('core's must match)
+        [InlineData("aspnet50", "net451", true)]
+        [InlineData("aspnet50", "net40", true)]
+        [InlineData("aspnet50", "net20", true)]
+        [InlineData("aspnetcore50", "netcore451", true)]
+        [InlineData("aspnetcore50", "netcore45", true)]
+        [InlineData("aspnetcore50", "win81", true)]
+        [InlineData("aspnetcore50", "win80", true)]
+
+        // COMPATIBLE: Portable Packages
+        [InlineData("aspnet50", "portable-net45+win81", true)]
+        [InlineData("aspnetcore50", "portable-net45+win81", true)]
+
+        // NOT COMPATIBLE: Portable Packages
+        [InlineData("aspnet50", "portable-sl50+win81", false)]
+        [InlineData("aspnetcore50", "portable-net45+sl40", false)]
+        public void IsCompatibleMatrixForASPNetFrameworks(string projectFramework, string packageFramework, bool compatible)
+        {
+            Assert.Equal(
+                VersionUtility.IsCompatible(
+                    VersionUtility.ParseFrameworkName(projectFramework),
+                    VersionUtility.ParseFrameworkName(packageFramework)),
+                compatible);
         }
 
         [Theory]
