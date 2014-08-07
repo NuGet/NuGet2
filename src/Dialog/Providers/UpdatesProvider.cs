@@ -113,18 +113,6 @@ namespace NuGet.Dialog.Providers
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        /*
-        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
-        {
-            activePackageManager.UpdatePackages(
-                projectManager,
-                new[] { item.PackageIdentity },
-                operations,
-                updateDependencies: true,
-                allowPrereleaseVersions: IncludePrerelease,
-                logger: this); 
-        } */
-
         private IEnumerable<Resolver.PackageAction> ResolveActionsForUpdateAll(IVsPackageManager activePackageManager, IProjectManager projectManager)
         {
             var resolver = new ActionResolver()
@@ -154,32 +142,33 @@ namespace NuGet.Dialog.Providers
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
-            IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null);
-            IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
-
-            var actions = ResolveActionsForUpdateAll(activePackageManager, projectManager);
-            bool accepted = this.ShowLicenseAgreement(actions);
-            if (!accepted)
+            using (IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null))
             {
-                return false;
-            }
+                IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
 
-            try
-            {
-                RegisterPackageOperationEvents(activePackageManager, projectManager);
-
-                var actionExecutor = new ActionExecutor()
+                var actions = ResolveActionsForUpdateAll(activePackageManager, projectManager);
+                bool accepted = this.ShowLicenseAgreement(actions);
+                if (!accepted)
                 {
-                    Logger = this
-                };
-                actionExecutor.Execute(actions);
+                    return false;
+                }
 
-                return true;
-            }
-            finally
-            {
-                UnregisterPackageOperationEvents(activePackageManager, projectManager);
-                action.Dispose();
+                try
+                {
+                    RegisterPackageOperationEvents(activePackageManager, projectManager);
+
+                    var actionExecutor = new ActionExecutor()
+                    {
+                        Logger = this
+                    };
+                    actionExecutor.Execute(actions);
+
+                    return true;
+                }
+                finally
+                {
+                    UnregisterPackageOperationEvents(activePackageManager, projectManager);
+                }
             }
         }
 

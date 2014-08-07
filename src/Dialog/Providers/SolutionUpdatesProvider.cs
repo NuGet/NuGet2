@@ -6,6 +6,7 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers
@@ -138,6 +139,74 @@ namespace NuGet.Dialog.Providers
                 }
 
                 return true;
+            }
+        }
+
+
+        // Resolve actions to update all packages in all projects.
+        private IEnumerable<Resolver.PackageAction> ResolveActionsForUpdateAll(IVsPackageManager activePackageManager)
+        {
+            var resolver = new ActionResolver()
+            {
+                Logger = this,
+                AllowPrereleaseVersions = IncludePrerelease,
+                DependencyVersion = activePackageManager.DependencyVersion
+            };
+            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
+            foreach (Project project in _solutionManager.GetProjects())
+            {
+                IProjectManager projectManager = activePackageManager.GetProjectManager(project);
+                foreach (var package in allPackages)
+                {
+                    // Update if an older version package is installed in the project
+                    var localPackge = projectManager.LocalRepository.FindPackage(package.Id);
+                    if (localPackge != null && localPackge.Version < package.Version)
+                    {
+                        resolver.AddOperation(PackageAction.Install, package, projectManager);
+                    }
+                }
+            }
+            var actions = resolver.ResolveActions();
+            return actions;
+        }
+
+        protected override bool ExecuteAllCore()
+        {
+            if (SelectedNode == null || SelectedNode.Extensions == null || SelectedNode.Extensions.Count == 0)
+            {
+                return false;
+            }
+
+            ShowProgressWindow();
+
+            IVsPackageManager activePackageManager = GetActivePackageManager();
+            Debug.Assert(activePackageManager != null);
+
+            using (IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName, mainPackageId: null, mainPackageVersion: null))
+            {
+                var actions = ResolveActionsForUpdateAll(activePackageManager);
+                bool accepted = this.ShowLicenseAgreement(actions);
+                if (!accepted)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    RegisterPackageOperationEvents(activePackageManager, null);
+
+                    var actionExecutor = new ActionExecutor()
+                    {
+                        Logger = this
+                    };
+                    actionExecutor.Execute(actions);
+
+                    return true;
+                }
+                finally
+                {
+                    UnregisterPackageOperationEvents(activePackageManager, null);
+                }
             }
         }
 
