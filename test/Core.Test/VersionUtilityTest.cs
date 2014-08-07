@@ -1436,18 +1436,25 @@ namespace NuGet.Test
         // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
         [InlineData("aspnet50", "aspnetcore50", false)]
         [InlineData("aspnetcore50", "aspnet50", false)]
+
+        // COMPATIBLE: aspnet project, net package (any version)
+        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
+        [InlineData("aspnet50", "net451", true)]
+        [InlineData("aspnet50", "net40", true)]
+        [InlineData("aspnet50", "net20", true)]
+        [InlineData("aspnet50", "net50", true)]
+        [InlineData("aspnet50", "net60", true)]
+        [InlineData("aspnet50", "net70", true)]
         
         // NOT COMPATIBLE: Package targeting later framework
         [InlineData("aspnet50", "aspnet51", false)]
         [InlineData("aspnetcore50", "aspnetcore51", false)]
-        [InlineData("aspnet50", "net50", false)]
-        [InlineData("aspnetcore50", "netcore50", false)]
-        [InlineData("aspnetcore50", "win90", false)] // Don't get excited, just randomly guessing higher version numbers :)
 
-        // COMPATIBLE: Install net(core)451 into aspnet(core)50 ('core's must match)
-        [InlineData("aspnet50", "net451", true)]
-        [InlineData("aspnet50", "net40", true)]
-        [InlineData("aspnet50", "net20", true)]
+        // COMPATIBLE: aspnetcore project, netcore/win package (any version)
+        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
+        [InlineData("aspnetcore50", "netcore70", true)]
+        [InlineData("aspnetcore50", "netcore60", true)]
+        [InlineData("aspnetcore50", "netcore50", true)]
         [InlineData("aspnetcore50", "netcore451", true)]
         [InlineData("aspnetcore50", "netcore45", true)]
         [InlineData("aspnetcore50", "win81", true)]

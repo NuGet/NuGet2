@@ -168,10 +168,11 @@ namespace NuGet
         };
 
         // See IsCompatible
+        private static readonly Version MaxVersion = new Version(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue);
         private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
         {
-            { AspNetFrameworkIdentifier, new FrameworkName(".NETFramework, Version=v4.5.1") },
-            { AspNetCoreFrameworkIdentifier, new FrameworkName(".NETCore, Version=v4.5.1") },
+            { AspNetFrameworkIdentifier, new FrameworkName(".NETFramework", MaxVersion) },
+            { AspNetCoreFrameworkIdentifier, new FrameworkName(".NETCore", MaxVersion) },
         };
 
         public static Version DefaultTargetFrameworkVersion
