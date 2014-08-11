@@ -1428,11 +1428,7 @@ namespace NuGet.Test
         [InlineData("aspnet51", "net40", true)]
         [InlineData("aspnet51", "net20", true)]
         [InlineData("aspnetcore51", "aspnetcore50", true)]
-        [InlineData("aspnetcore51", "netcore451", true)]
-        [InlineData("aspnetcore51", "netcore45", true)]
-        [InlineData("aspnetcore51", "win81", true)]
-        [InlineData("aspnetcore51", "win80", true)]
-
+        
         // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
         [InlineData("aspnet50", "aspnetcore50", false)]
         [InlineData("aspnetcore50", "aspnet50", false)]
@@ -1450,22 +1446,22 @@ namespace NuGet.Test
         [InlineData("aspnet50", "aspnet51", false)]
         [InlineData("aspnetcore50", "aspnetcore51", false)]
 
-        // COMPATIBLE: aspnetcore project, netcore/win package (any version)
+        // NOT COMPATIBLE: aspnetcore project, netcore/win package (any version)
         // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
-        [InlineData("aspnetcore50", "netcore70", true)]
-        [InlineData("aspnetcore50", "netcore60", true)]
-        [InlineData("aspnetcore50", "netcore50", true)]
-        [InlineData("aspnetcore50", "netcore451", true)]
-        [InlineData("aspnetcore50", "netcore45", true)]
-        [InlineData("aspnetcore50", "win81", true)]
-        [InlineData("aspnetcore50", "win80", true)]
+        [InlineData("aspnetcore50", "netcore70", false)]
+        [InlineData("aspnetcore50", "netcore60", false)]
+        [InlineData("aspnetcore50", "netcore50", false)]
+        [InlineData("aspnetcore50", "netcore451", false)]
+        [InlineData("aspnetcore50", "netcore45", false)]
+        [InlineData("aspnetcore50", "win81", false)]
+        [InlineData("aspnetcore50", "win80", false)]
 
         // COMPATIBLE: Portable Packages
         [InlineData("aspnet50", "portable-net45+win81", true)]
-        [InlineData("aspnetcore50", "portable-net45+win81", true)]
 
         // NOT COMPATIBLE: Portable Packages
         [InlineData("aspnet50", "portable-sl50+win81", false)]
+        [InlineData("aspnetcore50", "portable-net45+win81", false)]
         [InlineData("aspnetcore50", "portable-net45+sl40", false)]
         public void IsCompatibleMatrixForASPNetFrameworks(string projectFramework, string packageFramework, bool compatible)
         {

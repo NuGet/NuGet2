@@ -53,7 +53,8 @@
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
         <MinorVersion>8</MinorVersion>
-        <Patch>2</Patch>
+        <Patch>3</Patch>
+        <PrereleaseTag>alpha0001</PrereleaseTag>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -63,11 +64,9 @@
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
 
-	<!-- This is the version number of all DLLs produced -->
+	    <!-- This is the version number of nupkg files produced -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
-
-	<!-- This is the version number of nupkg files produced -->
-        <NuGetPackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)-beta</NuGetPackageVersion>
+        <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -103,7 +102,7 @@
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\**\*.nuspec">
             <Find><![CDATA[<version>\d+\.\d+\.\d+\.\d+</version>]]></Find>
-            <ReplaceWith><![CDATA[<version>$(Version)</version>]]></ReplaceWith>
+            <ReplaceWith><![CDATA[<version>$(PackageVersion)</version>]]></ReplaceWith>
         </RegexTransform>
     </ItemGroup>
 

@@ -174,7 +174,6 @@ namespace NuGet
         private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
         {
             { AspNetFrameworkIdentifier, new FrameworkName(".NETFramework", MaxVersion) },
-            { AspNetCoreFrameworkIdentifier, new FrameworkName(".NETCore", MaxVersion) },
         };
 
         public static Version DefaultTargetFrameworkVersion
