@@ -534,7 +534,7 @@ namespace NuGet.Test
             Assert.Null(VersionUtility.ParseFrameworkFolderName(@"foo.dll"));
         }
 
-        [Fact]
+        [Theory]
         [InlineData(@"sub\foo.dll", "Unsupported", "0.0")]
         [InlineData(@"SL4\foo.dll", "Silverlight", "4.0")]
         [InlineData(@"SL3\sub1\foo.dll", "Silverlight", "3.0")]
