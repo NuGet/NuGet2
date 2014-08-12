@@ -168,7 +168,7 @@ namespace NuGet
         };
 
         // See IsCompatible
-        // The ASP.Net framework authors desire complete compatibility between 'aspnet50' and all 'net' versions (and similar for aspnetcore/netcore)
+        // The ASP.Net framework authors desire complete compatibility between 'aspnet50' and all 'net' versions
         // So we use this MaxVersion value to achieve complete compatiblilty.
         private static readonly Version MaxVersion = new Version(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue);
         private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
