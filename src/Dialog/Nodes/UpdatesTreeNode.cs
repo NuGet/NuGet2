@@ -43,6 +43,38 @@ namespace NuGet.Dialog.Providers
             base.OnClosed();
         }
 
+        // When user is updating packges in the solution, i.e. the provider is SolutionUpdatesProvider, 
+        // only packages that are referenced by a project or the solution shoul be checked for updates.
+        // This method removes unreferenced packages from the list.
+        private void RemoveUnreferencedPackages(
+            List<IPackage> packages)
+        {
+            var solutionUpdatesProvider = Provider as SolutionUpdatesProvider;
+            if (solutionUpdatesProvider == null)
+            {
+                return;
+            }
+
+            var packageManager = solutionUpdatesProvider.GetActivePackageManager();
+            var projectManagers = solutionUpdatesProvider.SolutionManager.GetProjects().Select(
+                project => packageManager.GetProjectManager(project)).ToList();
+
+            var dict = new Dictionary<IPackage, string>(PackageEqualityComparer.IdAndVersion);
+            foreach (var projectManager in projectManagers)
+            {
+                foreach (var package in projectManager.LocalRepository.GetPackages())
+                {
+                    dict[package] = projectManager.Project.ProjectName;
+                }
+            }
+
+            var sharedRepo = _localRepository as ISharedPackageRepository;
+            packages.RemoveAll(
+                package => 
+                    !dict.ContainsKey(package) &&
+                    !sharedRepo.IsSolutionReferenced(package.Id, package.Version));
+        }
+
         public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
             int cacheIndex = -1;
@@ -63,7 +95,7 @@ namespace NuGet.Dialog.Providers
 
             // The allow prerelease flag passed to this method indicates if we are allowed to show prerelease packages as part of the updates 
             // and does not reflect the filtering of packages we are looking for updates to.
-            var packages = _localRepository.GetPackages();
+            var packages = _localRepository.GetPackages();            
             if (!String.IsNullOrEmpty(searchTerm))
             {
                 packages = packages.Find(searchTerm);
@@ -74,6 +106,8 @@ namespace NuGet.Dialog.Providers
             // sure to remove jQuery 1.9 from the list.
             // To do so, we sort all packages by increasing version, and call Distinct() which effectively remove higher versions of each package id
             List<IPackage> packagesList = packages.ToList();
+            RemoveUnreferencedPackages(packagesList);
+
             if (packagesList.Count > 0)
             {
                 packagesList.Sort(PackageComparer.Version);

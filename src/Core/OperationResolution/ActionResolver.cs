@@ -92,10 +92,18 @@ namespace NuGet.Resolver
         // Initialize _packageRefCounts
         private void InitializeRefCount()
         {
+            // !!! test
+            var k = new List<string>();
+
             // calculate package ref count   
             _packageRefCounts = new Dictionary<IPackageManager, Dictionary<IPackage, int>>();
             foreach (var packageManager in _operations.Select(op => op.ProjectManager.PackageManager))
             {
+                if (_packageRefCounts.ContainsKey(packageManager))
+                {
+                    continue;
+                }
+
                 var refCount = new Dictionary<IPackage, int>(PackageEqualityComparer.IdAndVersion);
                 foreach (var package in packageManager.LocalRepository.GetPackages())
                 {
@@ -110,6 +118,12 @@ namespace NuGet.Resolver
                         if (refCount.ContainsKey(p))
                         {
                             refCount[p]++;
+
+                            // !!!
+                            if (p.Id == "Newtonsoft.Json")
+                            {
+                                k.Add(((PackageReferenceRepository)repo).ReferenceFile.FullPath);
+                            }
                         }
                         else
                         {

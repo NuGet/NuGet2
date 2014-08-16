@@ -89,6 +89,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public ISolutionManager SolutionManager
+        {
+            get
+            {
+                return _solutionManager;
+            }
+        }
+
         public virtual bool RefreshOnNodeSelection
         {
             get
