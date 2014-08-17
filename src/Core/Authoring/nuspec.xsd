@@ -43,7 +43,10 @@
                             <xs:element name="authors" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="owners" maxOccurs="1" minOccurs="0" type="xs:string" />
                             <xs:element name="licenseUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
+                            <xs:element name="licenseNames" maxOccurs="1" minOccurs="0" type="xs:string" />
                             <xs:element name="projectUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
+                            <xs:element name="repositoryUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
+                            <xs:element name="repositoryType" maxOccurs="1" minOccurs="0" type="xs:string" />
                             <xs:element name="iconUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
                             <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="developmentDependency" maxOccurs="1" minOccurs="0" type="xs:boolean" />
@@ -82,6 +85,18 @@
                                             <xs:element name="reference" type="reference" />
                                             <xs:element name="group" type="referenceGroup" />
                                         </xs:choice>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="properties" maxOccurs="1" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:attribute name="name" type="xs:string" use="required" />
+                                                <xs:attribute name="value" type="xs:string" use="optional" />
+                                            </xs:complexType>
+                                        </xs:element>
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>

@@ -82,9 +82,24 @@ namespace NuGet.VisualStudio
             get { return _basePackage.LicenseUrl; }
         }
 
+        public string LicenseNames
+        {
+            get { return _basePackage.LicenseNames; }
+        }
+
         public Uri ProjectUrl
         {
             get { return _basePackage.ProjectUrl; }
+        }
+
+        public Uri RepositoryUrl
+        {
+            get { return _basePackage.RepositoryUrl; }
+        }
+
+        public string RepositoryType
+        {
+            get { return _basePackage.RepositoryType; }
         }
 
         public bool RequireLicenseAcceptance
@@ -125,6 +140,11 @@ namespace NuGet.VisualStudio
         public string Copyright
         {
             get { return _basePackage.Copyright; }
+        }
+
+        public IEnumerable<PackageProperty> Properties
+        {
+            get { return _basePackage.Properties; }
         }
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies

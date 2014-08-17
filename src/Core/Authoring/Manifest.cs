@@ -143,7 +143,10 @@ namespace NuGet
                     Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
                     Tags = String.IsNullOrEmpty(metadata.Tags) ? null : metadata.Tags.SafeTrim(),
                     LicenseUrl = ConvertUrlToStringSafe(metadata.LicenseUrl),
+                    LicenseNames = metadata.LicenseNames.SafeTrim(),
                     ProjectUrl = ConvertUrlToStringSafe(metadata.ProjectUrl),
+                    RepositoryUrl = ConvertUrlToStringSafe(metadata.RepositoryUrl),
+                    RepositoryType = metadata.RepositoryType.SafeTrim(),
                     IconUrl = ConvertUrlToStringSafe(metadata.IconUrl),
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     DevelopmentDependency = metadata.DevelopmentDependency,
@@ -155,6 +158,7 @@ namespace NuGet
                     DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
                     ReferenceSets = CreateReferenceSets(metadata),
+                    Properties = CreateProperties(metadata),
                     MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
                 },
             };
@@ -236,6 +240,20 @@ namespace NuGet
                     {
                         AssemblyName = reference.AssemblyName,
                         TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
+                    }).ToList();
+        }
+
+        private static List<ManifestProperty> CreateProperties(IPackageMetadata metadata)
+        {
+            if (metadata.Properties.IsEmpty())
+            {
+                return null;
+            }
+            return (from property in metadata.Properties
+                    select new ManifestProperty
+                    {
+                        Name = property.Name,
+                        Value = property.Value
                     }).ToList();
         }
 

@@ -33,6 +33,7 @@ namespace NuGet
         private static ManifestMetadata ReadMetadata(XElement xElement)
         {
             var manifestMetadata = new ManifestMetadata();
+            manifestMetadata.Properties = new List<ManifestProperty>();
             manifestMetadata.DependencySets = new List<ManifestDependencySet>();
             manifestMetadata.ReferenceSets = new List<ManifestReferenceSet>();
             manifestMetadata.MinClientVersionString = xElement.GetOptionalAttributeValue("minClientVersion");
@@ -92,8 +93,17 @@ namespace NuGet
                 case "licenseUrl":
                     manifestMetadata.LicenseUrl = value;
                     break;
+                case "licenseName":
+                    manifestMetadata.LicenseNames = value;
+                    break;
                 case "projectUrl":
                     manifestMetadata.ProjectUrl = value;
+                    break;
+                case "repositoryUrl":
+                    manifestMetadata.RepositoryUrl = value;
+                    break;
+                case "repositoryType":
+                    manifestMetadata.RepositoryType = value;
                     break;
                 case "iconUrl":
                     manifestMetadata.IconUrl = value;
@@ -125,6 +135,9 @@ namespace NuGet
                 case "tags":
                     manifestMetadata.Tags = value;
                     break;
+                case "properties":
+                    manifestMetadata.Properties = ReadProperties(element);
+                    break;
                 case "dependencies":
                     manifestMetadata.DependencySets = ReadDependencySets(element);
                     break;
@@ -135,6 +148,21 @@ namespace NuGet
                     manifestMetadata.ReferenceSets = ReadReferenceSets(element);
                     break;
             }
+        }
+
+        private static List<ManifestProperty> ReadProperties(XElement propertiesElement)
+        {
+            if (!propertiesElement.HasElements)
+            {
+                return new List<ManifestProperty>(0);
+            }
+
+            return (from element in propertiesElement.ElementsNoNamespace("property")
+                    let nameAttribute = element.Attribute("name")
+                    let valueAttribute = element.Attribute("value")
+                    where nameAttribute != null && !String.IsNullOrEmpty(nameAttribute.Value)
+                    select new ManifestProperty { Name = nameAttribute.Value.SafeTrim(), Value = valueAttribute != null ? valueAttribute.Value.SafeTrim() : null }
+                 ).ToList();
         }
 
         private static List<ManifestReferenceSet> ReadReferenceSets(XElement referencesElement)

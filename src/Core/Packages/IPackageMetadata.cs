@@ -35,6 +35,36 @@ namespace NuGet
         /// </summary>
         IEnumerable<PackageDependencySet> DependencySets { get; }
 
+        /// <summary>
+        /// The minimum NuGet client version required to consume this package
+        /// </summary>
         Version MinClientVersion { get; }
+
+        /// <summary>
+        /// The source code repository URL for the package. Meant for tooling.
+        /// </summary>
+        Uri RepositoryUrl { get; }
+
+        /// <summary>
+        /// The source code repository type (such as 'git') for the package. Meant for tooling.
+        /// </summary>
+        string RepositoryType { get; }
+
+        /// <summary>
+        /// The author-specified friendly license names.
+        /// </summary>
+        string LicenseNames { get; }
+
+        /// <summary>
+        /// Arbitrary properties for the package. Future NuGet client versions may begin to
+        /// understand specific properties within this list, but custom properties can flow
+        /// through as well.
+        /// </summary>
+        /// <remarks>
+        /// Future NuGet clients will only understand properties within
+        /// this list if the package specifies a MinClientVersion for the version that adds
+        /// understanding of the property.
+        /// </remarks>
+        IEnumerable<PackageProperty> Properties { get; }
     }
 }

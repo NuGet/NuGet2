@@ -50,6 +50,7 @@ namespace NuGet
         private PackageBuilder(bool includeEmptyDirectories)
         {
             _includeEmptyDirectories = includeEmptyDirectories;
+            Properties = new Collection<PackageProperty>();
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
@@ -101,7 +102,25 @@ namespace NuGet
             set;
         }
 
+        public string LicenseNames
+        {
+            get;
+            set;
+        }
+
         public Uri ProjectUrl
+        {
+            get;
+            set;
+        }
+
+        public Uri RepositoryUrl
+        {
+            get;
+            set;
+        }
+
+        public string RepositoryType
         {
             get;
             set;
@@ -155,6 +174,12 @@ namespace NuGet
             set;
         }
 
+        public Collection<PackageProperty> Properties
+        {
+            get;
+            private set;
+        }
+
         public Collection<PackageDependencySet> DependencySets
         {
             get;
@@ -200,6 +225,14 @@ namespace NuGet
             get
             {
                 return String.Join(" ", Tags);
+            }
+        }
+
+        IEnumerable<PackageProperty> IPackageMetadata.Properties
+        {
+            get
+            {
+                return Properties;
             }
         }
 
@@ -403,7 +436,10 @@ namespace NuGet
             Owners.AddRange(metadata.Owners);
             IconUrl = metadata.IconUrl;
             LicenseUrl = metadata.LicenseUrl;
+            LicenseNames = metadata.LicenseNames;
             ProjectUrl = metadata.ProjectUrl;
+            RepositoryUrl = metadata.RepositoryUrl;
+            RepositoryType = metadata.RepositoryType;
             RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
             DevelopmentDependency = metadata.DevelopmentDependency;
             Description = metadata.Description;
@@ -418,6 +454,7 @@ namespace NuGet
                 Tags.AddRange(ParseTags(metadata.Tags));
             }
 
+            Properties.AddRange(metadata.Properties);
             DependencySets.AddRange(metadata.DependencySets);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
 

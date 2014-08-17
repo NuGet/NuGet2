@@ -72,6 +72,18 @@ namespace NuGet
             set;
         }
 
+        public Uri RepositoryUrl
+        {
+            get;
+            set;
+        }
+
+        public string RepositoryType
+        {
+            get;
+            set;
+        }
+
         public Uri ReportAbuseUrl
         {
             get;
@@ -238,6 +250,12 @@ namespace NuGet
             {
                 return Listed;
             }
+        }
+
+        public IEnumerable<PackageProperty> Properties
+        {
+            get;
+            set;
         }
 
         IEnumerable<string> IPackageMetadata.Authors

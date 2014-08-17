@@ -71,9 +71,19 @@ namespace NuGet
         [XmlElement("licenseUrl")]
         public string LicenseUrl { get; set; }
 
+        [XmlElement("licenseNames")]
+        public string LicenseNames { get; set; }
+
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Xml deserialziation can't handle uris")]
         [XmlElement("projectUrl")]
         public string ProjectUrl { get; set; }
+
+        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Xml deserialziation can't handle uris")]
+        [XmlElement("repositoryUrl")]
+        public string RepositoryUrl { get; set; }
+
+        [XmlElement("repositoryType")]
+        public string RepositoryType { get; set; }
 
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Xml deserialziation can't handle uris")]
         [XmlElement("iconUrl")]
@@ -192,6 +202,12 @@ namespace NuGet
         [XmlIgnore]
         public List<ManifestReferenceSet> ReferenceSets { get; set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("properties")]
+        [XmlArrayItem("property")]
+        public List<ManifestProperty> Properties { get; set; }
+
         SemanticVersion IPackageName.Version
         {
             get
@@ -237,6 +253,18 @@ namespace NuGet
                     return null;
                 }
                 return new Uri(ProjectUrl);
+            }
+        }
+
+        Uri IPackageMetadata.RepositoryUrl
+        {
+            get
+            {
+                if (RepositoryUrl == null)
+                {
+                    return null;
+                }
+                return new Uri(RepositoryUrl);
             }
         }
 
@@ -330,6 +358,20 @@ namespace NuGet
 
                 return from frameworkReference in FrameworkAssemblies
                        select new FrameworkAssemblyReference(frameworkReference.AssemblyName, ParseFrameworkNames(frameworkReference.TargetFramework));
+            }
+        }
+
+        IEnumerable<PackageProperty> IPackageMetadata.Properties
+        {
+            get
+            {
+                if (Properties == null)
+                {
+                    return Enumerable.Empty<PackageProperty>();
+                }
+
+                return from property in Properties
+                       select new PackageProperty(property.Name, property.Value);
             }
         }
 

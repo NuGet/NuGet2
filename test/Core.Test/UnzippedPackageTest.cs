@@ -56,6 +56,7 @@ namespace NuGet.Test
             Assert.Equal(1, package.Owners.Count());
             Assert.Equal("Outercurve", package.Owners.ElementAt(0));
             Assert.Equal("http://www.nuget.com/license", package.LicenseUrl.ToString());
+            Assert.Equal("Apache 2", package.LicenseNames);
             Assert.Equal("http://www.nuget.com/", package.ProjectUrl.ToString());
             Assert.Equal("http://www.outercurve.com/", package.IconUrl.ToString());
             Assert.Equal(1, package.DependencySets.Count());

@@ -227,10 +227,12 @@ namespace NuGet.Test
 
             // Arrange
             var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: "Outercurve",
-                licenseUrl: "http://nuget.org/license", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
+                licenseUrl: "http://nuget.org/license", licenseNames: "Apache 2", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
+                repositoryType: "git", repositoryUrl: "http://github.com/nuget/nugetgallery.git",
                 requiresLicenseAcceptance: true, developmentDependency: true, description: "This is not a description",
                 summary: "This is a summary", releaseNotes: "Release notes",
                 copyright: "Copyright 2012", language: "fr-FR", tags: "Test Unit",
+                properties: new[] { new ManifestProperty { Name = "customProperty", Value = "customPropertyValue" } },
                 dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
                 assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
                 references: references,
@@ -246,7 +248,10 @@ namespace NuGet.Test
                     Description = "This is not a description",
                     Authors = "Outercurve",
                     LicenseUrl = "http://nuget.org/license",
+                    LicenseNames = "Apache 2",
                     ProjectUrl = "http://nuget.org/project",
+                    RepositoryUrl = "http://github.com/nuget/nugetgallery.git",
+                    RepositoryType = "git",
                     IconUrl = "https://nuget.org/icon",
                     RequireLicenseAcceptance = true,
                     DevelopmentDependency = true,
@@ -255,6 +260,9 @@ namespace NuGet.Test
                     Copyright = "Copyright 2012",
                     Language = "fr-FR",
                     Tags = "Test Unit",
+                    Properties = new List<ManifestProperty> {
+                        new ManifestProperty { Name = "customProperty", Value = "customPropertyValye" }
+                    },
                     DependencySets = new List<ManifestDependencySet> {
                             new ManifestDependencySet {
                                 TargetFramework = null,
@@ -606,8 +614,11 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.IconUrl, actual.Metadata.IconUrl);
             Assert.Equal(expected.Metadata.Language, actual.Metadata.Language);
             Assert.Equal(expected.Metadata.LicenseUrl, actual.Metadata.LicenseUrl);
+            Assert.Equal(expected.Metadata.LicenseNames, actual.Metadata.LicenseNames);
             Assert.Equal(expected.Metadata.Owners, actual.Metadata.Owners);
             Assert.Equal(expected.Metadata.ProjectUrl, actual.Metadata.ProjectUrl);
+            Assert.Equal(expected.Metadata.RepositoryUrl, actual.Metadata.RepositoryUrl);
+            Assert.Equal(expected.Metadata.RepositoryType, actual.Metadata.RepositoryType);
             Assert.Equal(expected.Metadata.ReleaseNotes, actual.Metadata.ReleaseNotes);
             Assert.Equal(expected.Metadata.RequireLicenseAcceptance, actual.Metadata.RequireLicenseAcceptance);
             Assert.Equal(expected.Metadata.DevelopmentDependency, actual.Metadata.DevelopmentDependency);
@@ -615,6 +626,13 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
             Assert.Equal(expected.Metadata.MinClientVersion, actual.Metadata.MinClientVersion);
 
+            if (expected.Metadata.Properties != null)
+            {
+                for (int i = 0; i < expected.Metadata.Properties.Count; i++)
+                {
+                    AssertProperty(expected.Metadata.Properties[i], actual.Metadata.Properties[i]);
+                }
+            }
             if (expected.Metadata.DependencySets != null)
             {
                 for (int i = 0; i < expected.Metadata.DependencySets.Count; i++)
@@ -650,6 +668,12 @@ namespace NuGet.Test
             Assert.Equal(expected.Source, actual.Source);
             Assert.Equal(expected.Target, actual.Target);
             Assert.Equal(expected.Exclude, actual.Exclude);
+        }
+
+        private static void AssertProperty(ManifestProperty expected, ManifestProperty actual)
+        {
+            Assert.Equal(expected.Name, actual.Name);
+            Assert.Equal(expected.Value, actual.Value);
         }
 
         private static void AssertDependencySet(ManifestDependencySet expected, ManifestDependencySet actual)
@@ -695,7 +719,10 @@ namespace NuGet.Test
                                             string authors = "NuGet Test",
                                             string owners = null,
                                             string licenseUrl = null,
+                                            string licenseNames = null,
                                             string projectUrl = null,
+                                            string repositoryUrl = null,
+                                            string repositoryType = null,
                                             string iconUrl = null,
                                             bool? requiresLicenseAcceptance = null,
                                             bool? developmentDependency = null,
@@ -705,6 +732,7 @@ namespace NuGet.Test
                                             string copyright = null,
                                             string language = null,
                                             string tags = null,
+                                            IEnumerable<ManifestProperty> properties = null,
                                             IEnumerable<ManifestDependency> dependencies = null,
                                             IEnumerable<ManifestFrameworkAssembly> assemblyReference = null,
                                             IEnumerable<ManifestReferenceSet> references = null,
@@ -734,9 +762,21 @@ namespace NuGet.Test
             {
                 metadata.Add(new XElement("licenseUrl", licenseUrl));
             }
+            if (licenseNames != null)
+            {
+                metadata.Add(new XElement("licenseNames", licenseNames));
+            }
             if (projectUrl != null)
             {
                 metadata.Add(new XElement("projectUrl", projectUrl));
+            }
+            if (repositoryUrl != null)
+            {
+                metadata.Add(new XElement("repositoryUrl", repositoryUrl));
+            }
+            if (repositoryType != null)
+            {
+                metadata.Add(new XElement("repositoryType", repositoryType));
             }
             if (iconUrl != null)
             {
@@ -769,6 +809,11 @@ namespace NuGet.Test
             if (tags != null)
             {
                 metadata.Add(new XElement("tags", tags));
+            }
+            if (properties != null)
+            {
+                metadata.Add(new XElement("properties",
+                    properties.Select(p => new XElement("property", new XAttribute("name", p.Name), new XAttribute("value", p.Value)))));
             }
             if (dependencies != null)
             {

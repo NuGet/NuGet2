@@ -718,6 +718,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Property name is required..
+        /// </summary>
+        public static string Manifest_PropertyNameRequired {
+            get {
+                return ResourceManager.GetString("Manifest_PropertyNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
         /// </summary>
         public static string Manifest_ReferencesHasMixedElements {
@@ -980,7 +989,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Using credentials from config. UserName: {0}.
+        ///   Looks up a localized string similar to Using credentials from config or environment. UserName: {0}.
         /// </summary>
         public static string SettingsCredentials_UsingSavedCredentials {
             get {

@@ -81,6 +81,46 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void V7MetadataIsRecognized()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Description",
+                LicenseNames = "Apache 2",
+                RepositoryUrl = new Uri("http://github.com/nuget/nugetgallery.git"),
+                RepositoryType = "git"
+            };
+            builder.Authors.Add("JohnDoe");
+            builder.Properties.Add(new PackageProperty("propertyName", "propertyValue"));
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>JohnDoe</authors>
+    <owners>JohnDoe</owners>
+    <licenseNames>Apache 2</licenseNames>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <repositoryUrl>http://github.com/nuget/nugetgallery.git</repositoryUrl>
+    <repositoryType>git</repositoryType>
+    <description>Description</description>
+    <properties>
+        <property name=""propertyName"" value=""propertyValue"" />
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+        [Fact]
         public void CreatePackageUsesV1SchemaNamespaceIfFrameworkAssembliesAreUsed()
         {
             // Arrange
@@ -757,13 +797,16 @@ namespace NuGet.Test
                 Description = "Descriptions                                         ",
                 Summary = "                            Summary",
                 Language = "     en-us   ",
-                Copyright = "            Copyright 2012                "
+                Copyright = "            Copyright 2012                ",
+                LicenseNames = " Apache 2   ",
+                RepositoryType = " git  "
             };
             builder.Authors.Add("JohnDoe");
             builder.Owners.Add("John");
             builder.Tags.Add("t1");
             builder.Tags.Add("t2");
             builder.Tags.Add("t3");
+            builder.Properties.Add(new PackageProperty(" propertyName  ", " propertyValue  "));
             var dependencies = new PackageDependency[] { 
                 new PackageDependency("    X     ")
             };
@@ -782,12 +825,16 @@ namespace NuGet.Test
     <version>1.0</version>
     <authors>JohnDoe</authors>
     <owners>John</owners>
+    <licenseNames>Apache 2</licenseNames>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <repositoryType>git</repositoryType>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <copyright>Copyright 2012</copyright>
     <language>en-us</language>
     <tags>t1 t2 t3</tags>
+    <properties>
+        <property name=""propertyName"" value=""propertyValue"" />    
     <dependencies>
       <dependency id=""X"" />
     </dependencies>

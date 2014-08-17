@@ -481,4 +481,7 @@
   <data name="PortableProfileTableMustBeSpecified" xml:space="preserve">
     <value>A Portable Profile Table must be specified when resolving the short name of a portable profile.</value>
   </data>
+  <data name="Manifest_PropertyNameRequired" xml:space="preserve">
+    <value>Property name is required.</value>
+  </data>
 </root>

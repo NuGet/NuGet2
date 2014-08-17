@@ -59,7 +59,25 @@ namespace NuGet
             set;
         }
 
+        public string LicenseNames
+        {
+            get;
+            set;
+        }
+
         public Uri ProjectUrl
+        {
+            get;
+            set;
+        }
+
+        public Uri RepositoryUrl
+        {
+            get;
+            set;
+        }
+
+        public string RepositoryType
         {
             get;
             set;
@@ -163,6 +181,12 @@ namespace NuGet
             set;
         }
 
+        public IEnumerable<PackageProperty> Properties
+        {
+            get;
+            set;
+        }
+
         public IEnumerable<PackageDependencySet> DependencySets
         {
             get;
@@ -225,7 +249,10 @@ namespace NuGet
             Owners = metadata.Owners;
             IconUrl = metadata.IconUrl;
             LicenseUrl = metadata.LicenseUrl;
+            LicenseNames = metadata.LicenseNames;
             ProjectUrl = metadata.ProjectUrl;
+            RepositoryUrl = metadata.RepositoryUrl;
+            RepositoryType = metadata.RepositoryType;
             RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
             DevelopmentDependency = metadata.DevelopmentDependency;
             Description = metadata.Description;
@@ -237,6 +264,7 @@ namespace NuGet
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
             PackageAssemblyReferences = metadata.PackageAssemblyReferences;
+            Properties = metadata.Properties;
             MinClientVersion = metadata.MinClientVersion;
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably

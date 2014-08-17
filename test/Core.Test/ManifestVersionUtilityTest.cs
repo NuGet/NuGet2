@@ -9,7 +9,7 @@ namespace NuGet.Test
         public void GetManifestVersionReturns1IfNoNewPropertiesAreSet()
         {
             // Arrange
-            var metadata =    new ManifestMetadata
+            var metadata = new ManifestMetadata
             {
                 Id = "Foo",
                 Version = "1.0",
@@ -178,6 +178,78 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(3, version);
+        }
+
+        [Fact]
+        public void GetManifestVersionReturnsV7IfUsingLicenseName()
+        {
+            // Arrange
+            var metadata = new ManifestMetadata
+            {
+                Id = "Foo",
+                Version = "1.0.0",
+                LicenseNames = "Apache 2"
+            };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(metadata);
+
+            // Assert
+            Assert.Equal(7, version);
+        }
+
+        [Fact]
+        public void GetManifestVersionReturnsV7IfUsingRepositoryUrl()
+        {
+            // Arrange
+            var metadata = new ManifestMetadata
+            {
+                Id = "NuGetGallery",
+                Version = "1.0.0",
+                RepositoryUrl = "http://github.com/nuget/nugetgallery.git"
+            };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(metadata);
+
+            // Assert
+            Assert.Equal(7, version);
+        }
+
+        [Fact]
+        public void GetManifestVersionReturnsV7IfUsingRepositoryType()
+        {
+            // Arrange
+            var metadata = new ManifestMetadata
+            {
+                Id = "NuGetGallery",
+                Version = "1.0.0",
+                RepositoryType = "git"
+            };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(metadata);
+
+            // Assert
+            Assert.Equal(7, version);
+        }
+
+        [Fact]
+        public void GetManifestVersionReturnsV7IfUsingProperties()
+        {
+            // Arrange
+            var metadata = new ManifestMetadata
+            {
+                Id = "NuGet.Core",
+                Version = "1.0.0",
+                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "propertyName" } }
+            };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(metadata);
+
+            // Assert
+            Assert.Equal(7, version);
         }
     }
 }

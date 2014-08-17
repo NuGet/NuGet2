@@ -14,6 +14,7 @@ namespace NuGet
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
         public const int XdtTransformationVersion = 6;
+        public const int RepositoryLicenseNamesAndPropertiesVersion = 7;
 
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
@@ -24,6 +25,17 @@ namespace NuGet
 
         private static int GetMaxVersionFromMetadata(ManifestMetadata metadata)
         {
+            bool hasV7Metadata =
+                metadata.RepositoryUrl != null ||
+                metadata.RepositoryType != null ||
+                metadata.LicenseNames != null ||
+                metadata.Properties.Any();
+
+            if (hasV7Metadata)
+            {
+                return RepositoryLicenseNamesAndPropertiesVersion;
+            }
+
             // Important: check for version 5 before version 4
             bool referencesHasTargetFramework =
               metadata.ReferenceSets != null &&

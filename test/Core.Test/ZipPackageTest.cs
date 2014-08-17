@@ -36,6 +36,7 @@ namespace NuGet.Test
             builder.Description = "This is a test package";
             builder.ReleaseNotes = "This is a release note.";
             builder.Copyright = "Copyright";
+            builder.RepositoryType = "git";
             builder.Files.AddRange(PackageUtility.CreateFiles(new[] { PathFixUtility.FixPath(@"lib\40\A.dll"), PathFixUtility.FixPath(@"content\foo") }));
 
             var ms = new MemoryStream();
@@ -50,6 +51,7 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), package.Version);
             Assert.Equal("David", package.Authors.First());
             Assert.Equal("Copyright", package.Copyright);
+            Assert.Equal("RepositoryType", package.RepositoryType);
 
             //Order is not gauranteed (or required) from GetFiles(), 
             //but we rely on the order for a few of the asserts, 

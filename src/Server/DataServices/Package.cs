@@ -36,6 +36,12 @@ namespace NuGet.Server.DataServices
             {
                 ProjectUrl = package.ProjectUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
+            if (package.RepositoryType != null)
+            {
+                RepositoryUrl = package.RepositoryUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            }
+            LicenseNames = package.LicenseNames;
+            RepositoryType = package.RepositoryType;
             RequireLicenseAcceptance = package.RequireLicenseAcceptance;
             DevelopmentDependency = package.DevelopmentDependency;
             Description = package.Description;
@@ -118,7 +124,25 @@ namespace NuGet.Server.DataServices
             set;
         }
 
+        public string LicenseNames
+        {
+            get;
+            set;
+        }
+
         public string ProjectUrl
+        {
+            get;
+            set;
+        }
+
+        public string RepositoryUrl
+        {
+            get;
+            set;
+        }
+
+        public string RepositoryType
         {
             get;
             set;

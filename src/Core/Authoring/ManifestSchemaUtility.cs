@@ -17,7 +17,7 @@ namespace NuGet
         internal const string SchemaVersionV1 = "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd";
 
         /// <summary>
-        /// Added copyrights, references and release notes
+        /// Added 'copyright', 'references' and 'releaseNotes'
         /// </summary>
         internal const string SchemaVersionV2 = "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd";
 
@@ -43,13 +43,19 @@ namespace NuGet
         /// </summary>
         internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
+        /// <summary>
+        /// Added 'licenseNames', 'repositoryUrl', 'repositoryType', and 'properties'
+        /// </summary>
+        internal const string SchemaVersionV7 = "http://schemas.microsoft.com/packaging/2014/08/nuspec.xsd";
+
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
             SchemaVersionV2,
             SchemaVersionV3,
             SchemaVersionV4,
             SchemaVersionV5,
-            SchemaVersionV6
+            SchemaVersionV6,
+            SchemaVersionV7
         };
 
         private static ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
