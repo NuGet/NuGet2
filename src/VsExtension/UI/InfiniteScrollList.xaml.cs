@@ -88,6 +88,12 @@ namespace NuGet.Tools
                     _loadingStatusIndicator.Status = LoadingStatus.Ready;
                 }
                 _items.Add(_loadingStatusIndicator);
+
+                // select the first item if none was selected before
+                if (_list.SelectedIndex == -1 && _items.Count > 1)
+                {
+                    _list.SelectedIndex = 0;
+                }
             }
             catch (OperationCanceledException)
             {
