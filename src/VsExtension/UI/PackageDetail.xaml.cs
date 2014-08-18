@@ -1,20 +1,14 @@
-﻿using NuGet.Dialog.PackageManagerUI;
-using NuGet.Resolver;
-using NuGet.VisualStudio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using NuGet.Dialog.PackageManagerUI;
+using NuGet.Resolver;
+using NuGet.VisualStudio;
 
 namespace NuGet.Tools
 {
@@ -92,103 +86,12 @@ namespace NuGet.Tools
             _fileConflictAction.SelectedItem = FileConflictResolution.Overwrite;
         }
 
-        void PackageDetail_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void PackageDetail_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            this.Visibility = DataContext is PackageDetailControlModel  ? 
+            this.Visibility = DataContext is PackageDetailControlModel ?
                 System.Windows.Visibility.Visible :
                 System.Windows.Visibility.Collapsed;
-        }        
-
-        /*
-        private void UpdatePackageDetail()
-        {
-            _dependencies.Items.Clear();
-            if (_package == null)
-            {
-                _id.Text = "";
-                _description.Text = "";
-
-                _dropdownButton.IsEnabled = false;                
-            }
-            else
-            {
-                _id.Text = _package.Id;
-                _description.Text = _package.Description;
-
-                
-
-                // metadata
-                SetMetadata(Metadatas.Authors, String.Join(", ", _package.Authors));
-                SetMetadata(Metadatas.Owners, String.Join(", ", _package.Owners));
-                SetMetadata(Metadatas.License, _package.LicenseUrl, "View License");
-                SetMetadata(Metadatas.Donwloads, _package.DownloadCount.ToString());
-                SetMetadata(Metadatas.DatePublished, 
-                    _package.Published.HasValue ? _package.Published.Value.ToString("d"): "");
-                SetMetadata(Metadatas.ProjectInformation, _package.ProjectUrl, "Project Information");
-                SetMetadata(Metadatas.Tags, _package.Tags);
-
-                // dependencies
-                foreach (var dependencySet in _package.DependencySets)
-                {
-                    if (dependencySet.TargetFramework != null)
-                    {
-                        _dependencies.Items.Add(new TextBlock()
-                        {
-                            Text = dependencySet.TargetFramework.ToString(),
-                            FontWeight = FontWeights.DemiBold,
-                            Margin = new Thickness(10, 0, 0, 0)
-                        });
-                    }
-
-                    foreach (var d in dependencySet.Dependencies)
-                    {
-                        _dependencies.Items.Add(new TextBlock()
-                        {
-                            Text = d.ToString(),
-                            TextWrapping = System.Windows.TextWrapping.Wrap,
-                            Margin = new Thickness(20, 0, 0, 0)
-                        });
-                    }
-                }
-            }
         }
-
-        private void SetMetadata(Metadatas metadatas, Uri uri, string text)
-        {
-            var textBlock = _metadataControls[metadatas];
-            textBlock.Inlines.Clear();
-
-            if (uri != null)
-            {
-                var hyperLink = new Hyperlink(new Run(text))
-                {
-                    NavigateUri = uri
-                };
-                hyperLink.Click += hyperLink_Click;
-
-                textBlock.Inlines.Add(hyperLink);
-                textBlock.ToolTip = uri.ToString();
-            }
-        }
-
-        void hyperLink_Click(object sender, RoutedEventArgs e)
-        {
-            Hyperlink hyperLink = sender as Hyperlink;
-            if (hyperLink == null)
-            {
-                return;
-            }
-
-            UriHelper.OpenExternalLink(hyperLink.NavigateUri);
-        }
-
-        private void SetMetadata(Metadatas metadatas, string text)
-        {
-            _metadataControls[metadatas].Text = text;
-        }
-
-
-        } */
 
         private void Versions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -198,21 +101,9 @@ namespace NuGet.Tools
                 return;
             }
 
-            model.SelectVersion((SemanticVersion)_versions.SelectedItem);
-            bool isInstalled = Control.Model.LocalRepo.Exists(model.Package.Id, model.Package.Version);
-            if (isInstalled)
-            {
-                _dropdownButton.SetItems(
-                    new[] { "Uninstall", "Uninstall Preview" });
-            }
-            else
-            {
-                _dropdownButton.SetItems(
-                    new[] { "Install", "Install Preview" });
-            }
-
-            _dropdownButton.IsEnabled = true;
-
+            var v = (VersionForDisplay)_versions.SelectedItem;            
+            model.SelectVersion(v == null ? null : v.Version);
+            UpdateInstallUninstallButton();
         }
 
         private async void Preview(PackageAction action)
@@ -231,7 +122,7 @@ namespace NuGet.Tools
         {
             var d = (DependencyBehavior)_dependencyBehavior.SelectedItem;
             var resolver = new ActionResolver()
-            {   
+            {
                 IgnoreDependencies = !d.DependencyVersion.HasValue,
                 AllowPrereleaseVersions = false
             };
@@ -245,7 +136,7 @@ namespace NuGet.Tools
 
             var actions = await Task.Factory.StartNew(
                 () =>
-                {   
+                {
                     resolver.AddOperation(action, package, projectManager);
                     return resolver.ResolveActions();
                 });
@@ -312,7 +203,44 @@ namespace NuGet.Tools
             executor.Execute(actions);
 
             Control.UpdatePackageStatus();
+            UpdatePackageStatus();
         }
+
+        private void UpdateInstallUninstallButton()
+        {
+            var model = (PackageDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            bool isInstalled = Control.Model.LocalRepo.Exists(model.Package.Id, model.Package.Version);
+            if (isInstalled)
+            {
+                _dropdownButton.SetItems(
+                    new[] { "Uninstall", "Uninstall Preview" });
+            }
+            else
+            {
+                _dropdownButton.SetItems(
+                    new[] { "Install", "Install Preview" });
+            }
+        }
+
+        private void UpdatePackageStatus()
+        {
+            var model = (PackageDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            UpdateInstallUninstallButton();
+            var installedPackage = Control.Model.LocalRepo.FindPackage(model.Package.Id);
+            var installedVersion = installedPackage != null ? installedPackage.Version : null;
+            model.CreateVersions(installedVersion);
+        }
+
         protected bool ShowLicenseAgreement(IEnumerable<Resolver.PackageAction> operations)
         {
             var licensePackages = operations.Where(
@@ -335,6 +263,16 @@ namespace NuGet.Tools
             return true;
         }
 
+        private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
+        {
+            Hyperlink hyperlink = e.OriginalSource as Hyperlink;
+            if (hyperlink != null && hyperlink.NavigateUri != null)
+            {
+                UriHelper.OpenExternalLink(hyperlink.NavigateUri);
+                e.Handled = true;
+            }
+        }
+
         private void _dropdownButton_Clicked(object sender, DropdownButtonClickEventArgs e)
         {
             switch (e.ButtonText)
@@ -342,12 +280,15 @@ namespace NuGet.Tools
                 case "Install":
                     PerformPackageAction(PackageAction.Install);
                     break;
+
                 case "Install Preview":
                     Preview(PackageAction.Install);
                     break;
+
                 case "Uninstall":
                     PerformPackageAction(PackageAction.Uninstall);
                     break;
+
                 case "Uninstall Preview":
                     Preview(PackageAction.Uninstall);
                     break;

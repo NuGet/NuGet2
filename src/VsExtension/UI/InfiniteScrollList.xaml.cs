@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,7 +17,7 @@ namespace NuGet.Tools
     public partial class InfiniteScrollList : UserControl
     {
         private ObservableCollection<object> _items;
-        private Loading _loading;
+        private LoadingStatusIndicator _loadingStatusIndicator;
         private ScrollViewer _scrollViewer;
 
         public event SelectionChangedEventHandler SelectionChanged;
@@ -26,7 +27,7 @@ namespace NuGet.Tools
         public InfiniteScrollList()
         {
             InitializeComponent();
-            _loading = new Loading();
+            _loadingStatusIndicator = new LoadingStatusIndicator();
 
             _items = new ObservableCollection<object>();
             _list.ItemsSource = _items;
@@ -49,7 +50,7 @@ namespace NuGet.Tools
             {
                 _loader = value;
                 _items.Clear();
-                _items.Add(_loading);
+                _items.Add(_loadingStatusIndicator);
                 Load();
             }
         }
@@ -65,10 +66,13 @@ namespace NuGet.Tools
             var newCts = new CancellationTokenSource();
             _cts = newCts;
 
-            _loading.Status = LoadingStatus.Loading;
+            _loadingStatusIndicator.Status = LoadingStatus.Loading;
             try
             {
-                var r = await Loader.LoadItems(_items.Count, _cts.Token);
+                // Note that the last item is _loadingStatusIndicator. So the start index of the
+                // items to load is _items.Count - 1.
+                var r = await Loader.LoadItems(_items.Count - 1, _cts.Token);
+
                 _items.RemoveAt(_items.Count - 1);
                 foreach (var obj in r.Items)
                 {
@@ -77,16 +81,24 @@ namespace NuGet.Tools
 
                 if (!r.HasMoreItems)
                 {
-                    _loading.Status = LoadingStatus.NoMoreItems;
+                    _loadingStatusIndicator.Status = LoadingStatus.NoMoreItems;
                 }
                 else
                 {
-                    _loading.Status = LoadingStatus.Ready;
+                    _loadingStatusIndicator.Status = LoadingStatus.Ready;
                 }
-                _items.Add(_loading);
+                _items.Add(_loadingStatusIndicator);
             }
             catch (OperationCanceledException)
             {
+            }
+            catch (Exception ex)
+            {
+                var message = String.Format(
+                    CultureInfo.CurrentCulture,
+                    "Error: {0}\nDetails: {1}",
+                    ex.Message, ex.ToString());
+                MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             // When the process is complete, signal that another process can proceed.
@@ -106,7 +118,7 @@ namespace NuGet.Tools
 
         private void _list_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count > 0 && e.AddedItems[0] is Loading)
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is LoadingStatusIndicator)
             {
                 // make the loading object not selectable
                 if (e.RemovedItems.Count > 0)
@@ -136,8 +148,8 @@ namespace NuGet.Tools
 
         private void _scrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_loading.Status == LoadingStatus.Loading ||
-                _loading.Status == LoadingStatus.NoMoreItems)
+            if (_loadingStatusIndicator.Status == LoadingStatus.Loading ||
+                _loadingStatusIndicator.Status == LoadingStatus.NoMoreItems)
             {
                 return;
             }
@@ -171,7 +183,7 @@ namespace NuGet.Tools
         NoMoreItems
     }
 
-    internal class Loading : INotifyPropertyChanged
+    internal class LoadingStatusIndicator : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

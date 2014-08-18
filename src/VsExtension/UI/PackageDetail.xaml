@@ -7,10 +7,18 @@
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="300">
     <UserControl.Resources>
-        <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="packageicon.png" />
-        <Tools:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Tools:VersionToVersionForDisplayConverter x:Key="VersionToVersionForDisplayConverter" />
+        </ResourceDictionary>        
     </UserControl.Resources>
+    <UserControl.CommandBindings>
+        <CommandBinding 
+            Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}"
+            Executed="ExecuteOpenLicenseLink" />
+    </UserControl.CommandBindings>
     <Grid x:Name="_grid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,7 +32,9 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Image  Source="{Binding Path=Package.IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" x:Name="_icon" Width="32" Height="32" />
+            <Image  Source="{Binding Path=Package.IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" 
+                    x:Name="_icon"
+                    Style="{StaticResource PackageIconStyle}" />
             <TextBlock Margin="4, 0, 0, 0" Text="{Binding Path=Package.Id}" TextWrapping="Wrap" FontSize="20" ></TextBlock>
         </StackPanel>
         <Line Stroke="Black" StrokeThickness="1" Stretch="Fill" X2="1" Grid.Row="1" />
@@ -39,8 +49,25 @@
             <ComboBox Margin="4" x:Name="_versions"
                       Grid.Column="1"
                       ItemsSource="{Binding Path=Versions}"
-                      SelectedItem="{Binding Path=Package.Version,Mode=OneWay}"
-                      SelectionChanged="Versions_SelectionChanged" />
+                      SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
+                      SelectionChanged="Versions_SelectionChanged">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                        <Style.Triggers>
+                            <!-- generate a separator if value is null -->
+                            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                            <Separator HorizontalAlignment="Stretch" IsEnabled="False"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+            </ComboBox>
             <Tools:DropdownButton Grid.Column="3" Margin="4" x:Name="_dropdownButton" Clicked="_dropdownButton_Clicked" />
         </Grid>
         <Tools:BusyControl Grid.Row="2" x:Name="_versionBusyControl" Visibility="Collapsed"></Tools:BusyControl>
@@ -107,10 +134,14 @@
                                Margin="3"
                                Grid.Row="2" Grid.Column="0" FontWeight="Bold">License</TextBlock>
                     <TextBlock Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
-                               Text="{Binding Path=Package.LicenseUrl}"
                                Margin="3"
                                TextWrapping="Wrap"
-                               Grid.Row="2" Grid.Column="1"></TextBlock>
+                               Grid.Row="2" Grid.Column="1">
+                        <Hyperlink NavigateUri="{Binding Path=Package.LicenseUrl}"
+                                   Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
+                            <Run Text="{Binding Path=Package.LicenseUrl}" />
+                        </Hyperlink>
+                    </TextBlock>
 
                     <TextBlock Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
                                Margin="3"
@@ -132,12 +163,18 @@
 
                     <TextBlock Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
                                Margin="3"
-                               Grid.Row="5" Grid.Column="0" FontWeight="Bold">Project information</TextBlock>
+                               Grid.Row="5" Grid.Column="0" FontWeight="Bold">Project Information
+                    </TextBlock>
+                    
                     <TextBlock Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
                                Margin="3"
-                               Text="{Binding Path=Package.ProjectUrl}"
                                TextWrapping="Wrap"
-                               Grid.Row="5" Grid.Column="1"></TextBlock>
+                               Grid.Row="5" Grid.Column="1">
+                        <Hyperlink NavigateUri="{Binding Path=Package.ProjectUrl}"
+                                   Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
+                            <Run Text="{Binding Path=Package.ProjectUrl}" />
+                        </Hyperlink>
+                    </TextBlock>
 
                     <TextBlock Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
                                Margin="3"

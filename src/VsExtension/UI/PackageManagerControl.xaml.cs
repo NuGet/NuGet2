@@ -93,16 +93,26 @@ namespace NuGet.Tools
         {
             private string _searchText;
             private IEnumerable<string> _supportedFrameworks;
+
+            // where to get the package list
+            private IPackageRepository _repoForPackageList;
+
+            // where to get the package list
             private IPackageRepository _repo;
+
+            // the local repository of the project
             private IPackageRepository _localRepo;
+
             private const int pageSize = 15;
 
             public PackageLoader(
+                IPackageRepository repoForPackageList,
                 IPackageRepository repo,
                 IPackageRepository localRepo,
                 string searchText,
                 IEnumerable<string> supportedFrameworks)
             {
+                _repoForPackageList = repoForPackageList;
                 _repo = repo;
                 _localRepo = localRepo;
                 _searchText = searchText;
@@ -111,10 +121,13 @@ namespace NuGet.Tools
 
             public Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
-                var query = _repo.Search(
+                var query = _repoForPackageList.Search(
                     searchTerm: _searchText,
                     targetFrameworks: _supportedFrameworks,
-                    allowPrereleaseVersions: false).Skip(startIndex).Take(pageSize);
+                    allowPrereleaseVersions: false)
+                    .OrderByDescending(p => p.DownloadCount)
+                    .Skip(startIndex)
+                    .Take(pageSize);
 
                 return Task.Factory.StartNew<LoadResult>(() =>
                 {
@@ -164,32 +177,37 @@ namespace NuGet.Tools
             // Get all versions of the package
             private List<UiDetailedPackage> GetAllVersions(IPackageRepository repo, string id)
             {
-                var allVersions = new List<UiDetailedPackage>();
-                foreach (var p in repo.FindPackagesById(id))
+                var retValue = new List<UiDetailedPackage>();
+
+                // If repo is AggregateRepository, the package duplicates can be returned by
+                // FindPackagesById(), so Distinct is needed here to remove the duplicates.
+                var allVersions = repo.FindPackagesById(id)
+                    .Distinct<IPackage>(PackageEqualityComparer.IdAndVersion);
+                foreach (var package in allVersions)
                 {
                     var detailedPackage = new UiDetailedPackage()
                     {
-                        Id = p.Id,
-                        Version = p.Version,
-                        Summary = p.Summary,
-                        Description = p.Description,
-                        Authors = StringCollectionToString(p.Authors),
-                        Owners = StringCollectionToString(p.Owners),
-                        IconUrl = p.IconUrl,
-                        LicenseUrl = p.LicenseUrl,
-                        ProjectUrl = p.ProjectUrl,
-                        Tags = p.Tags,
-                        DownloadCount = p.DownloadCount,
-                        Published = p.Published,
-                        DependencySets = p.DependencySets,
-                        NoDependencies = !HasDependencies(p.DependencySets),
-                        Package = p
+                        Id = package.Id,
+                        Version = package.Version,
+                        Summary = package.Summary,
+                        Description = package.Description,
+                        Authors = StringCollectionToString(package.Authors),
+                        Owners = StringCollectionToString(package.Owners),
+                        IconUrl = package.IconUrl,
+                        LicenseUrl = package.LicenseUrl,
+                        ProjectUrl = package.ProjectUrl,
+                        Tags = package.Tags,
+                        DownloadCount = package.DownloadCount,
+                        Published = package.Published,
+                        DependencySets = package.DependencySets,
+                        NoDependencies = !HasDependencies(package.DependencySets),
+                        Package = package
                     };
 
-                    allVersions.Add(detailedPackage);
+                    retValue.Add(detailedPackage);
                 }
 
-                return allVersions;
+                return retValue;
             }
 
             private bool HasDependencies(IEnumerable<PackageDependencySet> dependencySets)
@@ -233,25 +251,23 @@ namespace NuGet.Tools
             string targetFramework = _model.Project.GetTargetFramework();
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
+            var supportedFrameWorks = targetFramework != null ? new[] { targetFramework } : new string[0];
 
             if (showOnlyInstalled)
             {
-                /* !!!
-                _packageList.ItemsSource = null;
-                _packageList.ItemsSource = _model.LocalRepo.GetPackages().ToList().Select
-                    (p =>
-                        {
-                            return new PackageListItem(
-                                p,
-                                installed: true,
-                                updateAvailable: false);
-                        }); */
+                var loader = new PackageLoader(
+                    _model.LocalRepo,
+                    _model.ActiveSourceRepo,
+                    _model.LocalRepo,
+                    searchText,
+                    supportedFrameWorks);
+                _packageList.Loader = loader;
             }
             else
             {
-                // search online
-                var supportedFrameWorks = targetFramework != null ? new[] { targetFramework } : new string[0];
+                // search online                
                 var loader = new PackageLoader(
+                    _model.ActiveSourceRepo,
                     _model.ActiveSourceRepo,
                     _model.LocalRepo,
                     searchText,
@@ -277,7 +293,9 @@ namespace NuGet.Tools
             }
             else
             {
-                _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage);
+                var installedPackage = Model.LocalRepo.FindPackage(selectedPackage.Id);
+                var installedVersion = installedPackage != null ? installedPackage.Version : null;
+                _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
             }
         }
 

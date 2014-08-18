@@ -68,6 +68,7 @@
     </Compile>
     <Compile Include="UI\NullToVisibilityConverter.cs" />
     <Compile Include="UI\PackageDetailControlModel.cs" />
+    <Compile Include="UI\PackageManagerControlCommands.cs" />
     <Compile Include="UI\PackageManagerDocData.cs" />
     <Compile Include="UI\PackageStatusToInstallImageConverter.cs" />
     <Compile Include="UI\PreviewWindow.xaml.cs">
@@ -91,6 +92,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="UI\VersionToVersionForDisplayConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\VsConsole\PowerShellCmdlets\Help\about_NuGet.Cmdlets.help.txt">
@@ -347,6 +349,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\PackageManagerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Resources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

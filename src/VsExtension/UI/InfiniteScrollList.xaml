@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
-        <DataTemplate DataType="{x:Type self:Loading}">
+        <DataTemplate DataType="{x:Type self:LoadingStatusIndicator}">
             <Grid Margin="0,10,0,0">
                 <TextBlock Name="_noMoreItems" 
                            FontStyle="Italic"
