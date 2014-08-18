@@ -43,6 +43,9 @@ namespace NuGet
         /// </summary>
         internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
+        // Note that we're no longer adding schema versions for informational package metadata.
+        // So 'licenseNames', 'repositoryUrl', 'repositoryType', and 'properties' didn't require a new version.
+
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
             SchemaVersionV2,

@@ -51,7 +51,7 @@ namespace NuGet
         string RepositoryType { get; }
 
         /// <summary>
-        /// The author-specified friendly license names.
+        /// The friendly license names identified for the package. Separated with a semicolon.
         /// </summary>
         string LicenseNames { get; }
 

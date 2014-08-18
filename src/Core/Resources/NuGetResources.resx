@@ -484,4 +484,7 @@
   <data name="Manifest_PropertyNameRequired" xml:space="preserve">
     <value>Property name is required.</value>
   </data>
+  <data name="Manifest_PropertyValueRequired" xml:space="preserve">
+    <value>Property value is required.</value>
+  </data>
 </root>

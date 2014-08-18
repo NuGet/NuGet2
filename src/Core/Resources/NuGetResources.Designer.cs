@@ -727,6 +727,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Property value is required..
+        /// </summary>
+        public static string Manifest_PropertyValueRequired {
+            get {
+                return ResourceManager.GetString("Manifest_PropertyValueRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
         /// </summary>
         public static string Manifest_ReferencesHasMixedElements {

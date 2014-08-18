@@ -11,6 +11,7 @@ namespace NuGet
         [XmlAttribute("name")]
         public string Name { get; set; }
 
+        [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_PropertyValueRequired")]
         [XmlAttribute("value")]
         public string Value { get; set; }
     }
