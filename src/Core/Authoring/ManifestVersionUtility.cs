@@ -25,16 +25,10 @@ namespace NuGet
 
         private static int GetMaxVersionFromMetadata(ManifestMetadata metadata)
         {
-            bool hasV7Metadata =
-                metadata.RepositoryUrl != null ||
-                metadata.RepositoryType != null ||
-                metadata.LicenseNames != null ||
-                (metadata.Properties != null && metadata.Properties.Any());
-
-            if (hasV7Metadata)
-            {
-                return RepositoryLicenseNamesAndPropertiesVersion;
-            }
+            // We are no longer increasing the schema version when new informational
+            // metadata is added -- only when meaningful metadata is added that adds
+            // business logic to NuGet itself. So Properties, LicenseNames, RepositoryUrl,
+            // and RepositoryType don't alter the schema version.
 
             // Important: check for version 5 before version 4
             bool referencesHasTargetFramework =

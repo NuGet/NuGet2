@@ -181,7 +181,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void GetManifestVersionReturnsV7IfUsingLicenseName()
+        public void GetManifestVersionReturnsV1IfUsingLicenseName()
         {
             // Arrange
             var metadata = new ManifestMetadata
@@ -195,11 +195,11 @@ namespace NuGet.Test
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.Equal(7, version);
+            Assert.Equal(1, version);
         }
 
         [Fact]
-        public void GetManifestVersionReturnsV7IfUsingRepositoryUrl()
+        public void GetManifestVersionReturnsV1IfUsingRepositoryUrl()
         {
             // Arrange
             var metadata = new ManifestMetadata
@@ -213,11 +213,11 @@ namespace NuGet.Test
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.Equal(7, version);
+            Assert.Equal(1, version);
         }
 
         [Fact]
-        public void GetManifestVersionReturnsV7IfUsingRepositoryType()
+        public void GetManifestVersionReturnsV1IfUsingRepositoryType()
         {
             // Arrange
             var metadata = new ManifestMetadata
@@ -231,11 +231,11 @@ namespace NuGet.Test
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.Equal(7, version);
+            Assert.Equal(1, version);
         }
 
         [Fact]
-        public void GetManifestVersionReturnsV7IfUsingProperties()
+        public void GetManifestVersionReturnsV1IfUsingProperties()
         {
             // Arrange
             var metadata = new ManifestMetadata
@@ -249,7 +249,7 @@ namespace NuGet.Test
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.Equal(7, version);
+            Assert.Equal(1, version);
         }
     }
 }
