@@ -29,7 +29,7 @@ namespace NuGet
                 metadata.RepositoryUrl != null ||
                 metadata.RepositoryType != null ||
                 metadata.LicenseNames != null ||
-                metadata.Properties.Any();
+                (metadata.Properties != null && metadata.Properties.Any());
 
             if (hasV7Metadata)
             {
