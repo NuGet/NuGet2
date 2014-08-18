@@ -252,8 +252,8 @@ namespace NuGet
             return (from property in metadata.Properties
                     select new ManifestProperty
                     {
-                        Name = property.Name,
-                        Value = property.Value
+                        Name = property.Name.SafeTrim(),
+                        Value = property.Value.SafeTrim()
                     }).ToList();
         }
 

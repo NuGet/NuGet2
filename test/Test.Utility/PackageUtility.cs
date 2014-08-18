@@ -198,6 +198,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Language).Returns("en-US");
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
+            mockPackage.Setup(m => m.LicenseNames).Returns((string)null);
             mockPackage.Setup(m => m.Summary).Returns(summary);
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(Enumerable.Empty<FrameworkAssemblyReference>());
             mockPackage.Setup(m => m.Tags).Returns(tags);
@@ -209,9 +210,12 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Language).Returns(language);
             mockPackage.Setup(m => m.IconUrl).Returns((Uri)null);
             mockPackage.Setup(m => m.ProjectUrl).Returns((Uri)null);
+            mockPackage.Setup(m => m.RepositoryUrl).Returns((Uri)null);
+            mockPackage.Setup(m => m.RepositoryType).Returns((string)null);
             mockPackage.Setup(m => m.ReleaseNotes).Returns("");
             mockPackage.Setup(m => m.Owners).Returns(new string[0]);
             mockPackage.Setup(m => m.Copyright).Returns("");
+            mockPackage.Setup(m => m.Properties).Returns((IEnumerable<PackageProperty>)null);
             mockPackage.Setup(m => m.MinClientVersion).Returns(minClientVersion == null ? new Version() : Version.Parse(minClientVersion));
             mockPackage.Setup(m => m.PackageAssemblyReferences).Returns(new PackageReferenceSet[0]);
             if (!listed)

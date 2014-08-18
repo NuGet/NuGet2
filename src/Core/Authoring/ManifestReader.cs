@@ -93,7 +93,7 @@ namespace NuGet
                 case "licenseUrl":
                     manifestMetadata.LicenseUrl = value;
                     break;
-                case "licenseName":
+                case "licenseNames":
                     manifestMetadata.LicenseNames = value;
                     break;
                 case "projectUrl":

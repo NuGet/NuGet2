@@ -58,6 +58,8 @@ namespace NuGet.Test
             Assert.Equal("http://www.nuget.com/license", package.LicenseUrl.ToString());
             Assert.Equal("Apache 2", package.LicenseNames);
             Assert.Equal("http://www.nuget.com/", package.ProjectUrl.ToString());
+            Assert.Equal("http://github.com/nuget/nugetgallery.git", package.RepositoryUrl.ToString());
+            Assert.Equal("git", package.RepositoryType);
             Assert.Equal("http://www.outercurve.com/", package.IconUrl.ToString());
             Assert.Equal(1, package.DependencySets.Count());
             Assert.Equal("bing", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).Id);
@@ -72,6 +74,11 @@ namespace NuGet.Test
             Assert.Equal("New jumpo.", package.ReleaseNotes);
             Assert.Equal("ar-EG", package.Language);
             Assert.Equal(" haha void ", package.Tags);
+            Assert.Equal(2, package.Properties.Count());
+            Assert.Equal("jumpoProperty", package.Properties.ElementAt(0).Name);
+            Assert.Equal("jumpoPropertyValue", package.Properties.ElementAt(0).Value);
+            Assert.Equal("anotherJumpo", package.Properties.ElementAt(1).Name);
+            Assert.Equal("jumpoToo", package.Properties.ElementAt(1).Value);
             Assert.Equal(1, package.FrameworkAssemblies.Count());
             Assert.Equal("System", package.FrameworkAssemblies.ElementAt(0).AssemblyName);
             Assert.Equal(1, package.FrameworkAssemblies.ElementAt(0).SupportedFrameworks.Count());
@@ -298,7 +305,10 @@ namespace NuGet.Test
     <authors>dotnetjunky</authors>
     <owners>Outercurve</owners>
     <licenseUrl>http://www.nuget.com/license</licenseUrl>
+    <licenseNames>Apache 2</licenseNames>
     <projectUrl>http://www.nuget.com</projectUrl>
+    <repositoryUrl>http://github.com/nuget/nugetgallery.git</repositoryUrl>
+    <repositoryType>git</repositoryType>
     <iconUrl>http://www.outercurve.com</iconUrl>
     <dependencies>
       <dependency id=""bing"" version=""1.0-RC"" />
@@ -319,6 +329,10 @@ namespace NuGet.Test
     <copyright>Outercurve Foundation</copyright>
     <language>ar-EG</language>
     <tags>haha void</tags>
+    <properties>
+        <property name=""jumpoProperty"" value=""jumpoPropertyValue"" />
+        <property name=""anotherJumpo"" value=""jumpoToo"" />
+    </properties>
   </metadata>
   <files />
 </package>";

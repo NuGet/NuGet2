@@ -51,7 +51,7 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("1.0"), package.Version);
             Assert.Equal("David", package.Authors.First());
             Assert.Equal("Copyright", package.Copyright);
-            Assert.Equal("RepositoryType", package.RepositoryType);
+            Assert.Equal("git", package.RepositoryType);
 
             //Order is not gauranteed (or required) from GetFiles(), 
             //but we rely on the order for a few of the asserts, 

@@ -261,7 +261,7 @@ namespace NuGet.Test
                     Language = "fr-FR",
                     Tags = "Test Unit",
                     Properties = new List<ManifestProperty> {
-                        new ManifestProperty { Name = "customProperty", Value = "customPropertyValye" }
+                        new ManifestProperty { Name = "customProperty", Value = "customPropertyValue" }
                     },
                     DependencySets = new List<ManifestDependencySet> {
                             new ManifestDependencySet {

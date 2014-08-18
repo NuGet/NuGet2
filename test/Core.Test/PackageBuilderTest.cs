@@ -103,19 +103,20 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2014/08/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>JohnDoe</authors>
     <owners>JohnDoe</owners>
     <licenseNames>Apache 2</licenseNames>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <repositoryUrl>http://github.com/nuget/nugetgallery.git</repositoryUrl>
     <repositoryType>git</repositoryType>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Description</description>
     <properties>
-        <property name=""propertyName"" value=""propertyValue"" />
+      <property name=""propertyName"" value=""propertyValue"" />
+    </properties>
   </metadata>
 </package>", ms.ReadToEnd());
         }
@@ -819,25 +820,26 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2014/08/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>JohnDoe</authors>
     <owners>John</owners>
     <licenseNames>Apache 2</licenseNames>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <repositoryType>git</repositoryType>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <summary>Summary</summary>
     <copyright>Copyright 2012</copyright>
     <language>en-us</language>
     <tags>t1 t2 t3</tags>
-    <properties>
-        <property name=""propertyName"" value=""propertyValue"" />    
     <dependencies>
       <dependency id=""X"" />
     </dependencies>
+    <properties>
+      <property name=""propertyName"" value=""propertyValue"" />
+    </properties>
   </metadata>
 </package>", ms.ReadToEnd());
         }
