@@ -44,7 +44,7 @@ namespace NuGet
             }
 
             _references = new ReadOnlyHashSet<string>(manifestReferenceSet.References.Select(r => r.File), StringComparer.OrdinalIgnoreCase);
-            _properties = new ReadOnlyCollection<PackageProperty>(manifestReferenceSet.Properties.Select(p => new PackageProperty(p.Name, p.Value)).ToList());
+            _properties = new ReadOnlyCollection<PackageProperty>(manifestReferenceSet.Properties != null ? manifestReferenceSet.Properties.Select(p => new PackageProperty(p.Name, p.Value)).ToList() : new List<PackageProperty>(0));
         }
 
         public ICollection<string> References

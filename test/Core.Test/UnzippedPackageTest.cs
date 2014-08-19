@@ -67,6 +67,10 @@ namespace NuGet.Test
             Assert.True(package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.IsMinInclusive);
             Assert.Equal(null, package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.MaxVersion);
             Assert.False(package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.IsMaxInclusive);
+            Assert.Equal("configuration", package.DependencySets.ElementAt(0).Properties.ElementAt(0).Name);
+            Assert.Equal("release", package.DependencySets.ElementAt(0).Properties.ElementAt(0).Value);
+            Assert.Equal("os", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).PropertyConstraints.ElementAt(0).Name);
+            Assert.Equal("windows", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).PropertyConstraints.ElementAt(0).Value);
             Assert.Equal("Jumpo Jet", package.Title);
             Assert.True(package.RequireLicenseAcceptance);
             Assert.Equal("My package description.", package.Description);
@@ -81,6 +85,10 @@ namespace NuGet.Test
             Assert.Equal("jumpoToo", package.Properties.ElementAt(1).Value);
             Assert.Equal(1, package.FrameworkAssemblies.Count());
             Assert.Equal("System", package.FrameworkAssemblies.ElementAt(0).AssemblyName);
+            Assert.Equal("one", package.PackageAssemblyReferences.ElementAt(0).References.ElementAt(0));
+            Assert.Equal("two", package.PackageAssemblyReferences.ElementAt(0).References.ElementAt(1));
+            Assert.Equal("configuration", package.PackageAssemblyReferences.ElementAt(0).Properties.ElementAt(0).Name);
+            Assert.Equal("release", package.PackageAssemblyReferences.ElementAt(0).Properties.ElementAt(0).Value);
             Assert.Equal(1, package.FrameworkAssemblies.ElementAt(0).SupportedFrameworks.Count());
             Assert.Equal(
                 new FrameworkName(".NETFramework", new Version("4.5")), 
@@ -311,11 +319,19 @@ namespace NuGet.Test
     <repositoryType>git</repositoryType>
     <iconUrl>http://www.outercurve.com</iconUrl>
     <dependencies>
-      <dependency id=""bing"" version=""1.0-RC"" />
+      <group targetFramework=""net20"">
+        <property name=""configuration"" value=""release"" />
+        <dependency id=""bing"" version=""1.0-RC"">
+          <propertyConstraint name=""os"" value=""windows"" />
+        </dependency>
+      </group>
     </dependencies>
     <references>
-      <reference file=""one"" />
-      <reference file=""two"" />
+      <group targetFramework=""net20"">
+        <property name=""configuration"" value=""release"" />
+        <reference file=""one"" />
+        <reference file=""two"" />
+      </group>
     </references>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName=""System"" targetFramework="".NETFramework4.5"" />

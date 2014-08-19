@@ -135,7 +135,7 @@ namespace NuGet
                     return null;
                 }
 
-                if (DependencySets.Any(set => set.TargetFramework != null))
+                if (DependencySets.Any(set => set.TargetFramework != null || (set.Properties != null && set.Properties.Any())))
                 {
                     return DependencySets.Cast<object>().ToList();
                 }
@@ -181,7 +181,7 @@ namespace NuGet
                     return null;
                 }
 
-                if (ReferenceSets.Any(set => set.TargetFramework != null))
+                if (ReferenceSets.Any(set => set.TargetFramework != null || (set.Properties != null && set.Properties.Any())))
                 {
                     return ReferenceSets.Cast<object>().ToList();
                 }
@@ -303,20 +303,28 @@ namespace NuGet
                 
                 var dependencySets = DependencySets.Select(CreatePackageDependencySet);
 
-                // group the dependency sets with the same target framework together.
-                var dependencySetGroups = dependencySets.GroupBy(set => new { set.TargetFramework, set.Properties });
-                var groupedDependencySets = dependencySetGroups.Select(group => new PackageDependencySet(group.Key.TargetFramework, group.SelectMany(g => g.Dependencies), group.Key.Properties))
-                                                               .ToList();
-                // move the group with the null target framework (if any) to the front just for nicer display in UI
-                int nullTargetFrameworkIndex = groupedDependencySets.FindIndex(set => set.TargetFramework == null);
-                if (nullTargetFrameworkIndex > -1)
+                // group the dependency sets with the same target framework and properties together.
+                var groups = new Dictionary<Tuple<FrameworkName, string>, Tuple<IEnumerable<PackageProperty>, List<PackageDependency>>>();
+                foreach (var set in dependencySets)
                 {
-                    var nullFxDependencySet = groupedDependencySets[nullTargetFrameworkIndex];
-                    groupedDependencySets.RemoveAt(nullTargetFrameworkIndex);
-                    groupedDependencySets.Insert(0, nullFxDependencySet);
+                    var propertyGrouping = GetPropertyGrouping(set.Properties);
+
+                    Tuple<IEnumerable<PackageProperty>, List<PackageDependency>> existing;
+                    if (groups.TryGetValue(new Tuple<FrameworkName, string>(set.TargetFramework, propertyGrouping), out existing))
+                    {
+                        existing.Item2.AddRange(set.Dependencies);
+                    }
+                    else
+                    {
+                        groups.Add(new Tuple<FrameworkName, string>(set.TargetFramework, propertyGrouping),
+                            new Tuple<IEnumerable<PackageProperty>, List<PackageDependency>>(set.Properties, set.Dependencies.ToList()));
+                    }
                 }
 
-                return groupedDependencySets;
+                return groups.Select(g => new PackageDependencySet(g.Key.Item1, g.Value.Item2, g.Value.Item1))
+                    .OrderBy(g => g.TargetFramework.ToStringSafe())
+                    .ThenBy(g => g.Properties.Count())
+                    .ToList();
             }
         }
 
@@ -331,19 +339,28 @@ namespace NuGet
 
                 var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r));
 
-                var referenceSetGroups = referenceSets.GroupBy(set => new { set.TargetFramework, set.Properties });
-                var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key.TargetFramework, group.SelectMany(g => g.References), group.Key.Properties))
-                                                             .ToList();
-
-                int nullTargetFrameworkIndex = groupedReferenceSets.FindIndex(set => set.TargetFramework == null);
-                if (nullTargetFrameworkIndex > -1)
+                // group the reference sets with the same target framework and properties together.
+                var groups = new Dictionary<Tuple<FrameworkName, string>, Tuple<IEnumerable<PackageProperty>, List<string>>>();
+                foreach (var set in referenceSets)
                 {
-                    var nullFxReferenceSet = groupedReferenceSets[nullTargetFrameworkIndex];
-                    groupedReferenceSets.RemoveAt(nullTargetFrameworkIndex);
-                    groupedReferenceSets.Insert(0, nullFxReferenceSet);
+                    var propertyGrouping = GetPropertyGrouping(set.Properties);
+
+                    Tuple<IEnumerable<PackageProperty>, List<string>> existing;
+                    if (groups.TryGetValue(new Tuple<FrameworkName, string>(set.TargetFramework, propertyGrouping), out existing))
+                    {
+                        existing.Item2.AddRange(set.References);
+                    }
+                    else
+                    {
+                        groups.Add(new Tuple<FrameworkName, string>(set.TargetFramework, propertyGrouping),
+                            new Tuple<IEnumerable<PackageProperty>, List<string>>(set.Properties, set.References.ToList()));
+                    }
                 }
 
-                return groupedReferenceSets;
+                return groups.Select(g => new PackageReferenceSet(g.Key.Item1, g.Value.Item2, g.Value.Item1))
+                    .OrderBy(g => g.TargetFramework.ToStringSafe())
+                    .ThenBy(g => g.Properties.Count())
+                    .ToList();
             }
         }
 
@@ -433,12 +450,29 @@ namespace NuGet
             var dependencies = from d in manifestDependencySet.Dependencies
                                select new PackageDependency(
                                    d.Id,
-                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version));
+                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version),
+                                   d.PropertyConstraints != null ? d.PropertyConstraints.Select(c => new PackageProperty(c.Name, c.Value)) : Enumerable.Empty<PackageProperty>());
 
-            var properties = from p in manifestDependencySet.Properties
-                             select new PackageProperty(p.Name, p.Value);
+            var properties = manifestDependencySet.Properties == null ? Enumerable.Empty<PackageProperty>() :
+                from p in manifestDependencySet.Properties
+                select new PackageProperty(p.Name, p.Value);
 
             return new PackageDependencySet(targetFramework, dependencies, properties);
         }
+
+        private static string GetPropertyGrouping(IEnumerable<PackageProperty> properties)
+        {
+            if (properties == null)
+            {
+                return null;
+            }
+
+            var namesValues = from propertyName in properties.Select(p => p.Name).Distinct().OrderBy(n => n)
+                              let values = String.Join(",", properties.Where(p => p.Name == propertyName).Select(p => p.Value).Distinct().OrderBy(v => v))
+                              select propertyName + "=" + values;
+
+            return String.Join(";", namesValues);
+        }
+
     }
 }

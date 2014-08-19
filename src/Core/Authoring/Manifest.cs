@@ -184,7 +184,8 @@ namespace NuGet
                     select new ManifestReferenceSet 
                     {
                         TargetFramework = referenceSet.TargetFramework != null ? VersionUtility.GetFrameworkString(referenceSet.TargetFramework) : null,
-                        References = CreateReferences(referenceSet) 
+                        References = CreateReferences(referenceSet),
+                        Properties = CreateProperties(referenceSet)
                     }).ToList();
         }
 
@@ -210,7 +211,8 @@ namespace NuGet
                     select new ManifestDependencySet
                     {
                         TargetFramework = dependencySet.TargetFramework != null ? VersionUtility.GetFrameworkString(dependencySet.TargetFramework) : null,
-                        Dependencies = CreateDependencies(dependencySet.Dependencies)
+                        Dependencies = CreateDependencies(dependencySet.Dependencies),
+                        Properties = CreateProperties(dependencySet).ToList()
                     }).ToList();
         }
 
@@ -244,6 +246,34 @@ namespace NuGet
         }
 
         private static List<ManifestProperty> CreateProperties(IPackageMetadata metadata)
+        {
+            if (metadata.Properties.IsEmpty())
+            {
+                return null;
+            }
+            return (from property in metadata.Properties
+                    select new ManifestProperty
+                    {
+                        Name = property.Name.SafeTrim(),
+                        Value = property.Value.SafeTrim()
+                    }).ToList();
+        }
+
+        private static List<ManifestProperty> CreateProperties(PackageReferenceSet metadata)
+        {
+            if (metadata.Properties.IsEmpty())
+            {
+                return null;
+            }
+            return (from property in metadata.Properties
+                    select new ManifestProperty
+                    {
+                        Name = property.Name.SafeTrim(),
+                        Value = property.Value.SafeTrim()
+                    }).ToList();
+        }
+
+        private static List<ManifestProperty> CreateProperties(PackageDependencySet metadata)
         {
             if (metadata.Properties.IsEmpty())
             {

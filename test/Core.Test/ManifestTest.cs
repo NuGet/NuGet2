@@ -557,18 +557,320 @@ namespace NuGet.Test
             Assert.Equal("A", dependencySets[0].Dependencies.First().Id);
             Assert.Equal("C", dependencySets[0].Dependencies.Last().Id);
 
-            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), dependencySets[1].TargetFramework);
-            Assert.Equal(2, dependencySets[1].Dependencies.Count);
-            Assert.Equal("B", dependencySets[1].Dependencies.First().Id);
-            Assert.Equal("E", dependencySets[1].Dependencies.Last().Id);
+            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), dependencySets[1].TargetFramework);
+            Assert.Equal(0, dependencySets[1].Dependencies.Count);
 
-            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), dependencySets[2].TargetFramework);
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), dependencySets[2].TargetFramework);
             Assert.Equal(2, dependencySets[2].Dependencies.Count);
-            Assert.Equal("D", dependencySets[2].Dependencies.First().Id);
-            Assert.Equal("F", dependencySets[2].Dependencies.Last().Id);
+            Assert.Equal("B", dependencySets[2].Dependencies.First().Id);
+            Assert.Equal("E", dependencySets[2].Dependencies.Last().Id);
 
-            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), dependencySets[3].TargetFramework);
-            Assert.Equal(0, dependencySets[3].Dependencies.Count);
+            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), dependencySets[3].TargetFramework);
+            Assert.Equal(2, dependencySets[3].Dependencies.Count);
+            Assert.Equal("D", dependencySets[3].Dependencies.First().Id);
+            Assert.Equal("F", dependencySets[3].Dependencies.Last().Id);
+        }
+
+        [Fact]
+        public void ManifestGroupReferenceSetsByTargetFrameworkAndPutNullFrameworkFirst()
+        {
+            // Arrange
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    ReferenceSets = new List<ManifestReferenceSet> {
+                            new ManifestReferenceSet {
+                                TargetFramework = ".NETFramework40",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "B" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = null,
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "A" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = null,
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "C" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "Silverlight35",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "D" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "net40",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "E" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "sl35",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "F" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "winrt45",
+                                References = new List<ManifestReference>() 
+                            },
+                    }
+                }
+            };
+
+            // Act
+            var referenceSets = ((IPackageMetadata)manifest.Metadata).PackageAssemblyReferences.ToList();
+
+            // Assert
+            Assert.Equal(4, referenceSets.Count);
+
+            Assert.Null(referenceSets[0].TargetFramework);
+            Assert.Equal(2, referenceSets[0].References.Count);
+            Assert.Equal("A", referenceSets[0].References.First());
+            Assert.Equal("C", referenceSets[0].References.Last());
+
+            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), referenceSets[1].TargetFramework);
+            Assert.Equal(0, referenceSets[1].References.Count);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), referenceSets[2].TargetFramework);
+            Assert.Equal(2, referenceSets[2].References.Count);
+            Assert.Equal("B", referenceSets[2].References.First());
+            Assert.Equal("E", referenceSets[2].References.Last());
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), referenceSets[3].TargetFramework);
+            Assert.Equal(2, referenceSets[3].References.Count);
+            Assert.Equal("D", referenceSets[3].References.First());
+            Assert.Equal("F", referenceSets[3].References.Last());
+        }
+
+        [Fact]
+        public void ManifestGroupDependencySetsByTargetFrameworkAndPropertiesAndPutNullFrameworkFirst()
+        {
+            // Arrange
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    DependencySets = new List<ManifestDependencySet> {
+                            new ManifestDependencySet {
+                                TargetFramework = ".NETFramework40",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "B" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "configuration", Value = "debug" }}
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "A" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "architecture", Value = "x86" }}
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "C" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "architecture", Value = "x64" }}
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "Silverlight35",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "D" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "net40",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "E" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "configuration", Value = "debug" }}
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "sl35",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "F" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "winrt45",
+                                Dependencies = new List<ManifestDependency>() 
+                            },
+                    }
+                }
+            };
+
+            // Act
+            var dependencySets = ((IPackageMetadata)manifest.Metadata).DependencySets.ToList();
+
+            // Assert
+            Assert.Equal(5, dependencySets.Count);
+
+            Assert.Null(dependencySets[0].TargetFramework);
+            Assert.Equal(1, dependencySets[0].Dependencies.Count);
+            Assert.Equal("A", dependencySets[0].Dependencies.First().Id);
+            Assert.Equal("x86", dependencySets[0].Properties.Where(p => p.Name == "architecture").Select(p => p.Value).Single());
+
+            Assert.Null(dependencySets[1].TargetFramework);
+            Assert.Equal(1, dependencySets[1].Dependencies.Count);
+            Assert.Equal("C", dependencySets[1].Dependencies.Last().Id);
+            Assert.Equal("x64", dependencySets[1].Properties.Where(p => p.Name == "architecture").Select(p => p.Value).Single());
+
+            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), dependencySets[2].TargetFramework);
+            Assert.Equal(0, dependencySets[2].Dependencies.Count);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), dependencySets[3].TargetFramework);
+            Assert.Equal(2, dependencySets[3].Dependencies.Count);
+            Assert.Equal("B", dependencySets[3].Dependencies.First().Id);
+            Assert.Equal("E", dependencySets[3].Dependencies.Last().Id);
+            Assert.Equal("debug", dependencySets[3].Properties.Where(p => p.Name == "configuration").Select(p => p.Value).Single());
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), dependencySets[4].TargetFramework);
+            Assert.Equal(2, dependencySets[4].Dependencies.Count);
+            Assert.Equal("D", dependencySets[4].Dependencies.First().Id);
+            Assert.Equal("F", dependencySets[4].Dependencies.Last().Id);
+        }
+
+        [Fact]
+        public void ManifestGroupReferenceSetsByTargetFrameworkAndPropertiesAndPutNullFrameworkFirst()
+        {
+            // Arrange
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    ReferenceSets = new List<ManifestReferenceSet> {
+                            new ManifestReferenceSet {
+                                TargetFramework = ".NETFramework40",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "B" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "configuration", Value = "debug" }}
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = null,
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "A" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "architecture", Value = "x86" }}
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = null,
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "C" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "architecture", Value = "x64" }}
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "Silverlight35",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "D" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "net40",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "E" }
+                                    },
+                                Properties = new List<ManifestProperty>() { new ManifestProperty() { Name = "configuration", Value = "debug" }}
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "sl35",
+                                References = new List<ManifestReference> 
+                                    {
+                                        new ManifestReference { File = "F" }
+                                    }
+                            },
+
+                            new ManifestReferenceSet {
+                                TargetFramework = "winrt45",
+                                References = new List<ManifestReference>() 
+                            },
+                    }
+                }
+            };
+
+            // Act
+            var ReferenceSets = ((IPackageMetadata)manifest.Metadata).PackageAssemblyReferences.ToList();
+
+            // Assert
+            Assert.Equal(5, ReferenceSets.Count);
+
+            Assert.Null(ReferenceSets[0].TargetFramework);
+            Assert.Equal(1, ReferenceSets[0].References.Count);
+            Assert.Equal("A", ReferenceSets[0].References.First());
+            Assert.Equal("x86", ReferenceSets[0].Properties.Where(p => p.Name == "architecture").Select(p => p.Value).Single());
+
+            Assert.Null(ReferenceSets[1].TargetFramework);
+            Assert.Equal(1, ReferenceSets[1].References.Count);
+            Assert.Equal("C", ReferenceSets[1].References.Last());
+            Assert.Equal("x64", ReferenceSets[1].Properties.Where(p => p.Name == "architecture").Select(p => p.Value).Single());
+
+            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), ReferenceSets[2].TargetFramework);
+            Assert.Equal(0, ReferenceSets[2].References.Count);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), ReferenceSets[3].TargetFramework);
+            Assert.Equal(2, ReferenceSets[3].References.Count);
+            Assert.Equal("B", ReferenceSets[3].References.First());
+            Assert.Equal("E", ReferenceSets[3].References.Last());
+            Assert.Equal("debug", ReferenceSets[3].Properties.Where(p => p.Name == "configuration").Select(p => p.Value).Single());
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), ReferenceSets[4].TargetFramework);
+            Assert.Equal(2, ReferenceSets[4].References.Count);
+            Assert.Equal("D", ReferenceSets[4].References.First());
+            Assert.Equal("F", ReferenceSets[4].References.Last());
         }
 
         // Test that manifest is serialized correctly.

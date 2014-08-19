@@ -14,6 +14,7 @@ namespace NuGet
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
         public const int XdtTransformationVersion = 6;
+        public const int ReferenceGroupDependencyGroupAndDependencyProperties = 7;
 
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
@@ -28,6 +29,19 @@ namespace NuGet
             // metadata is added -- only when meaningful metadata is added that adds
             // business logic to NuGet itself. So Properties, LicenseNames, RepositoryUrl,
             // and RepositoryType don't alter the schema version.
+
+            // However, properties and propertyConstraints on dependencies, and
+            // assembly references are meaningful and therefore bump the version
+
+            bool hasMeaningfulProperties = 
+                metadata.ReferenceSets.Any(rs => rs.Properties != null && rs.Properties.Any()) ||
+                metadata.DependencySets.Any(ds => ds.Properties != null && ds.Properties.Any()) ||
+                metadata.DependencySets.Any(ds => ds.Dependencies.Any(d => d.PropertyConstraints != null && d.PropertyConstraints.Any()));
+
+            if (hasMeaningfulProperties)
+            {
+                return ReferenceGroupDependencyGroupAndDependencyProperties;
+            }
 
             // Important: check for version 5 before version 4
             bool referencesHasTargetFramework =
