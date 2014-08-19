@@ -21,7 +21,7 @@
   
     <xs:complexType name="dependencyGroup">
         <xs:sequence>
-            <xs:choice>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
                 <xs:element name="dependency" minOccurs="0" maxOccurs="unbounded" type="dependency" />
             </xs:choice>
@@ -35,7 +35,7 @@
 
     <xs:complexType name="referenceGroup">
         <xs:sequence>
-            <xs:choice>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
                 <xs:element name="reference" minOccurs="1" maxOccurs="unbounded" type="reference" />
             </xs:choice>
