@@ -43,8 +43,10 @@ namespace NuGet
         /// </summary>
         internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
-        // Note that we're no longer adding schema versions for informational package metadata.
-        // So 'licenseNames', 'repositoryUrl', 'repositoryType', and 'properties' didn't require a new version.
+        /// <summary>
+        /// Added 'licenseNames', 'repositoryUrl', 'repositoryType', and Property/PropertyConstraints
+        /// </summary>
+        internal const string SchemaVersionV7 = "http://schemas.microsoft.com/packaging/2014/08/nuspec.xsd";
 
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
@@ -52,7 +54,8 @@ namespace NuGet
             SchemaVersionV3,
             SchemaVersionV4,
             SchemaVersionV5,
-            SchemaVersionV6
+            SchemaVersionV6,
+            SchemaVersionV7
         };
 
         private static ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
