@@ -17,6 +17,7 @@ namespace NuGet.VisualStudio12
 {
     public static class ProjectHelper
     {
+
 #if VS12
 
         /// <summary>
@@ -99,6 +100,9 @@ namespace NuGet.VisualStudio12
             return context != null ? context.UnconfiguredProject : null;
         }
 #else
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "project")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "hierarchy")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "action")]
         public static void DoWorkInWriterLock(Project project, IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
         }

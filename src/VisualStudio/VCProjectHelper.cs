@@ -7,7 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.VCProjectEngine;
 
-#if VS10
+#if VS10_NAMESPACE
 namespace NuGet.VisualStudio10
 #else
 namespace NuGet.VisualStudio
