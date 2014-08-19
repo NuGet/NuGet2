@@ -123,9 +123,6 @@
   <data name="ErrorDialogBoxTitle" xml:space="preserve">
     <value>Operation failed</value>
   </data>
-  <data name="Error_UnsupportedVSVersion" xml:space="preserve">
-    <value>This version of VisualStudio is not supported: {0}</value>
-  </data>
   <data name="ManagePackageForSolutionLabel" xml:space="preserve">
     <value>Manage NuGet Packages for &amp;Solution...</value>
   </data>

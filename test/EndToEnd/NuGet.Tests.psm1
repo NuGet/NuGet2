@@ -69,7 +69,7 @@ Register-TabExpansion 'Run-Test' @{
 function Rearrange-Tests {
     param($tests)    
 
-    if ($dte.Version -eq "12.0")
+    if ($dte.Version -eq "12.0" -or $dte.Version -eq "14.0")
     {
         # TODO: Running PackageRestore tests on Dev12 RTM causes hang problem,
 		# so disable those tests for now.
@@ -121,6 +121,11 @@ function global:Run-Test {
         $File = "*.ps1"
     }
 
+    if ($SourceNuGet -eq $null) 
+    {
+        $SourceNuGet = "nuget.org"
+    }
+	
     # Load all of the test scripts
     Get-ChildItem $testPath -Filter $File | %{ 
         . $_.FullName

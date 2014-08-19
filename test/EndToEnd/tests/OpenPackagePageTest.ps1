@@ -26,8 +26,17 @@ function Test-OpenPackagePageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     # Act
     $p = Open-PackagePage elmah -Report -WhatIf -PassThru -Version 1.1
 
+	if ($SourceNuGet.Contains('api/v2'))
+    {
+		$expectedString = $SourceNuGet.Replace('/api/v2', '') + '/Package/ReportAbuse/elmah/1.1.0'
+	}
+	else 
+	{
+		$expectedString = 'https://www.nuget.org/Package/ReportAbuse/elmah/1.1.0'
+	}
+    
     # Assert
-    Assert-AreEqual 'https://www.nuget.org/Package/ReportAbuse/elmah/1.1.0' $p.OriginalString
+    Assert-AreEqual $expectedString $p.OriginalString
 }
 
 function Test-OpenPackagePageFailsIfIdIsSetToTheWrongValue {
@@ -91,14 +100,23 @@ function Test-OpenPackagePageFailsIfLicenseUrlIsNotAvailable {
 }
 
 function Test-OpenPackagePageAcceptSourceName {
+	if ($SourceNuGet -eq 'nuget.org')
+	{
+		$source = 'nUGet.OrG'  # keep the coverage that the source name is case insensitive
+	}
+	else 
+	{
+	   $source = $SourceNuGet
+	}
+
     # Act
-    $p = Open-PackagePage 'elmah' -Source 'nUGet.OrG' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -Source $source -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
 
     # Act
-    $p = Open-PackagePage 'elmah' -License -Source 'nuGEt.oRG' -WhatIf -PassThru
+    $p = Open-PackagePage 'elmah' -License -Source $source -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString

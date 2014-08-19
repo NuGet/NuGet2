@@ -984,7 +984,7 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
     }
-    elseif ($dte.Version -eq "12.0")
+    elseif ($dte.Version -eq "12.0" -or $dte.Version -eq "14.0")
     {
         $profile = "WindowsPhone,Version=v8.0"
     }
@@ -2220,7 +2220,7 @@ function Test-InstallMetadataPackageAddPackageToProject
 function Test-FrameworkAssemblyReferenceShouldNotHaveBindingRedirect
 {
     # This test uses a particular profile which is available only in VS 2012.
-    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
+    if ($dte.Version -ne "13.0")
     {
         return
     }
@@ -2280,7 +2280,7 @@ function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
     Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
-function Test-InstallPackageIntoJavaScriptApplication
+function InstallPackageIntoJavaScriptApplication
 {
     if ($dte.Version -eq "10.0")
     {
@@ -2315,7 +2315,7 @@ function Test-InstallPackageIntoJavaScriptWindowsPhoneApp
     Assert-Package $p "jQuery"
 }
 
-function Test-InstallPackageIntoNativeWinStoreApplication
+function InstallPackageIntoNativeWinStoreApplication
 {
     if ($dte.Version -eq "10.0")
     {
@@ -2332,7 +2332,7 @@ function Test-InstallPackageIntoNativeWinStoreApplication
     Assert-Package $p "zlib"
 }
 
-function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
+function InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
@@ -2356,7 +2356,7 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 }
 
 
-function Test-InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
+function InstallPackageIntoJSWindowsPhoneAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
@@ -2403,10 +2403,10 @@ function Test-InstallLatestVersionWorksCorrectly
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters -ProjectName $p.Name
+    Install-Package A -ProjectName $p.Name -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p XamlConverters 0.5
+    Assert-Package $p A 0.5
 }
 
 function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
@@ -2415,13 +2415,13 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
     $p = New-WebApplication
 
     # Act
-    Install-Package XamlConverters -IncludePrerelease -ProjectName $p.Name
+    Install-Package A -IncludePrerelease -ProjectName $p.Name -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p XamlConverters 0.6-beta
+    Assert-Package $p A 0.6-beta
 }
 
-function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
+function InstallPackageIntoJSAppOnWin81AcceptWinmdFile
 {
     param($context)
 
@@ -2441,7 +2441,7 @@ function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
     Assert-Package $p MarkedUp
 }
 
-function Test-PackageWithConfigTransformInstallToWinJsProject
+function PackageWithConfigTransformInstallToWinJsProject
 {
     param($context)
 
@@ -2467,7 +2467,7 @@ function Test-InstallPackageIntoLightSwitchApplication
     param($context)
 
     # this test is only applicable to VS 2013 because it has the latest LightSwitch template
-    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    if ($dte.Version -ne "12.0")
     {
         return
     }

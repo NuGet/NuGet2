@@ -1,4 +1,4 @@
-﻿#if VS11 || VS10
+#if VS11 || VS10
 extern alias dialog10;
 extern alias dialog11;
 #endif
@@ -7,6 +7,9 @@ extern alias dialog11;
 extern alias dialog12;
 #endif
 
+#if VS14
+extern alias dialog14;
+#endif
 
 using System;
 using System.ComponentModel.Design;
@@ -36,6 +39,10 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+#endif
+
+#if VS14
+using VS14ManagePackageDialog = dialog14::NuGet.Dialog.PackageManagerWindow;
 #endif
 
 namespace NuGet.Tools
@@ -390,26 +397,21 @@ namespace NuGet.Tools
                 {
                     window = GetVS10PackageManagerWindow(project, parameterString);
                 }
-                else if (VsVersionHelper.IsVisualStudio2012)
+                else 
                 {
+                    // VS 2012
                     window = GetVS11PackageManagerWindow(project, parameterString);
                 }
 #endif
                 
 #if VS12
-                if (VsVersionHelper.IsVisualStudio2013)
-                {
-                    window = GetVS12PackageManagerWindow(project, parameterString);
-                }
+				window = GetVS12PackageManagerWindow(project, parameterString);
 #endif
-                else
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.Error_UnsupportedVSVersion,
-                        VsVersionHelper.FullVsEdition);
-                    throw new InvalidOperationException(message);
-                }
+
+#if VS14
+				window = GetVS14PackageManagerWindow(project, parameterString);
+#endif
+                
 
                 window.ShowModal();
             }
@@ -439,6 +441,14 @@ namespace NuGet.Tools
         private static DialogWindow GetVS12PackageManagerWindow(Project project, string parameterString)
         {
             return new VS12ManagePackageDialog(project, parameterString);
+        }
+#endif
+
+#if VS14
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS14PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS14ManagePackageDialog(project, parameterString);
         }
 #endif
 
