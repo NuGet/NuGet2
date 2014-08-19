@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NuGet
 {
     public class PackageDependency
     {
         public PackageDependency(string id)
-            : this(id, versionSpec: null)
+            : this(id, versionSpec: null, propertyConstraints: null)
         {
         }
 
-        public PackageDependency(string id, IVersionSpec versionSpec) 
+        public PackageDependency(string id, IVersionSpec versionSpec)
+            : this(id, versionSpec: versionSpec, propertyConstraints: null)
+        {
+        }
+
+        public PackageDependency(string id, IVersionSpec versionSpec, IEnumerable<PackageProperty> propertyConstraints)
         {
             if (String.IsNullOrEmpty(id))
             {
@@ -17,6 +23,7 @@ namespace NuGet
             }
             Id = id;
             VersionSpec = versionSpec;
+            PropertyConstraints = propertyConstraints;
         }
 
         public string Id
@@ -26,6 +33,12 @@ namespace NuGet
         }
 
         public IVersionSpec VersionSpec
+        {
+            get;
+            private set;
+        }
+
+        public IEnumerable<PackageProperty> PropertyConstraints
         {
             get;
             private set;

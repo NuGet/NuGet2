@@ -304,8 +304,8 @@ namespace NuGet
                 var dependencySets = DependencySets.Select(CreatePackageDependencySet);
 
                 // group the dependency sets with the same target framework together.
-                var dependencySetGroups = dependencySets.GroupBy(set => set.TargetFramework);
-                var groupedDependencySets = dependencySetGroups.Select(group => new PackageDependencySet(group.Key, group.SelectMany(g => g.Dependencies)))
+                var dependencySetGroups = dependencySets.GroupBy(set => new { set.TargetFramework, set.Properties });
+                var groupedDependencySets = dependencySetGroups.Select(group => new PackageDependencySet(group.Key.TargetFramework, group.SelectMany(g => g.Dependencies), group.Key.Properties))
                                                                .ToList();
                 // move the group with the null target framework (if any) to the front just for nicer display in UI
                 int nullTargetFrameworkIndex = groupedDependencySets.FindIndex(set => set.TargetFramework == null);
@@ -331,8 +331,8 @@ namespace NuGet
 
                 var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r));
 
-                var referenceSetGroups = referenceSets.GroupBy(set => set.TargetFramework);
-                var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key, group.SelectMany(g => g.References)))
+                var referenceSetGroups = referenceSets.GroupBy(set => new { set.TargetFramework, set.Properties });
+                var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key.TargetFramework, group.SelectMany(g => g.References), group.Key.Properties))
                                                              .ToList();
 
                 int nullTargetFrameworkIndex = groupedReferenceSets.FindIndex(set => set.TargetFramework == null);
@@ -435,7 +435,10 @@ namespace NuGet
                                    d.Id,
                                    String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version));
 
-            return new PackageDependencySet(targetFramework, dependencies);
+            var properties = from p in manifestDependencySet.Properties
+                             select new PackageProperty(p.Name, p.Value);
+
+            return new PackageDependencySet(targetFramework, dependencies, properties);
         }
     }
 }

@@ -150,14 +150,14 @@ namespace NuGet
             }
         }
 
-        private static List<ManifestProperty> ReadProperties(XElement propertiesElement)
+        private static List<ManifestProperty> ReadProperties(XElement propertiesElement, string propertyElementName = "property")
         {
             if (!propertiesElement.HasElements)
             {
                 return new List<ManifestProperty>(0);
             }
 
-            return (from element in propertiesElement.ElementsNoNamespace("property")
+            return (from element in propertiesElement.ElementsNoNamespace(propertyElementName)
                     let nameAttribute = element.Attribute("name")
                     let valueAttribute = element.Attribute("value")
                     where nameAttribute != null && !String.IsNullOrEmpty(nameAttribute.Value)
@@ -195,7 +195,8 @@ namespace NuGet
                         select new ManifestReferenceSet
                         {
                             TargetFramework = element.GetOptionalAttributeValue("targetFramework").SafeTrim(),
-                            References = ReadReference(element, throwIfEmpty: true)
+                            References = ReadReference(element, throwIfEmpty: true),
+                            Properties = ReadProperties(element)
                         }).ToList();
             }
         }
@@ -265,7 +266,8 @@ namespace NuGet
                         select new ManifestDependencySet
                         {
                             TargetFramework = element.GetOptionalAttributeValue("targetFramework").SafeTrim(),
-                            Dependencies = ReadDependencies(element)
+                            Dependencies = ReadDependencies(element),
+                            Properties = ReadProperties(element)
                         }).ToList();
             }
         }
@@ -281,7 +283,8 @@ namespace NuGet
                     select new ManifestDependency
                     {
                         Id = idElement.Value.SafeTrim(),
-                        Version = element.GetOptionalAttributeValue("version").SafeTrim()
+                        Version = element.GetOptionalAttributeValue("version").SafeTrim(),
+                        PropertyConstraints = ReadProperties(element, "propertyConstraint")
                     }).ToList();
         }
 
