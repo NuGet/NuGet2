@@ -10,8 +10,14 @@ namespace NuGet
     {
         private readonly FrameworkName _targetFramework;
         private readonly ICollection<string> _references;
+        private readonly ReadOnlyCollection<PackageProperty> _properties;
 
         public PackageReferenceSet(FrameworkName targetFramework, IEnumerable<string> references)
+            : this(targetFramework, references, properties: null)
+        {
+        }
+
+        public PackageReferenceSet(FrameworkName targetFramework, IEnumerable<string> references, IEnumerable<PackageProperty> properties)
         {
             if (references == null)
             {
@@ -20,6 +26,9 @@ namespace NuGet
 
             _targetFramework = targetFramework;
             _references = new ReadOnlyCollection<string>(references.ToList());
+
+            // Properties are optional - so we'll create an empty list by default
+            _properties = new ReadOnlyCollection<PackageProperty>(properties != null ? properties.ToList() : new List<PackageProperty>(0));
         }
 
         public PackageReferenceSet(ManifestReferenceSet manifestReferenceSet)
@@ -35,6 +44,7 @@ namespace NuGet
             }
 
             _references = new ReadOnlyHashSet<string>(manifestReferenceSet.References.Select(r => r.File), StringComparer.OrdinalIgnoreCase);
+            _properties = new ReadOnlyCollection<PackageProperty>(manifestReferenceSet.Properties.Select(p => new PackageProperty(p.Name, p.Value)).ToList());
         }
 
         public ICollection<string> References
@@ -42,6 +52,14 @@ namespace NuGet
             get
             {
                 return _references;
+            }
+        }
+
+        public IEnumerable<PackageProperty> Properties
+        {
+            get
+            {
+                return _properties;
             }
         }
 

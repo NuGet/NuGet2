@@ -135,7 +135,7 @@ namespace NuGet.Test
         {
             var dependencySets = new List<PackageDependencySet>
             {
-                new PackageDependencySet(null, dependencies ?? Enumerable.Empty<PackageDependency>())
+                new PackageDependencySet(null, dependencies ?? Enumerable.Empty<PackageDependency>(), Enumerable.Empty<PackageProperty>())
             };
 
             return CreatePackage(id,

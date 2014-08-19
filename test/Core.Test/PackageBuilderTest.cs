@@ -1514,22 +1514,22 @@ Description is required.");
             var dependencySet2 = builder.DependencySets[1];
             var dependencySet3 = builder.DependencySets[2];
 
-            Assert.Equal(new FrameworkName("Silverlight, Version=4.0"), dependencySet1.TargetFramework);
+            Assert.Equal(new FrameworkName(".NETFramework, Version=1.0"), dependencySet1.TargetFramework);
             var dependencies1 = dependencySet1.Dependencies.ToList();
-            Assert.Equal(1, dependencies1.Count);
-            Assert.Equal("A", dependencies1[0].Id);
+            Assert.Equal(2, dependencies1.Count);
+            Assert.Equal("B", dependencies1[0].Id);
+            Assert.Null(dependencies1[0].VersionSpec);
+            Assert.Equal("C", dependencies1[1].Id);
             Assert.Null(dependencies1[0].VersionSpec);
 
-            Assert.Equal(new FrameworkName(".NETFramework, Version=1.0"), dependencySet2.TargetFramework);
-            var dependencies2 = dependencySet2.Dependencies.ToList();
-            Assert.Equal(2, dependencies2.Count);
-            Assert.Equal("B", dependencies2[0].Id);
-            Assert.Null(dependencies2[0].VersionSpec);
-            Assert.Equal("C", dependencies2[1].Id);
-            Assert.Null(dependencies2[0].VersionSpec);
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0, Profile=Client"), dependencySet2.TargetFramework);
+            Assert.False(dependencySet2.Dependencies.Any());
 
-            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0, Profile=Client"), dependencySet3.TargetFramework);
-            Assert.False(dependencySet3.Dependencies.Any());
+            Assert.Equal(new FrameworkName("Silverlight, Version=4.0"), dependencySet3.TargetFramework);
+            var dependencies3 = dependencySet3.Dependencies.ToList();
+            Assert.Equal(1, dependencies3.Count);
+            Assert.Equal("A", dependencies3[0].Id);
+            Assert.Null(dependencies3[0].VersionSpec);
         }
 
         [Fact]

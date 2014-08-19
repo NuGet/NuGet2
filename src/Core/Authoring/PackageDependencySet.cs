@@ -10,8 +10,14 @@ namespace NuGet
     {
         private readonly FrameworkName _targetFramework;
         private readonly ReadOnlyCollection<PackageDependency> _dependencies;
+        private readonly ReadOnlyCollection<PackageProperty> _properties;
 
         public PackageDependencySet(FrameworkName targetFramework, IEnumerable<PackageDependency> dependencies)
+            : this(targetFramework, dependencies, properties: null)
+        {
+        }
+
+        public PackageDependencySet(FrameworkName targetFramework, IEnumerable<PackageDependency> dependencies, IEnumerable<PackageProperty> properties)
         {
             if (dependencies == null)
             {
@@ -20,6 +26,9 @@ namespace NuGet
 
             _targetFramework = targetFramework;
             _dependencies = new ReadOnlyCollection<PackageDependency>(dependencies.ToList());
+
+            // Properties are optional - so we'll create an empty list by default
+            _properties = new ReadOnlyCollection<PackageProperty>(properties != null ? properties.ToList() : new List<PackageProperty>(0));
         }
 
         public FrameworkName TargetFramework
@@ -27,6 +36,14 @@ namespace NuGet
             get
             {
                 return _targetFramework;
+            }
+        }
+
+        public IEnumerable<PackageProperty> Properties
+        {
+            get
+            {
+                return _properties;
             }
         }
 
