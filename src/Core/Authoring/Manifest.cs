@@ -212,7 +212,7 @@ namespace NuGet
                     {
                         TargetFramework = dependencySet.TargetFramework != null ? VersionUtility.GetFrameworkString(dependencySet.TargetFramework) : null,
                         Dependencies = CreateDependencies(dependencySet.Dependencies),
-                        Properties = CreateProperties(dependencySet).ToList()
+                        Properties = CreateProperties(dependencySet)
                     }).ToList();
         }
 
@@ -227,7 +227,9 @@ namespace NuGet
                     select new ManifestDependency
                     {
                         Id = dependency.Id.SafeTrim(),
-                        Version = dependency.VersionSpec.ToStringSafe()
+                        Version = dependency.VersionSpec.ToStringSafe(),
+                        PropertyConstraints = dependency.PropertyConstraints != null ?
+                            dependency.PropertyConstraints.Select(c => new ManifestProperty { Name = c.Name, Value = c.Value }).ToList() : null
                     }).ToList();
         }
 
