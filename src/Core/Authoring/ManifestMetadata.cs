@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Serialization;
-using NuGet;
 using NuGet.Resources;
 
 namespace NuGet
@@ -452,7 +451,7 @@ namespace NuGet
                                select new PackageDependency(
                                    d.Id,
                                    String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version),
-                                   d.PropertyConstraints.Select(c => new PackageProperty(c.Name, c.Value)));
+                                   d.PropertyConstraints != null ? d.PropertyConstraints.Select(c => new PackageProperty(c.Name, c.Value)) : Enumerable.Empty<PackageProperty>());
 
             var properties = manifestDependencySet.Properties == null ? Enumerable.Empty<PackageProperty>() :
                 from p in manifestDependencySet.Properties
