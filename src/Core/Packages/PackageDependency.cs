@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NuGet
 {
@@ -23,7 +24,7 @@ namespace NuGet
             }
             Id = id;
             VersionSpec = versionSpec;
-            PropertyConstraints = propertyConstraints;
+            PropertyConstraints = propertyConstraints != null ? propertyConstraints : Enumerable.Empty<PackageProperty>();
         }
 
         public string Id
