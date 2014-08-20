@@ -1,11 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Moq;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
     public class PackageCreater
     {
-        public static string CreatePackage(string id, string version, string outputDirectory)
+        public static string CreatePackage(string id, string version, string outputDirectory, 
+            Action<PackageBuilder> additionalAction = null)
         {
             PackageBuilder builder = new PackageBuilder()
             {
@@ -15,6 +17,10 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             };
             builder.Authors.Add("test");
             builder.Files.Add(CreatePackageFile(@"content\test1.txt"));
+            if (additionalAction != null)
+            {
+                additionalAction(builder);
+            }
 
             var packageFileName = Path.Combine(outputDirectory, id + "." + version + ".nupkg");
             using (var stream = new FileStream(packageFileName, FileMode.CreateNew))
