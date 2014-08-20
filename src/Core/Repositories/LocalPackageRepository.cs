@@ -91,12 +91,13 @@ namespace NuGet
                 // The IPackage object doesn't carry the References information.
                 // Thus we set the References for the manifest to the set of all valid assembly references
                 manifest.Metadata.ReferenceSets = package.AssemblyReferences
+                                                      /* TODO We need to handle properties in this group */
                                                       .GroupBy(f => f.TargetFramework)
                                                       .Select(
                                                         g => new ManifestReferenceSet
                                                         {
                                                             TargetFramework = g.Key == null ? null : VersionUtility.GetFrameworkString(g.Key),
-                                                            References = g.Select(p => new ManifestReference { File = p.Name }).ToList()
+                                                            References = g.Select(p => new ManifestReference { File = p.Name }).ToList(),
                                                         })
                                                       .ToList();
 
