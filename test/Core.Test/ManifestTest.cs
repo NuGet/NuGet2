@@ -420,64 +420,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void ReadFromThrowIfReferenceGroupIsEmptyAndValidateSchemaIsTrue()
-        {
-            // Arrange
-            string content = @"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-    <references>
-        <group>
-        </group>
-    </references>
-  </metadata>
-</package>";
-
-            // Switch to invariant culture to ensure the error message is in english.
-            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
-
-            // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
-                () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
-                "The element 'group' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' has incomplete content. List of possible elements expected: 'reference' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd'.");
-        }
-
-        [Fact]
-        public void ReadFromThrowIfReferenceGroupIsEmptyAndValidateSchemaIsFalse()
-        {
-            // Arrange
-            string content = @"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-    <references>
-        <group>
-        </group>
-    </references>
-  </metadata>
-</package>";
-
-            // Switch to invariant culture to ensure the error message is in english.
-            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
-
-            // Act && Assert
-            ExceptionAssert.Throws<InvalidDataException>(
-                () => Manifest.ReadFrom(content.AsStream(), validateSchema: false),
-                @"The element package\metadata\references\group must contain at least one <reference> child element.");
-        }
-
-        [Fact]
         public void ManifestGroupDependencySetsByTargetFrameworkAndPutNullFrameworkFirst()
         {
             // Arrange
@@ -904,6 +846,440 @@ namespace NuGet.Test
                 Assert.Equal(newManifest.Files[i].Source, manifest.Files[i].Source);
                 Assert.Equal(newManifest.Files[i].Target, manifest.Files[i].Target);
             }
+        }
+
+        [Theory]
+        [InlineData("no group",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <dependency id=""B"" />
+                    <dependency id=""C"" />
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("one group",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group targetFramework=""net40"">
+                        <dependency id=""B"" />
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("two groups (1,1)",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group targetFramework=""net40"">
+                        <dependency id=""B"" />
+                    </group>
+                    <group targetFramework=""net45"">
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("two groups (2,0)",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group targetFramework=""net40"">
+                        <dependency id=""B"" />
+                        <dependency id=""C"" />
+                    </group>
+                    <group targetFramework=""net45"">
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("one group with a property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <dependency id=""B"" />
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("two groups with properties",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <dependency id=""B"" />
+                    </group>
+                    <group>
+                        <property name=""architecture"" value=""x86"" />
+                        <dependency id=""C"" />
+                        <property name=""configuration"" value=""release"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaSucceedsForValidDependencies(string test, string content)
+        {
+            // Arrange
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act
+            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: true);
+            var dependencies = manifest.Metadata.DependencySets.SelectMany(s => s.Dependencies);
+
+            // Assert
+            Assert.Equal(2, dependencies.Count());
+            Assert.Equal("B", dependencies.First().Id);
+            Assert.Equal("C", dependencies.Last().Id);
+        }
+
+        [Theory]
+        [InlineData("no groups",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <dependency />
+                    <dependency version=""1.0.0"" />
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("mixed with targetFramework",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <dependency id=""B"" />
+                    <group targetFramework=""net40"">
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("mixed with property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <dependency id=""B"" />
+                    </group>
+                    <dependency id=""C"" />
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("mixed with empty group with property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                    </group>
+                    <dependency id=""B"" />
+                    <dependency id=""C"" />
+                </dependencies>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaFailsForInvalidDependencies(string test, string content)
+        {
+            // Arrange
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act & Assert - Some will be InvalidDataExceptions; some will be InvalidOperationException
+            ExceptionAssert.Throws<Exception>(
+                () => Manifest.ReadFrom(content.AsStream(), validateSchema: true));
+        }
+
+
+        [Theory]
+        [InlineData("no group",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <reference file=""B"" />
+                    <reference file=""C"" />
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("one group",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group targetFramework=""net40"">
+                        <reference file=""B"" />
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("two groups (1,1)",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group targetFramework=""net40"">
+                        <reference file=""B"" />
+                    </group>
+                    <group targetFramework=""net45"">
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("two groups (2,0)",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group targetFramework=""net40"">
+                        <reference file=""B"" />
+                        <reference file=""C"" />
+                    </group>
+                    <group targetFramework=""net45"">
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("one group with property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <reference file=""B"" />
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("two groups with properties",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <reference file=""B"" />
+                    </group>
+                    <group>
+                        <property name=""architecture"" value=""x86"" />
+                        <reference file=""C"" />
+                        <property name=""configuration"" value=""release"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaSucceedsForValidReferences(string test, string content)
+        {
+            // Arrange
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act
+            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: true);
+            var references = manifest.Metadata.ReferenceSets.SelectMany(s => s.References);
+
+            // Assert
+            Assert.Equal(2, references.Count());
+            Assert.Equal("B", references.First().File);
+            Assert.Equal("C", references.Last().File);
+        }
+
+        [Theory]
+        [InlineData("missing file",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <reference />
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("mixed",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <reference file=""B"" />
+                    <group targetFramework=""net40"">
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("mixed with property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <reference file=""B"" />
+                    </group>
+                    <reference file=""C"" />
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("mixed with empty group with property",
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                    </group>
+                    <reference file=""B"" />
+                    <reference file=""C"" />
+                </references>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaFailsForInvalidReferences(string test, string content)
+        {
+            // Arrange
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act & Assert - Some will be InvalidDataExceptions; some will be InvalidOperationException
+            ExceptionAssert.Throws<Exception>(
+                () => Manifest.ReadFrom(content.AsStream(), validateSchema: true));
         }
 
         private void AssertManifest(Manifest expected, Manifest actual)

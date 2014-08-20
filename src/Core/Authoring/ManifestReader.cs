@@ -178,7 +178,7 @@ namespace NuGet
                 throw new InvalidDataException(NuGetResources.Manifest_ReferencesHasMixedElements);
             }
 
-            var references = ReadReference(referencesElement, throwIfEmpty: false);
+            var references = ReadReference(referencesElement);
             if (references.Count > 0)
             {
                 // old format, <reference> is direct child of <references>
@@ -195,24 +195,19 @@ namespace NuGet
                         select new ManifestReferenceSet
                         {
                             TargetFramework = element.GetOptionalAttributeValue("targetFramework").SafeTrim(),
-                            References = ReadReference(element, throwIfEmpty: true),
+                            References = ReadReference(element),
                             Properties = ReadProperties(element)
                         }).ToList();
             }
         }
 
-        public static List<ManifestReference> ReadReference(XElement referenceElement, bool throwIfEmpty)
+        public static List<ManifestReference> ReadReference(XElement referenceElement)
         {
             var references = (from element in referenceElement.ElementsNoNamespace("reference")
                               let fileAttribute = element.Attribute("file")
                               where fileAttribute != null && !String.IsNullOrEmpty(fileAttribute.Value)
                               select new ManifestReference { File = fileAttribute.Value.SafeTrim() }
                              ).ToList();
-
-            if (throwIfEmpty && references.Count == 0)
-            {
-                throw new InvalidDataException(NuGetResources.Manifest_ReferencesIsEmpty);
-            }
 
             return references;
         }

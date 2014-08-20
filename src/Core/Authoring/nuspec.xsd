@@ -20,12 +20,10 @@
     </xs:complexType>
   
     <xs:complexType name="dependencyGroup">
-        <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
-                <xs:element name="dependency" minOccurs="0" maxOccurs="unbounded" type="dependency" />
-            </xs:choice>
-        </xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="dependency" minOccurs="0" maxOccurs="unbounded" type="dependency" />
+            <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
+        </xs:choice>
         <xs:attribute name="targetFramework" type="xs:string" use="optional" />
     </xs:complexType>
 
@@ -34,12 +32,10 @@
     </xs:complexType>
 
     <xs:complexType name="referenceGroup">
-        <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
-                <xs:element name="reference" minOccurs="1" maxOccurs="unbounded" type="reference" />
-            </xs:choice>
-        </xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="reference" minOccurs="0" maxOccurs="unbounded" type="reference" />
+            <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="property" />
+        </xs:choice>
         <xs:attribute name="targetFramework" type="xs:string" use="optional" />
     </xs:complexType>
     
