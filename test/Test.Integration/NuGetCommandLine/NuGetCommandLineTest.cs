@@ -104,18 +104,31 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile()
         {
             //Arrange
-            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
-            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
-            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(OneSpecfolder);
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            //Act
-            int result = Program.Main(args);
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
+                File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+                File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(OneSpecfolder);
 
-            //Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                //Act
+                int result = Program.Main(args);
+
+                //Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Theory]
@@ -144,20 +157,33 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_CreatesPackageAppliesMinClientVersionValue()
         {
             //Arrange
-            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
-            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
-            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
-            string[] args = new string[] { "pack", "-minClientVersion", "2.4" };
-            Directory.SetCurrentDirectory(OneSpecfolder);
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            //Act
-            int result = Program.Main(args);
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
+                File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+                File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
+                string[] args = new string[] { "pack", "-minClientVersion", "2.4" };
+                Directory.SetCurrentDirectory(OneSpecfolder);
 
-            //Assert
-            Assert.Equal(0, result);
+                //Act
+                int result = Program.Main(args);
 
-            IPackage package = new OptimizedZipPackage(Path.GetFullPath("antlr.3.1.1.nupkg"));
-            Assert.Equal(new Version("2.4"), package.MinClientVersion);
+                //Assert
+                Assert.Equal(0, result);
+
+                IPackage package = new OptimizedZipPackage(Path.GetFullPath("antlr.3.1.1.nupkg"));
+                Assert.Equal(new Version("2.4"), package.MinClientVersion);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
@@ -478,14 +504,22 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         [Fact]
         public void PackageCommand_NotSpecifyingFilesElementPackagesEmptyFrameworkFolderInContent()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("wow", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory("wow\\content");
-            Directory.CreateDirectory("wow\\content\\net40");
-            File.WriteAllText("wow\\content\\file1.txt", "file 1");
-            File.WriteAllText("wow\\content\\file2.txt", "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange         
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+
+                string nuspecFile = Path.Combine("wow", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory("wow\\content");
+                Directory.CreateDirectory("wow\\content\\net40");
+                File.WriteAllText("wow\\content\\file1.txt", "file 1");
+                File.WriteAllText("wow\\content\\file2.txt", "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -495,31 +529,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack"};
-            Directory.SetCurrentDirectory("wow");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("wow");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt", @"content\net40\_._" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt", @"content\net40\_._" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_NotSpecifyingFilesElementPackagesEmptyFrameworkFolderInLib()
         {
             // Arrange            
-            string nuspecFile = Path.Combine("pta", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("pta", "lib"));
-            Directory.CreateDirectory(Path.Combine("pta", "lib", "net40"));
-            File.WriteAllText(Path.Combine("pta", "lib\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("pta", "lib\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("pta", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("pta", "lib"));
+                Directory.CreateDirectory(Path.Combine("pta", "lib", "net40"));
+                File.WriteAllText(Path.Combine("pta", "lib\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("pta", "lib\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -529,39 +576,52 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("pta");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("pta");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"lib\file1.txt", @"lib\file2.txt", @"lib\net40\_._" });
+                VerifyPackageContents(expectedPackage, new[] { @"lib\file1.txt", @"lib\file2.txt", @"lib\net40\_._" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FileSourceEndsWithDirectoryCharPackageTheWholeDirectory()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("hir", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            if (Directory.Exists("hir"))
+            // Arrange    
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
             {
-                Directory.Delete("hir", recursive: true);
-            }
-            Directory.CreateDirectory(Path.Combine("hir", "lib"));
-            Directory.CreateDirectory(Path.Combine("hir", "lib", "net40"));
-            Directory.CreateDirectory(Path.Combine("hir", "lib", "net45"));
-            Directory.CreateDirectory(Path.Combine("hir", "lib", "net45", "css"));
-            Directory.CreateDirectory(Path.Combine("hir", "lib", "win8"));
-            Directory.CreateDirectory(Path.Combine("hir", "lib", "win8", "js"));
-            File.WriteAllText(Path.Combine("hir", "lib\\net45\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("hir", "lib\\win8\\js\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("hir", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                if (Directory.Exists("hir"))
+                {
+                    Directory.Delete("hir", recursive: true);
+                }
+                Directory.CreateDirectory(Path.Combine("hir", "lib"));
+                Directory.CreateDirectory(Path.Combine("hir", "lib", "net40"));
+                Directory.CreateDirectory(Path.Combine("hir", "lib", "net45"));
+                Directory.CreateDirectory(Path.Combine("hir", "lib", "net45", "css"));
+                Directory.CreateDirectory(Path.Combine("hir", "lib", "win8"));
+                Directory.CreateDirectory(Path.Combine("hir", "lib", "win8", "js"));
+                File.WriteAllText(Path.Combine("hir", "lib\\net45\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("hir", "lib\\win8\\js\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -574,18 +634,24 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <file src=""lib\"" target=""content"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("hir");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("hir");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\net45\file1.txt", @"content\net45\css\_._", @"content\win8\js\file2.txt", @"content\net40\_._" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\net45\file1.txt", @"content\net45\css\_._", @"content\win8\js\file2.txt", @"content\net40\_._" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Theory]
@@ -593,12 +659,19 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         [InlineData("lib\\net40")]
         public void PackageCommand_FileSourceEndsWithDirectoryCharPackageEmptyDirectory(string sourcePath)
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("tir", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("tir", "lib"));
-            Directory.CreateDirectory(Path.Combine("tir", "lib", "net40"));
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange       
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("tir", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("tir", "lib"));
+                Directory.CreateDirectory(Path.Combine("tir", "lib", "net40"));
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -611,31 +684,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <file src=""" + sourcePath + @""" target=""lib\net40"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("tir");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("tir");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"lib\net40\_._" });
+                VerifyPackageContents(expectedPackage, new[] { @"lib\net40\_._" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_NotSpecfingFilesElementDoesNotPackageEmptyFrameworkFolderIfExcludeEmptyDirectoriesIsSet()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("bar", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("bar", "content"));
-            Directory.CreateDirectory(Path.Combine("bar", "content", "net40"));
-            File.WriteAllText(Path.Combine("bar", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("bar", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("bar", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("bar", "content"));
+                Directory.CreateDirectory(Path.Combine("bar", "content", "net40"));
+                File.WriteAllText(Path.Combine("bar", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("bar", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -645,31 +731,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
-            Directory.SetCurrentDirectory("bar");
+                string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
+                Directory.SetCurrentDirectory("bar");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt"});
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FilesElementSearchIncludesEmptyFrameworkFolders()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("cat", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("cat", "content"));
-            Directory.CreateDirectory(Path.Combine("cat", "content", "sl40"));
-            File.WriteAllText(Path.Combine("cat", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("cat", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange         
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("cat", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("cat", "content"));
+                Directory.CreateDirectory(Path.Combine("cat", "content", "sl40"));
+                File.WriteAllText(Path.Combine("cat", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("cat", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -682,31 +781,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("cat");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("cat");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt", @"content\sl40\_._" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt", @"content\sl40\_._" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfExcludeEmptyDirectoriesIsSet()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("ohm", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("ohm", "content"));
-            Directory.CreateDirectory(Path.Combine("ohm", "content", "sl40"));
-            File.WriteAllText(Path.Combine("ohm", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("ohm", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("ohm", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("ohm", "content"));
+                Directory.CreateDirectory(Path.Combine("ohm", "content", "sl40"));
+                File.WriteAllText(Path.Combine("ohm", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("ohm", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -719,31 +831,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
-            Directory.SetCurrentDirectory("ohm");
+                string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
+                Directory.SetCurrentDirectory("ohm");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfExcluded()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("pam", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("pam", "content"));
-            Directory.CreateDirectory(Path.Combine("pam", "content", "sl40"));
-            File.WriteAllText(Path.Combine("pam", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("pam", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange  
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("pam", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("pam", "content"));
+                Directory.CreateDirectory(Path.Combine("pam", "content", "sl40"));
+                File.WriteAllText(Path.Combine("pam", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("pam", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -756,31 +881,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack", "-Exclude", @"content\sl*" };
-            Directory.SetCurrentDirectory("pam");
+                string[] args = new string[] { "pack", "-Exclude", @"content\sl*" };
+                Directory.SetCurrentDirectory("pam");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfSearchPatternDoesNotMatch()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("nay", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("nay", "content"));
-            Directory.CreateDirectory(Path.Combine("nay", "content", "sl40"));
-            File.WriteAllText(Path.Combine("nay", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("nay", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("nay", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("nay", "content"));
+                Directory.CreateDirectory(Path.Combine("nay", "content", "sl40"));
+                File.WriteAllText(Path.Combine("nay", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("nay", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -793,31 +931,44 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\*.*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("nay");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("nay");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfSearchPatternDoesNotMatch2()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("qaw", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("qaw", "content"));
-            Directory.CreateDirectory(Path.Combine("qaw", "content", "winrt"));
-            File.WriteAllText(Path.Combine("qaw", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("qaw", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("qaw", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("qaw", "content"));
+                Directory.CreateDirectory(Path.Combine("qaw", "content", "winrt"));
+                File.WriteAllText(Path.Combine("qaw", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("qaw", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -830,31 +981,43 @@ namespace NuGet.Test.Integration.NuGetCommandLine
      <file src=""**\file*"" />
   </files>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("qaw");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("qaw");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_NotSpecfingFilesElementDoesNotPackageEmptyNormalFolder()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine("lil", "SpecWithFiles.nuspec");
-            string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("lil", "content"));
-            Directory.CreateDirectory(Path.Combine("lil", "content", "abc"));
-            File.WriteAllText(Path.Combine("lil", "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("lil", "content\\file2.txt"), "file 2");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange      
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine("lil", "SpecWithFiles.nuspec");
+                string expectedPackage = "test.1.1.1.nupkg";
+                Directory.CreateDirectory(Path.Combine("lil", "content"));
+                Directory.CreateDirectory(Path.Combine("lil", "content", "abc"));
+                File.WriteAllText(Path.Combine("lil", "content\\file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine("lil", "content\\file2.txt"), "file 2");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>test</id>
@@ -864,30 +1027,42 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("lil");
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory("lil");
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt"});
+                VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt", @"content\file2.txt" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingEmptyFilesElementInNuspecPackagesNoFiles()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
-            string expectedPackage = "empty.2.2.2.nupkg";
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file2.txt"), "file 2");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file3.txt"), "file 3");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange 
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+                string expectedPackage = "empty.2.2.2.nupkg";
+                File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+                File.WriteAllText(Path.Combine(SpecificFilesFolder, "file2.txt"), "file 2");
+                File.WriteAllText(Path.Combine(SpecificFilesFolder, "file3.txt"), "file 3");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>empty</id>
@@ -901,28 +1076,40 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </metadata>
   <files />
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(SpecificFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            VerifyPackageContents(expectedPackage, new string[0]);
+                VerifyPackageContents(expectedPackage, new string[0]);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_AcceptEmptyDependenciesElement()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
-            string expectedPackage = "dep.2.2.2.nupkg";
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange 
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+                string expectedPackage = "dep.2.2.2.nupkg";
+                File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>dep</id>
@@ -934,30 +1121,42 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     </dependencies>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(SpecificFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
+                ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
 
-            Assert.False(package.DependencySets.Any());
+                Assert.False(package.DependencySets.Any());
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_AcceptEmptyFrameworkAssemblyElement()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
-            string expectedPackage = "framework.2.2.2.nupkg";
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange   
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+                string expectedPackage = "framework.2.2.2.nupkg";
+                File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>framework</id>
@@ -969,204 +1168,256 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     </frameworkAssemblies>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(SpecificFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
+                ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
 
-            Assert.False(package.FrameworkAssemblies.Any());
+                Assert.False(package.FrameworkAssemblies.Any());
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge()
         {
-            // Arrange            
-            string expectedPackage = "FakeProject.1.2.0.0.nupkg";
-            string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
+            // Arrange        
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("Runner.cs", @"using System;
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "FakeProject.1.2.0.0.nupkg";
+                string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
+
+                WriteProjectFile("Runner.cs", @"using System;
 public class Runner { 
     public static void Run() { 
         Console.WriteLine(""Hello World"");
     }
 }");
-            WriteProjectFile(@"..\Foo.cs", @"using System;
+                WriteProjectFile(@"..\Foo.cs", @"using System;
 public class Foo { 
     public static void Run() { 
         Console.WriteLine(""Hello World"");
     }
 }");
-            WriteProjectFile(@"Bar.cs", @"using System;
+                WriteProjectFile(@"Bar.cs", @"using System;
 public class Bar { 
     public static void Run() { 
         Console.WriteLine(""Hello World"");
     }
 }");
-            WriteProjectFile(@"..\Baz.cs", @"using System;
+                WriteProjectFile(@"..\Baz.cs", @"using System;
 public class Baz { 
     public static void Run() { 
         Console.WriteLine(""Hello World"");
     }
 }");
-            WriteAssemblyInfo("FakeProject",
-                               "1.2.0.0",
-                               "David Inc",
-                               "This is a test. Ignore me");
+                WriteAssemblyInfo("FakeProject",
+                                   "1.2.0.0",
+                                   "David Inc",
+                                   "This is a test. Ignore me");
 
-            CreateProject("FakeProject",
-                          compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
-                          links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
+                CreateProject("FakeProject",
+                              compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
+                              links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
 
-            string[] args = new string[] { "pack", "-Symbols", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "-Symbols", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
-            Assert.Equal("FakeProject", package.Id);
-            Assert.Equal(new SemanticVersion("1.2"), package.Version);
-            Assert.Equal("David Inc", package.Authors.First());
-            Assert.Equal("This is a test. Ignore me", package.Description);
-            Assert.True(File.Exists(expectedSymbolsPackage));
-            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
+                Assert.Equal("FakeProject", package.Id);
+                Assert.Equal(new SemanticVersion("1.2"), package.Version);
+                Assert.Equal("David Inc", package.Authors.First());
+                Assert.Equal("This is a test. Ignore me", package.Description);
+                Assert.True(File.Exists(expectedSymbolsPackage));
+                VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
                                                                   @"src\Runner.cs",
                                                                   @"src\Folder\Baz.cs",
                                                                   @"src\Bar.cs",
                                                                   @"src\Properties\AssemblyInfo.cs",
                                                                   @"lib\net40\FakeProject.dll",
                                                                   @"lib\net40\FakeProject.pdb" });
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput()
         {
-            // Arrange                        
-            string expectedPackage = "ProjectWithContent.1.5.0.0.nupkg";
-            var contentFiles = new[] { "Foo.xml", "Bar.txt" };
-            var sourceFiles = new[] { "A.cs", "B.cs" };
+            // Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            foreach (var contentFile in contentFiles)
+            try
             {
-                WriteProjectFile(contentFile, contentFile);
-            }
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithContent.1.5.0.0.nupkg";
+                var contentFiles = new[] { "Foo.xml", "Bar.txt" };
+                var sourceFiles = new[] { "A.cs", "B.cs" };
 
-            int index = 0;
-            foreach (var sourceFile in sourceFiles)
-            {
-                WriteProjectFile(sourceFile, String.Format(@"using System;
+                foreach (var contentFile in contentFiles)
+                {
+                    WriteProjectFile(contentFile, contentFile);
+                }
+
+                int index = 0;
+                foreach (var sourceFile in sourceFiles)
+                {
+                    WriteProjectFile(sourceFile, String.Format(@"using System;
 public class Cl_{0} {{
     public void Foo() {{ }}
 }}
 ", index++));
-            }
+                }
 
-            WriteAssemblyInfo("ProjectWithContent",
-                               "1.5.0.0",
-                               "David",
-                               "Project with content");
+                WriteAssemblyInfo("ProjectWithContent",
+                                   "1.5.0.0",
+                                   "David",
+                                   "Project with content");
 
-            CreateProject("ProjectWithContent", content: contentFiles, compile: sourceFiles);
+                CreateProject("ProjectWithContent", content: contentFiles, compile: sourceFiles);
 
-            string[] args = new string[] { "pack", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithContent.dll",
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithContent.dll",
                                                                          @"content\Foo.xml",
                                                                          @"content\Bar.txt" });
-            Assert.Equal("ProjectWithContent", package.Id);
-            Assert.Equal(new SemanticVersion("1.5"), package.Version);
-            Assert.Equal("David", package.Authors.First());
-            Assert.Equal("Project with content", package.Description);
+                Assert.Equal("ProjectWithContent", package.Id);
+                Assert.Equal(new SemanticVersion("1.5"), package.Version);
+                Assert.Equal("David", package.Authors.First());
+                Assert.Equal("Project with content", package.Description);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_TestDefaultPackageIssueRules()
         {
             //Arrange
-            string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
-            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            // violated rule: Invalid Framework Folder
-            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib"));
-            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
-            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\unknown\\abc.dll"), "assembly");
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
+                File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
 
-            // violated rule: Assembly placed directly under lib
-            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\def.dll"), "assembly");
+                // violated rule: Invalid Framework Folder
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\unknown\\abc.dll"), "assembly");
 
-            // violated rule: Assembly placed directly under lib
-            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "content"));
-            File.WriteAllText(Path.Combine(OneSpecfolder, "content\\hello.dll"), "assembly");
+                // violated rule: Assembly placed directly under lib
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\def.dll"), "assembly");
 
-            // violated rule: Script file placed outside tools
-            File.WriteAllText(Path.Combine(OneSpecfolder, "install.ps1"), "script");
+                // violated rule: Assembly placed directly under lib
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "content"));
+                File.WriteAllText(Path.Combine(OneSpecfolder, "content\\hello.dll"), "assembly");
 
-            // violated rule: Unrecognized script file
-            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools"));
-            File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\myscript.ps1"), "script");
+                // violated rule: Script file placed outside tools
+                File.WriteAllText(Path.Combine(OneSpecfolder, "install.ps1"), "script");
 
-            // violated rule: transform file outside content folder
-            File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\web.config.transform"), "transform");
+                // violated rule: Unrecognized script file
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools"));
+                File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\myscript.ps1"), "script");
 
-            // violated rule: non-assembly inside lib
-            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\mylibrary.xml"), "xml");
+                // violated rule: transform file outside content folder
+                File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\web.config.transform"), "transform");
 
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(OneSpecfolder);
+                // violated rule: non-assembly inside lib
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\mylibrary.xml"), "xml");
 
-            //Act
-            int result = Program.Main(args);
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(OneSpecfolder);
 
-            //Assert
-            Assert.Equal(0, result);
-            string output = consoleOutput.ToString();
-            Assert.True(output.Contains("Successfully created package"));
+                //Act
+                int result = Program.Main(args);
 
-            // Asserts for package issues
-            Assert.True(output.Contains("6 issue(s) found with package 'Antlr'."));
-            Assert.True(output.Contains("Invalid framework folder"));
-            Assert.True(output.Contains("Assembly not inside a framework folder"));
-            Assert.True(output.Contains("Assembly outside lib folder"));
-            Assert.True(output.Contains("PowerShell file outside tools folder"));
-            Assert.True(output.Contains("Transform file outside content folder."));
-            Assert.True(output.Contains("Unrecognized PowerShell file"));
+                //Assert
+                Assert.Equal(0, result);
+                string output = consoleOutput.ToString();
+                Assert.True(output.Contains("Successfully created package"));
+
+                // Asserts for package issues
+                Assert.True(output.Contains("6 issue(s) found with package 'Antlr'."));
+                Assert.True(output.Contains("Invalid framework folder"));
+                Assert.True(output.Contains("Assembly not inside a framework folder"));
+                Assert.True(output.Contains("Assembly outside lib folder"));
+                Assert.True(output.Contains("PowerShell file outside tools folder"));
+                Assert.True(output.Contains("Transform file outside content folder."));
+                Assert.True(output.Contains("Unrecognized PowerShell file"));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject()
         {
             // Arrange
-            string expectedPackage = "ProjectWithNuSpec.1.2.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithNuSpec",
-                               "1.2.0.0",
-                               "David",
-                               "Project with content",
-                               "Title of Package");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithNuSpec.1.2.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithNuSpec",
+                                   "1.2.0.0",
+                                   "David",
+                                   "Project with content",
+                                   "Title of Package");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$id$</id>
@@ -1185,48 +1436,61 @@ public class Cl_{0} {{
   </metadata>
 </package>");
 
-            CreateProject("ProjectWithNuSpec", content: new[] { "package.nuspec" },
-                                               compile: new[] { "foo.cs" });
+                CreateProject("ProjectWithNuSpec", content: new[] { "package.nuspec" },
+                                                   compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithNuSpec.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "ProjectWithNuSpec.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpec.dll" });
-            Assert.Equal("ProjectWithNuSpec", package.Id);
-            Assert.Equal(new SemanticVersion("1.2"), package.Version);
-            Assert.Equal("Title of Package", package.Title);
-            Assert.Equal("David", package.Authors.First());
-            Assert.Equal("Description from nuspec", package.Description);
-            var dependencySets = package.DependencySets.ToList();
-            Assert.Equal(1, dependencySets.Count);
-            var dependencies = dependencySets[0].Dependencies.ToList();
-            Assert.Equal(1, dependencies.Count);
-            Assert.Equal("elmah", dependencies[0].Id);
-            var frameworkAssemblies = package.FrameworkAssemblies.ToList();
-            Assert.Equal("System.Web", frameworkAssemblies[0].AssemblyName);
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpec.dll" });
+                Assert.Equal("ProjectWithNuSpec", package.Id);
+                Assert.Equal(new SemanticVersion("1.2"), package.Version);
+                Assert.Equal("Title of Package", package.Title);
+                Assert.Equal("David", package.Authors.First());
+                Assert.Equal("Description from nuspec", package.Description);
+                var dependencySets = package.DependencySets.ToList();
+                Assert.Equal(1, dependencySets.Count);
+                var dependencies = dependencySets[0].Dependencies.ToList();
+                Assert.Equal(1, dependencies.Count);
+                Assert.Equal("elmah", dependencies[0].Id);
+                var frameworkAssemblies = package.FrameworkAssemblies.ToList();
+                Assert.Equal("System.Web", frameworkAssemblies[0].AssemblyName);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles()
         {
             // Arrange
-            string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithNuSpecEmptyFiles",
-                               "1.0.0.0",
-                               "Luan",
-                               "Project with content",
-                               "Title of Package");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithNuSpecEmptyFiles",
+                                   "1.0.0.0",
+                                   "Luan",
+                                   "Project with content",
+                                   "Title of Package");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$id$</id>
@@ -1241,37 +1505,50 @@ public class Cl_{0} {{
   </metadata>
   <files />
 </package>");
-            WriteProjectFile("readme.txt", "This is so fun.");
-            CreateProject("ProjectWithNuSpecEmptyFiles", content: new[] { "package.nuspec", "readme.txt" },
-                                               compile: new[] { "foo.cs" });
+                WriteProjectFile("readme.txt", "This is so fun.");
+                CreateProject("ProjectWithNuSpecEmptyFiles", content: new[] { "package.nuspec", "readme.txt" },
+                                                   compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithNuSpecEmptyFiles.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "ProjectWithNuSpecEmptyFiles.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecEmptyFiles.dll" });
-            Assert.False(package.GetFiles("content").Any());
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecEmptyFiles.dll" });
+                Assert.False(package.GetFiles("content").Any());
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata()
         {
-            // Arrange                        
-            string expectedPackage = "Test.1.2.nupkg";
-            WriteAssemblyInfo("FooProject",
-                               "1.5.0.0",
-                               "David",
-                               "Project with content");
+            // Arrange       
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("FooProject.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "Test.1.2.nupkg";
+                WriteAssemblyInfo("FooProject",
+                                   "1.5.0.0",
+                                   "David",
+                                   "Project with content");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("FooProject.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>Test</id>
@@ -1281,61 +1558,87 @@ public class Cl_{0} {{
   </metadata>
 </package>");
 
-            CreateProject("FooProject", compile: new[] { "foo.cs" });
+                CreateProject("FooProject", compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "FooProject.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "FooProject.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FooProject.dll" });
-            Assert.Equal("Test", package.Id);
-            Assert.Equal(new SemanticVersion("1.2"), package.Version);
-            Assert.Equal("Description from nuspec", package.Description);
-            Assert.Equal("John", package.Authors.First());
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FooProject.dll" });
+                Assert.Equal("Test", package.Id);
+                Assert.Equal(new SemanticVersion("1.2"), package.Version);
+                Assert.Equal("Description from nuspec", package.Description);
+                Assert.Equal("John", package.Authors.First());
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNoBuildThrowsIfProjectNotBuilt()
         {
-            // Arrange                        
-            WriteAssemblyInfo("ProjectNoBuild",
-                               "1.5.0.0",
-                               "David",
-                               "Project with content");
+            // Arrange  
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            CreateProject("ProjectNoBuild", compile: new[] { "foo.cs" });
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                WriteAssemblyInfo("ProjectNoBuild",
+                                   "1.5.0.0",
+                                   "David",
+                                   "Project with content");
 
-            string[] args = new string[] { "pack", "ProjectNoBuild.csproj" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                CreateProject("ProjectNoBuild", compile: new[] { "foo.cs" });
 
-            // Act
-            int result = Program.Main(args);
+                string[] args = new string[] { "pack", "ProjectNoBuild.csproj" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Assert
-            Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("Make sure the project has been built."));
+                // Act
+                int result = Program.Main(args);
+
+                // Assert
+                Assert.Equal(1, result);
+                Assert.True(consoleOutput.ToString().Contains("Make sure the project has been built."));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithUnsupportedTokensThrows()
         {
-            // Arrange                        
-            string expectedPackage = "ProjectWithBrokenNuSpec.1.2.nupkg";
-            WriteAssemblyInfo("ProjectWithBrokenNuSpec",
-                               "1.2.0.0",
-                               "David",
-                               "Project with content");
+            // Arrange       
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithBrokenNuSpec.1.2.nupkg";
+                WriteAssemblyInfo("ProjectWithBrokenNuSpec",
+                                   "1.2.0.0",
+                                   "David",
+                                   "Project with content");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$id2$</id>
@@ -1345,33 +1648,46 @@ public class Cl_{0} {{
   </metadata>
 </package>");
 
-            CreateProject("ProjectWithBrokenNuSpec", content: new[] { "package.nuspec" },
-                                               compile: new[] { "foo.cs" });
+                CreateProject("ProjectWithBrokenNuSpec", content: new[] { "package.nuspec" },
+                                                   compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithBrokenNuSpec.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "ProjectWithBrokenNuSpec.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("The replacement token 'id2' has no value."));
-            Assert.False(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(1, result);
+                Assert.True(consoleOutput.ToString().Contains("The replacement token 'id2' has no value."));
+                Assert.False(File.Exists(expectedPackage));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles()
         {
-            // Arrange                        
-            string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
-                               "1.3.0.0",
-                               "David2",
-                               "Project with nuspec that has files");
+            // Arrange          
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
+                                   "1.3.0.0",
+                                   "David2",
+                                   "Project with nuspec that has files");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$AssemblyName$</id>   
@@ -1386,40 +1702,53 @@ public class Cl_{0} {{
   </files>
 </package>");
 
-            CreateProject("ProjectWithNuSpecAndFiles", content: new[] { "package.nuspec" },
-                                                       compile: new[] { "foo.cs" });
+                CreateProject("ProjectWithNuSpecAndFiles", content: new[] { "package.nuspec" },
+                                                           compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithNuSpecAndFiles.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "ProjectWithNuSpecAndFiles.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecAndFiles.dll", 
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecAndFiles.dll", 
                                                                          @"lib\net40\ProjectWithNuSpecAndFiles.pdb" });
-            Assert.Equal("ProjectWithNuSpecAndFiles", package.Id);
-            Assert.Equal(new SemanticVersion("1.3"), package.Version);
-            Assert.Equal("David2", package.Authors.First());
-            Assert.Equal("Project with nuspec that has files", package.Description);
+                Assert.Equal("ProjectWithNuSpecAndFiles", package.Id);
+                Assert.Equal(new SemanticVersion("1.3"), package.Version);
+                Assert.Equal("David2", package.Authors.First());
+                Assert.Equal("Project with nuspec that has files", package.Description);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory()
         {
-            // Arrange                        
-            string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithNuSpecProjectWins",
-                               "1.2.0.0",
-                               "David2",
-                               "Project with nuspec");
+            // Arrange     
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithNuSpecProjectWins",
+                                   "1.2.0.0",
+                                   "David2",
+                                   "Project with nuspec");
+
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$AssemblyName$</id>   
@@ -1429,68 +1758,94 @@ public class Cl_{0} {{
   </metadata>
 </package>");
 
-            CreateProject("ProjectWithNuSpecProjectWins", content: new[] { "package.nuspec" },
-                                                       compile: new[] { "foo.cs" });
+                CreateProject("ProjectWithNuSpecProjectWins", content: new[] { "package.nuspec" },
+                                                           compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                string[] args = new string[] { "pack", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecProjectWins.dll" });
-            Assert.Equal("ProjectWithNuSpecProjectWins", package.Id);
-            Assert.Equal(new SemanticVersion("1.2"), package.Version);
-            Assert.Equal("David2", package.Authors.First());
-            Assert.Equal("Project with nuspec", package.Description);
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecProjectWins.dll" });
+                Assert.Equal("ProjectWithNuSpecProjectWins", package.Id);
+                Assert.Equal(new SemanticVersion("1.2"), package.Version);
+                Assert.Equal("David2", package.Authors.First());
+                Assert.Equal("Project with nuspec", package.Description);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced()
         {
             // Arrange                        
-            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
-                               "1.3.0.0",
-                               "David2",
-                               "Project with nuspec that has files");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile(@"bin\Debug\Fake.dll", "Some fakedll");
-            WriteProjectFile(@"bin\Debug\ProjectWithAssembliesInOutputPath.Fake.dll", "Some fakedll");
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
+                                   "1.3.0.0",
+                                   "David2",
+                                   "Project with nuspec that has files");
 
-            CreateProject("ProjectWithAssembliesInOutputPath", compile: new[] { "foo.cs" });
+                WriteProjectFile("foo.cs", "public class Foo { }");
+                WriteProjectFile(@"bin\Debug\Fake.dll", "Some fakedll");
+                WriteProjectFile(@"bin\Debug\ProjectWithAssembliesInOutputPath.Fake.dll", "Some fakedll");
 
-            string[] args = new string[] { "pack", "ProjectWithAssembliesInOutputPath.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                CreateProject("ProjectWithAssembliesInOutputPath", compile: new[] { "foo.cs" });
 
-            // Act
-            int result = Program.Main(args);
+                string[] args = new string[] { "pack", "ProjectWithAssembliesInOutputPath.csproj", "-Build" };
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Act
+                int result = Program.Main(args);
 
-            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithAssembliesInOutputPath.dll" });
-            Assert.Equal("ProjectWithAssembliesInOutputPath", package.Id);
-            Assert.Equal(new SemanticVersion("1.3"), package.Version);
-            Assert.Equal("David2", package.Authors.First());
-            Assert.Equal("Project with nuspec that has files", package.Description);
+                // Assert
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
+
+                var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithAssembliesInOutputPath.dll" });
+                Assert.Equal("ProjectWithAssembliesInOutputPath", package.Id);
+                Assert.Equal(new SemanticVersion("1.3"), package.Version);
+                Assert.Equal("David2", package.Authors.First());
+                Assert.Equal("Project with nuspec that has files", package.Description);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted()
         {
-            // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
-            string expectedPackage = "hello world.1.1.1.nupkg";
-            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange  
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
+                string expectedPackage = "hello world.1.1.1.nupkg";
+                File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>hello world</id>
@@ -1500,94 +1855,118 @@ public class Cl_{0} {{
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(SpecificFilesFolder);
 
-            // Act
-            int result = Program.Main(args);
+                // Act
+                int result = Program.Main(args);
 
-            // Assert
-            Assert.Equal(1, result);
-            Assert.False(File.Exists(expectedPackage));
+                // Assert
+                Assert.Equal(1, result);
+                Assert.False(File.Exists(expectedPackage));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
         }
 
         [Fact]
         public void PackageCommand_SpecifyingProjectFileAndHaveDependenciesSkipContentFromDependencies()
         {
             // Arrange
-            string packagePath = SavePackage("Test.ContentPackage", "1.6.4");
-            string expectedPackage = "ProjectWithDependenciesWithContent.1.2.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithDependenciesWithContent",
-                              "1.2.0.0",
-                              "Thomas",
-                              "Project with content",
-                              "Title of Package");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
-            // add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
-            WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");
-            WriteProjectFile("foo.aspx", "");
-            WriteProjectFile("foo.cs", "public class Foo { }");
-
-            // temporarily enable package restore for the test to pass 
-            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.Process);
             try
             {
-                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.Process);
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string packagePath = SavePackage("Test.ContentPackage", "1.6.4");
+                string expectedPackage = "ProjectWithDependenciesWithContent.1.2.0.0.nupkg";
+                WriteAssemblyInfo("ProjectWithDependenciesWithContent",
+                                  "1.2.0.0",
+                                  "Thomas",
+                                  "Project with content",
+                                  "Title of Package");
 
-                // packages.config for dependencies  
-                WriteProjectFile("packages.config",
-                                 @"<?xml version=""1.0"" encoding=""utf-8""?>  
+                // add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
+                WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");
+                WriteProjectFile("foo.aspx", "");
+                WriteProjectFile("foo.cs", "public class Foo { }");
+
+                // temporarily enable package restore for the test to pass 
+                string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.Process);
+                try
+                {
+                    Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.Process);
+
+                    // packages.config for dependencies  
+                    WriteProjectFile(
+                        "packages.config",
+                        @"<?xml version=""1.0"" encoding=""utf-8""?>  
 <packages>  
    <package id=""Test.ContentPackage"" version=""1.6.4"" />  
 </packages>");
 
-                // added by Test.ContentPackage, but we have done local changes to this file 
-                WriteProjectFile("MyContentFile.js",
-                                 @"This is a file that is changed in this project. Therefore this file should be included in this package!");
+                    // added by Test.ContentPackage, but we have done local changes to this file 
+                    WriteProjectFile(
+                        "MyContentFile.js",
+                        @"This is a file that is changed in this project. Therefore this file should be included in this package!");
 
-                CreateProject("ProjectWithDependenciesWithContent",
-                              content: new[] { "foo.aspx", "packages.config", "MyContentFile.js", "MyContentFile2.js" },
-                              compile: new[] { "foo.cs" });
+                    CreateProject(
+                        "ProjectWithDependenciesWithContent",
+                        content: new[] { "foo.aspx", "packages.config", "MyContentFile.js", "MyContentFile2.js" },
+                        compile: new[] { "foo.cs" });
 
-                Directory.SetCurrentDirectory(ProjectFilesFolder);
+                    Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-                // Act  
+                    // Act  
 
-                // install packages from packages.config  
-                Program.Main(new[]
-                             {
-                                 "install", "packages.config", "-OutputDirectory", "packages", "-source",
-                                 Path.GetDirectoryName(packagePath)
-                             });
+                    // install packages from packages.config  
+                    Program.Main(new[]
+                    {
+                        "install", "packages.config", "-OutputDirectory", "packages", "-source",
+                        Path.GetDirectoryName(packagePath)
+                    });
 
-                // copy content from the test package (to ensure no changes to the file)
-                File.Copy(@"packages\Test.ContentPackage.1.6.4\Content\MyContentFile2.js", @"MyContentFile2.js");
+                    // copy content from the test package (to ensure no changes to the file)
+                    File.Copy(@"packages\Test.ContentPackage.1.6.4\Content\MyContentFile2.js", @"MyContentFile2.js");
 
-                // execute main program (pack)
-                int result =
-                    Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
+                    // execute main program (pack)
+                    int result =
+                        Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
 
-                // Assert  
-                Assert.Equal(0, result);
-                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-                Assert.True(File.Exists(expectedPackage));
+                    // Assert  
+                    Assert.Equal(0, result);
+                    Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                    Assert.True(File.Exists(expectedPackage));
 
-                // package should not contain content from jquery package that we have not changed
-                var package = VerifyPackageContents(expectedPackage, new[]
-                                                                     {
-                                                                         @"content\foo.aspx",
-                                                                         @"content\MyContentFile.js",
-                                                                         @"lib\net40\ProjectWithDependenciesWithContent.dll"
-                                                                     });
-                var dependencySets = package.DependencySets.ToList();
-                Assert.Equal(1, dependencySets.Count);
-                Assert.Equal("Test.ContentPackage", package.DependencySets.ElementAt(0).Dependencies.Single().Id);
+                    // package should not contain content from jquery package that we have not changed
+                    var package = VerifyPackageContents(
+                        expectedPackage, 
+                        new[]
+                        {
+                            @"content\foo.aspx",
+                            @"content\MyContentFile.js",
+                            @"lib\net40\ProjectWithDependenciesWithContent.dll"
+                        });
+                    var dependencySets = package.DependencySets.ToList();
+                    Assert.Equal(1, dependencySets.Count);
+                    Assert.Equal("Test.ContentPackage", package.DependencySets.ElementAt(0).Dependencies.Single().Id);
+                }
+                finally
+                {
+                    // clean up 
+                    Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable,
+                                                       EnvironmentVariableTarget.Process);
+                }
             }
             finally
             {
-                // clean up 
-                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable,
-                                                   EnvironmentVariableTarget.Process);
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
             }
         }
 
@@ -1686,7 +2065,7 @@ public class Runner {
                                "This is a test. Ignore me");
 
             CreateProject("LegacyProcessorProject",
-                          compile: new[] { "Runner.cs"});
+                          compile: new[] { "Runner.cs" });
 
             // re-write the project file's PropertyGroup conditions to support x86 instead of AnyCPU
             /*
@@ -1818,7 +2197,7 @@ public class Runner {
 
             var repositoryPath = Path.Combine(ProjectFilesFolder, "packages");
             Util.CreateDirectory(repositoryPath);
-            
+
             var args = new[] { "update", "MyProject.csproj", "-RepositoryPath", repositoryPath, "-Source", packageSource };
 
             Directory.SetCurrentDirectory(ProjectFilesFolder);

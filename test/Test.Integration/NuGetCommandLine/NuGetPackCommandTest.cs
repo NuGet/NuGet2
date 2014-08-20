@@ -655,10 +655,12 @@ namespace Proj2
             var targetDir = ConfigurationManager.AppSettings["TargetDir"];
             var nugetexe = Path.Combine(targetDir, "nuget.exe");
             var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
                 Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
                 var proj1Directory = Path.Combine(workingDirectory, "proj1");
                 var proj2Directory = Path.Combine(workingDirectory, "proj2");
                 Util.CreateDirectory(proj1Directory);
@@ -774,6 +776,7 @@ namespace Proj2
             }
             finally
             {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
                 Directory.Delete(workingDirectory, true);
             }
         }
