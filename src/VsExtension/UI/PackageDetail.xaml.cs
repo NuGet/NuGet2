@@ -106,14 +106,14 @@ namespace NuGet.Tools
             UpdateInstallUninstallButton();
         }
 
-        private async void Preview(PackageAction action)
+        private void Preview(PackageAction action)
         {
-            var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            Control.SetBusy(true);
-            var actions = await ResolveActionsAsync(action, projectManager);
-            Control.SetBusy(false);
+            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
+            //Control.SetBusy(true);
+            //var actions = await ResolveActionsAsync(action, projectManager);
+            //Control.SetBusy(false);
 
-            PreviewActions(actions, projectManager);
+            //PreviewActions(actions, projectManager);
         }
 
         private async Task<IEnumerable<Resolver.PackageAction>> ResolveActionsAsync(
@@ -185,25 +185,25 @@ namespace NuGet.Tools
             w.ShowDialog();
         }
 
-        private async void PerformPackageAction(PackageAction action)
+        private void PerformPackageAction(PackageAction action)
         {
-            var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            Control.SetBusy(true);
-            var actions = await ResolveActionsAsync(action, projectManager);
-            Control.SetBusy(false);
+            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
+            //Control.SetBusy(true);
+            //var actions = await ResolveActionsAsync(action, projectManager);
+            //Control.SetBusy(false);
 
-            // show license agreeement
-            bool acceptLicense = ShowLicenseAgreement(actions);
-            if (!acceptLicense)
-            {
-                return;
-            }
+            //// show license agreeement
+            //bool acceptLicense = ShowLicenseAgreement(actions);
+            //if (!acceptLicense)
+            //{
+            //    return;
+            //}
 
-            ActionExecutor executor = new ActionExecutor();
-            executor.Execute(actions);
+            //ActionExecutor executor = new ActionExecutor();
+            //executor.Execute(actions);
 
-            Control.UpdatePackageStatus();
-            UpdatePackageStatus();
+            //Control.UpdatePackageStatus();
+            //UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()

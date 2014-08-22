@@ -8,7 +8,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using Newtonsoft.Json.Linq;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Client;
 
 namespace NuGet.Tools
 {
@@ -95,10 +97,8 @@ namespace NuGet.Tools
             private IEnumerable<string> _supportedFrameworks;
 
             // where to get the package list
-            private IPackageRepository _repoForPackageList;
-
-            // where to get the package list
-            private IPackageRepository _repo;
+            private INuGetRepository _repo;
+            private IPackageSearcher _searcher;
 
             // the local repository of the project
             private IPackageRepository _localRepo;
@@ -106,108 +106,117 @@ namespace NuGet.Tools
             private const int pageSize = 15;
 
             public PackageLoader(
-                IPackageRepository repoForPackageList,
-                IPackageRepository repo,
+                INuGetRepository repo,
                 IPackageRepository localRepo,
                 string searchText,
                 IEnumerable<string> supportedFrameworks)
             {
-                _repoForPackageList = repoForPackageList;
                 _repo = repo;
+                _searcher = repo.CreateSearcher(Uris.Types.PackageSearchResult);
+
                 _localRepo = localRepo;
                 _searchText = searchText;
                 _supportedFrameworks = supportedFrameworks;
             }
 
-            public Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
+            public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
-                var query = _repoForPackageList.Search(
-                    searchTerm: _searchText,
-                    targetFrameworks: _supportedFrameworks,
-                    allowPrereleaseVersions: false)
-                    .OrderByDescending(p => p.DownloadCount)
-                    .Skip(startIndex)
-                    .Take(pageSize);
-
-                return Task.Factory.StartNew<LoadResult>(() =>
+                var filter = new SearchFilter()
                 {
-                    List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
-                    foreach (var p in query)
+                    SupportedFrameworks = _supportedFrameworks,
+                    IncludePrerelease = false
+                };
+
+                var query = await _searcher.Search(_searchText, filter, startIndex, pageSize, ct);
+
+                List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
+                foreach (JObject p in query)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var searchResultPackage = new UiSearchResultPackage()
                     {
-                        ct.ThrowIfCancellationRequested();
+                        // TODO: Use JSON-LD aware objects
+                        Id = p[Uris.Properties.PackageId.AbsoluteUri][0]["@value"].ToString(),
+                        Version = SemanticVersion.Parse(p[Uris.Properties.LatestVersion.AbsoluteUri][0]["@value"].ToString()),
+                        Summary = p[Uris.Properties.Summary.AbsoluteUri][0]["@value"].ToString(),
+                        IconUrl = new Uri(p[Uris.Properties.IconUrl.AbsoluteUri][0]["@value"].ToString())
+                    };
 
-                        var searchResultPackage = new UiSearchResultPackage()
+                    var installedPackage = _localRepo.FindPackage(searchResultPackage.Id);
+                    if (installedPackage != null)
+                    {
+                        if (installedPackage.Version < searchResultPackage.Version)
                         {
-                            Id = p.Id,
-                            Version = p.Version,
-                            Summary = p.Summary,
-                            IconUrl = p.IconUrl
-                        };
-
-                        var installedPackage = _localRepo.FindPackage(p.Id);
-                        if (installedPackage != null)
-                        {
-                            if (installedPackage.Version < p.Version)
-                            {
-                                searchResultPackage.Status = PackageStatus.UpdateAvailable;
-                            }
-                            else
-                            {
-                                searchResultPackage.Status = PackageStatus.Installed;
-                            }
+                            searchResultPackage.Status = PackageStatus.UpdateAvailable;
                         }
                         else
                         {
-                            searchResultPackage.Status = PackageStatus.NotInstalled;
+                            searchResultPackage.Status = PackageStatus.Installed;
                         }
-
-                        searchResultPackage.AllVersions = GetAllVersions(_repo, searchResultPackage.Id);
-                        packages.Add(searchResultPackage);
+                    }
+                    else
+                    {
+                        searchResultPackage.Status = PackageStatus.NotInstalled;
                     }
 
-                    ct.ThrowIfCancellationRequested();
-                    return new LoadResult()
-                    {
-                        Items = packages,
-                        HasMoreItems = packages.Count == pageSize
-                    };
-                });
+                    searchResultPackage.AllVersions = LoadVersions((JArray)p[Uris.Properties.PackageVersion.AbsoluteUri]);
+                    packages.Add(searchResultPackage);
+                }
+
+                ct.ThrowIfCancellationRequested();
+                return new LoadResult()
+                {
+                    Items = packages,
+                    HasMoreItems = packages.Count == pageSize
+                };
             }
 
             // Get all versions of the package
-            private List<UiDetailedPackage> GetAllVersions(IPackageRepository repo, string id)
+            private List<UiDetailedPackage> LoadVersions(JArray versions)
             {
                 var retValue = new List<UiDetailedPackage>();
 
                 // If repo is AggregateRepository, the package duplicates can be returned by
                 // FindPackagesById(), so Distinct is needed here to remove the duplicates.
-                var allVersions = repo.FindPackagesById(id)
-                    .Distinct<IPackage>(PackageEqualityComparer.IdAndVersion);
-                foreach (var package in allVersions)
+                foreach (var version in versions)
                 {
                     var detailedPackage = new UiDetailedPackage()
                     {
-                        Id = package.Id,
-                        Version = package.Version,
-                        Summary = package.Summary,
-                        Description = package.Description,
-                        Authors = StringCollectionToString(package.Authors),
-                        Owners = StringCollectionToString(package.Owners),
-                        IconUrl = package.IconUrl,
-                        LicenseUrl = package.LicenseUrl,
-                        ProjectUrl = package.ProjectUrl,
-                        Tags = package.Tags,
-                        DownloadCount = package.DownloadCount,
-                        Published = package.Published,
-                        DependencySets = package.DependencySets,
-                        NoDependencies = !HasDependencies(package.DependencySets),
-                        Package = package
+                        Id = version[Uris.Properties.PackageId.AbsoluteUri][0]["@value"].ToString(),
+                        Version = SemanticVersion.Parse(version[Uris.Properties.Version.AbsoluteUri][0]["@value"].ToString()),
+                        Summary = version[Uris.Properties.Summary.AbsoluteUri][0]["@value"].ToString(),
+                        Description = version[Uris.Properties.Description.AbsoluteUri][0]["@value"].ToString(),
+                        Authors = StringCollectionToString(version[Uris.Properties.Author.AbsoluteUri][0].Select(t => t["@value"].ToString())),
+                        Owners = StringCollectionToString(version[Uris.Properties.Owner.AbsoluteUri][0].Select(t => t["@value"].ToString())),
+                        IconUrl = new Uri(version[Uris.Properties.IconUrl.AbsoluteUri][0]["@value"].ToString()),
+                        LicenseUrl = new Uri(version[Uris.Properties.LicenseUrl.AbsoluteUri][0]["@value"].ToString()),
+                        ProjectUrl = new Uri(version[Uris.Properties.ProjectUrl.AbsoluteUri][0]["@value"].ToString()),
+                        Tags = version[Uris.Properties.Tags.AbsoluteUri][0]["@value"].ToString(),
+                        DownloadCount = version[Uris.Properties.DownloadCount.AbsoluteUri][0]["@value"].ToObject<int>(),
+                        Published = DateTime.Parse(version[Uris.Properties.Published.AbsoluteUri][0]["@value"].ToString()),
+                        DependencySets = version[Uris.Properties.DependencyGroup.AbsoluteUri].Select(t => LoadDependencySet((JObject)t))
                     };
+                    detailedPackage.NoDependencies = !HasDependencies(detailedPackage.DependencySets);
 
                     retValue.Add(detailedPackage);
                 }
 
                 return retValue;
+            }
+
+            private PackageDependencySet LoadDependencySet(JObject set)
+            {
+                return new PackageDependencySet(
+                    VersionUtility.ParseFrameworkName(set[Uris.Properties.TargetFramework.AbsoluteUri][0]["@value"].ToString()),
+                    set[Uris.Properties.Dependency.AbsoluteUri].Select(t => LoadDependency((JObject)t)));
+            }
+
+            private PackageDependency LoadDependency(JObject dep)
+            {
+                return new PackageDependency(
+                    dep[Uris.Properties.PackageId.AbsoluteUri][0]["@value"].ToString(),
+                    VersionUtility.ParseVersionSpec(dep[Uris.Properties.VersionRange.AbsoluteUri][0]["@value"].ToString()));
             }
 
             private bool HasDependencies(IEnumerable<PackageDependencySet> dependencySets)
@@ -253,27 +262,26 @@ namespace NuGet.Tools
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
             var supportedFrameWorks = targetFramework != null ? new[] { targetFramework } : new string[0];
 
-            if (showOnlyInstalled)
-            {
-                var loader = new PackageLoader(
-                    _model.LocalRepo,
-                    _model.ActiveSourceRepo,
-                    _model.LocalRepo,
-                    searchText,
-                    supportedFrameWorks);
-                _packageList.Loader = loader;
-            }
-            else
-            {
+            //if (showOnlyInstalled)
+            //{
+            //    var loader = new PackageLoader(
+            //        _model.LocalRepo,
+            //        _model.ActiveSourceRepo,
+            //        _model.LocalRepo,
+            //        searchText,
+            //        supportedFrameWorks);
+            //    _packageList.Loader = loader;
+            //}
+            //else
+            //{
                 // search online                
-                var loader = new PackageLoader(
-                    _model.ActiveSourceRepo,
-                    _model.ActiveSourceRepo,
-                    _model.LocalRepo,
-                    searchText,
-                    supportedFrameWorks);
-                _packageList.Loader = loader;
-            }
+            var loader = new PackageLoader(
+                _model.ActiveSourceRepo,
+                _model.LocalRepo,
+                searchText,
+                supportedFrameWorks);
+            _packageList.Loader = loader;
+            //}
         }
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)

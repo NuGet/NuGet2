@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.VisualStudio.Client;
 
 namespace NuGet.Tools
 {
@@ -35,16 +36,16 @@ namespace NuGet.Tools
         public IVsPackageManagerFactory PackageManagerFactory { get; private set; }
         public IPackageRepository LocalRepo { get; private set; }
 
-        public IPackageRepository ActiveSourceRepo { get; private set; }
+        public INuGetRepository ActiveSourceRepo { get; private set; }
 
-        public IVsPackageManager PackageManager
-        {
-            get
-            {
-                return PackageManagerFactory.CreatePackageManager(
-                    ActiveSourceRepo, useFallbackForDependencies: true);
-            }
-        }
+        //public IVsPackageManager PackageManager
+        //{
+        //    get
+        //    {
+        //        return PackageManagerFactory.CreatePackageManager(
+        //            ActiveSourceRepo, useFallbackForDependencies: true);
+        //    }
+        //}
 
         
         public PackageManagerDocData(Project project)
@@ -52,7 +53,7 @@ namespace NuGet.Tools
             PackageSourceProvider = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
             _packageRepoFactory = ServiceLocator.GetInstance<IPackageRepositoryFactory>();
             PackageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            ActiveSourceRepo = _packageRepoFactory.CreateRepository(PackageSourceProvider.ActivePackageSource.Name);
+            ActiveSourceRepo = NuGetRepository.Create(PackageSourceProvider.ActivePackageSource.Source);
 
             _project = project;
 
@@ -66,7 +67,7 @@ namespace NuGet.Tools
             PackageSourceProvider.ActivePackageSource = PackageSourceProvider.GetEnabledPackageSourcesWithAggregate()
                 .FirstOrDefault(ps => ps.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             
-            ActiveSourceRepo = _packageRepoFactory.CreateRepository(PackageSourceProvider.ActivePackageSource.Name);
+            ActiveSourceRepo = NuGetRepository.Create(PackageSourceProvider.ActivePackageSource.Source);
         }
 
         public IEnumerable<string> GetEnabledPackageSourcesWithAggregate()

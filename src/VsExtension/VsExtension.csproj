@@ -118,6 +118,8 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
     </VSCTCompile>
+    <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Resources\nugetAbout.ico" />
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.psd1">
       <Link>Modules\NuGet\NuGet.psd1</Link>
@@ -145,6 +147,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ClientV3\ClientV3.csproj">
+      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
+      <Name>ClientV3</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dialog10\Dialog10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
       <Name>Dialog10</Name>
@@ -286,6 +292,10 @@
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="JsonLD, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\json-ld.net.1.0.2\lib\net40\JsonLD.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -303,6 +313,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ShellAssemblyHintPath)</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
