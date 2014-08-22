@@ -18,9 +18,7 @@ namespace PackageDependencyFinder
             IPackage package1 = DependencyFinder.GetIPackageFromRepo("Microsoft.AspNet.WebApi", "5.2.0");
             IPackage package2 = DependencyFinder.GetIPackageFromRepo("Dotnetopenauth.aspnet", "4.3.4.13329");
             int level = DependencyFinder.GetDependencyLevelOfPackage(package);
-            DependencyFinder.deepestLevel = 0;
             int level1 = DependencyFinder.GetDependencyLevelOfPackage(package1);
-            DependencyFinder.deepestLevel = 0;
             int level2 = DependencyFinder.GetDependencyLevelOfPackage(package2);
         }
     }

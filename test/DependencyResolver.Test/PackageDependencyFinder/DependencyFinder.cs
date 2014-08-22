@@ -1,6 +1,7 @@
 ﻿using NuGet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,6 @@ namespace PackageDependencyFinder
 
             foreach (ZipPackage package in packages)
             {
-                deepestLevel = 0;
                 int level = GetDependencyLevelOfPackage(package);
                 if (level > criteria)
                 {
@@ -48,6 +48,8 @@ namespace PackageDependencyFinder
         {
             List<IPackage> list = new List<IPackage>();
 
+
+
             return list;
         }
 
@@ -55,19 +57,50 @@ namespace PackageDependencyFinder
         {
             List<IPackage> list = new List<IPackage>();
 
+            foreach (ZipPackage package in packages)
+            {
+                List<PackageDependency> dependencies = GetCompletePackageDependencyList(package);
+                bool isHardDependencyPackage = true;
+                foreach (PackageDependency dep in dependencies)
+                {
+                    if (!dep.ToString().Contains("="))
+                    {
+                        isHardDependencyPackage = false;
+                    }
+                }
+
+                if (isHardDependencyPackage)
+                {
+                    list.Add(package);
+                }
+            }
+
             return list;
         }
 
         public static List<IPackage> GetSatellitePackages(List<ZipPackage> packages)
         {
             List<IPackage> list = new List<IPackage>();
+            List<string> cultures = new List<string>();
+
+            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
+            {
+                cultures.Add(ci.Name);
+            }
 
             return list;
         }
 
+        /// <summary>
+        /// Calculate the deepest level of dependency chain for a given package
+        /// </summary>
+        /// <param name="package">IPackage</param>
+        /// <param name="level">starting level</param>
+        /// <returns></returns>
         public static int GetDependencyLevelOfPackage(IPackage package, int level = 0)
         {
             IEnumerable<PackageDependencySet> dependencySets = package.DependencySets;
+            int deepestLevel = level;
             foreach (PackageDependencySet set in dependencySets)
             {
                 ICollection<PackageDependency> coll = set.Dependencies;
@@ -77,27 +110,12 @@ namespace PackageDependencyFinder
                     IPackage pd;
                     foreach (PackageDependency depend in coll)
                     {
-                        IVersionSpec spec = depend.VersionSpec;
-                        try
+                        pd = ConvertToIPackageFromDependency(depend);
+                        int n = GetDependencyLevelOfPackage(pd, level);
+                        if (n > deepestLevel)
                         {
-                            pd = GetIPackageFromRepo(depend.Id, spec.MinVersion.ToString());
+                            deepestLevel = n;
                         }
-                        catch
-                        {
-                            try
-                            {
-                                pd = GetIPackageFromRepo(depend.Id, spec.MaxVersion.ToString());
-                            }
-                            catch
-                            {
-                                pd = GetZipPackageFromRepo(depend.Id).First();
-                            }
-                        }
-                        if (level > deepestLevel)
-                        {
-                            deepestLevel = level;
-                        }
-                        GetDependencyLevelOfPackage(pd, level);
                     }
                 }
             }
@@ -114,6 +132,65 @@ namespace PackageDependencyFinder
             return firstLevelDependencies;
         }
 
+        public static List<PackageDependency> GetCompletePackageDependencyList(ZipPackage package)
+        {
+            List<IPackage> list = new List<IPackage>();
+            list.Add(package);
+            return GetNthLevelOfPackageDependencyList(list, Int16.MaxValue);
+        }
+
+        public static List<PackageDependency> GetNthLevelOfPackageDependencyList(List<IPackage> packages, int N, int level = 0)
+        {
+            List<PackageDependency> dependencies = new List<PackageDependency>();
+            List<IPackage> list = new List<IPackage>();
+            foreach (IPackage p in packages)
+            {
+                foreach (PackageDependencySet dependencySet in p.DependencySets)
+                {
+                    dependencies.AddRange(dependencySet.Dependencies);
+                }
+
+                foreach (PackageDependency dependency in dependencies)
+                {
+                    IPackage pkg = ConvertToIPackageFromDependency(dependency);
+                    list.Add(pkg);
+                }
+            }
+            level++;
+            if (level < N || N == Int16.MaxValue)
+            {
+                GetNthLevelOfPackageDependencyList(list, N, level);
+            }
+            return dependencies;
+        }
+
+        /// <summary>
+        /// Based on the PackageDependency, try match a package from the repro.
+        /// </summary>
+        /// <param name="dependency"></param>
+        /// <returns>IPackage</returns>
+        public static IPackage ConvertToIPackageFromDependency(PackageDependency dependency)
+        {
+            IPackage package;
+            IVersionSpec spec = dependency.VersionSpec;
+            try
+            {
+                package = GetIPackageFromRepo(dependency.Id, spec.MinVersion.ToString());
+            }
+            catch
+            {
+                try
+                {
+                    package = GetIPackageFromRepo(dependency.Id, spec.MaxVersion.ToString());
+                }
+                catch
+                {
+                    package = GetZipPackageFromRepo(dependency.Id).First();
+                }
+            }
+            return package;
+        }
+             
         public static List<ZipPackage> GetZipPackagesFromPath(string packageRootFolder)
         {
             string[] nupkgFilePaths = Directory.GetFiles(packageRootFolder, "*.nupkg");
@@ -169,6 +246,5 @@ namespace PackageDependencyFinder
 
         private static IPackageRepository _repo;
         private static string _packageSource = "https://www.nuget.org/api/v2/";
-        public static int deepestLevel = 0;
     }
 }
