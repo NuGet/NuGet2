@@ -33,13 +33,39 @@ namespace PackageDependencyFinder
 
             foreach (ZipPackage package in packages)
             {
-               
+                deepestLevel = 0;
+                int level = GetDependencyLevelOfPackage(package);
+                if (level > criteria)
+                {
+                    list.Add(package);
+                }
             }
 
             return list;
         }
 
-        public static int GetDependencyLevelOfPackage(IPackage package, int level)
+        public static List<IPackage> GetDiamondDependencyPackages (List<ZipPackage> packages)
+        {
+            List<IPackage> list = new List<IPackage>();
+
+            return list;
+        }
+
+        public static List<IPackage> GetHardDependencyPackages (List<ZipPackage> packages)
+        {
+            List<IPackage> list = new List<IPackage>();
+
+            return list;
+        }
+
+        public static List<IPackage> GetSatellitePackages(List<ZipPackage> packages)
+        {
+            List<IPackage> list = new List<IPackage>();
+
+            return list;
+        }
+
+        public static int GetDependencyLevelOfPackage(IPackage package, int level = 0)
         {
             IEnumerable<PackageDependencySet> dependencySets = package.DependencySets;
             foreach (PackageDependencySet set in dependencySets)
