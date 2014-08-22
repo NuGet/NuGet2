@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.Options
 {
@@ -40,8 +42,25 @@ namespace NuGet.Options
 
         protected override void OnApply(PageApplyEventArgs e)
         {
-            base.OnApply(e);
-            GeneralControl.OnApply();
+            try
+            {
+                base.OnApply(e);
+                GeneralControl.OnApply();
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.IO.IOException ||
+                    ex is System.UnauthorizedAccessException)
+                {
+                    MessageHelper.ShowErrorMessage(
+                        ExceptionUtility.Unwrap(ex).Message,
+                        VsResources.DialogTitle);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private GeneralOptionControl GeneralControl

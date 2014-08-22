@@ -141,20 +141,6 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void CallingEnableCurrentSolutionThrowsIfSolutionIsNotOpen()
-        {
-            // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(p => p.IsSolutionOpen).Returns(false);
-
-            var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
-
-            // Act & Assert
-            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(fromActivation: false));
-            Assert.Equal("The current environment does not have a solution loaded.", exception.Message);
-        }
-
-        [Fact]
         public void CallingEnableCurrentSolutionSetupEverythingCorrectly()
         {
             // Arrange

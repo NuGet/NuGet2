@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.Options
 {
@@ -26,11 +28,28 @@ namespace NuGet.Options
 
         protected override void OnApply(PageApplyEventArgs e)
         {
-            // Do not need to call base.OnApply() here.
-            bool wasApplied = PackageSourcesControl.ApplyChangedSettings();
-            if (!wasApplied)
+            try
             {
-                e.ApplyBehavior = ApplyKind.CancelNoNavigate;
+                // Do not need to call base.OnApply() here.
+                bool wasApplied = PackageSourcesControl.ApplyChangedSettings();
+                if (!wasApplied)
+                {
+                    e.ApplyBehavior = ApplyKind.CancelNoNavigate;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.IO.IOException ||
+                    ex is System.UnauthorizedAccessException)
+                {
+                    MessageHelper.ShowErrorMessage(
+                        ExceptionUtility.Unwrap(ex).Message,
+                        VsResources.DialogTitle);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 

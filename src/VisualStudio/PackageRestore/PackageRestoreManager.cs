@@ -120,30 +120,29 @@ namespace NuGet.VisualStudio
 
         public void EnableCurrentSolutionForRestore(bool fromActivation)
         {
-            if (!_solutionManager.IsSolutionOpen)
-            {
-                throw new InvalidOperationException(VsResources.SolutionNotAvailable);
-            }
-
-            if (fromActivation)
-            {
-                // if not in quiet mode, ask user for confirmation before proceeding
-                bool? result = MessageHelper.ShowQueryMessage(
-                    VsResources.PackageRestoreConfirmation,
-                    VsResources.DialogTitle,
-                    showCancelButton: false);
-                if (result != true)
-                {
-                    return;
-                }
-            }
-
             Exception exception = null;
-
             IVsThreadedWaitDialog2 waitDialog;
             _waitDialogFactory.CreateInstance(out waitDialog);
             try
             {
+                if (!_solutionManager.IsSolutionOpen)
+                {
+                    throw new InvalidOperationException(VsResources.SolutionNotAvailable);
+                }
+
+                if (fromActivation)
+                {
+                    // if not in quiet mode, ask user for confirmation before proceeding
+                    bool? result = MessageHelper.ShowQueryMessage(
+                        VsResources.PackageRestoreConfirmation,
+                        VsResources.DialogTitle,
+                        showCancelButton: false);
+                    if (result != true)
+                    {
+                        return;
+                    }
+                }
+
                 // Start the wait dialog on the UI thread
                 InvokeOnUIThread(() =>
                     waitDialog.StartWaitDialog(
