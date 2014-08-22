@@ -54,24 +54,28 @@ namespace PackageDependencyFinder
                         IVersionSpec spec = depend.VersionSpec;
                         try
                         {
-                            pd = GetZipPackageFromRepo(depend.Id, spec.MinVersion.ToString());
+                            pd = GetIPackageFromRepo(depend.Id, spec.MinVersion.ToString());
                         }
                         catch
                         {
                             try
                             {
-                                pd = GetZipPackageFromRepo(depend.Id, spec.MaxVersion.ToString());
+                                pd = GetIPackageFromRepo(depend.Id, spec.MaxVersion.ToString());
                             }
                             catch
                             {
                                 pd = GetZipPackageFromRepo(depend.Id).First();
                             }
                         }
+                        if (level > deepestLevel)
+                        {
+                            deepestLevel = level;
+                        }
                         GetDependencyLevelOfPackage(pd, level);
                     }
                 }
             }
-            return level;
+            return deepestLevel;
         }
 
         public static List<PackageDependency> GetFirstLevelDependencyList(ZipPackage package)
@@ -96,7 +100,7 @@ namespace PackageDependencyFinder
             }
             return packageList;
         }
-        public static IPackage GetZipPackageFromRepo(string id, string version)
+        public static IPackage GetIPackageFromRepo(string id, string version)
         {
             SemanticVersion sVersion;
             SemanticVersion.TryParse(version, out sVersion);
@@ -139,5 +143,6 @@ namespace PackageDependencyFinder
 
         private static IPackageRepository _repo;
         private static string _packageSource = "https://www.nuget.org/api/v2/";
+        public static int deepestLevel = 0;
     }
 }
