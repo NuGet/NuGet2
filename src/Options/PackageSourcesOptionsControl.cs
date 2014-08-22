@@ -135,7 +135,8 @@ namespace NuGet.Options
 
             _initialized = true;
             // get packages sources
-            IList<PackageSource> allPackageSources = _packageSourceProvider.LoadPackageSources().ToList();
+            var sources = _packageSourceProvider.LoadPackageSources();
+            IList<PackageSource> allPackageSources = sources == null ? new List<PackageSource>() : sources.ToList();
             IList<PackageSource> packageSources = allPackageSources.Where(ps => !ps.IsMachineWide).ToList();
             IList<PackageSource> machineWidePackageSources = allPackageSources.Where(ps => ps.IsMachineWide).ToList();
             _activeSource = _packageSourceProvider.ActivePackageSource;
