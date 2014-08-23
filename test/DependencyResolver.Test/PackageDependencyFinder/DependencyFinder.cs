@@ -44,11 +44,36 @@ namespace PackageDependencyFinder
             return list;
         }
 
-        public static List<IPackage> GetDiamondDependencyPackages (List<ZipPackage> packages)
+        public static List<IPackage> GetDiamondDependencyPackages(List<ZipPackage> packages)
         {
             List<IPackage> list = new List<IPackage>();
 
 
+            foreach (ZipPackage package in packages)
+            {
+                List<PackageDependency> dependenciesFirtLevel = GetFirstLevelDependencyList(package);
+                List<PackageDependency> dependenciesSecondLevel = new List<PackageDependency>();
+
+                foreach (PackageDependency depend in dependenciesFirtLevel)
+                {
+                    IPackage p = ConvertToIPackageFromDependency(depend);
+                    List<PackageDependency> deps = GetFirstLevelDependencyList(p as ZipPackage);
+                    dependenciesSecondLevel.AddRange(deps);
+                }
+
+                // Find idential package Ids in the list of 2nd level dependencies
+                int count = dependenciesSecondLevel.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    for (int j = i + 1; j < count; j++)
+                    {
+                        if (dependenciesSecondLevel[i].Id.ToLowerInvariant() == dependenciesSecondLevel[j].Id.ToLowerInvariant())   
+                        {
+                            list.Add(package);
+                        }
+                    }
+                }
+            }
 
             return list;
         }
@@ -80,15 +105,35 @@ namespace PackageDependencyFinder
 
         public static List<IPackage> GetSatellitePackages(List<ZipPackage> packages)
         {
+            List<string> cultureNames = GetCultureNames(CultureTypes.NeutralCultures);
             List<IPackage> list = new List<IPackage>();
-            List<string> cultures = new List<string>();
 
-            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
+            foreach (ZipPackage package in packages)
+            {
+                string name = package.Id;
+                string lastPart = name.Split(new string[] {"."}, StringSplitOptions.RemoveEmptyEntries).ToList().Last();
+               
+                foreach (string culture in cultureNames)
+                {
+                    if (culture == lastPart)
+                    {
+                        list.Add(package);
+                    }
+                }
+
+            }
+ 
+            return list;
+        }
+
+        public static List<string> GetCultureNames(CultureTypes type)
+        {
+            List<string> cultures = new List<string>();
+            foreach (CultureInfo ci in CultureInfo.GetCultures(type))
             {
                 cultures.Add(ci.Name);
             }
-
-            return list;
+            return cultures;
         }
 
         /// <summary>
