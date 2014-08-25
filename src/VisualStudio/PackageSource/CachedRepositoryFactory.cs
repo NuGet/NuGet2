@@ -55,15 +55,6 @@ namespace NuGet.VisualStudio
                     "source");
             }
 
-            // aggregate source, return aggregate repository
-            if (AggregatePackageSource.Instance.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase) ||
-                AggregatePackageSource.Instance.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase))
-            {
-                //Set ignoreFailingRepositories to true. Fixes bug http://nuget.codeplex.com/workitem/3777
-                //Also, in the dialog when All is chosen and some repositories are failing, we will show aggregate from successful sources
-                return _packageSourceProvider.CreateAggregateRepository(this, ignoreFailingRepositories: true);
-            }
-
             // try to resolve the name or feed from the source 
             return GetPackageRepository(_packageSourceProvider.ResolveSource(source));
         }

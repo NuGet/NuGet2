@@ -139,6 +139,7 @@
     <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IOperationAwareRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />
+    <Compile Include="Repositories\NullPackageRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
     <Compile Include="Repositories\PriorityPackageRepository.cs" />
     <Compile Include="Repositories\UnzippedPackageRepository.cs" />

@@ -1,11 +1,14 @@
 using System;
 using System.Runtime.Serialization;
+using NuGet.Resources;
 
 namespace NuGet
 {
     [DataContract]
     public class PackageSource : IEquatable<PackageSource>
     {
+        public static readonly PackageSource Null = new PackageSource();
+
         private readonly int _hashCode;
 
         [DataMember]
@@ -62,6 +65,12 @@ namespace NuGet
             IsEnabled = isEnabled;
             IsOfficial = isOfficial;
             _hashCode = Name.ToUpperInvariant().GetHashCode() * 3137 + Source.ToUpperInvariant().GetHashCode();
+        }
+
+        // Null Package Source ctor
+        private PackageSource()
+            : this(String.Empty, NuGetResources.PackageSource_NullSourceName, isEnabled: false, isOfficial: false)
+        {
         }
 
         public bool Equals(PackageSource other)

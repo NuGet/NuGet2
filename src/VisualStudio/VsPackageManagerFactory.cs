@@ -127,10 +127,10 @@ namespace NuGet.VisualStudio
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies)
         {
-            if (useFallbackForDependencies)
-            {
-                repository = CreateFallbackRepository(repository);
-            }
+            //if (useFallbackForDependencies)
+            //{
+            //    repository = CreateFallbackRepository(repository);
+            //}
             RepositoryInfo info = GetRepositoryInfo();
             var packageManager = new VsPackageManager(_solutionManager,
                                         repository,
@@ -160,22 +160,6 @@ namespace NuGet.VisualStudio
 
             var priorityRepository = _packageSourceProvider.CreatePriorityPackageRepository(_repositoryFactory, repository);
             return CreatePackageManager(priorityRepository, useFallbackForDependencies: false);
-        }
-
-        /// <summary>
-        /// Creates a FallbackRepository with an aggregate repository that also contains the primaryRepository.
-        /// </summary>
-        internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository)
-        {
-            if (IsAggregateRepository(primaryRepository))
-            {
-                // If we're using the aggregate repository, we don't need to create a fall back repo.
-                return primaryRepository;
-            }
-
-            var aggregateRepository = _packageSourceProvider.CreateAggregateRepository(_repositoryFactory, ignoreFailingRepositories: true);
-            aggregateRepository.ResolveDependenciesVertically = true;
-            return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 
         private static bool IsAggregateRepository(IPackageRepository repository)

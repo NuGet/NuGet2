@@ -872,6 +872,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;none&gt;.
+        /// </summary>
+        public static string PackageSource_NullSourceName {
+            get {
+                return ResourceManager.GetString("PackageSource_NullSourceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The profile part of a portable target framework must not contain empty component..
         /// </summary>
         public static string PortableFrameworkProfileComponentIsEmpty {
@@ -980,7 +989,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Using credentials from config. UserName: {0}.
+        ///   Looks up a localized string similar to Using credentials from config or environment. UserName: {0}.
         /// </summary>
         public static string SettingsCredentials_UsingSavedCredentials {
             get {

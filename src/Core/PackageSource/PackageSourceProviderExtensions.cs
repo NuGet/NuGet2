@@ -7,13 +7,13 @@ namespace NuGet
     public static class PackageSourceProviderExtensions
     {
         public static AggregateRepository CreateAggregateRepository(
-            this IPackageSourceProvider provider, 
-            IPackageRepositoryFactory factory, 
+            this IPackageSourceProvider provider,
+            IPackageRepositoryFactory factory,
             bool ignoreFailingRepositories)
         {
             return new AggregateRepository(
-                factory, 
-                provider.GetEnabledPackageSources().Select(s => s.Source), 
+                factory,
+                provider.GetEnabledPackageSources().Select(s => s.Source),
                 ignoreFailingRepositories);
         }
 

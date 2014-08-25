@@ -451,18 +451,7 @@ namespace NuGet.VisualStudio
         {
             var activeSource = _packageSourceProvider.ActivePackageSource;
 
-            if (activeSource == null)
-            {
-                return _packageSourceProvider.CreateAggregateRepository(_packageRepositoryFactory, ignoreFailingRepositories: true);
-            }
-
-            IPackageRepository activeRepository = _packageRepositoryFactory.CreateRepository(activeSource.Source);
-            if (AggregatePackageSource.IsAggregate(activeSource))
-            {
-                return activeRepository;
-            }
-
-            return _packageSourceProvider.CreatePriorityPackageRepository(_packageRepositoryFactory, activeRepository);
+            return _packageRepositoryFactory.CreateRepository(activeSource.Source);
         }
 
         /// <summary>

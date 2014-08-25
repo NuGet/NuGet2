@@ -213,8 +213,8 @@ namespace NuGet.Options
             // find the enabled package source 
             var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
 
-            // restore current active source if it still exists, or reset to aggregate source
-            _packageSourceProvider.ActivePackageSource = updatedActiveSource ?? AggregatePackageSource.Instance;
+            // restore current active source if it still exists
+            _packageSourceProvider.ActivePackageSource = updatedActiveSource;
             return true;
         }
 
@@ -321,10 +321,8 @@ namespace NuGet.Options
             var sourcesList = (IEnumerable<PackageSource>)_packageSources.List;
 
             // check to see if name has already been added
-            // also make sure it's not the same as the aggregate source ('All')
             bool hasName = sourcesList.Any(ps => ps != selectedPackageSource &&
-                                                (String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase) || 
-                                                 String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase)));
+                                                String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase));
             if (hasName)
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);

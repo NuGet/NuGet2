@@ -55,14 +55,7 @@ namespace NuGet.VisualStudio
                 return false;
             }
 
-            if (activeSource.IsAggregate())
-            {
-                return packageSourceProvider.GetEnabledPackageSources().Any(s => IsHttpSource(s.Source));
-            }
-            else
-            {
-                return IsHttpSource(activeSource.Source);
-            }
+            return IsHttpSource(activeSource.Source);
         }
 
         public static bool IsHttpSource(string source, IVsPackageSourceProvider packageSourceProvider)
@@ -74,8 +67,8 @@ namespace NuGet.VisualStudio
                     return true;
                 }
 
-                var packageSource = packageSourceProvider.GetEnabledPackageSourcesWithAggregate()
-                                                          .FirstOrDefault(p => p.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase));
+                var packageSource = packageSourceProvider.GetEnabledPackageSources()
+                    .FirstOrDefault(p => p.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase));
                 return (packageSource != null) && IsHttpSource(packageSource.Source);
             }
 
@@ -119,34 +112,6 @@ namespace NuGet.VisualStudio
             return false;
         }
 
-        public static bool IsAnySourceLocal(IVsPackageSourceProvider packageSourceProvider, out string localSource)
-        {
-            localSource = string.Empty;
-            if (packageSourceProvider != null)
-            {
-                //If any of the active sources is local folder and is available, return true
-                IEnumerable<PackageSource> sources = null;
-                PackageSource activeSource = packageSourceProvider.ActivePackageSource;
-                if (activeSource.IsAggregate())
-                {
-                    sources = packageSourceProvider.GetEnabledPackageSources();
-                    foreach (PackageSource s in sources)
-                    {
-                        if (IsLocal(s.Source))
-                        {
-                            localSource = s.Source;
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    if (IsLocal(activeSource.Source)) return true;
-                }
-            }
-            return false;
-        }
-
         public static bool IsAnySourceAvailable(IVsPackageSourceProvider packageSourceProvider, bool checkHttp)
         {
             //If any of the enabled sources is http, return true
@@ -163,20 +128,8 @@ namespace NuGet.VisualStudio
             if (packageSourceProvider != null)
             {
                 //If any of the active sources is UNC share or local folder and is available, return true
-                IEnumerable<PackageSource> sources = null;
                 PackageSource activeSource = packageSourceProvider.ActivePackageSource;
-                if (activeSource.IsAggregate())
-                {
-                    sources = packageSourceProvider.GetEnabledPackageSources();
-                    foreach (PackageSource s in sources)
-                    {
-                        if (IsLocal(s.Source) || IsUNC(s.Source)) return true;
-                    }
-                }
-                else
-                {
-                    if (IsLocal(activeSource.Source) || IsUNC(activeSource.Source)) return true;
-                }
+                return (IsLocal(activeSource.Source) || IsUNC(activeSource.Source));
             }
 
             //If none of the above matched, return false

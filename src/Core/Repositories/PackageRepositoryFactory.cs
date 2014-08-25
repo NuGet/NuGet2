@@ -16,6 +16,14 @@ namespace NuGet
             }
         }
 
+        public static IPackageRepository NullRepository
+        {
+            get
+            {
+                return NullPackageRepository.Instance;
+            }
+        }
+
         public Func<Uri, IHttpClient> HttpClientFactory
         {
             get { return _httpClientFactory ?? _defaultHttpClientFactory; }
@@ -26,7 +34,7 @@ namespace NuGet
         {
             if (packageSource == null)
             {
-                throw new ArgumentNullException("packageSource");
+                return NullRepository;
             }
 
             Uri uri = new Uri(packageSource);

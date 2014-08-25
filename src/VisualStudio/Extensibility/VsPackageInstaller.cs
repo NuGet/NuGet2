@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using EnvDTE;
 using NuGet.Resolver;
+using NuGet.Resources;
 using NuGetConsole;
 
 namespace NuGet.VisualStudio
@@ -99,8 +101,9 @@ namespace NuGet.VisualStudio
         {
             if (String.IsNullOrEmpty(source))
             {
-                // if source is null or empty, we fall back to aggregate package source
-                source = AggregatePackageSource.Instance.Source;
+                // if source is null or empty, we fail
+                // BREAKING: We used to fall back to the aggregate source, but we've removed the aggregate source!
+                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source"), "source");
             }
             
             IPackageRepository repository = _repositoryFactory.CreateRepository(source);
