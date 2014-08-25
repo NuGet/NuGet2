@@ -50,6 +50,7 @@
     <Compile Include="Interop\V2InteropSearcher.cs" />
     <Compile Include="INuGetRepository.cs" />
     <Compile Include="IPackageSearcher.cs" />
+    <Compile Include="JsonLdExtensions.cs" />
     <Compile Include="NuGetRepository.cs" />
     <Compile Include="Uris.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

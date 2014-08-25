@@ -32,66 +32,78 @@ namespace NuGet.VisualStudio.Client.Interop
             // Need to fetch all the versions of this package (this is slow, but we're in V2-interop land, so whatever :))
             var versions = _repository.FindPackagesById(package.Id);
 
-            var value = new JObject(
-                new JProperty("@type", new JArray(Uris.Types.PackageSearchResult.AbsoluteUri)),
-                MakeProp(Uris.Properties.PackageId, package.Id),
-                MakeProp(Uris.Properties.LatestVersion, package.Version.ToString()),
-                MakeProp(Uris.Properties.Summary, package.Summary),
-                MakeProp(Uris.Properties.IconUrl, package.IconUrl),
-                MakeProp(Uris.Properties.PackageVersion, new JArray(versions.Select(v => CreatePackageVersionDetail(v)))));
+            var value = new JObject();
+            value.Add(new JProperty("@type", new JArray(Uris.Types.PackageSearchResult.AbsoluteUri)));
+            AddProp(value, Uris.Properties.PackageId, package.Id);
+            AddProp(value, Uris.Properties.LatestVersion, package.Version.ToString());
+            AddProp(value, Uris.Properties.Summary, package.Summary);
+            AddProp(value, Uris.Properties.IconUrl, package.IconUrl);
+            AddProp(value, Uris.Properties.PackageVersion, new JArray(versions.Select(v => CreatePackageVersionDetail(v))));
+            return value;
+        }
+
+        private JObject CreatePackageVersionDetail(IPackage version)
+        {
+            var value = new JObject();
+            AddProp(value, Uris.Properties.PackageId, version.Id);
+            AddProp(value, Uris.Properties.Version, version.Version.ToString());
+            AddProp(value, Uris.Properties.Summary, version.Summary);
+            AddProp(value, Uris.Properties.Description, version.Description);
+            AddProp(value, Uris.Properties.Author, new JArray(version.Authors.Select(a => MakeValue(a))));
+            AddProp(value, Uris.Properties.Owner, new JArray(version.Owners.Select(a => MakeValue(a))));
+            AddProp(value, Uris.Properties.IconUrl, version.IconUrl.AbsoluteUri);
+            AddProp(value, Uris.Properties.LicenseUrl, version.LicenseUrl);
+            AddProp(value, Uris.Properties.ProjectUrl, version.ProjectUrl);
+            AddProp(value, Uris.Properties.Tags, version.Tags);
+            AddProp(value, Uris.Properties.DownloadCount, version.DownloadCount);
+            AddProp(value, Uris.Properties.Published, version.Published.HasValue ? version.Published.Value.ToString("O") : null);
+            AddProp(value, Uris.Properties.DependencyGroup, new JArray(version.DependencySets.Select(set => CreateDependencyGroup(set))));
+            return value;
+        }
+
+        private JObject CreateDependencyGroup(PackageDependencySet set)
+        {
+            var value = new JObject();
+            AddProp(value, Uris.Properties.TargetFramework, set.TargetFramework.FullName);
+            AddProp(value, Uris.Properties.Dependency, new JArray(set.Dependencies.Select(d => CreateDependency(d))));
+            return value;
+        }
+
+        private JObject CreateDependency(PackageDependency dependency)
+        {
+            var value = new JObject();
+            AddProp(value, Uris.Properties.PackageId, dependency.Id);
+            AddProp(value, Uris.Properties.VersionRange, dependency.VersionSpec.ToString());
             return value;
         }
 
         private JToken MakeValue(object content)
         {
-            return new JArray(new JObject(new JProperty("@value", content)));
+            return new JObject(new JProperty("@value", content));
         }
 
-        private JProperty MakeProp(Uri name, Uri content)
+        private void AddProp(JObject obj, Uri property, JArray content)
         {
-            return MakeProp(name, content.AbsoluteUri);
-        }
-        private JProperty MakeProp(Uri name, JArray content)
-        {
-            return new JProperty(name.AbsoluteUri, content);
-        }
-
-        private JProperty MakeProp(Uri name, object content)
-        {
-            return new JProperty(name.AbsoluteUri, MakeValue(content));
+            if (content != null && content.Count != 0)
+            {
+                obj.Add(new JProperty(property.AbsoluteUri, content));
+            }
         }
 
-        private JObject CreatePackageVersionDetail(IPackage version)
+        private void AddProp(JObject obj, Uri property, Uri content)
         {
-            return new JObject(
-                MakeProp(Uris.Properties.PackageId, version.Id),
-                MakeProp(Uris.Properties.Version, version.Version.ToString()),
-                MakeProp(Uris.Properties.Summary, version.Summary),
-                MakeProp(Uris.Properties.Description, version.Description),
-                MakeProp(Uris.Properties.Author, new JArray(version.Authors.Select(a => MakeValue(a)))),
-                MakeProp(Uris.Properties.Owner, new JArray(version.Owners.Select(a => MakeValue(a)))),
-                MakeProp(Uris.Properties.IconUrl, version.IconUrl.AbsoluteUri),
-                MakeProp(Uris.Properties.LicenseUrl, version.LicenseUrl),
-                MakeProp(Uris.Properties.ProjectUrl, version.ProjectUrl),
-                MakeProp(Uris.Properties.Tags, version.Tags),
-                MakeProp(Uris.Properties.DownloadCount, version.DownloadCount),
-                MakeProp(Uris.Properties.Published, version.Published.HasValue ? version.Published.Value.ToString("O") : null),
-                MakeProp(Uris.Properties.DependencyGroup, new JArray(version.DependencySets.Select(set => CreateDependencyGroup(set)))));
-
+            if (content != null)
+            {
+                AddProp(obj, property, content.AbsoluteUri);
+            }
         }
 
-        private JObject CreateDependencyGroup(PackageDependencySet set)
+        private void AddProp(JObject obj, Uri property, object content)
         {
-            return new JObject(
-                MakeProp(Uris.Properties.TargetFramework, set.TargetFramework.FullName),
-                MakeProp(Uris.Properties.Dependency, new JArray(set.Dependencies.Select(d => CreateDependency(d)))));
-        }
-
-        private JObject CreateDependency(PackageDependency dependency)
-        {
-            return new JObject(
-                MakeProp(Uris.Properties.PackageId, dependency.Id),
-                MakeProp(Uris.Properties.VersionRange, dependency.VersionSpec.ToString()));
+            if (content != null)
+            {
+                obj.Add(new JProperty(property.AbsoluteUri, new JArray(MakeValue(content))));
+            }
         }
     }
 }
