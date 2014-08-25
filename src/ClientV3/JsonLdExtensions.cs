@@ -20,6 +20,16 @@ namespace Newtonsoft.Json.Linq
             return val.Value<T>();
         }
 
+        public static Uri GetScalarUri(this JObject obj, Uri property)
+        {
+            var str = GetScalar<string>(obj, property);
+            if (String.IsNullOrEmpty(str))
+            {
+                return null;
+            }
+            return new Uri(str);
+        }
+
         public static IEnumerable<T> GetArray<T>(this JObject obj, Uri property)
         {
             JToken val;
@@ -53,7 +63,12 @@ namespace Newtonsoft.Json.Linq
         {
             if (val.Type == JTokenType.Object)
             {
-                return ((JObject)val)["@value"];
+                JObject obj = (JObject)val;
+                var prop = obj.Property("@value");
+                if (prop != null)
+                {
+                    return prop.Value;
+                }
             }
             return val;
         }

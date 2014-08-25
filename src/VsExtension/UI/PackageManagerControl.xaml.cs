@@ -140,7 +140,7 @@ namespace NuGet.Tools
                         Id = p.GetScalar<string>(Uris.Properties.PackageId),
                         Version = SemanticVersion.Parse(p.GetScalar<string>(Uris.Properties.LatestVersion)),
                         Summary = p.GetScalar<string>(Uris.Properties.Summary),
-                        IconUrl = new Uri(p.GetScalar<string>(Uris.Properties.IconUrl))
+                        IconUrl = p.GetScalarUri(Uris.Properties.IconUrl)
                     };
 
                     var installedPackage = _localRepo.FindPackage(searchResultPackage.Id);
@@ -189,9 +189,9 @@ namespace NuGet.Tools
                         Description = version.GetScalar<string>(Uris.Properties.Description),
                         Authors = StringCollectionToString(version.GetArray<string>(Uris.Properties.Author)),
                         Owners = StringCollectionToString(version.GetArray<string>(Uris.Properties.Owner)),
-                        IconUrl = new Uri(version.GetScalar<string>(Uris.Properties.IconUrl)),
-                        LicenseUrl = new Uri(version.GetScalar<string>(Uris.Properties.LicenseUrl)),
-                        ProjectUrl = new Uri(version.GetScalar<string>(Uris.Properties.ProjectUrl)),
+                        IconUrl = version.GetScalarUri(Uris.Properties.IconUrl),
+                        LicenseUrl = version.GetScalarUri(Uris.Properties.LicenseUrl),
+                        ProjectUrl = version.GetScalarUri(Uris.Properties.ProjectUrl),
                         Tags = version.GetScalar<string>(Uris.Properties.Tags),
                         DownloadCount = version.GetScalar<int>(Uris.Properties.DownloadCount),
                         Published = DateTime.Parse(version.GetScalar<string>(Uris.Properties.Published)),
@@ -207,16 +207,18 @@ namespace NuGet.Tools
 
             private PackageDependencySet LoadDependencySet(JObject set)
             {
+                var fxName = set.GetScalar<string>(Uris.Properties.TargetFramework);
                 return new PackageDependencySet(
-                    VersionUtility.ParseFrameworkName(set.GetScalar<string>(Uris.Properties.TargetFramework)),
+                    String.IsNullOrEmpty(fxName) ? null : VersionUtility.ParseFrameworkName(fxName),
                     set.GetArray<JObject>(Uris.Properties.Dependency).Select(obj => LoadDependency(obj)));
             }
 
             private PackageDependency LoadDependency(JObject dep)
             {
+                var ver = dep.GetScalar<string>(Uris.Properties.VersionRange);
                 return new PackageDependency(
                     dep.GetScalar<string>(Uris.Properties.PackageId),
-                    VersionUtility.ParseVersionSpec(dep.GetScalar<string>(Uris.Properties.VersionRange)));
+                    String.IsNullOrEmpty(ver) ? null : VersionUtility.ParseVersionSpec(ver));
             }
 
             private bool HasDependencies(IEnumerable<PackageDependencySet> dependencySets)

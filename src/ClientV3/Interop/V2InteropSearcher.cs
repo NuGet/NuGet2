@@ -51,7 +51,7 @@ namespace NuGet.VisualStudio.Client.Interop
             AddProp(value, Uris.Properties.Description, version.Description);
             AddProp(value, Uris.Properties.Author, new JArray(version.Authors.Select(a => MakeValue(a))));
             AddProp(value, Uris.Properties.Owner, new JArray(version.Owners.Select(a => MakeValue(a))));
-            AddProp(value, Uris.Properties.IconUrl, version.IconUrl.AbsoluteUri);
+            AddProp(value, Uris.Properties.IconUrl, version.IconUrl);
             AddProp(value, Uris.Properties.LicenseUrl, version.LicenseUrl);
             AddProp(value, Uris.Properties.ProjectUrl, version.ProjectUrl);
             AddProp(value, Uris.Properties.Tags, version.Tags);
@@ -64,7 +64,7 @@ namespace NuGet.VisualStudio.Client.Interop
         private JObject CreateDependencyGroup(PackageDependencySet set)
         {
             var value = new JObject();
-            AddProp(value, Uris.Properties.TargetFramework, set.TargetFramework.FullName);
+            AddProp(value, Uris.Properties.TargetFramework, set.TargetFramework == null ? null : set.TargetFramework.FullName);
             AddProp(value, Uris.Properties.Dependency, new JArray(set.Dependencies.Select(d => CreateDependency(d))));
             return value;
         }
@@ -73,7 +73,7 @@ namespace NuGet.VisualStudio.Client.Interop
         {
             var value = new JObject();
             AddProp(value, Uris.Properties.PackageId, dependency.Id);
-            AddProp(value, Uris.Properties.VersionRange, dependency.VersionSpec.ToString());
+            AddProp(value, Uris.Properties.VersionRange, dependency.VersionSpec == null ? null : dependency.VersionSpec.ToString());
             return value;
         }
 
@@ -94,7 +94,7 @@ namespace NuGet.VisualStudio.Client.Interop
         {
             if (content != null)
             {
-                AddProp(obj, property, content.AbsoluteUri);
+                AddProp(obj, property, content.ToString());
             }
         }
 
