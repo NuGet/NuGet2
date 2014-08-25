@@ -120,7 +120,6 @@ namespace PackageDependencyFinder
                         list.Add(package);
                     }
                 }
-
             }
  
             return list;
