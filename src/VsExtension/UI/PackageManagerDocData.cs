@@ -7,72 +7,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.VisualStudio.Client;
+using NuGet.VisualStudio.ClientV3;
 
 namespace NuGet.Tools
 {
     public class PackageManagerDocData : IVsPersistDocData
     {
-        private Project _project;
-
         private readonly Guid _guidEditorType = new Guid(GuidList.guidEditorFactoryString);
 
-        public Project Project
-        {
-            get
-            {
-                return _project;
-            }
-        }
-
-        public IVsPackageSourceProvider PackageSourceProvider
-        {
-            get;
-            private set;
-        }
-
-        IPackageRepositoryFactory _packageRepoFactory;
-
-        public IVsPackageManagerFactory PackageManagerFactory { get; private set; }
-        public IPackageRepository LocalRepo { get; private set; }
-
-        public INuGetRepository ActiveSourceRepo { get; private set; }
-
-        //public IVsPackageManager PackageManager
-        //{
-        //    get
-        //    {
-        //        return PackageManagerFactory.CreatePackageManager(
-        //            ActiveSourceRepo, useFallbackForDependencies: true);
-        //    }
-        //}
-
+        public PackageManagerSession Session { get; private set; }
         
-        public PackageManagerDocData(Project project)
+        public PackageManagerDocData(PackageManagerSession context)
         {
-            PackageSourceProvider = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
-            _packageRepoFactory = ServiceLocator.GetInstance<IPackageRepositoryFactory>();
-            PackageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            ActiveSourceRepo = NuGetRepository.Create(PackageSourceProvider.ActivePackageSource.Source);
-
-            _project = project;
-
-            var packageManager = PackageManagerFactory.CreatePackageManagerToManageInstalledPackages();
-            var projectManager = packageManager.GetProjectManager(_project);
-            LocalRepo = projectManager.LocalRepository;
-        }
-
-        public void ChangeActiveSourceRepo(string name)
-        {
-            PackageSourceProvider.ActivePackageSource = PackageSourceProvider.GetEnabledPackageSourcesWithAggregate()
-                .FirstOrDefault(ps => ps.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            
-            ActiveSourceRepo = NuGetRepository.Create(PackageSourceProvider.ActivePackageSource.Source);
-        }
-
-        public IEnumerable<string> GetEnabledPackageSourcesWithAggregate()
-        {
-            return PackageSourceProvider.GetEnabledPackageSourcesWithAggregate().Select(ps => ps.Name);
+            Session = context;
         }
 
         #region IVsPersistDocData

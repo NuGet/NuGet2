@@ -40,6 +40,7 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+using NuGet.VisualStudio.ClientV3;
 #endif
 
 #if VS14
@@ -424,7 +425,7 @@ namespace NuGet.Tools
             vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out v2);
             int v3 = (int)v2;
 
-            var myDoc = new PackageManagerDocData(project);
+            var myDoc = new PackageManagerDocData(ProjectPackageManagerSession.Create(project));
             var NewEditor = new PackageManagerWindowPane(myDoc);
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

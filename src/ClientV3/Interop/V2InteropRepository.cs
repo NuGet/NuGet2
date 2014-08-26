@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.VisualStudio.Client.Interop
+namespace NuGet.VisualStudio.ClientV3.Interop
 {
     public class V2InteropRepository : INuGetRepository
     {
-        private readonly DataServicePackageRepository _repository;
+        private readonly IPackageRepository _repository;
 
-        public V2InteropRepository(Uri targetSource)
+        public V2InteropRepository(IPackageRepository repository)
         {
-            _repository = new DataServicePackageRepository(targetSource);
+            _repository = repository;
         }
 
-        public IPackageSearcher CreateSearcher(params Uri[] requiredResultTypes)
+        public IPackageSearcher CreateSearcher()
         {
             return new V2InteropSearcher(_repository);
         }

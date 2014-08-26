@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.VisualStudio.Client
+namespace NuGet.VisualStudio.ClientV3
 {
     /// <summary>
     /// Represents the top-level interface to a NuGet Repository

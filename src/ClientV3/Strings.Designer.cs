@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuGet.VisualStudio.Client {
+namespace NuGet.VisualStudio.ClientV3 {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio.Client {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.VisualStudio.Client.Strings", typeof(Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.VisualStudio.ClientV3.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,15 +57,6 @@ namespace NuGet.VisualStudio.Client {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cannot create a NuGet Repository from the Aggregate Source.
-        /// </summary>
-        internal static string NuGetRepository_CannotCreateAggregateRepo {
-            get {
-                return ResourceManager.GetString("NuGetRepository_CannotCreateAggregateRepo", resourceCulture);
             }
         }
     }

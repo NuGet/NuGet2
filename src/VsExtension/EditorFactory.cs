@@ -7,6 +7,8 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
+using NuGet.VisualStudio.ClientV3;
+using NuGet.VisualStudio;
 
 namespace NuGet.Tools
 {
@@ -169,7 +171,8 @@ namespace NuGet.Tools
                 VSConstants.VSITEMID_ROOT,
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
-            var myDoc = new PackageManagerDocData(project as Project);
+
+            var myDoc = new PackageManagerDocData(ProjectPackageManagerSession.Create((EnvDTE.Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

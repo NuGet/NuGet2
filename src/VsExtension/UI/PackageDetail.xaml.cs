@@ -19,6 +19,14 @@ namespace NuGet.Tools
     {
         public PackageManagerControl Control { get; set; }
 
+        public UiSearchResultPackage Package
+        {
+            get
+            {
+                return ((PackageDetailControlModel)DataContext).Package;
+            }
+        }
+
         private enum Metadatas
         {
             Authors,
@@ -106,41 +114,13 @@ namespace NuGet.Tools
             UpdateInstallUninstallButton();
         }
 
-        private void Preview(PackageAction action)
+        private async void Preview(PackageAction action)
         {
-            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            //Control.SetBusy(true);
-            //var actions = await ResolveActionsAsync(action, projectManager);
-            //Control.SetBusy(false);
+            Control.SetBusy(true);
+            var actions = await Control.Session.ResolveActionsAsync(action, Package.Id, Package.Version);
+            Control.SetBusy(false);
 
-            //PreviewActions(actions, projectManager);
-        }
-
-        private async Task<IEnumerable<Resolver.PackageAction>> ResolveActionsAsync(
-            PackageAction action,
-            IProjectManager projectManager)
-        {
-            var d = (DependencyBehavior)_dependencyBehavior.SelectedItem;
-            var resolver = new ActionResolver()
-            {
-                IgnoreDependencies = !d.DependencyVersion.HasValue,
-                AllowPrereleaseVersions = false
-            };
-
-            if (d.DependencyVersion.HasValue)
-            {
-                resolver.DependencyVersion = d.DependencyVersion.Value;
-            }
-
-            var package = ((PackageDetailControlModel)DataContext).Package.Package;
-
-            var actions = await Task.Factory.StartNew(
-                () =>
-                {
-                    resolver.AddOperation(action, package, projectManager);
-                    return resolver.ResolveActions();
-                });
-            return actions;
+            PreviewActions(actions, projectManager);
         }
 
         private void PreviewActions(
@@ -185,25 +165,23 @@ namespace NuGet.Tools
             w.ShowDialog();
         }
 
-        private void PerformPackageAction(PackageAction action)
+        private async void PerformPackageAction(PackageAction action)
         {
-            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            //Control.SetBusy(true);
-            //var actions = await ResolveActionsAsync(action, projectManager);
-            //Control.SetBusy(false);
+            Control.SetBusy(true);
+            var actions = await Control.Session.ResolveActionsAsync(action, Package.Id, Package.Version);
+            Control.SetBusy(false);
 
-            //// show license agreeement
-            //bool acceptLicense = ShowLicenseAgreement(actions);
-            //if (!acceptLicense)
-            //{
-            //    return;
-            //}
+            // show license agreeement
+            bool acceptLicense = ShowLicenseAgreement(actions);
+            if (!acceptLicense)
+            {
+                return;
+            }
 
-            //ActionExecutor executor = new ActionExecutor();
-            //executor.Execute(actions);
+            await Control.Session.ExecuteActions(actions);
 
-            //Control.UpdatePackageStatus();
-            //UpdatePackageStatus();
+            Control.UpdatePackageStatus();
+            UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()
@@ -214,7 +192,7 @@ namespace NuGet.Tools
                 return;
             }
 
-            bool isInstalled = Control.Model.LocalRepo.Exists(model.Package.Id, model.Package.Version);
+            bool isInstalled = Control.Session.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -236,8 +214,7 @@ namespace NuGet.Tools
             }
 
             UpdateInstallUninstallButton();
-            var installedPackage = Control.Model.LocalRepo.FindPackage(model.Package.Id);
-            var installedVersion = installedPackage != null ? installedPackage.Version : null;
+            var installedVersion = Control.Session.GetInstalledVersion(model.Package.Id);
             model.CreateVersions(installedVersion);
         }
 
