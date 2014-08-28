@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuGet.Client {
+namespace NuGet.Client.VisualStudio {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuGet.Client {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.Client.Strings", typeof(Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.Client.VisualStudio.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,11 @@ namespace NuGet.Client {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot create a NuGet Repository from the Aggregate Source.
+        ///   Looks up a localized string similar to Unknown Package Source: &apos;{0}&apos;. It is not present in the list of available sources..
         /// </summary>
-        internal static string NuGetRepository_CannotCreateAggregateRepo {
+        internal static string VsPackageManagerSession_UnknownSource {
             get {
-                return ResourceManager.GetString("NuGetRepository_CannotCreateAggregateRepo", resourceCulture);
+                return ResourceManager.GetString("VsPackageManagerSession_UnknownSource", resourceCulture);
             }
         }
     }

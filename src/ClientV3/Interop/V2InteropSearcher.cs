@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using JsonLD.Core;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.Client.Tools.Interop
+namespace NuGet.Client.Interop
 {
-    public class V2InteropSearcher
+    public class V2InteropSearcher : IPackageSearcher
     {
-        private DataServicePackageRepository _repository;
+        private IPackageRepository _repository;
 
-        public V2InteropSearcher(DataServicePackageRepository repository)
+        public V2InteropSearcher(IPackageRepository repository)
         {
             _repository = repository;
         }

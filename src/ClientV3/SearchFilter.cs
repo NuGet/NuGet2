@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 
-namespace NuGet.Client.Tools
+namespace NuGet.Client
 {
     public class SearchFilter
     {

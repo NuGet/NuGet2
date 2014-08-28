@@ -7,6 +7,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
+using NuGet.Client.VisualStudio;
 
 namespace NuGet.Tools
 {
@@ -151,7 +152,7 @@ namespace NuGet.Tools
             ppunkDocData = IntPtr.Zero;
             pguidCmdUI = Guid.Empty;
             pgrfCDW = 0;
-            pbstrEditorCaption = "PackageManager";
+            pbstrEditorCaption = "Package Manager";
 
             // Validate inputs
             if ((grfCreateDoc & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0)
@@ -169,7 +170,7 @@ namespace NuGet.Tools
                 VSConstants.VSITEMID_ROOT,
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
-            var myDoc = new PackageManagerDocData(project as Project);
+            var myDoc = new PackageManagerDocData(VsPackageManagerSession.ForProject((Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

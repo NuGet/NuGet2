@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.Client.Tools
+namespace NuGet.Client
 {
     public abstract class PackageManagerSession
     {
@@ -16,8 +16,17 @@ namespace NuGet.Client.Tools
         
         public abstract IEnumerable<PackageSource> GetAvailableSources();
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
-        public abstract IPackageSearcher GetSearcher();
-        public abstract IInstalledPackageList GetInstalledPackages();
+        public abstract IPackageSearcher CreateSearcher();
+        public abstract IInstalledPackageList GetInstalledPackageList();
+        
+        /// <summary>
+        /// Changes the active package source to the one specified. WARNING: This call does
+        /// NOT affect instances of <see cref="IPackageSearcher"/> retrieved via <see cref="CreateSearcher"/>.
+        /// After calling this method, consumers will need to retrieve a new <see cref="IPackageSearcher"/>
+        /// via <see cref="CreateSearcher"/> in order to search the new active source.
+        /// </summary>
+        /// <param name="newSourceName">The name of the source to change to</param>
+        /// <exception cref="ArgumentException">The specified source does not exist in the available sources, as defined by <see cref="GetAvailableSources"/></exception>
         public abstract void ChangeActiveSource(string newSourceName);
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.Client.Tools
+namespace NuGet.Client
 {
     public static class Uris
     {

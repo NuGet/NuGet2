@@ -32,6 +32,7 @@ using NuGet.VisualStudio11;
 
 using NuGetConsole;
 using NuGetConsole.Implementation;
+using NuGet.Client.VisualStudio;
 
 #if VS11 || VS10
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
@@ -479,14 +480,15 @@ namespace NuGet.Tools
             object firstChild;
             vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
             
-            var myDoc = new PackageManagerDocData(project);
+            var session = VsPackageManagerSession.ForProject(project);
+            var myDoc = new PackageManagerDocData(session);
             var NewEditor = new PackageManagerWindowPane(myDoc);
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             var guidEditorType = new Guid(GuidList.guidEditorFactoryString);
             var guidCommandUI = Guid.Empty;
             var caption = "PackageManager";
-            var documentName = String.Format("PackageManager:{0}", project.FullName);
+            var documentName = String.Format("Package Manager: {0}", session.Name);
             IVsWindowFrame windowFrame;
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,

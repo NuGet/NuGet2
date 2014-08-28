@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using NuGet.Client.Tools;
+using NuGet.Client;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
@@ -216,7 +216,7 @@ namespace NuGet.Tools
                 return;
             }
 
-            var isInstalled = Session.GetInstalledPackages().IsInstalled(model.Package.Id, model.Package.Version);
+            var isInstalled = Session.GetInstalledPackageList().IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -238,7 +238,7 @@ namespace NuGet.Tools
             }
 
             UpdateInstallUninstallButton();
-            var installedVersion = Session.GetInstalledPackages().GetInstalledVersion(model.Package.Id);
+            var installedVersion = Session.GetInstalledPackageList().GetInstalledVersion(model.Package.Id);
             model.CreateVersions(installedVersion);
         }
 
