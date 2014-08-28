@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,8 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Tools;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio.Client;
 
 namespace NuGet.Tools
 {
@@ -19,20 +20,20 @@ namespace NuGet.Tools
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
-        private PackageManagerDocData _model;
         private bool _initialized;
 
-        public PackageManagerDocData Model
+        public PackageManagerDocData Model { get; private set; }
+        public PackageManagerSession Session
         {
             get
             {
-                return _model;
+                return Model.Session;
             }
         }
 
         public PackageManagerControl(PackageManagerDocData myDoc)
         {
-            _model = myDoc;
+            Model = myDoc;
 
             InitializeComponent();
 
@@ -45,26 +46,26 @@ namespace NuGet.Tools
         {
             _label.Content = string.Format(CultureInfo.CurrentCulture,
                 "Package Manager: {0}",
-                _model.Project.Name);
+                Session.Name);
 
             // init source repo list
             _sourceRepoList.Items.Clear();
-            var sources = _model.GetEnabledPackageSourcesWithAggregate();
+            var sources = Session.GetAvailableSources();
             foreach (var source in sources)
             {
                 _sourceRepoList.Items.Add(source);
             }
-            _sourceRepoList.SelectedItem = _model.PackageSourceProvider.ActivePackageSource.Name;
+            _sourceRepoList.SelectedItem = Session.ActiveSource.Name;
 
             UpdatePackageList();
         }
 
         private void UpdatePackageList()
         {
-            if (_model.Project != null)
-            {
+            //if (_model.Project != null)
+            //{
                 SearchPackageInActivePackageSource();
-            }
+            //}
         }
 
         public void SetBusy(bool busy)
@@ -94,27 +95,23 @@ namespace NuGet.Tools
         private class PackageLoader : ILoader
         {
             private string _searchText;
-            private IEnumerable<string> _supportedFrameworks;
+            private IEnumerable<FrameworkName> _supportedFrameworks;
 
             // where to get the package list
-            private INuGetRepository _repo;
             private IPackageSearcher _searcher;
-
-            // the local repository of the project
-            private IPackageRepository _localRepo;
+            private IInstalledPackageList _installed;
 
             private const int pageSize = 15;
 
             public PackageLoader(
-                INuGetRepository repo,
-                IPackageRepository localRepo,
+                IPackageSearcher searcher,
+                IInstalledPackageList installed,
                 string searchText,
-                IEnumerable<string> supportedFrameworks)
+                IEnumerable<FrameworkName> supportedFrameworks)
             {
-                _repo = repo;
-                _searcher = repo.CreateSearcher(Uris.Types.PackageSearchResult);
+                _searcher = searcher;
+                _installed = installed;
 
-                _localRepo = localRepo;
                 _searchText = searchText;
                 _supportedFrameworks = supportedFrameworks;
             }
@@ -143,10 +140,10 @@ namespace NuGet.Tools
                         IconUrl = p.GetScalarUri(Uris.Properties.IconUrl)
                     };
 
-                    var installedPackage = _localRepo.FindPackage(searchResultPackage.Id);
-                    if (installedPackage != null)
+                    var installedVersion = _installed.GetInstalledVersion(searchResultPackage.Id);
+                    if (installedVersion != null)
                     {
-                        if (installedPackage.Version < searchResultPackage.Version)
+                        if (installedVersion < searchResultPackage.Version)
                         {
                             searchResultPackage.Status = PackageStatus.UpdateAvailable;
                         }
@@ -259,11 +256,10 @@ namespace NuGet.Tools
 
         private void SearchPackageInActivePackageSource()
         {
-            string targetFramework = _model.Project.GetTargetFramework();
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
-            var supportedFrameWorks = targetFramework != null ? new[] { targetFramework } : new string[0];
-
+            var supportedFrameworks = Session.GetSupportedFrameworks();
+            
             //if (showOnlyInstalled)
             //{
             //    var loader = new PackageLoader(
@@ -278,10 +274,10 @@ namespace NuGet.Tools
             //{
                 // search online                
             var loader = new PackageLoader(
-                _model.ActiveSourceRepo,
-                _model.LocalRepo,
+                Session.GetSearcher(),
+                Session.GetInstalledPackages(),
                 searchText,
-                supportedFrameWorks);
+                supportedFrameworks);
             _packageList.Loader = loader;
             //}
         }
@@ -303,8 +299,7 @@ namespace NuGet.Tools
             }
             else
             {
-                var installedPackage = Model.LocalRepo.FindPackage(selectedPackage.Id);
-                var installedVersion = installedPackage != null ? installedPackage.Version : null;
+                var installedVersion = Session.GetInstalledPackages().GetInstalledVersion(selectedPackage.Id);
                 _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
             }
         }
@@ -319,13 +314,13 @@ namespace NuGet.Tools
 
         private void _sourceRepoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var s = _sourceRepoList.SelectedItem as string;
-            if (string.IsNullOrEmpty(s))
+            var newSource = _sourceRepoList.SelectedItem as string;
+            if (string.IsNullOrEmpty(newSource))
             {
                 return;
             }
 
-            _model.ChangeActiveSourceRepo(s);
+            Session.ChangeActiveSource(newSource);
         }
 
         private void _filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -339,7 +334,9 @@ namespace NuGet.Tools
         internal void UpdatePackageStatus()
         {
             var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
-            foreach (var package in _model.LocalRepo.GetPackages())
+
+            // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
+            foreach (var package in Session.GetInstalledPackages().GetInstalledPackages())
             {
                 installedPackages[package.Id] = package.Version;
             }

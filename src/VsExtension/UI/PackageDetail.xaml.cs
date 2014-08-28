@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using NuGet.Client.Tools;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
@@ -18,6 +19,7 @@ namespace NuGet.Tools
     public partial class PackageDetail : UserControl
     {
         public PackageManagerControl Control { get; set; }
+        public PackageManagerSession Session { get { return Control.Session; } }
 
         private enum Metadatas
         {
@@ -214,7 +216,7 @@ namespace NuGet.Tools
                 return;
             }
 
-            bool isInstalled = Control.Model.LocalRepo.Exists(model.Package.Id, model.Package.Version);
+            var isInstalled = Session.GetInstalledPackages().IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -236,8 +238,7 @@ namespace NuGet.Tools
             }
 
             UpdateInstallUninstallButton();
-            var installedPackage = Control.Model.LocalRepo.FindPackage(model.Package.Id);
-            var installedVersion = installedPackage != null ? installedPackage.Version : null;
+            var installedVersion = Session.GetInstalledPackages().GetInstalledVersion(model.Package.Id);
             model.CreateVersions(installedVersion);
         }
 
