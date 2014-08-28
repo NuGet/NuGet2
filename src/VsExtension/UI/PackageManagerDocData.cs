@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client.Tools;
+using NuGet.Client;
 
 namespace NuGet.Tools
 {

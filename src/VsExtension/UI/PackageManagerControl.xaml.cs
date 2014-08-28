@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
-using NuGet.Client.Tools;
+using NuGet.Client;
 using NuGet.VisualStudio;
 
 namespace NuGet.Tools
@@ -274,8 +274,8 @@ namespace NuGet.Tools
             //{
                 // search online                
             var loader = new PackageLoader(
-                Session.GetSearcher(),
-                Session.GetInstalledPackages(),
+                Session.CreateSearcher(),
+                Session.GetInstalledPackageList(),
                 searchText,
                 supportedFrameworks);
             _packageList.Loader = loader;
@@ -299,7 +299,7 @@ namespace NuGet.Tools
             }
             else
             {
-                var installedVersion = Session.GetInstalledPackages().GetInstalledVersion(selectedPackage.Id);
+                var installedVersion = Session.GetInstalledPackageList().GetInstalledVersion(selectedPackage.Id);
                 _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
             }
         }
@@ -336,7 +336,7 @@ namespace NuGet.Tools
             var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
 
             // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
-            foreach (var package in Session.GetInstalledPackages().GetInstalledPackages())
+            foreach (var package in Session.GetInstalledPackageList().GetInstalledPackages())
             {
                 installedPackages[package.Id] = package.Version;
             }

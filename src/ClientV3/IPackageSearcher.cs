@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.Client.Tools
+namespace NuGet.Client
 {
     public interface IPackageSearcher
     {
