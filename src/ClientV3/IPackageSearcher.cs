@@ -6,13 +6,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.VisualStudio.Client
+namespace NuGet.Client.Tools
 {
-    /// <summary>
-    /// Represents the top-level interface to a NuGet Repository
-    /// </summary>
     public interface IPackageSearcher
     {
-        Task<IEnumerable<JToken>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken ct);
+        Task<IEnumerable<JToken>> Search(
+            string searchTerm,
+            SearchFilter filters,
+            int skip,
+            int take,
+            CancellationToken cancelToken);
     }
 }

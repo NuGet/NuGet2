@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using JsonLD.Core;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.VisualStudio.Client.Interop
+namespace NuGet.Client.Tools.Interop
 {
-    public class V2InteropSearcher : IPackageSearcher
+    public class V2InteropSearcher
     {
         private DataServicePackageRepository _repository;
 
@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio.Client.Interop
         public Task<IEnumerable<JToken>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken ct)
         {
             return Task.Factory.StartNew(() => _repository.Search(
-                searchTerm, filters.SupportedFrameworks, filters.IncludePrerelease)
+                searchTerm, filters.SupportedFrameworks.Select(fx => VersionUtility.GetShortFrameworkName(fx)), filters.IncludePrerelease)
                 .Skip(skip)
                 .Take(take)
                 .ToList()

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 
-namespace NuGet.VisualStudio.Client
+namespace NuGet.Client.Tools
 {
     public class SearchFilter
     {
-        public IEnumerable<string> SupportedFrameworks { get; set; }
+        public IEnumerable<FrameworkName> SupportedFrameworks { get; set; }
         public bool IncludePrerelease { get; set; }
     }
 }
