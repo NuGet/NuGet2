@@ -21,9 +21,24 @@ namespace NuGet.Client.VisualStudio
             get { return _packageSourceProvider.ActivePackageSource; }
         }
 
+        protected VsPackageManagerSession()
+            : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), ServiceLocator.GetInstance<IPackageRepositoryFactory>())
+        {
+
+        }
+
+        protected VsPackageManagerSession(IVsPackageSourceProvider packageSourceProvider, IPackageRepositoryFactory repoFactory)
+        {
+            _packageSourceProvider = packageSourceProvider;
+            _repoFactory = repoFactory;
+        }
+
         public static VsPackageManagerSession ForProject(EnvDTE.Project project)
         {
-            return new ProjectPackageManagerSession(project);
+            var packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
+            return new ProjectPackageManagerSession(
+                project,
+                packageManagerFactory.CreatePackageManagerToManageInstalledPackages().GetProjectManager(project));
         }
 
         public override IEnumerable<PackageSource> GetAvailableSources()

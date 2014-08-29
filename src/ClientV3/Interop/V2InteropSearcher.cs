@@ -21,7 +21,7 @@ namespace NuGet.Client.Interop
         public Task<IEnumerable<JToken>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken ct)
         {
             return Task.Factory.StartNew(() => _repository.Search(
-                searchTerm, filters.SupportedFrameworks.Select(fx => VersionUtility.GetShortFrameworkName(fx)), filters.IncludePrerelease)
+                searchTerm, filters.SupportedFrameworks.Select(fx => fx.FullName), filters.IncludePrerelease)
                 .Skip(skip)
                 .Take(take)
                 .ToList()
