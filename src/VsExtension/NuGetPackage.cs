@@ -412,25 +412,79 @@ namespace NuGet.Tools
             ShowDocWindow(project);
         }
 
-        private void ShowDocWindow(Project project)
+        IEnumerable<IVsWindowFrame> EnumDocumentWindows(IVsUIShell uiShell)
+        {
+            IEnumWindowFrames ppenum;
+            int hr = uiShell.GetDocumentWindowEnum(out ppenum);
+            if (ppenum == null)
+            {
+                yield break;
+            }
+
+            IVsWindowFrame[] windowFrames = new IVsWindowFrame[1];
+            uint frameCount;
+            while (ppenum.Next(1, windowFrames, out frameCount) == VSConstants.S_OK && 
+                frameCount == 1)
+            {
+                yield return windowFrames[0];
+            }
+        }
+
+        private IVsWindowFrame FindExistingWindowFrame(
+            Project project)
         {
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            foreach (var windowFrame in EnumDocumentWindows(uiShell))
+            {
+                object property;
+                int hr = windowFrame.GetProperty(
+                    (int)__VSFPROPID.VSFPROPID_DocData,
+                    out property);
+                if (hr == VSConstants.S_OK && property is PackageManagerDocData)
+                {
+                    var packageManagerDocData = (PackageManagerDocData)property;
+                    if (packageManagerDocData.Project == project)
+                    {
+                        return windowFrame;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private void ShowDocWindow(Project project)
+        {
+            var windowFrame = FindExistingWindowFrame(project);
+            if (windowFrame == null)
+            {
+                windowFrame = CreateNewWindowFrame(project);
+            }
+
+            if (windowFrame != null)
+            {
+                windowFrame.Show();
+            }
+        }
+
+        private IVsWindowFrame CreateNewWindowFrame(Project project)
+        {
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+
             var vsProject = project.ToVsHierarchy();
             uint windowFlags =
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            object v2;
-            vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out v2);
-            int v3 = (int)v2;
-
+            object firstChild;
+            vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
+            
             var myDoc = new PackageManagerDocData(project);
             var NewEditor = new PackageManagerWindowPane(myDoc);
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             var guidEditorType = new Guid(GuidList.guidEditorFactoryString);
             var guidCommandUI = Guid.Empty;
-
             var caption = "PackageManager";
             var documentName = String.Format("PackageManager:{0}", project.FullName);
             IVsWindowFrame windowFrame;
@@ -438,7 +492,7 @@ namespace NuGet.Tools
                 windowFlags,
                 documentName,
                 (IVsUIHierarchy)vsProject,
-                (uint)v3, // !!! (uint)VSConstants.VSITEMID.Root, // !!! (uint)v3,
+                (uint)((int)firstChild), // !!! (uint)VSConstants.VSITEMID.Root,
                 ppunkDocView,
                 ppunkDocData,
                 ref guidEditorType,
@@ -450,7 +504,7 @@ namespace NuGet.Tools
                 null,
                 out windowFrame);
             ErrorHandler.ThrowOnFailure(hr);
-            windowFrame.Show();
+            return windowFrame;
         }
 
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
