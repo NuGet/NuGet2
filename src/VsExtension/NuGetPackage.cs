@@ -443,8 +443,10 @@ namespace NuGet.Tools
                     out property);
                 if (hr == VSConstants.S_OK && property is PackageManagerDocData)
                 {
+                    // TODO: Find a cleaner way to do this.
                     var packageManagerDocData = (PackageManagerDocData)property;
-                    if (packageManagerDocData.Project == project)
+                    var session = packageManagerDocData.Session as ProjectPackageManagerSession;
+                    if (session != null && session.Project == project)
                     {
                         return windowFrame;
                     }

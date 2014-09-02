@@ -8,7 +8,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using NuGet.Client;
 using NuGet.Dialog.PackageManagerUI;
-using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 namespace NuGet.Tools
@@ -33,7 +32,7 @@ namespace NuGet.Tools
         }
 
         // item in the dependency installation behavior list view
-        private class DependencyBehavior
+        private class DependencyBehaviorItem
         {
             public string Text
             {
@@ -41,16 +40,16 @@ namespace NuGet.Tools
                 private set;
             }
 
-            public DependencyVersion? DependencyVersion
+            public DependencyBehavior Behavior
             {
                 get;
                 private set;
             }
 
-            public DependencyBehavior(string text, DependencyVersion? dependencyVersion)
+            public DependencyBehaviorItem(string text, DependencyBehavior dependencyBehavior)
             {
                 Text = text;
-                DependencyVersion = dependencyVersion;
+                Behavior = dependencyBehavior;
             }
 
             public override string ToString()
@@ -59,12 +58,12 @@ namespace NuGet.Tools
             }
         }
 
-        private static DependencyBehavior[] _dependencyBehaviors = new DependencyBehavior[] {
-            new DependencyBehavior("Ignore Dependencies", null),
-            new DependencyBehavior("Lowest", DependencyVersion.Lowest),
-            new DependencyBehavior("HighestPath", DependencyVersion.HighestPatch),
-            new DependencyBehavior("HighestMinor", DependencyVersion.HighestMinor),
-            new DependencyBehavior("Highest", DependencyVersion.Highest),
+        private static DependencyBehaviorItem[] _dependencyBehaviors = new[] {
+            new DependencyBehaviorItem("Ignore Dependencies", DependencyBehavior.Ignore),
+            new DependencyBehaviorItem("Lowest", DependencyBehavior.Lowest),
+            new DependencyBehaviorItem("HighestPath", DependencyBehavior.HighestPatch),
+            new DependencyBehaviorItem("HighestMinor", DependencyBehavior.HighestMinor),
+            new DependencyBehaviorItem("Highest", DependencyBehavior.Highest),
         };
 
         public PackageDetail()
@@ -108,73 +107,45 @@ namespace NuGet.Tools
             UpdateInstallUninstallButton();
         }
 
-        private void Preview(PackageAction action)
+        private async void Preview(PackageActionType action)
         {
-            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            //Control.SetBusy(true);
-            //var actions = await ResolveActionsAsync(action, projectManager);
-            //Control.SetBusy(false);
-
-            //PreviewActions(actions, projectManager);
-        }
-
-        private async Task<IEnumerable<Resolver.PackageAction>> ResolveActionsAsync(
-            PackageAction action,
-            IProjectManager projectManager)
-        {
-            var d = (DependencyBehavior)_dependencyBehavior.SelectedItem;
-            var resolver = new ActionResolver()
-            {
-                IgnoreDependencies = !d.DependencyVersion.HasValue,
-                AllowPrereleaseVersions = false
-            };
-
-            if (d.DependencyVersion.HasValue)
-            {
-                resolver.DependencyVersion = d.DependencyVersion.Value;
-            }
-
-            var package = ((PackageDetailControlModel)DataContext).Package.Package;
-
-            var actions = await Task.Factory.StartNew(
-                () =>
+            var package = (PackageDetailControlModel)DataContext;
+            Control.SetBusy(true);
+            var actions = await Session.CreateActionResolver().ResolveActions(
+                action,
+                new PackageName(package.Package.Id, package.Package.Version),
+                new ResolverContext()
                 {
-                    resolver.AddOperation(action, package, projectManager);
-                    return resolver.ResolveActions();
+                    DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
+                    AllowPrerelease = false
                 });
-            return actions;
+            Control.SetBusy(false);
+
+            PreviewActions(actions);
         }
 
         private void PreviewActions(
-            IEnumerable<Resolver.PackageAction> actions,
-            IProjectManager projectManager)
+            IEnumerable<PackageActionDescription> actions)
         {
             // Show result
             // values:
             // 1: unchanged
             // 0: deleted
             // 2: added
-            var packageStatus = new Dictionary<IPackage, int>(PackageEqualityComparer.IdAndVersion);
-            foreach (var p in projectManager.LocalRepository.GetPackages())
-            {
-                packageStatus[p] = 1;
-            }
+            var packageStatus = Session
+                .GetInstalledPackageList()
+                .GetInstalledPackages()
+                .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
             foreach (var action in actions)
             {
-                var projectAction = action as PackageProjectAction;
-                if (projectAction == null)
+                if (action.ActionType == PackageActionType.Install)
                 {
-                    continue;
+                    packageStatus[action.Package] = 2;
                 }
-
-                if (projectAction.ActionType == PackageActionType.Install)
+                else if (action.ActionType == PackageActionType.Uninstall)
                 {
-                    packageStatus[projectAction.Package] = 2;
-                }
-                else if (projectAction.ActionType == PackageActionType.Uninstall)
-                {
-                    packageStatus[projectAction.Package] = 0;
+                    packageStatus[action.Package] = 0;
                 }
             }
 
@@ -187,7 +158,7 @@ namespace NuGet.Tools
             w.ShowDialog();
         }
 
-        private void PerformPackageAction(PackageAction action)
+        private void PerformPackageAction(PackageActionType action)
         {
             //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
             //Control.SetBusy(true);
@@ -242,27 +213,27 @@ namespace NuGet.Tools
             model.CreateVersions(installedVersion);
         }
 
-        protected bool ShowLicenseAgreement(IEnumerable<Resolver.PackageAction> operations)
-        {
-            var licensePackages = operations.Where(
-                    op => op.ActionType == PackageActionType.AddToPackagesFolder &&
-                        op.Package.RequireLicenseAcceptance)
-                    .Select(op => op.Package);
+        //protected bool ShowLicenseAgreement(IEnumerable<Resolver.PackageAction> operations)
+        //{
+        //    var licensePackages = operations.Where(
+        //            op => op.ActionType == PackageActionType.AddToPackagesFolder &&
+        //                op.Package.RequireLicenseAcceptance)
+        //            .Select(op => op.Package);
 
-            // display license window if necessary
-            if (licensePackages.Any())
-            {
-                IUserNotifierServices uss = new UserNotifierServices();
-                bool accepted = uss.ShowLicenseWindow(
-                    licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
-                if (!accepted)
-                {
-                    return false;
-                }
-            }
+        //    // display license window if necessary
+        //    if (licensePackages.Any())
+        //    {
+        //        IUserNotifierServices uss = new UserNotifierServices();
+        //        bool accepted = uss.ShowLicenseWindow(
+        //            licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
+        //        if (!accepted)
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
         {
@@ -279,19 +250,19 @@ namespace NuGet.Tools
             switch (e.ButtonText)
             {
                 case "Install":
-                    PerformPackageAction(PackageAction.Install);
+                    PerformPackageAction(PackageActionType.Install);
                     break;
 
                 case "Install Preview":
-                    Preview(PackageAction.Install);
+                    Preview(PackageActionType.Install);
                     break;
 
                 case "Uninstall":
-                    PerformPackageAction(PackageAction.Uninstall);
+                    PerformPackageAction(PackageActionType.Uninstall);
                     break;
 
                 case "Uninstall Preview":
-                    Preview(PackageAction.Uninstall);
+                    Preview(PackageActionType.Uninstall);
                     break;
             }
         }

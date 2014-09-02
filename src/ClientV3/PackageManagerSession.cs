@@ -33,5 +33,7 @@ namespace NuGet.Client
         {
             ChangeActiveSource(newSource.Name);
         }
+
+        public abstract IActionResolver CreateActionResolver();
     }
 }

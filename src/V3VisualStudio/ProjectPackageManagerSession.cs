@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 using EnvDTE;
 using NuGet.VisualStudio;
 using NuGet.Client;
+using NuGet.Client.Interop;
 
 namespace NuGet.Client.VisualStudio
 {
-    internal class ProjectPackageManagerSession : VsPackageManagerSession
+    public class ProjectPackageManagerSession : VsPackageManagerSession
     {
         private Project _project;
         private IProjectManager _projectManager;
+
+        public Project Project { get { return _project; } }
 
         public override string Name
         {
@@ -21,6 +24,7 @@ namespace NuGet.Client.VisualStudio
         }
 
         public ProjectPackageManagerSession(Project project, IProjectManager projectManager)
+            : base(ServiceLocator.GetInstance<ILoggerManager>().GetLogger(typeof(ProjectPackageManagerSession).Name))
         {
             _project = project;
             _projectManager = projectManager;
@@ -36,6 +40,14 @@ namespace NuGet.Client.VisualStudio
         public override IInstalledPackageList GetInstalledPackageList()
         {
             return new ProjectInstalledPackageList(_projectManager);
+        }
+
+        public override IActionResolver CreateActionResolver()
+        {
+            return new V2InteropActionResolver(
+                GetActiveRepo(),
+                _projectManager,
+                ServiceLocator.GetInstance<ILoggerManager>().GetLogger(typeof(V2InteropActionResolver).Name));
         }
     }
 }

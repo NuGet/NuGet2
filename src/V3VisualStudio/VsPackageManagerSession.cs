@@ -15,28 +15,26 @@ namespace NuGet.Client.VisualStudio
     {
         private IVsPackageSourceProvider _packageSourceProvider;
         private IPackageRepositoryFactory _repoFactory;
-        private ILogger _logger;
 
-        protected ILogger Logger { get { return _logger; } }
+        protected ILogger Logger { get; private set; }
 
         public override PackageSource ActiveSource
         {
             get { return GetActiveSource(); }
         }
 
-        protected VsPackageManagerSession() : this(
+        protected VsPackageManagerSession(ILogger logger) : this(
             ServiceLocator.GetInstance<IVsPackageSourceProvider>(), 
             ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-            ServiceLocator.GetInstance<ILogger>())
+            logger)
         {
-
         }
 
         protected VsPackageManagerSession(IVsPackageSourceProvider packageSourceProvider, IPackageRepositoryFactory repoFactory, ILogger logger)
         {
             _packageSourceProvider = packageSourceProvider;
             _repoFactory = repoFactory;
-            _logger = logger;
+            Logger = logger;
         }
 
         public static VsPackageManagerSession ForProject(EnvDTE.Project project)
@@ -54,13 +52,18 @@ namespace NuGet.Client.VisualStudio
 
         public override IPackageSearcher CreateSearcher()
         {
+            return new V2InteropSearcher(GetActiveRepo());
+        }
+
+        protected virtual IPackageRepository GetActiveRepo()
+        {
             if (ActiveSource.IsAggregate())
             {
                 throw new InvalidOperationException(Strings.VsPackageManagerSession_CannotUseAggregateSource);
             }
 
-            var v2Repo = _repoFactory.CreateRepository(ActiveSource.Source);
-            return new V2InteropSearcher(v2Repo);
+            var repo = _repoFactory.CreateRepository(ActiveSource.Source);
+            return repo;
         }
 
         public override void ChangeActiveSource(string newSourceName)
@@ -85,7 +88,7 @@ namespace NuGet.Client.VisualStudio
             if (trueActive == null || trueActive.IsAggregate())
             {
                 var firstAvailable = GetAvailableSources().FirstOrDefault();
-                _logger.Log(MessageLevel.Debug, "Current repo is Aggregate, replacing with '{0}'", firstAvailable.Name);
+                Logger.Log(MessageLevel.Debug, "Current repo is Aggregate, replacing with '{0}'", firstAvailable.Name);
                 return firstAvailable;
             }
             return trueActive;

@@ -19,14 +19,14 @@ namespace NuGet.Tools
     /// </summary>
     public partial class PreviewWindow : Window
     {
-        IEnumerable<IPackage> _unchanged;
-        IEnumerable<IPackage> _deleted;
-        IEnumerable<IPackage> _added;
+        IEnumerable<PackageName> _unchanged;
+        IEnumerable<PackageName> _deleted;
+        IEnumerable<PackageName> _added;
 
         public PreviewWindow(
-            IEnumerable<IPackage> unchanged,
-            IEnumerable<IPackage> deleted,
-            IEnumerable<IPackage> added)
+            IEnumerable<PackageName> unchanged,
+            IEnumerable<PackageName> deleted,
+            IEnumerable<PackageName> added)
         {
             InitializeComponent();
 

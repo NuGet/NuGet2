@@ -68,5 +68,32 @@ namespace NuGet.Client {
                 return ResourceManager.GetString("NuGetRepository_CannotCreateAggregateRepo", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageActionDescriptionWrapper_UnrecognizedAction {
+            get {
+                return ResourceManager.GetString("PackageActionDescriptionWrapper_UnrecognizedAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
+        /// </summary>
+        internal static string V2InteropActionResolver_UnrecognizedAction {
+            get {
+                return ResourceManager.GetString("V2InteropActionResolver_UnrecognizedAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported Dependency Behavior &apos;{0}&apos;..
+        /// </summary>
+        internal static string V2InteropActionResolver_UnsupportedDependencyBehavior {
+            get {
+                return ResourceManager.GetString("V2InteropActionResolver_UnsupportedDependencyBehavior", resourceCulture);
+            }
+        }
     }
 }

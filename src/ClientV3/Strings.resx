@@ -120,4 +120,13 @@
   <data name="NuGetRepository_CannotCreateAggregateRepo" xml:space="preserve">
     <value>Cannot create a NuGet Repository from the Aggregate Source</value>
   </data>
+  <data name="PackageActionDescriptionWrapper_UnrecognizedAction" xml:space="preserve">
+    <value>Unrecognized Package Action '{0}'.</value>
+  </data>
+  <data name="V2InteropActionResolver_UnrecognizedAction" xml:space="preserve">
+    <value>Unrecognized Package Action '{0}'.</value>
+  </data>
+  <data name="V2InteropActionResolver_UnsupportedDependencyBehavior" xml:space="preserve">
+    <value>Unsupported Dependency Behavior '{0}'.</value>
+  </data>
 </root>
