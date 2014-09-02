@@ -25,6 +25,7 @@ namespace NuGet.Client
         Install,
         Uninstall,
         Purge,
-        Download
+        Download,
+        AcceptLicense
     }
 }

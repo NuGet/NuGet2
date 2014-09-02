@@ -109,6 +109,13 @@ namespace NuGet.Tools
 
         private async void Preview(PackageActionType action)
         {
+            var actions = await ResolveActions(action);
+
+            PreviewActions(actions);
+        }
+
+        private async Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action)
+        {
             var package = (PackageDetailControlModel)DataContext;
             Control.SetBusy(true);
             var actions = await Session.CreateActionResolver().ResolveActions(
@@ -120,8 +127,7 @@ namespace NuGet.Tools
                     AllowPrerelease = false
                 });
             Control.SetBusy(false);
-
-            PreviewActions(actions);
+            return actions;
         }
 
         private void PreviewActions(
@@ -158,25 +164,21 @@ namespace NuGet.Tools
             w.ShowDialog();
         }
 
-        private void PerformPackageAction(PackageActionType action)
+        private async void PerformPackageAction(PackageActionType action)
         {
-            //var projectManager = Control.Model.PackageManager.GetProjectManager(Control.Model.Project);
-            //Control.SetBusy(true);
-            //var actions = await ResolveActionsAsync(action, projectManager);
-            //Control.SetBusy(false);
+            var actions = await ResolveActions(action);
 
-            //// show license agreeement
-            //bool acceptLicense = ShowLicenseAgreement(actions);
-            //if (!acceptLicense)
-            //{
-            //    return;
-            //}
+            // show license agreeement
+            bool acceptLicense = ShowLicenseAgreement(actions);
+            if (!acceptLicense)
+            {
+                return;
+            }
 
-            //ActionExecutor executor = new ActionExecutor();
-            //executor.Execute(actions);
+            await Session.CreateActionExecutor().ExecuteActions(actions);
 
-            //Control.UpdatePackageStatus();
-            //UpdatePackageStatus();
+            Control.UpdatePackageStatus();
+            UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()
@@ -213,27 +215,32 @@ namespace NuGet.Tools
             model.CreateVersions(installedVersion);
         }
 
-        //protected bool ShowLicenseAgreement(IEnumerable<Resolver.PackageAction> operations)
-        //{
-        //    var licensePackages = operations.Where(
-        //            op => op.ActionType == PackageActionType.AddToPackagesFolder &&
-        //                op.Package.RequireLicenseAcceptance)
-        //            .Select(op => op.Package);
+        protected bool ShowLicenseAgreement(IEnumerable<PackageActionDescription> operations)
+        {
+            var licensePackages = operations.Where(op => op.ActionType == PackageActionType.AcceptLicense);
 
-        //    // display license window if necessary
-        //    if (licensePackages.Any())
-        //    {
-        //        IUserNotifierServices uss = new UserNotifierServices();
-        //        bool accepted = uss.ShowLicenseWindow(
-        //            licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
-        //        if (!accepted)
-        //        {
-        //            return false;
-        //        }
-        //    }
+            // display license window if necessary
+            if (licensePackages.Any())
+            {
+                var result = MessageBox.Show(
+                    "Accept Licenses? TODO: Show proper license dialog!",
+                    "NuGet",
+                    MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return false;
+                }
+                //IUserNotifierServices uss = new UserNotifierServices();
+                //bool accepted = uss.ShowLicenseWindow(
+                //    licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
+                //if (!accepted)
+                //{
+                //    return false;
+                //}
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
         {

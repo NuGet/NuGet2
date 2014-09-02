@@ -35,5 +35,6 @@ namespace NuGet.Client
         }
 
         public abstract IActionResolver CreateActionResolver();
+        public abstract IActionExecutor CreateActionExecutor();
     }
 }

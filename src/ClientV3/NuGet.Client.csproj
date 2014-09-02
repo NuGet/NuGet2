@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyBehavior.cs" />
+    <Compile Include="IActionExecutor.cs" />
     <Compile Include="IActionResolver.cs" />
     <Compile Include="IInstalledPackageList.cs" />
     <Compile Include="Interop\PackageActionDescriptionWrapper.cs" />
+    <Compile Include="Interop\V2InteropActionExecutor.cs" />
     <Compile Include="Interop\V2InteropActionResolver.cs" />
     <Compile Include="Interop\V2InteropSearcher.cs" />
     <Compile Include="IPackageSearcher.cs" />

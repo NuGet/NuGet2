@@ -8,7 +8,7 @@ namespace NuGet.Client.Interop
 {
     internal class PackageActionDescriptionWrapper : PackageActionDescription
     {
-        private NuGet.Resolver.PackageAction _resolverAction;
+        internal NuGet.Resolver.PackageAction ResolverAction { get; private set; }
 
         public PackageActionDescriptionWrapper(NuGet.Resolver.PackageAction resolverAction)
             : base(
@@ -16,7 +16,7 @@ namespace NuGet.Client.Interop
                 new PackageName(resolverAction.Package.Id, resolverAction.Package.Version),
                 GetTarget(resolverAction))
         {
-            _resolverAction = resolverAction;
+            ResolverAction = resolverAction;
         }
 
         private static PackageActionType ConvertAction(Resolver.PackageActionType packageActionType)

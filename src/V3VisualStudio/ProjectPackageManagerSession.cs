@@ -49,5 +49,10 @@ namespace NuGet.Client.VisualStudio
                 _projectManager,
                 ServiceLocator.GetInstance<ILoggerManager>().GetLogger(typeof(V2InteropActionResolver).Name));
         }
+
+        public override IActionExecutor CreateActionExecutor()
+        {
+            return new V2InteropActionExecutor();
+        }
     }
 }
