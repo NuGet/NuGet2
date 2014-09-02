@@ -36,7 +36,7 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0">Repository:</Label>
-                <ComboBox Style="{StaticResource GridCell}" x:Name="_sourceRepoList"
+                <ComboBox Style="{StaticResource GridCell}" x:Name="_sourceRepoList" DisplayMemberPath="Name"
                           Grid.Row="1" Grid.Column="0"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
 
                 <Label Grid.Row="0" Grid.Column="1">Filter:</Label>

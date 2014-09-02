@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EnvDTE;
+using NuGet.Client.Interop;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
@@ -34,6 +35,11 @@ namespace NuGet.Client.VisualStudio
         public bool IsInstalled(string packageId, SemanticVersion packageVersion)
         {
             return _projectManager.LocalRepository.Exists(packageId, packageVersion);
+        }
+
+        public IPackageSearcher CreateSearcher()
+        {
+            return new V2InteropSearcher(_projectManager.LocalRepository);
         }
     }
 }

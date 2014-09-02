@@ -24,6 +24,8 @@ namespace NuGet.Client.VisualStudio
         {
             _project = project;
             _projectManager = projectManager;
+
+            Logger.Log(MessageLevel.Debug, "Creating PackageManagerSession for {0}", project.Name);
         }
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()

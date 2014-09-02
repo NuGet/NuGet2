@@ -28,5 +28,10 @@ namespace NuGet.Client
         /// <param name="newSourceName">The name of the source to change to</param>
         /// <exception cref="ArgumentException">The specified source does not exist in the available sources, as defined by <see cref="GetAvailableSources"/></exception>
         public abstract void ChangeActiveSource(string newSourceName);
+
+        public virtual void ChangeActiveSource(PackageSource newSource)
+        {
+            ChangeActiveSource(newSource.Name);
+        }
     }
 }

@@ -55,7 +55,7 @@ namespace NuGet.Tools
             {
                 _sourceRepoList.Items.Add(source);
             }
-            _sourceRepoList.SelectedItem = Session.ActiveSource.Name;
+            _sourceRepoList.SelectedItem = Session.ActiveSource;
 
             UpdatePackageList();
         }
@@ -191,9 +191,14 @@ namespace NuGet.Tools
                         ProjectUrl = version.GetScalarUri(Uris.Properties.ProjectUrl),
                         Tags = version.GetScalar<string>(Uris.Properties.Tags),
                         DownloadCount = version.GetScalar<int>(Uris.Properties.DownloadCount),
-                        Published = DateTime.Parse(version.GetScalar<string>(Uris.Properties.Published)),
                         DependencySets = version.GetArray<JObject>(Uris.Properties.DependencyGroup).Select(obj => LoadDependencySet(obj))
                     };
+
+                    string publishedStr = version.GetScalar<string>(Uris.Properties.Published);
+                    if (!String.IsNullOrEmpty(publishedStr))
+                    {
+                        detailedPackage.Published = DateTime.Parse(publishedStr);
+                    }
                     detailedPackage.NoDependencies = !HasDependencies(detailedPackage.DependencySets);
 
                     retValue.Add(detailedPackage);
@@ -260,26 +265,25 @@ namespace NuGet.Tools
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
             var supportedFrameworks = Session.GetSupportedFrameworks();
             
-            //if (showOnlyInstalled)
-            //{
-            //    var loader = new PackageLoader(
-            //        _model.LocalRepo,
-            //        _model.ActiveSourceRepo,
-            //        _model.LocalRepo,
-            //        searchText,
-            //        supportedFrameWorks);
-            //    _packageList.Loader = loader;
-            //}
-            //else
-            //{
+            if (showOnlyInstalled)
+            {
+                var loader = new PackageLoader(
+                    Session.GetInstalledPackageList().CreateSearcher(),
+                    Session.GetInstalledPackageList(),
+                    searchText,
+                    supportedFrameworks);
+                _packageList.Loader = loader;
+            }
+            else
+            {
                 // search online                
-            var loader = new PackageLoader(
-                Session.CreateSearcher(),
-                Session.GetInstalledPackageList(),
-                searchText,
-                supportedFrameworks);
-            _packageList.Loader = loader;
-            //}
+                var loader = new PackageLoader(
+                    Session.CreateSearcher(),
+                    Session.GetInstalledPackageList(),
+                    searchText,
+                    supportedFrameworks);
+                _packageList.Loader = loader;
+            }
         }
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
@@ -314,8 +318,8 @@ namespace NuGet.Tools
 
         private void _sourceRepoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var newSource = _sourceRepoList.SelectedItem as string;
-            if (string.IsNullOrEmpty(newSource))
+            var newSource = _sourceRepoList.SelectedItem as PackageSource;
+            if (newSource == null)
             {
                 return;
             }

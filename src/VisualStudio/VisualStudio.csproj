@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762, 1591, 1573</NoWarn>
@@ -68,6 +68,7 @@
     <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="Utility\SettingsHelper.cs" />
     <Compile Include="VisualStudioUIWrapper.cs" />
+    <Compile Include="VsLogger.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -271,7 +272,7 @@
       <Project>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</Project>
       <Name>VisualStudio10</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj"> 
+    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj">
       <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
       <Name>VisualStudio12</Name>
       <Private>True</Private>

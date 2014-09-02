@@ -61,6 +61,15 @@ namespace NuGet.Client.VisualStudio {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You cannot use the aggregate source with the V2InteropSearcher..
+        /// </summary>
+        internal static string VsPackageManagerSession_CannotUseAggregateSource {
+            get {
+                return ResourceManager.GetString("VsPackageManagerSession_CannotUseAggregateSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown Package Source: &apos;{0}&apos;. It is not present in the list of available sources..
         /// </summary>
         internal static string VsPackageManagerSession_UnknownSource {

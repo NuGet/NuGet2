@@ -15,22 +15,28 @@ namespace NuGet.Client.VisualStudio
     {
         private IVsPackageSourceProvider _packageSourceProvider;
         private IPackageRepositoryFactory _repoFactory;
+        private ILogger _logger;
+
+        protected ILogger Logger { get { return _logger; } }
 
         public override PackageSource ActiveSource
         {
-            get { return _packageSourceProvider.ActivePackageSource; }
+            get { return GetActiveSource(); }
         }
 
-        protected VsPackageManagerSession()
-            : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), ServiceLocator.GetInstance<IPackageRepositoryFactory>())
+        protected VsPackageManagerSession() : this(
+            ServiceLocator.GetInstance<IVsPackageSourceProvider>(), 
+            ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+            ServiceLocator.GetInstance<ILogger>())
         {
 
         }
 
-        protected VsPackageManagerSession(IVsPackageSourceProvider packageSourceProvider, IPackageRepositoryFactory repoFactory)
+        protected VsPackageManagerSession(IVsPackageSourceProvider packageSourceProvider, IPackageRepositoryFactory repoFactory, ILogger logger)
         {
             _packageSourceProvider = packageSourceProvider;
             _repoFactory = repoFactory;
+            _logger = logger;
         }
 
         public static VsPackageManagerSession ForProject(EnvDTE.Project project)
@@ -43,11 +49,16 @@ namespace NuGet.Client.VisualStudio
 
         public override IEnumerable<PackageSource> GetAvailableSources()
         {
-            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregate();
+            return _packageSourceProvider.GetEnabledPackageSources();
         }
 
         public override IPackageSearcher CreateSearcher()
         {
+            if (ActiveSource.IsAggregate())
+            {
+                throw new InvalidOperationException(Strings.VsPackageManagerSession_CannotUseAggregateSource);
+            }
+
             var v2Repo = _repoFactory.CreateRepository(ActiveSource.Source);
             return new V2InteropSearcher(v2Repo);
         }
@@ -66,6 +77,18 @@ namespace NuGet.Client.VisualStudio
                     "newSourceName");
             }
             _packageSourceProvider.ActivePackageSource = source;
+        }
+
+        private PackageSource GetActiveSource()
+        {
+            var trueActive = _packageSourceProvider.ActivePackageSource;
+            if (trueActive == null || trueActive.IsAggregate())
+            {
+                var firstAvailable = GetAvailableSources().FirstOrDefault();
+                _logger.Log(MessageLevel.Debug, "Current repo is Aggregate, replacing with '{0}'", firstAvailable.Name);
+                return firstAvailable;
+            }
+            return trueActive;
         }
     }
 }
