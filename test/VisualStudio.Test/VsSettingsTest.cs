@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var value = vsSettings.GetValue("Solution", "Foo");
+            var value = vsSettings.GetValue("Solution", "Foo", isPath: false);
 
             // Assert
             Assert.Equal("", value);
@@ -63,7 +63,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var value = vsSettings.GetValue("Solution", "Foo");
+            var value = vsSettings.GetValue("Solution", "Foo", isPath: false);
 
             // Assert
             Assert.Equal("", value);
@@ -83,7 +83,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var value = vsSettings.GetValue("Solution", "Foo");
+            var value = vsSettings.GetValue("Solution", "Foo", isPath: false);
 
             // Assert
             Assert.Equal("", value);
@@ -106,7 +106,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var value = vsSettings.GetValue("solution", "foo");
+            var value = vsSettings.GetValue("solution", "foo", isPath: false);
 
             // Assert
             Assert.Equal("bar", value);
@@ -122,7 +122,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
             solutionManager.Setup(s => s.SolutionDirectory).Returns(@"x:\solution").Verifiable();
             var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
-            defaultSettings.Setup(d => d.GetValue("PackageSources", "foo")).Returns("qux").Verifiable();
+            defaultSettings.Setup(d => d.GetValue("PackageSources", "foo", false)).Returns("qux").Verifiable();
 
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""bar"" /></solution></configuration>");
@@ -131,7 +131,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var value = vsSettings.GetValue("PackageSources", "foo");
+            var value = vsSettings.GetValue("PackageSources", "foo", isPath: false);
 
             // Assert
             Assert.Equal("qux", value);
@@ -160,12 +160,12 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var valueA = vsSettings.GetValue("solution", "foo");
+            var valueA = vsSettings.GetValue("solution", "foo", isPath: false);
             solutionManager.Object.CloseSolution();
             solutionManager.Setup(s => s.SolutionDirectory).Returns(@"y:\solution").Verifiable();
             solutionManager.Object.CloseSolution();
 
-            var valueB = vsSettings.GetValue("solution", "foo");
+            var valueB = vsSettings.GetValue("solution", "foo", isPath: false);
 
             // Assert
             Assert.Equal("barA", valueA);
@@ -189,9 +189,9 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
-            var valueA = vsSettings.GetValue("solution", "foo");
+            var valueA = vsSettings.GetValue("solution", "foo", isPath: false);
             fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""qux"" /></solution></configuration>");
-            var valueB = vsSettings.GetValue("solution", "foo");
+            var valueB = vsSettings.GetValue("solution", "foo", isPath: false);
 
             // Assert
             Assert.Equal("bar", valueA);

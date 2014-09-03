@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("").Verifiable();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns("").Verifiable();
 
             // Act
             bool isDisabled = settings.Object.IsSourceControlDisabled();
@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns(value).Verifiable();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns(value).Verifiable();
 
             // Act
             bool isDisabled = settings.Object.IsSourceControlDisabled();
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns(value).Verifiable();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns(value).Verifiable();
 
             // Act
             bool isDisabled = settings.Object.IsSourceControlDisabled();

@@ -66,7 +66,7 @@ namespace NuGet
         {
             var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var settingsValue = new List<SettingValue>();            
-            IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);
+            IList<SettingValue> values = _settingsManager.GetValues(PackageSourcesSectionName, isPath: true);
             var machineWideSourcesCount = 0;
             
             if (!values.IsEmpty())
@@ -104,27 +104,41 @@ namespace NuGet
             var loadedPackageSources = new List<PackageSource>();
             if (!settingsValue.IsEmpty())
             {
-                // put disabled package source names into the hash set
+                // Create disabledSources list                
+                var disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName, isPath: false) ??
+                    Enumerable.Empty<SettingValue>();
 
-                IEnumerable<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName) ??
-                                                                                  Enumerable.Empty<KeyValuePair<string, string>>();
-                var disabledSources = new HashSet<string>(disabledSourcesValues.Select(s => s.Key), StringComparer.CurrentCultureIgnoreCase);
-                loadedPackageSources = settingsValue.
-                                           Select(p =>
-                                           {
-                                               string name = p.Key;
-                                               string src = p.Value;
-                                               PackageSourceCredential creds = ReadCredential(name);
+                // the value of this dictionary is the priority value
+                var disabledSources = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+                foreach (var v in disabledSourcesValues)
+                {
+                    if (!disabledSources.ContainsKey(v.Key) ||
+                        disabledSources[v.Key] < v.Priority)
+                    {
+                        disabledSources[v.Key] = v.Priority;
+                    }
+                }
 
-                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name))
-                                               {
-                                                   UserName = creds != null ? creds.Username : null,
-                                                   Password = creds != null ? creds.Password : null,
-                                                   IsPasswordClearText = creds != null && creds.IsPasswordClearText,
-                                                   IsMachineWide = p.IsMachineWide
-                                               };
+                // Create loadedPackageSources list
+                loadedPackageSources = new List<PackageSource>();
+                foreach (var p in settingsValue)
+                {
+                    string name = p.Key;
+                    string src = p.Value;
+                    PackageSourceCredential creds = ReadCredential(name);
 
-                                           }).ToList();
+                    var isEnabled = !disabledSources.ContainsKey(name) ||
+                        disabledSources[name] < p.Priority;
+                    var packageSource = new PackageSource(src, name, isEnabled)
+                    {
+                        UserName = creds != null ? creds.Username : null,
+                        Password = creds != null ? creds.Password : null,
+                        IsPasswordClearText = creds != null && creds.IsPasswordClearText,
+                        IsMachineWide = p.IsMachineWide
+                    };
+
+                    loadedPackageSources.Add(packageSource);
+                }
 
                 if (_migratePackageSources != null)
                 {
@@ -146,13 +160,15 @@ namespace NuGet
 
                 if (!String.IsNullOrEmpty(userName))
                 {
-                    string encryptedPassword = values.FirstOrDefault(k => k.Key.Equals(PasswordToken, StringComparison.OrdinalIgnoreCase)).Value;
+                    var setting = values.FirstOrDefault(k => k.Key.Equals(PasswordToken, StringComparison.OrdinalIgnoreCase));
+                    string encryptedPassword = setting != null ? setting.Value : null;
                     if (!String.IsNullOrEmpty(encryptedPassword))
                     {
                         return new PackageSourceCredential(userName, EncryptionUtility.DecryptString(encryptedPassword), isPasswordClearText: false);
                     }
 
-                    string clearTextPassword = values.FirstOrDefault(k => k.Key.Equals(ClearTextPasswordToken, StringComparison.Ordinal)).Value;
+                    setting = values.FirstOrDefault(k => k.Key.Equals(ClearTextPasswordToken, StringComparison.Ordinal));
+                    string clearTextPassword = setting != null ? setting.Value : null;
                     if (!String.IsNullOrEmpty(clearTextPassword))
                     {
                         return new PackageSourceCredential(userName, clearTextPassword, isPasswordClearText: true);
@@ -319,7 +335,10 @@ namespace NuGet
                 throw new ArgumentNullException("source");
             }
 
-            string value = _settingsManager.GetValue(DisabledPackageSourcesSectionName, source.Name);
+            string value = _settingsManager.GetValue(
+                DisabledPackageSourcesSectionName, 
+                source.Name,
+                isPath: false);
 
             // It doesn't matter what value it is.
             // As long as the package source name is persisted in the <disabledPackageSources> section, the source is disabled.

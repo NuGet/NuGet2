@@ -904,7 +904,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             private static ISettings CreateSettings(bool allowPackageRestore)
             {
                 var settings = new Mock<ISettings>();
-                settings.Setup(s => s.GetValue("packageRestore", "enabled"))
+                settings.Setup(s => s.GetValue("packageRestore", "enabled", false))
                         .Returns(allowPackageRestore.ToString());
                 return settings.Object;
             }

@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio
     /// <summary>
     /// This class unifies all the different ways of getting services within visual studio.
     /// </summary>
-    // REVIEW: Make this internal 
+    // REVIEW: Make this internal
     public static class ServiceLocator
     {
         public static void InitializePackageServiceProvider(IServiceProvider provider)
@@ -41,16 +41,16 @@ namespace NuGet.VisualStudio
             }
 
             // then try to find the service as a component model, then try dte then lastly try global service
-            // Per bug #2072, avoid calling GetGlobalService() from within the Initialize() method of NuGetPackage class. 
+            // Per bug #2072, avoid calling GetGlobalService() from within the Initialize() method of NuGetPackage class.
             // Doing so is illegal and may cause VS to hang. As a result of that, we defer calling GetGlobalService to the last option.
             return GetDTEService<TService>() ??
-                   GetComponentModelService<TService>() ?? 
+                   GetComponentModelService<TService>() ??
                    GetGlobalService<TService, TService>();
         }
 
         public static TInterface GetGlobalService<TService, TInterface>() where TInterface : class
         {
-            if (PackageServiceProvider != null) 
+            if (PackageServiceProvider != null)
             {
                 TInterface service = PackageServiceProvider.GetService(typeof(TService)) as TInterface;
                 if (service != null)
@@ -84,7 +84,7 @@ namespace NuGet.VisualStudio
         {
             Guid guidService = serviceType.GUID;
             Guid riid = guidService;
-            var serviceProvider = dte as VsServiceProvider;            
+            var serviceProvider = dte as VsServiceProvider;
 
             IntPtr servicePtr;
             int hr = serviceProvider.QueryService(ref guidService, ref riid, out servicePtr);
@@ -104,7 +104,6 @@ namespace NuGet.VisualStudio
             }
 
             return service;
-
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The caller is responsible for disposing this")]

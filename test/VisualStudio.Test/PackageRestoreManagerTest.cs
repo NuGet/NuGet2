@@ -161,7 +161,7 @@ namespace NuGet.VisualStudio.Test
 
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();
-            defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
+            defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns("false");
 
             // setup DTE
             var dte = new Mock<DTE>();
@@ -708,7 +708,7 @@ namespace NuGet.VisualStudio.Test
 
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();
-            defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
+            defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns("false");
 
             // setup DTE
             var dte = new Mock<DTE>();

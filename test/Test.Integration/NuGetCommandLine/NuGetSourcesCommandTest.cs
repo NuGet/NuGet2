@@ -33,7 +33,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 // Assert
                 Assert.Equal(0, result);
                 var settings = Settings.LoadDefaultSettings(null, null, null);
-                var source = settings.GetValue("packageSources", "test_source");
+                var source = settings.GetValue("packageSources", "test_source", isPath: false);
                 Assert.Equal("http://test_source", source);
             }
         }
@@ -65,7 +65,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Assert.Equal(0, result);
 
                 var settings = Settings.LoadDefaultSettings(null, null, null);
-                var source = settings.GetValue("packageSources", "test_source");
+                var source = settings.GetValue("packageSources", "test_source", isPath: false);
                 Assert.Equal("http://test_source", source);
 
                 var credentials = settings.GetNestedValues(
@@ -109,7 +109,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Assert.Equal(0, result);
 
                 var settings = Settings.LoadDefaultSettings(null, null, null);
-                var source = settings.GetValue("packageSources", "test_source");
+                var source = settings.GetValue("packageSources", "test_source", isPath: false);
                 Assert.Equal("http://test_source", source);
 
                 var credentials = settings.GetNestedValues(
@@ -156,7 +156,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
                 Path.GetFileName(configFile),
                 null);
-            var source = settings.GetValue("packageSources", "test_source");
+            var source = settings.GetValue("packageSources", "test_source", isPath: false);
             Assert.Equal("http://test_source", source);
 
             var credentials = settings.GetNestedValues(

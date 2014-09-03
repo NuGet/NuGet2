@@ -33,9 +33,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Assert.Equal(0, result);
 
                 var settings = Settings.LoadDefaultSettings(null, null, null);
-                var values = settings.GetValues("config");
-                AssertEqualCollections(values, new[] { "Name1", "Value1", "HTTP_PROXY", "http://127.0.0.1", "HTTP_PROXY.USER", @"domain\user" });
-
+                var values = settings.GetValues("config", isPath: false);
+                Assert.Equal<SettingValue>(values, new [] { 
+                    new SettingValue("Name1", "Value1", false), 
+                    new SettingValue("HTTP_PROXY", "http://127.0.0.1", false),
+                    new SettingValue("HTTP_PROXY.USER", @"domain\user", false) });
             }
         }
 
@@ -67,9 +69,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                     new PhysicalFileSystem(Path.GetDirectoryName(configFile)),
                     Path.GetFileName(configFile),
                     null);
-                var values = settings.GetValues("config");
-                AssertEqualCollections(values, new[] { "Name1", "Value1", "HTTP_PROXY", "http://127.0.0.1", "HTTP_PROXY.USER", @"domain\user" });
-
+                var values = settings.GetValues("config", isPath: false);
+                Assert.Equal<SettingValue>(values, new[] { 
+                    new SettingValue("Name1", "Value1", false),
+                    new SettingValue("HTTP_PROXY", "http://127.0.0.1", false),
+                    new SettingValue("HTTP_PROXY.USER", @"domain\user", false) });
             }
             finally
             {
@@ -122,16 +126,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 // cleanup
                 File.Delete(configFile);
-            }
-        }
-
-        private void AssertEqualCollections(IList<KeyValuePair<string, string>> actual, string[] expected)
-        {
-            Assert.Equal(actual.Count, expected.Length / 2);
-            for (int i = 0; i < actual.Count; ++i)
-            {
-                Assert.Equal(expected[2 * i], actual[i].Key);
-                Assert.Equal(expected[2 * i + 1], actual[i].Value);
             }
         }
     }

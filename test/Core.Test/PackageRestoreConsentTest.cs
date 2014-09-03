@@ -31,7 +31,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("wrong value");
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns("wrong value");
             var environmentReader = new Mock<IEnvironmentVariableReader>();
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
@@ -52,7 +52,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns(settingsValue);
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns(settingsValue);
             var environmentReader = new Mock<IEnvironmentVariableReader>();
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
@@ -129,7 +129,7 @@ namespace NuGet.Test
             var settings = new Mock<ISettings>();
             var environmentReader = new Mock<IEnvironmentVariableReader>(); 
             
-            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns(settingsValue);
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns(settingsValue);
             environmentReader.Setup(r => r.GetEnvironmentVariable("EnableNuGetPackageRestore")).Returns(environmentValue);
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
@@ -162,7 +162,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "enabled"));
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false));
             var environmentReader = new Mock<IEnvironmentVariableReader>();
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
@@ -199,7 +199,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns(valueInUserSettings);
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns(valueInUserSettings);
 
             var mockFileSystem = new MockFileSystem();
             mockFileSystem.AddFile("NuGetDefaults.config",
@@ -260,7 +260,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "automatic")).Returns(valueInUserSettings);
+            settings.Setup(s => s.GetValue("packageRestore", "automatic", false)).Returns(valueInUserSettings);
             var environmentReader = new Mock<IEnvironmentVariableReader>();
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
 
@@ -277,7 +277,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns(grantSetting);
+            settings.Setup(s => s.GetValue("packageRestore", "enabled", false)).Returns(grantSetting);
             var environmentReader = new Mock<IEnvironmentVariableReader>();
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
 

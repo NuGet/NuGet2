@@ -14,34 +14,19 @@ namespace NuGet
             get { return _settings; }
         }
 
-        public string GetValue(string section, string key)
-        {
-            return String.Empty;
-        }
-
         public string GetValue(string section, string key, bool isPath)
         {
             return String.Empty;
         }
 
-        public IList<KeyValuePair<string, string>> GetValues(string section)
-        {
-            return new List<KeyValuePair<string, string>>().AsReadOnly();
-        }
-
-        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
-        {
-            return new List<KeyValuePair<string, string>>().AsReadOnly();
-        }
-
-        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        public IList<SettingValue> GetValues(string section, bool isPath)
         {
             return new List<SettingValue>().AsReadOnly();
         }
 
-        public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
+        public IList<SettingValue> GetNestedValues(string section, string subsection)
         {
-            return new List<KeyValuePair<string, string>>().AsReadOnly();
+            return new List<SettingValue>().AsReadOnly();
         }
 
         public void SetValue(string section, string key, string value)

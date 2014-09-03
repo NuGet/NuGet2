@@ -61,7 +61,10 @@ namespace NuGet
         {
             get
             {
-                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey);
+                string settingsValue = _settings.GetValue(
+                    PackageRestoreSection, 
+                    PackageRestoreConsentKey,
+                    isPath: false);
                 if (String.IsNullOrWhiteSpace(settingsValue))
                 {
                     settingsValue = _configurationDefaults.DefaultPackageRestoreConsent;
@@ -86,7 +89,10 @@ namespace NuGet
         {
             get
             {
-                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreAutomaticKey);
+                string settingsValue = _settings.GetValue(
+                    PackageRestoreSection, 
+                    PackageRestoreAutomaticKey,
+                    isPath: false);
                 if (String.IsNullOrWhiteSpace(settingsValue))
                 {
                     return IsGrantedInSettings;

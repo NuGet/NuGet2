@@ -33,7 +33,7 @@ function Test-GetRepositoryPathFromVsSettings {
 	$p2 | Install-Package elmah -Version 1.1
 
 	$vsSetting = [NuGet.VisualStudio.SettingsHelper]::GetVsSettings()
-	$v = $vsSetting.GetValue("config", "repositoryPath")
+	$v = $vsSetting.GetValue("config", "repositoryPath", $FALSE)
 
 	# Assert
 	Assert-AreEqual $repoPath $v

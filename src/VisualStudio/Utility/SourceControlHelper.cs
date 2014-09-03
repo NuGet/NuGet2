@@ -9,7 +9,10 @@ namespace NuGet.VisualStudio
 
         public static bool IsSourceControlDisabled(this ISettings settings)
         {
-            var value = settings.GetValue(SolutionSection, DisableSourceControlIntegerationKey);
+            var value = settings.GetValue(
+                SolutionSection, 
+                DisableSourceControlIntegerationKey,
+                isPath: false);
             bool disableSourceControlIntegration;
             return !String.IsNullOrEmpty(value) && Boolean.TryParse(value, out disableSourceControlIntegration) && disableSourceControlIntegration;
         }

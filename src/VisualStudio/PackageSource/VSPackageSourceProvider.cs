@@ -16,10 +16,11 @@ namespace NuGet.VisualStudio
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
         
-        private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
-                                                                                 VsResources.VisualStudioExpressForWindows8SourceName,
-                                                                                 isEnabled: true,
-                                                                                 isOfficial: true);
+        private static readonly PackageSource Windows8Source = new PackageSource(
+            NuGetConstants.VSExpressForWindows8FeedUrl,
+            VsResources.VisualStudioExpressForWindows8SourceName,
+            isEnabled: true,
+            isOfficial: true);
 
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
@@ -233,12 +234,12 @@ namespace NuGet.VisualStudio
             ISettings settings,
             IVsShellInfo vsShellInfo)
         {
-            var settingValues = settings.GetValues(ActivePackageSourceSectionName);
+            var settingValues = settings.GetValues(ActivePackageSourceSectionName, isPath: false);
 
             PackageSource packageSource = null;
             if (settingValues != null && settingValues.Any())
             {
-                KeyValuePair<string, string> setting = settingValues.First();
+                var setting = settingValues.First();
                 if (IsAggregateSource(setting.Key, setting.Value))
                 {
                     packageSource = AggregatePackageSource.Instance;

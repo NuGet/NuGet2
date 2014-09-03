@@ -12,7 +12,7 @@ namespace NuGet.VisualStudio.Test
         private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
         private const string NuGetOfficialFeedName = "nuget.org";
         private const string NuGetLegacyOfficialFeedName = "NuGet official package source";
-        
+
         [Fact]
         public void CtorIfFirstRunningAddsDefaultSource()
         {
@@ -34,7 +34,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -52,7 +52,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=230477", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -70,7 +70,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://nuget.org/api/v2/", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -89,7 +89,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new SettingValue("NuGET oFFIcial PACKAGE souRCe", "HTTPS://nUGet.org/ApI/V2/", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -103,7 +103,6 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(NuGetOfficialFeedName, sources[0].Name);
         }
 
-
         // Test that when there are non-machine wide user specified sources, the
         // official source is added but disabled.
         [Fact]
@@ -111,10 +110,10 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
-                        .Returns(new[] { 
+            userSettings.Setup(s => s.GetValues("packageSources", true))
+                        .Returns(new[] {
                             new SettingValue("Test1", "https://test1", true),
-                            new SettingValue("Test2", "https://test2", false) 
+                            new SettingValue("Test2", "https://test2", false)
                         });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -140,10 +139,10 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
-                        .Returns(new[] { 
+            userSettings.Setup(s => s.GetValues("packageSources", true))
+                        .Returns(new[] {
                             new SettingValue("Test1", "https://test1", true),
-                            new SettingValue("Test2", "https://test2", true) 
+                            new SettingValue("Test2", "https://test2", true)
                         });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -162,7 +161,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new SettingValue("my source", "http://www.nuget.org", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -177,18 +176,18 @@ namespace NuGet.VisualStudio.Test
             Assert.False(sources[1].IsEnabled);
             Assert.True(sources[1].IsOfficial);
         }
-              
+
         [Fact]
         public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false) });
 
             // disable the official source
-            userSettings.Setup(s => s.GetValues("disabledPackageSources"))
-                        .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "true") });
+            userSettings.Setup(s => s.GetValues("disabledPackageSources", false))
+                        .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "true", false) });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
@@ -207,14 +206,14 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true)).Returns(new[]
+            userSettings.Setup(s => s.GetValues("packageSources", true)).Returns(new[]
             {
                 new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false),
                 new SettingValue("one", "onesource", false),
             });
 
-            userSettings.Setup(s => s.GetValues("activePackageSource"))
-                        .Returns(new[] { new KeyValuePair<string, string>("one", "onesource") });
+            userSettings.Setup(s => s.GetValues("activePackageSource", false))
+                        .Returns(new[] { new SettingValue("one", "onesource", false) });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
@@ -246,7 +245,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("activePackageSource", NuGetLegacyOfficialFeedName))
+            settings.Setup(s => s.GetValue("activePackageSource", NuGetLegacyOfficialFeedName, false))
                     .Returns("https://go.microsoft.com/fwlink/?LinkID=206669");
             var provider = new VsPackageSourceProvider(settings.Object, CreateDefaultSourceProvider(settings.Object), new Mock<IVsShellInfo>().Object);
 
@@ -310,13 +309,13 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>(MockBehavior.Strict);
-            userSettings.Setup(_ => _.GetSettingValues("packageSources", true)).Returns(new[]
+            userSettings.Setup(_ => _.GetValues("packageSources", true)).Returns(new[]
             {
                 new SettingValue(NuGetOfficialFeedName, NuGetOfficialFeedUrl, false)
             });
-            userSettings.Setup(_ => _.GetValues("activePackageSource")).Returns(new List<KeyValuePair<string, string>>
+            userSettings.Setup(_ => _.GetValues("activePackageSource", false)).Returns(new[]
             {
-                new KeyValuePair<string, string>("Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl)
+                new SettingValue("Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl, false)
             });
 
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
@@ -344,9 +343,9 @@ namespace NuGet.VisualStudio.Test
                 new PackageSource("theThirdSource", "theThirdFeed"),
             });
 
-            userSettings.Setup(_ => _.GetValues("activePackageSource")).Returns(new[]
+            userSettings.Setup(_ => _.GetValues("activePackageSource", false)).Returns(new[]
             {
-                new KeyValuePair<string, string>("theFirstFeed", "theFirstSource")
+                new SettingValue("theFirstFeed", "theFirstSource", false)
             });
             userSettings.Setup(_ => _.DeleteSection("activePackageSource")).Returns(true);
             userSettings.Setup(_ => _.SetValue("activePackageSource", "Windows 8 packages", NuGetConstants.VSExpressForWindows8FeedUrl)).Verifiable();
@@ -583,6 +582,6 @@ namespace NuGet.VisualStudio.Test
         private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
         {
             return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null);
-        }              
+        }
     }
 }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Moq;
-using Xunit;
 using NuGet.Test.Mocks;
+using Xunit;
 using Xunit.Extensions;
 
 namespace NuGet.Test
@@ -21,7 +21,7 @@ namespace NuGet.Test
         [Fact]
         public void WillGetConfigurationFromSpecifiedPath()
         {
-            // Arrange 
+            // Arrange
             const string configFile = "NuGet.Config";
             var mockFileSystem = new Mock<IFileSystem>();
             string config = @"
@@ -38,41 +38,41 @@ namespace NuGet.Test
             // Act
             new Settings(mockFileSystem.Object);
 
-            // Assert 
+            // Assert
             mockFileSystem.Verify(x => x.OpenFile(configFile), Times.Once(), "File was not read");
         }
 
         [Fact]
         public void CallingGetValuesWithNullSectionWillThrowException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValues(null));
+            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValues(null, false));
         }
 
         [Fact]
         public void CallingGetValueWithNullSectionWillThrowException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue(null, "SomeKey"));
+            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue(null, "SomeKey", false));
         }
 
         [Fact]
         public void CallingGetValueWithNullKeyWillThrowException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue("SomeSection", null));
+            ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue("SomeSection", null, false));
         }
 
         [Fact]
@@ -85,7 +85,6 @@ namespace NuGet.Test
 
             // Act & Assert
             ExceptionAssert.Throws<System.Xml.XmlException>(() => new Settings(mockFileSystem));
-
         }
 
         [Fact]
@@ -94,15 +93,15 @@ namespace NuGet.Test
             // Arrange
             var mockFileSystem = new MockFileSystem();
             var nugetConfigPath = "NuGet.Config";
-            
+
             string config = @"<configuration></configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValues("DoesNotExisit");
+            var result = settings.GetValues("DoesNotExisit", isPath: false);
 
-            // Assert 
+            // Assert
             Assert.Empty(result);
         }
 
@@ -122,7 +121,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => settings.GetValues("SectionName"), @"Unable to parse config file 'x:\test\NuGet.Config'.");
+            ExceptionAssert.Throws<InvalidDataException>(
+                () => settings.GetValues("SectionName", isPath: false),
+                @"Unable to parse config file 'x:\test\NuGet.Config'.");
         }
 
         [Fact]
@@ -143,7 +144,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => settings.GetValues("packageSources"), @"Unable to parse config file 'x:\test\NuGet.Config'.");
+            ExceptionAssert.Throws<InvalidDataException>(
+                () => settings.GetValues("packageSources", isPath: true), 
+                @"Unable to parse config file 'x:\test\NuGet.Config'.");
         }
 
         [Fact]
@@ -163,9 +166,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValues("NotTheSectionName");
+            var result = settings.GetValues("NotTheSectionName", isPath: false);
 
-            // Arrange 
+            // Arrange
             Assert.Empty(result);
         }
 
@@ -186,9 +189,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValue("NotTheSectionName", "key1");
+            var result = settings.GetValue("NotTheSectionName", "key1", isPath: false);
 
-            // Arrange 
+            // Arrange
             Assert.Null(result);
         }
 
@@ -209,9 +212,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValue("SectionName", "key3");
+            var result = settings.GetValue("SectionName", "key3", isPath: false);
 
-            // Assert 
+            // Assert
             Assert.Null(result);
         }
 
@@ -232,9 +235,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValues("SectionName");
+            var result = settings.GetValues("SectionName", isPath: false);
 
-            // Assert 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
@@ -258,10 +261,10 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result1 = settings.GetValue("SectionName", "key1");
-            var result2 = settings.GetValue("SectionNameTwo", "key2");
+            var result1 = settings.GetValue("SectionName", "key1", isPath: false);
+            var result2 = settings.GetValue("SectionNameTwo", "key2", isPath: false);
 
-            // Assert 
+            // Assert
             Assert.Equal("value1", result1);
             Assert.Equal("value2", result2);
         }
@@ -269,7 +272,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingSetValueWithEmptySectionNameThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -280,7 +283,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingSetValueWithEmptyKeyThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -376,7 +379,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingSetValuesWithEmptySectionThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
             var settings = new Settings(mockFileSystem);
@@ -388,7 +391,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingSetValuesWithNullValuesThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -399,7 +402,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingSetValuesWithEmptyKeyThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("", "value") };
             var settings = new Settings(mockFileSystem);
@@ -474,7 +477,7 @@ namespace NuGet.Test
             // Arrange
             var mockFileSystem = new MockFileSystem();
             var nugetConfigPath = "NuGet.Config";
-            
+
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
@@ -503,7 +506,7 @@ namespace NuGet.Test
             // Arrange
             var mockFileSystem = new MockFileSystem();
             var nugetConfigPath = "NuGet.Config";
-            
+
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
@@ -511,7 +514,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key1", "Value1"), 
+            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key1", "Value1"),
                                                                     new KeyValuePair<string, string>("key2", "Value2") };
             Settings settings = new Settings(mockFileSystem);
 
@@ -539,7 +542,7 @@ namespace NuGet.Test
 <configuration>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new [] { new KeyValuePair<string, string>("key1", "Value1"), 
+            var values = new[] { new KeyValuePair<string, string>("key1", "Value1"),
                                   new KeyValuePair<string, string>("key2", "Value2") };
             Settings settings = new Settings(mockFileSystem);
 
@@ -575,7 +578,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new[] { new KeyValuePair<string, string>("key3", "Value3"), 
+            var values = new[] { new KeyValuePair<string, string>("key3", "Value3"),
                                   new KeyValuePair<string, string>("key4", "Value4") };
             Settings settings = new Settings(mockFileSystem);
 
@@ -615,7 +618,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new[] { new KeyValuePair<string, string>("key3", "Value3"), 
+            var values = new[] { new KeyValuePair<string, string>("key3", "Value3"),
                                   new KeyValuePair<string, string>("key4", "Value4") };
             Settings settings = new Settings(mockFileSystem);
 
@@ -640,7 +643,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingDeleteValueWithEmptyKeyThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -651,7 +654,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingDeleteValueWithEmptySectionThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -673,7 +676,7 @@ namespace NuGet.Test
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
             Settings settings = new Settings(mockFileSystem);
-            
+
             // Act & Assert
             Assert.False(settings.DeleteValue("SectionDoesNotExists", "SomeKey"));
         }
@@ -732,7 +735,7 @@ namespace NuGet.Test
         [Fact]
         public void CallingDeleteSectionWithEmptySectionThrowsException()
         {
-            // Arrange 
+            // Arrange
             var mockFileSystem = new MockFileSystem();
             var settings = new Settings(mockFileSystem);
 
@@ -788,8 +791,8 @@ namespace NuGet.Test
 </configuration>", mockFileSystem.ReadAllText(nugetConfigPath));
         }
 
-
         /* Extension Methods for Settings Class */
+
         [Fact]
         public void UserSettingsExtentions_SetEncryptedValue()
         {
@@ -975,8 +978,8 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result1 = settings.GetValue("SectionName", "Key1");
-            var result2 = settings.GetValue("SectionName", "Key2");
+            var result1 = settings.GetValue("SectionName", "Key1", isPath: false);
+            var result2 = settings.GetValue("SectionName", "Key2", isPath: false);
 
             // Assert
             Assert.Null(result1);
@@ -985,8 +988,8 @@ namespace NuGet.Test
 
         private void AssertEqualCollections(IList<KeyValuePair<string, string>> actual, string[] expected)
         {
-            Assert.Equal(actual.Count, expected.Length/2);
-            for (int i=0;i<actual.Count;++i)
+            Assert.Equal(actual.Count, expected.Length / 2);
+            for (int i = 0; i < actual.Count; ++i)
             {
                 Assert.Equal(expected[2 * i], actual[i].Key);
                 Assert.Equal(expected[2 * i + 1], actual[i].Value);
@@ -1013,11 +1016,12 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValues("SectionName");
-            
+            var result = settings.GetValues("SectionName", isPath: false);
 
             // Assert
-            AssertEqualCollections(result, new [] { "key3", "value3", "key4", "value4"});            
+            Assert.Equal<SettingValue>(result, new[] {
+                new SettingValue("key3", "value3", false),
+                new SettingValue("key4", "value4", false) });
         }
 
         [Fact]
@@ -1036,7 +1040,7 @@ namespace NuGet.Test
 
     <!-- values that are not relative paths -->
     <add key=""key4"" value=""c:\value2"" />
-    <add key=""key5"" value=""http://value3"" />    
+    <add key=""key5"" value=""http://value3"" />
     <add key=""key6"" value=""\\a\b\c"" />
     <add key=""key7"" value=""\a\b\c"" />
   </SectionName>
@@ -1048,20 +1052,18 @@ namespace NuGet.Test
             var result = settings.GetValues("SectionName", isPath: true);
 
             // Assert
-            AssertEqualCollections(
-                result, 
-                new[] { 
-                    "key1", @"c:\root\..\value1",
-                    "key2", @"c:\root\a\b\c",
-                    "key3", @"c:\root\.\a\b\c",
-
-                    "key4", @"c:\value2",
-                    "key5", @"http://value3",
-                    "key6", @"\\a\b\c",
-                    "key7", @"\a\b\c"
+            Assert.Equal<SettingValue>(
+                result,
+                new[] {
+                    new SettingValue("key1", @"c:\root\..\value1", false),
+                    new SettingValue("key2", @"c:\root\a\b\c", false),
+                    new SettingValue("key3", @"c:\root\.\a\b\c", false),
+                    new SettingValue("key4", @"c:\value2", false),
+                    new SettingValue("key5", @"http://value3", false),
+                    new SettingValue("key6", @"\\a\b\c", false),
+                    new SettingValue("key7", @"\a\b\c", false)
                 });
         }
-
 
         [Fact]
         public void GetValuesMultipleConfFilesAdditive()
@@ -1088,10 +1090,14 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Act
-            var result = settings.GetValues("SectionName");
+            var result = settings.GetValues("SectionName", isPath: false);
 
             // Assert
-            AssertEqualCollections(result, new[] {"key1", "value1", "key2", "value2" , "key3", "value3", "key4", "value4" });
+            Assert.Equal<SettingValue>(result, new[] { 
+                new SettingValue("key1", "value1", false),
+                new SettingValue("key2", "value2", false),
+                new SettingValue("key3", "value3", false),
+                new SettingValue("key4", "value4", false) });
         }
 
         [Fact]
@@ -1120,10 +1126,12 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Act
-            var result = settings.GetValues("SectionName");
-            
+            var result = settings.GetValues("SectionName", isPath: false);
+
             // Assert
-            AssertEqualCollections(result, new[] { "key3", "value3", "key4", "value4" });
+            Assert.Equal<SettingValue>(result, new[] { 
+                new SettingValue("key3", "value3", false),
+                new SettingValue("key4", "value4", false) });
         }
 
         [Fact]
@@ -1152,11 +1160,11 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Act
-            var result = settings.GetSettingValues("SectionName", isPath: false);
+            var result = settings.GetValues("SectionName", isPath: false);
 
             // Assert
             Assert.Equal<SettingValue>(
-                new [] {
+                new[] {
                     new SettingValue("key3", "value3", isMachineWide: false),
                     new SettingValue("key4", "value4", isMachineWide: false)
                 },
@@ -1188,10 +1196,10 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
-            Assert.Equal("value4", settings.GetValue("SectionName", "key4"));
-            Assert.Equal("value3", settings.GetValue("SectionName", "key3"));
-            Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
-            Assert.Equal("value1", settings.GetValue("SectionName", "key1"));
+            Assert.Equal("value4", settings.GetValue("SectionName", "key4", isPath: false));
+            Assert.Equal("value3", settings.GetValue("SectionName", "key3", isPath: false));
+            Assert.Equal("value2", settings.GetValue("SectionName", "key2", isPath: false));
+            Assert.Equal("value1", settings.GetValue("SectionName", "key1", isPath: false));
         }
 
         [Fact]
@@ -1219,8 +1227,8 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
-            Assert.Equal("LastOneWins2", settings.GetValue("SectionName", "key2"));
-            Assert.Equal("LastOneWins1", settings.GetValue("SectionName", "key1"));
+            Assert.Equal("LastOneWins2", settings.GetValue("SectionName", "key2", isPath: false));
+            Assert.Equal("LastOneWins1", settings.GetValue("SectionName", "key1", isPath: false));
         }
 
         [Fact]
@@ -1239,7 +1247,7 @@ namespace NuGet.Test
             config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <add key=""key1"" value=""value1"" />    
+    <add key=""key1"" value=""value1"" />
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
@@ -1247,9 +1255,9 @@ namespace NuGet.Test
             var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
 
             // Assert
-            Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
-            Assert.Equal(null, settings.GetValue("SectionName", "key1"));
-        }        
+            Assert.Equal("value2", settings.GetValue("SectionName", "key2", isPath: false));
+            Assert.Equal(null, settings.GetValue("SectionName", "key1", isPath: false));
+        }
 
         [Fact]
         public void GetValueReturnsPathRelativeToConfigWhenPathIsNotRooted()
@@ -1296,15 +1304,19 @@ namespace NuGet.Test
             mockFileSystem.AddFile("UserDefinedConfigFile.confg", config);
 
             var settings = Settings.LoadDefaultSettings(
-                mockFileSystem, 
+                mockFileSystem,
                 "UserDefinedConfigFile.confg",
                 null);
 
             // Act
-            var result = settings.GetValues("SectionName");
+            var result = settings.GetValues("SectionName", isPath: false);
 
             // Assert
-            AssertEqualCollections(result, new[] { "key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4" });
+            Assert.Equal<SettingValue>(result, new[] { 
+                new SettingValue("key1", "value1", false),
+                new SettingValue("key2", "value2", false),
+                new SettingValue("key3", "value3", false),
+                new SettingValue("key4", "value4", false) });
         }
 
         [Theory]
@@ -1375,7 +1387,7 @@ namespace NuGet.Test
             Assert.Equal(@"x:\mock-directory\Qux\Blah", result);
         }
 
-        // Checks that the correct files are read, in the right order, 
+        // Checks that the correct files are read, in the right order,
         // when laoding machine wide settings.
         [Fact]
         public void LoadMachineWideSettings()
@@ -1432,7 +1444,7 @@ namespace NuGet.Test
             mockFileSystem.AddFile(
                 @"NuGet\Config\IDE\Version\SKU\Dir\a1.config",
                 fileContent);
-            
+
             // Act
             var settings = Settings.LoadMachineWideSettings(
                 mockFileSystem, "IDE", "Version", "SKU", "TestDir");
@@ -1450,14 +1462,14 @@ namespace NuGet.Test
                     @"C:\NuGet\Config\IDE\a2.config",
                     @"C:\NuGet\Config\a1.config",
                     @"C:\NuGet\Config\a2.config"
-                });            
+                });
         }
 
         // Tests method GetValue() with machine wide settings.
         [Fact]
         public void GetValueWithMachineWideSettings()
         {
-            // Arrange            
+            // Arrange
             var mockFileSystem = new MockFileSystem(@"C:\");
             mockFileSystem.AddFile(
                 @"NuGet\Config\a1.config",
@@ -1492,21 +1504,21 @@ namespace NuGet.Test
 
             // Act
             var settings = Settings.LoadDefaultSettings(
-                mockFileSystem, 
+                mockFileSystem,
                 "user.config",
                 m.Object);
 
             // Assert
-            var v = settings.GetValue("SectionName", "key1");
+            var v = settings.GetValue("SectionName", "key1", isPath: false);
             Assert.Equal("value1", v);
 
             // the value in NuGet\Config\IDE\a1.config overrides the value in
             // NuGet\Config\a1.config
-            v = settings.GetValue("SectionName", "key2");
+            v = settings.GetValue("SectionName", "key2", isPath: false);
             Assert.Equal("value3", v);
 
             // the value in user.config overrides the value in NuGet\Config\IDE\a1.config
-            v = settings.GetValue("SectionName", "key3");
+            v = settings.GetValue("SectionName", "key3", isPath: false);
             Assert.Equal("user", v);
         }
 
@@ -1557,7 +1569,7 @@ namespace NuGet.Test
                 "user.config",
                 m.Object);
 
-            // Act            
+            // Act
             settings.SetValue("SectionName", "key1", "newValue");
 
             // Assert
@@ -1601,7 +1613,7 @@ namespace NuGet.Test
         [Fact]
         public void GetValueFromTwoUserSettingsWithMachineWideSettings()
         {
-            // Arrange            
+            // Arrange
             var mockFileSystem = new MockFileSystem(@"C:\");
             mockFileSystem.AddFile(
                 @"NuGet\Config\a1.config",
@@ -1611,7 +1623,7 @@ namespace NuGet.Test
     <add key=""key1"" value=""value1"" />
   </SectionName>
 </configuration>");
-            
+
             mockFileSystem.AddFile(
                "user1.config",
                @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -1644,14 +1656,14 @@ namespace NuGet.Test
                 m.Object);
 
             // Assert
-            var v = settings1.GetValue("SectionName", "key3");
+            var v = settings1.GetValue("SectionName", "key3", isPath: false);
             Assert.Equal("user1", v);
-            v = settings1.GetValue("SectionName", "key1");
+            v = settings1.GetValue("SectionName", "key1", isPath: false);
             Assert.Equal("value1", v);
 
-            v = settings2.GetValue("SectionName", "key3");
+            v = settings2.GetValue("SectionName", "key3", isPath: false);
             Assert.Equal("user2", v);
-            v = settings2.GetValue("SectionName", "key1");
+            v = settings2.GetValue("SectionName", "key1", isPath: false);
             Assert.Equal("value1", v);
         }
     }

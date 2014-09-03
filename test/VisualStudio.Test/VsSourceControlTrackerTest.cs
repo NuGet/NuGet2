@@ -69,7 +69,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("true");
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns("true");
 
             // Act
             var scTracker = new VsSourceControlTracker(
@@ -94,7 +94,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("true");
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns("true");
 
             var scTracker = new VsSourceControlTracker(
                 solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, settings.Object);

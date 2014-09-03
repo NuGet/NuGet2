@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio.Test
             var dte = new Mock<DTE>();
             var componentModel = new Mock<IComponentModel>();
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("true").Verifiable();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration", false)).Returns("true").Verifiable();
 
             // Act
             var vsFileSystemProvider = new VsFileSystemProvider(dte.Object, componentModel.Object, settings.Object);

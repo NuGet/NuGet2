@@ -39,6 +39,7 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+using System.IO;
 #endif
 
 #if VS14

@@ -61,8 +61,8 @@ namespace NuGet
                 if (_defaultPackageSources == null)
                 {
                     _defaultPackageSources = new List<PackageSource>();
-                    IList<SettingValue> disabledPackageSources = _settingsManager.GetSettingValues("disabledPackageSources", isPath: false);
-                    IList<SettingValue> packageSources = _settingsManager.GetSettingValues("packageSources", isPath: false);
+                    IList<SettingValue> disabledPackageSources = _settingsManager.GetValues("disabledPackageSources", isPath: false);
+                    IList<SettingValue> packageSources = _settingsManager.GetValues("packageSources", isPath: false);
 
                     foreach (var settingValue in packageSources)
                     {
@@ -94,7 +94,7 @@ namespace NuGet
         {
             get
             {
-                return _settingsManager.GetValue("packageRestore", "enabled");
+                return _settingsManager.GetValue("packageRestore", "enabled", isPath: false);
             }
         }
     }

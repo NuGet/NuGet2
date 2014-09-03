@@ -310,13 +310,13 @@ namespace NuGet.PowerShell.Commands.Test
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Returns(sourceVsPackageManager);
 
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true)).Returns(new[]
+            userSettings.Setup(s => s.GetValues("packageSources", true)).Returns(new[]
             {
                 new SettingValue("one", @"\\LetsHopeThisDirectory\IsNotAvaialble", false),
             });
 
-            userSettings.Setup(s => s.GetValues("activePackageSource"))
-                        .Returns(new[] { new KeyValuePair<string, string>("one", @"\\LetsHopeThisDirectory\IsNotAvaialble") });
+            userSettings.Setup(s => s.GetValues("activePackageSource", true))
+                        .Returns(new[] { new SettingValue("one", @"\\LetsHopeThisDirectory\IsNotAvaialble", false) });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new
 
@@ -342,16 +342,15 @@ Mock<IVsShellInfo>().Object);
             // Arrange
             string localdrive = System.Environment.GetEnvironmentVariable("TEMP");
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetSettingValues("packageSources", true)).Returns(new[]
+            userSettings.Setup(s => s.GetValues("packageSources", true)).Returns(new[]
             {
                 new SettingValue("one", @"\\LetsHopeThisDirectory\IsNotAvaialble", false),
                 new SettingValue("two", localdrive, false),
                 new SettingValue("three", @"http://SomeHttpSource/NotAvailable", false),
             });
 
-            userSettings.Setup(s => s.GetValues("activePackageSource"))
-                        .Returns(new[] { new KeyValuePair<string, string>("All", @"(All)"),
-                                         });
+            userSettings.Setup(s => s.GetValues("activePackageSource", false))
+                        .Returns(new[] { new SettingValue("All", @"(All)", false) });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new 
                 Mock<IVsShellInfo>().Object);

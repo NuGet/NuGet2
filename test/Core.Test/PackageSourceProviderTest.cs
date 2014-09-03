@@ -74,10 +74,10 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("AOld", "urlA", false), new SettingValue("userDefinedSource", "userDefinedSourceUrl", false) });
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
             
             var defaultPackageSourceA = new PackageSource("urlA", "ANew");
             var defaultPackageSourceB = new PackageSource("urlB", "B");
@@ -113,7 +113,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true)).Returns(
+            settings.Setup(s => s.GetValues("packageSources", true)).Returns(
                 new[] { 
                     new SettingValue("one", "onesource", false),
                     new SettingValue("two", "twosource", false),
@@ -122,7 +122,7 @@ namespace NuGet.Test
             );
 
             // disable package "three"
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("three", "true" ) });
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new[] { new SettingValue("three", "true", false) });
 
             IList<KeyValuePair<string, string>> savedSettingValues = null;
             settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
@@ -163,14 +163,14 @@ namespace NuGet.Test
             // Arrange
             var expectedSources = new[] { new PackageSource("one", "one"), new PackageSource("two", "two"), new PackageSource("three", "three") };
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "one", false), 
                                      new SettingValue("two", "two", false), 
                                      new SettingValue("three", "three", false)
                                 })
                     .Verifiable();
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
             settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
             settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
             settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
@@ -214,7 +214,7 @@ namespace NuGet.Test
         {
             // Arrange           
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "one", true), 
                                      new SettingValue("two", "two", false), 
                                      new SettingValue("three", "three", false)
@@ -263,14 +263,14 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", true), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("three", "threesource", false)
                                 })
                     .Verifiable();
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
 
             var provider = CreatePackageSourceProvider(settings.Object);
 
@@ -289,14 +289,14 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("three", "threesource", false)
                                 });
 
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("two", "true") });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new[] { new SettingValue("two", "true", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
 
             var provider = CreatePackageSourceProvider(settings.Object);
 
@@ -319,12 +319,12 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false)});
 
             // Disable package source one
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("one", "true") });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new[] { new SettingValue("one", "true", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
 
             string configurationDefaultsFileContent = @"
 <configuration>
@@ -358,10 +358,10 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("two", "twosource", false) });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
 
             string configurationDefaultsFileContent = @"
 <configuration>
@@ -398,10 +398,10 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("three", "threesource", false) });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
 
             string configurationDefaultsFileContent = @"
 <configuration>
@@ -435,10 +435,10 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new List<SettingValue>());
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
 
             string configurationDefaultsFileContent = @"
 <configuration>
@@ -502,10 +502,10 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false) });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
 
             string configurationDefaultsFileContent = @"
 <configuration>
@@ -543,11 +543,11 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false),
                     new SettingValue("nuget.org", "https://www.nuget.org/api/v2", false) });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
 
             var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null,
                 migratePackageSources: new Dictionary<PackageSource, PackageSource>
@@ -570,11 +570,11 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new List<SettingValue>() { new SettingValue("NuGet official package source", "https://nuget.org/api/v2", false),
                     new SettingValue("nuget.org", "https://www.nuget.org/api/v2", false) });
-            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
-            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
             settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
             settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
             settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
@@ -625,7 +625,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("disabledPackageSources", "A")).Returns("sdfds");
+            settings.Setup(s => s.GetValue("disabledPackageSources", "A", false)).Returns("sdfds");
             var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
@@ -642,7 +642,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("disabledPackageSources", "A")).Returns(returnValue);
+            settings.Setup(s => s.GetValue("disabledPackageSources", "A", false)).Returns(returnValue);
             var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
@@ -661,14 +661,16 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("three", "threesource", false)
                                 });
 
             settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
-                    .Returns(new [] { new KeyValuePair<string, string>("Username", userName), new KeyValuePair<string, string>("Password", password) });
+                    .Returns(new[] { 
+                        new SettingValue("Username", userName, false), 
+                        new SettingValue("Password", password, false) });
 
             var provider = CreatePackageSourceProvider(settings.Object);
 
@@ -689,14 +691,14 @@ namespace NuGet.Test
             string encryptedPassword = EncryptionUtility.EncryptString("topsecret");
            
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("three", "threesource", false)
                                 });
 
             settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
-                    .Returns(new[] { new KeyValuePair<string, string>("Username", "user1"), new KeyValuePair<string, string>("Password", encryptedPassword) });
+                    .Returns(new[] { new SettingValue("Username", "user1", false), new SettingValue("Password", encryptedPassword, false) });
 
             var provider = CreatePackageSourceProvider(settings.Object);
 
@@ -718,14 +720,14 @@ namespace NuGet.Test
             const string clearTextPassword = "topsecret";
 
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("three", "threesource", false)
                                 });
 
             settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
-                    .Returns(new[] { new KeyValuePair<string, string>("Username", "user1"), new KeyValuePair<string, string>("ClearTextPassword", clearTextPassword) });
+                    .Returns(new[] { new SettingValue("Username", "user1", false), new SettingValue("ClearTextPassword", clearTextPassword, false) });
 
             var provider = CreatePackageSourceProvider(settings.Object);
 
@@ -747,7 +749,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetSettingValues("packageSources", true))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new SettingValue("one", "onesource", false), 
                                      new SettingValue("two", "twosource", false), 
                                      new SettingValue("one", "threesource", false)
@@ -1072,6 +1074,60 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(source, result);
+        }
+
+        [Fact]
+        public void HighPriortySourceIsNotDisabledByLowPriorityConfigSetting()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"c:\a\b");
+
+            mockFileSystem.AddFile(
+                @"c:\a\NuGet.Config",
+                @"
+<configuration>
+    <packageSources>
+        <add key='s1' value='\\server\s1' />
+        <add key='s2' value='\\server\s2' />
+    </packageSources>
+    <disabledPackageSources>
+        <add key='s1' value='true' />
+        <add key='s3' value='true' />
+    </disabledPackageSources>
+</configuration>");
+
+            mockFileSystem.AddFile(
+                @"NuGet.Config",
+                @"
+<configuration>
+    <packageSources>
+        <add key='s3' value='\\server\s3' />
+    </packageSources>
+    <disabledPackageSources>
+        <add key='s2' value='true' />
+    </disabledPackageSources>
+</configuration>");
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
+
+            var packageSourceProvider = new PackageSourceProvider(settings);
+
+            // Act
+            var sources = packageSourceProvider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, sources.Count);
+            Assert.Equal("s1", sources[0].Name);
+            // source s1 is disabled in c:\a\NuGet.Config
+            Assert.False(sources[0].IsEnabled);
+
+            Assert.Equal("s2", sources[1].Name);
+            // source s2 is disabled in c:\a\b\Nuget.Config
+            Assert.False(sources[1].IsEnabled);
+
+            Assert.Equal("s3", sources[2].Name);
+            // the disable source s3 setting in c:\a\nuget.Config has lower priority
+            // than c:\a\b\nuget.config, so source s3 is enabled.
+            Assert.True(sources[2].IsEnabled);
         }
 
         private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled, bool isMachineWide = false, bool isOfficial = false)

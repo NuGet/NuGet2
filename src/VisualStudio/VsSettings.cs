@@ -89,15 +89,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public string GetValue(string section, string key)
-        {
-            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
-            {
-                return SolutionSettings.GetValue(section, key);
-            }
-            return _defaultSettings.GetValue(section, key);
-        }
-
         public string GetValue(string section, string key, bool isPath)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
@@ -105,14 +96,9 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValue(section, key, isPath);
             }
             return _defaultSettings.GetValue(section, key, isPath);
-        }        
-
-        public IList<KeyValuePair<string, string>> GetValues(string section)
-        {
-            return GetValues(section, isPath: false);
         }
 
-        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
+        public IList<SettingValue> GetValues(string section, bool isPath)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
@@ -121,22 +107,13 @@ namespace NuGet.VisualStudio
             return _defaultSettings.GetValues(section, isPath);
         }
 
-        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        public IList<SettingValue> GetNestedValues(string section, string subsection)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                return SolutionSettings.GetSettingValues(section, isPath);
+                return SolutionSettings.GetNestedValues(section, subsection);
             }
-            return _defaultSettings.GetSettingValues(section, isPath);
-        }
-
-        public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
-        {
-            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
-            {
-                return SolutionSettings.GetNestedValues(section, key);
-            }
-            return _defaultSettings.GetNestedValues(section, key);
+            return _defaultSettings.GetNestedValues(section, subsection);
         }
 
         public void SetValue(string section, string key, string value)
