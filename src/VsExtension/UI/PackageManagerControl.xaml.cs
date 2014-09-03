@@ -131,14 +131,12 @@ namespace NuGet.Tools
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var searchResultPackage = new UiSearchResultPackage()
-                    {
-                        // TODO: Use JSON-LD aware objects
-                        Id = p.GetScalar<string>(Uris.Properties.PackageId),
-                        Version = SemanticVersion.Parse(p.GetScalar<string>(Uris.Properties.LatestVersion)),
-                        Summary = p.GetScalar<string>(Uris.Properties.Summary),
-                        IconUrl = p.GetScalarUri(Uris.Properties.IconUrl)
-                    };
+                    // As a debugging aide, I am intentionally NOT using an object initializer -anurse
+                    var searchResultPackage = new UiSearchResultPackage();
+                    searchResultPackage.Id = p.Value<string>("id");
+                    searchResultPackage.Version = SemanticVersion.Parse(p.Value<string>("latestVersion"));
+                    searchResultPackage.Summary = p.Value<string>("summary");
+                    searchResultPackage.IconUrl = p.Value<Uri>("iconUrl");
 
                     var installedVersion = _installed.GetInstalledVersion(searchResultPackage.Id);
                     if (installedVersion != null)
@@ -157,7 +155,7 @@ namespace NuGet.Tools
                         searchResultPackage.Status = PackageStatus.NotInstalled;
                     }
 
-                    searchResultPackage.AllVersions = LoadVersions((JArray)p[Uris.Properties.PackageVersion.AbsoluteUri]);
+                    searchResultPackage.AllVersions = LoadVersions(p.Value<JArray>("packages"));
                     packages.Add(searchResultPackage);
                 }
 
@@ -176,30 +174,32 @@ namespace NuGet.Tools
 
                 // If repo is AggregateRepository, the package duplicates can be returned by
                 // FindPackagesById(), so Distinct is needed here to remove the duplicates.
-                foreach (var version in versions.Cast<JObject>())
+                foreach (var token in versions)
                 {
+                    JObject version = (JObject)token;
                     var detailedPackage = new UiDetailedPackage()
                     {
-                        Id = version.GetScalar<string>(Uris.Properties.PackageId),
-                        Version = SemanticVersion.Parse(version.GetScalar<string>(Uris.Properties.Version)),
-                        Summary = version.GetScalar<string>(Uris.Properties.Summary),
-                        Description = version.GetScalar<string>(Uris.Properties.Description),
-                        Authors = StringCollectionToString(version.GetArray<string>(Uris.Properties.Author)),
-                        Owners = StringCollectionToString(version.GetArray<string>(Uris.Properties.Owner)),
-                        IconUrl = version.GetScalarUri(Uris.Properties.IconUrl),
-                        LicenseUrl = version.GetScalarUri(Uris.Properties.LicenseUrl),
-                        ProjectUrl = version.GetScalarUri(Uris.Properties.ProjectUrl),
-                        Tags = version.GetScalar<string>(Uris.Properties.Tags),
-                        DownloadCount = version.GetScalar<int>(Uris.Properties.DownloadCount),
-                        DependencySets = version.GetArray<JObject>(Uris.Properties.DependencyGroup).Select(obj => LoadDependencySet(obj))
+                        Id = version.Value<string>("id"),
+                        Version = SemanticVersion.Parse(version.Value<string>("version")),
+                        Summary = version.Value<string>("summary"),
+                        Description = version.Value<string>("description"),
+                        Authors = StringCollectionToString(version.Value<JArray>("authors")),
+                        Owners = StringCollectionToString(version.Value<JArray>("owners")),
+                        IconUrl = version.Value<Uri>("iconUrl"),
+                        LicenseUrl = version.Value<Uri>("licenseUrl"),
+                        ProjectUrl = version.Value<Uri>("projectUrl"),
+                        Tags = String.Join(" ", (version.Value<JArray>("tags") ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
+                        DownloadCount = version.Value<int>("downloadCount"),
+                        DependencySets = (version.Value<JArray>("dependencyGroups") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
                     };
 
-                    string publishedStr = version.GetScalar<string>(Uris.Properties.Published);
+                    string publishedStr = version.Value<string>("published");
                     if (!String.IsNullOrEmpty(publishedStr))
                     {
                         detailedPackage.Published = DateTime.Parse(publishedStr);
                     }
-                    detailedPackage.NoDependencies = !HasDependencies(detailedPackage.DependencySets);
+                    detailedPackage.NoDependencies = detailedPackage.DependencySets.Any(
+                        set => set.Dependencies != null && set.Dependencies.Count > 0);
 
                     retValue.Add(detailedPackage);
                 }
@@ -209,47 +209,28 @@ namespace NuGet.Tools
 
             private PackageDependencySet LoadDependencySet(JObject set)
             {
-                var fxName = set.GetScalar<string>(Uris.Properties.TargetFramework);
+                var fxName = set.Value<string>("targetFramework");
                 return new PackageDependencySet(
                     String.IsNullOrEmpty(fxName) ? null : VersionUtility.ParseFrameworkName(fxName),
-                    set.GetArray<JObject>(Uris.Properties.Dependency).Select(obj => LoadDependency(obj)));
+                    (set.Value<JArray>("dependencies") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
             private PackageDependency LoadDependency(JObject dep)
             {
-                var ver = dep.GetScalar<string>(Uris.Properties.VersionRange);
+                var ver = dep.Value<string>("range");
                 return new PackageDependency(
-                    dep.GetScalar<string>(Uris.Properties.PackageId),
+                    dep.Value<string>("id"),
                     String.IsNullOrEmpty(ver) ? null : VersionUtility.ParseVersionSpec(ver));
             }
 
-            private bool HasDependencies(IEnumerable<PackageDependencySet> dependencySets)
-            {
-                if (dependencySets == null)
-                {
-                    return false;
-                }
-
-                foreach (var dependencySet in dependencySets)
-                {
-                    if (dependencySet.Dependencies != null &&
-                        dependencySet.Dependencies.Count > 0)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            private string StringCollectionToString(IEnumerable<string> v)
+            private string StringCollectionToString(JArray v)
             {
                 if (v == null)
                 {
                     return null;
                 }
 
-                string retValue = String.Join(", ", v);
+                string retValue = String.Join(", ", v.Select(t => t.ToString()));
                 if (retValue == String.Empty)
                 {
                     return null;

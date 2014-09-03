@@ -12,11 +12,7 @@ namespace NuGet.Client.Interop
         {
             var executor = new NuGet.Resolver.ActionExecutor();
 
-            // Why not just use OfType<PackageActionDescriptionWrapper>? Because I WANT this to fail
-            // if it is given any actions to execute that were not PackageActionDescriptionWrappers!
-            var executableActions = actions.Where(a => a.ActionType != PackageActionType.AcceptLicense);
-
-            executor.Execute(executableActions.Cast<PackageActionDescriptionWrapper>().Select(w => w.ResolverAction));
+            executor.Execute(actions.Cast<PackageActionDescriptionWrapper>().Select(w => w.ResolverAction));
             return Task.FromResult(0);
         }
     }

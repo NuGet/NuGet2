@@ -51,11 +51,11 @@
     <Compile Include="IActionResolver.cs" />
     <Compile Include="IInstalledPackageList.cs" />
     <Compile Include="Interop\PackageActionDescriptionWrapper.cs" />
+    <Compile Include="Interop\PackageJsonLd.cs" />
     <Compile Include="Interop\V2InteropActionExecutor.cs" />
     <Compile Include="Interop\V2InteropActionResolver.cs" />
     <Compile Include="Interop\V2InteropSearcher.cs" />
     <Compile Include="IPackageSearcher.cs" />
-    <Compile Include="JsonLdExtensions.cs" />
     <Compile Include="PackageActionDescription.cs" />
     <Compile Include="PackageManagerSession.cs" />
     <Compile Include="ResolverContext.cs" />

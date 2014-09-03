@@ -147,11 +147,11 @@ namespace NuGet.Tools
             {
                 if (action.ActionType == PackageActionType.Install)
                 {
-                    packageStatus[action.Package] = 2;
+                    packageStatus[action.PackageName] = 2;
                 }
                 else if (action.ActionType == PackageActionType.Uninstall)
                 {
-                    packageStatus[action.Package] = 0;
+                    packageStatus[action.PackageName] = 0;
                 }
             }
 
@@ -217,26 +217,28 @@ namespace NuGet.Tools
 
         protected bool ShowLicenseAgreement(IEnumerable<PackageActionDescription> operations)
         {
-            var licensePackages = operations.Where(op => op.ActionType == PackageActionType.AcceptLicense);
+            var licensePackages = operations.Where(op => 
+                op.ActionType == PackageActionType.Install &&
+                op.Package.Value<bool>("requireLicenseAcceptance"));
 
             // display license window if necessary
             if (licensePackages.Any())
             {
-                var result = MessageBox.Show(
-                    "Accept Licenses? TODO: Show proper license dialog!",
-                    "NuGet",
-                    MessageBoxButton.YesNo);
-                if (result == MessageBoxResult.No)
+                // Hacky distinct without writing a custom comparer
+                var licenseModels = licensePackages
+                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
+                    .Select(g => g.First())
+                    .Select(a => new PackageLicenseModel(
+                        a.Package.Value<string>("id"),
+                        a.Package.Value<Uri>("licenseUrl"),
+                        a.Package["authors"].Values<string>()));
+
+                IUserNotifierServices uss = new UserNotifierServices();
+                bool accepted = uss.ShowLicenseWindow(licenseModels);
+                if (!accepted)
                 {
                     return false;
                 }
-                //IUserNotifierServices uss = new UserNotifierServices();
-                //bool accepted = uss.ShowLicenseWindow(
-                //    licensePackages.Distinct<IPackage>(PackageEqualityComparer.IdAndVersion));
-                //if (!accepted)
-                //{
-                //    return false;
-                //}
             }
 
             return true;

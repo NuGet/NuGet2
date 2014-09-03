@@ -41,15 +41,7 @@ namespace NuGet.Client.Interop
 
             var ret = resolved.Select(a => (PackageActionDescription)new PackageActionDescriptionWrapper(a));
 
-            // Add license acceptance actions
-            var acceptLicenses = resolved
-                .Where(a => a.ActionType == Resolver.PackageActionType.AddToPackagesFolder && a.Package.RequireLicenseAcceptance)
-                .Select(a => new PackageActionDescription(
-                    PackageActionType.AcceptLicense,
-                    new PackageName(a.Package.Id, a.Package.Version),
-                    a.Package.LicenseUrl.ToString()));
-
-            return Task.FromResult(Enumerable.Concat(ret, acceptLicenses));
+            return Task.FromResult(ret);
         }
 
         private ActionResolver CreateResolver(ResolverContext context)

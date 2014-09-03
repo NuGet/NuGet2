@@ -55,6 +55,7 @@
       <DependentUpon>FileConflictDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageManagerUI\IUpdateAllUIService.cs" />
+    <Compile Include="PackageManagerUI\PackageLicenseModel.cs" />
     <Compile Include="PackageManagerUI\UpdateAllUI.xaml.cs">
       <DependentUpon>UpdateAllUI.xaml</DependentUpon>
     </Compile>

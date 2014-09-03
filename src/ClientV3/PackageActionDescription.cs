@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace NuGet.Client
 {
     public class PackageActionDescription
     {
-        public PackageName Package { get; private set; }
+        public PackageName PackageName { get; private set; }
+        public JObject Package { get; private set; }
         public string Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
 
-        public PackageActionDescription(PackageActionType actionType, PackageName package, string target)
+        public PackageActionDescription(PackageActionType actionType, PackageName packageName, JObject package, string target)
         {
             ActionType = actionType;
+            PackageName = packageName;
             Package = package;
             Target = target;
         }
@@ -25,7 +28,6 @@ namespace NuGet.Client
         Install,
         Uninstall,
         Purge,
-        Download,
-        AcceptLicense
+        Download
     }
 }

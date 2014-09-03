@@ -14,6 +14,7 @@ namespace NuGet.Client.Interop
             : base(
                 ConvertAction(resolverAction.ActionType),
                 new PackageName(resolverAction.Package.Id, resolverAction.Package.Version),
+                PackageJsonLd.CreatePackage(resolverAction.Package),
                 GetTarget(resolverAction))
         {
             ResolverAction = resolverAction;

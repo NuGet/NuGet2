@@ -20,6 +20,11 @@ namespace NuGet.Dialog.PackageManagerUI
 
         bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<IPackage> packages)
         {
+            return ShowLicenseWindow(PackageLicenseModel.FromV2Packages(packages));
+        }
+
+        bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<PackageLicenseModel> packages)
+        {
             if (_uiDispatcher.CheckAccess())
             {
                 return ShowLicenseWindow(packages);
