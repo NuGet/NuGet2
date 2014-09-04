@@ -52,34 +52,8 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="EditorFactory.cs" />
     <Compile Include="FontAndColorsRegistrationAttribute.cs" />
     <Compile Include="Guids.cs" />
-    <Compile Include="PackageManagerWindowPane.cs" />
-    <Compile Include="UiSearchResultPackage.cs" />
-    <Compile Include="UI\BusyControl.xaml.cs">
-      <DependentUpon>BusyControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\DropdownButton.xaml.cs">
-      <DependentUpon>DropdownButton.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\InfiniteScrollList.xaml.cs">
-      <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\NullToVisibilityConverter.cs" />
-    <Compile Include="UI\PackageDetailControlModel.cs" />
-    <Compile Include="UI\PackageManagerControlCommands.cs" />
-    <Compile Include="UI\PackageManagerDocData.cs" />
-    <Compile Include="UI\PackageStatusToInstallImageConverter.cs" />
-    <Compile Include="UI\PreviewWindow.xaml.cs">
-      <DependentUpon>PreviewWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\PackageDetail.xaml.cs">
-      <DependentUpon>PackageDetail.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\PackageManagerControl.xaml.cs">
-      <DependentUpon>PackageManagerControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="NuGetVSEventsPackage.cs" />
     <Compile Include="NuGetPackage.cs" />
@@ -92,7 +66,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="UI\VersionToVersionForDisplayConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\VsConsole\PowerShellCmdlets\Help\about_NuGet.Cmdlets.help.txt">
@@ -107,9 +80,6 @@
       <Link>Modules\NuGet\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Resource Include="UI\CheckMark.png" />
-    <Resource Include="UI\UpwardsArrow.png" />
-    <Resource Include="UI\packageicon.png" />
     <Content Include="Resources\nuget_32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -147,10 +117,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClientV3\NuGet.Client.csproj">
-      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
-      <Name>NuGet.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Dialog10\Dialog10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
       <Name>Dialog10</Name>
@@ -191,10 +157,6 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\ShimV3\ShimV3.csproj">
-      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
-      <Name>ShimV3</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
       <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
       <Name>TeamFoundationServer10</Name>
@@ -221,9 +183,13 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\V3VisualStudio\NuGet.Client.VisualStudio.csproj">
-      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
-      <Name>NuGet.Client.VisualStudio</Name>
+    <ProjectReference Include="..\V3\NuGet.Client.V3Shim\NuGet.Client.V3Shim.csproj">
+      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
+      <Name>NuGet.Client.V3Shim</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj">
+      <Project>{a8efbe54-4136-4d15-8db7-3ffecee50682}</Project>
+      <Name>NuGet.Client.VisualStudio.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
@@ -344,36 +310,6 @@
       <ManifestResourceName>VSPackage</ManifestResourceName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="UI\BusyControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\DropdownButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\InfiniteScrollList.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\PreviewWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\PackageDetail.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\PackageManagerControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\Resources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
