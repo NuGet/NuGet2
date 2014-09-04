@@ -38,6 +38,7 @@
       <Word>Percent</Word>
       <Word>Callback</Word>
       <Word>Color</Word>
+      <Word>Ld</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
