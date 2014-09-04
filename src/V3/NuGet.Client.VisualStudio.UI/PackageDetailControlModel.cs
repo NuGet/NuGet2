@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -12,14 +13,14 @@ namespace NuGet.Client.VisualStudio.UI
         string _additionalInfo;
 
         public VersionForDisplay(
-            SemanticVersion version,
+            NuGetVersion version,
             string additionalInfo)
         {
             Version = version;
             _additionalInfo = additionalInfo;
         }
 
-        public SemanticVersion Version
+        public NuGetVersion Version
         {
             get;
             private set;
@@ -46,16 +47,16 @@ namespace NuGet.Client.VisualStudio.UI
     public class PackageDetailControlModel : INotifyPropertyChanged
     {
         private UiDetailedPackage _package;
-        private Dictionary<SemanticVersion, UiDetailedPackage> _allPackages;
+        private Dictionary<NuGetVersion, UiDetailedPackage> _allPackages;
 
         // used for data binding
         private List<VersionForDisplay> _versions;
 
         public PackageDetailControlModel(
             UiSearchResultPackage searchResultPackage,
-            SemanticVersion installedVersion)
+            NuGetVersion installedVersion)
         {
-            _allPackages = new Dictionary<SemanticVersion, UiDetailedPackage>();
+            _allPackages = new Dictionary<NuGetVersion, UiDetailedPackage>();
             foreach (var p in searchResultPackage.AllVersions)
             {
                 _allPackages[p.Version] = p;
@@ -78,7 +79,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public void CreateVersions(SemanticVersion installedVersion)
+        public void CreateVersions(NuGetVersion installedVersion)
         {
             _versions = new List<VersionForDisplay>();
 
@@ -88,7 +89,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             var allVersions = _allPackages.Keys.OrderByDescending(v => v);
-            var latestStableVersion = allVersions.FirstOrDefault(v => String.IsNullOrEmpty(v.SpecialVersion));
+            var latestStableVersion = allVersions.FirstOrDefault(v => !v.IsPrerelease);
             if (latestStableVersion != null)
             {
                 _versions.Add(new VersionForDisplay(latestStableVersion, "Latest stable "));

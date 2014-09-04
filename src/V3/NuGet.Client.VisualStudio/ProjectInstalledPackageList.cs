@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using EnvDTE;
 using NuGet.Client.Interop;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
@@ -17,24 +18,28 @@ namespace NuGet.Client.VisualStudio
             _projectManager = projectManager;
         }
 
-        public IEnumerable<PackageName> GetInstalledPackages()
+        public IEnumerable<PackageIdentity> GetInstalledPackages()
         {
-            return _projectManager.LocalRepository.GetPackages().Select(p => new PackageName(p.Id, p.Version));
+            return _projectManager.LocalRepository.GetPackages().Select(p => new PackageIdentity(
+                p.Id, 
+                new NuGetVersion(p.Version.Version, p.Version.SpecialVersion, null)));
         }
 
-        public SemanticVersion GetInstalledVersion(string packageId)
+        public NuGetVersion GetInstalledVersion(string packageId)
         {
             var package = _projectManager.LocalRepository.FindPackage(packageId);
             if (package == null)
             {
                 return null;
             }
-            return package.Version;
+            return new NuGetVersion(package.Version.Version, package.Version.SpecialVersion);
         }
 
-        public bool IsInstalled(string packageId, SemanticVersion packageVersion)
+        public bool IsInstalled(string packageId, NuGetVersion packageVersion)
         {
-            return _projectManager.LocalRepository.Exists(packageId, packageVersion);
+            return _projectManager.LocalRepository.Exists(
+                packageId, 
+                new SemanticVersion(packageVersion.Version, packageVersion.Release));
         }
 
         public IPackageSearcher CreateSearcher()

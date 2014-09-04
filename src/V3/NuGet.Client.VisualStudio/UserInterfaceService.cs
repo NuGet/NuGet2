@@ -15,5 +15,16 @@ namespace NuGet.Client.VisualStudio
         {
             throw new NotImplementedException();
         }
+
+        public void LaunchExternalLink(Uri url)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public void LaunchNuGetOptionsDialog()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -46,7 +46,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Common\HashCodeCombiner.cs">
+      <Link>HashCodeCombiner.cs</Link>
+    </Compile>
     <Compile Include="DependencyBehavior.cs" />
+    <Compile Include="FileConflictAction.cs" />
     <Compile Include="IActionExecutor.cs" />
     <Compile Include="IActionResolver.cs" />
     <Compile Include="IInstalledPackageList.cs" />
@@ -57,7 +61,9 @@
     <Compile Include="Interop\V2InteropSearcher.cs" />
     <Compile Include="IPackageSearcher.cs" />
     <Compile Include="PackageActionDescription.cs" />
+    <Compile Include="PackageIdentity.cs" />
     <Compile Include="PackageManagerSession.cs" />
+    <Compile Include="PackageSource.cs" />
     <Compile Include="ResolverContext.cs" />
     <Compile Include="Strings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -77,6 +83,10 @@
     <ProjectReference Include="..\..\Core\Core.csproj">
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Versioning\Versioning.csproj">
+      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
+      <Name>Versioning</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

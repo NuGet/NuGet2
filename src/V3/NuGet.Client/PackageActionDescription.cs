@@ -9,12 +9,12 @@ namespace NuGet.Client
 {
     public class PackageActionDescription
     {
-        public PackageName PackageName { get; private set; }
+        public PackageIdentity PackageName { get; private set; }
         public JObject Package { get; private set; }
         public string Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
 
-        public PackageActionDescription(PackageActionType actionType, PackageName packageName, JObject package, string target)
+        public PackageActionDescription(PackageActionType actionType, PackageIdentity packageName, JObject package, string target)
         {
             ActionType = actionType;
             PackageName = packageName;

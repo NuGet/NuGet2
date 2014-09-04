@@ -18,7 +18,7 @@ namespace NuGet.Client.VisualStudio
 
         protected ILogger Logger { get; private set; }
 
-        public override PackageSource ActiveSource
+        public override NuGet.Client.PackageSource ActiveSource
         {
             get { return GetActiveSource(); }
         }
@@ -45,9 +45,10 @@ namespace NuGet.Client.VisualStudio
                 packageManagerFactory.CreatePackageManagerToManageInstalledPackages().GetProjectManager(project));
         }
 
-        public override IEnumerable<PackageSource> GetAvailableSources()
+        public override IEnumerable<NuGet.Client.PackageSource> GetAvailableSources()
         {
-            return _packageSourceProvider.GetEnabledPackageSources();
+            return _packageSourceProvider.GetEnabledPackageSources()
+                .Select(s => new NuGet.Client.PackageSource(s.Name, s.Source));
         }
 
         public override IPackageSearcher CreateSearcher()
@@ -57,18 +58,18 @@ namespace NuGet.Client.VisualStudio
 
         protected virtual IPackageRepository GetActiveRepo()
         {
-            if (ActiveSource.IsAggregate())
-            {
-                throw new InvalidOperationException(Strings.VsPackageManagerSession_CannotUseAggregateSource);
-            }
+            //if (ActiveSource.IsAggregate())
+            //{
+            //    throw new InvalidOperationException(Strings.VsPackageManagerSession_CannotUseAggregateSource);
+            //}
 
-            var repo = _repoFactory.CreateRepository(ActiveSource.Source);
+            var repo = _repoFactory.CreateRepository(ActiveSource.Url);
             return repo;
         }
 
         public override void ChangeActiveSource(string newSourceName)
         {
-            var source = GetAvailableSources().FirstOrDefault(s =>
+            var source = _packageSourceProvider.GetEnabledPackageSources().FirstOrDefault(s =>
                 String.Equals(newSourceName, s.Name, StringComparison.OrdinalIgnoreCase));
             if (source == null)
             {
@@ -82,12 +83,18 @@ namespace NuGet.Client.VisualStudio
             _packageSourceProvider.ActivePackageSource = source;
         }
 
-        private PackageSource GetActiveSource()
+        private NuGet.Client.PackageSource GetActiveSource()
+        {
+            var source = GetV2ActiveSource();
+            return new NuGet.Client.PackageSource(source.Name, source.Source);
+        }
+
+        private NuGet.PackageSource GetV2ActiveSource()
         {
             var trueActive = _packageSourceProvider.ActivePackageSource;
             if (trueActive == null || trueActive.IsAggregate())
             {
-                var firstAvailable = GetAvailableSources().FirstOrDefault();
+                var firstAvailable = _packageSourceProvider.GetEnabledPackageSources().FirstOrDefault();
                 Logger.Log(MessageLevel.Debug, "Current repo is Aggregate, replacing with '{0}'", firstAvailable.Name);
                 return firstAvailable;
             }

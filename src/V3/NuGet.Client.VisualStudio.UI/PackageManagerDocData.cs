@@ -1,7 +1,6 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,23 +19,11 @@ namespace NuGet.Client.VisualStudio.UI
     /// </remarks>
     public class PackageManagerDocData : IVsPersistDocData
     {
-        private readonly Guid _guidEditorType = new Guid(GuidList.guidEditorFactoryString);
-
         public PackageManagerSession Session { get; private set; }
         
         public PackageManagerDocData(PackageManagerSession session)
         {
             Session = session;
-            //PackageSourceProvider = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
-            //_packageRepoFactory = ServiceLocator.GetInstance<IPackageRepositoryFactory>();
-            //PackageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            //ActiveSourceRepo = NuGetRepository.Create(PackageSourceProvider.ActivePackageSource.Source);
-
-            //_project = project;
-
-            //var packageManager = PackageManagerFactory.CreatePackageManagerToManageInstalledPackages();
-            //var projectManager = packageManager.GetProjectManager(_project);
-            //LocalRepo = projectManager.LocalRepository;
         }
 
         #region IVsPersistDocData
@@ -48,7 +35,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public int GetGuidEditorType(out Guid pClassID)
         {
-            pClassID = _guidEditorType;
+            pClassID = PackageManagerEditorFactory.EditorFactoryGuid;
             return VSConstants.S_OK;
         }
 

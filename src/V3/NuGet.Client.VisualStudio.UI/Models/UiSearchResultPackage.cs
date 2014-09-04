@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -11,7 +12,7 @@ namespace NuGet.Client.VisualStudio.UI
     {
         public string Id { get; set; }
 
-        public SemanticVersion Version { get; set; }
+        public NuGetVersion Version { get; set; }
 
         public string Summary { get; set; }
 
@@ -33,12 +34,10 @@ namespace NuGet.Client.VisualStudio.UI
 
         public DateTimeOffset? Published { get; set; }
 
-        public IEnumerable<PackageDependencySet> DependencySets { get; set; }
+        public IEnumerable<UiPackageDependencySet> DependencySets { get; set; }
 
         // This property is used by data binding to display text "No dependencies"
         public bool NoDependencies { get; set; }
-
-        public IPackage Package { get; set; }
 
         public override string ToString()
         {

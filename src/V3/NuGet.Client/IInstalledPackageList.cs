@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NuGet.Versioning;
 
 namespace NuGet.Client
 {
@@ -17,14 +18,14 @@ namespace NuGet.Client
         /// Retrieves a list of installed packages
         /// </summary>
         /// <returns></returns>
-        IEnumerable<PackageName> GetInstalledPackages();
+        IEnumerable<PackageIdentity> GetInstalledPackages();
 
         /// <summary>
         /// Retrieves either a) null if the specified package is not installed or b) the version that is installed.
         /// </summary>
         /// <param name="packageId"></param>
         /// <returns></returns>
-        SemanticVersion GetInstalledVersion(string packageId);
+        NuGetVersion GetInstalledVersion(string packageId);
         
         /// <summary>
         /// Returns a boolean indicating if a package with the specific ID/Version pair is installed.
@@ -32,6 +33,6 @@ namespace NuGet.Client
         /// <param name="packageId"></param>
         /// <param name="packageVersion"></param>
         /// <returns></returns>
-        bool IsInstalled(string packageId, SemanticVersion packageVersion);
+        bool IsInstalled(string packageId, NuGetVersion packageVersion);
     }
 }

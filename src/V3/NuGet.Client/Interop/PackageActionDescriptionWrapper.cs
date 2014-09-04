@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using NuGet.Versioning;
 
 namespace NuGet.Client.Interop
 {
@@ -13,7 +14,9 @@ namespace NuGet.Client.Interop
         public PackageActionDescriptionWrapper(NuGet.Resolver.PackageAction resolverAction)
             : base(
                 ConvertAction(resolverAction.ActionType),
-                new PackageName(resolverAction.Package.Id, resolverAction.Package.Version),
+                new PackageIdentity(
+                    resolverAction.Package.Id, 
+                    new NuGetVersion(resolverAction.Package.Version.Version, resolverAction.Package.Version.SpecialVersion)),
                 PackageJsonLd.CreatePackage(resolverAction.Package),
                 GetTarget(resolverAction))
         {

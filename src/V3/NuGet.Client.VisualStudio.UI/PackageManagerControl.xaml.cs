@@ -11,7 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
-using NuGet.VisualStudio;
+using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -20,6 +20,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
+        private readonly IUserInterfaceService _ui;
         private bool _initialized;
 
         public PackageManagerDocData Model { get; private set; }
@@ -134,7 +135,7 @@ namespace NuGet.Client.VisualStudio.UI
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
                     searchResultPackage.Id = p.Value<string>("id");
-                    searchResultPackage.Version = SemanticVersion.Parse(p.Value<string>("latestVersion"));
+                    searchResultPackage.Version = NuGetVersion.Parse(p.Value<string>("latestVersion"));
                     searchResultPackage.Summary = p.Value<string>("summary");
                     searchResultPackage.IconUrl = p.Value<Uri>("iconUrl");
 
@@ -180,7 +181,7 @@ namespace NuGet.Client.VisualStudio.UI
                     var detailedPackage = new UiDetailedPackage()
                     {
                         Id = version.Value<string>("id"),
-                        Version = SemanticVersion.Parse(version.Value<string>("version")),
+                        Version = NuGetVersion.Parse(version.Value<string>("version")),
                         Summary = version.Value<string>("summary"),
                         Description = version.Value<string>("description"),
                         Authors = StringCollectionToString(version.Value<JArray>("authors")),
@@ -207,18 +208,18 @@ namespace NuGet.Client.VisualStudio.UI
                 return retValue;
             }
 
-            private PackageDependencySet LoadDependencySet(JObject set)
+            private UiPackageDependencySet LoadDependencySet(JObject set)
             {
                 var fxName = set.Value<string>("targetFramework");
-                return new PackageDependencySet(
+                return new UiPackageDependencySet(
                     String.IsNullOrEmpty(fxName) ? null : VersionUtility.ParseFrameworkName(fxName),
                     (set.Value<JArray>("dependencies") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
-            private PackageDependency LoadDependency(JObject dep)
+            private UiPackageDependency LoadDependency(JObject dep)
             {
                 var ver = dep.Value<string>("range");
-                return new PackageDependency(
+                return new UiPackageDependency(
                     dep.Value<string>("id"),
                     String.IsNullOrEmpty(ver) ? null : VersionUtility.ParseVersionSpec(ver));
             }
@@ -269,10 +270,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
         {
-            var optionsPageActivator = ServiceLocator.GetInstance<IOptionsPageActivator>();
-            optionsPageActivator.ActivatePage(
-                OptionsPage.PackageSources,
-                null);
+            _ui.LaunchNuGetOptionsDialog();
         }
 
         private void PackageList_SelectionChanged(object sender, SelectionChangedEventArgs e)

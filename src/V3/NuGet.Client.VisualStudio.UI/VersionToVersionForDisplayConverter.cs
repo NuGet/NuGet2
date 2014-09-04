@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -11,7 +12,7 @@ namespace NuGet.Client.VisualStudio.UI
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            SemanticVersion version = value as SemanticVersion;
+            NuGetVersion version = value as NuGetVersion;
             return new VersionForDisplay(version, String.Empty);
         }
 

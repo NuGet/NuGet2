@@ -7,8 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using NuGet.Client;
-using NuGet.Dialog.PackageManagerUI;
-using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -82,11 +80,11 @@ namespace NuGet.Client.VisualStudio.UI
             }
             _dependencyBehavior.SelectedItem = _dependencyBehaviors[1];
 
-            foreach (var v in Enum.GetValues(typeof(FileConflictResolution)))
+            foreach (var v in Enum.GetValues(typeof(FileConflictAction)))
             {
                 _fileConflictAction.Items.Add(v);
             }
-            _fileConflictAction.SelectedItem = FileConflictResolution.Overwrite;
+            _fileConflictAction.SelectedItem = FileConflictAction.Overwrite;
         }
 
         private void PackageDetail_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -122,7 +120,7 @@ namespace NuGet.Client.VisualStudio.UI
             Control.SetBusy(true);
             var actions = await Session.CreateActionResolver().ResolveActions(
                 action,
-                new PackageName(package.Package.Id, package.Package.Version),
+                new PackageIdentity(package.Package.Id, package.Package.Version),
                 new ResolverContext()
                 {
                     DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
@@ -227,16 +225,15 @@ namespace NuGet.Client.VisualStudio.UI
             if (licensePackages.Any())
             {
                 // Hacky distinct without writing a custom comparer
-                var licenseModels = licensePackages
-                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
-                    .Select(g => g.First())
-                    .Select(a => new PackageLicenseModel(
-                        a.Package.Value<string>("id"),
-                        a.Package.Value<Uri>("licenseUrl"),
-                        a.Package["authors"].Values<string>()));
+                //var licenseModels = licensePackages
+                //    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
+                //    .Select(g => g.First())
+                //    .Select(a => new PackageLicenseModel(
+                //        a.Package.Value<string>("id"),
+                //        a.Package.Value<Uri>("licenseUrl"),
+                //        a.Package["authors"].Values<string>()));
 
-                IUserNotifierServices uss = new UserNotifierServices();
-                bool accepted = uss.ShowLicenseWindow(licenseModels);
+                bool accepted = _ui.PromptForLicenseAcceptance(licensePackages);
                 if (!accepted)
                 {
                     return false;
@@ -251,7 +248,7 @@ namespace NuGet.Client.VisualStudio.UI
             Hyperlink hyperlink = e.OriginalSource as Hyperlink;
             if (hyperlink != null && hyperlink.NavigateUri != null)
             {
-                UriHelper.OpenExternalLink(hyperlink.NavigateUri);
+                _ui.LaunchExternalLink(hyperlink.NavigateUri);
                 e.Handled = true;
             }
         }

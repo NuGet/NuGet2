@@ -22,14 +22,16 @@ namespace NuGet.Client.Interop
             Logger = logger;
         }
 
-        public Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action, PackageName target, ResolverContext context)
+        public Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action, PackageIdentity target, ResolverContext context)
         {
             Logger.Log(MessageLevel.Info, "Resolving {0} {1}", action, target);
 
             // TODO: Figure out a way to avoid this? We need the IPackage but we never want to expose that to the
             // UI, so we have to look it up again.
             Logger.Log(MessageLevel.Debug, "Fetching package data for {0}", target);
-            var package = _sourceRepository.FindPackage(target.Id, target.Version);
+            var package = _sourceRepository.FindPackage(
+                target.Id, 
+                new SemanticVersion(target.Version.Version, target.Version.Release));
 
             var resolver = CreateResolver(context);
 

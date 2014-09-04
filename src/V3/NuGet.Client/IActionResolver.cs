@@ -10,7 +10,7 @@ namespace NuGet.Client
     {
         Task<IEnumerable<PackageActionDescription>> ResolveActions(
             PackageActionType action, 
-            PackageName target,
+            PackageIdentity target,
             ResolverContext context);
     }
 }

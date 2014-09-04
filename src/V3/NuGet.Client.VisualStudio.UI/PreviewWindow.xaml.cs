@@ -19,14 +19,14 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PreviewWindow : Window
     {
-        IEnumerable<PackageName> _unchanged;
-        IEnumerable<PackageName> _deleted;
-        IEnumerable<PackageName> _added;
+        IEnumerable<PackageIdentity> _unchanged;
+        IEnumerable<PackageIdentity> _deleted;
+        IEnumerable<PackageIdentity> _added;
 
         public PreviewWindow(
-            IEnumerable<PackageName> unchanged,
-            IEnumerable<PackageName> deleted,
-            IEnumerable<PackageName> added)
+            IEnumerable<PackageIdentity> unchanged,
+            IEnumerable<PackageIdentity> deleted,
+            IEnumerable<PackageIdentity> added)
         {
             InitializeComponent();
 

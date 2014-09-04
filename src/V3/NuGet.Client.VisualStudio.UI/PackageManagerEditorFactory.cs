@@ -11,12 +11,15 @@ using NuGet.Client.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    [Guid(GuidList.guidEditorFactoryString)]
-    public sealed class EditorFactory : IVsEditorFactory, IDisposable
+    [Guid(EditorFactoryGuidString)]
+    public sealed class PackageManagerEditorFactory : IVsEditorFactory, IDisposable
     {
+        internal const string EditorFactoryGuidString = "EC269AD5-3EA8-4A13-AAF8-76741843B3CD";
+        public static readonly Guid EditorFactoryGuid = new Guid(EditorFactoryGuidString);
+
         private ServiceProvider vsServiceProvider;
 
-        public EditorFactory()
+        public PackageManagerEditorFactory()
         {
         }
 

@@ -10,5 +10,8 @@ namespace NuGet.Client.VisualStudio
     public interface IUserInterfaceService
     {
         bool PromptForLicenseAcceptance(IEnumerable<JObject> packages);
+        void LaunchExternalLink(Uri url);
+
+        void LaunchNuGetOptionsDialog();
     }
 }

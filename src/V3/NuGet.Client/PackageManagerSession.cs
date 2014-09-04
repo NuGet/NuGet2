@@ -12,9 +12,9 @@ namespace NuGet.Client
     public abstract class PackageManagerSession
     {
         public abstract string Name { get; }
-        public abstract PackageSource ActiveSource { get; }
-        
-        public abstract IEnumerable<PackageSource> GetAvailableSources();
+        public abstract NuGet.Client.PackageSource ActiveSource { get; }
+
+        public abstract IEnumerable<NuGet.Client.PackageSource> GetAvailableSources();
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
         public abstract IPackageSearcher CreateSearcher();
         public abstract IInstalledPackageList GetInstalledPackageList();
@@ -29,7 +29,7 @@ namespace NuGet.Client
         /// <exception cref="ArgumentException">The specified source does not exist in the available sources, as defined by <see cref="GetAvailableSources"/></exception>
         public abstract void ChangeActiveSource(string newSourceName);
 
-        public virtual void ChangeActiveSource(PackageSource newSource)
+        public virtual void ChangeActiveSource(NuGet.Client.PackageSource newSource)
         {
             ChangeActiveSource(newSource.Name);
         }
