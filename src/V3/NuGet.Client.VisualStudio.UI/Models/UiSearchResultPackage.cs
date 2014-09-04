@@ -58,7 +58,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public string Id { get; set; }
 
-        public SemanticVersion Version { get; set; }
+        public NuGetVersion Version { get; set; }
 
         public string Summary { get; set; }
 

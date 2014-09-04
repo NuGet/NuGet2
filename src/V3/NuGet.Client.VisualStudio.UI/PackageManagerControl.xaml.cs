@@ -20,7 +20,6 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
-        private readonly IUserInterfaceService _ui;
         private bool _initialized;
 
         public PackageManagerDocData Model { get; private set; }
@@ -32,8 +31,11 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public PackageManagerControl(PackageManagerDocData myDoc)
+        internal IUserInterfaceService UI { get; private set; }
+
+        public PackageManagerControl(PackageManagerDocData myDoc, IUserInterfaceService ui)
         {
+            UI = ui;
             Model = myDoc;
 
             InitializeComponent();
@@ -212,7 +214,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var fxName = set.Value<string>("targetFramework");
                 return new UiPackageDependencySet(
-                    String.IsNullOrEmpty(fxName) ? null : VersionUtility.ParseFrameworkName(fxName),
+                    String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelpers.ParseFrameworkName(fxName),
                     (set.Value<JArray>("dependencies") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
@@ -221,7 +223,7 @@ namespace NuGet.Client.VisualStudio.UI
                 var ver = dep.Value<string>("range");
                 return new UiPackageDependency(
                     dep.Value<string>("id"),
-                    String.IsNullOrEmpty(ver) ? null : VersionUtility.ParseVersionSpec(ver));
+                    String.IsNullOrEmpty(ver) ? null : VersionRange.Parse(ver));
             }
 
             private string StringCollectionToString(JArray v)
@@ -270,7 +272,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
         {
-            _ui.LaunchNuGetOptionsDialog();
+            UI.LaunchNuGetOptionsDialog();
         }
 
         private void PackageList_SelectionChanged(object sender, SelectionChangedEventArgs e)

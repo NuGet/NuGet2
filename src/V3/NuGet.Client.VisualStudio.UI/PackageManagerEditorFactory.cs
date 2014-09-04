@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
 using NuGet.Client.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -18,9 +19,11 @@ namespace NuGet.Client.VisualStudio.UI
         public static readonly Guid EditorFactoryGuid = new Guid(EditorFactoryGuidString);
 
         private ServiceProvider vsServiceProvider;
-
-        public PackageManagerEditorFactory()
+        private IUserInterfaceService _ui;
+        
+        public PackageManagerEditorFactory(IUserInterfaceService ui)
         {
+            _ui = ui;
         }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace NuGet.Client.VisualStudio.UI
         public int SetSite(Microsoft.VisualStudio.OLE.Interop.IServiceProvider psp)
         {
             vsServiceProvider = new ServiceProvider(psp);
+
             return VSConstants.S_OK;
         }
 
@@ -166,7 +170,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 return VSConstants.VS_E_INCOMPATIBLEDOCDATA;
             }
-            
+
             // Create the Document (editor)
             object project;
             ErrorHandler.ThrowOnFailure(pvHier.GetProperty(
@@ -174,7 +178,7 @@ namespace NuGet.Client.VisualStudio.UI
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
             var myDoc = new PackageManagerDocData(VsPackageManagerSession.ForProject((Project)project));
-            var NewEditor = new PackageManagerWindowPane(myDoc);
+            var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             

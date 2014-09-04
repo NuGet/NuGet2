@@ -15,8 +15,6 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageDetail : UserControl
     {
-        private IUserInterfaceService _ui;
-
         public PackageManagerControl Control { get; set; }
         public PackageManagerSession Session { get { return Control.Session; } }
 
@@ -225,15 +223,11 @@ namespace NuGet.Client.VisualStudio.UI
             if (licensePackages.Any())
             {
                 // Hacky distinct without writing a custom comparer
-                //var licenseModels = licensePackages
-                //    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
-                //    .Select(g => g.First())
-                //    .Select(a => new PackageLicenseModel(
-                //        a.Package.Value<string>("id"),
-                //        a.Package.Value<Uri>("licenseUrl"),
-                //        a.Package["authors"].Values<string>()));
+                var licenseModels = licensePackages
+                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
+                    .Select(g => g.First().Package);
 
-                bool accepted = _ui.PromptForLicenseAcceptance(licensePackages);
+                bool accepted = Control.UI.PromptForLicenseAcceptance(licenseModels);
                 if (!accepted)
                 {
                     return false;
@@ -248,7 +242,7 @@ namespace NuGet.Client.VisualStudio.UI
             Hyperlink hyperlink = e.OriginalSource as Hyperlink;
             if (hyperlink != null && hyperlink.NavigateUri != null)
             {
-                _ui.LaunchExternalLink(hyperlink.NavigateUri);
+                Control.UI.LaunchExternalLink(hyperlink.NavigateUri);
                 e.Handled = true;
             }
         }

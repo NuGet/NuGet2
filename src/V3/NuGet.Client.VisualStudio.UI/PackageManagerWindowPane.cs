@@ -11,17 +11,17 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    class PackageManagerWindowPane : WindowPane
+    public class PackageManagerWindowPane : WindowPane
     {
         private object _content;
 
         /// <summary>
         /// Initializes a new instance of the EditorPane class.
         /// </summary>
-        public PackageManagerWindowPane(PackageManagerDocData myDoc)
+        public PackageManagerWindowPane(PackageManagerDocData myDoc, IUserInterfaceService ui)
             : base(null)
         {
-            PackageManagerControl control = new PackageManagerControl(myDoc);
+            PackageManagerControl control = new PackageManagerControl(myDoc, ui);
             _content = control;
         }
 

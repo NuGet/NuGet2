@@ -41,6 +41,7 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+using NuGet.Client.VisualStudio.UI;
 #endif
 
 #if VS14
@@ -72,7 +73,7 @@ namespace NuGet.Tools
         "Package Manager Console",
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
         "{" + GuidList.guidNuGetPkgString + "}")]
-    [ProvideEditorExtension(typeof(EditorFactory), ".PackageManagerDocumentWindow", 50,
+    [ProvideEditorExtension(typeof(PackageManagerEditorFactory), ".PackageManagerDocumentWindow", 50,
               ProjectGuid = "{D1DCDB85-C5E8-11d2-BFCA-00C04F990235}",
               TemplateDir = "Templates",
               NameResourceID = 300,
@@ -231,7 +232,7 @@ namespace NuGet.Tools
             AddMenuCommandHandlers();
 
             //Create Editor Factory. Note that the base Package class will call Dispose on it.
-            base.RegisterEditorFactory(new EditorFactory());
+            base.RegisterEditorFactory(new PackageManagerEditorFactory(ServiceLocator.GetInstance<IUserInterfaceService>()));
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
             // Doing so is illegal and may cause VS to hang.
@@ -484,10 +485,10 @@ namespace NuGet.Tools
             
             var session = VsPackageManagerSession.ForProject(project);
             var myDoc = new PackageManagerDocData(session);
-            var NewEditor = new PackageManagerWindowPane(myDoc);
+            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            var guidEditorType = new Guid(GuidList.guidEditorFactoryString);
+            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
             var guidCommandUI = Guid.Empty;
             var caption = "PackageManager";
             var documentName = String.Format("Package Manager: {0}", session.Name);

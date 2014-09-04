@@ -116,7 +116,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public void SelectVersion(SemanticVersion version)
+        public void SelectVersion(NuGetVersion version)
         {
             if (version == null)
             {

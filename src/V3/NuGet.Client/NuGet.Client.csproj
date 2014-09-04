@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.Client</RootNamespace>
-    <AssemblyName>NuGet.Client.Tools</AssemblyName>
+    <AssemblyName>NuGet.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,6 +51,7 @@
     </Compile>
     <Compile Include="DependencyBehavior.cs" />
     <Compile Include="FileConflictAction.cs" />
+    <Compile Include="FrameworkNameHelpers.cs" />
     <Compile Include="IActionExecutor.cs" />
     <Compile Include="IActionResolver.cs" />
     <Compile Include="IInstalledPackageList.cs" />

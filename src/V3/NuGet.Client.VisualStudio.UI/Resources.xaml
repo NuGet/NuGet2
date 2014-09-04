@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:Tools="clr-namespace:NuGet.Tools"
+                    xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="packageicon.png" />
     <BitmapImage x:Key="Image_UpwardsArrow" UriSource="UpwardsArrow.png" />
