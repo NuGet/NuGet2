@@ -99,6 +99,7 @@ namespace NuGet.Client.V3Shim
         /// <summary>
         /// Entry point for requests from OData.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
         public DataServiceClientRequestMessage ShimDataService(DataServiceClientRequestMessageArgs args)
         {
             DataServiceClientRequestMessage message = null;
@@ -168,6 +169,7 @@ namespace NuGet.Client.V3Shim
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ms"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
         private ShimWebResponse CallDispatcher(InterceptDispatcher dispatcher, WebRequest request, MemoryStream requestStream)
         {
             ShimWebResponse response = null;
@@ -215,6 +217,7 @@ namespace NuGet.Client.V3Shim
         /// <summary>
         /// Pass the request to the interceptors. Interceptors will be initialized as needed.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
         private bool TryGetInterceptorResponse(WebRequest request, MemoryStream requestStream, out WebResponse response)
         {
             response = null;
@@ -289,6 +292,7 @@ namespace NuGet.Client.V3Shim
         /// <summary>
         /// Get the response directly without the interceptor.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ms"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
         private WebResponse CallV2(WebRequest request)
         {
             Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);

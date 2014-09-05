@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V3Shim
 {
-    public class ShimCache : IShimCache
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
+    public class ShimCache : IShimCache, IDisposable
     {
         private ConcurrentDictionary<string, CacheItem> _cache;
         private Timer _timer;
@@ -24,6 +25,7 @@ namespace NuGet.Client.V3Shim
             _timer = new Timer(TimeTick, null, 0, 0);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         public void AddOrUpdate(Uri uri, JObject blob)
         {
             _cache.AddOrUpdate(uri.ToString().ToLowerInvariant(), new CacheItem(blob), (k, i) => new CacheItem(blob));
@@ -31,6 +33,7 @@ namespace NuGet.Client.V3Shim
             _timer.Change((int)_cleanup.TotalMilliseconds, (int)_cleanup.TotalMilliseconds);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         public bool TryGet(Uri uri, out JObject blob)
         {
             CacheItem item = null;
@@ -44,13 +47,22 @@ namespace NuGet.Client.V3Shim
             return false;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_timer != null)
+                {
+                    _timer.Dispose();
+                    _timer = null;
+                }
+            }
+        }
+
         public void Dispose()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         private void TimeTick(object state)

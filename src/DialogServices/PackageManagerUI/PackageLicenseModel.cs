@@ -18,7 +18,7 @@ namespace NuGet.Dialog.PackageManagerUI
             Authors = authors;
         }
 
-        public static PackageLicenseModel FromV2Package(IPackage package)
+        public static PackageLicenseModel FromV2Package(IPackageMetadata package)
         {
             return new PackageLicenseModel(
                 package.Id,

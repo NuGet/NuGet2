@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 
 namespace NuGet.Client.V3Shim
 {
@@ -26,13 +27,22 @@ namespace NuGet.Client.V3Shim
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_controller != null)
+                {
+                    _controller.Dispose();
+                    _controller = null;
+                }
+            }
+        }
+
         public void Dispose()
         {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

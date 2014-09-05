@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5">
     <Name>NuGet Package Manager</Name>
@@ -22,9 +22,10 @@
   <Content>
     <MefComponent>|PowerShellHostProvider|</MefComponent>
     <MefComponent>|Console|</MefComponent>
-    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>|VisualStudio|</MefComponent>
-	<MefComponent>|ShimV3|</MefComponent>
+    <MefComponent>|NuGet.Client.VisualStudio|</MefComponent>
+    <MefComponent>|NuGet.Client.V3Interop|</MefComponent>
+    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
   </Content>
 </Vsix>

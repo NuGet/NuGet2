@@ -47,6 +47,7 @@ namespace NuGet.Client.V3Shim
             return feed;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         static XElement MakeEntry(string feedBaseAddress, string id, JToken package)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
@@ -187,6 +188,7 @@ namespace NuGet.Client.V3Shim
 
         //  The search service currently returns a slightly different JSON format (this will be fixed)
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "id")]
         public static XElement MakeFeedFromSearch(string source, string feedBaseAddress, string method, IEnumerable<JToken> packages, string id)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
@@ -200,6 +202,7 @@ namespace NuGet.Client.V3Shim
             return feed;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "id")]
         static XElement MakeEntrySearch(string source, string feedBaseAddress, string id, JToken package)
         {
             XNamespace atom = XNamespace.Get(@"http://www.w3.org/2005/Atom");
@@ -260,7 +263,7 @@ namespace NuGet.Client.V3Shim
 
             string downloadCount = package["PackageRegistration"]["DownloadCount"].ToString();
 
-            DateTime published = DateTime.Parse(package["Published"].ToString());
+            DateTime published = DateTime.Parse(package["Published"].ToString(), CultureInfo.InvariantCulture);
 
             properties.Add(new XElement(d + "DownloadCount", new XAttribute(m + "type", "Edm.Int32"), downloadCount));
             properties.Add(new XElement(d + "GalleryDetailsUrl", FieldOrDefault(package, "GalleryDetailsUrl", "http://tempuri.org/")));

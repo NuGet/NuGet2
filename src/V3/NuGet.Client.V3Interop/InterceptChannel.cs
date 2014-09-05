@@ -55,23 +55,25 @@ namespace NuGet.Client.V3Shim
             // create the interceptor from the intercept.json file. exper
             string interceptUrl = String.Format(CultureInfo.InvariantCulture, "{0}/intercept.json", source);
 
-            System.Net.Http.HttpClient client = new System.Net.Http.HttpClient();
-            var reqTask = client.GetAsync(interceptUrl);
-            reqTask.Wait();
-            HttpResponseMessage response = reqTask.Result;
-
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
             {
-                var resTask = response.Content.ReadAsStringAsync();
-                resTask.Wait();
-                JObject obj = JObject.Parse(resTask.Result);
+                var reqTask = client.GetAsync(interceptUrl);
+                reqTask.Wait();
+                HttpResponseMessage response = reqTask.Result;
 
-                channel = new InterceptChannel(source, obj, cache);
-                return true;
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var resTask = response.Content.ReadAsStringAsync();
+                    resTask.Wait();
+                    JObject obj = JObject.Parse(resTask.Result);
+
+                    channel = new InterceptChannel(source, obj, cache);
+                    return true;
+                }
+
+                channel = null;
+                return false;
             }
-
-            channel = null;
-            return false;
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
@@ -464,6 +466,7 @@ namespace NuGet.Client.V3Shim
         /// <summary>
         ///  Skip to the first needed segment, and include all following segments.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         public static Queue<string> GetListAvailableSegmentsIncludingAndAfter(InterceptCallContext context, JObject index, string startsWith=null)
         {
             var segs = index["entry"].ToArray();
@@ -581,6 +584,7 @@ namespace NuGet.Client.V3Shim
             return candidateLatest;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         private Uri MakeResolverAddress(string id)
         {
             id = id.ToLowerInvariant();
@@ -588,6 +592,7 @@ namespace NuGet.Client.V3Shim
             return resolverBlobAddress;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "isLatestVersion")]
         private Uri MakeSearchAddress(string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
             string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
