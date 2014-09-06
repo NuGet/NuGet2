@@ -117,6 +117,12 @@ namespace NuGet
         [XmlElement("tags")]
         public string Tags { get; set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("properties")]
+        [XmlArrayItem("property")]
+        public List<ManifestProperty> Properties { get; set; }
+
         /// <summary>
         /// This property should be used only by the XML serializer. Do not use it in code.
         /// </summary>
@@ -201,12 +207,6 @@ namespace NuGet
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlIgnore]
         public List<ManifestReferenceSet> ReferenceSets { get; set; }
-
-        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
-        [XmlArray("properties")]
-        [XmlArrayItem("property")]
-        public List<ManifestProperty> Properties { get; set; }
 
         SemanticVersion IPackageName.Version
         {

@@ -834,12 +834,12 @@ namespace NuGet.Test
     <copyright>Copyright 2012</copyright>
     <language>en-us</language>
     <tags>t1 t2 t3</tags>
-    <dependencies>
-      <dependency id=""X"" />
-    </dependencies>
     <properties>
       <property name=""propertyName"" value=""propertyValue"" />
     </properties>
+    <dependencies>
+      <dependency id=""X"" />
+    </dependencies>
   </metadata>
 </package>", ms.ReadToEnd());
         }
