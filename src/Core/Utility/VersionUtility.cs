@@ -722,7 +722,6 @@ namespace NuGet
                                   };
 
             // Group references by target framework (if there is no target framework we assume it is the default)
-            /* TODO We need to handle properties in this group */
             var frameworkGroups = normalizedItems.GroupBy(g => g.TargetFramework, g => g.Item).ToList();
 
             // Try to find the best match
