@@ -849,7 +849,7 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("no group",
+        [InlineData("no group", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -865,7 +865,7 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        [InlineData("one group",
+        [InlineData("one group", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -883,7 +883,7 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        [InlineData("two groups (1,1)",
+        [InlineData("two groups (1,1)", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -903,7 +903,7 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        [InlineData("two groups (2,0)",
+        [InlineData("two groups (2,0)", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -923,7 +923,7 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        [InlineData("one group with a property",
+        [InlineData("one group with a property", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -942,7 +942,7 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        [InlineData("two groups with properties",
+        [InlineData("two groups with properties", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -965,17 +965,64 @@ namespace NuGet.Test
                 </dependencies>
               </metadata>
             </package>")]
-        public void ValidateSchemaSucceedsForValidDependencies(string test, string content)
+        [InlineData("duplicate target framework", 2, 1,
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group targetFramework=""net40"">
+                        <dependency id=""B"" />
+                    </group>
+                    <group targetFramework=""net40"">
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        [InlineData("duplicate properties", 2, 1,
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <dependencies>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <dependency id=""B"" />
+                    </group>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <dependency id=""C"" />
+                    </group>
+                </dependencies>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaSucceedsForValidDependencies(string test, int rawGroupCount, int groupedSetCount, string content)
         {
             // Arrange
             // Switch to invariant culture to ensure the error message is in english.
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 
             // Act
-            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: true);
-            var dependencies = manifest.Metadata.DependencySets.SelectMany(s => s.Dependencies);
+            var metadata = Manifest.ReadFrom(content.AsStream(), validateSchema: true).Metadata;
+            var groupCount = metadata.DependencySets.Count;
+            var dependencySets = ((IPackageMetadata)metadata).DependencySets;
+            var dependencies = dependencySets.SelectMany(s => s.Dependencies);
 
             // Assert
+            Assert.Equal(rawGroupCount, groupCount);
+            Assert.Equal(groupedSetCount, dependencySets.Count());
+
             Assert.Equal(2, dependencies.Count());
             Assert.Equal("B", dependencies.First().Id);
             Assert.Equal("C", dependencies.Last().Id);
@@ -1067,7 +1114,7 @@ namespace NuGet.Test
 
 
         [Theory]
-        [InlineData("no group",
+        [InlineData("no group", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1083,7 +1130,7 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        [InlineData("one group",
+        [InlineData("one group", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1101,7 +1148,7 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        [InlineData("two groups (1,1)",
+        [InlineData("two groups (1,1)", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1121,7 +1168,7 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        [InlineData("two groups (2,0)",
+        [InlineData("two groups (2,0)", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1141,7 +1188,7 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        [InlineData("one group with property",
+        [InlineData("one group with property", 1, 1,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1160,7 +1207,7 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        [InlineData("two groups with properties",
+        [InlineData("two groups with properties", 2, 2,
             @"<?xml version=""1.0""?>
             <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
               <metadata>
@@ -1183,20 +1230,67 @@ namespace NuGet.Test
                 </references>
               </metadata>
             </package>")]
-        public void ValidateSchemaSucceedsForValidReferences(string test, string content)
+        [InlineData("duplicate target framework", 2, 1,
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group targetFramework=""net40"">
+                        <reference file=""B"" />
+                    </group>
+                    <group targetFramework=""net40"">
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        [InlineData("duplicate properties", 2, 1,
+            @"<?xml version=""1.0""?>
+            <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+              <metadata>
+                <id>A</id>
+                <version>1.0</version>
+                <authors>jeffhandley</authors>
+                <owners>jeffhandley</owners>
+                <requireLicenseAcceptance>false</requireLicenseAcceptance>
+                <description>Descriptions</description>
+                <references>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <reference file=""B"" />
+                    </group>
+                    <group>
+                        <property name=""configuration"" value=""debug"" />
+                        <reference file=""C"" />
+                    </group>
+                </references>
+              </metadata>
+            </package>")]
+        public void ValidateSchemaSucceedsForValidReferences(string test, int rawGroupCount, int groupedSetCount, string content)
         {
             // Arrange
             // Switch to invariant culture to ensure the error message is in english.
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 
             // Act
-            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: true);
-            var references = manifest.Metadata.ReferenceSets.SelectMany(s => s.References);
+            var metadata = Manifest.ReadFrom(content.AsStream(), validateSchema: true).Metadata;
+            var groupCount = metadata.ReferenceSets.Count;
+            var referenceSets = ((IPackageMetadata)metadata).PackageAssemblyReferences;
+            var references = referenceSets.SelectMany(s => s.References);
 
             // Assert
+            Assert.Equal(rawGroupCount, groupCount);
+            Assert.Equal(groupedSetCount, referenceSets.Count);
+
             Assert.Equal(2, references.Count());
-            Assert.Equal("B", references.First().File);
-            Assert.Equal("C", references.Last().File);
+            Assert.Equal("B", references.First());
+            Assert.Equal("C", references.Last());
         }
 
         [Theory]
