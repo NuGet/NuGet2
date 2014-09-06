@@ -1517,46 +1517,6 @@ Description is required.");
         }
 
         [Fact]
-        public void ReadingPackageManifestRecognizeDependencyWithPropertyConstraints()
-        {
-            // Arrange
-            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package>
-  <metadata>
-    <id>SuperPackage</id>
-    <version>2.5</version>
-    <authors>JaneDoe</authors>
-    <description>description</description>
-    <dependencies>
-        <group>
-            <property name=""config"" value=""debug"" />
-            <dependency id=""A"">
-                <propertyConstraint name=""architecture"" value=""x86"" />
-            </dependency>
-        </group>
-    </dependencies>
-  </metadata>
-</package>";
-
-            // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
-
-            // Assert
-            Assert.Equal(1, builder.DependencySets.Count);
-            var dependencySet = builder.DependencySets[0];
-
-            Assert.Equal("config", dependencySet.Properties.Single().Name);
-            Assert.Equal("debug", dependencySet.Properties.Single().Value);
-
-            var dependencies = dependencySet.Dependencies.ToList();
-            Assert.Equal(1, dependencies.Count);
-            Assert.Equal("A", dependencies[0].Id);
-            Assert.Null(dependencies[0].VersionSpec);
-            Assert.Equal("architecture", dependencies[0].PropertyConstraints.Single().Name);
-            Assert.Equal("x86", dependencies[0].PropertyConstraints.Single().Value);
-        }
-
-        [Fact]
         public void ReadingPackageManifestRecognizeMultipleDependenciesWithTargetFramework()
         {
             // Arrange

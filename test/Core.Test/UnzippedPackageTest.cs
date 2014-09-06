@@ -69,8 +69,6 @@ namespace NuGet.Test
             Assert.False(package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.IsMaxInclusive);
             Assert.Equal("configuration", package.DependencySets.ElementAt(0).Properties.ElementAt(0).Name);
             Assert.Equal("release", package.DependencySets.ElementAt(0).Properties.ElementAt(0).Value);
-            Assert.Equal("os", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).PropertyConstraints.ElementAt(0).Name);
-            Assert.Equal("windows", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).PropertyConstraints.ElementAt(0).Value);
             Assert.Equal("Jumpo Jet", package.Title);
             Assert.True(package.RequireLicenseAcceptance);
             Assert.Equal("My package description.", package.Description);
@@ -321,9 +319,7 @@ namespace NuGet.Test
     <dependencies>
       <group targetFramework=""net20"">
         <property name=""configuration"" value=""release"" />
-        <dependency id=""bing"" version=""1.0-RC"">
-          <propertyConstraint name=""os"" value=""windows"" />
-        </dependency>
+        <dependency id=""bing"" version=""1.0-RC"" />
       </group>
     </dependencies>
     <references>

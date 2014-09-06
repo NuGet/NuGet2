@@ -227,9 +227,7 @@ namespace NuGet
                     select new ManifestDependency
                     {
                         Id = dependency.Id.SafeTrim(),
-                        Version = dependency.VersionSpec.ToStringSafe(),
-                        PropertyConstraints = dependency.PropertyConstraints != null ?
-                            dependency.PropertyConstraints.Select(c => new ManifestProperty { Name = c.Name, Value = c.Value }).ToList() : null
+                        Version = dependency.VersionSpec.ToStringSafe()
                     }).ToList();
         }
 

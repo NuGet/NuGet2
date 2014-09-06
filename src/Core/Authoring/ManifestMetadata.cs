@@ -450,8 +450,7 @@ namespace NuGet
             var dependencies = from d in manifestDependencySet.Dependencies
                                select new PackageDependency(
                                    d.Id,
-                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version),
-                                   d.PropertyConstraints != null ? d.PropertyConstraints.Select(c => new PackageProperty(c.Name, c.Value)) : Enumerable.Empty<PackageProperty>());
+                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version));
 
             var properties = manifestDependencySet.Properties == null ? Enumerable.Empty<PackageProperty>() :
                 from p in manifestDependencySet.Properties

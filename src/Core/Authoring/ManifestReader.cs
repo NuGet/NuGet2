@@ -278,8 +278,7 @@ namespace NuGet
                     select new ManifestDependency
                     {
                         Id = idElement.Value.SafeTrim(),
-                        Version = element.GetOptionalAttributeValue("version").SafeTrim(),
-                        PropertyConstraints = ReadProperties(element, "propertyConstraint")
+                        Version = element.GetOptionalAttributeValue("version").SafeTrim()
                     }).ToList();
         }
 

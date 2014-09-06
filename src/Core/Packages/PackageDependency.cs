@@ -7,16 +7,11 @@ namespace NuGet
     public class PackageDependency
     {
         public PackageDependency(string id)
-            : this(id, versionSpec: null, propertyConstraints: null)
+            : this(id, versionSpec: null)
         {
         }
 
         public PackageDependency(string id, IVersionSpec versionSpec)
-            : this(id, versionSpec: versionSpec, propertyConstraints: null)
-        {
-        }
-
-        public PackageDependency(string id, IVersionSpec versionSpec, IEnumerable<PackageProperty> propertyConstraints)
         {
             if (String.IsNullOrEmpty(id))
             {
@@ -24,7 +19,6 @@ namespace NuGet
             }
             Id = id;
             VersionSpec = versionSpec;
-            PropertyConstraints = propertyConstraints != null ? propertyConstraints : Enumerable.Empty<PackageProperty>();
         }
 
         public string Id
@@ -34,12 +28,6 @@ namespace NuGet
         }
 
         public IVersionSpec VersionSpec
-        {
-            get;
-            private set;
-        }
-
-        public IEnumerable<PackageProperty> PropertyConstraints
         {
             get;
             private set;

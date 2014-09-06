@@ -12,9 +12,6 @@
     </xs:complexType>
   
     <xs:complexType name="dependency">
-        <xs:sequence>
-            <xs:element name="propertyConstraint" minOccurs="0" maxOccurs="unbounded" type="property" />
-        </xs:sequence>
         <xs:attribute name="id" type="xs:string" use="required" />
         <xs:attribute name="version" type="xs:string" use="optional" />
     </xs:complexType>
