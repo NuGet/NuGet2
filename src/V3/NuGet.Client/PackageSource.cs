@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Internal.Utils;
 
 namespace NuGet.Client
 {
@@ -33,7 +34,10 @@ namespace NuGet.Client
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() * 3137 + Url.GetHashCode();
+            return HashCodeCombiner.Start()
+                .Add(Name)
+                .Add(Url)
+                .CombinedHash;
         }
     }
 }
