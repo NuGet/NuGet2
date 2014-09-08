@@ -442,10 +442,10 @@ namespace NuGet.Tools
                 int hr = windowFrame.GetProperty(
                     (int)__VSFPROPID.VSFPROPID_DocData,
                     out property);
-                if (hr == VSConstants.S_OK && property is PackageManagerDocData)
+                if (hr == VSConstants.S_OK && property is PackageManagerModel)
                 {
                     // TODO: Find a cleaner way to do this.
-                    var packageManagerDocData = (PackageManagerDocData)property;
+                    var packageManagerDocData = (PackageManagerModel)property;
                     var session = packageManagerDocData.Session as ProjectPackageManagerSession;
                     if (session != null && session.Project == project)
                     {
@@ -484,7 +484,7 @@ namespace NuGet.Tools
             vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
             
             var session = VsPackageManagerSession.ForProject(project);
-            var myDoc = new PackageManagerDocData(session);
+            var myDoc = new PackageManagerModel(session);
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

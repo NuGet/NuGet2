@@ -37,7 +37,7 @@ namespace NuGet.Client.VisualStudio.UI
         public IEnumerable<UiPackageDependencySet> DependencySets { get; set; }
 
         // This property is used by data binding to display text "No dependencies"
-        public bool NoDependencies { get; set; }
+        public bool HasDependencies { get; set; }
 
         public override string ToString()
         {

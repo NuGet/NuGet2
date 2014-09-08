@@ -43,6 +43,12 @@
              ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
              HorizontalContentAlignment="Stretch"
              SelectionChanged="_list_SelectionChanged" 
-             Loaded="_list_Loaded">
+             Loaded="_list_Loaded">         
+        <!-- Get rid of padding of ListBoxItem -->
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="{x:Type ListBoxItem}">
+                <Setter Property="Padding" Value="0" />
+            </Style>
+        </ListBox.ItemContainerStyle>
     </ListBox>
 </UserControl>

@@ -17,7 +17,8 @@
                 <TextBlock TextWrapping="Wrap">
                     <Run Text="{Binding Id, Mode=OneTime}" FontWeight="Bold" />
                     <Run Text=" " />
-                    <Run Text="Authors" />
+                    <Run Text="Authors: " />
+                    <Run Text="{Binding Authors, Mode=OneTime}" />
                 </TextBlock>
                 <TextBlock AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTerm_{0}'}">
                     <Hyperlink AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTermLink_{0}'}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">

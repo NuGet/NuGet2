@@ -17,11 +17,11 @@ namespace NuGet.Client.VisualStudio.UI
     /// This class just proxies all calls through to the PackageManagerSession and implements IVsPersistDocData to fit
     /// into the VS model. It's basically an adaptor that turns PackageManagerSession into an IVsPersistDocData so VS is happy.
     /// </remarks>
-    public class PackageManagerDocData : IVsPersistDocData
+    public class PackageManagerModel : IVsPersistDocData
     {
         public PackageManagerSession Session { get; private set; }
         
-        public PackageManagerDocData(PackageManagerSession session)
+        public PackageManagerModel(PackageManagerSession session)
         {
             Session = session;
         }

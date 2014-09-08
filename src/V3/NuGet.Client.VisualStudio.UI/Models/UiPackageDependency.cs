@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using NuGet.Versioning;
@@ -24,6 +25,14 @@ namespace NuGet.Client.VisualStudio.UI
         {
             Id = id;
             Range = range;
+        }
+
+        public override string ToString()
+        {
+            return String.Format(
+                CultureInfo.InvariantCulture,
+                "{0} {1}",
+                Id, Range);
         }
     }
 }

@@ -22,7 +22,8 @@ namespace NuGet.Client.VisualStudio.UI
     {
         private bool _initialized;
 
-        public PackageManagerDocData Model { get; private set; }
+        public PackageManagerModel Model { get; private set; }
+
         public PackageManagerSession Session
         {
             get
@@ -33,7 +34,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         internal IUserInterfaceService UI { get; private set; }
 
-        public PackageManagerControl(PackageManagerDocData myDoc, IUserInterfaceService ui)
+        public PackageManagerControl(PackageManagerModel myDoc, IUserInterfaceService ui)
         {
             UI = ui;
             Model = myDoc;
@@ -201,7 +202,7 @@ namespace NuGet.Client.VisualStudio.UI
                     {
                         detailedPackage.Published = DateTime.Parse(publishedStr);
                     }
-                    detailedPackage.NoDependencies = detailedPackage.DependencySets.Any(
+                    detailedPackage.HasDependencies = detailedPackage.DependencySets.Any(
                         set => set.Dependencies != null && set.Dependencies.Count > 0);
 
                     retValue.Add(detailedPackage);

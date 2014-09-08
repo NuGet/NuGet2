@@ -177,7 +177,7 @@ namespace NuGet.Client.VisualStudio.UI
                 VSConstants.VSITEMID_ROOT,
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
-            var myDoc = new PackageManagerDocData(VsPackageManagerSession.ForProject((Project)project));
+            var myDoc = new PackageManagerModel(VsPackageManagerSession.ForProject((Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

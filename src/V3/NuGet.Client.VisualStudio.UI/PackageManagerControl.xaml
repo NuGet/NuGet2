@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI"
              Background="{DynamicResource VsBrush.Window}"
              Foreground="{DynamicResource VsBrush.WindowText}"
              mc:Ignorable="d"
-             d:DesignHeight="323" d:DesignWidth="358">
+             d:DesignHeight="523" d:DesignWidth="958">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -21,55 +22,88 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Label Grid.Row="0" x:Name="_label" FontSize="20">Test</Label>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" Margin="0,20">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" Grid.Column="0">Repository:</Label>
-                <ComboBox Style="{StaticResource GridCell}" x:Name="_sourceRepoList" DisplayMemberPath="Name"
-                          Grid.Row="1" Grid.Column="0"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
+                <Label
+                    Grid.Column="0"
+                    Content="{x:Static resx:Resources.Label_Repository}"
+                    Margin="24,0,0,0" />
 
-                <Label Grid.Row="0" Grid.Column="1">Filter:</Label>
+                <ComboBox
+                    Margin="6,0,0,0"
+                    x:Name="_sourceRepoList"
+                    DisplayMemberPath="Name"
+                    Width="186"
+                    Grid.Column="1"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
 
-                <ComboBox Style="{StaticResource GridCell}"
-                          Grid.Row="1" Grid.Column="1" SelectedIndex="0"
-                          x:Name="_filter"
-                          SelectionChanged="_filter_SelectionChanged">
+                <Label
+                    Grid.Column="2"
+                    Margin="24,0,0,0"
+                    Content="{x:Static resx:Resources.Label_Filter}" />
+
+                <ComboBox
+                    Grid.Column="3"
+                    Margin="6,0,0,0"
+                    SelectedIndex="0"
+                    x:Name="_filter"
+                    Width="186"
+                    SelectionChanged="_filter_SelectionChanged">
                     <ComboBoxItem>All</ComboBoxItem>
                     <ComboBoxItem>Installed</ComboBoxItem>
                 </ComboBox>
 
-                <Label Grid.Row="0" Grid.Column="2">Search:</Label>
-                <TextBox Style="{StaticResource GridCell}" x:Name="_searchText" KeyDown="_searchText_KeyDown"
-                         Grid.Row="1" Grid.Column="2"></TextBox>
+                <TextBox
+                    Grid.Column="5"
+                    Margin="6,0,0,0"
+                    x:Name="_searchText"
+                    Width="224"
+                    KeyDown="_searchText_KeyDown" />
 
-                <Button Style="{StaticResource GridCell}"
-                        Grid.Row="1"
-                        Grid.Column="3" Click="SettingsButtonClick" x:Name="_settingsButton">Settings</Button>
+                <Button
+                    Margin="24,0"
+                    Grid.Column="6"
+                    Click="SettingsButtonClick" x:Name="_settingsButton">Settings</Button>
             </Grid>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Tools:InfiniteScrollList x:Name="_packageList" SelectionChanged="PackageList_SelectionChanged">
-                </Tools:InfiniteScrollList>                
-                <GridSplitter Grid.Column="0" Width="5" />
-                <Tools:BusyControl Style="{StaticResource GridCell}" x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
+                </Tools:InfiniteScrollList>
+
+                <StackPanel
+                    Margin="24,12"
+                    Grid.Row="1" 
+                    Grid.Column="0" 
+                    Orientation="Vertical">
+                    <TextBlock                         
+                        TextWrapping="Wrap"
+                        Text="{x:Static resx:Resources.Text_LegalDisclaimer}"/>
+                </StackPanel>               
+
+                <GridSplitter Grid.Column="0" Width="5" Grid.RowSpan="2" />
+                
+                <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
                 </Tools:BusyControl>
 
-                <Tools:PackageDetail Style="{StaticResource GridCell}" x:Name="_packageDetail" Grid.Column="1" />
+                <Tools:PackageDetail x:Name="_packageDetail" Grid.Column="1" Grid.RowSpan="2"/>
             </Grid>
+            
         </Grid>
         <Tools:BusyControl x:Name="_busyControl" Visibility="Collapsed"></Tools:BusyControl>
     </Grid>

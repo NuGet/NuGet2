@@ -18,7 +18,7 @@ namespace NuGet.Client.VisualStudio.UI
         /// <summary>
         /// Initializes a new instance of the EditorPane class.
         /// </summary>
-        public PackageManagerWindowPane(PackageManagerDocData myDoc, IUserInterfaceService ui)
+        public PackageManagerWindowPane(PackageManagerModel myDoc, IUserInterfaceService ui)
             : base(null)
         {
             PackageManagerControl control = new PackageManagerControl(myDoc, ui);

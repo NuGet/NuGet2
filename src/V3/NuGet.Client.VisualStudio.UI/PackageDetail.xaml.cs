@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using Newtonsoft.Json.Linq;
 using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -227,15 +228,15 @@ namespace NuGet.Client.VisualStudio.UI
                     .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
                     .Select(g =>
                     {
-                        var p = g.First().Package;
-
-                        var k1 = p.GetValue("id");
-                        var k2 = p.Property("id");
+                        dynamic p = g.First().Package;
+                        var authors = String.Join(", ",
+                            ((JArray)(p.authors)).Cast<JValue>()
+                            .Select(author => author.Value as string));
 
                         return new PackageLicenseInfo(
-                            "id",
-                            "url",
-                            "author");
+                            p.id.Value,
+                            p.licenseUrl.Value,
+                            authors);
                     });
 
                 bool accepted = Control.UI.PromptForLicenseAcceptance(licenseModels);

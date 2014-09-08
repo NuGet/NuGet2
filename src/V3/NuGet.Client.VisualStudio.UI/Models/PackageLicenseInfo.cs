@@ -10,12 +10,12 @@ namespace NuGet.Client.VisualStudio.UI
     {
         public PackageLicenseInfo(
             string id,
-            string licenseUrl,
-            string author)
+            Uri licenseUrl,
+            string authors)
         {
             Id = id;
             LicenseUrl = licenseUrl;
-            Author = author;
+            Authors = authors;
         }
 
         public string Id
@@ -24,13 +24,13 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        public string LicenseUrl
+        public Uri LicenseUrl
         {
             get;
             private set;
         }
 
-        public string Author
+        public string Authors
         {
             get;
             private set;

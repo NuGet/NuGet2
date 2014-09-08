@@ -9,11 +9,13 @@
     <Tools:PackageStatusToUpdateImageConverter x:Key="PackageStatusToUpdateImageConverter" />
 
     <Tools:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    
+    <Tools:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <Tools:BooleanToVisibilityConverter Inverted="True" x:Key="InvertedBooleanToVisibilityConverter" />
+
     <Style x:Key="PackageIconStyle" TargetType="{x:Type Image}">
         <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="32" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
         <Style.Triggers>
             <EventTrigger RoutedEvent="ImageFailed">
                 <BeginStoryboard>
@@ -26,59 +28,68 @@
             </EventTrigger>
         </Style.Triggers>
     </Style>
-    <DataTemplate DataType="{x:Type Tools:UiSearchResultPackage}">
-        <Grid Margin="0,0,0,5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Image
-                            Grid.Column="0"
-                            Source="{Binding IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}"
-                            Style="{StaticResource PackageIconStyle}">
-                    </Image>
-                    <TextBlock
-                            Grid.Column="1"
-                            Margin="4,0,0,0"
-                            FontWeight="Bold"                        
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap"
-                            Text="{Binding Id}"></TextBlock>
-                </Grid>
-                <TextBlock
-                    Grid.Row="1"
-                    Text="{Binding Summary}" 
-                    MaxHeight="44"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="Wrap"></TextBlock>
-            </Grid>
 
-            <Image
+    <!-- !!! -->
+    <DataTemplate DataType="{x:Type Tools:UiPackageDependency}">
+        <TextBlock Text="{Binding}" />
+    </DataTemplate>
+    
+    <DataTemplate DataType="{x:Type Tools:UiSearchResultPackage}">
+        <Border
+            BorderThickness="0,1,0,0"
+            BorderBrush="Gray"
+            Padding="0,16">
+            <Grid Margin="24,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.Column="0"
+                    Source="{Binding IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}"
+                    Style="{StaticResource PackageIconStyle}"
+                    VerticalAlignment="Top"
+                    Margin="0,0,16,0" />
+
+                <Grid Grid.Column="1" VerticalAlignment="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        FontWeight="Bold"
+                        Height="16"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        Text="{Binding Id}"></TextBlock>
+                    <TextBlock
+                        Grid.Row="1"
+                        Text="{Binding Summary}"
+                        Height="32"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap"></TextBlock>
+                </Grid>
+
+                <Image
                     Name="_checkMark"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Source="{StaticResource Image_CheckMark}"
-                    Width="32"
-                    Height="32"
+                    Width="16"
+                    Height="16"
+                    VerticalAlignment="Top"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" />
-            <Image
+                <Image
                     Name="_updateMark"
                     Grid.Column="2"
-                    Width="32"
-                    Height="32"
+                    Width="16"
+                    Height="16"
+                    VerticalAlignment="Top"
                     Source="{StaticResource Image_UpwardsArrow}"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToUpdateImageConverter}}" />
-        </Grid>
+            </Grid>
+        </Border>
         <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding}" Value="{x:Null}">
                 <Setter TargetName="_checkMark" Property="Visibility" Value="Collapsed" />
@@ -86,9 +97,4 @@
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
-
-    <Style x:Key="GridCell" TargetType="Control">
-        <Setter Property="Margin" Value="4" />
-    </Style>
-    
 </ResourceDictionary>
