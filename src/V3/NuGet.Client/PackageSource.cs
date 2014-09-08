@@ -18,5 +18,22 @@ namespace NuGet.Client
             Name = name;
             Url = url;
         }
+
+        public override bool Equals(object obj)
+        {
+            PackageSource other = obj as PackageSource;
+            if (other == null)
+            {
+                return false;
+            }
+
+            return String.Equals(Name, other.Name, StringComparison.CurrentCultureIgnoreCase) &&
+                String.Equals(Url, other.Url, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() * 3137 + Url.GetHashCode();
+        }
     }
 }
