@@ -51,14 +51,17 @@
                     <TextBlock
                             Grid.Column="1"
                             Margin="4,0,0,0"
-                            FontWeight="Bold"
+                            FontWeight="Bold"                        
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap"
                             Text="{Binding Id}"></TextBlock>
                 </Grid>
                 <TextBlock
-                        Grid.Row="1"
-                        Text="{Binding Summary}" TextWrapping="Wrap"></TextBlock>
+                    Grid.Row="1"
+                    Text="{Binding Summary}" 
+                    MaxHeight="44"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="Wrap"></TextBlock>
             </Grid>
 
             <Image

@@ -225,7 +225,18 @@ namespace NuGet.Client.VisualStudio.UI
                 // Hacky distinct without writing a custom comparer
                 var licenseModels = licensePackages
                     .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
-                    .Select(g => g.First().Package);
+                    .Select(g =>
+                    {
+                        var p = g.First().Package;
+
+                        var k1 = p.GetValue("id");
+                        var k2 = p.Property("id");
+
+                        return new PackageLicenseInfo(
+                            "id",
+                            "url",
+                            "author");
+                    });
 
                 bool accepted = Control.UI.PromptForLicenseAcceptance(licenseModels);
                 if (!accepted)

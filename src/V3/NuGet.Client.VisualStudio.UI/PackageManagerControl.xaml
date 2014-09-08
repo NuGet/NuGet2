@@ -63,20 +63,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Tools:InfiniteScrollList x:Name="_packageList" SelectionChanged="PackageList_SelectionChanged">
-                </Tools:InfiniteScrollList>
-                <!--
-                <ListBox Style="{StaticResource GridCell}"
-                         x:Name="_packageList" Grid.Column="0"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ScrollViewer.IsDeferredScrollingEnabled="True"
-                         SelectionChanged="PackageList_SelectionChanged">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment"
-                        Value="Stretch" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox> -->
+                </Tools:InfiniteScrollList>                
                 <GridSplitter Grid.Column="0" Width="5" />
                 <Tools:BusyControl Style="{StaticResource GridCell}" x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
                 </Tools:BusyControl>

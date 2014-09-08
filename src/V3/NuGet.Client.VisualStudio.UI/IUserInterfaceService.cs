@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace NuGet.Client.VisualStudio
+namespace NuGet.Client.VisualStudio.UI
 {
     public interface IUserInterfaceService
     {
-        bool PromptForLicenseAcceptance(IEnumerable<JObject> packages);
+        bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages);
         void LaunchExternalLink(Uri url);
 
         void LaunchNuGetOptionsDialog();

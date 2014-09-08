@@ -39,6 +39,10 @@
             </DataTemplate.Triggers>
         </DataTemplate>
     </UserControl.Resources>
-    <ListBox x:Name="_list" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="_list_SelectionChanged" Loaded="_list_Loaded">
+    <ListBox x:Name="_list" 
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+             HorizontalContentAlignment="Stretch"
+             SelectionChanged="_list_SelectionChanged" 
+             Loaded="_list_Loaded">
     </ListBox>
 </UserControl>

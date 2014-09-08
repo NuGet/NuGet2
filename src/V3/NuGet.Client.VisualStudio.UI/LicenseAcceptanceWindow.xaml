@@ -1,0 +1,65 @@
+﻿<Window x:Class="NuGet.Client.VisualStudio.UI.LicenseAcceptanceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="License Acceptance"
+        d:DesignHeight="300" d:DesignWidth="300">
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="6,6,6,2" />
+            <Setter Property="Padding" Value="10,3,10,3" />
+        </Style>
+
+        <DataTemplate x:Key="LicenseItemTemplate">
+            <StackPanel Margin="2,0,2,5">
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="{Binding Id, Mode=OneTime}" FontWeight="Bold" />
+                    <Run Text=" " />
+                    <Run Text="Authors" />
+                </TextBlock>
+                <TextBlock AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTerm_{0}'}">
+                    <Hyperlink AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTermLink_{0}'}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">
+                        <Run Text="View License" />
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" TextWrapping="Wrap">The following package(s) require a click-to-accept license:</TextBlock>
+        <ItemsControl 
+            Grid.Row="1"
+            Margin="0,0,0,3"
+            MinHeight="130"
+            ItemsSource="{Binding}"
+            ItemTemplate="{StaticResource LicenseItemTemplate}" >
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="{x:Type ItemsControl}">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                        <ScrollViewer
+                            Padding="3"
+                            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                            CanContentScroll="True"
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Disabled">
+                            <ItemsPresenter></ItemsPresenter>
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+        </ItemsControl>
+        <TextBlock Grid.Row="2" TextWrapping="Wrap">By clicking "I Accept", you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline".</TextBlock>
+        <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button>I Decline</Button>
+            <Button>I Accept</Button>
+        </StackPanel>
+    </Grid>
+</Window>
