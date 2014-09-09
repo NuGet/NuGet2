@@ -5239,4 +5239,88 @@ nuget update -Self</value>
   <data name="PushCommandDisableBufferingDescription" xml:space="preserve">
     <value>Disable buffering when pushing to an HTTP(S) server to decrease memory usage. Note that when this option is enabled, integrated windows authentication might not work.</value>
   </data>
+  <data name="PackageCommandBaseTargetPath" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_chs" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_cht" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_csy" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_deu" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_esp" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_fra" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_ita" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_jpn" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_kor" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_plk" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_ptb" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_rus" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandBaseTargetPath_trk" xml:space="preserve">
+    <value>The base path of the assemblies to be included in the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_chs" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_cht" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_csy" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_deu" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_esp" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_fra" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_ita" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_jpn" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_kor" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_plk" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_ptb" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_rus" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
+  <data name="PackageCommandSolutionName_trk" xml:space="preserve">
+    <value>The name of the solution that includes the project for which to build the package.</value>
+  </data>
 </root>

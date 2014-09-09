@@ -120,6 +120,9 @@ namespace NuGet.Commands
             }
         }
 
+        public string BaseTargetPath { get; set; }
+        public string SolutionName { get; set; }
+
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
         public PackageBuilder CreateBuilder(string basePath)
         {
@@ -272,7 +275,11 @@ namespace NuGet.Commands
             }
             else
             {
-                TargetPath = ResolveTargetPath();
+                // If BaseTargetPath property is provided, then use its value for resolving the TargetPath
+                // BaseTargetPath property only makes sense when Build==false.
+                TargetPath = !string.IsNullOrWhiteSpace(BaseTargetPath)
+                                 ? ResolveTargetPathByBaseTargetPath()
+                                 : ResolveTargetPath();
 
                 // Make if the target path doesn't exist, fail
                 if (!File.Exists(TargetPath))
@@ -280,6 +287,50 @@ namespace NuGet.Commands
                     throw new CommandLineException(LocalizedResourceManager.GetString("UnableToFindBuildOutput"), TargetPath);
                 }
             }
+        }
+
+        /// <summary>
+        /// Resolves the TargetPath for a project built by TFS Team Build.
+        /// Format is:
+        /// {BaseTargetPath}\bin\[{Platform}]\[{Configuration}]\[{Solution}]\{Project}\{ProjectAssembly}
+        /// </summary>
+        /// <returns></returns>
+        private string ResolveTargetPathByBaseTargetPath()
+        {
+            // The original resolution method is called to update the _project as normal.
+            ResolveTargetPath();
+
+            string targetPath = BaseTargetPath;
+
+            // Add the platform and configuration specific subfolders,
+            // e.g. "bin\x64\Release"
+            // Platform and Configuration subfolders are included only if explicit
+            // properties are provided to the PackCommand,
+            // e.g. -Properties Platform=x64 -Properties Configuration=Release
+            // On TFS Team Build, platform and configuration specific subfolders are included
+            // when more than one "Configuration to Build" is selected.
+            targetPath = Path.Combine(targetPath, _project.GetPropertyValue("OutputPath"));
+
+            // Add the solution specific subfolder,
+            // e.g. "MySolution"
+            if (!string.IsNullOrWhiteSpace(SolutionName))
+            {
+                // On TFS Team Build, solution specific subfolder is included when
+                // "Solution Specific Build Outputs" is enabled.
+                targetPath = Path.Combine(targetPath, SolutionName);
+            }
+
+            // Add the project specific subfolder,
+            // e.g. "MyProject"
+            // Project specific subfolders are produced by TFS Team Build when
+            // MSBuild agrument /p:GenerateProjectSpecificOutputFolder=true is provided.
+            targetPath = Path.Combine(targetPath, _project.GetPropertyValue("MSBuildProjectName"));
+
+            // Add the target assembly filename,
+            // e.g. "MyProject.dll"
+            targetPath = Path.Combine(targetPath, _project.GetPropertyValue("TargetFileName"));
+
+            return targetPath;
         }
 
         private string ResolveTargetPath()
@@ -404,6 +455,8 @@ namespace NuGet.Commands
                     referencedProject.IncludeReferencedProjects = IncludeReferencedProjects;
                     referencedProject.ProjectProperties = ProjectProperties;
                     referencedProject.TargetFramework = TargetFramework;
+                    referencedProject.BaseTargetPath = BaseTargetPath;
+                    referencedProject.SolutionName = SolutionName;
                     referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
@@ -481,6 +534,8 @@ namespace NuGet.Commands
                 var projectFactory = new ProjectFactory(project);
                 projectFactory.Build = Build;
                 projectFactory.ProjectProperties = ProjectProperties;
+                projectFactory.BaseTargetPath = BaseTargetPath;
+                projectFactory.SolutionName = SolutionName;
                 projectFactory.BuildProject();
                 var builder = new PackageBuilder();
                 try
