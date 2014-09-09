@@ -284,6 +284,9 @@ nuget list -verbose -allversions</value>
   <data name="PackageCommandSymbolsDescription" xml:space="preserve">
     <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular NuGet package file and the corresponding symbols package.</value>
   </data>
+  <data name="PackageCommandExcludeSourceCodeDescription" xml:space="preserve">
+    <value>Determines if a symbols package should exclude sources when created.  Only useful when included with -Symbols.</value>
+  </data>
   <data name="PackageCommandToolDescription" xml:space="preserve">
     <value>Determines if the output files of the project should be in the tool folder. </value>
   </data>
