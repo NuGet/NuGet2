@@ -70,6 +70,15 @@ namespace NuGet.Client {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The {0} service is not supported by this object..
+        /// </summary>
+        internal static string NuGetServiceProvider_ServiceNotSupported {
+            get {
+                return ResourceManager.GetString("NuGetServiceProvider_ServiceNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
         /// </summary>
         internal static string PackageActionDescriptionWrapper_UnrecognizedAction {

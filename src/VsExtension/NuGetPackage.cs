@@ -42,6 +42,7 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
+using NuGet.Client;
 #endif
 
 #if VS14
@@ -232,7 +233,9 @@ namespace NuGet.Tools
             AddMenuCommandHandlers();
 
             //Create Editor Factory. Note that the base Package class will call Dispose on it.
-            base.RegisterEditorFactory(new PackageManagerEditorFactory(ServiceLocator.GetInstance<IUserInterfaceService>()));
+            base.RegisterEditorFactory(new PackageManagerEditorFactory(
+                ServiceLocator.GetInstance<SourceRepositoryManager>(),
+                ServiceLocator.GetInstance<IUserInterfaceService>()));
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
             // Doing so is illegal and may cause VS to hang.
@@ -446,8 +449,8 @@ namespace NuGet.Tools
                 {
                     // TODO: Find a cleaner way to do this.
                     var packageManagerDocData = (PackageManagerModel)property;
-                    var session = packageManagerDocData.Session as ProjectPackageManagerSession;
-                    if (session != null && session.Project == project)
+                    var target = packageManagerDocData.Target as VsProjectInstallationTarget;
+                    if (target != null && target.Project == project)
                     {
                         return windowFrame;
                     }
@@ -482,16 +485,17 @@ namespace NuGet.Tools
 
             object firstChild;
             vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
-            
-            var session = VsPackageManagerSession.ForProject(project);
-            var myDoc = new PackageManagerModel(session);
+
+            var sources = ServiceLocator.GetInstance<SourceRepositoryManager>();
+            var target = VsProjectInstallationTarget.Create(project);
+            var myDoc = new PackageManagerModel(sources, target);
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
             var guidCommandUI = Guid.Empty;
             var caption = "PackageManager";
-            var documentName = String.Format("Package Manager: {0}", session.Name);
+            var documentName = String.Format("Package Manager: {0}", target.Name);
             IVsWindowFrame windowFrame;
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,

@@ -19,10 +19,12 @@ namespace NuGet.Client.VisualStudio.UI
         public static readonly Guid EditorFactoryGuid = new Guid(EditorFactoryGuidString);
 
         private ServiceProvider vsServiceProvider;
-        private IUserInterfaceService _ui;
+        private readonly IUserInterfaceService _ui;
+        private readonly SourceRepositoryManager _repoManager;
         
-        public PackageManagerEditorFactory(IUserInterfaceService ui)
+        public PackageManagerEditorFactory(SourceRepositoryManager repoManager, IUserInterfaceService ui)
         {
+            _repoManager = repoManager;
             _ui = ui;
         }
 
@@ -177,7 +179,10 @@ namespace NuGet.Client.VisualStudio.UI
                 VSConstants.VSITEMID_ROOT,
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
-            var myDoc = new PackageManagerModel(VsPackageManagerSession.ForProject((Project)project));
+
+            var myDoc = new PackageManagerModel(
+                _repoManager,
+                VsProjectInstallationTarget.Create((EnvDTE.Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

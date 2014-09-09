@@ -8,11 +8,17 @@ using Newtonsoft.Json.Linq;
 
 namespace NuGet.Client
 {
-    public interface IPackageSearcher
+    /// <summary>
+    /// Represents a place where packages can be retrieved
+    /// </summary>
+    public abstract class SourceRepository
     {
+        public abstract PackageSource Source { get; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        Task<IEnumerable<JToken>> Search(
+        public abstract Task<IEnumerable<JObject>> Search(
             string searchTerm,
+            // REVIEW: Do we use parameters instead of this object? What about adding filter criteria?
             SearchFilter filters,
             int skip,
             int take,

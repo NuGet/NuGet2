@@ -20,15 +20,24 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
+        private const int PageSize = 15;
+
         private bool _initialized;
 
         public PackageManagerModel Model { get; private set; }
 
-        public PackageManagerSession Session
+        public SourceRepositoryManager Sources
         {
             get
             {
-                return Model.Session;
+                return Model.Sources;
+            }
+        }
+        public InstallationTarget Target
+        {
+            get
+            {
+                return Model.Target;
             }
         }
 
@@ -50,26 +59,22 @@ namespace NuGet.Client.VisualStudio.UI
         {
             _label.Content = string.Format(CultureInfo.CurrentCulture,
                 "Package Manager: {0}",
-                Session.Name);
+                Target.Name);
 
             // init source repo list
             _sourceRepoList.Items.Clear();
-            var sources = Session.GetAvailableSources();
-            foreach (var source in sources)
+            foreach (var source in Sources.AvailableSources)
             {
                 _sourceRepoList.Items.Add(source);
             }
-            _sourceRepoList.SelectedItem = Session.ActiveSource;
+            _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
 
             UpdatePackageList();
         }
 
         private void UpdatePackageList()
         {
-            //if (_model.Project != null)
-            //{
-                SearchPackageInActivePackageSource();
-            //}
+            SearchPackageInActivePackageSource();
         }
 
         public void SetBusy(bool busy)
@@ -98,51 +103,35 @@ namespace NuGet.Client.VisualStudio.UI
 
         private class PackageLoader : ILoader
         {
-            private string _searchText;
-            private IEnumerable<FrameworkName> _supportedFrameworks;
-
             // where to get the package list
-            private IPackageSearcher _searcher;
-            private IInstalledPackageList _installed;
-
-            private const int pageSize = 15;
+            private Func<int, CancellationToken, Task<IEnumerable<JObject>>> _loader;
+            private InstallationTarget _target;
 
             public PackageLoader(
-                IPackageSearcher searcher,
-                IInstalledPackageList installed,
-                string searchText,
-                IEnumerable<FrameworkName> supportedFrameworks)
+                Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
+                InstallationTarget target)
             {
-                _searcher = searcher;
-                _installed = installed;
-
-                _searchText = searchText;
-                _supportedFrameworks = supportedFrameworks;
+                _loader = loader;
+                _target = target;
             }
 
             public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
-                var filter = new SearchFilter()
-                {
-                    SupportedFrameworks = _supportedFrameworks,
-                    IncludePrerelease = false
-                };
-
-                var query = await _searcher.Search(_searchText, filter, startIndex, pageSize, ct);
+                var results = await _loader(startIndex, ct);
 
                 List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
-                foreach (JObject p in query)
+                foreach (var package in results)
                 {
                     ct.ThrowIfCancellationRequested();
 
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
-                    searchResultPackage.Id = p.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(p.Value<string>("latestVersion"));
-                    searchResultPackage.Summary = p.Value<string>("summary");
-                    searchResultPackage.IconUrl = p.Value<Uri>("iconUrl");
+                    searchResultPackage.Id = package.Value<string>("id");
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));
+                    searchResultPackage.Summary = package.Value<string>("summary");
+                    searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
 
-                    var installedVersion = _installed.GetInstalledVersion(searchResultPackage.Id);
+                    var installedVersion = _target.GetInstalledVersion(searchResultPackage.Id);
                     if (installedVersion != null)
                     {
                         if (installedVersion < searchResultPackage.Version)
@@ -159,7 +148,7 @@ namespace NuGet.Client.VisualStudio.UI
                         searchResultPackage.Status = PackageStatus.NotInstalled;
                     }
 
-                    searchResultPackage.AllVersions = LoadVersions(p.Value<JArray>("packages"));
+                    searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
                     packages.Add(searchResultPackage);
                 }
 
@@ -167,7 +156,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return new LoadResult()
                 {
                     Items = packages,
-                    HasMoreItems = packages.Count == pageSize
+                    HasMoreItems = packages.Count == PageSize
                 };
             }
 
@@ -248,26 +237,37 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
-            var supportedFrameworks = Session.GetSupportedFrameworks();
+            var supportedFrameworks = Target.GetSupportedFrameworks();
             
             if (showOnlyInstalled)
             {
                 var loader = new PackageLoader(
-                    Session.GetInstalledPackageList().CreateSearcher(),
-                    Session.GetInstalledPackageList(),
-                    searchText,
-                    supportedFrameworks);
+                    (startIndex, ct) =>
+                        Target.SearchInstalledPackages(
+                            searchText,
+                            startIndex,
+                            PageSize,
+                            ct),
+                    Target);
                 _packageList.Loader = loader;
             }
             else
             {
-                // search online                
-                var loader = new PackageLoader(
-                    Session.CreateSearcher(),
-                    Session.GetInstalledPackageList(),
-                    searchText,
-                    supportedFrameworks);
-                _packageList.Loader = loader;
+            // search online                
+            var loader = new PackageLoader(
+                (startIndex, ct) =>
+                    Sources.ActiveRepository.Search(
+                        searchText,
+                        new SearchFilter()
+                        {
+                            SupportedFrameworks = supportedFrameworks,
+                            IncludePrerelease = false
+                        },
+                        startIndex,
+                        PageSize,
+                        ct),
+                Target);
+            _packageList.Loader = loader;
             }
         }
 
@@ -285,7 +285,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                var installedVersion = Session.GetInstalledPackageList().GetInstalledVersion(selectedPackage.Id);
+                var installedVersion = Target.GetInstalledVersion(selectedPackage.Id);
                 _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
             }
         }
@@ -306,7 +306,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            Session.ChangeActiveSource(newSource);
+            Sources.ChangeActiveSource(newSource);
         }
 
         private void _filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -322,7 +322,7 @@ namespace NuGet.Client.VisualStudio.UI
             var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
 
             // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
-            foreach (var package in Session.GetInstalledPackageList().GetInstalledPackages())
+            foreach (var package in Target.GetInstalledPackages())
             {
                 installedPackages[package.Id] = package.Version;
             }

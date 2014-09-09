@@ -9,16 +9,21 @@ using Newtonsoft.Json.Linq;
 
 namespace NuGet.Client.Interop
 {
-    public class V2InteropSearcher : IPackageSearcher
+    public class V2SourceRepository : SourceRepository
     {
-        private IPackageRepository _repository;
+        private readonly IPackageRepository _repository;
+        private readonly PackageSource _source;
 
-        public V2InteropSearcher(IPackageRepository repository)
+        public override PackageSource Source { get { return _source; } }
+
+        public V2SourceRepository(PackageSource source, IPackageRepository repository)
         {
+            _source = source;
+
             _repository = repository;
         }
 
-        public Task<IEnumerable<JToken>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
+        public override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew(() => _repository.Search(
                 searchTerm, filters.SupportedFrameworks.Select(fx => fx.FullName), filters.IncludePrerelease)
@@ -28,7 +33,7 @@ namespace NuGet.Client.Interop
                 .Select(p => CreatePackageSearchResult(p)), cancellationToken);
         }
 
-        private JToken CreatePackageSearchResult(IPackage package)
+        private JObject CreatePackageSearchResult(IPackage package)
         {
             var versions = _repository.FindPackagesById(package.Id);
             return PackageJsonLd.CreatePackageSearchResult(package, versions);

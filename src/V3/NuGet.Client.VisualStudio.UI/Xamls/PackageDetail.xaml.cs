@@ -17,8 +17,7 @@ namespace NuGet.Client.VisualStudio.UI
     public partial class PackageDetail : UserControl
     {
         public PackageManagerControl Control { get; set; }
-        public PackageManagerSession Session { get { return Control.Session; } }
-
+        
         private enum Metadatas
         {
             Authors,
@@ -113,71 +112,72 @@ namespace NuGet.Client.VisualStudio.UI
             PreviewActions(actions);
         }
 
-        private async Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action)
+        private Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action)
         {
-            var package = (PackageDetailControlModel)DataContext;
-            Control.SetBusy(true);
-            var actions = await Session.CreateActionResolver().ResolveActions(
-                action,
-                new PackageIdentity(package.Package.Id, package.Package.Version),
-                new ResolverContext()
-                {
-                    DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
-                    AllowPrerelease = false
-                });
-            Control.SetBusy(false);
-            return actions;
+            //var package = (PackageDetailControlModel)DataContext;
+            //Control.SetBusy(true);
+            //var actions = await Session.CreateActionResolver().ResolveActions(
+            //    action,
+            //    new PackageIdentity(package.Package.Id, package.Package.Version),
+            //    new ResolverContext()
+            //    {
+            //        DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
+            //        AllowPrerelease = false
+            //    });
+            //Control.SetBusy(false);
+            //return actions;
+            return Task.FromResult(Enumerable.Empty<PackageActionDescription>());
         }
 
         private void PreviewActions(
             IEnumerable<PackageActionDescription> actions)
         {
-            // Show result
-            // values:
-            // 1: unchanged
-            // 0: deleted
-            // 2: added
-            var packageStatus = Session
-                .GetInstalledPackageList()
-                .GetInstalledPackages()
-                .ToDictionary(p => /* key */ p, _ => /* value */ 1);
+            //// Show result
+            //// values:
+            //// 1: unchanged
+            //// 0: deleted
+            //// 2: added
+            //var packageStatus = Session
+            //    .GetInstalledPackageList()
+            //    .GetInstalledPackages()
+            //    .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
-            foreach (var action in actions)
-            {
-                if (action.ActionType == PackageActionType.Install)
-                {
-                    packageStatus[action.PackageName] = 2;
-                }
-                else if (action.ActionType == PackageActionType.Uninstall)
-                {
-                    packageStatus[action.PackageName] = 0;
-                }
-            }
+            //foreach (var action in actions)
+            //{
+            //    if (action.ActionType == PackageActionType.Install)
+            //    {
+            //        packageStatus[action.PackageName] = 2;
+            //    }
+            //    else if (action.ActionType == PackageActionType.Uninstall)
+            //    {
+            //        packageStatus[action.PackageName] = 0;
+            //    }
+            //}
 
-            var w = new PreviewWindow(
-                unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
-                deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
-                added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
-            w.Owner = Window.GetWindow(Control);
-            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            w.ShowDialog();
+            //var w = new PreviewWindow(
+            //    unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
+            //    deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
+            //    added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
+            //w.Owner = Window.GetWindow(Control);
+            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            //w.ShowDialog();
         }
 
-        private async void PerformPackageAction(PackageActionType action)
+        private void PerformPackageAction(PackageActionType action)
         {
-            var actions = await ResolveActions(action);
+            //var actions = await ResolveActions(action);
 
-            // show license agreeement
-            bool acceptLicense = ShowLicenseAgreement(actions);
-            if (!acceptLicense)
-            {
-                return;
-            }
+            //// show license agreeement
+            //bool acceptLicense = ShowLicenseAgreement(actions);
+            //if (!acceptLicense)
+            //{
+            //    return;
+            //}
 
-            await Session.CreateActionExecutor().ExecuteActions(actions);
+            //await Session.CreateActionExecutor().ExecuteActions(actions);
 
-            Control.UpdatePackageStatus();
-            UpdatePackageStatus();
+            //Control.UpdatePackageStatus();
+            //UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()
@@ -188,7 +188,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            var isInstalled = Session.GetInstalledPackageList().IsInstalled(model.Package.Id, model.Package.Version);
+            var isInstalled = Control.Target.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -210,7 +210,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             UpdateInstallUninstallButton();
-            var installedVersion = Session.GetInstalledPackageList().GetInstalledVersion(model.Package.Id);
+            var installedVersion = Control.Target.GetInstalledVersion(model.Package.Id);
             model.CreateVersions(installedVersion);
         }
 

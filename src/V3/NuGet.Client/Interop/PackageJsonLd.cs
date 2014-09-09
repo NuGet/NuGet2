@@ -12,7 +12,7 @@ namespace NuGet.Client.Interop
     public static class PackageJsonLd
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-        public static JToken CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions)
+        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions)
         {
             var value = new JObject();
             value.Add(new JProperty("@type", new JArray(Types.PackageSearchResult.ToString())));

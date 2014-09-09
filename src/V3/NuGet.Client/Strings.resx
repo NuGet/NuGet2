@@ -120,6 +120,9 @@
   <data name="NuGetRepository_CannotCreateAggregateRepo" xml:space="preserve">
     <value>Cannot create a NuGet Repository from the Aggregate Source</value>
   </data>
+  <data name="NuGetServiceProvider_ServiceNotSupported" xml:space="preserve">
+    <value>The {0} service is not supported by this object.</value>
+  </data>
   <data name="PackageActionDescriptionWrapper_UnrecognizedAction" xml:space="preserve">
     <value>Unrecognized Package Action '{0}'.</value>
   </data>

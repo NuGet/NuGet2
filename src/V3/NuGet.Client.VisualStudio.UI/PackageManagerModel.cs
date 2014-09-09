@@ -19,11 +19,13 @@ namespace NuGet.Client.VisualStudio.UI
     /// </remarks>
     public class PackageManagerModel : IVsPersistDocData
     {
-        public PackageManagerSession Session { get; private set; }
+        public SourceRepositoryManager Sources { get; private set; }
+        public InstallationTarget Target { get; private set; }
         
-        public PackageManagerModel(PackageManagerSession session)
+        public PackageManagerModel(SourceRepositoryManager sources, InstallationTarget target)
         {
-            Session = session;
+            Sources = sources;
+            Target = target;
         }
 
         #region IVsPersistDocData
