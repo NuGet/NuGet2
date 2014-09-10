@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.PackageDetail"
+﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.PackageSolutionDetailControl"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:k ="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
@@ -12,7 +12,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml" />
-            </ResourceDictionary.MergedDictionaries>            
+            </ResourceDictionary.MergedDictionaries>
             <Tools:VersionToVersionForDisplayConverter x:Key="VersionToVersionForDisplayConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
@@ -36,13 +36,11 @@
             </Grid.RowDefinitions>
 
             <!-- Icon and Id -->
-            <StackPanel
-                Grid.Row="0"
-                Orientation="Horizontal"
-                Margin="0,8">
-                <Image                    
-                    Source="{Binding Path=Package.IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}"
-                    x:Name="_icon"
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        Margin="0,8">
+                <Image
+                    Source="{Binding Path=Package.IconUrl}"                    
                     Style="{StaticResource PackageIconStyle}" />
                 <TextBlock
                     Margin="8, 0, 0, 0"
@@ -51,12 +49,12 @@
                     FontSize="20"></TextBlock>
             </StackPanel>
 
-            <!-- Version dropdown and the install/uninstall button -->
+            <!-- Action and Versions -->
             <Grid Grid.Row="1" Margin="0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -66,15 +64,27 @@
                     Grid.Row="0"
                     Grid.Column="0"
                     Margin="0,0,0,8"
+                    Text="{x:Static resx:Resources.Label_Action}" />
+                <ComboBox
+                    x:Name="_actions"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Width="150"
+                    ItemsSource="{Binding Path=Actions}"
+                    SelectedItem="{Binding Path=SelectedAction}" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Margin="0,0,0,8"
                     Text="{x:Static resx:Resources.Label_Version}" />
                 <ComboBox
                     x:Name="_versions"
                     Grid.Row="1"
-                    Grid.Column="0"
+                    Grid.Column="2"
                     Width="150"
                     ItemsSource="{Binding Path=Versions}"
-                    SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
-                    SelectionChanged="Versions_SelectionChanged">
+                    SelectedItem="{Binding Path=SelectedVersion}">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
                             <Style.Triggers>
@@ -92,24 +102,41 @@
                         </Style>
                     </ComboBox.ItemContainerStyle>
                 </ComboBox>
-                <Tools:DropdownButton
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Width="100"
-                    Margin="12,0,0,0"
-                    x:Name="_dropdownButton"
-                    Clicked="_dropdownButton_Clicked" />
             </Grid>
 
+            <!-- Project list -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Vertical"
+                        Margin="0,8">
+                <TextBlock
+                    Text="{x:Static resx:Resources.Label_Projects}" />
+                <ItemsControl
+                    Margin="16,8,0,0"
+                    ItemsSource="{Binding Path=Projects}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                                Content="{Binding}"
+                                IsChecked="{Binding Path=Selected}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Margin="0,8,0,0"
+                        Width="100"
+                        HorizontalAlignment="Left"
+                        Content="{Binding ElementName=_actions,Path=SelectedItem}"
+                        ></Button>
+            </StackPanel>
+
             <!-- installation options -->
-            <Expander Grid.Row="2" Margin="0,8">
+            <Expander Grid.Row="3" Margin="0,8">
                 <Expander.Header>
                     <Label Content="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition />
-                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="8" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -130,23 +157,21 @@
             </Expander>
 
             <!-- descriptions -->
-            <TextBlock
-                Grid.Row="3"
-                Margin="0,8,0,0"
-                Text="{x:Static resx:Resources.Label_Description}"
-                FontWeight="Bold" />
-            <TextBlock
-                Grid.Row="4"
-                x:Name="_description"
-                Margin="0,8,0,0"
-                TextWrapping="Wrap"
-                Text="{Binding Path=Package.Description}"/>
+            <StackPanel Grid.Row="4"
+                        Margin="0,8">
+                <TextBlock
+                    Text="{x:Static resx:Resources.Label_Description}"
+                    FontWeight="Bold" />
+                <TextBlock
+                    x:Name="_description"
+                    Margin="0,8,0,0"
+                    TextWrapping="Wrap"
+                    Text="{Binding Path=Package.Description}" />
+            </StackPanel>
 
             <!-- metadata -->
-            <Grid
-                Grid.Row="5"
-                x:Name="_metadataGrid"
-                Margin="0,8,0,0">
+            <Grid Grid.Row="5"
+                  Margin="0,8">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
@@ -170,7 +195,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.Owners,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Owners}"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="0" Grid.Column="1" />
 
@@ -184,7 +209,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.Authors,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Authors}"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="1" Grid.Column="1"></TextBlock>
 
@@ -197,7 +222,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
                         TextWrapping="Wrap"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         Grid.Row="2" Grid.Column="1">
                         <Hyperlink NavigateUri="{Binding Path=Package.LicenseUrl}"
                                    Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
@@ -214,7 +239,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.DownloadCount}"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="3" Grid.Column="1"></TextBlock>
 
@@ -227,7 +252,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.Published,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Published}"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="4" Grid.Column="1"></TextBlock>
 
@@ -241,7 +266,7 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
                         TextWrapping="Wrap"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         Grid.Row="5" Grid.Column="1">
                         <Hyperlink NavigateUri="{Binding Path=Package.ProjectUrl}"
                                    Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
@@ -249,6 +274,7 @@
                         </Hyperlink>
                 </TextBlock>
 
+                <!-- Tags -->
                 <TextBlock
                         Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="6" Grid.Column="0" FontWeight="Bold"
@@ -257,48 +283,46 @@
                 <TextBlock
                         Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Tags}"
-                        Margin="0,8,0,0"
+                        Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="6" Grid.Column="1"></TextBlock>
             </Grid>
 
             <!-- dependencies -->
-            <TextBlock
-                Grid.Row="6"
-                FontWeight="Bold" Margin="0,16,0,0"
+            <StackPanel Grid.Row="6" Margin="0,8">
+                <TextBlock
+                FontWeight="Bold"
                 Text="{x:Static resx:Resources.Label_Dependencies}" />
 
-            <ItemsControl
-                    Grid.Row="7"
+                <ItemsControl
                     x:Name="_dependencies"
                     ItemsSource="{Binding Path=Package.DependencySets}"
                     Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0,8,0,0">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock 
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
                                 Text="{Binding TargetFramework}" FontWeight="Bold"
-                                Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}"
-                                />
-                            <ItemsControl ItemsSource="{Binding Dependencies}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}"></TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
+                                <ItemsControl ItemsSource="{Binding Dependencies}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"></TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-            <TextBlock
-                Grid.Row="7"
+                <TextBlock
                 Margin="0,8,0,0"
                 Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
                 FontStyle="Italic"
                 Text="{x:Static resx:Resources.Text_NoDependencies}" />
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </UserControl>

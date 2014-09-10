@@ -61,6 +61,132 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Consolidate.
+        /// </summary>
+        public static string Action_Consolidate {
+            get {
+                return ResourceManager.GetString("Action_Consolidate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install.
+        /// </summary>
+        public static string Action_Install {
+            get {
+                return ResourceManager.GetString("Action_Install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall.
+        /// </summary>
+        public static string Action_Uninstall {
+            get {
+                return ResourceManager.GetString("Action_Uninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update.
+        /// </summary>
+        public static string Action_Update {
+            get {
+                return ResourceManager.GetString("Action_Update", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest.
+        /// </summary>
+        public static string DependencyBehavior_Highest {
+            get {
+                return ResourceManager.GetString("DependencyBehavior_Highest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest Minor.
+        /// </summary>
+        public static string DependencyBehavior_HighestMinor {
+            get {
+                return ResourceManager.GetString("DependencyBehavior_HighestMinor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest Patch.
+        /// </summary>
+        public static string DependencyBehavior_HighestPatch {
+            get {
+                return ResourceManager.GetString("DependencyBehavior_HighestPatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore Dependencies.
+        /// </summary>
+        public static string DependencyBehavior_IgnoreDependencies {
+            get {
+                return ResourceManager.GetString("DependencyBehavior_IgnoreDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lowest.
+        /// </summary>
+        public static string DependencyBehavior_Lowest {
+            get {
+                return ResourceManager.GetString("DependencyBehavior_Lowest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore.
+        /// </summary>
+        public static string FileConflictAction_Ignore {
+            get {
+                return ResourceManager.GetString("FileConflictAction_Ignore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore All.
+        /// </summary>
+        public static string FileConflictAction_IgnoreAll {
+            get {
+                return ResourceManager.GetString("FileConflictAction_IgnoreAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwrite.
+        /// </summary>
+        public static string FileConflictAction_Overwrite {
+            get {
+                return ResourceManager.GetString("FileConflictAction_Overwrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwrite All.
+        /// </summary>
+        public static string FileConflictAction_OverwriteAll {
+            get {
+                return ResourceManager.GetString("FileConflictAction_OverwriteAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action:.
+        /// </summary>
+        public static string Label_Action {
+            get {
+                return ResourceManager.GetString("Label_Action", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author(s):.
         /// </summary>
         public static string Label_Authors {
@@ -156,6 +282,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_License {
             get {
                 return ResourceManager.GetString("Label_License", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select which projects to apply changes to:.
+        /// </summary>
+        public static string Label_Projects {
+            get {
+                return ResourceManager.GetString("Label_Projects", resourceCulture);
             }
         }
         

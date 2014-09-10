@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     public class VersionForDisplay
     {
-        string _additionalInfo;
+        private string _additionalInfo;
 
         public VersionForDisplay(
             NuGetVersion version,
@@ -43,7 +42,100 @@ namespace NuGet.Client.VisualStudio.UI
         }
     }
 
+    // Represents the version of a package that is installed in the project
+    public class ProjectPackageInfo
+    {
+        public EnvDTE.Project Project
+        { 
+            get; 
+            private set; 
+        }
+
+        public SemanticVersion Version
+        {
+            get;
+            private set;
+        }
+
+        public bool Selected
+        {
+            get;
+            set;
+        }
+
+        private string _projectName;
+
+        public ProjectPackageInfo(EnvDTE.Project project, SemanticVersion version)
+        {
+            Debug.Assert(project != null);
+
+            Project = project;
+            _projectName = Project.Name;
+            Version = version;
+        }
+
+        public override string ToString()
+        {
+            if (Version == null)
+            {
+                return _projectName;
+            }
+            else
+            {
+                return string.Format("{0} ({1})", _projectName,
+                    Version.ToString());
+            }
+        }
+    }
+
+    // Used to check if a package is installed in a project
+    public class InstalledPackages
+    {
+        Dictionary<EnvDTE.Project, Dictionary<string, SemanticVersion>> _installedPackages;
+
+        public InstalledPackages()
+        {
+            _installedPackages = new Dictionary<EnvDTE.Project, Dictionary<string, SemanticVersion>>();
+        }
+
+        public IEnumerable<EnvDTE.Project> Projects
+        {
+            get
+            {
+                return _installedPackages.Keys;
+            }
+        }
+
+        public void AddProject(EnvDTE.Project project)
+        {
+            _installedPackages[project] = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void Add(EnvDTE.Project project, string packageId, SemanticVersion version)
+        {
+            _installedPackages[project][packageId] = version;
+        }
+
+        public SemanticVersion GetInstalledVersion(EnvDTE.Project project, string packageId)
+        {
+            Dictionary<string, SemanticVersion> d;
+            if (!_installedPackages.TryGetValue(project, out d))
+            {
+                return null;
+            }
+
+            SemanticVersion version;
+            if (!d.TryGetValue(packageId, out version))
+            {
+                return null;
+            }
+
+            return version;
+        }
+    }    
+
     // The DataContext of the PackageDetail control is this class
+    // It has two mode: Project, or Solution
     public class PackageDetailControlModel : INotifyPropertyChanged
     {
         private UiDetailedPackage _package;
@@ -61,8 +153,8 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 _allPackages[p.Version] = p;
             }
-            
-            Package = _allPackages[searchResultPackage.Version];
+
+            _package = _allPackages[searchResultPackage.Version];
             CreateVersions(installedVersion);
         }
 
@@ -113,6 +205,26 @@ namespace NuGet.Client.VisualStudio.UI
             get
             {
                 return _versions;
+            }
+        }
+
+        private VersionForDisplay _selectedVersion;
+
+        protected virtual void OnSelectedVersionChanged()
+        {
+        }
+
+        public VersionForDisplay SelectedVersion
+        {
+            get
+            {
+                return _selectedVersion;
+            }
+            set
+            {
+                _selectedVersion = value;
+                OnSelectedVersionChanged();
+                OnPropertyChanged("SelectedVersion");
             }
         }
 

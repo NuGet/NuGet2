@@ -61,6 +61,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="VsProjectInstallationTarget.cs" />
+    <Compile Include="VsSolutionInstallationTarget.cs" />
     <Compile Include="VsSourceRepositoryManager.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -117,6 +117,48 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Action_Consolidate" xml:space="preserve">
+    <value>Consolidate</value>
+  </data>
+  <data name="Action_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Action_Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="Action_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="DependencyBehavior_Highest" xml:space="preserve">
+    <value>Highest</value>
+  </data>
+  <data name="DependencyBehavior_HighestMinor" xml:space="preserve">
+    <value>Highest Minor</value>
+  </data>
+  <data name="DependencyBehavior_HighestPatch" xml:space="preserve">
+    <value>Highest Patch</value>
+  </data>
+  <data name="DependencyBehavior_IgnoreDependencies" xml:space="preserve">
+    <value>Ignore Dependencies</value>
+  </data>
+  <data name="DependencyBehavior_Lowest" xml:space="preserve">
+    <value>Lowest</value>
+  </data>
+  <data name="FileConflictAction_Ignore" xml:space="preserve">
+    <value>Ignore</value>
+  </data>
+  <data name="FileConflictAction_IgnoreAll" xml:space="preserve">
+    <value>Ignore All</value>
+  </data>
+  <data name="FileConflictAction_Overwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="FileConflictAction_OverwriteAll" xml:space="preserve">
+    <value>Overwrite All</value>
+  </data>
+  <data name="Label_Action" xml:space="preserve">
+    <value>Action:</value>
+  </data>
   <data name="Label_Authors" xml:space="preserve">
     <value>Author(s):</value>
   </data>
@@ -149,6 +191,9 @@
   </data>
   <data name="Label_License" xml:space="preserve">
     <value>License:</value>
+  </data>
+  <data name="Label_Projects" xml:space="preserve">
+    <value>Select which projects to apply changes to:</value>
   </data>
   <data name="Label_ProjectUrl" xml:space="preserve">
     <value>Project URL:</value>

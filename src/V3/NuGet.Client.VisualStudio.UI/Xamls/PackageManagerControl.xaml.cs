@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,8 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
-using NuGet.Client;
 using NuGet.Versioning;
+using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -33,6 +32,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return Model.Sources;
             }
         }
+
         public InstallationTarget Target
         {
             get
@@ -43,6 +43,12 @@ namespace NuGet.Client.VisualStudio.UI
 
         internal IUserInterfaceService UI { get; private set; }
 
+        // Indicates if the user is managing packages for a project or for the solution
+        private bool _forProject;
+
+        // applicable only when _forProject is false
+        private InstalledPackages _installedPackages;
+
         public PackageManagerControl(PackageManagerModel myDoc, IUserInterfaceService ui)
         {
             UI = ui;
@@ -50,7 +56,35 @@ namespace NuGet.Client.VisualStudio.UI
 
             InitializeComponent();
 
+            _packageDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageDetail.Control = this;
+
+            _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
+            _packageSolutionDetail.Control = this;
+
+            if (Target is VsProjectInstallationTarget)
+            {
+                _forProject = true;
+            }
+            else
+            {
+                _forProject = false;
+
+                _installedPackages = new InstalledPackages();
+                var solutionTarget = Target as VsSolutionInstallationTarget;
+                foreach (EnvDTE.Project project in solutionTarget.Solution.Projects)
+                {
+                    _installedPackages.AddProject(project);
+
+                    foreach (var package in solutionTarget.GetInstalledPackages(project))
+                    {
+                        _installedPackages.Add(project,
+                            package.Id,
+                            package.Version);
+                    }                    
+                }
+            }
+
             Update();
             _initialized = true;
         }
@@ -105,6 +139,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             // where to get the package list
             private Func<int, CancellationToken, Task<IEnumerable<JObject>>> _loader;
+
             private InstallationTarget _target;
 
             public PackageLoader(
@@ -238,7 +273,7 @@ namespace NuGet.Client.VisualStudio.UI
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
             var supportedFrameworks = Target.GetSupportedFrameworks();
-            
+
             if (showOnlyInstalled)
             {
                 var loader = new PackageLoader(
@@ -253,21 +288,21 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-            // search online                
-            var loader = new PackageLoader(
-                (startIndex, ct) =>
-                    Sources.ActiveRepository.Search(
-                        searchText,
-                        new SearchFilter()
-                        {
-                            SupportedFrameworks = supportedFrameworks,
-                            IncludePrerelease = false
-                        },
-                        startIndex,
-                        PageSize,
-                        ct),
-                Target);
-            _packageList.Loader = loader;
+                // search online
+                var loader = new PackageLoader(
+                    (startIndex, ct) =>
+                        Sources.ActiveRepository.Search(
+                            searchText,
+                            new SearchFilter()
+                            {
+                                SupportedFrameworks = supportedFrameworks,
+                                IncludePrerelease = false
+                            },
+                            startIndex,
+                            PageSize,
+                            ct),
+                    Target);
+                _packageList.Loader = loader;
             }
         }
 
@@ -281,12 +316,32 @@ namespace NuGet.Client.VisualStudio.UI
             var selectedPackage = _packageList.SelectedItem as UiSearchResultPackage;
             if (selectedPackage == null)
             {
-                _packageDetail.DataContext = null;
+                if (_forProject)
+                {
+                    _packageDetail.DataContext = null;
+                    _packageDetail.Visibility = System.Windows.Visibility.Collapsed;
+                }
+                else
+                {
+                    _packageSolutionDetail.DataContext = null;
+                    _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
+                }
             }
             else
             {
-                var installedVersion = Target.GetInstalledVersion(selectedPackage.Id);
-                _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
+                if (_forProject)
+                {
+                    var installedVersion = Target.GetInstalledVersion(selectedPackage.Id);
+                    _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
+                    _packageDetail.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(
+                        selectedPackage,
+                        _installedPackages);
+                    _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
+                }
             }
         }
 

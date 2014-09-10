@@ -22,7 +22,9 @@ namespace NuGet.Client.VisualStudio.UI
         private readonly IUserInterfaceService _ui;
         private readonly SourceRepositoryManager _repoManager;
         
-        public PackageManagerEditorFactory(SourceRepositoryManager repoManager, IUserInterfaceService ui)
+        public PackageManagerEditorFactory(
+            SourceRepositoryManager repoManager, 
+            IUserInterfaceService ui)
         {
             _repoManager = repoManager;
             _ui = ui;

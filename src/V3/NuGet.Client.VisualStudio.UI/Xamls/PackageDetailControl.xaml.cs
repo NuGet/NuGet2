@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -15,19 +16,34 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for PackageDetail.xaml
     /// </summary>
-    public partial class PackageDetail : UserControl
+    public partial class PackageDetailControl : UserControl
     {
         public PackageManagerControl Control { get; set; }
         
-        private enum Metadatas
+        private class FileConflictActionItem
         {
-            Authors,
-            Owners,
-            License,
-            Donwloads,
-            DatePublished,
-            ProjectInformation,
-            Tags
+            public string Text
+            {
+                get;
+                private set;
+            }
+
+            public FileConflictAction Action
+            {
+                get;
+                private set;
+            }
+
+            public FileConflictActionItem(string text, FileConflictAction action)
+            {
+                Text = text;
+                Action = action;
+            }
+
+            public override string ToString()
+            {
+                return Text;
+            }
         }
 
         // item in the dependency installation behavior list view
@@ -58,19 +74,23 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         private static DependencyBehaviorItem[] _dependencyBehaviors = new[] {
-            new DependencyBehaviorItem("Ignore Dependencies", DependencyBehavior.Ignore),
-            new DependencyBehaviorItem("Lowest", DependencyBehavior.Lowest),
-            new DependencyBehaviorItem("HighestPath", DependencyBehavior.HighestPatch),
-            new DependencyBehaviorItem("HighestMinor", DependencyBehavior.HighestMinor),
-            new DependencyBehaviorItem("Highest", DependencyBehavior.Highest),
+            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_IgnoreDependencies, DependencyBehavior.Ignore),
+            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Lowest, DependencyBehavior.Lowest),
+            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestPatch, DependencyBehavior.HighestPatch),
+            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestMinor, DependencyBehavior.HighestMinor),
+            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Highest, DependencyBehavior.Highest),
         };
 
-        public PackageDetail()
+        private static FileConflictActionItem[] _fileConflicActions = new[] {
+            new FileConflictActionItem(Resx.Resources.FileConflictAction_Ignore, FileConflictAction.Ignore),
+            new FileConflictActionItem(Resx.Resources.FileConflictAction_IgnoreAll, FileConflictAction.IgnoreAll),
+            new FileConflictActionItem(Resx.Resources.FileConflictAction_Overwrite, FileConflictAction.Overwrite),
+            new FileConflictActionItem(Resx.Resources.FileConflictAction_OverwriteAll, FileConflictAction.OverwriteAll)
+        };
+
+        public PackageDetailControl()
         {
             InitializeComponent();
-            this.DataContextChanged += PackageDetail_DataContextChanged;
-
-            this.Visibility = System.Windows.Visibility.Collapsed;
 
             _dependencyBehavior.Items.Clear();
             foreach (var d in _dependencyBehaviors)
@@ -79,18 +99,11 @@ namespace NuGet.Client.VisualStudio.UI
             }
             _dependencyBehavior.SelectedItem = _dependencyBehaviors[1];
 
-            foreach (var v in Enum.GetValues(typeof(FileConflictAction)))
+            foreach (var v in _fileConflicActions)
             {
                 _fileConflictAction.Items.Add(v);
             }
-            _fileConflictAction.SelectedItem = FileConflictAction.Overwrite;
-        }
-
-        private void PackageDetail_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            this.Visibility = DataContext is PackageDetailControlModel ?
-                System.Windows.Visibility.Visible :
-                System.Windows.Visibility.Collapsed;
+            _fileConflictAction.SelectedItem = _fileConflicActions[2];
         }
 
         private void Versions_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -16,6 +16,8 @@
         <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="32" />
         <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+        
+        <!--
         <Style.Triggers>
             <EventTrigger RoutedEvent="ImageFailed">
                 <BeginStoryboard>
@@ -26,10 +28,9 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-        </Style.Triggers>
+        </Style.Triggers> -->
     </Style>
 
-    <!-- !!! -->
     <DataTemplate DataType="{x:Type Tools:UiPackageDependency}">
         <TextBlock Text="{Binding}" />
     </DataTemplate>
@@ -47,7 +48,7 @@
                 </Grid.ColumnDefinitions>
                 <Image
                     Grid.Column="0"
-                    Source="{Binding IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}"
+                    Source="{Binding IconUrl}"
                     Style="{StaticResource PackageIconStyle}"
                     VerticalAlignment="Top"
                     Margin="0,0,16,0" />

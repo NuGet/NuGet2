@@ -101,7 +101,16 @@
                 <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
                 </Tools:BusyControl>
 
-                <Tools:PackageDetail x:Name="_packageDetail" Grid.Column="1" Grid.RowSpan="2"/>
+                <Tools:PackageDetailControl 
+                    x:Name="_packageDetail" 
+                    Grid.Column="1"
+                    Grid.RowSpan="2" 
+                    Visibility="Collapsed"/>
+                <Tools:PackageSolutionDetailControl 
+                    x:Name="_packageSolutionDetail" 
+                    Grid.Column="1" 
+                    Grid.RowSpan="2"
+                    Visibility="Collapsed"/>
             </Grid>
             
         </Grid>

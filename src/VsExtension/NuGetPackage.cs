@@ -412,11 +412,6 @@ namespace NuGet.Tools
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
-        private void ShowToolWindow(Project project)
-        {
-            ShowDocWindow(project);
-        }
-
         IEnumerable<IVsWindowFrame> EnumDocumentWindows(IVsUIShell uiShell)
         {
             IEnumWindowFrames ppenum;
@@ -501,7 +496,7 @@ namespace NuGet.Tools
                 windowFlags,
                 documentName,
                 (IVsUIHierarchy)vsProject,
-                (uint)((int)firstChild), // !!! (uint)VSConstants.VSITEMID.Root,
+                (uint)VSConstants.VSITEMID.Root,
                 ppunkDocView,
                 ppunkDocData,
                 ref guidEditorType,
@@ -521,7 +516,7 @@ namespace NuGet.Tools
             Project project = VsMonitorSelection.GetActiveProject();
             if (project != null && !project.IsUnloaded() && project.IsSupported())
             {
-                ShowToolWindow(project);
+                ShowDocWindow(project);
             }
             else
             {
@@ -534,49 +529,58 @@ namespace NuGet.Tools
 
                 MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
             }
-
-            /* !!!
-            string parameterString = null;
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (null != args)
-            {
-                parameterString = args.InValue as string;
-            }
-
-            if (VsMonitorSelection.GetIsSolutionNodeSelected())
-            {
-                ShowManageLibraryPackageDialog(null, parameterString);
-            }
-            else
-            {
-                Project project = VsMonitorSelection.GetActiveProject();
-                if (project != null && !project.IsUnloaded() && project.IsSupported())
-                {
-                    ShowManageLibraryPackageDialog(project, parameterString);
-                }
-                else
-                {
-                    // show error message when no supported project is selected.
-                    string projectName = project != null ? project.Name : String.Empty;
-
-                    string errorMessage = String.IsNullOrEmpty(projectName) 
-                        ? Resources.NoProjectSelected 
-                        : String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
-
-                    MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
-                }
-            } */
         }
 
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
         {
+            //!!! Need to wait until solution is loaded
+
+            IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            uint windowFlags =
+                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
+
+            _dte.Solution.GetName();
+            var sources = ServiceLocator.GetInstance<SourceRepositoryManager>();
+            var target = new VsSolutionInstallationTarget(_dte.Solution);
+            var myDoc = new PackageManagerModel(sources, target);
+            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
+            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+            var guidCommandUI = Guid.Empty;
+            var caption = "PackageManager";
+            var documentName = String.Format("Package Manager: {0}", _dte.Solution.GetName());
+            IVsWindowFrame windowFrame;
+            int hr = uiShell.CreateDocumentWindow(
+                windowFlags,
+                documentName,
+                (IVsUIHierarchy)solution,
+                (uint)VSConstants.VSITEMID.Root,
+                ppunkDocView,
+                ppunkDocData,
+                ref guidEditorType,
+                null,
+                ref guidCommandUI,
+                null,
+                caption,
+                string.Empty,
+                null,
+                out windowFrame);
+            ErrorHandler.ThrowOnFailure(hr);
+
+            windowFrame.Show();
+
+
+            /*
             string parameterString = null;
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null)
             {
                 parameterString = args.InValue as string;
             }
-            ShowManageLibraryPackageDialog(null, parameterString);
+            ShowManageLibraryPackageDialog(null, parameterString); */
         }
 
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
