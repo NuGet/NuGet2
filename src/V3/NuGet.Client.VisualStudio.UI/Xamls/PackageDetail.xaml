@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.PackageDetail"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
-             xmlns:resource="clr-namespace:NuGet.Client.VisualStudio.UI"
+             xmlns:k ="clr-namespace:NuGet.Client.VisualStudio.UI"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,7 +12,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary.MergedDictionaries>            
             <Tools:VersionToVersionForDisplayConverter x:Key="VersionToVersionForDisplayConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
@@ -65,7 +66,7 @@
                     Grid.Row="0"
                     Grid.Column="0"
                     Margin="0,0,0,8"
-                    Text="{x:Static resource:Resources.Label_Version}" />
+                    Text="{x:Static resx:Resources.Label_Version}" />
                 <ComboBox
                     x:Name="_versions"
                     Grid.Row="1"
@@ -103,7 +104,7 @@
             <!-- installation options -->
             <Expander Grid.Row="2" Margin="0,8">
                 <Expander.Header>
-                    <Label Content="{x:Static resource:Resources.Label_InstallationOptions }" />
+                    <Label Content="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -118,12 +119,12 @@
                     <TextBlock
                         Grid.Row="0" Grid.Column="0"
                         Margin="0,0,6,0"
-                        Text="{x:Static resource:Resources.Label_DependencyBehavior}" />
+                        Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
                     <ComboBox Grid.Row="0" Grid.Column="1" x:Name="_dependencyBehavior"></ComboBox>
                     <TextBlock
                         Grid.Row="2" Grid.Column="0"
                         Margin="0,0,6,0"
-                        Text="{x:Static resource:Resources.Label_FileConflictAction}" />
+                        Text="{x:Static resx:Resources.Label_FileConflictAction}" />
                     <ComboBox Grid.Row="2" Grid.Column="1" x:Name="_fileConflictAction" ></ComboBox>
                 </Grid>
             </Expander>
@@ -132,7 +133,7 @@
             <TextBlock
                 Grid.Row="3"
                 Margin="0,8,0,0"
-                Text="{x:Static resource:Resources.Label_Description}"
+                Text="{x:Static resx:Resources.Label_Description}"
                 FontWeight="Bold" />
             <TextBlock
                 Grid.Row="4"
@@ -165,7 +166,7 @@
                         Visibility="{Binding Path=Package.Owners,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="0" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_Publishers}" />
+                        Text="{x:Static resx:Resources.Label_Publishers}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.Owners,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Owners}"
@@ -179,7 +180,7 @@
                         Grid.Row="1" Grid.Column="0"
                         Margin="0,8,0,0"
                         FontWeight="Bold"
-                        Text="{x:Static resource:Resources.Label_Authors}" />
+                        Text="{x:Static resx:Resources.Label_Authors}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.Authors,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Authors}"
@@ -192,7 +193,7 @@
                         Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="2" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_License}" />
+                        Text="{x:Static resx:Resources.Label_License}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
                         TextWrapping="Wrap"
@@ -209,7 +210,7 @@
                         Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="3" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_Downloads}" />
+                        Text="{x:Static resx:Resources.Label_Downloads}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.DownloadCount}"
@@ -222,7 +223,7 @@
                         Visibility="{Binding Path=Package.Published,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="4" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_DatePublished}" />
+                        Text="{x:Static resx:Resources.Label_DatePublished}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.Published,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Published}"
@@ -235,7 +236,7 @@
                         Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="5" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_ProjectUrl}" />
+                        Text="{x:Static resx:Resources.Label_ProjectUrl}" />
 
                 <TextBlock
                         Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
@@ -252,7 +253,7 @@
                         Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
                         Grid.Row="6" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
-                        Text="{x:Static resource:Resources.Label_Tags}" />
+                        Text="{x:Static resx:Resources.Label_Tags}" />
                 <TextBlock
                         Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
                         Text="{Binding Path=Package.Tags}"
@@ -265,7 +266,7 @@
             <TextBlock
                 Grid.Row="6"
                 FontWeight="Bold" Margin="0,16,0,0"
-                Text="{x:Static resource:Resources.Label_Dependencies}" />
+                Text="{x:Static resx:Resources.Label_Dependencies}" />
 
             <ItemsControl
                     Grid.Row="7"
@@ -297,7 +298,7 @@
                 Margin="0,8,0,0"
                 Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
                 FontStyle="Italic"
-                Text="{x:Static resource:Resources.Text_NoDependencies}" />
+                Text="{x:Static resx:Resources.Text_NoDependencies}" />
         </Grid>
     </ScrollViewer>
 </UserControl>

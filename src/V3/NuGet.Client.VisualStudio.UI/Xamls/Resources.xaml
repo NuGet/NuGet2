@@ -1,9 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="packageicon.png" />
-    <BitmapImage x:Key="Image_UpwardsArrow" UriSource="UpwardsArrow.png" />
-    <BitmapImage x:Key="Image_CheckMark" UriSource="CheckMark.png" />
+    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="../Resources/packageicon.png" />
+    <BitmapImage x:Key="Image_UpwardsArrow" UriSource="../Resources/UpwardsArrow.png" />
+    <BitmapImage x:Key="Image_CheckMark" UriSource="../Resources/CheckMark.png" />
 
     <Tools:PackageStatusToInstallImageConverter x:Key="PackageStatusToInstallImageVis" />
     <Tools:PackageStatusToUpdateImageConverter x:Key="PackageStatusToUpdateImageConverter" />
@@ -79,6 +79,7 @@
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
+                    RenderOptions.BitmapScalingMode="HighQuality"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" />
                 <Image
                     Name="_updateMark"
@@ -86,6 +87,7 @@
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
+                    RenderOptions.BitmapScalingMode="HighQuality"
                     Source="{StaticResource Image_UpwardsArrow}"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToUpdateImageConverter}}" />
             </Grid>

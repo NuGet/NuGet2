@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
-             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              Background="{DynamicResource VsBrush.Window}"
              Foreground="{DynamicResource VsBrush.WindowText}"
              mc:Ignorable="d"

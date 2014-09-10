@@ -57,7 +57,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiPackageDependency.cs" />
@@ -66,82 +66,82 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\UiPackageDependencySet.cs" />
     <Compile Include="Models\UiSearchResultPackage.cs" />
-    <Compile Include="BusyControl.xaml.cs">
+    <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DropdownButton.xaml.cs">
+    <Compile Include="Xamls\DropdownButton.xaml.cs">
       <DependentUpon>DropdownButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="InfiniteScrollList.xaml.cs">
+    <Compile Include="Xamls\InfiniteScrollList.xaml.cs">
       <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="NullToVisibilityConverter.cs" />
-    <Compile Include="PackageDetail.xaml.cs">
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="Xamls\PackageDetail.xaml.cs">
       <DependentUpon>PackageDetail.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageDetailControlModel.cs" />
-    <Compile Include="PackageManagerControl.xaml.cs">
+    <Compile Include="Xamls\PackageManagerControl.xaml.cs">
       <DependentUpon>PackageManagerControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageManagerControlCommands.cs" />
     <Compile Include="PackageManagerModel.cs" />
-    <Compile Include="PackageStatusToInstallImageConverter.cs" />
-    <Compile Include="PreviewWindow.xaml.cs">
+    <Compile Include="Converters\PackageStatusToInstallImageConverter.cs" />
+    <Compile Include="Xamls\PreviewWindow.xaml.cs">
       <DependentUpon>PreviewWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LicenseAcceptanceWindow.xaml.cs">
+    <Compile Include="Xamls\LicenseAcceptanceWindow.xaml.cs">
       <DependentUpon>LicenseAcceptanceWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Resources.Designer.cs">
+    <Compile Include="Resources\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="UserInterfaceService.cs" />
-    <Compile Include="VersionToVersionForDisplayConverter.cs" />
+    <Compile Include="Converters\VersionToVersionForDisplayConverter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="BusyControl.xaml">
+    <Page Include="Xamls\BusyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DropdownButton.xaml">
+    <Page Include="Xamls\DropdownButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="InfiniteScrollList.xaml">
+    <Page Include="Xamls\InfiniteScrollList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PackageDetail.xaml">
+    <Page Include="Xamls\PackageDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PackageManagerControl.xaml">
+    <Page Include="Xamls\PackageManagerControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PreviewWindow.xaml">
+    <Page Include="Xamls\PreviewWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Resources.xaml">
+    <Page Include="Xamls\Resources.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="LicenseAcceptanceWindow.xaml">
+    <Page Include="Xamls\LicenseAcceptanceWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CheckMark.png" />
+    <Resource Include="Resources\CheckMark.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="packageicon.png" />
+    <Resource Include="Resources\packageicon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="UpwardsArrow.png" />
+    <Resource Include="Resources\UpwardsArrow.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
@@ -162,9 +162,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
+    <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
