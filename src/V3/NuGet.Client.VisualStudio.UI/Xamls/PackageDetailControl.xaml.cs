@@ -19,91 +19,23 @@ namespace NuGet.Client.VisualStudio.UI
     public partial class PackageDetailControl : UserControl
     {
         public PackageManagerControl Control { get; set; }
-        
-        private class FileConflictActionItem
-        {
-            public string Text
-            {
-                get;
-                private set;
-            }
-
-            public FileConflictAction Action
-            {
-                get;
-                private set;
-            }
-
-            public FileConflictActionItem(string text, FileConflictAction action)
-            {
-                Text = text;
-                Action = action;
-            }
-
-            public override string ToString()
-            {
-                return Text;
-            }
-        }
-
-        // item in the dependency installation behavior list view
-        private class DependencyBehaviorItem
-        {
-            public string Text
-            {
-                get;
-                private set;
-            }
-
-            public DependencyBehavior Behavior
-            {
-                get;
-                private set;
-            }
-
-            public DependencyBehaviorItem(string text, DependencyBehavior dependencyBehavior)
-            {
-                Text = text;
-                Behavior = dependencyBehavior;
-            }
-
-            public override string ToString()
-            {
-                return Text;
-            }
-        }
-
-        private static DependencyBehaviorItem[] _dependencyBehaviors = new[] {
-            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_IgnoreDependencies, DependencyBehavior.Ignore),
-            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Lowest, DependencyBehavior.Lowest),
-            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestPatch, DependencyBehavior.HighestPatch),
-            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestMinor, DependencyBehavior.HighestMinor),
-            new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Highest, DependencyBehavior.Highest),
-        };
-
-        private static FileConflictActionItem[] _fileConflicActions = new[] {
-            new FileConflictActionItem(Resx.Resources.FileConflictAction_Ignore, FileConflictAction.Ignore),
-            new FileConflictActionItem(Resx.Resources.FileConflictAction_IgnoreAll, FileConflictAction.IgnoreAll),
-            new FileConflictActionItem(Resx.Resources.FileConflictAction_Overwrite, FileConflictAction.Overwrite),
-            new FileConflictActionItem(Resx.Resources.FileConflictAction_OverwriteAll, FileConflictAction.OverwriteAll)
-        };
 
         public PackageDetailControl()
         {
             InitializeComponent();
+            this.DataContextChanged += PackageDetailControl_DataContextChanged;
+        }
 
-            _dependencyBehavior.Items.Clear();
-            foreach (var d in _dependencyBehaviors)
+        void PackageDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is PackageDetailControlModel)
             {
-                _dependencyBehavior.Items.Add(d);
+                _root.Visibility = System.Windows.Visibility.Visible;
             }
-            _dependencyBehavior.SelectedItem = _dependencyBehaviors[1];
-
-            foreach (var v in _fileConflicActions)
-            {
-                _fileConflictAction.Items.Add(v);
+            else
+            {   
+                _root.Visibility = System.Windows.Visibility.Collapsed;
             }
-            _fileConflictAction.SelectedItem = _fileConflicActions[2];
         }
 
         private void Versions_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -136,7 +68,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private async Task<IEnumerable<PackageAction>> ResolveActions(PackageActionType action)
         {
-            var package = (PackageDetailControlModel)DataContext;
+            var packageDetail = (PackageDetailControlModel)DataContext;
             
             Control.SetBusy(true);
             try
@@ -147,12 +79,12 @@ namespace NuGet.Client.VisualStudio.UI
                     Control.Target,
                     new ResolutionContext()
                     {
-                        DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
+                        DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
                         AllowPrerelease = false
                     });
 
                 // Resolve actions
-                return await resolver.ResolveActionsAsync(package.Package.Id, package.Package.Version, action);
+                return await resolver.ResolveActionsAsync(packageDetail.Package.Id, packageDetail.Package.Version, action);
             }
             finally
             {

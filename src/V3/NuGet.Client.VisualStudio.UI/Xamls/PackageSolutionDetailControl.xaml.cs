@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -22,6 +12,19 @@ namespace NuGet.Client.VisualStudio.UI
         public PackageSolutionDetailControl()
         {
             InitializeComponent();
+            this.DataContextChanged += PackageSolutionDetailControl_DataContextChanged;
+        }
+
+        private void PackageSolutionDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is PackageSolutionDetailControlModel)
+            {
+                _root.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                _root.Visibility = System.Windows.Visibility.Collapsed;
+            }
         }
 
         private void Versions_SelectionChanged(object sender, SelectionChangedEventArgs e)

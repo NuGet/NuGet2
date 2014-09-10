@@ -216,4 +216,7 @@
   <data name="Text_NoDependencies" xml:space="preserve">
     <value>No dependencies</value>
   </data>
+  <data name="Label_PackageManager" xml:space="preserve">
+    <value>Package Manager: {0}</value>
+  </data>
 </root>

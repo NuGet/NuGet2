@@ -58,6 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="DependencyBehaviorItem.cs" />
+    <Compile Include="FileConflictActionItem.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
@@ -65,9 +67,12 @@
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
     <Compile Include="PackageSolutionDetailControlModel.cs" />
+    <Compile Include="ProjectPackageInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\UiPackageDependencySet.cs" />
     <Compile Include="Models\UiSearchResultPackage.cs" />
+    <Compile Include="Resources\Colors.cs" />
+    <Compile Include="VersionForDisplay.cs" />
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>

@@ -16,8 +16,8 @@ namespace NuGet
         private readonly PackageReferenceFile _packageReferenceFile;
 
         public PackageReferenceRepository(
-            IFileSystem fileSystem, 
-            string projectName, 
+            IFileSystem fileSystem,
+            string projectName,
             ISharedPackageRepository sourceRepository)
         {
             if (fileSystem == null)
@@ -172,7 +172,7 @@ namespace NuGet
         public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
         {
             IEnumerable<PackageReference> references = GetPackageReferences(id);
-            if (!includePrerelease) 
+            if (!includePrerelease)
             {
                 references = references.Where(r => String.IsNullOrEmpty(r.Version.SpecialVersion));
             }
@@ -196,7 +196,7 @@ namespace NuGet
 
             // Notify the source repository every time we add a new package to the repository.
             // This doesn't really need to happen on every package add, but this is over agressive
-            // to combat scenarios where the 2 repositories get out of sync. If this repository is already 
+            // to combat scenarios where the 2 repositories get out of sync. If this repository is already
             // registered in the source then this will be ignored
             SourceRepository.RegisterRepository(_packageReferenceFile);
         }
@@ -216,6 +216,11 @@ namespace NuGet
             return GetPackageReferences(packageId).FirstOrDefault();
         }
 
+        public IEnumerable<PackageReference> GetPackageReferences()
+        {
+            return _packageReferenceFile.GetPackageReferences();
+        }
+
         /// <summary>
         /// Gets all references to a specific package id that are valid.
         /// </summary>
@@ -224,7 +229,7 @@ namespace NuGet
         public IEnumerable<PackageReference> GetPackageReferences(string packageId)
         {
             return _packageReferenceFile.GetPackageReferences()
-                                        .Where(reference => IsValidReference(reference) && 
+                                        .Where(reference => IsValidReference(reference) &&
                                                             reference.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
         }
 

@@ -71,5 +71,10 @@ namespace NuGet.Client.VisualStudio
                 _projectManager.PackageManager.LocalRepository.LoadProjectRepositories()
                     .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((PackageReferenceRepository)r)));
         }
+
+        public override bool IsSolutionOpen
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

@@ -33,7 +33,6 @@ namespace NuGet.VisualStudio
         {
             _packageRestoreManager.PackagesMissingStatusChanged -= OnPackagesMissingStatusChanged;
         }
-
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // when the control is first loaded, check for missing packages

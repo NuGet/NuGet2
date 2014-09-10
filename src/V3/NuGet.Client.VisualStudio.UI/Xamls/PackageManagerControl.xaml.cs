@@ -12,6 +12,7 @@ using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -47,8 +48,11 @@ namespace NuGet.Client.VisualStudio.UI
         // Indicates if the user is managing packages for a project or for the solution
         private bool _forProject;
 
-        // applicable only when _forProject is false
-        private InstalledPackages _installedPackages;
+        // applicable when _forProject if false
+        VsSolutionInstallationTarget _solutionTarget;
+
+        private PackageRestoreBar _restoreBar;
+        private IPackageRestoreManager _packageRestoreManager;
 
         public PackageManagerControl(PackageManagerModel myDoc, IUserInterfaceService ui)
         {
@@ -56,6 +60,9 @@ namespace NuGet.Client.VisualStudio.UI
             Model = myDoc;
 
             InitializeComponent();
+
+            _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
+            AddRestoreBar();
 
             _packageDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageDetail.Control = this;
@@ -66,34 +73,66 @@ namespace NuGet.Client.VisualStudio.UI
             if (Target is VsProjectInstallationTarget)
             {
                 _forProject = true;
+                _packageDetail.Visibility = System.Windows.Visibility.Visible;
             }
             else
             {
                 _forProject = false;
-
-                _installedPackages = new InstalledPackages();
-                var solutionTarget = Target as VsSolutionInstallationTarget;
-                foreach (EnvDTE.Project project in solutionTarget.Solution.Projects)
-                {
-                    _installedPackages.AddProject(project);
-
-                    foreach (var package in solutionTarget.GetInstalledPackages(project))
-                    {
-                        _installedPackages.Add(project,
-                            package.Id,
-                            package.Version);
-                    }                    
-                }
+                _solutionTarget = (VsSolutionInstallationTarget)Target;
+                _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
             }
 
             Update();
+            this.Unloaded += PackageManagerControl_Unloaded;
             _initialized = true;
+        }
+
+        void PackageManagerControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            RemoveRestoreBar();
+        }
+
+        void AddRestoreBar()
+        {
+            _restoreBar = new PackageRestoreBar(_packageRestoreManager);
+            _root.Children.Add(_restoreBar);
+            _packageRestoreManager.PackagesMissingStatusChanged += packageRestoreManager_PackagesMissingStatusChanged;
+        }
+
+        void RemoveRestoreBar()
+        {
+            _restoreBar.CleanUp();
+            _packageRestoreManager.PackagesMissingStatusChanged -= packageRestoreManager_PackagesMissingStatusChanged;
+        }
+
+        void packageRestoreManager_PackagesMissingStatusChanged(object sender, PackagesMissingStatusEventArgs e)
+        {
+            // PackageRestoreManager fires this event even when solution is closed. 
+            // Don't do anything if solution is closed.
+            if (!Target.IsSolutionOpen)
+            {
+                return;
+            }
+
+            if (!e.PackagesMissing)
+            {
+                // packages are restored. Update the UI
+                if (_forProject)
+                {
+                }
+                else
+                {
+                    _solutionTarget.CreateInstalledPackages();
+                    UpdateDetailPane();
+                }
+            }
         }
 
         private void Update()
         {
-            _label.Content = string.Format(CultureInfo.CurrentCulture,
-                "Package Manager: {0}",
+            _label.Content = string.Format(
+                CultureInfo.CurrentCulture,
+                Resx.Resources.Label_PackageManager,
                 Target.Name);
 
             // init source repo list
@@ -104,11 +143,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
             _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
 
-            UpdatePackageList();
-        }
-
-        private void UpdatePackageList()
-        {
             SearchPackageInActivePackageSource();
         }
 
@@ -314,18 +348,24 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void PackageList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            UpdateDetailPane();
+        }
+
+        /// <summary>
+        /// Updates the detail pane based on the selected package
+        /// </summary>
+        private void UpdateDetailPane()
+        {
             var selectedPackage = _packageList.SelectedItem as UiSearchResultPackage;
             if (selectedPackage == null)
             {
                 if (_forProject)
                 {
                     _packageDetail.DataContext = null;
-                    _packageDetail.Visibility = System.Windows.Visibility.Collapsed;
                 }
                 else
                 {
                     _packageSolutionDetail.DataContext = null;
-                    _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
                 }
             }
             else
@@ -333,16 +373,14 @@ namespace NuGet.Client.VisualStudio.UI
                 if (_forProject)
                 {
                     var installedPackage = Target.Installed.GetInstalledPackage(selectedPackage.Id);
-	                var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
-    	            _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
-                    _packageDetail.Visibility = System.Windows.Visibility.Visible;
+                    var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
+                    _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
                 }
                 else
                 {
                     _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(
                         selectedPackage,
-                        _installedPackages);
-                    _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
+                        (SolutionInstalledPackageList)_solutionTarget.Installed);
                 }
             }
         }
@@ -364,6 +402,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             Sources.ChangeActiveSource(newSource);
+            SearchPackageInActivePackageSource();
         }
 
         private void _filter_SelectionChanged(object sender, SelectionChangedEventArgs e)

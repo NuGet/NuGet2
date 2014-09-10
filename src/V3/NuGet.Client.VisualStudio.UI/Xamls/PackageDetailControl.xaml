@@ -6,6 +6,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             Background="{DynamicResource {x:Static resx:Brushes.DetailPaneBackground}}"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="400">
     <UserControl.Resources>
@@ -21,8 +22,8 @@
             Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}"
             Executed="ExecuteOpenLicenseLink" />
     </UserControl.CommandBindings>
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid x:Name="_grid" Margin="24,0,7,0">
+    <ScrollViewer x:Name="_root" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24,0,7,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -119,12 +120,16 @@
                         Grid.Row="0" Grid.Column="0"
                         Margin="0,0,6,0"
                         Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
-                    <ComboBox Grid.Row="0" Grid.Column="1" x:Name="_dependencyBehavior"></ComboBox>
+                    <ComboBox Grid.Row="0" Grid.Column="1" 
+                              ItemsSource="{Binding Path=DependencyBehaviors}"
+                              SelectedItem="{Binding Path=SelectedDependencyBehavior}"/>
                     <TextBlock
                         Grid.Row="2" Grid.Column="0"
                         Margin="0,0,6,0"
                         Text="{x:Static resx:Resources.Label_FileConflictAction}" />
-                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="_fileConflictAction" ></ComboBox>
+                    <ComboBox Grid.Row="2" Grid.Column="1" 
+                              ItemsSource="{Binding Path=FileConflictActions}" 
+                              SelectedItem="{Binding Path=SelectedFileConflictAction}" />
                 </Grid>
             </Expander>
 

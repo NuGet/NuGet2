@@ -1,29 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using NuGet.Versioning;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
 {
     public class VsSolutionInstallationTarget : InstallationTarget
     {
-        EnvDTE.Solution _solution;
-        string _name;
+        private EnvDTE.Solution _solution;
+        private string _name;
+        private SolutionInstalledPackageList _installedPackageList;
+        private IVsPackageManager _packageManager;
 
         public VsSolutionInstallationTarget(EnvDTE.Solution solution)
         {
             _solution = solution;
-            _name = string.Format("Solution '{0}'", _solution.GetName());
+            _name = string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Lable_Solution,
+                _solution.GetName());
+
+            _packageManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
+                .CreatePackageManagerToManageInstalledPackages();
+            CreateInstalledPackages();
         }
 
-        public EnvDTE.Solution Solution
+        public void CreateInstalledPackages()
+        {
+            _installedPackageList = new SolutionInstalledPackageList(_packageManager.LocalRepository);
+            foreach (EnvDTE.Project project in _solution.Projects)
+            {
+                _installedPackageList.AddProject(project);
+
+                foreach (var package in GetInstalledPackages(project))
+                {
+                    _installedPackageList.Add(
+                        project,
+                        NuGet.Client.CoreConverters.SafeToInstalledPackageReference(package));
+                }
+            }
+        }
+
+        public override bool IsSolutionOpen
         {
             get
             {
-                return _solution;
+                return _solution.IsOpen;
             }
         }
 
@@ -35,19 +59,24 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        public IEnumerable<PackageIdentity> GetInstalledPackages(EnvDTE.Project project)
+        /// <summary>
+        /// Gets the list of packages installed in the project.
+        /// </summary>
+        /// <param name="project">The project to check.</param>
+        /// <returns>The list of packages installed in the project.</returns>
+        private IEnumerable<PackageReference> GetInstalledPackages(EnvDTE.Project project)
         {
-            var projectManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
-                .CreatePackageManagerToManageInstalledPackages()
-                .GetProjectManager(project);
-            return projectManager.LocalRepository.GetPackages().Select(p => new PackageIdentity(
-                p.Id,
-                new NuGetVersion(p.Version.Version, p.Version.SpecialVersion, null)));
+            var projectManager = _packageManager.GetProjectManager(project);
+            var repo = (PackageReferenceRepository)projectManager.LocalRepository;
+            return repo.GetPackageReferences();
         }
 
         public override InstalledPackagesList Installed
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _installedPackageList;
+            }
         }
 
         public override Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects()

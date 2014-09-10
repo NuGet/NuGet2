@@ -61,6 +61,15 @@ namespace NuGet.Client.VisualStudio {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Solution &apos;{0}&apos;.
+        /// </summary>
+        internal static string Lable_Solution {
+            get {
+                return ResourceManager.GetString("Lable_Solution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You cannot use the aggregate source with the V2InteropSearcher..
         /// </summary>
         internal static string VsPackageManagerSession_CannotUseAggregateSource {

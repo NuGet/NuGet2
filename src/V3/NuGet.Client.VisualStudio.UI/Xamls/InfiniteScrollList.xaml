@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.InfiniteScrollList"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              xmlns:self="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -11,15 +12,18 @@
             <Grid Margin="0,10,0,0">
                 <TextBlock Name="_noMoreItems" 
                            FontStyle="Italic"
+                           Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                            Visibility="Collapsed">No more items</TextBlock>
                 <TextBlock Name="_ready" 
-                        Visibility="Collapsed" >Ready</TextBlock>
+                           Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                           Visibility="Collapsed" >Ready</TextBlock>
                 <StackPanel Orientation="Horizontal" Name="_progressBar"  
                             HorizontalAlignment="Center"
                             Visibility="Collapsed">
                     <ProgressBar 
                         Height="20" IsIndeterminate="True" Width="40" />
-                    <TextBlock Margin="10,0,0,0">Loading...</TextBlock>
+                    <TextBlock Margin="10,0,0,0"
+                               Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">Loading...</TextBlock>
                 </StackPanel>
             </Grid>
             <DataTemplate.Triggers>
@@ -39,12 +43,13 @@
                             Value="Visible"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
-        </DataTemplate>
+        </DataTemplate>        
     </UserControl.Resources>
     <ListBox x:Name="_list" 
              ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
              HorizontalContentAlignment="Stretch"
              SelectionChanged="_list_SelectionChanged" 
+             Background="{DynamicResource {x:Static resx:Brushes.ListPaneBackground}}"
              Loaded="_list_Loaded">         
         <!-- Get rid of padding of ListBoxItem -->
         <ListBox.ItemContainerStyle>

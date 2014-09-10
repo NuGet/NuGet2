@@ -7,7 +7,7 @@ using NuGet.Versioning;
 
 namespace NuGet.Client
 {
-    internal static class CoreConverters
+    public static class CoreConverters
     {
         internal static NuGetVersion SafeToNuGetVer(SemanticVersion semanticVersion)
         {
@@ -46,7 +46,7 @@ namespace NuGet.Client
             return SafeToPackageIdentity(name.Id, name.Version);
         }
 
-        internal static InstalledPackageReference SafeToInstalledPackageReference(PackageReference packageRef)
+        public static InstalledPackageReference SafeToInstalledPackageReference(PackageReference packageRef)
         {
             if (packageRef == null)
             {

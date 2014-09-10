@@ -4,145 +4,21 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using NuGet.Versioning;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    public class VersionForDisplay
-    {
-        private string _additionalInfo;
-
-        public VersionForDisplay(
-            NuGetVersion version,
-            string additionalInfo)
-        {
-            Version = version;
-            _additionalInfo = additionalInfo;
-        }
-
-        public NuGetVersion Version
-        {
-            get;
-            private set;
-        }
-
-        public override string ToString()
-        {
-            return _additionalInfo + Version.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as VersionForDisplay;
-            return other != null && other.Version == Version;
-        }
-
-        public override int GetHashCode()
-        {
-            return Version.GetHashCode();
-        }
-    }
-
-    // Represents the version of a package that is installed in the project
-    public class ProjectPackageInfo
-    {
-        public EnvDTE.Project Project
-        { 
-            get; 
-            private set; 
-        }
-
-        public SemanticVersion Version
-        {
-            get;
-            private set;
-        }
-
-        public bool Selected
-        {
-            get;
-            set;
-        }
-
-        private string _projectName;
-
-        public ProjectPackageInfo(EnvDTE.Project project, SemanticVersion version)
-        {
-            Debug.Assert(project != null);
-
-            Project = project;
-            _projectName = Project.Name;
-            Version = version;
-        }
-
-        public override string ToString()
-        {
-            if (Version == null)
-            {
-                return _projectName;
-            }
-            else
-            {
-                return string.Format("{0} ({1})", _projectName,
-                    Version.ToString());
-            }
-        }
-    }
-
-    // Used to check if a package is installed in a project
-    public class InstalledPackages
-    {
-        Dictionary<EnvDTE.Project, Dictionary<string, SemanticVersion>> _installedPackages;
-
-        public InstalledPackages()
-        {
-            _installedPackages = new Dictionary<EnvDTE.Project, Dictionary<string, SemanticVersion>>();
-        }
-
-        public IEnumerable<EnvDTE.Project> Projects
-        {
-            get
-            {
-                return _installedPackages.Keys;
-            }
-        }
-
-        public void AddProject(EnvDTE.Project project)
-        {
-            _installedPackages[project] = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public void Add(EnvDTE.Project project, string packageId, SemanticVersion version)
-        {
-            _installedPackages[project][packageId] = version;
-        }
-
-        public SemanticVersion GetInstalledVersion(EnvDTE.Project project, string packageId)
-        {
-            Dictionary<string, SemanticVersion> d;
-            if (!_installedPackages.TryGetValue(project, out d))
-            {
-                return null;
-            }
-
-            SemanticVersion version;
-            if (!d.TryGetValue(packageId, out version))
-            {
-                return null;
-            }
-
-            return version;
-        }
-    }    
-
     // The DataContext of the PackageDetail control is this class
     // It has two mode: Project, or Solution
     public class PackageDetailControlModel : INotifyPropertyChanged
     {
         private UiDetailedPackage _package;
-        private Dictionary<NuGetVersion, UiDetailedPackage> _allPackages;
+        protected Dictionary<NuGetVersion, UiDetailedPackage> _allPackages;
 
         // used for data binding
-        private List<VersionForDisplay> _versions;
+        protected List<VersionForDisplay> _versions;
+        private FileConflictActionItem[] _fileConflicActions;
+        private DependencyBehaviorItem[] _dependencyBehaviors;
 
         public PackageDetailControlModel(
             UiSearchResultPackage searchResultPackage,
@@ -156,6 +32,34 @@ namespace NuGet.Client.VisualStudio.UI
 
             _package = _allPackages[searchResultPackage.Version];
             CreateVersions(installedVersion);
+            CreateFileConflictActions();
+            CreateDependencyBehaviors();
+        }
+
+        private void CreateDependencyBehaviors()
+        {
+            _dependencyBehaviors = new[] 
+            {
+                new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_IgnoreDependencies, DependencyBehavior.Ignore),
+                new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Lowest, DependencyBehavior.Lowest),
+                new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestPatch, DependencyBehavior.HighestPatch),
+                new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_HighestMinor, DependencyBehavior.HighestMinor),
+                new DependencyBehaviorItem(Resx.Resources.DependencyBehavior_Highest, DependencyBehavior.Highest),
+            };
+            SelectedDependencyBehavior = _dependencyBehaviors[1];
+        }
+
+        private void CreateFileConflictActions()
+        {
+            _fileConflicActions = new []
+            {
+                new FileConflictActionItem(Resx.Resources.FileConflictAction_Ignore, FileConflictAction.Ignore),
+                new FileConflictActionItem(Resx.Resources.FileConflictAction_IgnoreAll, FileConflictAction.IgnoreAll),
+                new FileConflictActionItem(Resx.Resources.FileConflictAction_Overwrite, FileConflictAction.Overwrite),
+                new FileConflictActionItem(Resx.Resources.FileConflictAction_OverwriteAll, FileConflictAction.OverwriteAll)
+            };
+
+            SelectedFileConflictAction = _fileConflicActions[3];
         }
 
         public UiDetailedPackage Package
@@ -236,6 +140,34 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             Package = _allPackages[version];
+        }
+
+        public IEnumerable<FileConflictActionItem> FileConflictActions
+        {
+            get
+            {
+                return _fileConflicActions;
+            }
+        }
+
+        public FileConflictActionItem SelectedFileConflictAction
+        {
+            get;
+            set;
+        }
+
+        public IEnumerable<DependencyBehaviorItem> DependencyBehaviors
+        {
+            get
+            {
+                return _dependencyBehaviors;
+            }
+        }
+
+        public DependencyBehaviorItem SelectedDependencyBehavior
+        {
+            get;
+            set;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

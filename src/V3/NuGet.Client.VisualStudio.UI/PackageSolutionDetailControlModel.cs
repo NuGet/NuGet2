@@ -3,13 +3,14 @@ using System.Linq;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    // SelectedVersion -> ActionList update -> ProjectList update
+    // SelectedAction -> SelectedVersion
+    // SelectedVersion -> ProjectList update
     public class PackageSolutionDetailControlModel : PackageDetailControlModel
     {
         // list of projects where the package is installed
         private List<ProjectPackageInfo> _projects;
 
-        private InstalledPackages _installedPackages;
+        private SolutionInstalledPackageList _installedPackages;
 
         private List<string> _actions;
 
@@ -41,125 +42,147 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 _selectedAction = value;
 
+                CreateVersions();
                 OnPropertyChanged("SelectedAction");
-                CreateProjectList();
             }
+        }
+
+        protected override void OnSelectedVersionChanged()
+        {
+            CreateProjectList();
+        }
+
+        private void CreateVersions()
+        {
+            if (_selectedAction == Resources.Resources.Action_Consolidate ||
+                _selectedAction == Resources.Resources.Action_Uninstall)
+            {
+                _versions = _installedPackages.Projects
+                    .Select(project => _installedPackages.GetInstalledVersion(project, Package.Id))
+                    .Where(version => version != null)
+                    .OrderByDescending(v => v)
+                    .Select(version => new VersionForDisplay(version, string.Empty))
+                    .ToList();
+            }
+            else if (_selectedAction == Resources.Resources.Action_Install ||
+                _selectedAction == Resources.Resources.Action_Update)
+            {
+                _versions = new List<VersionForDisplay>();
+                var allVersions = _allPackages.Keys.OrderByDescending(v => v);
+                var latestStableVersion = allVersions.FirstOrDefault(v => !v.IsPrerelease);
+                if (latestStableVersion != null)
+                {
+                    _versions.Add(new VersionForDisplay(latestStableVersion, "Latest stable "));
+                }
+
+                // add a separator
+                if (_versions.Count > 0)
+                {
+                    _versions.Add(null);
+                }
+
+                foreach (var version in allVersions)
+                {
+                    _versions.Add(new VersionForDisplay(version, string.Empty));
+                }
+            }
+
+            SelectedVersion = _versions[0];
+            OnPropertyChanged("Versions");
         }
 
         public PackageSolutionDetailControlModel(
             UiSearchResultPackage searchResultPackage,
-            InstalledPackages installedPackages) :
+            SolutionInstalledPackageList installedPackages) :
             base(searchResultPackage, installedVersion: null)
         {
             _installedPackages = installedPackages;
-
             SelectedVersion = new VersionForDisplay(Package.Version, null);
             CreateActions();
         }
 
         private void CreateActions()
         {
+            // initialize actions
             _actions = new List<string>();
-
-            // 'update' is applicable if any project has the same package but different
-            // version.
-            var v = _installedPackages.Projects.Any(
-                project =>
+            var canUpdate = _installedPackages.Projects
+                .Any(project =>
                 {
                     var installedVersion = _installedPackages.GetInstalledVersion(project, Package.Id);
                     return installedVersion != null &&
-                        installedVersion != SelectedVersion.Version;
+                        installedVersion != Package.Version;
                 });
-            if (v)
+            if (canUpdate)
             {
                 _actions.Add(Resources.Resources.Action_Update);
             }
 
-            // !!! What's the difference between consolidate and update?
-            // _actions.Add(Resources.Resources.Action_Consolidate);
-
-            // 'install' is applicable if any project does not have package installed.
-            v = _installedPackages.Projects.Any(
-                project =>
+            var canInstall = _installedPackages.Projects
+                .Any(project =>
                 {
                     var installedVersion = _installedPackages.GetInstalledVersion(project, Package.Id);
                     return installedVersion == null;
                 });
-            if (v)
+            if (canInstall)
             {
                 _actions.Add(Resources.Resources.Action_Install);
             }
 
-            // 'install' is applicable if any project has the package with the same version installed.
-            v = _installedPackages.Projects.Any(
-                project =>
+            var canUninstall = _installedPackages.Projects
+                .Any(project =>
                 {
                     var installedVersion = _installedPackages.GetInstalledVersion(project, Package.Id);
-                    return installedVersion != null && installedVersion == SelectedVersion.Version;
+                    return installedVersion != null;
                 });
-            if (v)
+            if (canUninstall)
             {
                 _actions.Add(Resources.Resources.Action_Uninstall);
             }
 
-            SelectedAction = _actions[0];
-            OnPropertyChanged("Actions");
-        }
+            var installedVersions = _installedPackages.Projects
+                .Select(project => _installedPackages.GetInstalledVersion(project, Package.Id))
+                .Where(version => version != null)
+                .Distinct();
+            if (installedVersions.Count() >= 2)
+            {
+                _actions.Add(Resources.Resources.Action_Consolidate);
+            }
 
-        protected override void OnSelectedVersionChanged()
-        {
-            CreateActions();
+            SelectedAction = _actions[0];
         }
 
         private void CreateProjectList()
         {
             _projects = new List<ProjectPackageInfo>();
 
-            if (_selectedAction == Resources.Resources.Action_Update)
+            if (_selectedAction == Resources.Resources.Action_Update ||
+                _selectedAction == Resources.Resources.Action_Consolidate)
             {
-                // project list contains projects that have a different version installed
-                // !!! should projects with the same version be included ?
+                // project list contains projects that have the package installed.
+                // The project with the same version installed is included, but disabled.
                 foreach (var project in _installedPackages.Projects)
                 {
                     var installedVersion = _installedPackages.GetInstalledVersion(
                         project,
                         Package.Id);
-                    if (installedVersion != null &&
-                        installedVersion != SelectedVersion.Version)
+                    if (installedVersion != null)
                     {
-                        _projects.Add(new ProjectPackageInfo(project, installedVersion));
-                    }
-                }
-            }
-            else if (_selectedAction == Resources.Resources.Action_Consolidate)
-            {
-                // project list contains projects that have a different version installed
-                // !!! should projects with the same version be included ?
-                foreach (var project in _installedPackages.Projects)
-                {
-                    var installedVersion = _installedPackages.GetInstalledVersion(
-                        project,
-                        Package.Id);
-                    if (installedVersion != null &&
-                        installedVersion != SelectedVersion.Version)
-                    {
-                        _projects.Add(new ProjectPackageInfo(project, installedVersion));
+                        var enabled = installedVersion != SelectedVersion.Version;
+                        _projects.Add(new ProjectPackageInfo(project, installedVersion, enabled));
                     }
                 }
             }
             else if (_selectedAction == Resources.Resources.Action_Install)
             {
-                // project list contains projects that either have a different version installed,
-                // or does not have the package installed.
+                // project list contains projects that do not have the package installed.
                 foreach (var project in _installedPackages.Projects)
                 {
                     var installedVersion = _installedPackages.GetInstalledVersion(
                         project,
                         Package.Id);
-                    if (installedVersion == null ||
-                        installedVersion != SelectedVersion.Version)
+                    if (installedVersion == null)
                     {
-                        _projects.Add(new ProjectPackageInfo(project, installedVersion));
+                        _projects.Add(new ProjectPackageInfo(project, installedVersion, enabled: true));
                     }
                 }
             }
@@ -174,7 +197,7 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installedVersion != null &&
                         installedVersion == SelectedVersion.Version)
                     {
-                        _projects.Add(new ProjectPackageInfo(project, installedVersion));
+                        _projects.Add(new ProjectPackageInfo(project, installedVersion, enabled: true));
                     }
                 }
             }

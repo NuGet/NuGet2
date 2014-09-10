@@ -286,6 +286,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package Manager: {0}.
+        /// </summary>
+        public static string Label_PackageManager {
+            get {
+                return ResourceManager.GetString("Label_PackageManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select which projects to apply changes to:.
         /// </summary>
         public static string Label_Projects {

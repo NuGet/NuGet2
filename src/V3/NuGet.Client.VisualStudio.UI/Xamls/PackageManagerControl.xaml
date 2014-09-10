@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
-             Background="{DynamicResource VsBrush.Window}"
-             Foreground="{DynamicResource VsBrush.WindowText}"
+             Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
+             Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              mc:Ignorable="d"
              d:DesignHeight="523" d:DesignWidth="958">
     <UserControl.Resources>
@@ -14,17 +14,25 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static resx:Brushes.UIText}}" />
+            </Style>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static resx:Brushes.UIText}}" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Grid>
+        <Grid x:Name="_root">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Label Grid.Row="0" x:Name="_label" FontSize="20">Test</Label>
-            <Grid Grid.Row="1" Margin="0,20">
+            <!-- Row 0 is used by restore bar -->
+            <Label Grid.Row="1" x:Name="_label" FontSize="20">Test</Label>
+            <Grid Grid.Row="2" Margin="0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -36,6 +44,7 @@
                 </Grid.ColumnDefinitions>
                 <Label
                     Grid.Column="0"
+                    
                     Content="{x:Static resx:Resources.Label_Repository}"
                     Margin="24,0,0,0" />
 
@@ -74,7 +83,7 @@
                     Grid.Column="6"
                     Click="SettingsButtonClick" x:Name="_settingsButton">Settings</Button>
             </Grid>
-            <Grid Grid.Row="2" >
+            <Grid Grid.Row="3" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -86,12 +95,14 @@
                 <Tools:InfiniteScrollList x:Name="_packageList" SelectionChanged="PackageList_SelectionChanged">
                 </Tools:InfiniteScrollList>
 
-                <StackPanel
-                    Margin="24,12"
+                <StackPanel                    
                     Grid.Row="1" 
                     Grid.Column="0" 
-                    Orientation="Vertical">
+                    Orientation="Vertical"
+                    Background="{DynamicResource {x:Static resx:Brushes.LegalMessageBackground}}"
+                    >
                     <TextBlock                         
+                        Margin="24,12"
                         TextWrapping="Wrap"
                         Text="{x:Static resx:Resources.Text_LegalDisclaimer}"/>
                 </StackPanel>               
@@ -111,8 +122,7 @@
                     Grid.Column="1" 
                     Grid.RowSpan="2"
                     Visibility="Collapsed"/>
-            </Grid>
-            
+            </Grid>            
         </Grid>
         <Tools:BusyControl x:Name="_busyControl" Visibility="Collapsed"></Tools:BusyControl>
     </Grid>

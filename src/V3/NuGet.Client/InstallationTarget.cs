@@ -29,7 +29,7 @@ namespace NuGet.Client
         #region Ugly stuff that needs to be reviewed and reorganized
         public abstract Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects();
         public abstract IProjectSystem ProjectSystem { get; }
-        #endregion
+        #endregion        
 
         /// <summary>
         /// Gets the list of frameworks supported by this target.
@@ -43,5 +43,10 @@ namespace NuGet.Client
         /// <param name="actions"></param>
         /// <returns></returns>
         public abstract Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions);
+
+        public abstract bool IsSolutionOpen
+        {
+            get;
+        }
     }
 }
