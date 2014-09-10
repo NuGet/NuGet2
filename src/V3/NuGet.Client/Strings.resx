@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ActionResolver_UnsupportedAction" xml:space="preserve">
+    <value>Unrecognized Package Action '{0}'.</value>
+  </data>
+  <data name="ActionResolver_UnsupportedDependencyBehavior" xml:space="preserve">
+    <value>Unsupported Dependency Behavior '{0}'.</value>
+  </data>
   <data name="NuGetRepository_CannotCreateAggregateRepo" xml:space="preserve">
     <value>Cannot create a NuGet Repository from the Aggregate Source</value>
   </data>
@@ -125,11 +131,5 @@
   </data>
   <data name="PackageActionDescriptionWrapper_UnrecognizedAction" xml:space="preserve">
     <value>Unrecognized Package Action '{0}'.</value>
-  </data>
-  <data name="V2InteropActionResolver_UnrecognizedAction" xml:space="preserve">
-    <value>Unrecognized Package Action '{0}'.</value>
-  </data>
-  <data name="V2InteropActionResolver_UnsupportedDependencyBehavior" xml:space="preserve">
-    <value>Unsupported Dependency Behavior '{0}'.</value>
   </data>
 </root>

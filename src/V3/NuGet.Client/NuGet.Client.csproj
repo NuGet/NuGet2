@@ -65,10 +65,15 @@
     <Compile Include="InstallationTarget.cs" />
     <Compile Include="Interop\PackageJsonLd.cs" />
     <Compile Include="Interop\V2SourceRepository.cs" />
-    <Compile Include="PackageActionDescription.cs" />
+    <Compile Include="Interop\V3InteropLocalRepository.cs" />
+    <Compile Include="Interop\V3InteropPackage.cs" />
+    <Compile Include="Interop\V3InteropPackageManager.cs" />
+    <Compile Include="Interop\V3InteropProjectManager.cs" />
+    <Compile Include="Resolution\PackageAction.cs" />
     <Compile Include="PackageIdentity.cs" />
     <Compile Include="PackageSource.cs" />
-    <Compile Include="ResolverContext.cs" />
+    <Compile Include="Resolution\ActionResolver.cs" />
+    <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />
     <Compile Include="Strings.Designer.cs">

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client;
+using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {

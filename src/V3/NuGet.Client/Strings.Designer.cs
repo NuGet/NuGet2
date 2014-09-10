@@ -61,6 +61,24 @@ namespace NuGet.Client {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
+        /// </summary>
+        internal static string ActionResolver_UnsupportedAction {
+            get {
+                return ResourceManager.GetString("ActionResolver_UnsupportedAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported Dependency Behavior &apos;{0}&apos;..
+        /// </summary>
+        internal static string ActionResolver_UnsupportedDependencyBehavior {
+            get {
+                return ResourceManager.GetString("ActionResolver_UnsupportedDependencyBehavior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create a NuGet Repository from the Aggregate Source.
         /// </summary>
         internal static string NuGetRepository_CannotCreateAggregateRepo {
@@ -84,24 +102,6 @@ namespace NuGet.Client {
         internal static string PackageActionDescriptionWrapper_UnrecognizedAction {
             get {
                 return ResourceManager.GetString("PackageActionDescriptionWrapper_UnrecognizedAction", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
-        /// </summary>
-        internal static string V2InteropActionResolver_UnrecognizedAction {
-            get {
-                return ResourceManager.GetString("V2InteropActionResolver_UnrecognizedAction", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported Dependency Behavior &apos;{0}&apos;..
-        /// </summary>
-        internal static string V2InteropActionResolver_UnsupportedDependencyBehavior {
-            get {
-                return ResourceManager.GetString("V2InteropActionResolver_UnsupportedDependencyBehavior", resourceCulture);
             }
         }
     }

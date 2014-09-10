@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NuGet.Client
+namespace NuGet.Client.Resolution
 {
-    public class ResolverContext
+    public class ResolutionContext
     {
         public DependencyBehavior DependencyBehavior { get; set; }
         public bool AllowPrerelease { get; set; }

@@ -37,5 +37,10 @@ namespace NuGet.Client
                 .Add(Version)
                 .CombinedHash;
         }
+
+        public override string ToString()
+        {
+            return Id + " " + Version.ToString();
+        }
     }
 }

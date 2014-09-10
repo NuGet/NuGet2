@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
+using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client
 {
@@ -55,5 +56,12 @@ namespace NuGet.Client
         /// </summary>
         /// <returns></returns>
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
+
+        /// <summary>
+        /// Executes the specified action against this installation target.
+        /// </summary>
+        /// <param name="actions"></param>
+        /// <returns></returns>
+        public abstract Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions);
     }
 }

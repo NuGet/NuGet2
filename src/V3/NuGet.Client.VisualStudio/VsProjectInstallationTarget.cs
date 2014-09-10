@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
+using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -73,6 +74,13 @@ namespace NuGet.Client.VisualStudio
                 _projectManager.LocalRepository.Search(searchTerm, allowPrereleaseVersions: true)
                     .Skip(skip).Take(take).ToList()
                     .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
+        }
+
+        public override Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
+        {
+            // No-op temporarily
+            return Task.FromResult(0);
+            //throw new NotImplementedException();
         }
     }
 }

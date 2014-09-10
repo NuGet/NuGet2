@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
+using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -112,55 +113,59 @@ namespace NuGet.Client.VisualStudio.UI
             PreviewActions(actions);
         }
 
-        private Task<IEnumerable<PackageActionDescription>> ResolveActions(PackageActionType action)
+        private async Task<IEnumerable<PackageAction>> ResolveActions(PackageActionType action)
         {
-            //var package = (PackageDetailControlModel)DataContext;
-            //Control.SetBusy(true);
-            //var actions = await Session.CreateActionResolver().ResolveActions(
-            //    action,
-            //    new PackageIdentity(package.Package.Id, package.Package.Version),
-            //    new ResolverContext()
-            //    {
-            //        DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
-            //        AllowPrerelease = false
-            //    });
-            //Control.SetBusy(false);
-            //return actions;
-            return Task.FromResult(Enumerable.Empty<PackageActionDescription>());
+            var package = (PackageDetailControlModel)DataContext;
+            Control.SetBusy(true);
+
+            // Create a resolver
+            var resolver = new ActionResolver(
+                Control.Sources.ActiveRepository,
+                Control.Target,
+                new ResolutionContext()
+                {
+                    DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
+                    AllowPrerelease = false
+                });
+            
+            // Resolve actions
+            var actions = await resolver.ResolveActionsAsync(package.Package.Id, package.Package.Version, action);
+
+            Control.SetBusy(false);
+            return actions;
         }
 
         private void PreviewActions(
-            IEnumerable<PackageActionDescription> actions)
+            IEnumerable<PackageAction> actions)
         {
-            //// Show result
-            //// values:
-            //// 1: unchanged
-            //// 0: deleted
-            //// 2: added
-            //var packageStatus = Session
-            //    .GetInstalledPackageList()
-            //    .GetInstalledPackages()
-            //    .ToDictionary(p => /* key */ p, _ => /* value */ 1);
+            // Show result
+            // values:
+            // 1: unchanged
+            // 0: deleted
+            // 2: added
+            var packageStatus = Control.Target
+                .GetInstalledPackages()
+                .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
-            //foreach (var action in actions)
-            //{
-            //    if (action.ActionType == PackageActionType.Install)
-            //    {
-            //        packageStatus[action.PackageName] = 2;
-            //    }
-            //    else if (action.ActionType == PackageActionType.Uninstall)
-            //    {
-            //        packageStatus[action.PackageName] = 0;
-            //    }
-            //}
+            foreach (var action in actions)
+            {
+                if (action.ActionType == PackageActionType.Install)
+                {
+                    packageStatus[action.PackageName] = 2;
+                }
+                else if (action.ActionType == PackageActionType.Uninstall)
+                {
+                    packageStatus[action.PackageName] = 0;
+                }
+            }
 
-            //var w = new PreviewWindow(
-            //    unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
-            //    deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
-            //    added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
-            //w.Owner = Window.GetWindow(Control);
-            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            //w.ShowDialog();
+            var w = new PreviewWindow(
+                unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
+                deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
+                added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
+            w.Owner = Window.GetWindow(Control);
+            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            w.ShowDialog();
         }
 
         private void PerformPackageAction(PackageActionType action)
@@ -214,7 +219,7 @@ namespace NuGet.Client.VisualStudio.UI
             model.CreateVersions(installedVersion);
         }
 
-        protected bool ShowLicenseAgreement(IEnumerable<PackageActionDescription> operations)
+        protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
         {
             var licensePackages = operations.Where(op => 
                 op.ActionType == PackageActionType.Install &&
