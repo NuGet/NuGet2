@@ -111,7 +111,7 @@ namespace NuGet.ServerExtensions
         private TimeSpan GetTimeout()
         {
             TimeSpan timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
-            return (timeout.Seconds <= 0) ? TimeSpan.FromMinutes(5) : timeout;
+            return (timeout.TotalSeconds <= 0) ? TimeSpan.FromMinutes(5) : timeout;
         }
 
         private SemanticVersion GetVersion()
