@@ -41,7 +41,8 @@ namespace NuGet.Commands
             ".csproj",
             ".vbproj",
             ".fsproj",
-            ".nproj"
+            ".nproj",
+            ".dxjsproj"
         };
 
         private Version _minClientVersionValue;

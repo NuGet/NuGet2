@@ -57,6 +57,7 @@ namespace NuGet.VisualStudio
                 VsConstants.CppProjectTypeGuid,
                 VsConstants.SynergexProjectTypeGuid,
                 VsConstants.NomadForVisualStudioProjectTypeGuid,
+                VsConstants.DxJsProjectTypeGuid
             };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
