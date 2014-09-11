@@ -42,6 +42,7 @@ namespace NuGet.Commands
             ".vbproj",
             ".fsproj",
             ".nproj",
+            ".btproj",
             ".dxjsproj"
         };
 
