@@ -5,8 +5,16 @@ using System.Text;
 
 namespace NuGet.Client.Interop
 {
-    class V3InteropPackageManager : IPackageManager
+    internal class CoreInteropPackageManager : IPackageManager
     {
+        private CoreInteropSharedRepository _sharedRepo;
+
+        public CoreInteropPackageManager(CoreInteropSharedRepository sharedRepo)
+        {
+            _sharedRepo = sharedRepo;
+        }
+
+        #region Unimplemented Stuff
         public IFileSystem FileSystem
         {
             get
@@ -21,7 +29,7 @@ namespace NuGet.Client.Interop
 
         public ISharedPackageRepository LocalRepository
         {
-            get { throw new NotImplementedException(); }
+            get { return _sharedRepo; }
         }
 
         public ILogger Logger
@@ -76,7 +84,8 @@ namespace NuGet.Client.Interop
 
         public bool IsProjectLevel(IPackage package)
         {
-            throw new NotImplementedException();
+            // THIS ONE IS NEXT!
+            
         }
 
         public bool BindingRedirectEnabled
@@ -100,5 +109,6 @@ namespace NuGet.Client.Interop
         {
             throw new NotImplementedException();
         }
+        #endregion
     }
 }

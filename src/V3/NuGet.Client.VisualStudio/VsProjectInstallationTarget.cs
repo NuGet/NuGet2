@@ -17,6 +17,7 @@ namespace NuGet.Client.VisualStudio
     public class VsProjectInstallationTarget : InstallationTarget
     {
         private readonly IProjectManager _projectManager;
+        private readonly ProjectInstalledPackagesList _installedList;
 
         public Project Project { get; private set; }
 
@@ -25,10 +26,16 @@ namespace NuGet.Client.VisualStudio
             get { return Project.Name; }
         }
 
+        public override InstalledPackagesList Installed
+        {
+            get { return _installedList; }
+        }
+
         public VsProjectInstallationTarget(Project project, IProjectManager projectManager)
         {
             Project = project;
             _projectManager = projectManager;
+            _installedList = new ProjectInstalledPackagesList(projectManager.LocalRepository);
         }
 
         public static VsProjectInstallationTarget Create(Project project)
@@ -39,41 +46,9 @@ namespace NuGet.Client.VisualStudio
             return new VsProjectInstallationTarget(project, projectManager);
         }
 
-        public override IEnumerable<PackageIdentity> GetInstalledPackages()
-        {
-            return _projectManager.LocalRepository.GetPackages().Select(p => new PackageIdentity(
-                p.Id,
-                new NuGetVersion(p.Version.Version, p.Version.SpecialVersion, null)));
-        }
-
-        public override NuGetVersion GetInstalledVersion(string packageId)
-        {
-            var package = _projectManager.LocalRepository.FindPackage(packageId);
-            if (package == null)
-            {
-                return null;
-            }
-            return new NuGetVersion(package.Version.Version, package.Version.SpecialVersion);
-        }
-
-        public override bool IsInstalled(string packageId, NuGetVersion packageVersion)
-        {
-            return _projectManager.LocalRepository.Exists(
-                packageId,
-                new SemanticVersion(packageVersion.Version, packageVersion.Release));
-        }
-
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             yield return Project.GetTargetFrameworkName();
-        }
-
-        public override Task<IEnumerable<JObject>> SearchInstalledPackages(string searchTerm, int skip, int take, CancellationToken cancelToken)
-        {
-            return Task.FromResult(
-                _projectManager.LocalRepository.Search(searchTerm, allowPrereleaseVersions: true)
-                    .Skip(skip).Take(take).ToList()
-                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
         }
 
         public override Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
@@ -81,6 +56,13 @@ namespace NuGet.Client.VisualStudio
             // No-op temporarily
             return Task.FromResult(0);
             //throw new NotImplementedException();
+        }
+
+        public override Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects()
+        {
+            return Task.FromResult(
+                _projectManager.PackageManager.LocalRepository.LoadProjectRepositories()
+                    .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList(r)));
         }
     }
 }

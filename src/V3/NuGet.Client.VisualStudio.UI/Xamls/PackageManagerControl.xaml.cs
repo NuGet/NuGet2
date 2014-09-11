@@ -166,7 +166,7 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Summary = package.Value<string>("summary");
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
 
-                    var installedVersion = _target.GetInstalledVersion(searchResultPackage.Id);
+                    var installedVersion = _target.Installed.GetInstalledVersion(searchResultPackage.Id);
                     if (installedVersion != null)
                     {
                         if (installedVersion < searchResultPackage.Version)
@@ -278,7 +278,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
-                        Target.SearchInstalledPackages(
+                        Target.Installed.Search(
                             searchText,
                             startIndex,
                             PageSize,
@@ -331,7 +331,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 if (_forProject)
                 {
-                    var installedVersion = Target.GetInstalledVersion(selectedPackage.Id);
+                    var installedVersion = Target.Installed.GetInstalledVersion(selectedPackage.Id);
                     _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
                     _packageDetail.Visibility = System.Windows.Visibility.Visible;
                 }
@@ -377,7 +377,7 @@ namespace NuGet.Client.VisualStudio.UI
             var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
 
             // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
-            foreach (var package in Target.GetInstalledPackages())
+            foreach (var package in Target.Installed.GetAllPackages())
             {
                 installedPackages[package.Id] = package.Version;
             }

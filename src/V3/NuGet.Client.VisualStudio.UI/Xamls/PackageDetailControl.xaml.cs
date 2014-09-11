@@ -157,7 +157,8 @@ namespace NuGet.Client.VisualStudio.UI
             // 0: deleted
             // 2: added
             var packageStatus = Control.Target
-                .GetInstalledPackages()
+                .Installed
+                .GetAllPackages()
                 .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
             foreach (var action in actions)
@@ -206,7 +207,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            var isInstalled = Control.Target.IsInstalled(model.Package.Id, model.Package.Version);
+            var isInstalled = Control.Target.Installed.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -228,7 +229,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             UpdateInstallUninstallButton();
-            var installedVersion = Control.Target.GetInstalledVersion(model.Package.Id);
+            var installedVersion = Control.Target.Installed.GetInstalledVersion(model.Package.Id);
             model.CreateVersions(installedVersion);
         }
 
