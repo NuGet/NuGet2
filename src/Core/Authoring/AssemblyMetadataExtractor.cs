@@ -32,7 +32,6 @@ namespace NuGet
         public static void ExtractMetadata(PackageBuilder builder, string assemblyPath)
         {
             AssemblyMetadata assemblyMetadata = GetMetadata(assemblyPath);
-            builder.Id = assemblyMetadata.Name;
             builder.Version = assemblyMetadata.Version;
             builder.Title = assemblyMetadata.Title;
             builder.Description = assemblyMetadata.Description;
@@ -42,6 +41,16 @@ namespace NuGet
             {
                 builder.Authors.Add(assemblyMetadata.Company);
             }
+
+            builder.Properties.AddRange(assemblyMetadata.Properties);
+
+            // Let the id be overriden by AssemblyMetadataAttribute
+            // This preserves the existing behavior if no id metadata 
+            // is provided by the assembly.
+            if (builder.Properties.ContainsKey("id"))
+                builder.Id = builder.Properties["id"];
+            else
+                builder.Id = assemblyMetadata.Name;
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "It's constructed using CreateInstanceAndUnwrap in another app domain")]
@@ -87,14 +96,14 @@ namespace NuGet
                         version = new SemanticVersion(assemblyName.Version);
                     }
 
-                    return new AssemblyMetadata
+                    return new AssemblyMetadata(GetProperties(attributes))
                     {
                         Name = assemblyName.Name,
                         Version = version,
                         Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(attributes),
                         Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(attributes),
                         Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(attributes),
-                        Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(attributes)
+                        Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(attributes),
                     };
                 }
                 finally
@@ -118,6 +127,33 @@ namespace NuGet
                     }
                 }
                 return null;
+            }
+
+            private static Dictionary<string, string> GetProperties(IList<CustomAttributeData> attributes)
+            {
+                var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                // NOTE: we make this check only by attribute type fullname, and we try to duck
+                // type it, therefore enabling the same metadata extesibility behavior for other platforms
+                // that don't define the attribute already as part of the framework. 
+                // A package author could simply declare this attribute in his own project, using 
+                // the same namespace and members, and we'd pick it up automatically. This is consistent 
+                // with what MS did in the past with the System.Runtime.CompilerServices.ExtensionAttribute 
+                // which allowed Linq to be re-implemented for .NET 2.0 :).
+                var attributeName = typeof(AssemblyMetadataAttribute).FullName;
+                foreach (var attribute in attributes.Where(x => 
+                    x.Constructor.DeclaringType.FullName == attributeName && 
+                    x.ConstructorArguments.Count == 2))
+                {
+                    string key = attribute.ConstructorArguments[0].Value.ToString();
+                    string value = attribute.ConstructorArguments[1].Value.ToString();
+                    // Return the value only if it isn't null or empty so that we can use ?? to fall back
+                    if (!String.IsNullOrEmpty(key) && !String.IsNullOrEmpty(value))
+                    {
+                        properties[key] = value;
+                    }
+                }
+
+                return properties;
             }
         }
     }

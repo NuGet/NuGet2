@@ -151,6 +151,16 @@ namespace NuGet.Commands
 
             var projectAuthor = InitializeProperties(builder);
 
+            // Only override properties from assembly extracted metadata if they haven't 
+            // been specified also at construction time for the factory (that is, 
+            // console properties always take precedence.
+            foreach (var key in builder.Properties.Keys)
+            {
+                if (!_properties.ContainsKey(key) && 
+                    !ProjectProperties.ContainsKey(key))
+                    _properties.Add(key, builder.Properties[key]);
+            }
+
             // If the package contains a nuspec file then use it for metadata
             Manifest manifest = ProcessNuspec(builder, basePath);
 
@@ -199,7 +209,13 @@ namespace NuGet.Commands
             // Set the properties that were resolved from the assembly/project so they can be
             // resolved by name if the nuspec contains tokens
             _properties.Clear();
-            _properties.Add("Id", metadata.Id);
+
+            // Allow Id to be overriden by cmd line properties
+            if (ProjectProperties.ContainsKey("Id"))
+                _properties.Add("Id", ProjectProperties["Id"]);
+            else
+                _properties.Add("Id", metadata.Id);
+            
             _properties.Add("Version", metadata.Version.ToString());
 
             if (!String.IsNullOrEmpty(metadata.Title))
@@ -228,7 +244,8 @@ namespace NuGet.Commands
         dynamic IPropertyProvider.GetPropertyValue(string propertyName)
         {
             string value;
-            if (!_properties.TryGetValue(propertyName, out value))
+            if (!_properties.TryGetValue(propertyName, out value) && 
+                !ProjectProperties.TryGetValue(propertyName, out value))
             {
                 ProjectProperty property = _project.GetProperty(propertyName);
                 if (property != null)

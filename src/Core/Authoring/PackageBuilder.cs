@@ -57,6 +57,7 @@ namespace NuGet
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
             Tags = new HashSet<string>();
+            Properties = new Dictionary<string, string>();
         }
 
         public string Id
@@ -144,6 +145,16 @@ namespace NuGet
         }
 
         public ISet<string> Tags
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Exposes the additional properties extracted by the metadata 
+        /// extractor or received from the command line.
+        /// </summary>
+        public Dictionary<string, string> Properties
         {
             get;
             private set;
