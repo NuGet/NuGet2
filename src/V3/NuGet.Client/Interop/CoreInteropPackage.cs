@@ -4,14 +4,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 using OldSemVer = NuGet.SemanticVersion;
 
 namespace NuGet.Client.Interop
 {
-    internal class V3InteropPackage : IPackage
+    internal class CoreInteropPackage : IPackage
     {
         private OldSemVer _oldVer;
+        private JObject _json;
 
         public string Id { get; private set; }
         public NuGetVersion Version { get; private set; }
@@ -21,11 +23,17 @@ namespace NuGet.Client.Interop
             get { return _oldVer; }
         }
  
-        public V3InteropPackage(string id, NuGetVersion version)
+        public CoreInteropPackage(string id, NuGetVersion version)
         {
             Id = id;
             Version = version;
             _oldVer = new SemanticVersion(version.Version, version.Release);
+        }
+
+        public CoreInteropPackage(JObject j)
+            : this(j.Value<string>("id"), NuGetVersion.Parse(j.Value<string>("version")))
+        {
+            _json = j;
         }
 
         #region Unimplemented Parts

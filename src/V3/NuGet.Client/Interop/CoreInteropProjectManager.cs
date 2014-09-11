@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.Interop
 {
-    internal class V3InteropProjectManager : IProjectManager
+    internal class CoreInteropProjectManager : IProjectManager
     {
         private readonly SourceRepository _source;
         private readonly InstallationTarget _target;
-        private readonly V3InteropLocalRepository _localRepo;
-        private readonly V3InteropPackageManager _pacman;
+        private readonly CoreInteropSharedRepository _sharedRepo;
+        private readonly CoreInteropPackageManager _pacman;
 
         public IPackageRepository LocalRepository
         {
-            get { return _localRepo; }
+            get { return _sharedRepo; }
         }
 
         public IPackageManager PackageManager
@@ -63,13 +63,13 @@ namespace NuGet.Client.Interop
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving;
 #pragma warning restore 0067
 
-        public V3InteropProjectManager(InstallationTarget target, SourceRepository activeSource)
+        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
         {
             _target = target;
             _source = activeSource;
 
-            _localRepo = new V3InteropLocalRepository();
-            _pacman = new V3InteropPackageManager();
+            _sharedRepo = new CoreInteropSharedRepository(target);
+            _pacman = new CoreInteropPackageManager(_sharedRepo);
         }
 
         public void Execute(PackageOperation operation)

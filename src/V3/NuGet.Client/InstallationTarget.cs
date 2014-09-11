@@ -22,34 +22,13 @@ namespace NuGet.Client
         public abstract string Name { get; }
 
         /// <summary>
-        /// Searches the list of installed packages
+        /// Gets a list of packages installed in the target
         /// </summary>
-        /// <param name="searchTerm"></param>
-        /// <param name="cancelToken"></param>
-        /// <returns>Returns a list of JSON objects suitable for rendering by the Package Manager Dialog</returns>
-        public abstract Task<IEnumerable<JObject>> SearchInstalledPackages(string searchTerm, int skip, int take, CancellationToken cancelToken);
+        public abstract InstalledPackagesList Installed { get; }
 
-        /// <summary>
-        /// Retrieves a list of installed packages
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public abstract IEnumerable<PackageIdentity> GetInstalledPackages();
-
-        /// <summary>
-        /// Retrieves either a) null if the specified package is not installed or b) the version that is installed.
-        /// </summary>
-        /// <param name="packageId"></param>
-        /// <returns></returns>
-        public abstract NuGetVersion GetInstalledVersion(string packageId);
-
-        /// <summary>
-        /// Returns a boolean indicating if a package with the specific ID/Version pair is installed.
-        /// </summary>
-        /// <param name="packageId"></param>
-        /// <param name="packageVersion"></param>
-        /// <returns></returns>
-        public abstract bool IsInstalled(string packageId, NuGetVersion packageVersion);
+        #region Ugly stuff that needs to be reviewed and reorganized
+        public abstract Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects();
+        #endregion
 
         /// <summary>
         /// Gets the list of frameworks supported by this target.

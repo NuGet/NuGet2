@@ -25,30 +25,46 @@ namespace NuGet.Client.Resolution
             _context = context;
         }
 
-        public Task<IEnumerable<PackageAction>> ResolveActionsAsync(
+        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(
             string id,
             NuGetVersion version,
             PackageActionType operation)
         {
-            //// Construct the Action Resolver
-            //var resolver = new OldResolver();
+            // Construct the Action Resolver
+            var resolver = new OldResolver();
 
-            //// Apply context settings
-            //ApplyContext(resolver);
+            // Apply context settings
+            ApplyContext(resolver);
 
-            //// Add the operation request
-            //resolver.AddOperation(
-            //    MapAction(operation),
-            //    CreateVirtualPackage(id, version));
+            // Add the operation request
+            resolver.AddOperation(
+                MapNewToOldActionType(operation),
+                CreateVirtualPackage(id, version),
+                new CoreInteropProjectManager(_target, _source));
 
-            //// Resolve actions!
-            //var actions = 
-            return Task.FromResult(Enumerable.Empty<PackageAction>());
+            // Resolve actions!
+            var actions = await Task.Factory.StartNew(() => resolver.ResolveActions());
+            
+            // Convert the actions and return them
+            return from action in actions
+                   let projectAction = action as PackageProjectAction
+                   select new PackageAction(
+                       MapOldToNewActionType(action.ActionType),
+                       new PackageIdentity(
+                           action.Package.Id,
+                           new NuGetVersion(
+                                action.Package.Version.Version,
+                                action.Package.Version.SpecialVersion)),
+                       PackageJsonLd.CreatePackage(action.Package),
+                       (projectAction != null ?
+                            projectAction.ProjectManager.Project.ProjectName :
+                            String.Empty));
+
         }
 
         private IPackage CreateVirtualPackage(string id, NuGetVersion version)
         {
-            return new V3InteropPackage(id, version);
+            return new CoreInteropPackage(id, version);
         }
 
         private void ApplyContext(OldResolver resolver)
@@ -81,15 +97,38 @@ namespace NuGet.Client.Resolution
             case DependencyBehavior.Highest:
                 return DependencyVersion.Highest;
             default:
-                throw new InvalidOperationException(
+                throw new ArgumentException(
                     String.Format(
                         CultureInfo.CurrentCulture,
                         Strings.ActionResolver_UnsupportedDependencyBehavior,
-                        behavior));
+                        behavior),
+                    "behavior");
             }
         }
 
-        private NuGet.PackageAction MapAction(PackageActionType operation)
+        private PackageActionType MapOldToNewActionType(Resolver.PackageActionType packageActionType)
+        {
+            switch (packageActionType)
+            {
+            case NuGet.Resolver.PackageActionType.Install:
+                return PackageActionType.Install;
+            case NuGet.Resolver.PackageActionType.Uninstall:
+                return PackageActionType.Uninstall;
+            case NuGet.Resolver.PackageActionType.AddToPackagesFolder:
+                return PackageActionType.Download;
+            case NuGet.Resolver.PackageActionType.DeleteFromPackagesFolder:
+                return PackageActionType.Purge;
+            default:
+                throw new ArgumentException(
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        Strings.ActionResolver_UnsupportedAction,
+                        packageActionType),
+                    "packageActionType");
+            }
+        }
+
+        private NuGet.PackageAction MapNewToOldActionType(PackageActionType operation)
         {
             switch (operation)
             {
@@ -98,11 +137,12 @@ namespace NuGet.Client.Resolution
             case PackageActionType.Uninstall:
                 return NuGet.PackageAction.Uninstall;
             default:
-                throw new InvalidOperationException(
+                throw new ArgumentException(
                     String.Format(
                         CultureInfo.CurrentCulture,
                         Strings.ActionResolver_UnsupportedAction,
-                        operation));
+                        operation),
+                    "operation");
             }
         }
     }
