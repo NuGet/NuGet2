@@ -267,6 +267,17 @@ namespace NuGet.Test
             Assert.Equal(expected, semVer.ToString());
         }
 
+        [Theory]
+        [PropertyDataAttribute("ToStringFromVersionData")]
+        public void ToStringFromStringFormat(Version version, string specialVersion, string expected)
+        {
+            // Act
+            NuGetVersion semVer = new NuGetVersion(version, specialVersion);
+
+            // Assert
+            Assert.Equal(expected, String.Format("{0}", semVer));
+        }
+
         [Fact]
         public void TryParseStrictParsesStrictVersion()
         {
