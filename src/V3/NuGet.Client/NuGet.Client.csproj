@@ -65,7 +65,6 @@
     <Compile Include="Diagnostics\NuGetTraceSources.cs" />
     <Compile Include="Diagnostics\TraceSourceExtensions.cs" />
     <Compile Include="FileConflictAction.cs" />
-    <Compile Include="FrameworkNameHelpers.cs" />
     <Compile Include="InstallationTarget.cs" />
     <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />

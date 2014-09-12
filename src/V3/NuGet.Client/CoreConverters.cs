@@ -81,6 +81,11 @@ namespace NuGet.Client
 
         internal static IVersionSpec SafeToVerSpec(VersionRange versionRange)
         {
+            if (versionRange == null)
+            {
+                return null;
+            }
+
             return new VersionSpec()
             {
                 IsMaxInclusive = versionRange.IsMaxInclusive,

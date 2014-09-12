@@ -108,31 +108,43 @@ namespace NuGet.Client.VisualStudio.UI
 
         private async void Preview(PackageActionType action)
         {
-            var actions = await ResolveActions(action);
+            try
+            {
+                var actions = await ResolveActions(action);
 
-            PreviewActions(actions);
+                PreviewActions(actions);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // TODO: Is this the only reason for this exception???
+                MessageBox.Show("Temporary Message! Clean this up!" + Environment.NewLine + ex.Message, "Temporary Message");
+            }
         }
 
         private async Task<IEnumerable<PackageAction>> ResolveActions(PackageActionType action)
         {
             var package = (PackageDetailControlModel)DataContext;
-            Control.SetBusy(true);
-
-            // Create a resolver
-            var resolver = new ActionResolver(
-                Control.Sources.ActiveRepository,
-                Control.Target,
-                new ResolutionContext()
-                {
-                    DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
-                    AllowPrerelease = false
-                });
             
-            // Resolve actions
-            var actions = await resolver.ResolveActionsAsync(package.Package.Id, package.Package.Version, action);
+            Control.SetBusy(true);
+            try
+            {
+                // Create a resolver
+                var resolver = new ActionResolver(
+                    Control.Sources.ActiveRepository,
+                    Control.Target,
+                    new ResolutionContext()
+                    {
+                        DependencyBehavior = ((DependencyBehaviorItem)_dependencyBehavior.SelectedItem).Behavior,
+                        AllowPrerelease = false
+                    });
 
-            Control.SetBusy(false);
-            return actions;
+                // Resolve actions
+                return await resolver.ResolveActionsAsync(package.Package.Id, package.Package.Version, action);
+            }
+            finally
+            {
+                Control.SetBusy(false);
+            }
         }
 
         private void PreviewActions(
