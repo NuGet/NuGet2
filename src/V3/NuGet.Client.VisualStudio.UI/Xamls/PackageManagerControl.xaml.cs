@@ -239,7 +239,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var fxName = set.Value<string>("targetFramework");
                 return new UiPackageDependencySet(
-                    String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelpers.ParseFrameworkName(fxName),
+                    String.IsNullOrEmpty(fxName) ? null : new FrameworkName(fxName),
                     (set.Value<JArray>("dependencies") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
