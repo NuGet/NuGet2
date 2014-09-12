@@ -59,11 +59,18 @@
     <Compile Include="..\..\..\Common\HashCodeCombiner.cs">
       <Link>HashCodeCombiner.cs</Link>
     </Compile>
+    <Compile Include="CoreConverters.cs" />
     <Compile Include="DependencyBehavior.cs" />
+    <Compile Include="Diagnostics\NuGetEventIds.cs" />
+    <Compile Include="Diagnostics\NuGetTraceSources.cs" />
+    <Compile Include="Diagnostics\TraceSourceExtensions.cs" />
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="FrameworkNameHelpers.cs" />
     <Compile Include="InstallationTarget.cs" />
+    <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />
+    <Compile Include="Interop\CoreInteropConstraintProvider.cs" />
+    <Compile Include="Interop\CoreInteropSourceRepository.cs" />
     <Compile Include="Interop\PackageJsonLd.cs" />
     <Compile Include="Interop\V2SourceRepository.cs" />
     <Compile Include="ProjectInstalledPackagesList.cs" />
@@ -83,7 +90,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Uris.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchFilter.cs" />
   </ItemGroup>

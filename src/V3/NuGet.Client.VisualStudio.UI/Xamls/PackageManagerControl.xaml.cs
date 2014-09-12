@@ -166,10 +166,10 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Summary = package.Value<string>("summary");
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
 
-                    var installedVersion = _target.Installed.GetInstalledVersion(searchResultPackage.Id);
-                    if (installedVersion != null)
+                    var installedPackage = _target.Installed.GetInstalledPackage(searchResultPackage.Id);
+                    if (installedPackage != null)
                     {
-                        if (installedVersion < searchResultPackage.Version)
+                        if (installedPackage.Identity.Version < searchResultPackage.Version)
                         {
                             searchResultPackage.Status = PackageStatus.UpdateAvailable;
                         }
@@ -331,8 +331,9 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 if (_forProject)
                 {
-                    var installedVersion = Target.Installed.GetInstalledVersion(selectedPackage.Id);
-                    _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
+                    var installedPackage = Target.Installed.GetInstalledPackage(selectedPackage.Id);
+	                var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
+    	            _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
                     _packageDetail.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
@@ -377,9 +378,9 @@ namespace NuGet.Client.VisualStudio.UI
             var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
 
             // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
-            foreach (var package in Target.Installed.GetAllPackages())
+            foreach (var packageReference in Target.Installed.GetInstalledPackageReferences())
             {
-                installedPackages[package.Id] = package.Version;
+                installedPackages[packageReference.Identity.Id] = packageReference.Identity.Version;
             }
 
             foreach (var item in _packageList.ItemsSource)

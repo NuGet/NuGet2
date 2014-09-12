@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
+using NuGet.Client.Diagnostics;
 
 namespace NuGet.Client.Interop
 {
@@ -10,16 +12,17 @@ namespace NuGet.Client.Interop
     /// </summary>
     internal class CoreInteropLocalRepository : IPackageRepository
     {
-        private readonly InstalledPackagesList _installed;
+        protected InstalledPackagesList Installed { get; private set; }
 
         public CoreInteropLocalRepository(InstalledPackagesList installed)
         {
-            _installed = installed;
+            Installed = installed;
         }
 
         public IQueryable<IPackage> GetPackages()
         {
-            return _installed.GetAllInstalledPackagesAndMetadata().Result
+            NuGetTraceSources.CoreInterop.Verbose("getinstalledpackages", "Retrieved all installed packages.");
+            return Installed.GetAllInstalledPackagesAndMetadata().Result
                 .Select(j => new CoreInteropPackage(j))
                 .AsQueryable();
         }
@@ -62,7 +65,7 @@ namespace NuGet.Client.Interop
     /// <summary>
     /// ISharedPackageRepository designed to wrap the InstallationTarget up for NuGet.Core-interop.
     /// </summary>
-    internal class CoreInteropSharedRepository : CoreInteropLocalRepository, ISharedPackageRepository
+    internal class CoreInteropSharedRepository : CoreInteropLocalRepository, ISharedPackageRepository, IPackageReferenceRepository
     {
         private readonly InstallationTarget _target;
         
@@ -94,8 +97,25 @@ namespace NuGet.Client.Interop
 
         public IEnumerable<IPackageRepository> LoadProjectRepositories()
         {
+            NuGetTraceSources.CoreInterop.Verbose("loadprojectrepositories", "Project Repositories Loaded");
             return _target.GetInstalledPackagesInAllProjects().Result
                 .Select(p => new CoreInteropLocalRepository(p));
+        }
+
+        public void AddPackage(string packageId, SemanticVersion version, bool developmentDependency, System.Runtime.Versioning.FrameworkName targetFramework)
+        {
+            throw new NotImplementedException();
+        }
+
+        public FrameworkName GetPackageTargetFramework(string packageId)
+        {
+            NuGetTraceSources.CoreInterop.Verbose("getpkgtargetfx", "Get target framework for {0}", packageId);
+            var package = Installed.GetInstalledPackage(packageId);
+            if (package == null)
+            {
+                return null;
+            }
+            return package.TargetFramework;
         }
     }
 }

@@ -158,7 +158,8 @@ namespace NuGet.Client.VisualStudio.UI
             // 2: added
             var packageStatus = Control.Target
                 .Installed
-                .GetAllPackages()
+                .GetInstalledPackageReferences()
+                .Select(p => p.Identity)
                 .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
             foreach (var action in actions)
@@ -229,7 +230,8 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             UpdateInstallUninstallButton();
-            var installedVersion = Control.Target.Installed.GetInstalledVersion(model.Package.Id);
+            var installedPackage = Control.Target.Installed.GetInstalledPackage(model.Package.Id);
+            var installedVersion = installedPackage.Identity.Version;
             model.CreateVersions(installedVersion);
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.Diagnostics;
 
 namespace NuGet.Client.Interop
 {
@@ -12,6 +13,7 @@ namespace NuGet.Client.Interop
         private readonly InstallationTarget _target;
         private readonly CoreInteropSharedRepository _sharedRepo;
         private readonly CoreInteropPackageManager _pacman;
+        private readonly CoreInteropSourceRepository _sourceRepo;
 
         public IPackageRepository LocalRepository
         {
@@ -22,6 +24,35 @@ namespace NuGet.Client.Interop
         {
             get { return _pacman; }
         }
+
+        public IProjectSystem Project
+        {
+            get { return _target.ProjectSystem; }
+        }
+
+        public IPackageConstraintProvider ConstraintProvider
+        {
+            get
+            {
+                return new CoreInteropConstraintProvider(_target.Installed);
+            }
+            set
+            {
+                NuGetTraceSources.CoreInterop.Error("setconstraintprovider", "Someone tried to set the constraint provider for an interop Project Manager! It won't work!!");
+            }
+        }
+
+        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
+        {
+            _target = target;
+            _source = activeSource;
+
+            _sharedRepo = new CoreInteropSharedRepository(target);
+            _sourceRepo = new CoreInteropSourceRepository(activeSource);
+            _pacman = new CoreInteropPackageManager(_sharedRepo, _sourceRepo);
+        }
+
+        #region Unimplemented stuff.
 
         public ILogger Logger
         {
@@ -35,21 +66,9 @@ namespace NuGet.Client.Interop
             }
         }
 
-        public IProjectSystem Project
+        public void Execute(PackageOperation operation)
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IPackageConstraintProvider ConstraintProvider
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
 
         // Suppress 'The event ... is never used' warning
@@ -62,19 +81,6 @@ namespace NuGet.Client.Interop
 
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving;
 #pragma warning restore 0067
-
-        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
-        {
-            _target = target;
-            _source = activeSource;
-
-            _sharedRepo = new CoreInteropSharedRepository(target);
-            _pacman = new CoreInteropPackageManager(_sharedRepo);
-        }
-
-        public void Execute(PackageOperation operation)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

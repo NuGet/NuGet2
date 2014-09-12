@@ -22,12 +22,13 @@ namespace NuGet.Client
         public abstract string Name { get; }
 
         /// <summary>
-        /// Gets a list of packages installed in the target
+        /// Gets a list of packages installed in the target. This is basically an interface to packages.config.
         /// </summary>
         public abstract InstalledPackagesList Installed { get; }
 
         #region Ugly stuff that needs to be reviewed and reorganized
         public abstract Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects();
+        public abstract IProjectSystem ProjectSystem { get; }
         #endregion
 
         /// <summary>

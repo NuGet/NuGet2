@@ -5,35 +5,100 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Diagnostics;
+using NuGet.V3Interop;
 using NuGet.Versioning;
 using OldSemVer = NuGet.SemanticVersion;
 
 namespace NuGet.Client.Interop
 {
-    internal class CoreInteropPackage : IPackage
+    internal class CoreInteropPackage : IPackage, IV3PackageMetadata
     {
         private OldSemVer _oldVer;
-        private JObject _json;
-
+        
         public string Id { get; private set; }
         public NuGetVersion Version { get; private set; }
+        public JObject Json { get; private set; }
 
         OldSemVer IPackageName.Version
         {
             get { return _oldVer; }
         }
  
-        public CoreInteropPackage(string id, NuGetVersion version)
+        public CoreInteropPackage(JObject json)
         {
-            Id = id;
-            Version = version;
-            _oldVer = new SemanticVersion(version.Version, version.Release);
+            Id = json.Value<string>("id");
+            Version = NuGetVersion.Parse(json.Value<string>("version"));
+            _oldVer = CoreConverters.SafeToSemVer(Version);
+        
+            Json = json;
         }
 
-        public CoreInteropPackage(JObject j)
-            : this(j.Value<string>("id"), NuGetVersion.Parse(j.Value<string>("version")))
+        public Version MinClientVersion
         {
-            _json = j;
+            get { return TryGet<Version>(Properties.MinimumClientVersion, System.Version.Parse, expected: true); }
+        }
+
+        public string Language
+        {
+            get { return TryGet(Properties.Language, expected: true); }
+        }
+        
+        public PackageTargets PackageTarget
+        {
+            get
+            {
+                NuGetTraceSources.CoreInterop.Error("packagetarget", "Returning dummy package target value. Need to fill this in with the right data!");
+                return PackageTargets.Project;
+            }
+        }
+
+        public IEnumerable<PackageDependencySet> DependencySets
+        {
+            get 
+            {
+                var sets = Json.Value<JArray>(Properties.DependencyGroups);
+                if (sets != null)
+                {
+                    return sets.Select(t => PackageJsonLd.DependencySetFromJson((JObject)t));
+                }
+                else
+                {
+                    return Enumerable.Empty<PackageDependencySet>();
+                }
+            }
+        }
+
+        // Listed doesn't matter!
+        public bool Listed
+        {
+            get { return true; }
+        }
+
+        private T TryGet<T>(string name, Func<string, T> parser, bool expected = false)
+        {
+            return TryGet(name, default(T), parser, expected);
+        }
+
+        private T TryGet<T>(string name, T defaultValue, Func<string, T> parser, bool expected = false)
+        {
+            string val = TryGet(name, expected);
+
+            if (String.IsNullOrEmpty(val))
+            {
+                return defaultValue;
+            }
+            return parser(val);
+        }
+
+        private string TryGet(string name, bool expected = false)
+        {
+            string val = Json.Value<string>(name);
+            if (expected && val == null)
+            {
+                NuGetTraceSources.CoreInterop.Warning("missingexpectedjsonprop", "Expected {0} property to be surfaced in JSON-LD but it wasn't", name);
+            }
+            return val;
         }
 
         #region Unimplemented Parts
@@ -43,11 +108,6 @@ namespace NuGet.Client.Interop
         }
 
         public bool IsLatestVersion
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public bool Listed
         {
             get { throw new NotImplementedException(); }
         }
@@ -132,11 +192,6 @@ namespace NuGet.Client.Interop
             get { throw new NotImplementedException(); }
         }
 
-        public string Language
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public string Tags
         {
             get { throw new NotImplementedException(); }
@@ -149,20 +204,13 @@ namespace NuGet.Client.Interop
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies
         {
-            get { throw new NotImplementedException(); }
+            get {
+                NuGetTraceSources.CoreInterop.Error("faking_fxasms", "Returning empty framework assemblies because we haven't figured that out yet :)");
+                return Enumerable.Empty<FrameworkAssemblyReference>();
+            }
         }
 
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IEnumerable<PackageDependencySet> DependencySets
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public Version MinClientVersion
         {
             get { throw new NotImplementedException(); }
         }
