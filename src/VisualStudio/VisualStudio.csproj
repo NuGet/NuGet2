@@ -68,7 +68,6 @@
     <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="Utility\SettingsHelper.cs" />
     <Compile Include="VisualStudioUIWrapper.cs" />
-    <Compile Include="VsLoggerManager.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />

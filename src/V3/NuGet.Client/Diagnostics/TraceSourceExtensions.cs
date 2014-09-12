@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
@@ -23,6 +24,11 @@ namespace NuGet
                 TraceEventType.Information,
                 NuGetEventIds.Unspecified,
                 FormatMessage(eventName, format, args));
+        }
+
+        public static void EnterMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        {
+            self.Verbose(method, "[{0}] ({1}:{2})", method, file, line);
         }
 
         public static void Verbose(this TraceSource self, string eventName, string format, params object[] args)

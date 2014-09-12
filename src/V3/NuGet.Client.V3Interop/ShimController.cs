@@ -115,7 +115,7 @@ namespace NuGet.Client.V3Shim
             // If no interceptors want the message create a normal HttpWebRequestMessage
             if (message == null)
             {
-                Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", args.RequestUri.AbsoluteUri), ConsoleColor.Gray);
+                V3InteropTraceSources.ShimController.Verbose("request", "{0} {1}", args.Method, args.RequestUri.AbsoluteUri);
                 message = new HttpWebRequestMessage(args);
             }
 
@@ -188,7 +188,7 @@ namespace NuGet.Client.V3Shim
                         context.UnBatch();
                     }
 
-                    Log(String.Format(CultureInfo.InvariantCulture, "[V3 RUN] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
+                    V3InteropTraceSources.ShimController.Verbose("dispatching", "Dispatching {0} {1}", request.Method, request.RequestUri.AbsoluteUri);
 
                     var t = Task.Run(async () => await dispatcher.Invoke(context));
                     t.Wait();
@@ -197,7 +197,7 @@ namespace NuGet.Client.V3Shim
 
                     timer.Stop();
 
-                    Log(String.Format(CultureInfo.InvariantCulture, "[V3 END] {0}ms", timer.ElapsedMilliseconds), ConsoleColor.Yellow);
+                    V3InteropTraceSources.ShimController.Verbose("dispatched", "Dispatched {0} {1} in {2}ms", request.Method, request.RequestUri.AbsoluteUri, timer.ElapsedMilliseconds);
 
                     response = new ShimWebResponse(stream, request.RequestUri, context.ResponseContentType, context.StatusCode);
                 }
@@ -257,14 +257,14 @@ namespace NuGet.Client.V3Shim
                     {
                         if (dispatcher.TryInit())
                         {
-                            Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] PASSED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Yellow);
-
+                            V3InteropTraceSources.ShimController.Info("dispatcher_init", "Dispatcher initialized. {0} is a V3 Feed", request.RequestUri.AbsoluteUri);
+                            
                             // init was successful, try again using the shim
                             response = CallDispatcher(dispatcher, request, requestStream);
                         }
                         else
                         {
-                            Log(String.Format(CultureInfo.InvariantCulture, "[V3 CHK] FAILED {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
+                            V3InteropTraceSources.ShimController.Info("dispatcher_fail", "Dispatcher failed to initialize. {0} is a V2 Feed", request.RequestUri.AbsoluteUri);
                         }
                     }
                 }
@@ -295,8 +295,8 @@ namespace NuGet.Client.V3Shim
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ms"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
         private WebResponse CallV2(WebRequest request)
         {
-            Log(String.Format(CultureInfo.InvariantCulture, "[V2 REQ] {0}", request.RequestUri.AbsoluteUri), ConsoleColor.Gray);
-
+            V3InteropTraceSources.ShimController.Verbose("v2_request", "V2 {0} {1}", request.Method, request.RequestUri.AbsoluteUri);
+                
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
@@ -308,24 +308,21 @@ namespace NuGet.Client.V3Shim
 
             if (httpResponse != null)
             {
-                Log(String.Format(CultureInfo.InvariantCulture, "[V2 RES] (status:{0}) (time:{1}ms) {2}",
-                    httpResponse.StatusCode, timer.ElapsedMilliseconds, httpResponse.ResponseUri.AbsoluteUri),
-                    httpResponse.StatusCode == HttpStatusCode.OK ? ConsoleColor.Gray : ConsoleColor.Red);
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    V3InteropTraceSources.ShimController.Verbose("v2_response", "V2 {0} {1} ({2}ms)", httpResponse.StatusCode, request.RequestUri.AbsoluteUri, timer.ElapsedMilliseconds);
+                }
+                else
+                {
+                    V3InteropTraceSources.ShimController.Error("v2_response", "V2 {0} {1} ({2}ms)", httpResponse.StatusCode, request.RequestUri.AbsoluteUri, timer.ElapsedMilliseconds);
+                }
             }
             else
             {
-                Log(String.Format(CultureInfo.InvariantCulture, "[V2 RES] (time:{0}ms) {1}", timer.ElapsedMilliseconds, response.ResponseUri.AbsoluteUri), ConsoleColor.Gray);
+                V3InteropTraceSources.ShimController.Verbose("v2_response", "V2 ? {0} ({1}ms)", request.RequestUri.AbsoluteUri, timer.ElapsedMilliseconds);
             }
 
             return response;
-        }
-
-        private void Log(string message, ConsoleColor color)
-        {
-            if (_debugLogger != null)
-            {
-                _debugLogger.Log(message, color);
-            }
         }
 
         private InterceptDispatcher GetDispatcher(Uri uri)

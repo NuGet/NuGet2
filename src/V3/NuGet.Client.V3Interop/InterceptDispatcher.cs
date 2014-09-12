@@ -187,14 +187,14 @@ namespace NuGet.Client.V3Shim
             }
             catch (Exception ex)
             {
-                context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 ERR] (exception:{0}) {1}", ex.GetType().ToString(), context.RequestUri.AbsoluteUri), ConsoleColor.Red);
+                V3InteropTraceSources.Dispatcher.Error("exception", "[{2}] {0} {1}", ex.GetType().ToString(), ex.Message, context.RequestUri.AbsoluteUri);
                 throw;
             }
         }
 
         private async Task DownloadPackage(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] DownloadPackage", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             var urlParts = new List<string>(context.RequestUri.AbsoluteUri.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries));
             urlParts.Reverse();
@@ -211,27 +211,27 @@ namespace NuGet.Client.V3Shim
 
         private async Task Root(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Root", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             await _channel.Root(context);
         }
 
         private async Task Metadata(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Metadata", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             await _channel.Metadata(context);
         }
 
         private async Task Count(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Count", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             await CountImpl(context);
         }
         private async Task Search(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Search", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             await SearchImpl(context);
         }
@@ -258,7 +258,7 @@ namespace NuGet.Client.V3Shim
 
         private async Task FindPackagesById(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] FindPackagesById", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             if (context.Args.Id == null)
             {
@@ -277,14 +277,14 @@ namespace NuGet.Client.V3Shim
 
         private async Task PackageIds(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] PackageIds", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             await _channel.GetListOfPackages(context);
         }
 
         private async Task PackageVersions(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] PackageVersions", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             string path = context.RequestUri.AbsolutePath;
             string id = path.Substring(path.LastIndexOf("/") + 1);
@@ -294,7 +294,7 @@ namespace NuGet.Client.V3Shim
 
         private async Task GetUpdates(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] GetUpdates", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             IDictionary<string, string> arguments = context.Args.Arguments;
 
@@ -310,7 +310,7 @@ namespace NuGet.Client.V3Shim
 
         private async Task Packages(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Packages", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
 
             string path = Uri.UnescapeDataString(context.RequestUri.AbsolutePath);
             string query = context.RequestUri.Query;
@@ -359,41 +359,41 @@ namespace NuGet.Client.V3Shim
 
         private async Task Feed_Metadata(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Feed_Metadata", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
             string feed = ExtractFeed(context.RequestUri.AbsolutePath);
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] feed: {0}", feed), ConsoleColor.DarkGreen);
+            V3InteropTraceSources.Dispatcher.Verbose("metadata_feed", "Feed: {0}", feed);
             await _channel.Metadata(context, feed);
         }
 
         private async Task Feed_Count(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Feed_Count", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
             string feed = ExtractFeed(context.RequestUri.AbsolutePath);
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] feed: {0}", feed), ConsoleColor.DarkGreen);
+            V3InteropTraceSources.Dispatcher.Verbose("count_feed", "Feed: {0}", feed);
             await CountImpl(context, feed);
         }
 
         private async Task Feed_Search(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Feed_Search", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
             string feed = ExtractFeed(context.RequestUri.AbsolutePath);
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] feed: {0}", feed), ConsoleColor.DarkGreen);
+            V3InteropTraceSources.Dispatcher.Verbose("search_feed", "Feed: {0}", feed);
             await SearchImpl(context, feed);
         }
 
         private async Task Feed_FindPackagesById(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Feed_FindPackagesById", ConsoleColor.Green);
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] feed: {0}", ExtractFeed(context.RequestUri.AbsolutePath)), ConsoleColor.DarkGreen);
-
+            V3InteropTraceSources.Dispatcher.EnterMethod();
+            string feed = ExtractFeed(context.RequestUri.AbsolutePath);
+            V3InteropTraceSources.Dispatcher.Verbose("findpackagesbyid_feed", "Feed: {0}", feed);
             await _channel.GetAllPackageVersions(context, context.Args.Id);
         }
 
         private async Task Feed_Packages(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] Feed_Packages", ConsoleColor.Green);
+            V3InteropTraceSources.Dispatcher.EnterMethod();
             string feed = ExtractFeed(context.RequestUri.AbsolutePath);
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] feed: {0}", feed), ConsoleColor.DarkGreen);
+            V3InteropTraceSources.Dispatcher.Verbose("packages_feed", "Feed: {0}", feed);
 
             string path = Uri.UnescapeDataString(context.RequestUri.AbsolutePath);
             path = path.Substring(path.IndexOf(feed) + feed.Length + 1);

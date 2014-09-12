@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.V3Shim;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -21,9 +22,9 @@ namespace NuGet.Client.VisualStudio
 
         private static IEnumerable<TraceSource> AllSources()
         {
-            return Enumerable.Concat(
-                NuGetTraceSources.GetAllSources(),
-                VsNuGetTraceSources.GetAllSources());
+            return NuGetTraceSources.GetAllSources()
+                .Concat(VsNuGetTraceSources.GetAllSources()
+                    .Concat(V3InteropTraceSources.GetAllSources()));
         }
     }
 }
