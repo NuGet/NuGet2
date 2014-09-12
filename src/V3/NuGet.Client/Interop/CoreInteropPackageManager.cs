@@ -1,17 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using NuGet.Client.Diagnostics;
+using NuGet.V3Interop;
 
 namespace NuGet.Client.Interop
 {
     internal class CoreInteropPackageManager : IPackageManager
     {
         private CoreInteropSharedRepository _sharedRepo;
+        private CoreInteropSourceRepository _sourceRepo;
 
-        public CoreInteropPackageManager(CoreInteropSharedRepository sharedRepo)
+        public ISharedPackageRepository LocalRepository
+        {
+            get { return _sharedRepo; }
+        }
+
+        public IPackageRepository SourceRepository
+        {
+            get { return _sourceRepo; }
+        }
+
+        public CoreInteropPackageManager(CoreInteropSharedRepository sharedRepo, CoreInteropSourceRepository sourceRepo)
         {
             _sharedRepo = sharedRepo;
+            _sourceRepo = sourceRepo;
+        }
+
+        public bool IsProjectLevel(IPackage package)
+        {
+            // TODO: Actually implement this!!
+            NuGetTraceSources.CoreInterop.Verbose("isprojectlevel", "IsProjectLevel? {0} {1}", package.Id, package.Version);
+
+            var v3Package = package as IV3PackageMetadata;
+            Debug.Assert(v3Package != null, "This method should only have been called with a CoreInteropPackage...");
+            return v3Package.PackageTarget.HasFlag(PackageTargets.Project);
         }
 
         #region Unimplemented Stuff
@@ -25,11 +50,6 @@ namespace NuGet.Client.Interop
             {
                 throw new NotImplementedException();
             }
-        }
-
-        public ISharedPackageRepository LocalRepository
-        {
-            get { return _sharedRepo; }
         }
 
         public ILogger Logger
@@ -56,11 +76,6 @@ namespace NuGet.Client.Interop
             }
         }
 
-        public IPackageRepository SourceRepository
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public IPackagePathResolver PathResolver
         {
             get { throw new NotImplementedException(); }
@@ -80,12 +95,6 @@ namespace NuGet.Client.Interop
         public void Execute(PackageOperation operation)
         {
             throw new NotImplementedException();
-        }
-
-        public bool IsProjectLevel(IPackage package)
-        {
-            // THIS ONE IS NEXT!
-            
         }
 
         public bool BindingRedirectEnabled

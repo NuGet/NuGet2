@@ -24,5 +24,8 @@ namespace NuGet.Client
             int skip,
             int take,
             CancellationToken cancellationToken);
+
+        public abstract Task<JObject> GetPackageMetadata(string id, NuGetVersion version);
+        public abstract Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId);
     }
 }

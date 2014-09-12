@@ -232,6 +232,8 @@
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
     <Compile Include="FileModifiers\XdtTransformer.cs" />
+    <Compile Include="V3Interop\IV3InteropRepository.cs" />
+    <Compile Include="V3Interop\IV3PackageMetadata.cs" />
     <Reference Include="Microsoft.Data.Edm, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.Edm.5.6.1\lib\net40\Microsoft.Data.Edm.dll</HintPath>

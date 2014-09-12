@@ -26,14 +26,14 @@ namespace NuGet.Client
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public abstract IEnumerable<PackageIdentity> GetAllPackages();
+        public abstract IEnumerable<InstalledPackageReference> GetInstalledPackageReferences();
 
         /// <summary>
         /// Retrieves either a) null if the specified package is not installed or b) the version that is installed.
         /// </summary>
         /// <param name="packageId"></param>
         /// <returns></returns>
-        public abstract NuGetVersion GetInstalledVersion(string packageId);
+        public abstract InstalledPackageReference GetInstalledPackage(string packageId);
 
         /// <summary>
         /// Returns a boolean indicating if a package with the specific ID/Version pair is installed.

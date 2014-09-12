@@ -5,6 +5,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using NuGet.Client.Diagnostics;
 using NuGet.Client.Interop;
 using NuGet.Resolver;
 using NuGet.Versioning;
@@ -17,7 +19,7 @@ namespace NuGet.Client.Resolution
         private readonly SourceRepository _source;
         private readonly InstallationTarget _target;
         private readonly ResolutionContext _context;
-
+        
         public ActionResolver(SourceRepository source, InstallationTarget target, ResolutionContext context)
         {
             _source = source;
@@ -37,6 +39,7 @@ namespace NuGet.Client.Resolution
             ApplyContext(resolver);
 
             // Add the operation request
+            NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), id, version.ToNormalizedString());
             resolver.AddOperation(
                 MapNewToOldActionType(operation),
                 CreateVirtualPackage(id, version),
@@ -55,16 +58,26 @@ namespace NuGet.Client.Resolution
                            new NuGetVersion(
                                 action.Package.Version.Version,
                                 action.Package.Version.SpecialVersion)),
-                       PackageJsonLd.CreatePackage(action.Package),
+                       UnwrapPackage(action.Package),
                        (projectAction != null ?
                             projectAction.ProjectManager.Project.ProjectName :
                             String.Empty));
 
         }
 
+        private JObject UnwrapPackage(IPackage package)
+        {
+            CoreInteropPackage interopPackage = package as CoreInteropPackage;
+            Debug.Assert(interopPackage != null, "Expected a CoreInteropPackage!");
+            return interopPackage.Json;
+        }
+
         private IPackage CreateVirtualPackage(string id, NuGetVersion version)
         {
-            return new CoreInteropPackage(id, version);
+            // Load JSON from source
+            var package = _source.GetPackageMetadata(id, version).Result;
+
+            return new CoreInteropPackage(package);
         }
 
         private void ApplyContext(OldResolver resolver)

@@ -211,7 +211,7 @@ namespace NuGet
             return null;
         }
 
-        private PackageReference GetPackageReference(string packageId)
+        public PackageReference GetPackageReference(string packageId)
         {
             return GetPackageReferences(packageId).FirstOrDefault();
         }
@@ -221,7 +221,7 @@ namespace NuGet
         /// </summary>
         /// <param name="packageId"></param>
         /// <returns></returns>
-        private IEnumerable<PackageReference> GetPackageReferences(string packageId)
+        public IEnumerable<PackageReference> GetPackageReferences(string packageId)
         {
             return _packageReferenceFile.GetPackageReferences()
                                         .Where(reference => IsValidReference(reference) && 

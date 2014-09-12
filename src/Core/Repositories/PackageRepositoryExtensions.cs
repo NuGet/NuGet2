@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Versioning;
 using NuGet.Resources;
+using NuGet.V3Interop;
 
 namespace NuGet
 {
@@ -157,6 +158,12 @@ namespace NuGet
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
         {
+            var directRepo = repository as IV3InteropRepository;
+            if (directRepo != null)
+            {
+                return directRepo.FindPackagesById(packageId);
+            }
+
             var serviceBasedRepository = repository as IPackageLookup;
             if (serviceBasedRepository != null)
             {
