@@ -30,27 +30,17 @@ namespace NuGet.Client.VisualStudio
             {
                 color = ConsoleColor.White;
             }
-            _console.Log("(" + eventCache.DateTime.ToString("O") + ")[" + Shorten(source) + "]" + message, color);
+            _console.Log(eventCache.DateTime, message, eventType, source);
         }
 
         public override void Write(string message)
         {
-            _console.Log(message, ConsoleColor.White);
+            _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
         }
 
         public override void WriteLine(string message)
         {
-            _console.Log(message, ConsoleColor.White);
-        }
-
-        // Shortens NuGet. trace source names.
-        private string Shorten(string source)
-        {
-            if (source.StartsWith("NuGet."))
-            {
-                return source.Split('.').Last();
-            }
-            return source;
+            _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
         }
     }
 }

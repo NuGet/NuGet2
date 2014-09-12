@@ -64,6 +64,7 @@
     <Compile Include="ShimException.cs" />
     <Compile Include="ShimWebResponse.cs" />
     <Compile Include="ShimResponseMessage.cs" />
+    <Compile Include="V3InteropTraceSources.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -88,6 +89,10 @@
     <ProjectReference Include="..\..\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6fd11460-39a3-4a10-ba63-7541b0a7d053}</Project>
       <Name>Console.Types</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
+      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
+      <Name>NuGet.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

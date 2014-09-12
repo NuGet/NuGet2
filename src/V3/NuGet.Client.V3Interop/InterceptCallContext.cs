@@ -26,8 +26,6 @@ namespace NuGet.Client.V3Shim
         public abstract string ResponseContentType { get; set; }
         public abstract Task WriteResponseAsync(byte[] data);
 
-        public abstract void Log(string message, ConsoleColor color);
-
         public abstract MemoryStream RequestStream { get; }
 
         public bool IsBatchRequest { get; set; }

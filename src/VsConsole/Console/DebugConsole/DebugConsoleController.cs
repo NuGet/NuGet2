@@ -5,6 +5,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace NuGetConsole
 {
@@ -16,22 +17,11 @@ namespace NuGetConsole
 
         }
 
-        public void Log(string message)
-        {
-            Log(message, ConsoleColor.White);
-        }
-
-        public void Log(string message, ConsoleColor color)
-        {
-            Log(message, color, null, null, null);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "bytes"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "span")]
-        public void Log(string message, ConsoleColor color, TimeSpan? span, int? bytes, Guid? context)
+        public void Log(DateTime timestamp, string message, TraceEventType level, string source)
         {
             if (OnMessage != null)
             {
-                DebugConsoleMessageEventArgs args = new DebugConsoleMessageEventArgs(message, color);
+                DebugConsoleMessageEventArgs args = new DebugConsoleMessageEventArgs(timestamp, message, level, source);
 
                 OnMessage(this, args);
             }

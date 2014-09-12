@@ -114,14 +114,6 @@ namespace NuGet.Client.V3Shim
                 });
         }
 
-        public override void Log(string message, ConsoleColor color)
-        {
-            if (!String.IsNullOrEmpty(message) && _logger != null)
-            {
-                _logger.Log(message, color);
-            }
-        }
-
         public void Dispose()
         {
             if (_sem != null)

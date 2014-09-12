@@ -79,7 +79,7 @@ namespace NuGet.Client.V3Shim
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public async Task Root(InterceptCallContext context, string feedName = null)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Root: {0}", feedName ?? string.Empty), ConsoleColor.Magenta);
+            V3InteropTraceSources.Channel.Verbose("root", feedName ?? String.Empty);
 
             if (feedName == null)
             {
@@ -117,7 +117,8 @@ namespace NuGet.Client.V3Shim
 
             string address = package["nupkgUrl"].ToString();
 
-            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 PKG] {0}", address.ToString()), ConsoleColor.Cyan);
+
+            V3InteropTraceSources.Channel.Info("downloadingpackage", "Downloading {0}", address);
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
@@ -128,8 +129,14 @@ namespace NuGet.Client.V3Shim
 
             timer.Stop();
 
-            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 PKG] (status:{0}) (time:{1}ms) {2}", response.StatusCode, timer.ElapsedMilliseconds, address.ToString()),
-                response.StatusCode == System.Net.HttpStatusCode.OK ? ConsoleColor.Cyan : ConsoleColor.Red);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                V3InteropTraceSources.Channel.Info("downloadedpackage", "Downloaded {0} in {1}ms", address, timer.ElapsedMilliseconds);
+            }
+            else
+            {
+                V3InteropTraceSources.Channel.Error("downloadedpackage_error", "Error downloading {0} in {1}ms (status {2})", address, timer.ElapsedMilliseconds, response.StatusCode);
+            }
 
             await context.WriteResponse(data, "application/zip");
         }
@@ -137,7 +144,7 @@ namespace NuGet.Client.V3Shim
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public async Task Metadata(InterceptCallContext context, string feed = null)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Metadata: {0}", feed ?? string.Empty), ConsoleColor.Magenta);
+            V3InteropTraceSources.Channel.Verbose("metadata", feed ?? String.Empty);
 
             Stream stream = GetResourceStream(feed == null ? "xml.Metadata.xml" : "xml.FeedMetadata.xml");
             XElement xml = XElement.Load(stream);
@@ -146,8 +153,8 @@ namespace NuGet.Client.V3Shim
 
         public async Task SearchCount(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] SearchCount: {0}", searchTerm), ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("searchcount", searchTerm);
+            
             JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName, sortBy));
 
             string count = obj != null ? count = obj["totalHits"].ToString() : "0";
@@ -157,8 +164,8 @@ namespace NuGet.Client.V3Shim
 
         public async Task Search(InterceptCallContext context, string searchTerm, bool isLatestVersion, string targetFramework, bool includePrerelease, int skip, int take, string feedName, string sortBy)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] Search: {0} ({1},{2})", searchTerm, skip, take), ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("search", "{0} ({1},{2})", searchTerm, skip, take);
+            
             JObject obj = await FetchJson(context, MakeSearchAddress(searchTerm, isLatestVersion, targetFramework, includePrerelease, skip, take, feedName, sortBy));
 
             IEnumerable<JToken> data = (obj != null) ? data = obj["data"] : Enumerable.Empty<JToken>();
@@ -170,8 +177,8 @@ namespace NuGet.Client.V3Shim
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "feedName")]
         public async Task GetPackage(InterceptCallContext context, string id, string version, string feedName)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetPackage: {0} {1}", id, version), ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("getpackage", "{0} {1}", id, version);
+            
             var desiredPackage = await GetPackageCore(context, id, version);
 
             if (desiredPackage == null)
@@ -210,8 +217,8 @@ namespace NuGet.Client.V3Shim
 
         public async Task GetLatestVersionPackage(InterceptCallContext context, string id, bool includePrerelease)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetLatestVersionPackage: {0} {1}", id, includePrerelease ? "[include prerelease]" : ""), ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("getlatestversionpackage", "{0} Pre={1}", id, includePrerelease);
+            
             JObject resolverBlob = await FetchJson(context, MakeResolverAddress(id));
 
             if (resolverBlob == null)
@@ -232,7 +239,7 @@ namespace NuGet.Client.V3Shim
 
         public async Task GetAllPackageVersions(InterceptCallContext context, string id)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetAllPackageVersions: {0}", id), ConsoleColor.Magenta);
+            V3InteropTraceSources.Channel.Verbose("getallpackageversions", id);
 
             var ids = id.Split(new string[] { " or " }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -277,8 +284,8 @@ namespace NuGet.Client.V3Shim
 
         public async Task GetListOfPackageVersions(InterceptCallContext context, string id)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetListOfPackageVersions: {0}", id), ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("GetListOfPackageVersions", id);
+            
             JObject resolverBlob = await FetchJson(context, MakeResolverAddress(id));
 
             JArray array = new JArray();
@@ -311,8 +318,8 @@ namespace NuGet.Client.V3Shim
 
         public async Task GetListOfPackages(InterceptCallContext context)
         {
-            context.Log("[V3 CALL] GetListOfPackages", ConsoleColor.Magenta);
-
+            V3InteropTraceSources.Channel.Verbose("GetListOfPackages", String.Empty);
+            
             var index = await FetchJson(context, context.Args.IncludePrerelease ? new Uri(_listAvailableLatestPrereleaseIndex) : new Uri(_listAvailableLatestStableIndex));
             var data = GetListAvailableDataStart(context, index);
 
@@ -507,7 +514,7 @@ namespace NuGet.Client.V3Shim
 
         public async Task GetUpdates(InterceptCallContext context, string[] packageIds, string[] versions, string[] versionConstraints, string[] targetFrameworks, bool includePrerelease, bool includeAllVersions, bool count = false)
         {
-            context.Log(string.Format(CultureInfo.InvariantCulture, "[V3 CALL] GetUpdates{1}: {0}", string.Join("|", packageIds), count ? "Count" : string.Empty), ConsoleColor.Magenta);
+            V3InteropTraceSources.Channel.Info(count ? "getupdates" : "getupdatescount", String.Join(", ", packageIds));
 
             var packages = await GetUpdatesCore(context, packageIds, versions, versionConstraints, targetFrameworks, includePrerelease, includeAllVersions);
 
@@ -610,12 +617,12 @@ namespace NuGet.Client.V3Shim
             JObject fromCache = null;
             if (_cache.TryGet(address, out fromCache))
             {
-                context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 CACHE] {0}", address.ToString()), ConsoleColor.DarkCyan);
+                V3InteropTraceSources.Channel.Verbose("cachehit", "Cache HIT : {0}", address);
                 return fromCache;
             }
 
-            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 REQ] {0}", address.ToString()), ConsoleColor.Cyan);
-
+            V3InteropTraceSources.Channel.Verbose("cachemiss", "Cache MISS: {0}", address);
+            
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
@@ -624,11 +631,9 @@ namespace NuGet.Client.V3Shim
 
             timer.Stop();
 
-            context.Log(String.Format(CultureInfo.InvariantCulture, "[V3 RES] (status:{0}) (time:{1}ms) {2}", response.StatusCode, timer.ElapsedMilliseconds, address.ToString()),
-                response.StatusCode == System.Net.HttpStatusCode.OK ? ConsoleColor.Cyan : ConsoleColor.Red);
-
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
+                V3InteropTraceSources.Channel.Verbose("jsonresp", "Retrieved {0} in {1}ms.", address, timer.ElapsedMilliseconds);
                 string json = await response.Content.ReadAsStringAsync();
                 JObject obj = JObject.Parse(json);
 
@@ -639,6 +644,7 @@ namespace NuGet.Client.V3Shim
             else
             {
                 // expected in some cases
+                V3InteropTraceSources.Channel.Verbose("jsonresp", "{2} error retrieving {0} in {1}ms.", address, timer.ElapsedMilliseconds, (int)response.StatusCode);
                 return null;
             }
         }
