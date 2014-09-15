@@ -45,29 +45,24 @@ namespace NuGet.Client.VisualStudio
                 new NuGetVersion(p.Version.Version, p.Version.SpecialVersion, null)));
         }
 
-        public override Task<IEnumerable<Newtonsoft.Json.Linq.JObject>> SearchInstalledPackages(string searchTerm, int skip, int take, System.Threading.CancellationToken cancelToken)
+        public override InstalledPackagesList Installed
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects()
         {
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<PackageIdentity> GetInstalledPackages()
+        public override IProjectSystem ProjectSystem
         {
-            throw new NotImplementedException();
-        }
-
-        public override Versioning.NuGetVersion GetInstalledVersion(string packageId)
-        {
-            return null; // !!!
-        }
-
-        public override bool IsInstalled(string packageId, Versioning.NuGetVersion packageVersion)
-        {
-            throw new NotImplementedException();
+            get { throw new NotImplementedException(); }
         }
 
         public override IEnumerable<System.Runtime.Versioning.FrameworkName> GetSupportedFrameworks()
         {
-            return new System.Runtime.Versioning.FrameworkName[] { };
+            yield break; // !!! NOT IMPLEMENTED!
         }
 
         public override Task ExecuteActionsAsync(IEnumerable<Resolution.PackageAction> actions)
