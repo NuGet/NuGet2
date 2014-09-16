@@ -97,6 +97,78 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to I Accept.
+        /// </summary>
+        public static string Button_IAccept {
+            get {
+                return ResourceManager.GetString("Button_IAccept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I Decline.
+        /// </summary>
+        public static string Button_IDecline {
+            get {
+                return ResourceManager.GetString("Button_IDecline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install.
+        /// </summary>
+        public static string Button_Install {
+            get {
+                return ResourceManager.GetString("Button_Install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install Preview.
+        /// </summary>
+        public static string Button_InstallPreview {
+            get {
+                return ResourceManager.GetString("Button_InstallPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string Button_OK {
+            get {
+                return ResourceManager.GetString("Button_OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error occurred. Retry.
+        /// </summary>
+        public static string Button_Retry {
+            get {
+                return ResourceManager.GetString("Button_Retry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall.
+        /// </summary>
+        public static string Button_Uninstall {
+            get {
+                return ResourceManager.GetString("Button_Uninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall Preview.
+        /// </summary>
+        public static string Button_UninstallPreview {
+            get {
+                return ResourceManager.GetString("Button_UninstallPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highest.
         /// </summary>
         public static string DependencyBehavior_Highest {
@@ -187,6 +259,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added packages:.
+        /// </summary>
+        public static string Label_AddedPackages {
+            get {
+                return ResourceManager.GetString("Label_AddedPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author(s):.
         /// </summary>
         public static string Label_Authors {
@@ -201,6 +282,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_DatePublished {
             get {
                 return ResourceManager.GetString("Label_DatePublished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted packages:.
+        /// </summary>
+        public static string Label_DeletedPackages {
+            get {
+                return ResourceManager.GetString("Label_DeletedPackages", resourceCulture);
             }
         }
         
@@ -331,11 +421,29 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Solution &apos;{0}&apos;.
+        /// </summary>
+        public static string Label_Solution {
+            get {
+                return ResourceManager.GetString("Label_Solution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tags:.
         /// </summary>
         public static string Label_Tags {
             get {
                 return ResourceManager.GetString("Label_Tags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unchanged packages:.
+        /// </summary>
+        public static string Label_UnchangedPackages {
+            get {
+                return ResourceManager.GetString("Label_UnchangedPackages", resourceCulture);
             }
         }
         
@@ -349,11 +457,38 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occured:\n{0}.
+        /// </summary>
+        public static string Text_ErrorOccurred {
+            get {
+                return ResourceManager.GetString("Text_ErrorOccurred", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages..
         /// </summary>
         public static string Text_LegalDisclaimer {
             get {
                 return ResourceManager.GetString("Text_LegalDisclaimer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following package(s) require a click-to-accept license:.
+        /// </summary>
+        public static string Text_LicenseHeaderText {
+            get {
+                return ResourceManager.GetString("Text_LicenseHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By clicking &quot;I Accept,&quot; you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click &quot;I Decline.&quot;.
+        /// </summary>
+        public static string Text_LicenseText {
+            get {
+                return ResourceManager.GetString("Text_LicenseText", resourceCulture);
             }
         }
         

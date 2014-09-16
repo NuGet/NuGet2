@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
-using NuGet.Client;
 using NuGet.Client.Resolution;
 using System.Diagnostics;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
@@ -27,14 +26,14 @@ namespace NuGet.Client.VisualStudio.UI
             this.DataContextChanged += PackageDetailControl_DataContextChanged;
         }
 
-        void PackageDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void PackageDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (DataContext is PackageDetailControlModel)
             {
                 _root.Visibility = System.Windows.Visibility.Visible;
             }
             else
-            {   
+            {
                 _root.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
@@ -47,7 +46,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            var v = (VersionForDisplay)_versions.SelectedItem;            
+            var v = (VersionForDisplay)_versions.SelectedItem;
             model.SelectVersion(v == null ? null : v.Version);
             UpdateInstallUninstallButton();
         }
@@ -70,7 +69,7 @@ namespace NuGet.Client.VisualStudio.UI
         private async Task<IEnumerable<PackageAction>> ResolveActions(PackageActionType action)
         {
             var packageDetail = (PackageDetailControlModel)DataContext;
-            
+
             Control.SetBusy(true);
             try
             {
@@ -93,40 +92,54 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        private enum PackageStatus
+        {
+            Unchanged,
+            Deleted,
+            Added
+        }
+
         private void PreviewActions(
             IEnumerable<PackageAction> actions)
         {
             MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
-            // Show result
-            // values:
-            // 1: unchanged
-            // 0: deleted
-            // 2: added
-            //var packageStatus = Control.Target
-            //    .Installed
-            //    .GetInstalledPackageReferences()
-            //    .Select(p => p.Identity)
-            //    .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
-            //foreach (var action in actions)
-            //{
-            //    if (action.ActionType == PackageActionType.Install)
-            //    {
-            //        packageStatus[action.PackageName] = 2;
-            //    }
-            //    else if (action.ActionType == PackageActionType.Uninstall)
-            //    {
-            //        packageStatus[action.PackageName] = 0;
-            //    }
-            //}
+            /* !!!
+            // Show preview result
+            var packageStatus = Control.Target
+                .Installed
+                .GetInstalledPackageReferences()
+                .Select(p => p.Identity)
+                .ToDictionary(p => p, _ => PackageStatus.Unchanged);
 
-            //var w = new PreviewWindow(
-            //    unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
-            //    deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
-            //    added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
-            //w.Owner = Window.GetWindow(Control);
-            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            //w.ShowDialog();
+            foreach (var action in actions)
+            {
+                if (action.ActionType == PackageActionType.Install)
+                {
+                    packageStatus[action.PackageName] = PackageStatus.Added;
+                }
+                else if (action.ActionType == PackageActionType.Uninstall)
+                {
+                    packageStatus[action.PackageName] = PackageStatus.Deleted;
+                }
+            }
+
+            var model = new PreviewWindowModel(
+                unchanged: packageStatus
+                    .Where(v => v.Value == PackageStatus.Unchanged)
+                    .Select(v => v.Key),
+                deleted: packageStatus
+                    .Where(v => v.Value == PackageStatus.Deleted)
+                    .Select(v => v.Key),
+                added: packageStatus
+                    .Where(v => v.Value == PackageStatus.Added)
+                    .Select(v => v.Key));
+
+            var w = new PreviewWindow();
+            w.DataContext = model;
+            w.Owner = Window.GetWindow(Control);
+            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            w.ShowDialog(); */
         }
 
         private async void PerformPackageAction(PackageActionType action)
@@ -183,12 +196,12 @@ namespace NuGet.Client.VisualStudio.UI
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
-                    new[] { "Uninstall", "Uninstall Preview" });
+                    new[] { Resx.Resources.Button_Uninstall, Resx.Resources.Button_UninstallPreview });
             }
             else
             {
                 _dropdownButton.SetItems(
-                    new[] { "Install", "Install Preview" });
+                    new[] { Resx.Resources.Button_Install, Resx.Resources.Button_InstallPreview });
             }
         }
 
@@ -214,7 +227,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
         {
-            var licensePackages = operations.Where(op => 
+            var licensePackages = operations.Where(op =>
                 op.ActionType == PackageActionType.Install &&
                 op.Package.Value<bool>("requireLicenseAcceptance"));
 
@@ -259,23 +272,21 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _dropdownButton_Clicked(object sender, DropdownButtonClickEventArgs e)
         {
-            switch (e.ButtonText)
+            if (e.ButtonText == Resx.Resources.Button_Install)
             {
-                case "Install":
-                    PerformPackageAction(PackageActionType.Install);
-                    break;
-
-                case "Install Preview":
-                    Preview(PackageActionType.Install);
-                    break;
-
-                case "Uninstall":
-                    PerformPackageAction(PackageActionType.Uninstall);
-                    break;
-
-                case "Uninstall Preview":
-                    Preview(PackageActionType.Uninstall);
-                    break;
+                PerformPackageAction(PackageActionType.Install);
+            }
+            else if (e.ButtonText == Resx.Resources.Button_InstallPreview)
+            {
+                Preview(PackageActionType.Install);
+            }
+            else if (e.ButtonText == Resx.Resources.Button_Uninstall)
+            {
+                PerformPackageAction(PackageActionType.Uninstall);
+            }
+            else if (e.ButtonText == Resx.Resources.Button_UninstallPreview)
+            {
+                Preview(PackageActionType.Uninstall);
             }
         }
     }

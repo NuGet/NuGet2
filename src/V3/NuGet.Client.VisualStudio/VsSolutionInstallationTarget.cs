@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Interop;
 using NuGet.VisualStudio;
+using System.Linq;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -16,6 +16,7 @@ namespace NuGet.Client.VisualStudio
         private string _name;
         private IVsPackageManager _packageManager;
         private IPackageRepository _packagesFolderSource;
+        private InstalledPackagesList _installedSolutionLevelPackages;
 
         public override bool IsActive
         {
@@ -42,6 +43,14 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
+        public InstalledPackagesList InstalledSolutionLevelPackages
+        {
+            get
+            {
+                return _installedSolutionLevelPackages;
+            }
+        }
+
         public override IEnumerable<TargetProject> TargetProjects
         {
             get {
@@ -61,6 +70,10 @@ namespace NuGet.Client.VisualStudio
             _packageManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
                 .CreatePackageManagerToManageInstalledPackages();
             _packagesFolderSource = _packageManager.LocalRepository;
+
+            var repo = _packageManager.LocalRepository as SharedPackageRepository;
+            var refRepo = new PackageReferenceRepository(repo.PackageReferenceFile.FullPath, _packageManager.LocalRepository);
+            _installedSolutionLevelPackages = new ProjectInstalledPackagesList(refRepo);
         }
 
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken ct)

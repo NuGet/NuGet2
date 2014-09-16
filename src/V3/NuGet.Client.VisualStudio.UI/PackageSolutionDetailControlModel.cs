@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -8,11 +11,11 @@ namespace NuGet.Client.VisualStudio.UI
     public class PackageSolutionDetailControlModel : PackageDetailControlModel
     {
         // list of projects where the package is installed
-        private List<ProjectPackageInfo> _projects;
-        private InstallationTarget _target;
+        private List<PackageInstallationInfo> _projects;
+        private VsSolutionInstallationTarget _target;
         private List<string> _actions;
 
-        public List<ProjectPackageInfo> Projects
+        public List<PackageInstallationInfo> Projects
         {
             get
             {
@@ -55,9 +58,12 @@ namespace NuGet.Client.VisualStudio.UI
             if (_selectedAction == Resources.Resources.Action_Consolidate ||
                 _selectedAction == Resources.Resources.Action_Uninstall)
             {
-                _versions = _target.TargetProjects
+                var installedVersions = _target.TargetProjects
                     .Select(project => project.InstalledPackages.GetInstalledPackage(Package.Id))
-                    .Where(package => package != null)
+                    .ToList();
+
+                installedVersions.Add(_target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id));
+                _versions = installedVersions.Where(package => package != null)
                     .OrderByDescending(p => p.Identity.Version)
                     .Select(package => new VersionForDisplay(package.Identity.Version, string.Empty))
                     .ToList();
@@ -94,54 +100,89 @@ namespace NuGet.Client.VisualStudio.UI
             InstallationTarget target) :
             base(searchResultPackage, installedVersion: null)
         {
-            _target = target;
+            Debug.Assert(target.IsSolution);
+
+            _target = (VsSolutionInstallationTarget)target;
             SelectedVersion = new VersionForDisplay(Package.Version, null);
             CreateActions();
+        }
+
+        private bool CanUpdate()
+        {
+            var canUpdateInProjects = _target.TargetProjects
+                .Any(project =>
+                {
+                    var installedPackage = project.InstalledPackages.GetInstalledPackage(Package.Id);
+                    return installedPackage != null &&
+                        _allPackages.Count >= 2;
+                });
+
+            var v = _target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id);
+            var canUpdateInSolution = v != null && _allPackages.Count >= 2;
+
+            return canUpdateInProjects || canUpdateInSolution;
+        }
+
+        private bool CanInstall()
+        {
+            var canInstallInProjects = _target.TargetProjects
+                .Any(project =>
+                {
+                    var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
+                    return installed == null;
+                });
+
+            var v = _target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id);
+            var installedInSolution = v != null;
+
+            return !installedInSolution && canInstallInProjects;
+        }
+
+        private bool CanUninstall()
+        {
+            var canUninstallFromProjects = _target.TargetProjects
+                .Any(project =>
+                {
+                    var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
+                    return installed != null;
+                });
+
+            var v = _target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id);
+            var installedInSolution = v != null;
+
+            return installedInSolution || canUninstallFromProjects;
+        }
+
+        private bool CanConsolidate()
+        {
+            var installedVersions = _target.TargetProjects
+                .Select(project => project.InstalledPackages.GetInstalledPackage(Package.Id))
+                .Where(version => version != null)
+                .Distinct();
+            return installedVersions.Count() >= 2;
         }
 
         private void CreateActions()
         {
             // initialize actions
             _actions = new List<string>();
-            var canUpdate = _target.TargetProjects
-                .Any(project =>
-                {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
-                    return installed != null &&
-                        installed.Identity.Version != Package.Version;
-                });
-            if (canUpdate)
+
+            if (CanUpdate())
             {
                 _actions.Add(Resources.Resources.Action_Update);
             }
 
-            var canInstall = _target.TargetProjects
-                .Any(project =>
-                {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
-                    return installed == null;
-                });
-            if (canInstall)
+            if (CanInstall())
             {
                 _actions.Add(Resources.Resources.Action_Install);
             }
 
-            var canUninstall = _target.TargetProjects
-                .Any(project =>
-                {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
-                    return installed != null;
-                });
-            if (canUninstall)
+            if (CanUninstall())
             {
                 _actions.Add(Resources.Resources.Action_Uninstall);
             }
 
-            var installedVersions = _target.TargetProjects
-                .Select(project => project.InstalledPackages.GetInstalledPackage(Package.Id))
-                .Where(version => version != null)
-                .Distinct();
-            if (installedVersions.Count() >= 2)
+            if (CanConsolidate())
             {
                 _actions.Add(Resources.Resources.Action_Consolidate);
             }
@@ -151,10 +192,9 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void CreateProjectList()
         {
-            _projects = new List<ProjectPackageInfo>();
+            _projects = new List<PackageInstallationInfo>();
 
-            if (_selectedAction == Resources.Resources.Action_Update ||
-                _selectedAction == Resources.Resources.Action_Consolidate)
+            if (_selectedAction == Resources.Resources.Action_Consolidate)
             {
                 // project list contains projects that have the package installed.
                 // The project with the same version installed is included, but disabled.
@@ -164,9 +204,36 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null)
                     {
                         var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        _projects.Add(new ProjectPackageInfo(project.Name, installed.Identity.Version, enabled));
+                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled));
                     }
                 }
+            }
+            else if (_selectedAction == Resources.Resources.Action_Update)
+            {
+                // project list contains projects/solution that have the package 
+                // installed. The project/solution with the same version installed 
+                // is included, but disabled.
+                foreach (var project in _target.TargetProjects)
+                {
+                    var installed = project.InstalledPackages.GetInstalledPackage(
+                        Package.Id);
+                    if (installed != null)
+                    {
+                        var enabled = installed.Identity.Version != SelectedVersion.Version;
+                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled));
+                    }
+                }
+
+                var v = _target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id);
+                if (v != null)
+                {
+                    var enabled = v.Identity.Version != SelectedVersion.Version;
+                    _projects.Add(new PackageInstallationInfo(
+                        _target.Name,
+                        SelectedVersion.Version,
+                        enabled,
+                        isSolution: true));
+                } 
             }
             else if (_selectedAction == Resources.Resources.Action_Install)
             {
@@ -176,21 +243,32 @@ namespace NuGet.Client.VisualStudio.UI
                     var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
                     if (installed == null)
                     {
-                        _projects.Add(new ProjectPackageInfo(project.Name, null, enabled: true));
+                        _projects.Add(new PackageInstallationInfo(project.Name, null, enabled: true));
                     }
                 }
             }
             else if (_selectedAction == Resources.Resources.Action_Uninstall)
             {
-                // project list contains projects that have the same version installed.
+                // project list contains projects/solution that have the same version installed.
                 foreach (var project in _target.TargetProjects)
                 {
                     var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
                     if (installed != null &&
                         installed.Identity.Version == SelectedVersion.Version)
                     {
-                        _projects.Add(new ProjectPackageInfo(project.Name, installed.Identity.Version, enabled: true));
+                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled: true));
                     }
+                }
+
+                var v = _target.InstalledSolutionLevelPackages.GetInstalledPackage(Package.Id);
+                if (v != null)
+                {
+                    var enabled = v.Identity.Version == SelectedVersion.Version;
+                    _projects.Add(new PackageInstallationInfo(
+                        _target.Name,
+                        SelectedVersion.Version,
+                        enabled,
+                        isSolution: true));
                 }
             }
 

@@ -88,7 +88,6 @@
                     SelectedItem="{Binding Path=SelectedVersion}">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static resx:Brushes.UIText}}" />
                             <Style.Triggers>
                                 <!-- generate a separator if value is null -->
                                 <DataTrigger Binding="{Binding}" Value="{x:Null}">
@@ -119,6 +118,7 @@
                         <DataTemplate>
                             <CheckBox
                                 Content="{Binding}"
+                                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                                 IsChecked="{Binding Path=Selected}"
                                 IsEnabled="{Binding Path=Enabled}" />
                         </DataTemplate>
@@ -132,11 +132,11 @@
             </StackPanel>
 
             <!-- installation options -->
-            <Expander Grid.Row="3" Margin="0,8">
+            <Expander Grid.Row="3" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
                 <Expander.Header>
-                    <Label Content="{x:Static resx:Resources.Label_InstallationOptions }" />
+                    <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>
-                <Grid>
+                <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition Height="8" />
@@ -148,6 +148,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock
                         Grid.Row="0" Grid.Column="0"
+                        VerticalAlignment="Center"
                         Margin="0,0,6,0"
                         Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
                     <ComboBox Grid.Row="0" Grid.Column="1"
@@ -155,6 +156,7 @@
                               SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
                     <TextBlock
                         Grid.Row="2" Grid.Column="0"
+                        VerticalAlignment="Center"
                         Margin="0,0,6,0"
                         Text="{x:Static resx:Resources.Label_FileConflictAction}" />
                     <ComboBox Grid.Row="2" Grid.Column="1"

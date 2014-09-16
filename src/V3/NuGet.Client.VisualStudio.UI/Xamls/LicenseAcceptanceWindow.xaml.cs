@@ -31,5 +31,15 @@ namespace NuGet.Client.VisualStudio.UI
             var licenseUrl = hyperlink.NavigateUri;
             // !!! UriHelper.OpenExternalLink(licenseUrl);
         }
+
+        private void OnDeclineButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+        }
+
+        private void OnAcceptButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+        }
     }
 }

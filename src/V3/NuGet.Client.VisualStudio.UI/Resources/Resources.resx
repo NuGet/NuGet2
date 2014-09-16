@@ -219,4 +219,49 @@
   <data name="Label_PackageManager" xml:space="preserve">
     <value>Package Manager: {0}</value>
   </data>
+  <data name="Button_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Label_AddedPackages" xml:space="preserve">
+    <value>Added packages:</value>
+  </data>
+  <data name="Label_DeletedPackages" xml:space="preserve">
+    <value>Deleted packages:</value>
+  </data>
+  <data name="Label_UnchangedPackages" xml:space="preserve">
+    <value>Unchanged packages:</value>
+  </data>
+  <data name="Button_IAccept" xml:space="preserve">
+    <value>I Accept</value>
+  </data>
+  <data name="Button_IDecline" xml:space="preserve">
+    <value>I Decline</value>
+  </data>
+  <data name="Text_LicenseHeaderText" xml:space="preserve">
+    <value>The following package(s) require a click-to-accept license:</value>
+  </data>
+  <data name="Text_LicenseText" xml:space="preserve">
+    <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
+  </data>
+  <data name="Button_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Button_InstallPreview" xml:space="preserve">
+    <value>Install Preview</value>
+  </data>
+  <data name="Button_Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="Button_UninstallPreview" xml:space="preserve">
+    <value>Uninstall Preview</value>
+  </data>
+  <data name="Button_Retry" xml:space="preserve">
+    <value>Error occurred. Retry</value>
+  </data>
+  <data name="Text_ErrorOccurred" xml:space="preserve">
+    <value>Error occured:\n{0}</value>
+  </data>
+  <data name="Label_Solution" xml:space="preserve">
+    <value>Solution '{0}'</value>
+  </data>
 </root>

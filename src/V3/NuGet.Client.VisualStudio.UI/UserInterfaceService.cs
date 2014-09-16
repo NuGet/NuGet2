@@ -61,7 +61,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public void LaunchNuGetOptionsDialog()
         {
-            throw new NotImplementedException();
+            System.Windows.MessageBox.Show("Not implemented yet!!!");
         }
     }
 }

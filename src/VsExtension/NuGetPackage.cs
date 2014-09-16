@@ -31,6 +31,7 @@ using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 
 using NuGetConsole;
+using NuGet.Client;
 using NuGetConsole.Implementation;
 using NuGet.Client.VisualStudio;
 using NuGet.Client.VisualStudio.UI;
@@ -42,7 +43,6 @@ using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 #if VS12
 using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
-using NuGet.Client;
 #endif
 
 #if VS14

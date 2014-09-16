@@ -67,6 +67,7 @@
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
     <Compile Include="PackageSolutionDetailControlModel.cs" />
+    <Compile Include="PreviewWindowModel.cs" />
     <Compile Include="ProjectPackageInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\UiPackageDependencySet.cs" />
@@ -75,6 +76,9 @@
     <Compile Include="VersionForDisplay.cs" />
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Xamls\InstalledIndicator.xaml.cs">
+      <DependentUpon>InstalledIndicator.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xamls\DropdownButton.xaml.cs">
       <DependentUpon>DropdownButton.xaml</DependentUpon>
@@ -109,11 +113,18 @@
     </Compile>
     <Compile Include="UserInterfaceService.cs" />
     <Compile Include="Converters\VersionToVersionForDisplayConverter.cs" />
+    <Compile Include="Xamls\UpdateAvailableIndicator.xaml.cs">
+      <DependentUpon>UpdateAvailableIndicator.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Xamls\BusyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Xamls\InstalledIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xamls\DropdownButton.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -147,15 +158,13 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\CheckMark.png" />
+    <Page Include="Xamls\UpdateAvailableIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\packageicon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\UpwardsArrow.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">

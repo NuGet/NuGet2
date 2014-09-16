@@ -2,9 +2,7 @@
                     xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
                     xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="../Resources/packageicon.png" />
-    <BitmapImage x:Key="Image_UpwardsArrow" UriSource="../Resources/UpwardsArrow.png" />
-    <BitmapImage x:Key="Image_CheckMark" UriSource="../Resources/CheckMark.png" />
+    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="../Resources/packageicon.png" />    
 
     <Tools:PackageStatusToInstallImageConverter x:Key="PackageStatusToInstallImageVis" />
     <Tools:PackageStatusToUpdateImageConverter x:Key="PackageStatusToUpdateImageConverter" />
@@ -39,7 +37,7 @@
     <DataTemplate DataType="{x:Type Tools:UiSearchResultPackage}">
         <Border
             BorderThickness="0,0,0,1"
-            BorderBrush="Gray"
+            BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}" 
             Padding="0,16">
             <Grid Margin="24,0" Height="70">
                 <Grid.ColumnDefinitions>
@@ -62,35 +60,29 @@
                     <TextBlock
                         Grid.Row="0"
                         FontWeight="Bold"
-                        Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="NoWrap"
                         Text="{Binding Id}"></TextBlock>
                     <TextBlock
                         Grid.Row="1"
                         Text="{Binding Summary}"
-                        Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap"></TextBlock>
                 </Grid>
 
-                <Image
+                <Tools:InstalledIndicator
                     Name="_checkMark"
                     Grid.Column="2"
-                    Source="{StaticResource Image_CheckMark}"
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
-                    RenderOptions.BitmapScalingMode="HighQuality"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" />
-                <Image
+                <Tools:UpdateAvailableIndicator
                     Name="_updateMark"
                     Grid.Column="2"
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
-                    RenderOptions.BitmapScalingMode="HighQuality"
-                    Source="{StaticResource Image_UpwardsArrow}"
                     Visibility="{Binding Status, Converter={StaticResource PackageStatusToUpdateImageConverter}}" />
             </Grid>
         </Border>

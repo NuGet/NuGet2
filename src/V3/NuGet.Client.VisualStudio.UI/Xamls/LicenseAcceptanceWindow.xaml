@@ -3,6 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
+        Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
+        Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+        MinWidth="350"
+        MinHeight="300"
+        Width="400"
+        Height="450"
         mc:Ignorable="d"
         Title="License Acceptance"
         d:DesignHeight="300" d:DesignWidth="300">
@@ -35,16 +42,19 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" TextWrapping="Wrap">The following package(s) require a click-to-accept license:</TextBlock>
-        <ItemsControl 
+        <TextBlock Grid.Row="0"
+                   Margin="0, 8"
+                   Text="{x:Static resx:Resources.Text_LicenseHeaderText}"
+                   TextWrapping="Wrap" />
+        <ItemsControl
             Grid.Row="1"
-            Margin="0,0,0,3"
+            Margin="0,8"
             MinHeight="130"
             ItemsSource="{Binding}"
-            ItemTemplate="{StaticResource LicenseItemTemplate}" >
+            ItemTemplate="{StaticResource LicenseItemTemplate}">
             <ItemsControl.Template>
                 <ControlTemplate TargetType="{x:Type ItemsControl}">
-                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}">
                         <ScrollViewer
                             Padding="3"
                             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
@@ -57,10 +67,13 @@
                 </ControlTemplate>
             </ItemsControl.Template>
         </ItemsControl>
-        <TextBlock Grid.Row="2" TextWrapping="Wrap">By clicking "I Accept", you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline".</TextBlock>
+        <TextBlock Grid.Row="2"
+                   Margin="0, 8"
+                   Text="{x:Static resx:Resources.Text_LicenseText}"
+                   TextWrapping="Wrap" ></TextBlock>
         <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button>I Decline</Button>
-            <Button>I Accept</Button>
+            <Button Content="{x:Static resx:Resources.Button_IDecline}" Click="OnDeclineButtonClick" />
+            <Button Content="{x:Static resx:Resources.Button_IAccept}" Click="OnAcceptButtonClick" />
         </StackPanel>
     </Grid>
 </Window>

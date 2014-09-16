@@ -10,23 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    /// <summary>
-    /// Interaction logic for InstallPreviewWindow.xaml
-    /// </summary>
-    public partial class PreviewWindow : Window
+    public partial class InstalledIndicator : UserControl
     {
-        public PreviewWindow()
+        public InstalledIndicator()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
         }
     }
 }

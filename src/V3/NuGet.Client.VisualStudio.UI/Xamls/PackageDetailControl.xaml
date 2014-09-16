@@ -7,6 +7,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              Background="{DynamicResource {x:Static resx:Brushes.DetailPaneBackground}}"
+             Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="400">
     <UserControl.Resources>
@@ -102,11 +103,11 @@
             </Grid>
 
             <!-- installation options -->
-            <Expander Grid.Row="2" Margin="0,8">
+            <Expander Grid.Row="2" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
                 <Expander.Header>
-                    <Label Content="{x:Static resx:Resources.Label_InstallationOptions }" />
+                    <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>
-                <Grid>
+                <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition Height="8"/>
@@ -119,6 +120,7 @@
                     <TextBlock
                         Grid.Row="0" Grid.Column="0"
                         Margin="0,0,6,0"
+                        VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
                     <ComboBox Grid.Row="0" Grid.Column="1" 
                               ItemsSource="{Binding Path=DependencyBehaviors}"
@@ -126,6 +128,7 @@
                     <TextBlock
                         Grid.Row="2" Grid.Column="0"
                         Margin="0,0,6,0"
+                        VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_FileConflictAction}" />
                     <ComboBox Grid.Row="2" Grid.Column="1" 
                               ItemsSource="{Binding Path=FileConflictActions}" 
@@ -274,8 +277,7 @@
                 Text="{x:Static resx:Resources.Label_Dependencies}" />
 
             <ItemsControl
-                    Grid.Row="7"
-                    x:Name="_dependencies"
+                    Grid.Row="7"                    
                     ItemsSource="{Binding Path=Package.DependencySets}"
                     Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0,8,0,0">

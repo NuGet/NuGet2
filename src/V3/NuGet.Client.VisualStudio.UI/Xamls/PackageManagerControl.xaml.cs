@@ -111,14 +111,20 @@ namespace NuGet.Client.VisualStudio.UI
                 // packages are restored. Update the UI
                 if (Target.IsSolution)
                 {
-                    UpdateDetailPane();
+                    // !!! TODO: update UI here
+                }
+                else
+                {
+                    /* !!!
+                    _solutionTarget.CreateInstalledPackages();
+                    UpdateDetailPane(); */
                 }
             }
         }
 
         private void Update()
         {
-            _label.Content = string.Format(
+            _label.Text = string.Format(
                 CultureInfo.CurrentCulture,
                 Resx.Resources.Label_PackageManager,
                 Target.Name);
@@ -173,9 +179,21 @@ namespace NuGet.Client.VisualStudio.UI
                 _target = target;
             }
 
+            private Task<List<JObject>> InternalLoadItems(
+                int startIndex,
+                CancellationToken ct,
+                Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader)
+            {   
+                return Task.Factory.StartNew(() =>
+                {
+                    var r1 = _loader(startIndex, ct);
+                    return r1.Result.ToList();
+                });
+            }
+
             public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
-                var results = await _loader(startIndex, ct);
+                var results = await InternalLoadItems(startIndex, ct, _loader);
 
                 List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
                 foreach (var package in results)
@@ -245,9 +263,16 @@ namespace NuGet.Client.VisualStudio.UI
 
             private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)
             {
-                // Get the minimum version installed in any target project
-                var minimumInstalledPackage = _target.TargetProjects
+                // Get the minimum version installed in any target project/solution
+                var installed = _target.TargetProjects
                     .Select(p => p.InstalledPackages.GetInstalledPackage(id))
+                    .ToList();
+                if (_target.IsSolution)
+                {
+                    installed.Add(((VsSolutionInstallationTarget)_target).InstalledSolutionLevelPackages
+                        .GetInstalledPackage(id));
+                }
+                var minimumInstalledPackage = installed
                     .Where(p => p != null)
                     .OrderBy(r => r.Identity.Version)
                     .FirstOrDefault();

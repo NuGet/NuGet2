@@ -4,8 +4,11 @@ using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    // Represents the version of a package that is installed in the project
-    public class ProjectPackageInfo
+    // This class is used to represent one of the following facts about a package:
+    // - A version of the package is installed. In this case, property Version is not null. 
+    //   Property IsSolution indicates if the package is installed in the solution or in a project.
+    // - The package is not installed in a project/solution. In this case, property Version is null.
+    public class PackageInstallationInfo
     {
         public NuGetVersion Version
         {
@@ -25,24 +28,32 @@ namespace NuGet.Client.VisualStudio.UI
             set;
         }
 
-        private string _projectName;
+        // displayed
+        private string _name;
 
-        public ProjectPackageInfo(string projectName, NuGetVersion version, bool enabled)
+        public bool IsSolution
         {
-            _projectName = projectName;
+            get;
+            private set;
+        }
+
+        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, bool isSolution = false)
+        {
+            _name = name;
             Version = version;
             Enabled = enabled;
+            IsSolution = isSolution;
         }
 
         public override string ToString()
         {
             if (Version == null)
             {
-                return _projectName;
+                return _name;
             }
             else
             {
-                return string.Format("{0} ({1})", _projectName,
+                return string.Format("{0} ({1})", _name,
                     Version.ToString());
             }
         }

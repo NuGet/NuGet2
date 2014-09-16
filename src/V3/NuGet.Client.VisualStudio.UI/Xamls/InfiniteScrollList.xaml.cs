@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -102,9 +103,10 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var message = String.Format(
                     CultureInfo.CurrentCulture,
-                    "Error: {0}\nDetails: {1}",
-                    ex.Message, ex.ToString());
-                MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Resx.Resources.Text_ErrorOccurred,
+                    ex);
+                _loadingStatusIndicator.Status = LoadingStatus.ErrorOccured;
+                _loadingStatusIndicator.ErrorMessage = message;
             }
 
             // When the process is complete, signal that another process can proceed.
@@ -154,8 +156,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _scrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_loadingStatusIndicator.Status == LoadingStatus.Loading ||
-                _loadingStatusIndicator.Status == LoadingStatus.NoMoreItems)
+            if (_loadingStatusIndicator.Status != LoadingStatus.Ready)
             {
                 return;
             }
@@ -166,6 +167,11 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 Load();
             }
+        }
+
+        private void RetryButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Load();
         }
     }
 
@@ -186,7 +192,8 @@ namespace NuGet.Client.VisualStudio.UI
     {
         Ready,
         Loading,
-        NoMoreItems
+        NoMoreItems,
+        ErrorOccured
     }
 
     internal class LoadingStatusIndicator : INotifyPropertyChanged
@@ -194,6 +201,8 @@ namespace NuGet.Client.VisualStudio.UI
         public event PropertyChangedEventHandler PropertyChanged;
 
         private LoadingStatus _status;
+
+        private string _errorMessage;
 
         public LoadingStatus Status
         {
@@ -204,7 +213,22 @@ namespace NuGet.Client.VisualStudio.UI
                 OnPropertyChanged("Status");
             }
         }
-
+        
+        public string ErrorMessage
+        {
+            get
+            {
+                return _errorMessage;
+            }
+            set
+            {
+                if (_errorMessage != value)
+                {
+                    _errorMessage = value;
+                    OnPropertyChanged("ErrorMessage");
+                }
+            }
+        }
         protected void OnPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null)

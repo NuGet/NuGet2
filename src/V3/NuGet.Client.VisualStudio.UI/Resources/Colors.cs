@@ -17,6 +17,14 @@ namespace NuGet.Client.VisualStudio.UI.Resources
             }
         }
 
+        public static object BorderBrush
+        {
+            get
+            {
+                return VsBrushes.BrandedUIBorderKey;
+            }
+        }
+
         public static object ListPaneBackground
         {
             get
@@ -46,14 +54,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources
             get
             {
                 return VsBrushes.BrandedUITextKey;
-            }
-        }
-
-        public static object ComboBoxBackground
-        {
-            get
-            {
-                return VsBrushes.ComboBoxBackgroundKey;
             }
         }
     }
