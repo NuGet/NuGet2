@@ -566,7 +566,7 @@ namespace NuGet.VisualStudio
 #if VS14
         public static INuGetPackageManager ToNuGetProjectSystem(this Project project)
         {
-            var vsProject = (IVsProject)project.ToVsHierarchy();
+            var vsProject = project.ToVsHierarchy() as IVsProject;
             if (vsProject == null)
             {
                 return null;

@@ -8,12 +8,13 @@ using System.Threading;
 using EnvDTE;
 
 #if VS14
+
 using Microsoft.VisualStudio.ProjectSystem.Interop;
+
 #endif
 
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Resources;
-using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -258,7 +259,8 @@ namespace NuGet.VisualStudio
 
                     CancellationTokenSource cts = new CancellationTokenSource();
                     var task = nugetAwareProject.InstallPackageAsync(
-                        new NuGetPackageMoniker{
+                        new NuGetPackageMoniker
+                        {
                             Id = package.Id,
                             Version = package.Version.ToString()
                         },
@@ -277,7 +279,7 @@ namespace NuGet.VisualStudio
             }
 #endif
 
-            projectManager.DependencyVersion = DependencyVersion;            
+            projectManager.DependencyVersion = DependencyVersion;
             using (StartInstallOperation(package.Id, package.Version.ToString()))
             {
                 ExecuteOperationsWithPackage(
@@ -315,7 +317,9 @@ namespace NuGet.VisualStudio
                     out appliesToProject);
 
 #if VS14
-                var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+                var nugetAwareProject = projectManager == null ?
+                    null :
+                    projectManager.Project as INuGetPackageManager;
                 if (nugetAwareProject != null)
                 {
                     var args = new Dictionary<string, object>();
@@ -325,7 +329,8 @@ namespace NuGet.VisualStudio
 
                     CancellationTokenSource cts = new CancellationTokenSource();
                     var task = nugetAwareProject.UninstallPackageAsync(
-                        new NuGetPackageMoniker{
+                        new NuGetPackageMoniker
+                        {
                             Id = package.Id,
                             Version = package.Version.ToString()
                         },
@@ -802,7 +807,7 @@ namespace NuGet.VisualStudio
         {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
-            
+
             if (appliesToProject)
             {
                 ReinstallPackageToAllProjects(packageId, updateDependencies, allowPrereleaseVersions, logger, eventListener);
@@ -855,7 +860,7 @@ namespace NuGet.VisualStudio
 
                 logger.Log(MessageLevel.Info, VsResources.ReinstallProjectPackage, package, projectManager.Project.ProjectName);
 
-                // Before we start reinstalling, need to make sure the package exists in the source repository. 
+                // Before we start reinstalling, need to make sure the package exists in the source repository.
                 // Otherwise, the package will be uninstalled and can't be reinstalled.
                 if (SourceRepository.Exists(package))
                 {
@@ -982,7 +987,6 @@ namespace NuGet.VisualStudio
                },
                logger,
                eventListener);
-
         }
 
         private void UninstallPackagesForReinstall(
@@ -1000,14 +1004,14 @@ namespace NuGet.VisualStudio
                 InitializeLogger(logger, projectManager);
                 var packages = projectManager.LocalRepository.GetPackages().ToArray();
 
-                foreach(IPackage package in packages)
+                foreach (IPackage package in packages)
                 {
                     IDisposable disposableAction = StartReinstallOperation(package.Id, package.Version.ToString());
                     try
                     {
                         logger.Log(MessageLevel.Info, VsResources.ReinstallProjectPackage, package, projectManager.Project.ProjectName);
 
-                        IPackage packageInSourceRepository; 
+                        IPackage packageInSourceRepository;
                         PackageName packageName = new PackageName(package.Id, package.Version);
 
                         if (!verifiedPackagesInSourceRepository.TryGetValue(packageName, out packageInSourceRepository))
@@ -1066,7 +1070,7 @@ namespace NuGet.VisualStudio
         {
             return packageAction == PackageAction.Install ?
                 PackageAction.Uninstall :
-                PackageAction.Install;            
+                PackageAction.Install;
         }
 
         private void ReinstallSolutionPackage(
@@ -1091,8 +1095,8 @@ namespace NuGet.VisualStudio
                         {
                             UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
 
-                            // Bug 2883: We must NOT use the overload that accepts 'package' object here, 
-                            // because after the UninstallPackage() call above, the package no longer exists. 
+                            // Bug 2883: We must NOT use the overload that accepts 'package' object here,
+                            // because after the UninstallPackage() call above, the package no longer exists.
                             InstallPackage(package.Id, package.Version, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
                         });
                 }
@@ -1226,7 +1230,7 @@ namespace NuGet.VisualStudio
 
         internal IPackage FindLocalPackage(string packageId, out bool appliesToProject)
         {
-            // It doesn't matter if there are multiple versions of the package installed at solution level, 
+            // It doesn't matter if there are multiple versions of the package installed at solution level,
             // we just want to know that one exists.
             var packages = LocalRepository.FindPackagesById(packageId).OrderByDescending(p => p.Version).ToList();
 
@@ -1275,15 +1279,15 @@ namespace NuGet.VisualStudio
         /// 1. The package has project content (i.e. content that can be applied to a project lib or content files)
         /// 2. The package is referenced by any other project
         /// 3. The package has at least one dependecy
-        /// 
+        ///
         /// This logic will probably fail in one edge case. If there is a meta package that applies to a project
         /// that ended up not being installed in any of the projects and it only exists at solution level.
         /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
         /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
-        /// 
-        /// Technically, the third condition is not totally accurate because a solution-level package can depend on another 
-        /// solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
-        /// This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+        ///
+        /// Technically, the third condition is not totally accurate because a solution-level package can depend on another
+        /// solution-level package. However, doing that check here is expensive and we haven't seen such a package.
+        /// This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages
         /// as solution-level ones.
         /// </summary>
         public bool IsProjectLevel(IPackage package)
@@ -1413,7 +1417,6 @@ namespace NuGet.VisualStudio
                     {
                         throw new InvalidOperationException(VsResources.OperationFailed);
                     }
-
                 },
                 logger);
         }
@@ -1627,7 +1630,6 @@ namespace NuGet.VisualStudio
                 }
             };
 
-
             // Try to get the project for this project manager
             Project project = GetProject(projectManager);
 
@@ -1715,7 +1717,7 @@ namespace NuGet.VisualStudio
         private void Uninstall(IEnumerable<IPackage> packages)
         {
             // Packages added to the sequence are added in the order in which they were visited. However for operations on satellite packages to work correctly,
-            // we need to ensure they are always uninstalled prior to the corresponding core package. To address this, we run it by Reduce which reorders it for us and ensures it 
+            // we need to ensure they are always uninstalled prior to the corresponding core package. To address this, we run it by Reduce which reorders it for us and ensures it
             // returns the minimal set of operations required.
             var packageOperations = packages.Select(p => new PackageOperation(p, PackageAction.Uninstall))
                                             .Reduce();
@@ -1724,7 +1726,7 @@ namespace NuGet.VisualStudio
                 if (WhatIf)
                 {
                     Logger.Log(
-                        MessageLevel.Info, 
+                        MessageLevel.Info,
                         NuGet.Resources.NuGetResources.Log_UninstallPackage,
                         operation.Package);
                 }
@@ -1876,7 +1878,7 @@ namespace NuGet.VisualStudio
 
         private IPackageRepository CreateProjectManagerSourceRepository()
         {
-            // The source repo for the project manager is the aggregate of the shared repo and the selected repo. 
+            // The source repo for the project manager is the aggregate of the shared repo and the selected repo.
             // For dependency resolution, we want VS to look for packages in the selected source and then use the fallback logic
             var fallbackRepository = SourceRepository as FallbackRepository;
             if (fallbackRepository != null)
@@ -1951,6 +1953,7 @@ namespace NuGet.VisualStudio
     }
 
 #if VS14
+
     public class NuGetPackageMoniker : INuGetPackageMoniker
     {
         public string Id
@@ -1965,5 +1968,6 @@ namespace NuGet.VisualStudio
             set;
         }
     }
+
 #endif
 }
