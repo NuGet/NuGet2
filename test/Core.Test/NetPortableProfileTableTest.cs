@@ -79,5 +79,39 @@ namespace NuGet.Test
             Assert.True(netPortableProfile.OptionalFrameworks.Count == 1);
             Assert.True(netPortableProfile.OptionalFrameworks.Contains(new FrameworkName("MonoTouch, Version=1.0")));
         }
+
+        [Fact]
+        public void LoadPortableProfileWithXamarinAsSupportedFramework()
+        {
+            // Arrange
+            string content1 = @"
+<Framework
+    Identifier="".NETFramework""
+    Profile=""*""
+    MinimumVersion=""4.5""
+    DisplayName="".NET Framework"" />";
+
+            string content2 = @"
+<Framework
+    Identifier=""Xamarin.Mac""
+    MinimumVersion=""1.0""
+    DisplayName=""Xamarin.Mac"" />";
+
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("frameworkFile1.xml", content1);
+            mockFileSystem.AddFile("frameworkFile2.xml", content2);
+
+            var frameworkFiles = new string[] { "frameworkFile1.xml", "frameworkFile2.xml" };
+
+            // Act
+            var netPortableProfile = NetPortableProfileTable.LoadPortableProfile("4.5.0.0", "Profile1", mockFileSystem, frameworkFiles);
+
+            // Assert
+            Assert.True(netPortableProfile.SupportedFrameworks.Count == 1);
+            Assert.True(netPortableProfile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+
+            Assert.True(netPortableProfile.OptionalFrameworks.Count == 1);
+            Assert.True(netPortableProfile.OptionalFrameworks.Contains(new FrameworkName("Xamarin.Mac, Version=1.0")));
+        }
     }
 }

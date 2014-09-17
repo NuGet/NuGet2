@@ -207,12 +207,18 @@ namespace NuGet
         {
             var frameworks = frameworkFiles.Select(p => LoadSupportedFramework(fileSystem, p)).Where(p => p != null);
             // Bug - 2926
-            var optionalFrameworks = frameworks.Where(p => p.Identifier.StartsWith("Mono", StringComparison.OrdinalIgnoreCase)).ToList();
+            var optionalFrameworks = frameworks.Where(p => IsOptionalFramework(p)).ToList();
 
             // If there are no optionalFrameworks, just set supportedFrameworks = frameworks
             var supportedFrameworks = optionalFrameworks.IsEmpty() ? frameworks : frameworks.Where(p => !optionalFrameworks.Contains(p));
 
             return new NetPortableProfile(version, profileName, supportedFrameworks, optionalFrameworks);
+        }
+
+        private static bool IsOptionalFramework(FrameworkName framework)
+        {
+            return framework.Identifier.StartsWith("Mono", StringComparison.OrdinalIgnoreCase) ||
+                framework.Identifier.StartsWith("Xamarin", StringComparison.OrdinalIgnoreCase);
         }
 
         private static FrameworkName LoadSupportedFramework(IFileSystem fileSystem, string frameworkFile)
