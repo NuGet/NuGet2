@@ -19,7 +19,10 @@ using VsWebSite;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using Project = EnvDTE.Project;
 using ProjectItem = EnvDTE.ProjectItem;
+
+#if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
 
 namespace NuGet.VisualStudio
 {
