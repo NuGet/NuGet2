@@ -20,6 +20,7 @@ namespace NuGet.VisualStudio
         internal const string TDSProjectTypeGuid = "{CAA73BB0-EF22-4d79-A57E-DF67B3BA9C80}";        
         internal const string TDSItemTypeGuid = "{6877B9B0-CDF7-4ff2-BC09-9608387B37F2}";
         internal const string DxJsProjectTypeGuid = "{1B19158F-E398-40A6-8E3B-350508E125F1}";
+        internal const string DeploymentProjectTypeGuid = "{151d2e53-a2c4-4d7d-83fe-d05416ebd58e}";
 
         // Copied from EnvDTE.Constants since that type can't be embedded
         internal const string VsProjectItemKindPhysicalFile = "{6BB5F8EE-4483-11D3-8BCF-00C04F8EC28C}";

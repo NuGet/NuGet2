@@ -31,7 +31,8 @@ namespace NuGet.VisualStudio
             VsConstants.SynergexProjectTypeGuid,
             VsConstants.NomadForVisualStudioProjectTypeGuid,
             VsConstants.TDSProjectTypeGuid,
-            VsConstants.DxJsProjectTypeGuid
+            VsConstants.DxJsProjectTypeGuid,
+            VsConstants.DeploymentProjectTypeGuid
         };
 
         /// <summary>
