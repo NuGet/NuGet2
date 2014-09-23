@@ -63,9 +63,9 @@ namespace NuGet.Client.VisualStudio {
         /// <summary>
         ///   Looks up a localized string similar to Solution &apos;{0}&apos;.
         /// </summary>
-        internal static string Lable_Solution {
+        internal static string Label_Solution {
             get {
-                return ResourceManager.GetString("Lable_Solution", resourceCulture);
+                return ResourceManager.GetString("Label_Solution", resourceCulture);
             }
         }
         

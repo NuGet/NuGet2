@@ -36,13 +36,11 @@ namespace NuGet.Client
         public abstract InstalledPackageReference GetInstalledPackage(string packageId);
 
         /// <summary>
-        /// Returns a boolean indicating if a package with the specific ID/Version pair is installed.
+        /// Returns a boolean indicating if ANY package with the specific ID/Version pair is installed.
         /// </summary>
         /// <param name="packageId"></param>
         /// <param name="packageVersion"></param>
         /// <returns></returns>
         public abstract bool IsInstalled(string packageId, NuGetVersion packageVersion);
-
-        
     }
 }

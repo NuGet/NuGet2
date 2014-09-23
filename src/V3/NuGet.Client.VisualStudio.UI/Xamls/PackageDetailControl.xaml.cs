@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Resolution;
+using System.Diagnostics;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -95,36 +96,37 @@ namespace NuGet.Client.VisualStudio.UI
         private void PreviewActions(
             IEnumerable<PackageAction> actions)
         {
+            MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
             // Show result
             // values:
             // 1: unchanged
             // 0: deleted
             // 2: added
-            var packageStatus = Control.Target
-                .Installed
-                .GetInstalledPackageReferences()
-                .Select(p => p.Identity)
-                .ToDictionary(p => /* key */ p, _ => /* value */ 1);
+            //var packageStatus = Control.Target
+            //    .Installed
+            //    .GetInstalledPackageReferences()
+            //    .Select(p => p.Identity)
+            //    .ToDictionary(p => /* key */ p, _ => /* value */ 1);
 
-            foreach (var action in actions)
-            {
-                if (action.ActionType == PackageActionType.Install)
-                {
-                    packageStatus[action.PackageName] = 2;
-                }
-                else if (action.ActionType == PackageActionType.Uninstall)
-                {
-                    packageStatus[action.PackageName] = 0;
-                }
-            }
+            //foreach (var action in actions)
+            //{
+            //    if (action.ActionType == PackageActionType.Install)
+            //    {
+            //        packageStatus[action.PackageName] = 2;
+            //    }
+            //    else if (action.ActionType == PackageActionType.Uninstall)
+            //    {
+            //        packageStatus[action.PackageName] = 0;
+            //    }
+            //}
 
-            var w = new PreviewWindow(
-                unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
-                deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
-                added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
-            w.Owner = Window.GetWindow(Control);
-            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            w.ShowDialog();
+            //var w = new PreviewWindow(
+            //    unchanged: packageStatus.Where(v => v.Value == 1).Select(v => v.Key),
+            //    deleted: packageStatus.Where(v => v.Value == 0).Select(v => v.Key),
+            //    added: packageStatus.Where(v => v.Value == 2).Select(v => v.Key));
+            //w.Owner = Window.GetWindow(Control);
+            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            //w.ShowDialog();
         }
 
         private void PerformPackageAction(PackageActionType action)
@@ -152,7 +154,10 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            var isInstalled = Control.Target.Installed.IsInstalled(model.Package.Id, model.Package.Version);
+            // This should only be called in cases where there is a single target
+            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
+
+            var isInstalled = Control.Target.TargetProjects.Single().InstalledPackages.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -165,19 +170,22 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void UpdatePackageStatus()
-        {
-            var model = (PackageDetailControlModel)DataContext;
-            if (model == null)
-            {
-                return;
-            }
+        //private void UpdatePackageStatus()
+        //{
+        //    var model = (PackageDetailControlModel)DataContext;
+        //    if (model == null)
+        //    {
+        //        return;
+        //    }
 
-            UpdateInstallUninstallButton();
-            var installedPackage = Control.Target.Installed.GetInstalledPackage(model.Package.Id);
-            var installedVersion = installedPackage.Identity.Version;
-            model.CreateVersions(installedVersion);
-        }
+        //    // This should only be called in cases where there is a single target
+        //    Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
+
+        //    UpdateInstallUninstallButton();
+        //    var installedPackage = Control.Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(model.Package.Id);
+        //    var installedVersion = installedPackage.Identity.Version;
+        //    model.CreateVersions(installedVersion);
+        //}
 
         protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
         {

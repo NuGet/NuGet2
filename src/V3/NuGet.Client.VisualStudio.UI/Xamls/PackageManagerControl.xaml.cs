@@ -45,22 +45,17 @@ namespace NuGet.Client.VisualStudio.UI
 
         internal IUserInterfaceService UI { get; private set; }
 
-        // Indicates if the user is managing packages for a project or for the solution
-        private bool _forProject;
-
-        // applicable when _forProject if false
-        VsSolutionInstallationTarget _solutionTarget;
-
         private PackageRestoreBar _restoreBar;
         private IPackageRestoreManager _packageRestoreManager;
 
-        public PackageManagerControl(PackageManagerModel myDoc, IUserInterfaceService ui)
+        public PackageManagerControl(PackageManagerModel model, IUserInterfaceService ui)
         {
             UI = ui;
-            Model = myDoc;
+            Model = model;
 
             InitializeComponent();
 
+            // TODO: Relocate to v3 API.
             _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
             AddRestoreBar();
 
@@ -70,16 +65,13 @@ namespace NuGet.Client.VisualStudio.UI
             _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageSolutionDetail.Control = this;
 
-            if (Target is VsProjectInstallationTarget)
+            if (Target.IsMultiProject)
             {
-                _forProject = true;
-                _packageDetail.Visibility = System.Windows.Visibility.Visible;
+                _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
             }
             else
             {
-                _forProject = false;
-                _solutionTarget = (VsSolutionInstallationTarget)Target;
-                _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
+                _packageDetail.Visibility = System.Windows.Visibility.Visible;
             }
 
             Update();
@@ -109,7 +101,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             // PackageRestoreManager fires this event even when solution is closed. 
             // Don't do anything if solution is closed.
-            if (!Target.IsSolutionOpen)
+            if (!Target.IsActive)
             {
                 return;
             }
@@ -117,12 +109,8 @@ namespace NuGet.Client.VisualStudio.UI
             if (!e.PackagesMissing)
             {
                 // packages are restored. Update the UI
-                if (_forProject)
+                if (Target.IsMultiProject)
                 {
-                }
-                else
-                {
-                    _solutionTarget.CreateInstalledPackages();
                     UpdateDetailPane();
                 }
             }
@@ -201,10 +189,16 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Summary = package.Value<string>("summary");
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
 
-                    var installedPackage = _target.Installed.GetInstalledPackage(searchResultPackage.Id);
-                    if (installedPackage != null)
+                    // Get the minimum version installed in any target project
+                    var minimumInstalledPackage = _target.TargetProjects
+                        .Select(p => p.InstalledPackages.GetInstalledPackage(searchResultPackage.Id))
+                        .Where(p => p != null)
+                        .OrderBy(r => r.Identity.Version)
+                        .FirstOrDefault();
+
+                    if (minimumInstalledPackage != null)
                     {
-                        if (installedPackage.Identity.Version < searchResultPackage.Version)
+                        if (minimumInstalledPackage.Identity.Version < searchResultPackage.Version)
                         {
                             searchResultPackage.Status = PackageStatus.UpdateAvailable;
                         }
@@ -307,13 +301,15 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
-            var supportedFrameworks = Target.GetSupportedFrameworks();
+            var supportedFrameworks = Target.IsMultiProject ?
+                Enumerable.Empty<FrameworkName>() :
+                Target.TargetProjects.Single().GetSupportedFrameworks();
 
             if (showOnlyInstalled)
             {
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
-                        Target.Installed.Search(
+                        Target.SearchInstalled(
                             searchText,
                             startIndex,
                             PageSize,
@@ -359,28 +355,20 @@ namespace NuGet.Client.VisualStudio.UI
             var selectedPackage = _packageList.SelectedItem as UiSearchResultPackage;
             if (selectedPackage == null)
             {
-                if (_forProject)
-                {
-                    _packageDetail.DataContext = null;
-                }
-                else
-                {
-                    _packageSolutionDetail.DataContext = null;
-                }
+                _packageDetail.DataContext = null;
+                _packageSolutionDetail.DataContext = null;
             }
             else
             {
-                if (_forProject)
+                if (!Target.IsMultiProject)
                 {
-                    var installedPackage = Target.Installed.GetInstalledPackage(selectedPackage.Id);
+                    var installedPackage = Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(selectedPackage.Id);
                     var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
                     _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
                 }
                 else
                 {
-                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(
-                        selectedPackage,
-                        (SolutionInstalledPackageList)_solutionTarget.Installed);
+                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, Target);
                 }
             }
         }
@@ -410,43 +398,6 @@ namespace NuGet.Client.VisualStudio.UI
             if (_initialized)
             {
                 SearchPackageInActivePackageSource();
-            }
-        }
-
-        internal void UpdatePackageStatus()
-        {
-            var installedPackages = new Dictionary<string, SemanticVersion>(StringComparer.OrdinalIgnoreCase);
-
-            // IInstalledPackageList makes for a slightly weird call here... may want to revisit some method naming :)
-            foreach (var packageReference in Target.Installed.GetInstalledPackageReferences())
-            {
-                installedPackages[packageReference.Identity.Id] = packageReference.Identity.Version;
-            }
-
-            foreach (var item in _packageList.ItemsSource)
-            {
-                var package = item as UiSearchResultPackage;
-                if (package == null)
-                {
-                    continue;
-                }
-
-                SemanticVersion installedVersion;
-                if (installedPackages.TryGetValue(package.Id, out installedVersion))
-                {
-                    if (installedVersion < package.Version)
-                    {
-                        package.Status = PackageStatus.UpdateAvailable;
-                    }
-                    else
-                    {
-                        package.Status = PackageStatus.Installed;
-                    }
-                }
-                else
-                {
-                    package.Status = PackageStatus.NotInstalled;
-                }
             }
         }
     }

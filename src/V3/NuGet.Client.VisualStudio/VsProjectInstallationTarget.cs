@@ -17,8 +17,7 @@ namespace NuGet.Client.VisualStudio
     public class VsProjectInstallationTarget : InstallationTarget
     {
         private readonly IProjectManager _projectManager;
-        private readonly ProjectInstalledPackagesList _installedList;
-
+        
         public Project Project { get; private set; }
 
         public override string Name
@@ -26,21 +25,40 @@ namespace NuGet.Client.VisualStudio
             get { return Project.Name; }
         }
 
-        public override InstalledPackagesList Installed
+        public override bool IsActive
         {
-            get { return _installedList; }
+            get { return true; }
         }
 
-        public override IProjectSystem ProjectSystem
+        public TargetProject TargetProject { get; private set; }
+
+        public override IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects
         {
-            get { return _projectManager.Project; }
+            get
+            {
+                VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
+                return _projectManager.PackageManager.LocalRepository.LoadProjectRepositories()
+                        .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((PackageReferenceRepository)r));
+            }
+        }
+
+        public override IEnumerable<TargetProject> TargetProjects
+        {
+            get
+            {
+                yield return TargetProject;
+            }
         }
 
         public VsProjectInstallationTarget(Project project, IProjectManager projectManager)
         {
             Project = project;
             _projectManager = projectManager;
-            _installedList = new ProjectInstalledPackagesList((PackageReferenceRepository)projectManager.LocalRepository);
+
+            TargetProject = new VsTargetProject(
+                Project,
+                _projectManager,
+                (PackageReferenceRepository)_projectManager.LocalRepository);
         }
 
         public static VsProjectInstallationTarget Create(Project project)
@@ -52,29 +70,9 @@ namespace NuGet.Client.VisualStudio
             return new VsProjectInstallationTarget(project, projectManager);
         }
 
-        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
+        public override Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
-            yield return Project.GetTargetFrameworkName();
-        }
-
-        public override Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
-        {
-            // No-op temporarily
-            return Task.FromResult(0);
-            //throw new NotImplementedException();
-        }
-
-        public override Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects()
-        {
-            VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
-            return Task.FromResult(
-                _projectManager.PackageManager.LocalRepository.LoadProjectRepositories()
-                    .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((PackageReferenceRepository)r)));
-        }
-
-        public override bool IsSolutionOpen
-        {
-            get { throw new NotImplementedException(); }
+            return TargetProject.InstalledPackages.Search(searchTerm, skip, take, cancelToken);
         }
     }
 }

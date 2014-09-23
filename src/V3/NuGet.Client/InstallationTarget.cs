@@ -22,31 +22,36 @@ namespace NuGet.Client
         public abstract string Name { get; }
 
         /// <summary>
-        /// Gets a list of packages installed in the target. This is basically an interface to packages.config.
+        /// Gets a boolean indicating if the installation target is active and available for installation (i.e. is it open).
         /// </summary>
-        public abstract InstalledPackagesList Installed { get; }
-
-        #region Ugly stuff that needs to be reviewed and reorganized
-        public abstract Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects();
-        public abstract IProjectSystem ProjectSystem { get; }
-        #endregion        
+        public abstract bool IsActive { get; }
 
         /// <summary>
-        /// Gets the list of frameworks supported by this target.
+        /// Gets a boolean indicating if the installation target is a multi-project target.
         /// </summary>
-        /// <returns></returns>
-        public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
-
-        /// <summary>
-        /// Executes the specified action against this installation target.
-        /// </summary>
-        /// <param name="actions"></param>
-        /// <returns></returns>
-        public abstract Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions);
-
-        public abstract bool IsSolutionOpen
+        public virtual bool IsMultiProject
         {
-            get;
+            get { return TargetProjects.Count() > 1; }
         }
+
+        /// <summary>
+        /// Gets a list of installed packages in all projects in the solution, including those NOT targetted by this installation target.
+        /// </summary>
+        public abstract IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects { get; }
+
+        /// <summary>
+        /// Gets a list of all projects targetted by this installation target.
+        /// </summary>
+        public abstract IEnumerable<TargetProject> TargetProjects { get; }
+
+        /// <summary>
+        /// Searches the installed packages list
+        /// </summary>
+        /// <param name="searchText"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="PageSize"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchText, int startIndex, int PageSize, CancellationToken ct);
     }
 }

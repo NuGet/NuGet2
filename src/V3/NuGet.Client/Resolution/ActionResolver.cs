@@ -38,12 +38,15 @@ namespace NuGet.Client.Resolution
             // Apply context settings
             ApplyContext(resolver);
 
-            // Add the operation request
+            // Add the operation request(s)
             NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), id, version.ToNormalizedString());
-            resolver.AddOperation(
-                MapNewToOldActionType(operation),
-                CreateVirtualPackage(id, version),
-                new CoreInteropProjectManager(_target, _source));
+            foreach (var project in _target.TargetProjects)
+            {
+                resolver.AddOperation(
+                    MapNewToOldActionType(operation),
+                    CreateVirtualPackage(id, version),
+                    new CoreInteropProjectManager(_target, project, _source));
+            }
 
             // Resolve actions!
             var actions = await Task.Factory.StartNew(() => resolver.ResolveActions());

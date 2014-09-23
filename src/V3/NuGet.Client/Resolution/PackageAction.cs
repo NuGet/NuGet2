@@ -24,6 +24,11 @@ namespace NuGet.Client.Resolution
             Package = package;
             Target = target;
         }
+
+        public override string ToString()
+        {
+            return ActionType.ToString() + " " + PackageName.ToString() + " " + Target;
+        }
     }
 
     public enum PackageActionType

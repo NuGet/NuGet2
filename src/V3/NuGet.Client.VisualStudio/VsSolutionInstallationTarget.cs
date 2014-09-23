@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using NuGet.Client.Interop;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
@@ -11,39 +14,10 @@ namespace NuGet.Client.VisualStudio
     {
         private EnvDTE.Solution _solution;
         private string _name;
-        private SolutionInstalledPackageList _installedPackageList;
         private IVsPackageManager _packageManager;
+        private IPackageRepository _packagesFolderSource;
 
-        public VsSolutionInstallationTarget(EnvDTE.Solution solution)
-        {
-            _solution = solution;
-            _name = string.Format(
-                CultureInfo.CurrentCulture,
-                Strings.Lable_Solution,
-                _solution.GetName());
-
-            _packageManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
-                .CreatePackageManagerToManageInstalledPackages();
-            CreateInstalledPackages();
-        }
-
-        public void CreateInstalledPackages()
-        {
-            _installedPackageList = new SolutionInstalledPackageList(_packageManager.LocalRepository);
-            foreach (EnvDTE.Project project in _solution.Projects)
-            {
-                _installedPackageList.AddProject(project);
-
-                foreach (var package in GetInstalledPackages(project))
-                {
-                    _installedPackageList.Add(
-                        project,
-                        NuGet.Client.CoreConverters.SafeToInstalledPackageReference(package));
-                }
-            }
-        }
-
-        public override bool IsSolutionOpen
+        public override bool IsActive
         {
             get
             {
@@ -59,44 +33,44 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        /// <summary>
-        /// Gets the list of packages installed in the project.
-        /// </summary>
-        /// <param name="project">The project to check.</param>
-        /// <returns>The list of packages installed in the project.</returns>
-        private IEnumerable<PackageReference> GetInstalledPackages(EnvDTE.Project project)
+        public override IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects
         {
-            var projectManager = _packageManager.GetProjectManager(project);
-            var repo = (PackageReferenceRepository)projectManager.LocalRepository;
-            return repo.GetPackageReferences();
-        }
-
-        public override InstalledPackagesList Installed
-        {
-            get
-            {
-                return _installedPackageList;
+            get {
+                return _solution.GetAllProjects()
+                    .Select(p => (InstalledPackagesList)new ProjectInstalledPackagesList(
+                        (PackageReferenceRepository)_packageManager.GetProjectManager(p).LocalRepository));
             }
         }
 
-        public override Task<IEnumerable<InstalledPackagesList>> GetInstalledPackagesInAllProjects()
+        public override IEnumerable<TargetProject> TargetProjects
         {
-            throw new NotImplementedException();
+            get {
+                return _solution.GetAllProjects()
+                    .Select(p => new VsTargetProject(p, _packageManager.GetProjectManager(p)));
+            }
         }
 
-        public override IProjectSystem ProjectSystem
+        public VsSolutionInstallationTarget(EnvDTE.Solution solution)
         {
-            get { throw new NotImplementedException(); }
+            _solution = solution;
+            _name = string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Label_Solution,
+                _solution.GetName());
+
+            _packageManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
+                .CreatePackageManagerToManageInstalledPackages();
+            _packagesFolderSource = _packageManager.LocalRepository;
         }
 
-        public override IEnumerable<System.Runtime.Versioning.FrameworkName> GetSupportedFrameworks()
+        public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken ct)
         {
-            yield break; // !!! NOT IMPLEMENTED!
-        }
-
-        public override Task ExecuteActionsAsync(IEnumerable<Resolution.PackageAction> actions)
-        {
-            throw new NotImplementedException();
+            return Task.FromResult(
+                _packagesFolderSource.Search(searchText, allowPrereleaseVersions: true)
+                    .Skip(skip)
+                    .Take(take)
+                    .ToList()
+                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
         }
     }
 }

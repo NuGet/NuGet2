@@ -110,7 +110,6 @@ namespace NuGet.VisualStudio
                 EnsureInitialized();
 
                 if (value != null &&
-                    !IsAggregateSource(value) &&
                     !_packageSources.Contains(value) &&
                     !value.Name.Equals(NuGetOfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -212,13 +211,21 @@ namespace NuGet.VisualStudio
         {
             _activePackageSource = DeserializeActivePackageSource(_settings, _vsShellInfo);
 
-            PackageSource migratedActiveSource;
             bool activeSourceChanged = false;
+            
+            // Don't allow the aggregate source as the active source any more!
+            if (IsAggregateSource(_activePackageSource))
+            {
+                activeSourceChanged = true;
+                _activePackageSource = _packageSources.FirstOrDefault(p => p.IsEnabled);
+            }
+
+            PackageSource migratedActiveSource;
             if (_activePackageSource == null)
             {
                 // If there are no sources, pick the first source that's enabled.
                 activeSourceChanged = true;
-                _activePackageSource = _packageSources.FirstOrDefault(p => p.IsEnabled) ?? AggregatePackageSource.Instance;
+                _activePackageSource = _packageSources.FirstOrDefault(p => p.IsEnabled);
             }
             else if (_feedsToMigrate.TryGetValue(_activePackageSource, out migratedActiveSource))
             {
@@ -247,6 +254,10 @@ namespace NuGet.VisualStudio
             ISettings settings,
             IVsShellInfo vsShellInfo)
         {
+            // NOTE: Even though the aggregate source is being disabled, this method can still return it because
+            //  it could be reading a v2.x active source setting. The caller of this method will migrate the active source
+            //  to the first enabled feed.
+
             var enabledSources = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
             foreach (var source in _packageSources.Where(p => p.IsEnabled))
             {

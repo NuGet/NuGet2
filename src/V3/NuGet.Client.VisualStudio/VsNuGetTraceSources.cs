@@ -11,6 +11,7 @@ namespace NuGet.Client.VisualStudio
     public static class VsNuGetTraceSources
     {
         public static readonly TraceSource VsProjectInstallationTarget = new TraceSource(typeof(VsProjectInstallationTarget).FullName);
+        public static readonly TraceSource VsTargetProject = new TraceSource(typeof(VsTargetProject).FullName);
         
         /// <summary>
         /// Retrieves a list of all sources defined in this class. Uses reflection, store the result!

@@ -24,6 +24,8 @@ namespace NuGet.Client.VisualStudio
         {
             get
             {
+                Debug.Assert(!_sourceProvider.ActivePackageSource.IsAggregate(), "Active source is the aggregate source! This shouldn't happen!");
+
                 return new V2SourceRepository(
                     new PackageSource(_sourceProvider.ActivePackageSource.Name, _sourceProvider.ActivePackageSource.Source),
                     _repoFactory.CreateRepository(

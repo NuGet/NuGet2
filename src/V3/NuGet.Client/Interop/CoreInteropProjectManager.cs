@@ -11,6 +11,7 @@ namespace NuGet.Client.Interop
     {
         private readonly SourceRepository _source;
         private readonly InstallationTarget _target;
+        private readonly TargetProject _targetProject;
         private readonly CoreInteropSharedRepository _sharedRepo;
         private readonly CoreInteropPackageManager _pacman;
         private readonly CoreInteropSourceRepository _sourceRepo;
@@ -27,14 +28,14 @@ namespace NuGet.Client.Interop
 
         public IProjectSystem Project
         {
-            get { return _target.ProjectSystem; }
+            get { return _targetProject.ProjectSystem; }
         }
 
         public IPackageConstraintProvider ConstraintProvider
         {
             get
             {
-                return new CoreInteropConstraintProvider(_target.Installed);
+                return new CoreInteropConstraintProvider(_targetProject.InstalledPackages);
             }
             set
             {
@@ -42,12 +43,13 @@ namespace NuGet.Client.Interop
             }
         }
 
-        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
+        public CoreInteropProjectManager(InstallationTarget target, TargetProject targetProject, SourceRepository activeSource)
         {
             _target = target;
             _source = activeSource;
+            _targetProject = targetProject;
 
-            _sharedRepo = new CoreInteropSharedRepository(target);
+            _sharedRepo = new CoreInteropSharedRepository(target, targetProject);
             _sourceRepo = new CoreInteropSourceRepository(activeSource);
             _pacman = new CoreInteropPackageManager(_sharedRepo, _sourceRepo);
         }

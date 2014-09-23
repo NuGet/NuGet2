@@ -67,12 +67,12 @@ namespace NuGet.Client.Interop
     /// </summary>
     internal class CoreInteropSharedRepository : CoreInteropLocalRepository, ISharedPackageRepository, IPackageReferenceRepository
     {
-        private readonly InstallationTarget _target;
+        private readonly InstallationTarget _installTarget;
         
-        public CoreInteropSharedRepository(InstallationTarget target) :
-            base(target.Installed)
+        public CoreInteropSharedRepository(InstallationTarget installTarget, TargetProject targetProject) :
+            base(targetProject.InstalledPackages)
         {
-            _target = target;
+            _installTarget = installTarget;
         }
 
         public bool IsReferenced(string packageId, SemanticVersion version)
@@ -98,7 +98,7 @@ namespace NuGet.Client.Interop
         public IEnumerable<IPackageRepository> LoadProjectRepositories()
         {
             NuGetTraceSources.CoreInterop.Verbose("loadprojectrepositories", "Project Repositories Loaded");
-            return _target.GetInstalledPackagesInAllProjects().Result
+            return _installTarget.InstalledPackagesInAllProjects
                 .Select(p => new CoreInteropLocalRepository(p));
         }
 
