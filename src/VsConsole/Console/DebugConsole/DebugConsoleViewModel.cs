@@ -18,7 +18,7 @@ namespace NuGetConsole.DebugConsole
             set { SetProperty(ref _activeLevel, value); }
         }
 
-        public IEnumerable<DebugConsoleLevel> AvailableLevels
+        public static IEnumerable<DebugConsoleLevel> AvailableLevels
         {
             get
             {
@@ -28,15 +28,17 @@ namespace NuGetConsole.DebugConsole
 
         #region INotifyPropertyChanged
         // This section is ripe for plucking up into a base class!
-        protected virtual void SetProperty<T>(ref T _field, T newValue, [CallerMemberName] string propertyName = null)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#", Justification="A reference is desired here so that the backing field can be set by the helper method")]
+        protected virtual void SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
         {
-            if (!Equals(_field, newValue))
+            if (!Equals(field, newValue))
             {
-                _field = newValue;
+                field = newValue;
                 RaisePropertyChanged(propertyName);
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification="It is an event.")]
         protected virtual void RaisePropertyChanged(string propertyName)
         {
             var handler = PropertyChanged;

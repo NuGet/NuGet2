@@ -37,15 +37,6 @@ namespace NuGet.Client
             return new PackageIdentity(id, SafeToNuGetVer(version));
         }
 
-        internal static PackageIdentity SafeToPackageIdentity(IPackageName name)
-        {
-            if (name == null)
-            {
-                return null;
-            }
-            return SafeToPackageIdentity(name.Id, name.Version);
-        }
-
         public static InstalledPackageReference SafeToInstalledPackageReference(PackageReference packageRef)
         {
             if (packageRef == null)

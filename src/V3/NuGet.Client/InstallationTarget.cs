@@ -27,9 +27,9 @@ namespace NuGet.Client
         public abstract bool IsActive { get; }
 
         /// <summary>
-        /// Gets a boolean indicating if the installation target is a multi-project target.
+        /// Gets a boolean indicating if the installation target is a solution target.
         /// </summary>
-        public virtual bool IsMultiProject
+        public virtual bool IsSolution
         {
             get { return TargetProjects.Count() > 1; }
         }
@@ -47,11 +47,11 @@ namespace NuGet.Client
         /// <summary>
         /// Searches the installed packages list
         /// </summary>
-        /// <param name="searchText"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="PageSize"></param>
-        /// <param name="ct"></param>
+        /// <param name="searchTerm"></param>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <param name="cancelToken"></param>
         /// <returns></returns>
-        public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchText, int startIndex, int PageSize, CancellationToken ct);
+        public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken);
     }
 }

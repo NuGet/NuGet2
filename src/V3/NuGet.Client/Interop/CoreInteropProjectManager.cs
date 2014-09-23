@@ -9,8 +9,6 @@ namespace NuGet.Client.Interop
 {
     internal class CoreInteropProjectManager : IProjectManager
     {
-        private readonly SourceRepository _source;
-        private readonly InstallationTarget _target;
         private readonly TargetProject _targetProject;
         private readonly CoreInteropSharedRepository _sharedRepo;
         private readonly CoreInteropPackageManager _pacman;
@@ -45,8 +43,6 @@ namespace NuGet.Client.Interop
 
         public CoreInteropProjectManager(InstallationTarget target, TargetProject targetProject, SourceRepository activeSource)
         {
-            _target = target;
-            _source = activeSource;
             _targetProject = targetProject;
 
             _sharedRepo = new CoreInteropSharedRepository(target, targetProject);

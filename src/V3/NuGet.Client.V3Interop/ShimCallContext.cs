@@ -14,16 +14,14 @@ namespace NuGet.Client.V3Shim
         private ManualResetEventSlim _sem;
         private MemoryStream _data;
         private string _contentType;
-        private IDebugConsoleController _logger;
         private InterceptorArguments _args;
         private HttpStatusCode _statusCode;
         private MemoryStream _requestStream;
         private string _batchBoundaryId;
 
-        public ShimCallContext(WebRequest request, MemoryStream requestStream, IDebugConsoleController logger)
+        public ShimCallContext(WebRequest request, MemoryStream requestStream)
             :base()
         {
-            _logger = logger;
             _request = request;
             _statusCode = HttpStatusCode.OK;
             _requestStream = requestStream;

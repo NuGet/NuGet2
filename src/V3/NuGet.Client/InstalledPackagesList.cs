@@ -11,6 +11,7 @@ namespace NuGet.Client
 {
     public abstract class InstalledPackagesList
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method make require computation.")]
         public abstract Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata();
 
         /// <summary>

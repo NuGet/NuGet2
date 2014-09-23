@@ -16,14 +16,12 @@ namespace NuGet.Client.V3Shim
     internal class ShimController : IShimController
     {
         private readonly List<InterceptDispatcher> _dispatchers;
-        private readonly IDebugConsoleController _debugLogger;
         private IPackageSourceProvider _sourceProvider;
         private IShimCache _cache;
         private InterceptDispatcher _lastUsedDispatcher;
 
-        public ShimController(IDebugConsoleController debugLogger)
+        public ShimController()
         {
-            _debugLogger = debugLogger;
             _dispatchers = new List<InterceptDispatcher>();
         }
 
@@ -180,7 +178,7 @@ namespace NuGet.Client.V3Shim
 
             try
             {
-                using (var context = new ShimCallContext(request, requestStream, _debugLogger))
+                using (var context = new ShimCallContext(request, requestStream))
                 {
                     if (StringComparer.OrdinalIgnoreCase.Equals(request.Method, "POST") && requestStream != null)
                     {
@@ -293,7 +291,7 @@ namespace NuGet.Client.V3Shim
         /// Get the response directly without the interceptor.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ms"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Client.V3Shim.ShimController.Log(System.String,System.ConsoleColor)")]
-        private WebResponse CallV2(WebRequest request)
+        private static WebResponse CallV2(WebRequest request)
         {
             V3InteropTraceSources.ShimController.Verbose("v2_request", "V2 {0} {1}", request.Method, request.RequestUri.AbsoluteUri);
                 

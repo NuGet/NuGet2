@@ -69,16 +69,16 @@ namespace NuGet.Client.Interop
             return value;
         }
 
-        public static PackageDependency DependencyFromJson(JObject dep)
+        public static PackageDependency DependencyFromJson(JObject dependency)
         {
             return new PackageDependency(
-                dep.Value<string>(Properties.Id),
-                VersionUtility.ParseVersionSpec(dep.Value<string>(Properties.Range)));
+                dependency.Value<string>(Properties.Id),
+                VersionUtility.ParseVersionSpec(dependency.Value<string>(Properties.Range)));
         }
 
-        public static PackageDependencySet DependencySetFromJson(JObject depSet)
+        public static PackageDependencySet DependencySetFromJson(JObject dependencySet)
         {
-            var deps = depSet.Value<JArray>(Properties.Dependencies);
+            var deps = dependencySet.Value<JArray>(Properties.Dependencies);
             IEnumerable<PackageDependency> depEnum;
             if (deps == null)
             {
@@ -89,16 +89,16 @@ namespace NuGet.Client.Interop
                 depEnum = deps.Select(t => DependencyFromJson((JObject)t));
             }
 
-            string fxName = depSet.Value<string>(Properties.TargetFramework);
+            string fxName = dependencySet.Value<string>(Properties.TargetFramework);
 
             return new PackageDependencySet(
                 String.IsNullOrEmpty(fxName) ? null : new FrameworkName(fxName),
                 depEnum);
         }
 
-        public static IPackage PackageFromJson(JObject j)
+        public static IPackage PackageFromJson(JObject json)
         {
-            return new CoreInteropPackage(j);
+            return new CoreInteropPackage(json);
         }
 
         private static void AddProp(JObject obj, string property, JArray content)

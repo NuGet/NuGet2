@@ -21,6 +21,7 @@ namespace NuGet.Client
         /// Gets the list of frameworks supported by this target.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method may require computation")]
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
 
         /// <summary>

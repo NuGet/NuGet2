@@ -10,7 +10,9 @@ namespace NuGet.Client.VisualStudio
 {
     public static class VsNuGetTraceSources
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource VsProjectInstallationTarget = new TraceSource(typeof(VsProjectInstallationTarget).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource VsTargetProject = new TraceSource(typeof(VsTargetProject).FullName);
         
         /// <summary>

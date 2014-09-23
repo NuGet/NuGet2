@@ -68,7 +68,7 @@ namespace NuGet.Client.Resolution
 
         }
 
-        private JObject UnwrapPackage(IPackage package)
+        private static JObject UnwrapPackage(IPackage package)
         {
             CoreInteropPackage interopPackage = package as CoreInteropPackage;
             Debug.Assert(interopPackage != null, "Expected a CoreInteropPackage!");
@@ -97,7 +97,7 @@ namespace NuGet.Client.Resolution
             }
         }
 
-        private DependencyVersion MapDependencyBehavior(DependencyBehavior behavior)
+        private static DependencyVersion MapDependencyBehavior(DependencyBehavior behavior)
         {
             // Ignore is checked before calling this.
             Debug.Assert(behavior != DependencyBehavior.Ignore);
@@ -122,7 +122,7 @@ namespace NuGet.Client.Resolution
             }
         }
 
-        private PackageActionType MapOldToNewActionType(Resolver.PackageActionType packageActionType)
+        private static PackageActionType MapOldToNewActionType(Resolver.PackageActionType packageActionType)
         {
             switch (packageActionType)
             {
@@ -144,7 +144,7 @@ namespace NuGet.Client.Resolution
             }
         }
 
-        private NuGet.PackageAction MapNewToOldActionType(PackageActionType operation)
+        private static NuGet.PackageAction MapNewToOldActionType(PackageActionType operation)
         {
             switch (operation)
             {

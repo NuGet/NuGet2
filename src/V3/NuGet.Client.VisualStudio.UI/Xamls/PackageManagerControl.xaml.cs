@@ -65,7 +65,7 @@ namespace NuGet.Client.VisualStudio.UI
             _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageSolutionDetail.Control = this;
 
-            if (Target.IsMultiProject)
+            if (Target.IsSolution)
             {
                 _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
             }
@@ -109,7 +109,7 @@ namespace NuGet.Client.VisualStudio.UI
             if (!e.PackagesMissing)
             {
                 // packages are restored. Update the UI
-                if (Target.IsMultiProject)
+                if (Target.IsSolution)
                 {
                     UpdateDetailPane();
                 }
@@ -301,7 +301,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var searchText = _searchText.Text;
             bool showOnlyInstalled = _filter.SelectedIndex == 1;
-            var supportedFrameworks = Target.IsMultiProject ?
+            var supportedFrameworks = Target.IsSolution ?
                 Enumerable.Empty<FrameworkName>() :
                 Target.TargetProjects.Single().GetSupportedFrameworks();
 
@@ -360,7 +360,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                if (!Target.IsMultiProject)
+                if (!Target.IsSolution)
                 {
                     var installedPackage = Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(selectedPackage.Id);
                     var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;

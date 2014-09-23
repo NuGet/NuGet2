@@ -17,6 +17,8 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Editor;
 using NuGet;
 using System.Diagnostics;
+using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGetConsole.Implementation
 {
@@ -115,6 +117,7 @@ namespace NuGetConsole.Implementation
             AttachEvents();
         }
 
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGetConsole.IConsole.Write(System.String,System.Nullable<System.Windows.Media.Color>,System.Nullable<System.Windows.Media.Color>)", Justification="String does not require localization.")]
         public void Log(DateTime timestamp, string message, TraceEventType level, string source)
         {
             if (IsActive)
@@ -126,7 +129,7 @@ namespace NuGetConsole.Implementation
                 if (mapped >= _viewModel.ActiveLevel)
                 {
                     _console.Write(
-                        String.Format("[{0:O}][{1}]{2}", timestamp, Shorten(source), message) + Environment.NewLine, 
+                        String.Format(CultureInfo.CurrentCulture, "[{0:O}][{1}]{2}", timestamp, Shorten(source), message) + Environment.NewLine, 
                         ConvertColor(mapped), null);
                 }
 
@@ -135,16 +138,16 @@ namespace NuGetConsole.Implementation
         }
 
         // Shortens NuGet. trace source names.
-        private string Shorten(string source)
+        private static string Shorten(string source)
         {
-            if (source.StartsWith("NuGet."))
+            if (source.StartsWith("NuGet.", StringComparison.OrdinalIgnoreCase))
             {
                 return source.Split('.').Last();
             }
             return source;
         }
 
-        private DebugConsoleLevel MapType(TraceEventType level)
+        private static DebugConsoleLevel MapType(TraceEventType level)
         {
             switch (level)
             {
