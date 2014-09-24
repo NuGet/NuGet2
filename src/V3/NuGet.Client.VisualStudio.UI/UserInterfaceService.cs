@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -36,18 +37,20 @@ namespace NuGet.Client.VisualStudio.UI
 
         private bool PromptForLicenseAcceptanceImpl(IEnumerable<PackageLicenseInfo> packages)
         {
-            var licenseWindow = new LicenseAcceptanceWindow()
-            {
-                DataContext = packages
-            };
+            MessageBox.Show("TODO: Fix license dialog");
+            return true;
+            //var licenseWindow = new LicenseAcceptanceWindow()
+            //{
+            //    DataContext = packages
+            //};
 
-            /* !!!
-            using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
-                NuGetEvent.LicenseWindowBegin,
-                NuGetEvent.LicenseWindowEnd))
-            { */
-            bool? dialogResult = licenseWindow.ShowDialog();
-            return dialogResult ?? false;
+            ///* !!!
+            //using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
+            //    NuGetEvent.LicenseWindowBegin,
+            //    NuGetEvent.LicenseWindowEnd))
+            //{ */
+            //bool? dialogResult = licenseWindow.ShowDialog();
+            //return dialogResult ?? false;
         }
 
         public void LaunchExternalLink(Uri url)

@@ -14,10 +14,8 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsProjectInstallationTarget : InstallationTarget
+    public class VsProjectInstallationTarget : ProjectInstallationTarget
     {
-        private readonly IProjectManager _projectManager;
-        
         public Project Project { get; private set; }
 
         public override string Name
@@ -37,7 +35,7 @@ namespace NuGet.Client.VisualStudio
             get
             {
                 VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
-                return _projectManager.PackageManager.LocalRepository.LoadProjectRepositories()
+                return ProjectManager.PackageManager.LocalRepository.LoadProjectRepositories()
                         .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((PackageReferenceRepository)r));
             }
         }
@@ -51,14 +49,14 @@ namespace NuGet.Client.VisualStudio
         }
 
         public VsProjectInstallationTarget(Project project, IProjectManager projectManager)
+            : base(projectManager)
         {
             Project = project;
-            _projectManager = projectManager;
-
+            
             TargetProject = new VsTargetProject(
                 Project,
-                _projectManager,
-                (PackageReferenceRepository)_projectManager.LocalRepository);
+                ProjectManager,
+                (PackageReferenceRepository)ProjectManager.LocalRepository);
         }
 
         public static VsProjectInstallationTarget Create(Project project)

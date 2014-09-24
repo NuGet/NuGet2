@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NuGet.Client.InstallationTarget">
+    <Position X="4.25" Y="4.5" Width="1.5" />
+    <AssociationLine Name="InstalledPackagesInAllProjects" Type="NuGet.Client.InstalledPackagesList">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.228" Y="-1.855" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="TargetProjects" Type="NuGet.Client.TargetProject" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.844" Y="6.632" />
+        <Point X="4.844" Y="7.125" />
+        <Point X="3.5" Y="7.125" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Property Name="InstalledPackagesInAllProjects" />
+      <Property Name="TargetProjects" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="NuGet.Client.SourceRepository" Collapsed="true">
+    <Position X="9.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.SourceRepositoryManager">
+    <Position X="9.25" Y="4.5" Width="2" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="ActiveRepository" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="AvailableSources" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="NuGet.Client.ProjectInstalledPackagesList" Collapsed="true">
+    <Position X="5.25" Y="9.75" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.InstalledPackagesList" Collapsed="true">
+    <Position X="5.5" Y="8.25" Width="1.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsProjectInstallationTarget" Collapsed="true">
+    <Position X="1.5" Y="5.25" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsSolutionInstallationTarget" Collapsed="true">
+    <Position X="1.5" Y="4.5" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsSourceRepositoryManager" Collapsed="true">
+    <Position X="11.75" Y="4.75" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsTargetProject">
+    <Position X="1.5" Y="9.5" Width="2" />
+    <AssociationLine Name="Project" Type="EnvDTE.Project">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.746" Y="0.247" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="InstalledPackages" Type="NuGet.Client.InstalledPackagesList" ManuallyRouted="true">
+      <Path>
+        <Point X="2.5" Y="9.5" />
+        <Point X="2.5" Y="9.302" />
+        <Point X="4.341" Y="9.302" />
+        <Point X="4.341" Y="8.655" />
+        <Point X="5.5" Y="8.655" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.255" Y="-0.572" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="Project" />
+      <Property Name="InstalledPackages" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="NuGet.Client.TargetProject">
+    <Position X="1.5" Y="6.75" Width="2" />
+    <AssociationLine Name="InstalledPackages" Type="NuGet.Client.InstalledPackagesList">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.793" Y="0.083" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="InstalledPackages" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="NuGet.Client.Interop.V2SourceRepository" Collapsed="true">
+    <Position X="9.25" Y="7.25" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.UI.PackageManagerModel" Collapsed="true">
+    <Position X="6.75" Y="2.25" Width="2" />
+    <AssociationLine Name="Sources" Type="NuGet.Client.SourceRepositoryManager" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.125" Y="2.812" />
+        <Point X="8.125" Y="5.031" />
+        <Point X="9.25" Y="5.031" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.266" Y="1.966" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Target" Type="NuGet.Client.InstallationTarget" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.812" />
+        <Point X="7.125" Y="5.797" />
+        <Point X="5.75" Y="5.797" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.591" Y="2.758" Height="0.182" Width="0.777" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAQCAAAAACAAAAQAhAAAACAAAAAQAAgQQAAAAACAAAA=</HashCode>
+      <FileName>PackageManagerModel.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Sources" />
+      <Property Name="Target" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NuGet.Client.PackageSource" Collapsed="true">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Interface Name="EnvDTE.Project" Collapsed="true">
+    <Position X="1.75" Y="12.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

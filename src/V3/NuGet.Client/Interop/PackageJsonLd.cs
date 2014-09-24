@@ -48,6 +48,13 @@ namespace NuGet.Client.Interop
             AddProp(value, Properties.Published, version.Published.HasValue ? version.Published.Value.ToString("O", CultureInfo.InvariantCulture) : null);
             AddProp(value, Properties.RequireLicenseAcceptance, version.RequireLicenseAcceptance);
             AddProp(value, Properties.DependencyGroups, version.DependencySets.Select(set => CreateDependencyGroup(set)));
+
+            var dsPackage = version as DataServicePackage;
+            if (dsPackage != null)
+            {
+                AddProp(value, Properties.NupkgUrl, dsPackage.DownloadUrl);
+            }
+
             return value;
         }
 

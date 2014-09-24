@@ -72,7 +72,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
-    <None Include="V3Api.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">

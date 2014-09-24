@@ -23,12 +23,5 @@ namespace NuGet.Client
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method may require computation")]
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
-
-        /// <summary>
-        /// Executes the specified action against this installation target.
-        /// </summary>
-        /// <param name="actions"></param>
-        /// <returns></returns>
-        public abstract Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions);
     }
 }

@@ -129,21 +129,35 @@ namespace NuGet.Client.VisualStudio.UI
             //w.ShowDialog();
         }
 
-        private void PerformPackageAction(PackageActionType action)
+        private async void PerformPackageAction(PackageActionType action)
         {
-            //var actions = await ResolveActions(action);
+            var actions = await ResolveActions(action);
 
-            //// show license agreeement
-            //bool acceptLicense = ShowLicenseAgreement(actions);
-            //if (!acceptLicense)
-            //{
-            //    return;
-            //}
+            // show license agreeement
+            bool acceptLicense = ShowLicenseAgreement(actions);
+            if (!acceptLicense)
+            {
+                return;
+            }
 
-            //await Session.CreateActionExecutor().ExecuteActions(actions);
+            // This should only be called in cases where there is a single target
+            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
+            Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
+            
+            // Create the executor and execute the actions
+            Control.SetBusy(true);
+            try
+            {
+                var executor = new ProjectActionExecutor((ProjectInstallationTarget)Control.Target);
+                await executor.ExecuteActionsAsync(actions);
+            }
+            finally
+            {
+                Control.SetBusy(false);
+            }
 
-            //Control.UpdatePackageStatus();
-            //UpdatePackageStatus();
+            Control.UpdatePackageStatus();
+            UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()
@@ -170,22 +184,22 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        //private void UpdatePackageStatus()
-        //{
-        //    var model = (PackageDetailControlModel)DataContext;
-        //    if (model == null)
-        //    {
-        //        return;
-        //    }
+        private void UpdatePackageStatus()
+        {
+            var model = (PackageDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
 
-        //    // This should only be called in cases where there is a single target
-        //    Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
+            // This should only be called in cases where there is a single target
+            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
 
-        //    UpdateInstallUninstallButton();
-        //    var installedPackage = Control.Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(model.Package.Id);
-        //    var installedVersion = installedPackage.Identity.Version;
-        //    model.CreateVersions(installedVersion);
-        //}
+            UpdateInstallUninstallButton();
+            var installedPackage = Control.Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(model.Package.Id);
+            var installedVersion = installedPackage.Identity.Version;
+            model.CreateVersions(installedVersion);
+        }
 
         protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
         {

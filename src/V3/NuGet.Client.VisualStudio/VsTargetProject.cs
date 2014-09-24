@@ -9,10 +9,11 @@ using EnvDTE;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Interop;
+using NuGet.Client.Resolution;
+using NuGet.Resolver;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
-
 
 namespace NuGet.Client.VisualStudio
 {
@@ -53,13 +54,6 @@ namespace NuGet.Client.VisualStudio
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             yield return Project.GetTargetFrameworkName();
-        }
-
-        public override Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
-        {
-            // No-op temporarily
-            return Task.FromResult(0);
-            //throw new NotImplementedException();
         }
     }
 }

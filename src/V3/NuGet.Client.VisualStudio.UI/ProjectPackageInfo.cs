@@ -7,7 +7,7 @@ namespace NuGet.Client.VisualStudio.UI
     // Represents the version of a package that is installed in the project
     public class ProjectPackageInfo
     {
-        public SemanticVersion Version
+        public NuGetVersion Version
         {
             get;
             private set;
@@ -27,7 +27,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private string _projectName;
 
-        public ProjectPackageInfo(string projectName, SemanticVersion version, bool enabled)
+        public ProjectPackageInfo(string projectName, NuGetVersion version, bool enabled)
         {
             _projectName = projectName;
             Version = version;

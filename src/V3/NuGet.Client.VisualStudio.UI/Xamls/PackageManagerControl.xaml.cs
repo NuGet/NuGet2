@@ -189,28 +189,7 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Summary = package.Value<string>("summary");
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
 
-                    // Get the minimum version installed in any target project
-                    var minimumInstalledPackage = _target.TargetProjects
-                        .Select(p => p.InstalledPackages.GetInstalledPackage(searchResultPackage.Id))
-                        .Where(p => p != null)
-                        .OrderBy(r => r.Identity.Version)
-                        .FirstOrDefault();
-
-                    if (minimumInstalledPackage != null)
-                    {
-                        if (minimumInstalledPackage.Identity.Version < searchResultPackage.Version)
-                        {
-                            searchResultPackage.Status = PackageStatus.UpdateAvailable;
-                        }
-                        else
-                        {
-                            searchResultPackage.Status = PackageStatus.Installed;
-                        }
-                    }
-                    else
-                    {
-                        searchResultPackage.Status = PackageStatus.NotInstalled;
-                    }
+                    searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
 
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
                     packages.Add(searchResultPackage);
@@ -262,6 +241,34 @@ namespace NuGet.Client.VisualStudio.UI
                 }
 
                 return retValue;
+            }
+
+            private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)
+            {
+                // Get the minimum version installed in any target project
+                var minimumInstalledPackage = _target.TargetProjects
+                    .Select(p => p.InstalledPackages.GetInstalledPackage(id))
+                    .Where(p => p != null)
+                    .OrderBy(r => r.Identity.Version)
+                    .FirstOrDefault();
+
+                PackageStatus status;
+                if (minimumInstalledPackage != null)
+                {
+                    if (minimumInstalledPackage.Identity.Version < currentVersion)
+                    {
+                        status = PackageStatus.UpdateAvailable;
+                    }
+                    else
+                    {
+                        status = PackageStatus.Installed;
+                    }
+                }
+                else
+                {
+                    status = PackageStatus.NotInstalled;
+                }
+                return status;
             }
 
             private UiPackageDependencySet LoadDependencySet(JObject set)
@@ -398,6 +405,45 @@ namespace NuGet.Client.VisualStudio.UI
             if (_initialized)
             {
                 SearchPackageInActivePackageSource();
+            }
+        }
+
+        internal void UpdatePackageStatus()
+        {
+            var installedPackages = new Dictionary<string, NuGetVersion>(StringComparer.OrdinalIgnoreCase);
+
+            var groups = Target.TargetProjects.SelectMany(p => p.InstalledPackages.GetInstalledPackageReferences())
+                .GroupBy(r => r.Identity.Id);
+
+            foreach (var group in groups)
+            {
+                installedPackages[group.Key] = group.Min(r => r.Identity.Version);
+            }
+
+            foreach (var item in _packageList.ItemsSource)
+            {
+                var package = item as UiSearchResultPackage;
+                if (package == null)
+                {
+                    continue;
+                }
+
+                NuGetVersion installedVersion;
+                if (installedPackages.TryGetValue(package.Id, out installedVersion))
+                {
+                    if (installedVersion < package.Version)
+                    {
+                        package.Status = PackageStatus.UpdateAvailable;
+                    }
+                    else
+                    {
+                        package.Status = PackageStatus.Installed;
+                    }
+                }
+                else
+                {
+                    package.Status = PackageStatus.NotInstalled;
+                }
             }
         }
     }
