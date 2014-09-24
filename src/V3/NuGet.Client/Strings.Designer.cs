@@ -79,6 +79,24 @@ namespace NuGet.Client {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The download URL for {0} &apos;{1}&apos; is invalid. {2}.
+        /// </summary>
+        internal static string DownloadActionHandler_InvalidDownloadUrl {
+            get {
+                return ResourceManager.GetString("DownloadActionHandler_InvalidDownloadUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No download URL could be found for {0}..
+        /// </summary>
+        internal static string DownloadActionHandler_NoDownloadUrl {
+            get {
+                return ResourceManager.GetString("DownloadActionHandler_NoDownloadUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create a NuGet Repository from the Aggregate Source.
         /// </summary>
         internal static string NuGetRepository_CannotCreateAggregateRepo {

@@ -85,5 +85,17 @@ namespace NuGet.Client
                 MinVersion = SafeToSemVer(versionRange.MinVersion)
             };
         }
+
+        internal static IPackageName SafeToPackageName(PackageIdentity packageIdentity)
+        {
+            if (packageIdentity == null)
+            {
+                return null;
+            }
+
+            return new PackageName(
+                packageIdentity.Id,
+                SafeToSemVer(packageIdentity.Version));
+        }
     }
 }

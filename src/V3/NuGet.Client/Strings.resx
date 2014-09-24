@@ -123,6 +123,12 @@
   <data name="ActionResolver_UnsupportedDependencyBehavior" xml:space="preserve">
     <value>Unsupported Dependency Behavior '{0}'.</value>
   </data>
+  <data name="DownloadActionHandler_InvalidDownloadUrl" xml:space="preserve">
+    <value>The download URL for {0} '{1}' is invalid. {2}</value>
+  </data>
+  <data name="DownloadActionHandler_NoDownloadUrl" xml:space="preserve">
+    <value>No download URL could be found for {0}.</value>
+  </data>
   <data name="NuGetRepository_CannotCreateAggregateRepo" xml:space="preserve">
     <value>Cannot create a NuGet Repository from the Aggregate Source</value>
   </data>

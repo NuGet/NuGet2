@@ -8,9 +8,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
-using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Resolution;
 using System.Diagnostics;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -144,12 +144,20 @@ namespace NuGet.Client.VisualStudio.UI
             Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
             Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
             
+            // Create the execution context
+            var context = new ExecutionContext((ProjectInstallationTarget)Control.Target);
+
             // Create the executor and execute the actions
             Control.SetBusy(true);
             try
             {
-                var executor = new ProjectActionExecutor((ProjectInstallationTarget)Control.Target);
-                await executor.ExecuteActionsAsync(actions);
+                var executor = new ActionExecutor();
+                await executor.ExecuteActionsAsync(actions, context);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                throw;
             }
             finally
             {
@@ -197,8 +205,11 @@ namespace NuGet.Client.VisualStudio.UI
 
             UpdateInstallUninstallButton();
             var installedPackage = Control.Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(model.Package.Id);
-            var installedVersion = installedPackage.Identity.Version;
-            model.CreateVersions(installedVersion);
+            if (installedPackage != null)
+            {
+                var installedVersion = installedPackage.Identity.Version;
+                model.CreateVersions(installedVersion);
+            }
         }
 
         protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
