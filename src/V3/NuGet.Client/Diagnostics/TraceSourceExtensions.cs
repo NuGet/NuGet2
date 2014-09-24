@@ -31,6 +31,18 @@ namespace NuGet
             self.Verbose(method, "[{0}] ({1}:{2})", method, file, line);
         }
 
+        public static IDisposable TraceMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        {
+            DateTime enterTime = DateTime.UtcNow;
+            self.Verbose(method, "[{0}] ({1}:{2}) Entered @ {3}", method, file, line, enterTime.ToString("O"));
+            return new DisposableAction(() =>
+            {
+                var exitTime = DateTime.UtcNow;
+                var duration = exitTime - enterTime;
+                self.Verbose(method + "_exit", "[{0}] Exited @ {1} (duration {2:0.00}ms)", method, exitTime.ToString("O"), duration.TotalMilliseconds);
+            });
+        }
+
         public static void Verbose(this TraceSource self, string eventName, string format, params object[] args)
         {
             self.TraceEvent(

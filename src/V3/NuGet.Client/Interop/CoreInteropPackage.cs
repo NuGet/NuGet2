@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,10 @@ namespace NuGet.Client.Interop
 {
     internal class CoreInteropPackage : IPackage, IV3PackageMetadata
     {
-        private OldSemVer _oldVer;
+        private readonly OldSemVer _oldVer;
+        private readonly PackageDownloader _downloader;
+
+        private IPackage _localPackage;
         
         public string Id { get; private set; }
         public NuGetVersion Version { get; private set; }
@@ -24,12 +28,19 @@ namespace NuGet.Client.Interop
         {
             get { return _oldVer; }
         }
- 
-        public CoreInteropPackage(JObject json)
+
+        internal Uri DownloadUrl
+        {
+            get { return TryGet<Uri>(
+        }
+
+        public CoreInteropPackage(JObject json) : this(json, new PackageDownloader()) { }
+        public CoreInteropPackage(JObject json, PackageDownloader downloader)
         {
             Id = json.Value<string>("id");
             Version = NuGetVersion.Parse(json.Value<string>("version"));
             _oldVer = CoreConverters.SafeToSemVer(Version);
+            _downloader = downloader;
         
             Json = json;
         }
@@ -99,6 +110,69 @@ namespace NuGet.Client.Interop
                 NuGetTraceSources.CoreInterop.Warning("missingexpectedjsonprop", "Expected {0} property to be surfaced in JSON-LD but it wasn't", name);
             }
             return val;
+        }
+
+        private void EnsureLocalPackage([CallerMemberName] string member = null)
+        {
+            if (_localPackage == null)
+            {
+                NuGetTraceSources.CoreInterop.Info(
+                    "downloadlocalpackage",
+                    "Downloading {0} {1} to access {2} member",
+                    Id,
+                    Version,
+                    member);
+                _localPackage = DownloadPackage(MachineCache.Default);
+            }
+            else
+            {
+                NuGetTraceSources.CoreInterop.Info(
+                    "uselocalpackage",
+                    "Using local package to access {2} member on {0} {1}",
+                    Id,
+                    Version,
+                    member);
+            }
+        }
+
+        private IPackage DownloadPackage(IPackageCacheRepository cacheRepository)
+        {
+            using (NuGetTraceSources.CoreInterop.TraceMethod())
+            {
+                // Try the cache
+                IPackage package = TryLoadFromCache(cacheRepository);
+                if (package != null)
+                {
+                    return package;
+                }
+
+                // Cache failed. Try to download the package into the cache
+                if(cacheRepository.InvokeOnPackage(Id, _oldVer, 
+                    strm => _downloader.DownloadPackage(
+            }
+        }
+
+        private IPackage TryLoadFromCache(IPackageCacheRepository cacheRepository)
+        {
+            using (NuGetTraceSources.CoreInterop.TraceMethod())
+            {
+                IPackage package;
+                try
+                {
+                    package = cacheRepository.FindPackage(Id, _oldVer);
+                }
+                catch (Exception ex)
+                {
+                    NuGetTraceSources.CoreInterop.Error(
+                        "tryloadfromcache_error",
+                        "Error retrieving {0} {1} from cache: {2}",
+                        Id,
+                        Version,
+                        ex.ToString());
+                    package = null;
+                }
+                return package;
+            }
         }
 
         #region Unimplemented Parts
