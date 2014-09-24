@@ -34,12 +34,12 @@ namespace NuGet
         public static IDisposable TraceMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
         {
             DateTime enterTime = DateTime.UtcNow;
-            self.Verbose(method, "[{0}] ({1}:{2}) Entered @ {3}", method, file, line, enterTime.ToString("O"));
+            self.Verbose(method, "[{0}] ({1}:{2}) Entered @ {3}", method, file, line, enterTime.ToString("O", CultureInfo.CurrentCulture));
             return new DisposableAction(() =>
             {
                 var exitTime = DateTime.UtcNow;
                 var duration = exitTime - enterTime;
-                self.Verbose(method + "_exit", "[{0}] Exited @ {1} (duration {2:0.00}ms)", method, exitTime.ToString("O"), duration.TotalMilliseconds);
+                self.Verbose(method + "_exit", "[{0}] Exited @ {1} (duration {2:0.00}ms)", method, exitTime.ToString("O", CultureInfo.CurrentCulture), duration.TotalMilliseconds);
             });
         }
 

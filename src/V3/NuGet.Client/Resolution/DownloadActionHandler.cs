@@ -40,7 +40,7 @@ namespace NuGet.Client.Resolution
             throw new NotImplementedException();
         }
 
-        private IPackage GetPackage(PackageAction action, ExecutionContext context)
+        private static IPackage GetPackage(PackageAction action, ExecutionContext context)
         {
             var packageSemVer = CoreConverters.SafeToSemVer(action.PackageName.Version);
             var packageName = CoreConverters.SafeToPackageName(action.PackageName);

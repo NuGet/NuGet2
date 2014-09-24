@@ -65,7 +65,7 @@ namespace NuGet.Client.Resolution
             }
         }
 
-        protected virtual void Rollback(List<NewPackageAction> executedActions, ExecutionContext context)
+        protected virtual void Rollback(IEnumerable<NewPackageAction> executedActions, ExecutionContext context)
         {
             foreach (var action in executedActions)
             {
