@@ -7,13 +7,6 @@
         <Position X="1.228" Y="-1.855" />
       </MemberNameLabel>
     </AssociationLine>
-    <AssociationLine Name="TargetProjects" Type="NuGet.Client.TargetProject" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="4.844" Y="6.632" />
-        <Point X="4.844" Y="7.125" />
-        <Point X="3.5" Y="7.125" />
-      </Path>
-    </AssociationLine>
     <TypeIdentifier />
     <ShowAsCollectionAssociation>
       <Property Name="InstalledPackagesInAllProjects" />
@@ -110,8 +103,8 @@
     <AssociationLine Name="Target" Type="NuGet.Client.InstallationTarget" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="7.125" Y="2.812" />
-        <Point X="7.125" Y="5.797" />
-        <Point X="5.75" Y="5.797" />
+        <Point X="7.125" Y="5.69" />
+        <Point X="5.75" Y="5.69" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
         <Position X="0.591" Y="2.758" Height="0.182" Width="0.777" />

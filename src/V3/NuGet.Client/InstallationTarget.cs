@@ -53,5 +53,15 @@ namespace NuGet.Client
         /// <param name="cancelToken"></param>
         /// <returns></returns>
         public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken);
+
+        /// <summary>
+        /// Gets the project with the specified name, if it exists, otherwise returns null.
+        /// </summary>
+        /// <param name="projectName"></param>
+        /// <returns></returns>
+        public virtual TargetProject GetProject(string projectName)
+        {
+            return TargetProjects.FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

@@ -69,6 +69,7 @@
     <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />
     <Compile Include="Interop\CoreInteropConstraintProvider.cs" />
+    <Compile Include="PackageManagerContext.cs" />
     <Compile Include="ProjectInstallationTarget.cs" />
     <Compile Include="Interop\CoreInteropSourceRepository.cs" />
     <Compile Include="Interop\PackageJsonLd.cs" />

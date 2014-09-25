@@ -483,16 +483,17 @@ namespace NuGet.Tools
             object firstChild;
             vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
 
-            var sources = ServiceLocator.GetInstance<SourceRepositoryManager>();
-            var target = VsProjectInstallationTarget.Create(project);
-            var myDoc = new PackageManagerModel(sources, target);
+            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
+            var myDoc = new PackageManagerModel(
+                context.SourceManager, 
+                context.CreateProjectInstallationTarget(project));
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
             var guidCommandUI = Guid.Empty;
             var caption = "PackageManager";
-            var documentName = String.Format("Package Manager: {0}", target.Name);
+            var documentName = String.Format("Package Manager: {0}", project.Name);
             IVsWindowFrame windowFrame;
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,
@@ -544,9 +545,8 @@ namespace NuGet.Tools
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
             _dte.Solution.GetName();
-            var sources = ServiceLocator.GetInstance<SourceRepositoryManager>();
-            var target = new VsSolutionInstallationTarget(_dte.Solution);
-            var myDoc = new PackageManagerModel(sources, target);
+            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
+            var myDoc = new PackageManagerModel(context.SourceManager, context.CreateSolutionInstallationTarget());
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

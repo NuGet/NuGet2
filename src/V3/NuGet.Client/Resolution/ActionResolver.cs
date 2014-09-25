@@ -63,8 +63,8 @@ namespace NuGet.Client.Resolution
                                 action.Package.Version.SpecialVersion)),
                        UnwrapPackage(action.Package),
                        (projectAction != null ?
-                            projectAction.ProjectManager.Project.ProjectName :
-                            String.Empty));
+                            _target.GetProject(projectAction.ProjectManager.Project.ProjectName) :
+                            null));
 
         }
 

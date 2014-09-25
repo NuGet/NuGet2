@@ -59,7 +59,7 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        public VsSolutionInstallationTarget(EnvDTE.Solution solution)
+        public VsSolutionInstallationTarget(EnvDTE.Solution solution, IVsPackageManager packageManager)
         {
             _solution = solution;
             _name = string.Format(
@@ -67,8 +67,7 @@ namespace NuGet.Client.VisualStudio
                 Strings.Label_Solution,
                 _solution.GetName());
 
-            _packageManager = ServiceLocator.GetInstance<IVsPackageManagerFactory>()
-                .CreatePackageManagerToManageInstalledPackages();
+            _packageManager = packageManager;
             _packagesFolderSource = _packageManager.LocalRepository;
 
             var repo = _packageManager.LocalRepository as SharedPackageRepository;
