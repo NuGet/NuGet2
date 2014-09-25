@@ -165,6 +165,8 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 var executor = new ActionExecutor();
+
+                // TODO: This method takes a logger! Use that to restore the install progress box.
                 await executor.ExecuteActionsAsync(actions, context);
             }
             catch (Exception ex)

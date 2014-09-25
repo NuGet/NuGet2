@@ -9,7 +9,7 @@ namespace NuGet.Client.Resolution
 {
     public class UninstallActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, ExecutionContext context)
+        public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
         {
             // Get the package out of the project manager
             var package = context.ProjectManager.LocalRepository.FindPackage(
@@ -26,9 +26,10 @@ namespace NuGet.Client.Resolution
             return Task.FromResult(0);
         }
 
-        public Task Rollback(PackageAction action, ExecutionContext context)
+        public Task Rollback(PackageAction action, ExecutionContext context, ILogger logger)
         {
-            throw new NotImplementedException();
+            // Just run the install action to undo a uninstall
+            return new InstallActionHandler().Execute(action, context, logger);
         }
     }
 }

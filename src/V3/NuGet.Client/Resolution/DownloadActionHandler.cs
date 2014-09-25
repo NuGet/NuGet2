@@ -15,7 +15,7 @@ namespace NuGet.Client.Resolution
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, ExecutionContext context)
+        public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
         {
             // Load the package
             var package = GetPackage(action, context);
@@ -27,6 +27,7 @@ namespace NuGet.Client.Resolution
 
             // Now convert the action and use the V2 Execution logic since we
             // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
+            context.PackageManager.Logger = logger;
             context.PackageManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Install));
@@ -35,9 +36,10 @@ namespace NuGet.Client.Resolution
             return Task.FromResult(0);
         }
 
-        public Task Rollback(PackageAction action, ExecutionContext context)
+        public Task Rollback(PackageAction action, ExecutionContext context, ILogger logger)
         {
-            throw new NotImplementedException();
+            // Just run the purge action to undo a download
+            return new PurgeActionHandler().Execute(action, context, logger);
         }
 
         private static IPackage GetPackage(PackageAction action, ExecutionContext context)

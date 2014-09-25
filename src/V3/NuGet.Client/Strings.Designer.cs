@@ -61,6 +61,15 @@ namespace NuGet.Client {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install failed. Rolling back....
+        /// </summary>
+        internal static string ActionExecutor_RollingBack {
+            get {
+                return ResourceManager.GetString("ActionExecutor_RollingBack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
         /// </summary>
         internal static string ActionResolver_UnsupportedAction {

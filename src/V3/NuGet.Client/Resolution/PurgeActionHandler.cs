@@ -9,7 +9,7 @@ namespace NuGet.Client.Resolution
 {
     public class PurgeActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, ExecutionContext context)
+        public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
         {
             // Preconditions:
             Debug.Assert(!context.PackageManager.LocalRepository.IsReferenced(
@@ -24,6 +24,7 @@ namespace NuGet.Client.Resolution
             Debug.Assert(package != null);
             
             // Purge the package from the local repository
+            context.PackageManager.Logger = logger;
             context.PackageManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Uninstall));
@@ -32,9 +33,10 @@ namespace NuGet.Client.Resolution
             return Task.FromResult(0);
         }
 
-        public Task Rollback(PackageAction action, ExecutionContext context)
+        public Task Rollback(PackageAction action, ExecutionContext context, ILogger logger)
         {
-            throw new NotImplementedException();
+            // Just run the download action to undo a purge
+            return new DownloadActionHandler().Execute(action, context, logger);
         }
     }
 }
