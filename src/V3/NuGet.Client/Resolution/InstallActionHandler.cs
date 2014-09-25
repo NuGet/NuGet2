@@ -24,6 +24,7 @@ namespace NuGet.Client.Resolution
             // Handle binding redirects
             if (context.SupportsBindingRedirects)
             {
+                Trace the binding redirect code next!
                 context.PackageManager.AddBindingRedirects(context.ProjectManager);
             }
 
