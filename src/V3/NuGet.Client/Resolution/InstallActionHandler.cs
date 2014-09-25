@@ -21,6 +21,12 @@ namespace NuGet.Client.Resolution
                 package,
                 NuGet.PackageAction.Install));
 
+            // Handle binding redirects
+            if (context.SupportsBindingRedirects)
+            {
+                context.PackageManager.AddBindingRedirects(context.ProjectManager);
+            }
+
             // Not async yet :)
             return Task.FromResult(0);
         }

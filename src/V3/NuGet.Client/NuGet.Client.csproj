@@ -68,6 +68,7 @@
     <Compile Include="InstallationTarget.cs" />
     <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />
+    <Compile Include="Interface1.cs" />
     <Compile Include="Interop\CoreInteropConstraintProvider.cs" />
     <Compile Include="PackageManagerContext.cs" />
     <Compile Include="ProjectInstallationTarget.cs" />

@@ -14,6 +14,13 @@ namespace NuGet.Client.Resolution
         public IPackageManager PackageManager { get; private set; }
         public IPackageCacheRepository PackageCache { get; private set; }
         public PackageDownloader PackageDownloader { get; private set; }
+        public bool SupportsBindingRedirects
+        {
+            get
+            {
+                return PackageManager.BindingRedirectEnabled && ProjectManager.Project.IsBindingRedirectSupported;
+            }
+        }
 
         public ExecutionContext(ProjectInstallationTarget target) : this(
             target.ProjectManager,

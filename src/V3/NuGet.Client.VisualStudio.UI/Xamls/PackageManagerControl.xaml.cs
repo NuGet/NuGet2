@@ -184,10 +184,10 @@ namespace NuGet.Client.VisualStudio.UI
                 CancellationToken ct,
                 Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader)
             {   
-                return Task.Factory.StartNew(() =>
+                return Task.Run(async () =>
                 {
-                    var r1 = _loader(startIndex, ct);
-                    return r1.Result.ToList();
+                    var r1 = await _loader(startIndex, ct);
+                    return r1.ToList();
                 });
             }
 

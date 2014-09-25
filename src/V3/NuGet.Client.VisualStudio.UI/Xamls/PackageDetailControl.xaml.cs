@@ -144,7 +144,16 @@ namespace NuGet.Client.VisualStudio.UI
 
         private async void PerformPackageAction(PackageActionType action)
         {
-            var actions = await ResolveActions(action);
+            IEnumerable<PackageAction> actions;
+            try
+            {
+                actions = await ResolveActions(action);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("TODO: Show better error." + Environment.NewLine + ex.Message);
+                return;
+            }
 
             // show license agreeement
             bool acceptLicense = ShowLicenseAgreement(actions);
