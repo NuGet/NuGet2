@@ -40,6 +40,9 @@
     <Compile Include="..\..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="..\..\Common\TraceSourceExtensions.cs">
+      <Link>Diagnostics\TraceSourceExtensions.cs</Link>
+    </Compile>
     <Compile Include="Analysis\IPackageRule.cs" />
     <Compile Include="Analysis\PackageIssue.cs" />
     <Compile Include="Analysis\DefaultPackageRuleSet.cs" />
@@ -77,6 +80,7 @@
     <Compile Include="Configuration\NullSettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Configuration\SettingValue.cs" />
+    <Compile Include="Diagnostics\NuGetTraceSources.cs" />
     <Compile Include="EnvironmentVariableWrapper.cs" />
     <Compile Include="Extensions\CredentialProviderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />

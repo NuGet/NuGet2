@@ -22,9 +22,12 @@ namespace NuGet.Client.VisualStudio
 
         private static IEnumerable<TraceSource> AllSources()
         {
-            return NuGetTraceSources.GetAllSources()
-                .Concat(VsNuGetTraceSources.GetAllSources()
-                    .Concat(V3InteropTraceSources.GetAllSources()));
+            return NuGetTraceSources.GetAllSources() // NuGet.Client
+                .Concat(VsNuGetTraceSources.GetAllSources()) // NuGet.Client.VisualStudio
+                .Concat(V3InteropTraceSources.GetAllSources()) // NuGet.Client.V3Interop
+                .Concat(NuGet.Diagnostics.NuGetTraceSources.GetAllSources()) // NuGet.Core
+                .Concat(NuGet.VisualStudio.Diagnostics.VsNuGetTraceSources.GetAllSources()) // NuGet.VisualStudio
+            ;
         }
     }
 }

@@ -99,6 +99,11 @@ namespace NuGet.Runtime
             private set;
         }
 
+        internal string ToDebugString()
+        {
+            return Name + ", PublicKeyToken=" + PublicKeyToken + " (" + OldVersion.ToString() + " => " + NewVersion.ToString() + ")";
+        }
+
         public XElement ToXElement()
         {
             // We're going to generate the fragment below.

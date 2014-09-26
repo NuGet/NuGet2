@@ -4,6 +4,7 @@ using EnvDTE;
 
 #if VS10 || VS11 || VS12
 using NuGetVS = NuGet.VisualStudio12;
+using NuGet.VisualStudio.Diagnostics;
 #endif
 
 #if VS14
@@ -45,8 +46,15 @@ namespace NuGet.VisualStudio
                 {
                     throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
                 }
+                VsNuGetTraceSources.VsProjectSystem.Info(
+                    "addimport",
+                    "[{0}] Adding MSBuild import of {1} to {2} of project",
+                    Project.Name,
+                    targetPath,
+                    location);
 
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
+
                 if (VsVersionHelper.IsVisualStudio2012)
                 {
                     Project.DoWorkInWriterLock(buildProject => NuGet.MSBuildProjectUtility.AddImportStatement(buildProject, relativeTargetPath, location));
@@ -85,6 +93,11 @@ namespace NuGet.VisualStudio
                 {
                     throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
                 }
+                VsNuGetTraceSources.VsProjectSystem.Info(
+                   "removeimport",
+                   "[{0}] Removing MSBuild import of {1} from project",
+                   Project.Name,
+                   targetPath);
 
                 // For VS 2012 or above, the operation has to be done inside the Writer lock
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);

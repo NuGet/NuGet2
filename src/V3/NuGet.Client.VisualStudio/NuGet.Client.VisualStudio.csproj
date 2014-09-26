@@ -56,6 +56,9 @@
     <Compile Include="..\..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\common\TraceSourceExtensions.cs">
+      <Link>Common\TraceSourceExtensions.cs</Link>
+    </Compile>
     <Compile Include="DebugConsoleTraceListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strings.Designer.cs">

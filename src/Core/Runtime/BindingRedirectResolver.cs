@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Diagnostics;
 
 namespace NuGet.Runtime
 {
@@ -74,14 +75,34 @@ namespace NuGet.Runtime
             // For each available assembly
             foreach (IAssembly assembly in assemblyList)
             {
+                NuGetTraceSources.BindingRedirectResolver.Verbose(
+                    "processing_references",
+                    "Processing References for ({0},{1})",
+                    assembly.Name,
+                    assembly.PublicKeyToken);
                 foreach (IAssembly referenceAssembly in assembly.ReferencedAssemblies)
                 {
+                    NuGetTraceSources.BindingRedirectResolver.Verbose(
+                        "processing_referenced",
+                        "Checking for conflicts with ({0},{1})",
+                        assembly.Name,
+                        assembly.PublicKeyToken);
                     Tuple<string, string> key = GetUniqueKey(referenceAssembly);
                     IAssembly targetAssembly;
                     // If we have an assembly with the same unique key in our list of a different version then we want to use that version
                     // then we want to add a redirect for that assembly
                     if (assemblyNameLookup.TryGetValue(key, out targetAssembly) && targetAssembly.Version != referenceAssembly.Version)
                     {
+                        NuGetTraceSources.BindingRedirectResolver.Verbose(
+                            "conflict_found",
+                            "Conflict found between '{0}, Version={1}, PublicKeyToken={2}' and '{3}, Version={4}, PublicKeyToken={5}'",
+                            assembly.Name,
+                            assembly.Version,
+                            assembly.PublicKeyToken,
+                            targetAssembly.Name,
+                            targetAssembly.Version,
+                            targetAssembly.PublicKeyToken);
+                    
                         // BUG #1158: Don't add binding redirects for assemblies without a strong name
                         if (!String.IsNullOrEmpty(targetAssembly.PublicKeyToken))
                         {

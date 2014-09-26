@@ -11,6 +11,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio.Diagnostics;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
@@ -125,6 +126,13 @@ namespace NuGet.VisualStudio
 
         public override void DeleteDirectory(string path, bool recursive = false)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "deletedirectory",
+                    "[{0}] Deleting {0} from project{1}",
+                    Project.Name,
+                    path,
+                    recursive ? (" recursively") : String.Empty);
+
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
             if (!recursive && (base.GetFiles(path, "*.*", recursive).Any() || base.GetDirectories(path).Any()))
             {
@@ -141,6 +149,11 @@ namespace NuGet.VisualStudio
 
         public override void DeleteFile(string path)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "deletefile",
+                    "[{0}] Deleting {0} from project",
+                    Project.Name,
+                    path);
             if (Project.DeleteProjectItem(path))
             {
                 string folderPath = Path.GetDirectoryName(path);
@@ -172,6 +185,11 @@ namespace NuGet.VisualStudio
 
         protected virtual void AddGacReference(string name)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                "addgacreference",
+                "[{0}] Adding GAC reference to: {1}",
+                Project.Name,
+                name);
             Project.GetReferences().Add(name);
         }
 
@@ -179,7 +197,12 @@ namespace NuGet.VisualStudio
         public virtual void AddReference(string referencePath)
         {
             string name = Path.GetFileNameWithoutExtension(referencePath);
-
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                "addreference",
+                "[{0}] Adding reference to: {1} ({2})",
+                Project.Name,
+                name,
+                referencePath);
             try
             {
                 // Get the full path to the reference
@@ -263,6 +286,11 @@ namespace NuGet.VisualStudio
             {
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
+                VsNuGetTraceSources.VsProjectSystem.Info(
+                    "removereference",
+                    "[{0}] Removing reference to: {1}",
+                    Project.Name,
+                    referenceName);
 
                 // Remove the reference from the project
                 // NOTE:- Project.Object.References.Item requires Reference.Identity
@@ -318,6 +346,12 @@ namespace NuGet.VisualStudio
 
         protected virtual void AddFileToContainer(string fullPath, string folderPath, ProjectItems container)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "addfromcopy",
+                    "[{0}] Copying {0} in to {1}",
+                    Project.Name,
+                    fullPath,
+                    ((ProjectItem)container.Parent).Name);
             container.AddFromFileCopy(fullPath);
         }
 
@@ -391,7 +425,13 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
             }
-
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "addimport",
+                    "[{0}] Adding MSBuild import of {1} to {2} of project",
+                    Project.Name,
+                    targetPath,
+                    location);
+            
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
             Project.AddImportStatement(relativeTargetPath, location);
 
@@ -407,6 +447,12 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
             }
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "removeimport",
+                    "[{0}] Removing MSBuild import of {1} from project",
+                    Project.Name,
+                    targetPath);
+            
             string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
             Project.RemoveImportStatement(relativeTargetPath);
             Project.Save(this);

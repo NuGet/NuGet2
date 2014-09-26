@@ -59,11 +59,12 @@
     <Compile Include="..\..\..\Common\HashCodeCombiner.cs">
       <Link>HashCodeCombiner.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\Common\TraceSourceExtensions.cs">
+      <Link>Diagnostics\TraceSourceExtensions.cs</Link>
+    </Compile>
     <Compile Include="CoreConverters.cs" />
     <Compile Include="DependencyBehavior.cs" />
-    <Compile Include="Diagnostics\NuGetEventIds.cs" />
     <Compile Include="Diagnostics\NuGetTraceSources.cs" />
-    <Compile Include="Diagnostics\TraceSourceExtensions.cs" />
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="InstallationTarget.cs" />
     <Compile Include="InstalledPackageReference.cs" />

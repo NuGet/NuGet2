@@ -6,11 +6,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client.Diagnostics;
 
 namespace NuGet
 {
-    public static class TraceSourceExtensions
+    internal static class TraceSourceExtensions
     {
         private static string FormatMessage(string eventName, string format, params object[] args)
         {
@@ -22,7 +21,7 @@ namespace NuGet
         {
             self.TraceEvent(
                 TraceEventType.Information,
-                NuGetEventIds.Unspecified,
+                0,
                 FormatMessage(eventName, format, args));
         }
 
@@ -47,7 +46,7 @@ namespace NuGet
         {
             self.TraceEvent(
                 TraceEventType.Verbose,
-                NuGetEventIds.Unspecified,
+                0,
                 FormatMessage(eventName, format, args));
         }
 
@@ -55,7 +54,7 @@ namespace NuGet
         {
             self.TraceEvent(
                 TraceEventType.Warning,
-                NuGetEventIds.Unspecified,
+                0,
                 FormatMessage(eventName, format, args));
         }
 
@@ -63,7 +62,7 @@ namespace NuGet
         {
             self.TraceEvent(
                 TraceEventType.Error,
-                NuGetEventIds.Unspecified,
+                0,
                 FormatMessage(eventName, format, args));
         }
     }

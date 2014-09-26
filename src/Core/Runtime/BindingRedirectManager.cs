@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
+using NuGet.Diagnostics;
 
 namespace NuGet.Runtime
 {
@@ -66,6 +67,10 @@ namespace NuGet.Runtime
                 // Look to see if we already have this in the list of bindings already in config.
                 if (currentBindings.Contains(bindingRedirect))
                 {
+                    NuGetTraceSources.BindingRedirectManager.Info(
+                        "adding_redirect",
+                        "Adding binding redirect: {0}",
+                        bindingRedirect.ToDebugString());
                     var existingBindings = currentBindings[bindingRedirect];
                     if (existingBindings.Any())
                     {

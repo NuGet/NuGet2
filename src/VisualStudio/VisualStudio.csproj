@@ -27,6 +27,9 @@
     <Compile Include="..\..\Common\MsBuildProjectUtility.cs">
       <Link>Common\MsBuildProjectUtility.cs</Link>
     </Compile>
+    <Compile Include="..\..\Common\TraceSourceExtensions.cs">
+      <Link>Diagnostics\TraceSourceExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\CommandLine\Common\PackageExtractor.cs">
       <Link>Extensibility\PackageExtractor.cs</Link>
     </Compile>
@@ -34,6 +37,7 @@
     <Compile Include="DeleteOnRestart\RestartRequestBar.xaml.cs">
       <DependentUpon>RestartRequestBar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Diagnostics\VsNuGetTraceSources.cs" />
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Extensibility\IVsPackageRestorer.cs" />
     <Compile Include="Extensibility\SkipAssemblyReferencesPackage.cs" />

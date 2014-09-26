@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
+using NuGet.VisualStudio.Diagnostics;
 using NuGet.VisualStudio.Resources;
 using VsWebSite;
 
@@ -40,6 +41,12 @@ namespace NuGet.VisualStudio
         public override void AddReference(string referencePath)
         {
             string name = Path.GetFileNameWithoutExtension(referencePath);
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                "addreference",
+                "[{0}] Adding reference to: {1} ({2})",
+                Project.Name,
+                name,
+                referencePath);
             try
             {
                 Project.GetAssemblyReferences().AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
@@ -58,6 +65,11 @@ namespace NuGet.VisualStudio
 
         public override void RemoveReference(string name)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                    "removereference",
+                    "[{0}] Removing reference to: {1}",
+                    Project.Name,
+                    name);
             // Remove the reference via DTE.
             RemoveDTEReference(name);
             
@@ -100,6 +112,11 @@ namespace NuGet.VisualStudio
 
         protected override void AddGacReference(string name)
         {
+            VsNuGetTraceSources.VsProjectSystem.Info(
+                "addgacreference",
+                "[{0}] Adding GAC reference to: {1}",
+                Project.Name,
+                name);
             Project.GetAssemblyReferences().AddFromGAC(name);
         }
 

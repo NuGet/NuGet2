@@ -7,6 +7,7 @@ using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Resources;
+using NuGet.VisualStudio.Diagnostics;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -303,6 +304,11 @@ namespace NuGet.VisualStudio
         {
             // Find the project by it's unique name
             Project project = GetProject(projectManager);
+
+            VsNuGetTraceSources.VsPackageManager.Info(
+                "addingbindingredirects",
+                "Adding binding redirects for {0}",
+                project.Name);
 
             // If we can't find the project or it doesn't support binding redirects then don't add any redirects
             if (project == null || !project.SupportsBindingRedirects())

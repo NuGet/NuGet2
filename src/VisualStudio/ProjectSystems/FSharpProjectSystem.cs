@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using EnvDTE;
+using NuGet.VisualStudio.Diagnostics;
 using NuGet.VisualStudio.Resources;
 using VSLangProj;
 
@@ -62,6 +63,11 @@ namespace NuGet.VisualStudio
             try
             {
                 var referenceName = System.IO.Path.GetFileNameWithoutExtension(name);
+                VsNuGetTraceSources.VsProjectSystem.Info(
+                    "removereference",
+                    "[{0}] Removing reference to: {1}",
+                    Project.Name,
+                    referenceName);
 
                 Reference reference = references.Item(referenceName);
 
