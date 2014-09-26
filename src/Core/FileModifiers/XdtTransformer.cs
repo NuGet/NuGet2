@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Microsoft.Web.XmlTransform;
+using NuGet.Diagnostics;
 using NuGet.Resources;
 
 namespace NuGet
@@ -15,11 +16,21 @@ namespace NuGet
 
         public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XdtTransformer.Info(
+                "applyingxdt",
+                "[{0}] Applying XDT transform to {1}", 
+                projectSystem.ProjectName,
+                targetPath);
             PerformXdtTransform(file, targetPath, projectSystem);
         }
 
         public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XdtTransformer.Info(
+                "revertingxdt",
+                "[{0}] Reverting XDT transform of {1}",
+                projectSystem.ProjectName,
+                targetPath);
             PerformXdtTransform(file, targetPath, projectSystem);
         }
 

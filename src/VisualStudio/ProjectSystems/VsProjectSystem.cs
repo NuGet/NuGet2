@@ -348,11 +348,26 @@ namespace NuGet.VisualStudio
         {
             VsNuGetTraceSources.VsProjectSystem.Info(
                     "addfromcopy",
-                    "[{0}] Copying {0} in to {1}",
+                    "[{0}] Copying {1} in to {2}",
                     Project.Name,
                     fullPath,
-                    ((ProjectItem)container.Parent).Name);
+                    GetParentName(container));
             container.AddFromFileCopy(fullPath);
+        }
+
+        private object GetParentName(ProjectItems container)
+        {
+            var projectItemParent = container.Parent as ProjectItem;
+            if (projectItemParent != null)
+            {
+                return projectItemParent.Name;
+            }
+            var projectParent = container.Parent as Project;
+            if (projectParent != null)
+            {
+                return projectParent.Name;
+            }
+            return "<<unknown destination>>";
         }
 
         public virtual string ResolvePath(string path)

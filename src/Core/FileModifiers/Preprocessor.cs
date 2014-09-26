@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using NuGet.Diagnostics;
 
 namespace NuGet
 {
@@ -15,11 +16,21 @@ namespace NuGet
     {
         public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XmlTransformer.Info(
+                "applyingpptransform",
+                "[{0}] Applying Token-Replacement transform to {1}",
+                projectSystem.ProjectName,
+                targetPath);
             ProjectSystemExtensions.TryAddFile(projectSystem, targetPath, () => Process(file, projectSystem).AsStream());
         }
 
         public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XmlTransformer.Info(
+                "revertingpptransform",
+                "[{0}] Reverting Token-Replacement transform of {1}",
+                projectSystem.ProjectName,
+                targetPath);
             Func<Stream> streamFactory = () => Process(file, projectSystem).AsStream();
             FileSystemExtensions.DeleteFileSafe(projectSystem, targetPath, streamFactory);
         }

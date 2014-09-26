@@ -93,7 +93,7 @@ namespace NuGet.Client.Resolution
                 {
                     NuGetTraceSources.ActionExecutor.Info(
                         "rollback/executing",
-                        "[{0}] Executing action: {1}",
+                        "[{0}] Executing rollback of: {1}",
                         action.PackageName,
                         action.ToString());
                     handler.Rollback(action, context, logger).Wait();

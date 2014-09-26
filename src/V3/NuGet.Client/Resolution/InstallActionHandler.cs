@@ -27,6 +27,8 @@ namespace NuGet.Client.Resolution
                 context.PackageManager.AddBindingRedirects(context.ProjectManager);
             }
 
+
+
             // Not async yet :)
             return Task.FromResult(0);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Linq;
+using NuGet.Diagnostics;
 
 namespace NuGet
 {
@@ -18,6 +19,12 @@ namespace NuGet
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
         public virtual void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XmlTransformer.Info(
+                "applyingxmltransform",
+                "[{0}] Applying XML transform to {1}",
+                projectSystem.ProjectName,
+                targetPath);
+            
             // Get the xml fragment
             XElement xmlFragment = GetXml(file, projectSystem);
 
@@ -32,6 +39,12 @@ namespace NuGet
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
         public virtual void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
         {
+            NuGetTraceSources.XmlTransformer.Info(
+                "revertingxmltransform",
+                "[{0}] Reverting XML transform of {1}",
+                projectSystem.ProjectName,
+                targetPath);
+
             // Get the xml snippet
             XElement xmlFragment = GetXml(file, projectSystem);
 

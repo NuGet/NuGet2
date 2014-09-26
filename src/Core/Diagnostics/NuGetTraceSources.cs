@@ -16,7 +16,11 @@ namespace NuGet.Diagnostics
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource BindingRedirectManager = new TraceSource(typeof(BindingRedirectManager).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource SharedPackageRepository = new TraceSource(typeof(SharedPackageRepository).FullName);
+        public static readonly TraceSource XmlTransformer = new TraceSource(typeof(XmlTransformer).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
+        public static readonly TraceSource XdtTransformer = new TraceSource(typeof(XdtTransformer).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
+        public static readonly TraceSource Preprocessor = new TraceSource(typeof(Preprocessor).FullName);
         
 
         /// <summary>
