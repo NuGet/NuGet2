@@ -17,6 +17,7 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
         <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuGetRoot)\Extended.Settings.targets</AdditionalSettingsImport>
+        <HighEntropyVA>true</HighEntropyVA>
     </PropertyGroup>
     
     <PropertyGroup Condition=" $(VisualStudioVersion) == '10.0' Or $(VisualStudioVersion) == '11.0' ">
