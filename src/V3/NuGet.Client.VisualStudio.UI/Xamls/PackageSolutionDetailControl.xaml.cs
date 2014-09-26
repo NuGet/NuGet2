@@ -1,7 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using NuGet.Client.Resolution;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using System.Linq;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -27,11 +32,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void Versions_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // !!!
-        }
-
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
         {
             Hyperlink hyperlink = e.OriginalSource as Hyperlink;
@@ -42,9 +42,43 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void _dropdownButton_Clicked(object sender, DropdownButtonClickEventArgs e)
+        private async void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
-            // !!!
+            var model = (PackageSolutionDetailControlModel)DataContext;
+
+            IEnumerable<PackageAction> actions = null;
+            Control.SetBusy(true);
+            try
+            {
+                var resolver = new ActionResolver(
+                    Control.Sources.ActiveRepository,
+                    Control.Target,
+                    new ResolutionContext()
+                    {
+                        DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
+                        AllowPrerelease = false
+                    });
+
+                var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
+                    PackageActionType.Uninstall :
+                    PackageActionType.Install;
+
+                var targetProjects = model.Projects
+                    .Where(p => p.Selected)
+                    .Select(p => p.Project);
+
+                actions = await resolver.ResolveActionsAsync(
+                    model.Package.Id,
+                    model.Package.Version,
+                    action,
+                    targetProjects);
+            }
+            finally
+            {
+                Control.SetBusy(false);
+            }
+
+            MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
         }
     }
 }

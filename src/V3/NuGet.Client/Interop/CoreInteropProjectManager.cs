@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
 
 namespace NuGet.Client.Interop
@@ -71,6 +67,7 @@ namespace NuGet.Client.Interop
 
         // Suppress 'The event ... is never used' warning
 #pragma warning disable 0067
+
         public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;
 
         public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding;
@@ -78,7 +75,9 @@ namespace NuGet.Client.Interop
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved;
 
         public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving;
+
 #pragma warning restore 0067
-        #endregion
+
+        #endregion Unimplemented stuff.
     }
 }

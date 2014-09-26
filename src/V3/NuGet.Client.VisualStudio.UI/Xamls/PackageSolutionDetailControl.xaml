@@ -127,7 +127,7 @@
                 <Button Margin="0,8,0,0"
                         Width="100"
                         HorizontalAlignment="Left"
-                        Content="{Binding ElementName=_actions,Path=SelectedItem}"
+                        Content="{Binding ElementName=_actions,Path=SelectedItem}" Click="ActionButtonClicked"
                         ></Button>
             </StackPanel>
 

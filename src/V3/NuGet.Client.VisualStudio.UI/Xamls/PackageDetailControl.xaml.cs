@@ -84,7 +84,11 @@ namespace NuGet.Client.VisualStudio.UI
                     });
 
                 // Resolve actions
-                return await resolver.ResolveActionsAsync(packageDetail.Package.Id, packageDetail.Package.Version, action);
+                return await resolver.ResolveActionsAsync(
+                    packageDetail.Package.Id, 
+                    packageDetail.Package.Version, 
+                    action,
+                    Control.Target.TargetProjects);
             }
             finally
             {
@@ -102,13 +106,9 @@ namespace NuGet.Client.VisualStudio.UI
         private void PreviewActions(
             IEnumerable<PackageAction> actions)
         {
-            MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
-
-            /* !!!
             // Show preview result
-            var packageStatus = Control.Target
-                .Installed
-                .GetInstalledPackageReferences()
+            var targetProject = Control.Target.TargetProjects.First();
+            var packageStatus = targetProject.InstalledPackages.GetInstalledPackageReferences()
                 .Select(p => p.Identity)
                 .ToDictionary(p => p, _ => PackageStatus.Unchanged);
 
@@ -139,7 +139,7 @@ namespace NuGet.Client.VisualStudio.UI
             w.DataContext = model;
             w.Owner = Window.GetWindow(Control);
             w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            w.ShowDialog(); */
+            w.ShowDialog();
         }
 
         private async void PerformPackageAction(PackageActionType action)

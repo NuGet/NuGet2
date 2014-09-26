@@ -28,21 +28,39 @@ namespace NuGet.Client.VisualStudio.UI
             set;
         }
 
-        // displayed
-        private string _name;
+        public TargetProject Project
+        {
+            get;
+            private set;
+        }
 
+        private string _name;
+        
         public bool IsSolution
         {
             get;
             private set;
         }
 
-        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, bool isSolution = false)
+        public PackageInstallationInfo(TargetProject project, NuGetVersion version, bool enabled)
+        {
+            Project = project;
+            _name = Project.Name;
+            Version = version;
+            Enabled = enabled;
+            IsSolution = false;
+        }
+
+        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, TargetProject project)
         {
             _name = name;
             Version = version;
             Enabled = enabled;
-            IsSolution = isSolution;
+            IsSolution = true;
+
+            // this is just a placeholder and will not be really used. It's used to avoid
+            // lots of null checks in our code.
+            Project = project;
         }
 
         public override string ToString()

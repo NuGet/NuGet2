@@ -204,7 +204,7 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null)
                     {
                         var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled));
+                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled));
                     }
                 }
             }
@@ -220,7 +220,7 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null)
                     {
                         var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled));
+                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled));
                     }
                 }
 
@@ -232,7 +232,7 @@ namespace NuGet.Client.VisualStudio.UI
                         _target.Name,
                         SelectedVersion.Version,
                         enabled,
-                        isSolution: true));
+                        _target.TargetProjects.First()));
                 } 
             }
             else if (_selectedAction == Resources.Resources.Action_Install)
@@ -243,7 +243,7 @@ namespace NuGet.Client.VisualStudio.UI
                     var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
                     if (installed == null)
                     {
-                        _projects.Add(new PackageInstallationInfo(project.Name, null, enabled: true));
+                        _projects.Add(new PackageInstallationInfo(project, null, enabled: true));
                     }
                 }
             }
@@ -256,7 +256,7 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null &&
                         installed.Identity.Version == SelectedVersion.Version)
                     {
-                        _projects.Add(new PackageInstallationInfo(project.Name, installed.Identity.Version, enabled: true));
+                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled: true));
                     }
                 }
 
@@ -268,7 +268,7 @@ namespace NuGet.Client.VisualStudio.UI
                         _target.Name,
                         SelectedVersion.Version,
                         enabled,
-                        isSolution: true));
+                        _target.TargetProjects.First()));
                 }
             }
 
