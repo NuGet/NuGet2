@@ -83,6 +83,7 @@
     <Compile Include="Resolution\DownloadActionHandler.cs" />
     <Compile Include="Resolution\ExecutionContext.cs" />
     <Compile Include="Resolution\ActionExecutor.cs" />
+    <Compile Include="Resolution\ExecutionLogger.cs" />
     <Compile Include="Resolution\InstallActionHandler.cs" />
     <Compile Include="Resolution\PackageAction.cs" />
     <Compile Include="PackageIdentity.cs" />

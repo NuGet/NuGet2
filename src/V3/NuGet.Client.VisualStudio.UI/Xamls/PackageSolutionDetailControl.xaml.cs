@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using NuGet.Client.Resolution;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
-using System.Linq;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -46,10 +46,11 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var model = (PackageSolutionDetailControlModel)DataContext;
 
-            IEnumerable<PackageAction> actions = null;
             Control.SetBusy(true);
+            var progressDialog = new ProgressDialog();
             try
             {
+                IEnumerable<PackageAction> actions = null;
                 var resolver = new ActionResolver(
                     Control.Sources.ActiveRepository,
                     Control.Target,
@@ -72,13 +73,25 @@ namespace NuGet.Client.VisualStudio.UI
                     model.Package.Version,
                     action,
                     targetProjects);
+                MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
+
+                var executor = new ActionExecutor();
+                progressDialog.Owner = Window.GetWindow(Control);
+                progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progressDialog.Show();
+
+                var context = new ExecutionContext((CoreInteropInstallationTargetBase)Control.Target);
+                await executor.ExecuteActionsAsync(actions, context, progressDialog);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
             finally
             {
+                progressDialog.RequestToClose();
                 Control.SetBusy(false);
             }
-
-            MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
         }
     }
 }

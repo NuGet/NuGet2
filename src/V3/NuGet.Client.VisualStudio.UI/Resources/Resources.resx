@@ -264,4 +264,7 @@
   <data name="Label_Solution" xml:space="preserve">
     <value>Solution '{0}'</value>
   </data>
+  <data name="WindowTitle_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
 </root>

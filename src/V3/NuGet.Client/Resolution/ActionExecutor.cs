@@ -14,8 +14,8 @@ namespace NuGet.Client.Resolution
 {
     public interface IActionHandler
     {
-        Task Execute(NewPackageAction action, ExecutionContext context, ILogger logger);
-        Task Rollback(NewPackageAction action, ExecutionContext context, ILogger logger);
+        Task Execute(NewPackageAction action, ExecutionContext context, IExecutionLogger logger);
+        Task Rollback(NewPackageAction action, ExecutionContext context, IExecutionLogger logger);
     }
 
     public class ActionExecutor
@@ -30,10 +30,10 @@ namespace NuGet.Client.Resolution
 
         public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, ExecutionContext context)
         {
-            return ExecuteActionsAsync(actions, context, NullLogger.Instance);
+            return ExecuteActionsAsync(actions, context, NullExecutionLogger.Instance);
         }
 
-        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, ExecutionContext context, ILogger logger)
+        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, ExecutionContext context, IExecutionLogger logger)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
@@ -70,7 +70,7 @@ namespace NuGet.Client.Resolution
             }
         }
 
-        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, ExecutionContext context, ILogger logger)
+        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, ExecutionContext context, IExecutionLogger logger)
         {
             if (executedActions.Count > 0)
             {

@@ -4,7 +4,8 @@
         xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
         Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
         Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-        Title="Install Preview" Height="300" Width="300">
+        Title="{x:Static resx:Resources.WindowTitle_Preview}"
+        Height="300" Width="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />

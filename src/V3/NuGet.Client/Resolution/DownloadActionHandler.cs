@@ -15,28 +15,30 @@ namespace NuGet.Client.Resolution
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
+        public Task Execute(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
-            // Load the package
-            var package = GetPackage(action, context);
+            return Task.Factory.StartNew(() =>
+            {
+                // Load the package
+                var package = GetPackage(action, context);
 
-            NuGetTraceSources.ActionExecutor.Verbose(
-                "download/loadedpackage",
-                "[{0}] Loaded package.",
-                action.PackageName);
+                NuGetTraceSources.ActionExecutor.Verbose(
+                    "download/loadedpackage",
+                    "[{0}] Loaded package.",
+                    action.PackageName);
 
-            // Now convert the action and use the V2 Execution logic since we
-            // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
-            context.PackageManager.Logger = logger;
-            context.PackageManager.Execute(new PackageOperation(
-                package,
-                NuGet.PackageAction.Install));
+                // Now convert the action and use the V2 Execution logic since we
+                // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
+                context.PackageManager.Logger = new ShimLogger(logger);
 
-            // Not async yet :)
-            return Task.FromResult(0);
+
+                context.PackageManager.Execute(new PackageOperation(
+                    package,
+                    NuGet.PackageAction.Install));
+            });
         }
 
-        public Task Rollback(PackageAction action, ExecutionContext context, ILogger logger)
+        public Task Rollback(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
             // Just run the purge action to undo a download
             return new PurgeActionHandler().Execute(action, context, logger);

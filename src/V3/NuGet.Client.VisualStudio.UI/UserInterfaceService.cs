@@ -55,7 +55,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public void LaunchExternalLink(Uri url)
         {
-            throw new NotImplementedException();
+            NuGet.VisualStudio.UriHelper.OpenExternalLink(url);
         }
 
 

@@ -534,48 +534,73 @@ namespace NuGet.Tools
             }
         }
 
+        private IVsWindowFrame FindExistingSolutionWindowFrame()
+        {
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            foreach (var windowFrame in EnumDocumentWindows(uiShell))
+            {
+                object property;
+                int hr = windowFrame.GetProperty(
+                    (int)__VSFPROPID.VSFPROPID_DocData,
+                    out property);
+                if (hr == VSConstants.S_OK && property is PackageManagerModel)
+                {
+                    // TODO: Find a cleaner way to do this.
+                    var packageManagerDocData = (PackageManagerModel)property;
+                    var target = packageManagerDocData.Target as VsSolutionInstallationTarget;
+                    if (target != null)
+                    {
+                        return windowFrame;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
         {
-            //!!! Need to wait until solution is loaded
+            var windowFrame = FindExistingSolutionWindowFrame();
+            if (windowFrame == null)
+            {
+                // Create the window frame
+                //!!! Need to wait until solution is loaded
+                IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
+                IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+                uint windowFlags =
+                    (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+                    (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
-            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-            uint windowFlags =
-                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
-                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
-
-            _dte.Solution.GetName();
-            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-            var myDoc = new PackageManagerModel(context.SourceManager, context.CreateSolutionInstallationTarget());
-            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
-            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
-            var guidCommandUI = Guid.Empty;
-            var caption = "PackageManager";
-            var documentName = String.Format("Package Manager: {0}", _dte.Solution.GetName());
-            IVsWindowFrame windowFrame;
-            int hr = uiShell.CreateDocumentWindow(
-                windowFlags,
-                documentName,
-                (IVsUIHierarchy)solution,
-                (uint)VSConstants.VSITEMID.Root,
-                ppunkDocView,
-                ppunkDocData,
-                ref guidEditorType,
-                null,
-                ref guidCommandUI,
-                null,
-                caption,
-                string.Empty,
-                null,
-                out windowFrame);
-            ErrorHandler.ThrowOnFailure(hr);
-
+                _dte.Solution.GetName();
+                var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
+                var myDoc = new PackageManagerModel(context.SourceManager, context.CreateSolutionInstallationTarget());
+                var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
+                var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+                var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+                var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+                var guidCommandUI = Guid.Empty;
+                var caption = "PackageManager";
+                var documentName = String.Format("Package Manager: {0}", _dte.Solution.GetName());
+                int hr = uiShell.CreateDocumentWindow(
+                    windowFlags,
+                    documentName,
+                    (IVsUIHierarchy)solution,
+                    (uint)VSConstants.VSITEMID.Root,
+                    ppunkDocView,
+                    ppunkDocData,
+                    ref guidEditorType,
+                    null,
+                    ref guidCommandUI,
+                    null,
+                    caption,
+                    string.Empty,
+                    null,
+                    out windowFrame);
+                ErrorHandler.ThrowOnFailure(hr);
+            }
             windowFrame.Show();
 
-
-            /*
+            /* +++
             string parameterString = null;
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null)

@@ -9,7 +9,7 @@ namespace NuGet.Client.Resolution
 {
     public class InstallActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
+        public Task Execute(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
             // Get the package from the shared repository
             var package = context.PackageManager.LocalRepository.FindPackage(
@@ -27,7 +27,7 @@ namespace NuGet.Client.Resolution
             return Task.FromResult(0);
         }
 
-        public Task Rollback(PackageAction action, ExecutionContext context, ILogger logger)
+        public Task Rollback(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
             // Just run the uninstall action to undo a install
             return new UninstallActionHandler().Execute(action, context, logger);

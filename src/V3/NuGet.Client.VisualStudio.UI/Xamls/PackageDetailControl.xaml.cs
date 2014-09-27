@@ -144,43 +144,45 @@ namespace NuGet.Client.VisualStudio.UI
 
         private async void PerformPackageAction(PackageActionType action)
         {
-            var actions = await ResolveActions(action);
-
-            // show license agreeement
-            bool acceptLicense = ShowLicenseAgreement(actions);
-            if (!acceptLicense)
-            {
-                return;
-            }
-
-            // This should only be called in cases where there is a single target
-            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
-            Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
-            
-            // Create the execution context
-            var context = new ExecutionContext((ProjectInstallationTarget)Control.Target);
-
-            // Create the executor and execute the actions
             Control.SetBusy(true);
+            var progressDialog = new ProgressDialog();
             try
             {
-                var executor = new ActionExecutor();
+                var actions = await ResolveActions(action);
 
-                // TODO: This method takes a logger! Use that to restore the install progress box.
-                await executor.ExecuteActionsAsync(actions, context);
+                // show license agreeement
+                bool acceptLicense = ShowLicenseAgreement(actions);
+                if (!acceptLicense)
+                {
+                    return;
+                }
+
+                // This should only be called in cases where there is a single target
+                Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
+                Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
+
+                // Create the execution context
+                var context = new ExecutionContext((ProjectInstallationTarget)Control.Target);
+
+                // Create the executor and execute the actions                
+                progressDialog.Owner = Window.GetWindow(Control);
+                progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progressDialog.Show();
+                var executor = new ActionExecutor();
+                await executor.ExecuteActionsAsync(actions, context, progressDialog);
+
+                Control.UpdatePackageStatus();
+                UpdatePackageStatus();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
-                throw;
+                MessageBox.Show(ex.Message);
             }
             finally
             {
+                progressDialog.RequestToClose();
                 Control.SetBusy(false);
             }
-
-            Control.UpdatePackageStatus();
-            UpdatePackageStatus();
         }
 
         private void UpdateInstallUninstallButton()
