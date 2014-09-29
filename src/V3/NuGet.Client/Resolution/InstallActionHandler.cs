@@ -16,8 +16,10 @@ namespace NuGet.Client.Resolution
                 action.PackageName.Id, CoreConverters.SafeToSemVer(action.PackageName.Version));
             Debug.Assert(package != null); // The package had better be in the local repository!!
 
+            var projectManager = context.GetProjectManager(action.Target);
+
             // Add the package to the project
-            context.ProjectManager.Execute(new PackageOperation(
+            projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Install));
 

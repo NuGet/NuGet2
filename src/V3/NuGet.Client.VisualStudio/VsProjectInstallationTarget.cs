@@ -28,8 +28,6 @@ namespace NuGet.Client.VisualStudio
             get { return true; }
         }
 
-        public TargetProject TargetProject { get; private set; }
-
         public override IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects
         {
             get
@@ -40,23 +38,13 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        public override IEnumerable<TargetProject> TargetProjects
-        {
-            get
-            {
-                yield return TargetProject;
-            }
-        }
-
         public VsProjectInstallationTarget(Project project, IProjectManager projectManager)
-            : base(projectManager)
+            : base(new VsTargetProject(
+                project,
+                projectManager,
+                (IPackageReferenceRepository2)projectManager.LocalRepository))
         {
             Project = project;
-            
-            TargetProject = new VsTargetProject(
-                Project,
-                ProjectManager,
-                (IPackageReferenceRepository2)ProjectManager.LocalRepository);
         }
 
         public static VsProjectInstallationTarget Create(Project project)

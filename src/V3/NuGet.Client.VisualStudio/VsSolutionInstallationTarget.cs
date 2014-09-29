@@ -7,10 +7,11 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Interop;
 using NuGet.VisualStudio;
 using System.Linq;
+using System.Diagnostics;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsSolutionInstallationTarget : InstallationTarget
+    public class VsSolutionInstallationTarget : CoreInteropInstallationTargetBase
     {
         private EnvDTE.Solution _solution;
         private string _name;
@@ -70,7 +71,7 @@ namespace NuGet.Client.VisualStudio
             _packageManager = packageManager;
             _packagesFolderSource = _packageManager.LocalRepository;
 
-            var repo = _packageManager.LocalRepository as SharedPackageRepository;
+            var repo = (SharedPackageRepository)_packageManager.LocalRepository;
             var refRepo = new PackageReferenceRepository(repo.PackageReferenceFile.FullPath, _packageManager.LocalRepository);
             _installedSolutionLevelPackages = new ProjectInstalledPackagesList(refRepo);
         }
@@ -83,6 +84,18 @@ namespace NuGet.Client.VisualStudio
                     .Take(take)
                     .ToList()
                     .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
+        }
+
+        protected override IProjectManager GetProjectManager(TargetProject project)
+        {
+            Debug.Assert(TargetProjects.Contains(project));
+
+            return _packageManager.GetProjectManager(((VsTargetProject)project).Project);
+        }
+
+        protected override IPackageManager GetPackageManager()
+        {
+            return _packageManager;
         }
     }
 }

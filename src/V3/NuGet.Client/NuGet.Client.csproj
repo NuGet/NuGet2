@@ -60,6 +60,7 @@
       <Link>HashCodeCombiner.cs</Link>
     </Compile>
     <Compile Include="CoreConverters.cs" />
+    <Compile Include="CoreInteropInstallationTargetBase.cs" />
     <Compile Include="DependencyBehavior.cs" />
     <Compile Include="Diagnostics\NuGetEventIds.cs" />
     <Compile Include="Diagnostics\NuGetTraceSources.cs" />

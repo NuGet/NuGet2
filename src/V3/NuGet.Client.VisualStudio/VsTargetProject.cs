@@ -17,7 +17,7 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsTargetProject : TargetProject
+    public class VsTargetProject : CoreInteropTargetProjectBase
     {
         private readonly IProjectManager _projectManager;
         private readonly InstalledPackagesList _installedPackages;
@@ -54,6 +54,28 @@ namespace NuGet.Client.VisualStudio
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             yield return Project.GetTargetFrameworkName();
+        }
+
+        protected override IProjectManager GetProjectManager()
+        {
+            return _projectManager;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as TargetProject);
+        }
+
+        public override bool Equals(TargetProject other)
+        {
+            var vsProj = other as VsTargetProject;
+            return vsProj != null &&
+                String.Equals(vsProj.Project.UniqueName, Project.UniqueName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return Project.UniqueName.GetHashCode();
         }
     }
 }

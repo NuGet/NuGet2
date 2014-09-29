@@ -141,4 +141,7 @@
   <data name="PackageActionDescriptionWrapper_UnrecognizedAction" xml:space="preserve">
     <value>Unrecognized Package Action '{0}'.</value>
   </data>
+  <data name="ProjectInstallationTarget_ProjectIsNotTargetted" xml:space="preserve">
+    <value>The project '{0}' is not one of the projects targetted by this object.</value>
+  </data>
 </root>

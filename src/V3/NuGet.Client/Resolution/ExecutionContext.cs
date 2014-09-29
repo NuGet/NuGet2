@@ -9,40 +9,33 @@ namespace NuGet.Client.Resolution
     public class ExecutionContext
     {
         private Func<Uri, IHttpClient> _httpClientFactory;
+        private CoreInteropInstallationTargetBase _target;
 
-        public IProjectManager ProjectManager { get; private set; }
         public IPackageManager PackageManager { get; private set; }
         public IPackageCacheRepository PackageCache { get; private set; }
         public PackageDownloader PackageDownloader { get; private set; }
 
-        public ExecutionContext(ProjectInstallationTarget target) : this(
-            target.ProjectManager,
-            target.ProjectManager.PackageManager,
+        public ExecutionContext(CoreInteropInstallationTargetBase target) : this(
+            target,
             MachineCache.Default,
             new PackageDownloader(),
             u => new HttpClient(u)) { }
 
         public ExecutionContext(
-            IProjectManager projectManager,
-            IPackageManager packageManager,
+            CoreInteropInstallationTargetBase target,
             IPackageCacheRepository packageCache)
-            : this(projectManager, packageManager, packageCache, new PackageDownloader(), u => new HttpClient(u)) { }
+            : this(target, packageCache, new PackageDownloader(), u => new HttpClient(u)) { }
 
         public ExecutionContext(
-            IProjectManager projectManager,
-            IPackageManager packageManager,
+            CoreInteropInstallationTargetBase target,
             IPackageCacheRepository packageCache,
             PackageDownloader packageDownloader,
             Func<Uri, IHttpClient> httpClientFactory)
         {
             // No nulls! Ever!
-            if (projectManager == null)
+            if (target == null)
             {
-                throw new ArgumentNullException("projectManager");
-            }
-            if (packageManager == null)
-            {
-                throw new ArgumentNullException("packageManager");
+                throw new ArgumentNullException("target");
             }
             if (packageCache == null)
             {
@@ -57,12 +50,18 @@ namespace NuGet.Client.Resolution
                 throw new ArgumentNullException("httpClientFactory");
             }
 
-            ProjectManager = projectManager;
-            PackageManager = packageManager;
+            _target = target;
+
+            PackageManager = _target.GetPackageManager();
             PackageCache = packageCache;
             PackageDownloader = packageDownloader;
 
             _httpClientFactory = httpClientFactory;
+        }
+
+        public IProjectManager GetProjectManager(TargetProject project)
+        {
+            return _target.GetProjectManager(project);
         }
 
         public IHttpClient CreateHttpClient(Uri downloadUri)

@@ -131,5 +131,14 @@ namespace NuGet.Client {
                 return ResourceManager.GetString("PackageActionDescriptionWrapper_UnrecognizedAction", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The project &apos;{0}&apos; is not one of the projects targetted by this object..
+        /// </summary>
+        internal static string ProjectInstallationTarget_ProjectIsNotTargetted {
+            get {
+                return ResourceManager.GetString("ProjectInstallationTarget_ProjectIsNotTargetted", resourceCulture);
+            }
+        }
     }
 }

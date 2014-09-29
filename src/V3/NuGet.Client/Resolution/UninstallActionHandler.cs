@@ -12,13 +12,14 @@ namespace NuGet.Client.Resolution
         public Task Execute(PackageAction action, ExecutionContext context, ILogger logger)
         {
             // Get the package out of the project manager
-            var package = context.ProjectManager.LocalRepository.FindPackage(
+            var projectManager = context.GetProjectManager(action.Target);
+            var package = projectManager.LocalRepository.FindPackage(
                 action.PackageName.Id,
                 CoreConverters.SafeToSemVer(action.PackageName.Version));
             Debug.Assert(package != null);
 
             // Add the package to the project
-            context.ProjectManager.Execute(new PackageOperation(
+            projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Uninstall));
 

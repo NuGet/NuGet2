@@ -11,7 +11,7 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client
 {
-    public abstract class TargetProject
+    public abstract class TargetProject : IEquatable<TargetProject>
     {
         public abstract string Name { get; }
         public abstract IProjectSystem ProjectSystem { get; }
@@ -23,5 +23,15 @@ namespace NuGet.Client
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method may require computation")]
         public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
+
+        public abstract bool Equals(TargetProject other);
+    }
+
+    /// <summary>
+    /// Base class for target projects that use NuGet.Core interop to install packages
+    /// </summary>
+    public abstract class CoreInteropTargetProjectBase : TargetProject
+    {
+        protected internal abstract IProjectManager GetProjectManager();
     }
 }
