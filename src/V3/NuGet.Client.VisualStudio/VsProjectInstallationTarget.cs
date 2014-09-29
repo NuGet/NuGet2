@@ -33,7 +33,7 @@ namespace NuGet.Client.VisualStudio
             get
             {
                 VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
-                return ProjectManager.PackageManager.LocalRepository.LoadProjectRepositories()
+                return GetProjectManager(TargetProject).PackageManager.LocalRepository.LoadProjectRepositories()
                         .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((IPackageReferenceRepository2)r));
             }
         }
