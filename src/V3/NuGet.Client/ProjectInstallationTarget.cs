@@ -12,11 +12,9 @@ namespace NuGet.Client
         /// <summary>
         /// Gets the name of the target in which packages will be installed (for example, the Project name when targetting a Project)
         /// </summary>
-        public override string Name { get { return ProjectManager.Project.ProjectName; } }
+        public override string Name { get { return TargetProject.GetProjectManager().Project.ProjectName; } }
 
         public CoreInteropTargetProjectBase TargetProject { get; private set; }
-
-        public IProjectManager ProjectManager { get; private set; }
 
         public override IEnumerable<TargetProject> TargetProjects
         {
@@ -40,12 +38,12 @@ namespace NuGet.Client
                     Strings.ProjectInstallationTarget_ProjectIsNotTargetted,
                     project.Name));
             }
-            return ProjectManager;
+            return TargetProject.GetProjectManager();
         }
 
         protected internal override IPackageManager GetPackageManager()
         {
-            return ProjectManager.PackageManager;
+            return TargetProject.GetProjectManager().PackageManager;
         }
     }
 }

@@ -32,6 +32,7 @@ namespace NuGet.Client
     /// </summary>
     public abstract class CoreInteropTargetProjectBase : TargetProject
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This may not be performant, clients should cache the value they receive")]
         protected internal abstract IProjectManager GetProjectManager();
     }
 }
