@@ -67,6 +67,9 @@
     <Compile Include="Diagnostics\TraceSourceExtensions.cs" />
     <Compile Include="FileConflictAction.cs" />
     <Compile Include="InstallationTarget.cs" />
+    <Compile Include="Installation\InstallationHost.cs" />
+    <Compile Include="Installation\RequiredFeatureNotSupportedException.cs" />
+    <Compile Include="Installation\CoreInteropFeature.cs" />
     <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />
     <Compile Include="Interop\CoreInteropConstraintProvider.cs" />

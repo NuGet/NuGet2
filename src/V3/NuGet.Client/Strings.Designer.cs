@@ -140,5 +140,23 @@ namespace NuGet.Client {
                 return ResourceManager.GetString("ProjectInstallationTarget_ProjectIsNotTargetted", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; installation feature was required by a package but is not supported on the current host..
+        /// </summary>
+        internal static string RequiredFeatureUnsupportedException_DefaultMessageWithFeature {
+            get {
+                return ResourceManager.GetString("RequiredFeatureUnsupportedException_DefaultMessageWithFeature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The installation host does not support a feature required by this package..
+        /// </summary>
+        internal static string RequiredFeatureUnsupportedException_DefaultMessageWithoutFeature {
+            get {
+                return ResourceManager.GetString("RequiredFeatureUnsupportedException_DefaultMessageWithoutFeature", resourceCulture);
+            }
+        }
     }
 }

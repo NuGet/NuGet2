@@ -9,13 +9,14 @@ using NuGet.Resolver;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 using OldPackageAction = NuGet.Resolver.PackageAction;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.Resolution
 {
     public interface IActionHandler
     {
-        Task Execute(NewPackageAction action, ExecutionContext context, IExecutionLogger logger);
-        Task Rollback(NewPackageAction action, ExecutionContext context, IExecutionLogger logger);
+        Task Execute(NewPackageAction action, InstallationHost host, IExecutionLogger logger);
+        Task Rollback(NewPackageAction action, InstallationHost host, IExecutionLogger logger);
     }
 
     public class ActionExecutor
@@ -28,12 +29,12 @@ namespace NuGet.Client.Resolution
             { PackageActionType.Purge, new PurgeActionHandler() },
         };
 
-        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, ExecutionContext context)
+        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, InstallationHost host)
         {
-            return ExecuteActionsAsync(actions, context, NullExecutionLogger.Instance);
+            return ExecuteActionsAsync(actions, host, NullExecutionLogger.Instance);
         }
 
-        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, ExecutionContext context, IExecutionLogger logger)
+        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, InstallationHost host, IExecutionLogger logger)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
@@ -47,7 +48,7 @@ namespace NuGet.Client.Resolution
                         NuGetTraceSources.ActionExecutor.Error(
                             "execute/unhandledaction",
                             "[{0}] Skipping unknown action: {1}",
-                            action.PackageName,
+                            action.PackageIdentity,
                             action.ToString());
                     }
                     else
@@ -55,9 +56,9 @@ namespace NuGet.Client.Resolution
                         NuGetTraceSources.ActionExecutor.Info(
                             "execute/executing",
                             "[{0}] Executing action: {1}",
-                            action.PackageName,
+                            action.PackageIdentity,
                             action.ToString());
-                        await handler.Execute(action, context, logger);
+                        await handler.Execute(action, host, logger);
                         executedActions.Add(action);
                     }
                 }
@@ -65,12 +66,12 @@ namespace NuGet.Client.Resolution
             catch
             {
                 // Roll back the actions and rethrow
-                Rollback(executedActions, context, logger);
+                Rollback(executedActions, host, logger);
                 throw;
             }
         }
 
-        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, ExecutionContext context, IExecutionLogger logger)
+        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, InstallationHost host, IExecutionLogger logger)
         {
             if (executedActions.Count > 0)
             {
@@ -86,7 +87,7 @@ namespace NuGet.Client.Resolution
                     NuGetTraceSources.ActionExecutor.Error(
                         "rollback/unhandledaction",
                         "[{0}] Skipping unknown action: {1}",
-                        action.PackageName,
+                        action.PackageIdentity,
                         action.ToString());
                 }
                 else
@@ -94,9 +95,9 @@ namespace NuGet.Client.Resolution
                     NuGetTraceSources.ActionExecutor.Info(
                         "rollback/executing",
                         "[{0}] Executing action: {1}",
-                        action.PackageName,
+                        action.PackageIdentity,
                         action.ToString());
-                    handler.Rollback(action, context, logger).Wait();
+                    handler.Rollback(action, host, logger).Wait();
                 }
             }
         }

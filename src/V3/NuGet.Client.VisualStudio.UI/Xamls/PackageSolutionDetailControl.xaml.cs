@@ -93,8 +93,7 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progressDialog.Show();
 
-                var context = new ExecutionContext((CoreInteropInstallationTargetBase)Control.Target);
-                await executor.ExecuteActionsAsync(actions, context, progressDialog);
+                await executor.ExecuteActionsAsync(actions, host: null, logger: progressDialog);
 
                 Control.UpdatePackageStatus();
                 model.Refresh();

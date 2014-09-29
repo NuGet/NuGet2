@@ -144,4 +144,10 @@
   <data name="ProjectInstallationTarget_ProjectIsNotTargetted" xml:space="preserve">
     <value>The project '{0}' is not one of the projects targetted by this object.</value>
   </data>
+  <data name="RequiredFeatureUnsupportedException_DefaultMessageWithFeature" xml:space="preserve">
+    <value>The '{0}' installation feature was required by a package but is not supported on the current host.</value>
+  </data>
+  <data name="RequiredFeatureUnsupportedException_DefaultMessageWithoutFeature" xml:space="preserve">
+    <value>The installation host does not support a feature required by this package.</value>
+  </data>
 </root>

@@ -115,15 +115,12 @@ namespace NuGet.Client.VisualStudio.UI
                 Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
                 Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
 
-                // Create the execution context
-                var context = new ExecutionContext((ProjectInstallationTarget)Control.Target);
-
                 // Create the executor and execute the actions                
                 progressDialog.Owner = Window.GetWindow(Control);
                 progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progressDialog.Show();
                 var executor = new ActionExecutor();
-                await executor.ExecuteActionsAsync(actions, context, progressDialog);
+                await executor.ExecuteActionsAsync(actions, host: null, logger: progressDialog);
 
                 Control.UpdatePackageStatus();
                 UpdatePackageStatus();

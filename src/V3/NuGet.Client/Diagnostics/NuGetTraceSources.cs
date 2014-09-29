@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.Installation;
 using NuGet.Client.Interop;
 using NuGet.Client.Resolution;
 
@@ -22,6 +23,8 @@ namespace NuGet.Client.Diagnostics
         public static readonly TraceSource ProjectInstalledPackagesList = new TraceSource(typeof(ProjectInstalledPackagesList).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource V2SourceRepository = new TraceSource(typeof(V2SourceRepository).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
+        public static readonly TraceSource V2InstallationFeatures = new TraceSource(typeof(InstallationHost).Namespace + ".V2InstallationFeatures");
         
 
         /// <summary>

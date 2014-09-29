@@ -39,11 +39,11 @@ namespace NuGet.Client.VisualStudio.UI
                 {   
                     if (action.ActionType == PackageActionType.Install)
                     {
-                        packageStatus[action.PackageName] = PackagePreviewStatus.Added;
+                        packageStatus[action.PackageIdentity] = PackagePreviewStatus.Added;
                     }
                     else if (action.ActionType == PackageActionType.Uninstall)
                     {
-                        packageStatus[action.PackageName] = PackagePreviewStatus.Deleted;
+                        packageStatus[action.PackageIdentity] = PackagePreviewStatus.Deleted;
                     }
                 }
 

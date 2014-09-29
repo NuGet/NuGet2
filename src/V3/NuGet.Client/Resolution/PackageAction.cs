@@ -12,7 +12,7 @@ namespace NuGet.Client.Resolution
     /// </summary>
     public class PackageAction
     {
-        public PackageIdentity PackageName { get; private set; }
+        public PackageIdentity PackageIdentity { get; private set; }
         public JObject Package { get; private set; }
         public TargetProject Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
@@ -20,7 +20,7 @@ namespace NuGet.Client.Resolution
         public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, TargetProject target)
         {
             ActionType = actionType;
-            PackageName = packageName;
+            PackageIdentity = packageName;
             Package = package;
             Target = target;
         }
@@ -28,7 +28,7 @@ namespace NuGet.Client.Resolution
         public override string ToString()
         {
             return 
-                ActionType.ToString() + " " + PackageName.ToString() + 
+                ActionType.ToString() + " " + PackageIdentity.ToString() + 
                 (Target == null ? String.Empty : (" " + Target.Name));
         }
     }
