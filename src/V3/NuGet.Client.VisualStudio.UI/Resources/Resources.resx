@@ -184,7 +184,7 @@
     <value>Filter:</value>
   </data>
   <data name="Label_InstallationOptions" xml:space="preserve">
-    <value>Installation Options</value>
+    <value>Options</value>
   </data>
   <data name="Label_LegalDisclaimer" xml:space="preserve">
     <value>Legal Disclaimer</value>

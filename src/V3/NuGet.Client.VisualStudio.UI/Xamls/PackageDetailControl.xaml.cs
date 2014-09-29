@@ -56,8 +56,7 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 var actions = await ResolveActions(action);
-
-                PreviewActions(actions);
+                Control.PreviewActions(actions);
             }
             catch (InvalidOperationException ex)
             {
@@ -96,52 +95,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private enum PackageStatus
-        {
-            Unchanged,
-            Deleted,
-            Added
-        }
-
-        private void PreviewActions(
-            IEnumerable<PackageAction> actions)
-        {
-            // Show preview result
-            var targetProject = Control.Target.TargetProjects.First();
-            var packageStatus = targetProject.InstalledPackages.GetInstalledPackageReferences()
-                .Select(p => p.Identity)
-                .ToDictionary(p => p, _ => PackageStatus.Unchanged);
-
-            foreach (var action in actions)
-            {
-                if (action.ActionType == PackageActionType.Install)
-                {
-                    packageStatus[action.PackageName] = PackageStatus.Added;
-                }
-                else if (action.ActionType == PackageActionType.Uninstall)
-                {
-                    packageStatus[action.PackageName] = PackageStatus.Deleted;
-                }
-            }
-
-            var model = new PreviewWindowModel(
-                unchanged: packageStatus
-                    .Where(v => v.Value == PackageStatus.Unchanged)
-                    .Select(v => v.Key),
-                deleted: packageStatus
-                    .Where(v => v.Value == PackageStatus.Deleted)
-                    .Select(v => v.Key),
-                added: packageStatus
-                    .Where(v => v.Value == PackageStatus.Added)
-                    .Select(v => v.Key));
-
-            var w = new PreviewWindow();
-            w.DataContext = model;
-            w.Owner = Window.GetWindow(Control);
-            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            w.ShowDialog();
-        }
-
         private async void PerformPackageAction(PackageActionType action)
         {
             Control.SetBusy(true);
@@ -151,7 +104,7 @@ namespace NuGet.Client.VisualStudio.UI
                 var actions = await ResolveActions(action);
 
                 // show license agreeement
-                bool acceptLicense = ShowLicenseAgreement(actions);
+                bool acceptLicense = Control.ShowLicenseAgreement(actions);
                 if (!acceptLicense)
                 {
                     return;
@@ -227,41 +180,6 @@ namespace NuGet.Client.VisualStudio.UI
                 var installedVersion = installedPackage.Identity.Version;
                 model.CreateVersions(installedVersion);
             }
-        }
-
-        protected bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
-        {
-            var licensePackages = operations.Where(op =>
-                op.ActionType == PackageActionType.Install &&
-                op.Package.Value<bool>("requireLicenseAcceptance"));
-
-            // display license window if necessary
-            if (licensePackages.Any())
-            {
-                // Hacky distinct without writing a custom comparer
-                var licenseModels = licensePackages
-                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
-                    .Select(g =>
-                    {
-                        dynamic p = g.First().Package;
-                        var authors = String.Join(", ",
-                            ((JArray)(p.authors)).Cast<JValue>()
-                            .Select(author => author.Value as string));
-
-                        return new PackageLicenseInfo(
-                            p.id.Value,
-                            p.licenseUrl.Value,
-                            authors);
-                    });
-
-                bool accepted = Control.UI.PromptForLicenseAcceptance(licenseModels);
-                if (!accepted)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)

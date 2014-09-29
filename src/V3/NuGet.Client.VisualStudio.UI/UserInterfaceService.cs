@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Windows.Threading;
 using System.Windows;
+using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -20,37 +21,41 @@ namespace NuGet.Client.VisualStudio.UI
             _uiDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        public bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages)
+        public bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages, Window ownerWindow)
         {
             if (_uiDispatcher.CheckAccess())
             {
-                return PromptForLicenseAcceptanceImpl(packages);
+                return PromptForLicenseAcceptanceImpl(packages, ownerWindow);
             }
             else
             {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
-                    new Func<IEnumerable<PackageLicenseInfo>, bool>(PromptForLicenseAcceptanceImpl), packages);
+                    new Func<IEnumerable<PackageLicenseInfo>, Window, bool>(PromptForLicenseAcceptanceImpl),
+                    packages,
+                    ownerWindow);
                 return (bool)result;
             }
         }
 
-        private bool PromptForLicenseAcceptanceImpl(IEnumerable<PackageLicenseInfo> packages)
+        private bool PromptForLicenseAcceptanceImpl(
+            IEnumerable<PackageLicenseInfo> packages,
+            Window ownerWindow)
         {
-            MessageBox.Show("TODO: Fix license dialog");
-            return true;
-            //var licenseWindow = new LicenseAcceptanceWindow()
-            //{
-            //    DataContext = packages
-            //};
+            var licenseWindow = new LicenseAcceptanceWindow()
+            {
+                DataContext = packages,
+                Owner = ownerWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
 
-            ///* !!!
-            //using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
-            //    NuGetEvent.LicenseWindowBegin,
-            //    NuGetEvent.LicenseWindowEnd))
-            //{ */
-            //bool? dialogResult = licenseWindow.ShowDialog();
-            //return dialogResult ?? false;
+            using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
+                NuGetEvent.LicenseWindowBegin,
+                NuGetEvent.LicenseWindowEnd))
+            {
+                bool? dialogResult = licenseWindow.ShowDialog();
+                return dialogResult ?? false;
+            }
         }
 
         public void LaunchExternalLink(Uri url)
@@ -58,10 +63,10 @@ namespace NuGet.Client.VisualStudio.UI
             NuGet.VisualStudio.UriHelper.OpenExternalLink(url);
         }
 
-
         public void LaunchNuGetOptionsDialog()
         {
-            System.Windows.MessageBox.Show("Not implemented yet!!!");
+            var optionsPageActivator = ServiceLocator.GetInstance<IOptionsPageActivator>();
+            optionsPageActivator.ActivatePage(OptionsPage.General, null);
         }
     }
 }

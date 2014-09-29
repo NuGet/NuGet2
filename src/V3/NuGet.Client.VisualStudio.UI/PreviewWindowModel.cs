@@ -1,12 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {
+    public enum PackagePreviewStatus
+    {
+        Unchanged,
+        Deleted,
+        Added
+    }
+
     public class PreviewWindowModel
+    {
+        private List<PreviewResult> _previewResults;
+
+        public IEnumerable<PreviewResult> PreviewResults
+        {
+            get
+            {
+                return _previewResults;
+            }
+        }
+
+        public PreviewWindowModel(IEnumerable<PackageAction> actions)
+        {
+            _previewResults = new List<PreviewResult>();
+            var projects = actions.Select(a => a.Target)
+                .Where(p => p != null)
+                .Distinct();
+            foreach (var targetProject in projects)
+            {
+                var packageStatus = targetProject.InstalledPackages.GetInstalledPackageReferences()
+                    .Select(p => p.Identity)
+                    .ToDictionary(p => p, _ => PackagePreviewStatus.Unchanged);
+
+                foreach (var action in actions.Where(a => targetProject.Equals(a.Target)))
+                {   
+                    if (action.ActionType == PackageActionType.Install)
+                    {
+                        packageStatus[action.PackageName] = PackagePreviewStatus.Added;
+                    }
+                    else if (action.ActionType == PackageActionType.Uninstall)
+                    {
+                        packageStatus[action.PackageName] = PackagePreviewStatus.Deleted;
+                    }
+                }
+
+                _previewResults.Add(new PreviewResult(
+                    targetProject.Name,
+                    unchanged: packageStatus
+                    .Where(v => v.Value == PackagePreviewStatus.Unchanged)
+                    .Select(v => v.Key),
+                deleted: packageStatus
+                    .Where(v => v.Value == PackagePreviewStatus.Deleted)
+                    .Select(v => v.Key),
+                added: packageStatus
+                    .Where(v => v.Value == PackagePreviewStatus.Added)
+                    .Select(v => v.Key)));
+            }
+        }
+    }
+
+    public class PreviewResult
     {
         public IEnumerable<PackageIdentity> Deleted
         {
@@ -26,11 +82,19 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        public PreviewWindowModel(
+        public string Name
+        {
+            get;
+            private set;
+        }
+
+        public PreviewResult(
+            string name,
             IEnumerable<PackageIdentity> added,
             IEnumerable<PackageIdentity> deleted,
             IEnumerable<PackageIdentity> unchanged)
         {
+            Name = name;
             Added = added;
             Deleted = deleted;
             Unchanged = unchanged;

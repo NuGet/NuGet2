@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -42,6 +43,32 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        private async Task<IEnumerable<PackageAction>> ResolveActions()
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+            var resolver = new ActionResolver(
+                Control.Sources.ActiveRepository,
+                Control.Target,
+                new ResolutionContext()
+                {
+                    DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
+                    AllowPrerelease = false
+                });
+
+            var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
+                PackageActionType.Uninstall :
+                PackageActionType.Install;
+
+            var targetProjects = model.Projects
+                .Where(p => p.Selected)
+                .Select(p => p.Project);
+            return await resolver.ResolveActionsAsync(
+                model.Package.Id,
+                model.Package.Version,
+                action,
+                targetProjects);
+        }
+
         private async void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
             var model = (PackageSolutionDetailControlModel)DataContext;
@@ -50,30 +77,15 @@ namespace NuGet.Client.VisualStudio.UI
             var progressDialog = new ProgressDialog();
             try
             {
-                IEnumerable<PackageAction> actions = null;
-                var resolver = new ActionResolver(
-                    Control.Sources.ActiveRepository,
-                    Control.Target,
-                    new ResolutionContext()
-                    {
-                        DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
-                        AllowPrerelease = false
-                    });
+                IEnumerable<PackageAction> actions = await ResolveActions();
+                Control.PreviewActions(actions);
 
-                var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
-                    PackageActionType.Uninstall :
-                    PackageActionType.Install;
-
-                var targetProjects = model.Projects
-                    .Where(p => p.Selected)
-                    .Select(p => p.Project);
-
-                actions = await resolver.ResolveActionsAsync(
-                    model.Package.Id,
-                    model.Package.Version,
-                    action,
-                    targetProjects);
-                MessageBox.Show("TODO: Better UI." + Environment.NewLine + String.Join(Environment.NewLine, actions.Select(a => a.ToString())));
+                // show license agreeement
+                bool acceptLicense = Control.ShowLicenseAgreement(actions);
+                if (!acceptLicense)
+                {
+                    return;
+                }
 
                 var executor = new ActionExecutor();
                 progressDialog.Owner = Window.GetWindow(Control);

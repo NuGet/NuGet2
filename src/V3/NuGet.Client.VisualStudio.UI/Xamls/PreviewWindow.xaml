@@ -11,40 +11,51 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}" 
+        <Border BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
                 BorderThickness="1">
             <ScrollViewer>
-                <StackPanel>
-                    <StackPanel Margin="0,8">
-                        <TextBlock
+                <ItemsControl ItemsSource="{Binding Path=PreviewResults}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0, 8">
+                                <TextBlock
+                                    FontWeight="Bold"
+                                    FontStyle="Italic"
+                                    Text="{Binding Path=Name}" />
+
+                                <StackPanel Margin="10,8,0,8">
+                                    <TextBlock
                         FontWeight="Bold"
                         Text="{x:Static resx:Resources.Label_AddedPackages}" />
-                        <ItemsControl
+                                    <ItemsControl
                         Margin="10,0,0,0"
                         ItemsSource="{Binding Path=Added}">
-                        </ItemsControl>
-                    </StackPanel>
+                                    </ItemsControl>
+                                </StackPanel>
 
-                    <StackPanel Margin="0,8">
-                        <TextBlock
+                                <StackPanel Margin="10,8,0,8">
+                                    <TextBlock
                         FontWeight="Bold"
                         Text="{x:Static resx:Resources.Label_DeletedPackages}" />
-                        <ItemsControl
+                                    <ItemsControl
                         Margin="10,0,0,0"
                         ItemsSource="{Binding Path=Deleted}">
-                        </ItemsControl>
-                    </StackPanel>
+                                    </ItemsControl>
+                                </StackPanel>
 
-                    <StackPanel Margin="0,8">
-                        <TextBlock
+                                <StackPanel Margin="10,8,0,8">
+                                    <TextBlock
                         FontWeight="Bold"
                         Text="{x:Static resx:Resources.Label_UnchangedPackages}" />
-                        <ItemsControl
+                                    <ItemsControl
                         Margin="10,0,0,0"
                         ItemsSource="{Binding Path=Unchanged}">
-                        </ItemsControl>
-                    </StackPanel>
-                </StackPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </ScrollViewer>
         </Border>
         <Grid Grid.Row="1" Margin="8,8">

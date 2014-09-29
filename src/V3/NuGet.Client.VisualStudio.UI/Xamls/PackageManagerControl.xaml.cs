@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
@@ -470,6 +471,51 @@ namespace NuGet.Client.VisualStudio.UI
                     package.Status = PackageStatus.NotInstalled;
                 }
             }
+        }
+
+        public bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
+        {
+            var licensePackages = operations.Where(op =>
+                op.ActionType == PackageActionType.Install &&
+                op.Package.Value<bool>("requireLicenseAcceptance"));
+
+            // display license window if necessary
+            if (licensePackages.Any())
+            {
+                // Hacky distinct without writing a custom comparer
+                var licenseModels = licensePackages
+                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
+                    .Select(g =>
+                    {
+                        dynamic p = g.First().Package;
+                        var authors = String.Join(", ",
+                            ((JArray)(p.authors)).Cast<JValue>()
+                            .Select(author => author.Value as string));
+
+                        return new PackageLicenseInfo(
+                            p.id.Value,
+                            p.licenseUrl.Value,
+                            authors);
+                    });
+
+                var ownerWindow = Window.GetWindow(this);
+                bool accepted = this.UI.PromptForLicenseAcceptance(licenseModels, ownerWindow);
+                if (!accepted)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }    
+
+        public void PreviewActions(IEnumerable<PackageAction> actions)
+        {
+            var w = new PreviewWindow();
+            w.DataContext = new PreviewWindowModel(actions);
+            w.Owner = Window.GetWindow(this);
+            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            w.ShowDialog();
         }
     }
 }

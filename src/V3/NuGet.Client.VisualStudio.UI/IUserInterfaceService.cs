@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Newtonsoft.Json.Linq;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     public interface IUserInterfaceService
     {
-        bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages);
+        bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages, Window ownerWindow);
         void LaunchExternalLink(Uri url);
-
         void LaunchNuGetOptionsDialog();
     }
 }
