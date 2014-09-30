@@ -20,11 +20,11 @@ namespace NuGet.Client.Diagnostics
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource CoreInterop = new TraceSource(typeof(CoreInteropProjectManager).Namespace);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource ProjectInstalledPackagesList = new TraceSource(typeof(ProjectInstalledPackagesList).FullName);
+        public static readonly TraceSource ProjectInstalledPackagesList = new TraceSource(typeof(CoreInteropInstalledPackagesList).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource V2SourceRepository = new TraceSource(typeof(V2SourceRepository).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource V2InstallationFeatures = new TraceSource(typeof(InstallationHost).Namespace + ".V2InstallationFeatures");
+        public static readonly TraceSource NuGetCoreInstallationFeature = new TraceSource(typeof(NuGetCoreInstallationFeature).FullName);
         
 
         /// <summary>

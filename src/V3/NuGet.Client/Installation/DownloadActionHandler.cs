@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
-using NuGet.Client.Installation;
+using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
-namespace NuGet.Client.Resolution
+namespace NuGet.Client.Installation
 {
     /// <summary>
     /// Handles the Download package Action by downloading the specified package into the shared repository
@@ -16,7 +16,7 @@ namespace NuGet.Client.Resolution
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public Task Execute(PackageAction action, InstallationHost host, IExecutionLogger logger)
+        public async Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
             Uri downloadUri;
             try
@@ -41,16 +41,23 @@ namespace NuGet.Client.Resolution
             }
 
             // Use the core-interop feature to execute the action
-            var interop = host.GetRequiredFeature<CoreInteropFeature>();
-            return interop.DownloadPackage(
+            var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
+            var package = await interop.DownloadPackage(
                 action.PackageIdentity,
                 downloadUri);
+
+            // Run init.ps1 if present. Init is run WITHOUT specifying a target framework.
+            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                "init.ps1",
+                target,
+                action.Target,
+                package);
         }
 
-        public Task Rollback(PackageAction action, InstallationHost host, IExecutionLogger logger)
+        public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
             // Just run the purge action to undo a download
-            return new PurgeActionHandler().Execute(action, host, logger);
+            return new PurgeActionHandler().Execute(action, target, logger);
         }
     }
 }

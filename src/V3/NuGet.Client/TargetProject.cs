@@ -22,17 +22,8 @@ namespace NuGet.Client
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method may require computation")]
-        public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
+        public abstract FrameworkName GetSupportedFramework();
 
         public abstract bool Equals(TargetProject other);
-    }
-
-    /// <summary>
-    /// Base class for target projects that use NuGet.Core interop to install packages
-    /// </summary>
-    public abstract class CoreInteropTargetProjectBase : TargetProject
-    {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This may not be performant, clients should cache the value they receive")]
-        protected internal abstract IProjectManager GetProjectManager();
     }
 }

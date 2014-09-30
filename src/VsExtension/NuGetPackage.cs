@@ -229,7 +229,8 @@ namespace NuGet.Tools
         {
             base.Initialize();
 
-            VsNuGetDiagnostics.Initialize(ServiceLocator.GetInstance<IDebugConsoleController>());
+            VsNuGetDiagnostics.Initialize(
+                ServiceLocator.GetInstance<IDebugConsoleController>());
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();

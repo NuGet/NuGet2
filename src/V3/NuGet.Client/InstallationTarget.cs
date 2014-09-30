@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Installation;
 using NuGet.Versioning;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
@@ -63,5 +64,53 @@ namespace NuGet.Client
         {
             return TargetProjects.FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
         }
+
+        /// <summary>
+        /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
+        /// if the feature is not supported by this host.
+        /// </summary>
+        /// <typeparam name="T">The type defining the feature to retrieve</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>.</returns>
+        /// <exception cref="RequiredFeatureNotSupportedException">The target does not support this feature.</exception>
+        public virtual T GetRequiredFeature<T>()
+        {
+            var feature = TryGetFeature<T>();
+            if (feature == null)
+            {
+                throw new RequiredFeatureNotSupportedException(typeof(T));
+            }
+            return feature;
+        }
+
+        /// <summary>
+        /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
+        /// if the feature is not supported by this host.
+        /// </summary>
+        /// <param name="featureType">The type defining the feature to retrieve</param>
+        /// <returns>An instance of <paramref name="featureType"/>.</returns>
+        /// <exception cref="RequiredFeatureNotSupportedException">The host does not support this feature.</exception>
+        public virtual object GetRequiredFeature(Type featureType)
+        {
+            var feature = TryGetFeature(featureType);
+            if (feature == null)
+            {
+                throw new RequiredFeatureNotSupportedException(featureType);
+            }
+            return feature;
+        }
+
+        /// <summary>
+        /// Retrieves an instance of the requested feature, if one exists in this host.
+        /// </summary>
+        /// <typeparam name="T">The type defining the feature to retrieve</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>, or null if no such feature exists.</returns>
+        public virtual T TryGetFeature<T>() { return (T)TryGetFeature(typeof(T)); }
+
+        /// <summary>
+        /// Retrieves an instance of the requested feature, if one exists in this host.
+        /// </summary>
+        /// <param name="featureType">The type defining the feature to retrieve</param>
+        /// <returns>An instance of <paramref name="featureType"/>, or null if no such feature exists.</returns>
+        public abstract object TryGetFeature(Type featureType);
     }
 }

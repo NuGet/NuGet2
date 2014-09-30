@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Resolution;
 using System.Diagnostics;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -120,7 +121,7 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progressDialog.Show();
                 var executor = new ActionExecutor();
-                await executor.ExecuteActionsAsync(actions, host: null, logger: progressDialog);
+                await executor.ExecuteActionsAsync(actions, Control.Target, logger: progressDialog);
 
                 Control.UpdatePackageStatus();
                 UpdatePackageStatus();

@@ -341,9 +341,9 @@ namespace NuGet.Client.VisualStudio.UI
         private void SearchPackageInActivePackageSource()
         {
             var searchText = _searchText.Text;
-            var supportedFrameworks = Target.IsSolution ?
-                Enumerable.Empty<FrameworkName>() :
-                Target.TargetProjects.Single().GetSupportedFrameworks();
+            var supportedFramework = Target.IsSolution ?
+                null :
+                Target.TargetProjects.Single().GetSupportedFramework();
 
             if (ShowOnlyInstalled())
             {
@@ -366,7 +366,7 @@ namespace NuGet.Client.VisualStudio.UI
                             searchText,
                             new SearchFilter()
                             {
-                                SupportedFrameworks = supportedFrameworks,
+                                SupportedFramework = supportedFramework,
                                 IncludePrerelease = false
                             },
                             startIndex,

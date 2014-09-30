@@ -11,11 +11,11 @@ using NuGet.Versioning;
 
 namespace NuGet.Client
 {
-    public class ProjectInstalledPackagesList : InstalledPackagesList
+    public class CoreInteropInstalledPackagesList : InstalledPackagesList
     {
         private IPackageReferenceRepository2 _localRepository;
 
-        public ProjectInstalledPackagesList(IPackageReferenceRepository2 localRepository)
+        public CoreInteropInstalledPackagesList(IPackageReferenceRepository2 localRepository)
         {
             _localRepository = localRepository;
         }

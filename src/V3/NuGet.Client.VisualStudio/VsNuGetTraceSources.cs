@@ -14,6 +14,8 @@ namespace NuGet.Client.VisualStudio
         public static readonly TraceSource VsProjectInstallationTarget = new TraceSource(typeof(VsProjectInstallationTarget).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource VsTargetProject = new TraceSource(typeof(VsTargetProject).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
+        public static readonly TraceSource VsPowerShellScriptExecutionFeature = new TraceSource(typeof(VsPowerShellScriptExecutionFeature).FullName);
         
         /// <summary>
         /// Retrieves a list of all sources defined in this class. Uses reflection, store the result!

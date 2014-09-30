@@ -14,7 +14,7 @@ namespace NuGet.Client.Installation
     /// <summary>
     /// Downloads a package from a V3 SourceRepository into a V2 IPackageRepository
     /// </summary>
-    public class CoreInteropFeature
+    public class NuGetCoreInstallationFeature
     {
         private readonly IPackageCacheRepository _packageCache;
         private readonly PackageDownloader _downloader;
@@ -22,7 +22,7 @@ namespace NuGet.Client.Installation
         private readonly IPackageManager _packageManager;
         private readonly Func<TargetProject, IProjectManager> _projectManagerFetcher;
 
-        public CoreInteropFeature(
+        public NuGetCoreInstallationFeature(
             IPackageManager packageManager,
             Func<TargetProject, IProjectManager> projectManagerFetcher,
             IPackageCacheRepository packageCache,
@@ -36,7 +36,7 @@ namespace NuGet.Client.Installation
             _projectManagerFetcher = projectManagerFetcher;
         }
 
-        public Task DownloadPackage(PackageIdentity packageIdentity, Uri downloadUri)
+        public Task<LocalPackageInfo> DownloadPackage(PackageIdentity packageIdentity, Uri downloadUri)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -53,6 +53,10 @@ namespace NuGet.Client.Installation
                 _packageManager.Execute(new PackageOperation(
                     package,
                     NuGet.PackageAction.Install));
+                
+                return new LocalPackageInfo(
+                    package,
+                    _packageManager.PathResolver.GetInstallPath(package));
             });
         }
 
@@ -81,7 +85,7 @@ namespace NuGet.Client.Installation
             });
         }
 
-        public void InstallPackage(PackageIdentity packageIdentity, TargetProject project)
+        public LocalPackageInfo InstallPackage(PackageIdentity packageIdentity, TargetProject project)
         {
             // Get the package from the shared repository
             var package = _packageManager.LocalRepository.FindPackage(
@@ -94,9 +98,13 @@ namespace NuGet.Client.Installation
             projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Install));
+
+            return new LocalPackageInfo(
+                package,
+                _packageManager.PathResolver.GetInstallPath(package));
         }
 
-        public void UninstallPackage(PackageIdentity packageIdentity, TargetProject project)
+        public LocalPackageInfo UninstallPackage(PackageIdentity packageIdentity, TargetProject project)
         {
             // Get the package out of the project manager
             var projectManager = _projectManagerFetcher(project);
@@ -109,6 +117,10 @@ namespace NuGet.Client.Installation
             projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Uninstall));
+
+            return new LocalPackageInfo(
+                package,
+                _packageManager.PathResolver.GetInstallPath(package));
         }
 
         private IPackage GetPackage(PackageIdentity packageIdentity, Uri downloadUri)
@@ -119,7 +131,7 @@ namespace NuGet.Client.Installation
             var package = _packageCache.FindPackage(packageName.Id, packageSemVer);
             if (package != null)
             {
-                NuGetTraceSources.V2InstallationFeatures.Info(
+                NuGetTraceSources.NuGetCoreInstallationFeature.Info(
                     "download/cachehit",
                     "[{0}] Download: Cache Hit!",
                     packageIdentity);
@@ -146,7 +158,7 @@ namespace NuGet.Client.Installation
                         targetStream));
             if (success)
             {
-                NuGetTraceSources.V2InstallationFeatures.Info(
+                NuGetTraceSources.NuGetCoreInstallationFeature.Info(
                     "download/downloadedtocache",
                     "[{0}] Download: Downloaded to cache",
                     packageName);
@@ -163,7 +175,7 @@ namespace NuGet.Client.Installation
             // Regardless, the cache isn't working for us, so download it in to memory.
             if (package == null)
             {
-                NuGetTraceSources.V2InstallationFeatures.Info(
+                NuGetTraceSources.NuGetCoreInstallationFeature.Info(
                     "download/cachefailing",
                     "[{0}] Download: Cache isn't working. Downloading to RAM",
                     packageName);
@@ -180,6 +192,17 @@ namespace NuGet.Client.Installation
                 }
             }
             return package;
+        }
+    }
+    public class LocalPackageInfo
+    {
+        public IPackage LocalPackage { get; private set; }
+        public string InstalledPath { get; private set; }
+
+        public LocalPackageInfo(IPackage localPackage, string installedPath)
+        {
+            LocalPackage = localPackage;
+            InstalledPath = installedPath;
         }
     }
 }

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client
 {
-    public abstract class ProjectInstallationTarget : CoreInteropInstallationTargetBase
+    public abstract class ProjectInstallationTarget : InstallationTarget
     {
         /// <summary>
         /// Gets the name of the target in which packages will be installed (for example, the Project name when targetting a Project)
         /// </summary>
-        public override string Name { get { return TargetProject.GetProjectManager().Project.ProjectName; } }
+        public override string Name { get { return TargetProject.Name; } }
 
-        public CoreInteropTargetProjectBase TargetProject { get; private set; }
+        public TargetProject TargetProject { get; private set; }
 
         public override IEnumerable<TargetProject> TargetProjects
         {
@@ -24,26 +24,9 @@ namespace NuGet.Client
             }
         }
 
-        protected ProjectInstallationTarget(CoreInteropTargetProjectBase targetProject)
+        protected ProjectInstallationTarget(TargetProject targetProject)
         {
             TargetProject = targetProject;
-        }
-
-        protected internal override IProjectManager GetProjectManager(TargetProject project)
-        {
-            if (!TargetProject.Equals(project))
-            {
-                throw new KeyNotFoundException(String.Format(
-                    CultureInfo.CurrentCulture,
-                    Strings.ProjectInstallationTarget_ProjectIsNotTargetted,
-                    project.Name));
-            }
-            return TargetProject.GetProjectManager();
-        }
-
-        protected internal override IPackageManager GetPackageManager()
-        {
-            return TargetProject.GetProjectManager().PackageManager;
         }
     }
 }

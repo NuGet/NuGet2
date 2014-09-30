@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -16,31 +17,38 @@ namespace NuGet.Client.VisualStudio
             { TraceEventType.Error, ConsoleColor.Red }
         };
 
-        private IDebugConsoleController _console;
+        private readonly ThreadHelper _helper;
+        private readonly IDebugConsoleController _console;
 
-        public DebugConsoleTraceListener(IDebugConsoleController console)
+        public DebugConsoleTraceListener(IDebugConsoleController console, ThreadHelper helper)
         {
+            _helper = helper;
             _console = console;
         }
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
         {
-            ConsoleColor color;
-            if (!_colorMap.TryGetValue(eventType, out color))
+            _helper.InvokeAsync(() =>
             {
-                color = ConsoleColor.White;
-            }
-            _console.Log(eventCache.DateTime, message, eventType, source);
+                ConsoleColor color;
+                if (!_colorMap.TryGetValue(eventType, out color))
+                {
+                    color = ConsoleColor.White;
+                }
+                _console.Log(eventCache.DateTime, message, eventType, source);
+            });
         }
 
         public override void Write(string message)
         {
-            _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
+            _helper.InvokeAsync(() =>
+                _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty));
         }
 
         public override void WriteLine(string message)
         {
-            _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
+            _helper.InvokeAsync(() =>
+                _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty));
         }
     }
 }

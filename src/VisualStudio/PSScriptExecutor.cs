@@ -53,29 +53,54 @@ namespace NuGet.VisualStudio
                 return false;
             }
 
-            if (File.Exists(fullPath))
+            return ExecuteCore(
+                fullPath,
+                installPath,
+                package,
+                project,
+                targetFramework,
+                logger,
+                scriptFile);
+        }
+
+        // Used in the V3 API (VsPowerShellExecutionFeature).
+        public bool ExecuteResolvedScript(string fullScriptPath, string installPath, IPackage package, Project project, FrameworkName targetFramework, ILogger logger)
+        {
+            return ExecuteCore(fullScriptPath, installPath, package, project, targetFramework, logger, scriptFile: null);
+        }
+
+        private bool ExecuteCore(
+            string fullScriptPath,
+            string installPath,
+            IPackage package,
+            Project project,
+            FrameworkName targetFramework,
+            ILogger logger,
+            IPackageFile scriptFile)
+        {
+            if (File.Exists(fullScriptPath))
             {
                 if (project != null && scriptFile != null)
                 {
                     // targetFramework can be null for unknown project types
                     string shortFramework = targetFramework == null ? string.Empty : VersionUtility.GetShortFrameworkName(targetFramework);
 
-                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(), 
+                    logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfoPrefix, package.GetFullName(),
                         project.Name, shortFramework);
 
                     logger.Log(MessageLevel.Debug, NuGetResources.Debug_TargetFrameworkInfo_PowershellScripts,
                         Path.GetDirectoryName(scriptFile.Path), VersionUtility.GetTargetFrameworkLogString(scriptFile.TargetFramework));
                 }
 
-                string toolsPath = Path.GetDirectoryName(fullPath);
-                string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath);
+                string toolsPath = Path.GetDirectoryName(fullScriptPath);
+                string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullScriptPath);
 
                 // logging to both the Output window and progress window.
                 logger.Log(MessageLevel.Info, logMessage);
 
                 IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
                 Host.Execute(console,
-                    "$__pc_args=@(); $input|%{$__pc_args+=$_}; & " + PathHelper.EscapePSPath(fullPath) + " $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
+                    "$__pc_args=@(); $input|%{$__pc_args+=$_}; & " + PathHelper.EscapePSPath(fullScriptPath) + " $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
                     new object[] { installPath, toolsPath, package, project });
 
                 return true;

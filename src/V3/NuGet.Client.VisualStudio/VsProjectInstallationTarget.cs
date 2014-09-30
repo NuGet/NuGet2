@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EnvDTE;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Installation;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
@@ -16,6 +17,9 @@ namespace NuGet.Client.VisualStudio
 {
     public class VsProjectInstallationTarget : ProjectInstallationTarget
     {
+        private readonly NuGetCoreInstallationFeature _coreInteropFeature;
+        private readonly VsPowerShellScriptExecutionFeature _vsPowerShell;
+
         public Project Project { get; private set; }
 
         public override string Name
@@ -34,7 +38,7 @@ namespace NuGet.Client.VisualStudio
             {
                 VsNuGetTraceSources.VsProjectInstallationTarget.Verbose("getinstalledpackages", "Getting all installed packages in all projects");
                 return GetProjectManager(TargetProject).PackageManager.LocalRepository.LoadProjectRepositories()
-                        .Select(r => (InstalledPackagesList)new ProjectInstalledPackagesList((IPackageReferenceRepository2)r));
+                        .Select(r => (InstalledPackagesList)new CoreInteropInstalledPackagesList((IPackageReferenceRepository2)r));
             }
         }
 
@@ -45,6 +49,15 @@ namespace NuGet.Client.VisualStudio
                 (IPackageReferenceRepository2)projectManager.LocalRepository))
         {
             Project = project;
+
+            _coreInteropFeature = new NuGetCoreInstallationFeature(
+                projectManager.PackageManager,
+                GetProjectManager,
+                MachineCache.Default,
+                new PackageDownloader(),
+                uri => new HttpClient(uri));
+
+            _vsPowerShell = new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>());
         }
 
         public static VsProjectInstallationTarget Create(Project project)
@@ -59,6 +72,24 @@ namespace NuGet.Client.VisualStudio
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             return TargetProject.InstalledPackages.Search(searchTerm, skip, take, cancelToken);
+        }
+
+        public override object TryGetFeature(Type featureType)
+        {
+            if (featureType == typeof(NuGetCoreInstallationFeature))
+            {
+                return _coreInteropFeature;
+            }
+            else if (featureType == typeof(PowerShellScriptExecutionFeature))
+            {
+                return _vsPowerShell;
+            }
+            return null;
+        }
+
+        private IProjectManager GetProjectManager(TargetProject project)
+        {
+            return ((VsTargetProject)project).ProjectManager;
         }
     }
 }

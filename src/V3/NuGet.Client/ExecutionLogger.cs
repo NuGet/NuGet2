@@ -1,4 +1,4 @@
-﻿namespace NuGet.Client.Resolution
+﻿namespace NuGet.Client
 {
     public enum MessageLevel
     {

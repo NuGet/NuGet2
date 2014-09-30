@@ -28,7 +28,7 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("search", "Searching for '{0}'", searchTerm);
             return Task.Factory.StartNew(() => _repository.Search(
-                searchTerm, filters.SupportedFrameworks.Select(fx => fx.FullName), filters.IncludePrerelease)
+                searchTerm, new [] { filters.SupportedFramework.FullName }, filters.IncludePrerelease)
                 .Skip(skip)
                 .Take(take)
                 .ToList()

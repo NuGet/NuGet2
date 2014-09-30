@@ -8,17 +8,21 @@ using NuGet.Client.Interop;
 using NuGet.VisualStudio;
 using System.Linq;
 using System.Diagnostics;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsSolutionInstallationTarget : CoreInteropInstallationTargetBase
+    public class VsSolutionInstallationTarget : InstallationTarget
     {
+        private readonly NuGetCoreInstallationFeature _coreInteropFeature;
+        private readonly VsPowerShellScriptExecutionFeature _vsPowerShell;
+        
         private EnvDTE.Solution _solution;
         private string _name;
         private IVsPackageManager _packageManager;
         private IPackageRepository _packagesFolderSource;
         private InstalledPackagesList _installedSolutionLevelPackages;
-
+        
         public override bool IsActive
         {
             get
@@ -39,7 +43,7 @@ namespace NuGet.Client.VisualStudio
         {
             get {
                 return _solution.GetAllProjects()
-                    .Select(p => (InstalledPackagesList)new ProjectInstalledPackagesList(
+                    .Select(p => (InstalledPackagesList)new CoreInteropInstalledPackagesList(
                         (IPackageReferenceRepository2)_packageManager.GetProjectManager(p).LocalRepository));
             }
         }
@@ -71,9 +75,17 @@ namespace NuGet.Client.VisualStudio
             _packageManager = packageManager;
             _packagesFolderSource = _packageManager.LocalRepository;
 
+            _coreInteropFeature = new NuGetCoreInstallationFeature(
+                _packageManager,
+                GetProjectManager,
+                MachineCache.Default,
+                new PackageDownloader(),
+                uri => new HttpClient(uri));
+            _vsPowerShell = new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>());
+
             var repo = (SharedPackageRepository)_packageManager.LocalRepository;
             var refRepo = new PackageReferenceRepository(repo.PackageReferenceFile.FullPath, _packageManager.LocalRepository);
-            _installedSolutionLevelPackages = new ProjectInstalledPackagesList(refRepo);
+            _installedSolutionLevelPackages = new CoreInteropInstalledPackagesList(refRepo);
         }
 
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken ct)
@@ -86,16 +98,22 @@ namespace NuGet.Client.VisualStudio
                     .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
         }
 
-        protected override IProjectManager GetProjectManager(TargetProject project)
+        public override object TryGetFeature(Type featureType)
         {
-            Debug.Assert(TargetProjects.Contains(project));
-
-            return _packageManager.GetProjectManager(((VsTargetProject)project).Project);
+            if (featureType == typeof(NuGetCoreInstallationFeature))
+            {
+                return _coreInteropFeature;
+            }
+            else if (featureType == typeof(PowerShellScriptExecutionFeature))
+            {
+                return _vsPowerShell;
+            }
+            return null;
         }
 
-        protected override IPackageManager GetPackageManager()
+        private IProjectManager GetProjectManager(TargetProject project)
         {
-            return _packageManager;
+            return ((VsTargetProject)project).ProjectManager;
         }
     }
 }

@@ -17,13 +17,13 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsTargetProject : CoreInteropTargetProjectBase
+    public class VsTargetProject : TargetProject
     {
-        private readonly IProjectManager _projectManager;
         private readonly InstalledPackagesList _installedPackages;
 
         public Project Project { get; private set; }
-
+        public IProjectManager ProjectManager { get; private set; }
+        
         public override string Name
         {
             get { return Project.Name; }
@@ -31,7 +31,7 @@ namespace NuGet.Client.VisualStudio
 
         public override IProjectSystem ProjectSystem
         {
-            get { return _projectManager.Project; }
+            get { return ProjectManager.Project; }
         }
 
         public override InstalledPackagesList InstalledPackages
@@ -47,18 +47,13 @@ namespace NuGet.Client.VisualStudio
         public VsTargetProject(Project project, IProjectManager projectManager, IPackageReferenceRepository2 localRepository)
         {
             Project = project;
-            _projectManager = projectManager;
-            _installedPackages = new ProjectInstalledPackagesList(localRepository);
+            ProjectManager = projectManager;
+            _installedPackages = new CoreInteropInstalledPackagesList(localRepository);
         }
 
-        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
+        public override FrameworkName GetSupportedFramework()
         {
-            yield return Project.GetTargetFrameworkName();
-        }
-
-        protected override IProjectManager GetProjectManager()
-        {
-            return _projectManager;
+            return Project.GetTargetFrameworkName();
         }
 
         public override bool Equals(object obj)

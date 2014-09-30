@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.V3Shim;
 
@@ -15,7 +16,7 @@ namespace NuGet.Client.VisualStudio
         {
             foreach (var source in AllSources())
             {
-                source.Listeners.Add(new DebugConsoleTraceListener(console));
+                source.Listeners.Add(new DebugConsoleTraceListener(console, ThreadHelper.Generic));
                 source.Switch.Level = SourceLevels.All;
             }
         }
