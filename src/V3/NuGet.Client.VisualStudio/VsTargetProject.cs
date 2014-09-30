@@ -75,7 +75,7 @@ namespace NuGet.Client.VisualStudio
 
         public override int GetHashCode()
         {
-            return Project.UniqueName.GetHashCode();
+            return Project.UniqueName.ToLowerInvariant().GetHashCode();
         }
     }
 }
