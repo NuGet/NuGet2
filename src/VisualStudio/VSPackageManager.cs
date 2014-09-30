@@ -426,21 +426,4 @@ namespace NuGet.VisualStudio
                 CreateAmbiguousUninstallException);
         }
     }
-
-#if VS14
-    public class NuGetPackageMoniker : INuGetPackageMoniker
-    {
-        public string Id
-        {
-            get;
-            set;
-        }
-
-        public string Version
-        {
-            get;
-            set;
-        }
-    }
-#endif
 }

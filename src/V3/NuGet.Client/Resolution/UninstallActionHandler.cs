@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
 
 namespace NuGet.Client.Resolution
 {
@@ -11,8 +16,27 @@ namespace NuGet.Client.Resolution
     {
         public Task Execute(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
-            // Get the package out of the project manager
             var projectManager = context.GetProjectManager(action.Target);
+#if VS14
+            var nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var args = new Dictionary<string, object>();
+                var task = nugetAwareProject.UninstallPackageAsync(
+                    new NuGetPackageMoniker
+                    {
+                        Id = action.PackageName.Id,
+                        Version = action.PackageName.Version.ToString()
+                    },
+                    args,
+                    logger: null,
+                    progress: null,
+                    cancellationToken: cts.Token);
+                return task;
+            }
+#endif
+            // Get the package out of the project manager            
             var package = projectManager.LocalRepository.FindPackage(
                 action.PackageName.Id,
                 CoreConverters.SafeToSemVer(action.PackageName.Version));
