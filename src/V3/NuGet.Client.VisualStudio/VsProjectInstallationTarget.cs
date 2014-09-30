@@ -17,9 +17,6 @@ namespace NuGet.Client.VisualStudio
 {
     public class VsProjectInstallationTarget : ProjectInstallationTarget
     {
-        private readonly NuGetCoreInstallationFeature _coreInteropFeature;
-        private readonly VsPowerShellScriptExecutionFeature _vsPowerShell;
-
         public Project Project { get; private set; }
 
         public override string Name
@@ -50,14 +47,16 @@ namespace NuGet.Client.VisualStudio
         {
             Project = project;
 
-            _coreInteropFeature = new NuGetCoreInstallationFeature(
-                projectManager.PackageManager,
-                GetProjectManager,
-                MachineCache.Default,
-                new PackageDownloader(),
-                uri => new HttpClient(uri));
+            AddFeature(() =>
+                new NuGetCoreInstallationFeature(
+                    projectManager.PackageManager,
+                    GetProjectManager,
+                    MachineCache.Default,
+                    new PackageDownloader(),
+                    uri => new HttpClient(uri)));
 
-            _vsPowerShell = new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>());
+            AddFeature<PowerShellScriptExecutionFeature>(() =>
+                new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>()));
         }
 
         public static VsProjectInstallationTarget Create(Project project)
@@ -72,19 +71,6 @@ namespace NuGet.Client.VisualStudio
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             return TargetProject.InstalledPackages.Search(searchTerm, skip, take, cancelToken);
-        }
-
-        public override object TryGetFeature(Type featureType)
-        {
-            if (featureType == typeof(NuGetCoreInstallationFeature))
-            {
-                return _coreInteropFeature;
-            }
-            else if (featureType == typeof(PowerShellScriptExecutionFeature))
-            {
-                return _vsPowerShell;
-            }
-            return null;
         }
 
         private IProjectManager GetProjectManager(TargetProject project)

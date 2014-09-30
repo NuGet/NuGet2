@@ -14,9 +14,6 @@ namespace NuGet.Client.VisualStudio
 {
     public class VsSolutionInstallationTarget : InstallationTarget
     {
-        private readonly NuGetCoreInstallationFeature _coreInteropFeature;
-        private readonly VsPowerShellScriptExecutionFeature _vsPowerShell;
-        
         private EnvDTE.Solution _solution;
         private string _name;
         private IVsPackageManager _packageManager;
@@ -75,13 +72,16 @@ namespace NuGet.Client.VisualStudio
             _packageManager = packageManager;
             _packagesFolderSource = _packageManager.LocalRepository;
 
-            _coreInteropFeature = new NuGetCoreInstallationFeature(
-                _packageManager,
-                GetProjectManager,
-                MachineCache.Default,
-                new PackageDownloader(),
-                uri => new HttpClient(uri));
-            _vsPowerShell = new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>());
+            AddFeature(() =>
+                new NuGetCoreInstallationFeature(
+                    _packageManager,
+                    GetProjectManager,
+                    MachineCache.Default,
+                    new PackageDownloader(),
+                    uri => new HttpClient(uri)));
+
+            AddFeature<PowerShellScriptExecutionFeature>(() =>
+                new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>()));
 
             var repo = (SharedPackageRepository)_packageManager.LocalRepository;
             var refRepo = new PackageReferenceRepository(repo.PackageReferenceFile.FullPath, _packageManager.LocalRepository);
@@ -96,19 +96,6 @@ namespace NuGet.Client.VisualStudio
                     .Take(take)
                     .ToList()
                     .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
-        }
-
-        public override object TryGetFeature(Type featureType)
-        {
-            if (featureType == typeof(NuGetCoreInstallationFeature))
-            {
-                return _coreInteropFeature;
-            }
-            else if (featureType == typeof(PowerShellScriptExecutionFeature))
-            {
-                return _vsPowerShell;
-            }
-            return null;
         }
 
         private IProjectManager GetProjectManager(TargetProject project)

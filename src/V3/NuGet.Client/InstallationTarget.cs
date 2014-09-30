@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
@@ -17,6 +18,17 @@ namespace NuGet.Client
     /// </summary>
     public abstract class InstallationTarget
     {
+#if DEBUG
+        // Helper list for debug builds only.
+        private static readonly HashSet<Type> KnownFeatures = new HashSet<Type>()
+        {
+            typeof(PowerShellScriptExecutionFeature),
+            typeof(NuGetCoreInstallationFeature)
+        };
+#endif
+
+        private readonly Dictionary<Type, Func<object>> _featureFactories = new Dictionary<Type, Func<object>>();
+
         /// <summary>
         /// Gets the name of the target in which packages will be installed (for example, the Project name when targetting a Project)
         /// </summary>
@@ -111,6 +123,24 @@ namespace NuGet.Client
         /// </summary>
         /// <param name="featureType">The type defining the feature to retrieve</param>
         /// <returns>An instance of <paramref name="featureType"/>, or null if no such feature exists.</returns>
-        public abstract object TryGetFeature(Type featureType);
+        public virtual object TryGetFeature(Type featureType)
+        {
+            Func<object> factory;
+            if (!_featureFactories.TryGetValue(featureType, out factory))
+            {
+                return null;
+            }
+            return factory();
+        }
+
+        protected virtual void AddFeature<T>(Func<T> factory) where T : class
+        {
+            // During development, there should NEVER be a feature type added that we don't know about :).
+            Debug.Assert(
+                KnownFeatures.Contains(typeof(T)), 
+                "You tried to register a feature I'm not familiar with. This isn't generally a good thing...");
+
+            _featureFactories.Add(typeof(T), factory);
+        }
     }
 }
