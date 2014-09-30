@@ -63,10 +63,7 @@
                     SelectedIndex="0"
                     x:Name="_filter"
                     Width="186"
-                    SelectionChanged="_filter_SelectionChanged">
-                    <ComboBoxItem>All</ComboBoxItem>
-                    <ComboBoxItem>Installed</ComboBoxItem>
-                </ComboBox>
+                    SelectionChanged="_filter_SelectionChanged"/>
 
                 <TextBox
                     Grid.Column="5"

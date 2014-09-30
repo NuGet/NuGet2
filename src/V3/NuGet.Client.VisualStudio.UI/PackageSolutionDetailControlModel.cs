@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -12,6 +10,7 @@ namespace NuGet.Client.VisualStudio.UI
     {
         // list of projects where the package is installed
         private List<PackageInstallationInfo> _projects;
+
         private VsSolutionInstallationTarget _target;
         private List<string> _actions;
 
@@ -188,6 +187,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             SelectedAction = _actions[0];
+            OnPropertyChanged("Actions");
         }
 
         private void CreateProjectList()
@@ -210,8 +210,8 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else if (_selectedAction == Resources.Resources.Action_Update)
             {
-                // project list contains projects/solution that have the package 
-                // installed. The project/solution with the same version installed 
+                // project list contains projects/solution that have the package
+                // installed. The project/solution with the same version installed
                 // is included, but disabled.
                 foreach (var project in _target.TargetProjects)
                 {
@@ -233,7 +233,7 @@ namespace NuGet.Client.VisualStudio.UI
                         SelectedVersion.Version,
                         enabled,
                         _target.TargetProjects.First()));
-                } 
+                }
             }
             else if (_selectedAction == Resources.Resources.Action_Install)
             {
@@ -273,6 +273,12 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             OnPropertyChanged("Projects");
+        }
+
+        public void Refresh()
+        {
+            SelectedVersion = new VersionForDisplay(Package.Version, null);
+            CreateActions();
         }
     }
 }

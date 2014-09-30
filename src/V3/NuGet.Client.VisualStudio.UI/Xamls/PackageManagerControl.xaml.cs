@@ -56,6 +56,9 @@ namespace NuGet.Client.VisualStudio.UI
 
             InitializeComponent();
 
+            _filter.Items.Add(Resx.Resources.Filter_All);
+            _filter.Items.Add(Resx.Resources.Filter_Installed);
+
             // TODO: Relocate to v3 API.
             _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
             AddRestoreBar();
@@ -80,27 +83,27 @@ namespace NuGet.Client.VisualStudio.UI
             _initialized = true;
         }
 
-        void PackageManagerControl_Unloaded(object sender, RoutedEventArgs e)
+        private void PackageManagerControl_Unloaded(object sender, RoutedEventArgs e)
         {
             RemoveRestoreBar();
         }
 
-        void AddRestoreBar()
+        private void AddRestoreBar()
         {
             _restoreBar = new PackageRestoreBar(_packageRestoreManager);
             _root.Children.Add(_restoreBar);
             _packageRestoreManager.PackagesMissingStatusChanged += packageRestoreManager_PackagesMissingStatusChanged;
         }
 
-        void RemoveRestoreBar()
+        private void RemoveRestoreBar()
         {
             _restoreBar.CleanUp();
             _packageRestoreManager.PackagesMissingStatusChanged -= packageRestoreManager_PackagesMissingStatusChanged;
         }
 
-        void packageRestoreManager_PackagesMissingStatusChanged(object sender, PackagesMissingStatusEventArgs e)
+        private void packageRestoreManager_PackagesMissingStatusChanged(object sender, PackagesMissingStatusEventArgs e)
         {
-            // PackageRestoreManager fires this event even when solution is closed. 
+            // PackageRestoreManager fires this event even when solution is closed.
             // Don't do anything if solution is closed.
             if (!Target.IsActive)
             {
@@ -184,7 +187,7 @@ namespace NuGet.Client.VisualStudio.UI
                 int startIndex,
                 CancellationToken ct,
                 Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader)
-            {   
+            {
                 return Task.Factory.StartNew(() =>
                 {
                     var r1 = _loader(startIndex, ct);
@@ -330,15 +333,19 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        private bool ShowOnlyInstalled()
+        {
+            return Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem);
+        }
+
         private void SearchPackageInActivePackageSource()
         {
             var searchText = _searchText.Text;
-            bool showOnlyInstalled = _filter.SelectedIndex == 1;
             var supportedFrameworks = Target.IsSolution ?
                 Enumerable.Empty<FrameworkName>() :
                 Target.TargetProjects.Single().GetSupportedFrameworks();
 
-            if (showOnlyInstalled)
+            if (ShowOnlyInstalled())
             {
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
@@ -446,7 +453,10 @@ namespace NuGet.Client.VisualStudio.UI
                 installedPackages[group.Key] = group.Min(r => r.Identity.Version);
             }
 
-            foreach (var item in _packageList.ItemsSource)
+            var showOnlyInstalled = ShowOnlyInstalled();
+            var uninstalledPackages = new List<UiSearchResultPackage>();
+
+            foreach (var item in _packageList.Items)
             {
                 var package = item as UiSearchResultPackage;
                 if (package == null)
@@ -469,6 +479,18 @@ namespace NuGet.Client.VisualStudio.UI
                 else
                 {
                     package.Status = PackageStatus.NotInstalled;
+                    if (showOnlyInstalled)
+                    {
+                        uninstalledPackages.Add(package);
+                    }
+                }                
+            }
+
+            if (showOnlyInstalled)
+            {
+                foreach (var item in uninstalledPackages)
+                {
+                    _packageList.Items.Remove(item);
                 }
             }
         }
@@ -507,7 +529,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             return true;
-        }    
+        }
 
         public void PreviewActions(IEnumerable<PackageAction> actions)
         {

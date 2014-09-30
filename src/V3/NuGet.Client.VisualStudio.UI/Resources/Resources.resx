@@ -267,4 +267,10 @@
   <data name="WindowTitle_Preview" xml:space="preserve">
     <value>Preview</value>
   </data>
+  <data name="Filter_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Filter_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
 </root>

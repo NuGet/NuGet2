@@ -1,19 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NuGet.Client.Resolution
+﻿namespace NuGet.Client.Resolution
 {
-    public enum FileConflictResolution
-    {
-        Overwrite,
-        Ignore,
-        OverwriteAll,
-        IgnoreAll
-    }
-
     public enum MessageLevel
     {
         Info,
@@ -26,7 +12,7 @@ namespace NuGet.Client.Resolution
     {
         void Log(MessageLevel level, string message, params object[] args);
 
-        FileConflictResolution ResolveFileConflict(string message);
+        FileConflictAction ResolveFileConflict(string message);
     }
 
     public class NullExecutionLogger : IExecutionLogger
@@ -45,16 +31,16 @@ namespace NuGet.Client.Resolution
         {
         }
 
-
-        public FileConflictResolution ResolveFileConflict(string message)
+        public FileConflictAction ResolveFileConflict(string message)
         {
-            return FileConflictResolution.Ignore;
+            return FileConflictAction.Ignore;
         }
     }
 
     public class ShimLogger : ILogger
     {
         private IExecutionLogger _logger;
+
         public ShimLogger(IExecutionLogger logger)
         {
             _logger = logger;

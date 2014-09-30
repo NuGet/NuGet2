@@ -250,6 +250,24 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        public static string Filter_All {
+            get {
+                return ResourceManager.GetString("Filter_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed.
+        /// </summary>
+        public static string Filter_Installed {
+            get {
+                return ResourceManager.GetString("Filter_Installed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Action:.
         /// </summary>
         public static string Label_Action {

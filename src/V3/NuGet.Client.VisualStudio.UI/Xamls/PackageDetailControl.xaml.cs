@@ -97,8 +97,9 @@ namespace NuGet.Client.VisualStudio.UI
 
         private async void PerformPackageAction(PackageActionType action)
         {
+            var model = (PackageDetailControlModel)DataContext;
             Control.SetBusy(true);
-            var progressDialog = new ProgressDialog();
+            var progressDialog = new ProgressDialog(model.SelectedFileConflictAction.Action);
             try
             {
                 var actions = await ResolveActions(action);

@@ -26,9 +26,11 @@ namespace NuGet.Client.VisualStudio.UI
         private readonly Dispatcher _uiDispatcher;
         private DateTime _loadedTime;
         private readonly TimeSpan minimumVisibleTime = TimeSpan.FromMilliseconds(500);
+        private FileConflictAction _fileConflictAction;
 
-        public ProgressDialog()
+        public ProgressDialog(FileConflictAction fileConflictAction)
         {
+            _fileConflictAction = fileConflictAction;
             _uiDispatcher = Dispatcher.CurrentDispatcher;
             this.Loaded += ProgressDialog_Loaded;
             InitializeComponent();
@@ -143,10 +145,9 @@ namespace NuGet.Client.VisualStudio.UI
             MessagePane.ScrollToEnd();
         }
 
-        public FileConflictResolution ResolveFileConflict(string message)
+        public FileConflictAction ResolveFileConflict(string message)
         {
-            // +++
-            return FileConflictResolution.Ignore;
+            return _fileConflictAction;
         }
     }
 }

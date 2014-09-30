@@ -74,7 +74,8 @@ namespace NuGet.Client.VisualStudio.UI
             var model = (PackageSolutionDetailControlModel)DataContext;
 
             Control.SetBusy(true);
-            var progressDialog = new ProgressDialog();
+            var progressDialog = new ProgressDialog(
+                model.SelectedFileConflictAction.Action);
             try
             {
                 IEnumerable<PackageAction> actions = await ResolveActions();
@@ -94,6 +95,9 @@ namespace NuGet.Client.VisualStudio.UI
 
                 var context = new ExecutionContext((CoreInteropInstallationTargetBase)Control.Target);
                 await executor.ExecuteActionsAsync(actions, context, progressDialog);
+
+                Control.UpdatePackageStatus();
+                model.Refresh();
             }
             catch (Exception ex)
             {

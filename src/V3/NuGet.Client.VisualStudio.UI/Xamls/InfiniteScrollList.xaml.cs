@@ -34,9 +34,12 @@ namespace NuGet.Client.VisualStudio.UI
             _list.ItemsSource = _items;
         }
 
-        public IEnumerable ItemsSource
+        public ObservableCollection<object> Items
         {
-            get { return _list.ItemsSource; }
+            get
+            {
+                return _items;
+            }
         }
 
         private ILoader _loader;
