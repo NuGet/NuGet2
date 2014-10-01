@@ -21,19 +21,21 @@ namespace NuGet.Client.Resolution
             var nugetAwareProject = projectManager.Project as INuGetPackageManager;
             if (nugetAwareProject != null)
             {
-                CancellationTokenSource cts = new CancellationTokenSource();
-                var args = new Dictionary<string, object>();
-                var task = nugetAwareProject.UninstallPackageAsync(
-                    new NuGetPackageMoniker
-                    {
-                        Id = action.PackageName.Id,
-                        Version = action.PackageName.Version.ToString()
-                    },
-                    args,
-                    logger: null,
-                    progress: null,
-                    cancellationToken: cts.Token);
-                return task;
+                using (var cts = new CancellationTokenSource())
+                {
+                    var args = new Dictionary<string, object>();
+                    var task = nugetAwareProject.UninstallPackageAsync(
+                        new NuGetPackageMoniker
+                        {
+                            Id = action.PackageName.Id,
+                            Version = action.PackageName.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    return task;
+                }
             }
 #endif
             // Get the package out of the project manager            

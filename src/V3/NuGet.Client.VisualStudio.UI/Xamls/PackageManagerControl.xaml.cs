@@ -53,6 +53,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
+            DataContext = model;
 
             InitializeComponent();
 

@@ -28,8 +28,11 @@ namespace NuGet.Client.VisualStudio.UI
         private void OnViewLicenseTermsRequestNavigate(object sender, RoutedEventArgs e)
         {
             Hyperlink hyperlink = (Hyperlink)sender;
-            var licenseUrl = hyperlink.NavigateUri;
-            // !!! UriHelper.OpenExternalLink(licenseUrl);
+            if (hyperlink != null && hyperlink.NavigateUri != null)
+            {
+                NuGet.VisualStudio.UriHelper.OpenExternalLink(hyperlink.NavigateUri);
+                e.Handled = true;
+            }
         }
 
         private void OnDeclineButtonClick(object sender, RoutedEventArgs e)

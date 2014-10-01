@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client;
 using NuGet.Client.Resolution;
+using System.ComponentModel;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -18,7 +19,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// This class just proxies all calls through to the PackageManagerSession and implements IVsPersistDocData to fit
     /// into the VS model. It's basically an adaptor that turns PackageManagerSession into an IVsPersistDocData so VS is happy.
     /// </remarks>
-    public class PackageManagerModel : IVsPersistDocData
+    public class PackageManagerModel : IVsPersistDocData, INotifyPropertyChanged
     {
         public SourceRepositoryManager Sources { get; private set; }
         public InstallationTarget Target { get; private set; }
@@ -27,6 +28,24 @@ namespace NuGet.Client.VisualStudio.UI
         {
             Sources = sources;
             Target = target;
+        }
+
+        private string _searchText;
+
+        public string SearchText
+        {
+            get
+            {
+                return _searchText;
+            }
+            set
+            {
+                if (_searchText != value)
+                {
+                    _searchText = value;
+                    OnPropertyChanged("SearchText");
+                }
+            }
         }
 
         #region IVsPersistDocData
@@ -90,5 +109,16 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         #endregion
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
 }

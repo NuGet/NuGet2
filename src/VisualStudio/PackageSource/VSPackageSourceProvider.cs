@@ -334,7 +334,8 @@ namespace NuGet.VisualStudio
 
         private static bool IsAggregateSource(PackageSource packageSource)
         {
-            return IsAggregateSource(packageSource.Name, packageSource.Source);
+            return packageSource != null &&
+                IsAggregateSource(packageSource.Name, packageSource.Source);
         }
     }
 }

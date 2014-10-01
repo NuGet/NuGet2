@@ -1,15 +1,16 @@
 using System;
 using System.Globalization;
-using System.IO;
 using System.Management.Automation;
 using System.Net.NetworkInformation;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 #if VS14
+
 using Microsoft.VisualStudio.ProjectSystem.Interop;
 using System.Collections.Generic;
 using System.Threading;
+
 #endif
 
 namespace NuGet.PowerShell.Commands
@@ -54,7 +55,7 @@ namespace NuGet.PowerShell.Commands
             _productUpdateService = productUpdateService;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
-            
+
             if (networkAvailable)
             {
                 _isNetworkAvailable = isNetworkAvailable();
@@ -96,6 +97,7 @@ namespace NuGet.PowerShell.Commands
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
         private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
         private string _cacheStatusMessage = String.Empty;
+
         // Type for _currentSource can be either string (actual path to the Source), or PackageSource.
         private object _currentSource = String.Empty;
 
@@ -105,12 +107,12 @@ namespace NuGet.PowerShell.Commands
             {
                 return null;
             }
-            
+
             if (_packageSourceProvider != null && _packageSourceProvider.ActivePackageSource != null && String.IsNullOrEmpty(Source))
             {
                 FallbackToCacheIfNeccessary();
-            }            
-            
+            }
+
             if (!String.IsNullOrEmpty(Source))
             {
                 var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
@@ -129,7 +131,7 @@ namespace NuGet.PowerShell.Commands
 
             //Check if any of the active package source is available. This function will return true if there is any http source in active sources
             //For http sources, we will continue and fallback to cache at a later point if the resource is unavailable
-            
+
             if (String.IsNullOrEmpty(Source))
             {
                 bool isAnySourceAvailable = false;
@@ -253,7 +255,7 @@ namespace NuGet.PowerShell.Commands
             {
                 return;
             }
-            
+
             // Locate the package to install
             IPackage package = PackageRepositoryHelper.ResolvePackage(
                 packageManager.SourceRepository,
@@ -273,20 +275,21 @@ namespace NuGet.PowerShell.Commands
                 args["SourceRepository"] = packageManager.SourceRepository;
                 args["SharedRepository"] = packageManager.LocalRepository;
 
-                CancellationTokenSource cts = new CancellationTokenSource();
-                var task = nugetAwareProject.InstallPackageAsync(
-                    new NuGetPackageMoniker
-                    {
-                        Id = package.Id,
-                        Version = package.Version.ToString()
-                    },
-                    args,
-                    logger: null,
-                    progress: null,
-                    cancellationToken: cts.Token);
-                task.Wait();
-
-                return;
+                using (var cts = new CancellationTokenSource())
+                {
+                    var task = nugetAwareProject.InstallPackageAsync(
+                        new NuGetPackageMoniker
+                        {
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+                    return;
+                }
             }
 #endif
             // Resolve actions

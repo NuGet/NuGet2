@@ -394,7 +394,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package Manager: {0}.
+        ///   Looks up a localized string similar to NuGet Package Manager: {0}.
         /// </summary>
         public static string Label_PackageManager {
             get {
@@ -471,6 +471,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_Version {
             get {
                 return ResourceManager.GetString("Label_Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet: {0}.
+        /// </summary>
+        public static string Label_WindowCaption {
+            get {
+                return ResourceManager.GetString("Label_WindowCaption", resourceCulture);
             }
         }
         
