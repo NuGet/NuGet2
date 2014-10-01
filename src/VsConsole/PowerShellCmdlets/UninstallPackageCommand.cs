@@ -1,9 +1,12 @@
-using Microsoft.VisualStudio.ProjectSystem.Interop;
-using NuGet.Resolver;
-using NuGet.VisualStudio;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Threading;
+using NuGet.Resolver;
+using NuGet.VisualStudio;
+
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
 
 namespace NuGet.PowerShell.Commands
 {
