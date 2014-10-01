@@ -36,31 +36,29 @@ namespace NuGet.Client.Installation
             _projectManagerFetcher = projectManagerFetcher;
         }
 
-        public Task<LocalPackageInfo> DownloadPackage(PackageIdentity packageIdentity, Uri downloadUri)
+        public LocalPackageInfo DownloadPackage(PackageIdentity packageIdentity, Uri downloadUri, IExecutionLogger logger)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                // Load the package
-                var package = GetPackage(packageIdentity, downloadUri);
+            // Load the package
+            var package = GetPackage(packageIdentity, downloadUri);
 
-                NuGetTraceSources.ActionExecutor.Verbose(
-                    "download/loadedpackage",
-                    "[{0}] Loaded package.",
-                    packageIdentity);
+            NuGetTraceSources.ActionExecutor.Verbose(
+                "download/loadedpackage",
+                "[{0}] Loaded package.",
+                packageIdentity);
 
-                // Now convert the action and use the V2 Execution logic since we
-                // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
-                _packageManager.Execute(new PackageOperation(
-                    package,
-                    NuGet.PackageAction.Install));
+            // Now convert the action and use the V2 Execution logic since we
+            // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
+            _packageManager.Logger = new ShimLogger(logger);
+            _packageManager.Execute(new PackageOperation(
+                package,
+                NuGet.PackageAction.Install));
                 
-                return new LocalPackageInfo(
-                    package,
-                    _packageManager.PathResolver.GetInstallPath(package));
-            });
+            return new LocalPackageInfo(
+                package,
+                _packageManager.PathResolver.GetInstallPath(package));
         }
 
-        public Task PurgePackage(PackageIdentity packageIdentity, IExecutionLogger logger)
+        public void PurgePackage(PackageIdentity packageIdentity, IExecutionLogger logger)
         {
             // Preconditions:
             Debug.Assert(!_packageManager.LocalRepository.IsReferenced(
@@ -75,17 +73,13 @@ namespace NuGet.Client.Installation
             Debug.Assert(package != null);
 
             // Purge the package from the local repository
-            return Task.Factory.StartNew(() =>
-            {
-                // Purge the package from the local repository
-                _packageManager.Logger = new ShimLogger(logger);
-                _packageManager.Execute(new PackageOperation(
-                    package,
-                    NuGet.PackageAction.Uninstall));
-            });
+            _packageManager.Logger = new ShimLogger(logger);
+            _packageManager.Execute(new PackageOperation(
+                package,
+                NuGet.PackageAction.Uninstall));
         }
 
-        public LocalPackageInfo InstallPackage(PackageIdentity packageIdentity, TargetProject project)
+        public LocalPackageInfo InstallPackage(PackageIdentity packageIdentity, TargetProject project, IExecutionLogger logger)
         {
             // Get the package from the shared repository
             var package = _packageManager.LocalRepository.FindPackage(
@@ -95,6 +89,7 @@ namespace NuGet.Client.Installation
             var projectManager = _projectManagerFetcher(project);
 
             // Add the package to the project
+            projectManager.Logger = new ShimLogger(logger);
             projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Install));
@@ -104,7 +99,7 @@ namespace NuGet.Client.Installation
                 _packageManager.PathResolver.GetInstallPath(package));
         }
 
-        public LocalPackageInfo UninstallPackage(PackageIdentity packageIdentity, TargetProject project)
+        public LocalPackageInfo UninstallPackage(PackageIdentity packageIdentity, TargetProject project, IExecutionLogger logger)
         {
             // Get the package out of the project manager
             var projectManager = _projectManagerFetcher(project);
@@ -114,6 +109,8 @@ namespace NuGet.Client.Installation
             Debug.Assert(package != null);
 
             // Add the package to the project
+
+            projectManager.Logger = new ShimLogger(logger);
             projectManager.Execute(new PackageOperation(
                 package,
                 NuGet.PackageAction.Uninstall));

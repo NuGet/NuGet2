@@ -22,7 +22,7 @@ namespace NuGet.Client.VisualStudio
             _scriptExecutor = (PSScriptExecutor)scriptExecutor;
         }
 
-        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, TargetProject project)
+        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, TargetProject project, IExecutionLogger logger)
         {
             // If we don't have a project, we're at solution level
             string projectName = project == null ? "<Solution>" : project.Name;
@@ -52,7 +52,7 @@ namespace NuGet.Client.VisualStudio
                     package,
                     dteProject,
                     targetFramework,
-                    NullLogger.Instance);
+                    new ShimLogger(logger));
             }
         }
     }

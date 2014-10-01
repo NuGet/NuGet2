@@ -13,8 +13,11 @@ namespace NuGet.Client.Installation
         public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
             // Use the core-interop feature to execute the action
-            var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-            return interop.PurgePackage(action.PackageIdentity, logger);
+            return Task.Run(() =>
+            {
+                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
+                interop.PurgePackage(action.PackageIdentity, logger);
+            });
         }
 
         public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)

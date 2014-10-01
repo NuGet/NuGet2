@@ -12,19 +12,26 @@ namespace NuGet.Client.Installation
     {
         public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
-            // Use the core-interop feature to execute the action
-            var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-            var package = interop.UninstallPackage(action.PackageIdentity, action.Target);
+            return Task.Run(() =>
+            {
+                // Use the core-interop feature to execute the action
+                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
+                var package = interop.UninstallPackage(
+                    action.PackageIdentity,
+                    action.Target,
+                    logger);
 
-            // Run uninstall.ps1 if present
-            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
-                "uninstall.ps1",
-                target,
-                action.Target,
-                package);
+                // Run uninstall.ps1 if present
+                ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                    "uninstall.ps1",
+                    target,
+                    action.Target,
+                    package,
+                    logger);
 
-            // Not async yet :)
-            return Task.FromResult(0);
+                // Not async yet :)
+                return Task.FromResult(0);
+            });
         }
 
         public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)

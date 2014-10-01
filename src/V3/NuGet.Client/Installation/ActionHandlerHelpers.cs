@@ -11,9 +11,10 @@ namespace NuGet.Client.Installation
     // Common code used by action handlers
     public static class ActionHandlerHelpers
     {
-        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, TargetProject project, LocalPackageInfo package)
+        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, TargetProject project, LocalPackageInfo package, IExecutionLogger logger)
         {
             // If we don't have a project, we're at solution level
+            //  The <Solution> string is only for tracing so it probably doesn't need to be loc'ed
             string projectName = project == null ? "<Solution>" : project.Name;
             FrameworkName targetFramework = project == null ? null : project.GetSupportedFramework();
 
@@ -36,7 +37,7 @@ namespace NuGet.Client.Installation
                         projectName,
                         package.LocalPackage.GetFullName(),
                         scriptFile.Path);
-                    powershell.ExecuteScript(package.InstalledPath, scriptFile.Path, package.LocalPackage, project);
+                    powershell.ExecuteScript(package.InstalledPath, scriptFile.Path, package.LocalPackage, project, logger);
                 }
                 else
                 {

@@ -14,19 +14,23 @@ namespace NuGet.Client.Installation
     {
         public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
-            // Use the core-interop feature to install the package
-            var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-            var package = interop.InstallPackage(action.PackageIdentity, action.Target);
+            return Task.Run(() =>
+            {
+                // Use the core-interop feature to install the package
+                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
+                var package = interop.InstallPackage(
+                    action.PackageIdentity, 
+                    action.Target,
+                    logger);
 
-            // Run install.ps1 if present
-            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
-                "install.ps1",
-                target,
-                action.Target,
-                package);
-
-            // Not async yet :(
-            return Task.FromResult(0);
+                // Run install.ps1 if present
+                ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                    "install.ps1",
+                    target,
+                    action.Target,
+                    package,
+                    logger);
+            });
         }
 
         public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)

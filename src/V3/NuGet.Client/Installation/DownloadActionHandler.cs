@@ -16,7 +16,7 @@ namespace NuGet.Client.Installation
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public async Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
         {
             Uri downloadUri;
             try
@@ -40,18 +40,23 @@ namespace NuGet.Client.Installation
                     action.PackageIdentity));
             }
 
-            // Use the core-interop feature to execute the action
-            var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-            var package = await interop.DownloadPackage(
-                action.PackageIdentity,
-                downloadUri);
+            return Task.Run(() =>
+            {
+                // Use the core-interop feature to execute the action
+                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
+                var package = interop.DownloadPackage(
+                    action.PackageIdentity,
+                    downloadUri,
+                    logger);
 
-            // Run init.ps1 if present. Init is run WITHOUT specifying a target framework.
-            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
-                "init.ps1",
-                target,
-                action.Target,
-                package);
+                // Run init.ps1 if present. Init is run WITHOUT specifying a target framework.
+                ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                    "init.ps1",
+                    target,
+                    action.Target,
+                    package,
+                    logger);
+            });
         }
 
         public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
