@@ -1,12 +1,14 @@
 ﻿using System;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.Interop
 {
     internal class CoreInteropProjectManager : IProjectManager
     {
-        private readonly TargetProject _targetProject;
-        private readonly CoreInteropSharedRepository _sharedRepo;
+        private readonly InstallationTarget _target;
+        private readonly IProjectSystem _projectSystem;
+        private readonly ISharedPackageRepository _sharedRepo;
         private readonly CoreInteropPackageManager _pacman;
         private readonly CoreInteropSourceRepository _sourceRepo;
 
@@ -22,14 +24,14 @@ namespace NuGet.Client.Interop
 
         public IProjectSystem Project
         {
-            get { return _targetProject.ProjectSystem; }
+            get { return _projectSystem; }
         }
 
         public IPackageConstraintProvider ConstraintProvider
         {
             get
             {
-                return new CoreInteropConstraintProvider(_targetProject.InstalledPackages);
+                return new CoreInteropConstraintProvider(_target.InstalledPackages);
             }
             set
             {
@@ -37,11 +39,13 @@ namespace NuGet.Client.Interop
             }
         }
 
-        public CoreInteropProjectManager(InstallationTarget target, TargetProject targetProject, SourceRepository activeSource)
+        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
         {
-            _targetProject = targetProject;
+            // Get the required features from the target
+            _sharedRepo = target.GetRequiredFeature<ISharedPackageRepository>();
+            _projectSystem = target.TryGetFeature<IProjectSystem>();
+            _target = target;
 
-            _sharedRepo = new CoreInteropSharedRepository(target, targetProject);
             _sourceRepo = new CoreInteropSourceRepository(activeSource);
             _pacman = new CoreInteropPackageManager(_sharedRepo, _sourceRepo);
         }

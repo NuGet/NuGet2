@@ -237,7 +237,7 @@ namespace NuGet.Tools
 
             //Create Editor Factory. Note that the base Package class will call Dispose on it.
             base.RegisterEditorFactory(new PackageManagerEditorFactory(
-                ServiceLocator.GetInstance<SourceRepositoryManager>(),
+                ServiceLocator.GetInstance<VsPackageManagerContext>(),
                 ServiceLocator.GetInstance<IUserInterfaceService>()));
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
@@ -447,8 +447,8 @@ namespace NuGet.Tools
                 {
                     // TODO: Find a cleaner way to do this.
                     var packageManagerDocData = (PackageManagerModel)property;
-                    var target = packageManagerDocData.Target as VsProjectInstallationTarget;
-                    if (target != null && target.Project == project)
+                    var target = packageManagerDocData.Target as VsProject;
+                    if (target != null && target.DteProject == project)
                     {
                         return windowFrame;
                     }
@@ -487,7 +487,7 @@ namespace NuGet.Tools
             var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
             var myDoc = new PackageManagerModel(
                 context.SourceManager, 
-                context.CreateProjectInstallationTarget(project));
+                context.GetCurrentVsSolution().GetProject(project));
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
@@ -546,10 +546,8 @@ namespace NuGet.Tools
                     out property);
                 if (hr == VSConstants.S_OK && property is PackageManagerModel)
                 {
-                    // TODO: Find a cleaner way to do this.
                     var packageManagerDocData = (PackageManagerModel)property;
-                    var target = packageManagerDocData.Target as VsSolutionInstallationTarget;
-                    if (target != null)
+                    if (packageManagerDocData.Target.IsSolution)
                     {
                         return windowFrame;
                     }
@@ -574,7 +572,7 @@ namespace NuGet.Tools
 
                 _dte.Solution.GetName();
                 var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-                var myDoc = new PackageManagerModel(context.SourceManager, context.CreateSolutionInstallationTarget());
+                var myDoc = new PackageManagerModel(context.SourceManager, context.GetCurrentSolution());
                 var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
                 var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
                 var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

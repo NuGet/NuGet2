@@ -14,8 +14,8 @@ namespace NuGet.Client.Installation
 {
     public interface IActionHandler
     {
-        Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger);
-        Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger);
+        Task Execute(NewPackageAction action, IExecutionLogger logger);
+        Task Rollback(NewPackageAction action, IExecutionLogger logger);
     }
 
     public class ActionExecutor
@@ -28,12 +28,12 @@ namespace NuGet.Client.Installation
             { PackageActionType.Purge, new PurgeActionHandler() },
         };
 
-        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, InstallationTarget target)
+        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
         {
-            return ExecuteActionsAsync(actions, target, NullExecutionLogger.Instance);
+            return ExecuteActionsAsync(actions, NullExecutionLogger.Instance);
         }
 
-        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, InstallationTarget target, IExecutionLogger logger)
+        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, IExecutionLogger logger)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
@@ -57,7 +57,7 @@ namespace NuGet.Client.Installation
                             "[{0}] Executing action: {1}",
                             action.PackageIdentity,
                             action.ToString());
-                        await handler.Execute(action, target, logger);
+                        await handler.Execute(action, logger);
                         executedActions.Add(action);
                     }
                 }
@@ -65,12 +65,12 @@ namespace NuGet.Client.Installation
             catch
             {
                 // Roll back the actions and rethrow
-                Rollback(executedActions, target, logger);
+                Rollback(executedActions, logger);
                 throw;
             }
         }
 
-        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, InstallationTarget target, IExecutionLogger logger)
+        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)
         {
             if (executedActions.Count > 0)
             {
@@ -96,7 +96,7 @@ namespace NuGet.Client.Installation
                         "[{0}] Executing action: {1}",
                         action.PackageIdentity,
                         action.ToString());
-                    handler.Rollback(action, target, logger).Wait();
+                    handler.Rollback(action, logger).Wait();
                 }
             }
         }

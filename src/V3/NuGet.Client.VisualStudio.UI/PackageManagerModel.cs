@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client;
 using NuGet.Client.Resolution;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.VisualStudio.UI
 {

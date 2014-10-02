@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
@@ -105,7 +106,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             // PackageRestoreManager fires this event even when solution is closed.
             // Don't do anything if solution is closed.
-            if (!Target.IsActive)
+            if (!Target.IsAvailable)
             {
                 return;
             }
@@ -268,15 +269,8 @@ namespace NuGet.Client.VisualStudio.UI
             private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)
             {
                 // Get the minimum version installed in any target project/solution
-                var installed = _target.TargetProjects
-                    .Select(p => p.InstalledPackages.GetInstalledPackage(id))
-                    .ToList();
-                if (_target.IsSolution)
-                {
-                    installed.Add(((VsSolutionInstallationTarget)_target).InstalledSolutionLevelPackages
-                        .GetInstalledPackage(id));
-                }
-                var minimumInstalledPackage = installed
+                var minimumInstalledPackage = _target.GetAllTargetsRecursively()
+                    .Select(t => t.InstalledPackages.GetInstalledPackage(id))
                     .Where(p => p != null)
                     .OrderBy(r => r.Identity.Version)
                     .FirstOrDefault();
@@ -341,9 +335,7 @@ namespace NuGet.Client.VisualStudio.UI
         private void SearchPackageInActivePackageSource()
         {
             var searchText = _searchText.Text;
-            var supportedFramework = Target.IsSolution ?
-                null :
-                Target.TargetProjects.Single().GetSupportedFramework();
+            var supportedFramework = Target.GetSupportedFramework();
 
             if (ShowOnlyInstalled())
             {
@@ -402,13 +394,13 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 if (!Target.IsSolution)
                 {
-                    var installedPackage = Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(selectedPackage.Id);
+                    var installedPackage = Target.InstalledPackages.GetInstalledPackage(selectedPackage.Id);
                     var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
                     _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
                 }
                 else
                 {
-                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, Target);
+                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, (VsSolution)Target);
                 }
             }
         }
@@ -445,7 +437,9 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var installedPackages = new Dictionary<string, NuGetVersion>(StringComparer.OrdinalIgnoreCase);
 
-            var groups = Target.TargetProjects.SelectMany(p => p.InstalledPackages.GetInstalledPackageReferences())
+            var groups = Target
+                .GetAllTargetsRecursively()
+                .SelectMany(p => p.InstalledPackages.GetInstalledPackages())
                 .GroupBy(r => r.Identity.Id);
 
             foreach (var group in groups)

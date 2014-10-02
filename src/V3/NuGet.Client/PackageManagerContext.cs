@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.ProjectSystem;
 
 namespace NuGet.Client
 {
@@ -14,21 +15,8 @@ namespace NuGet.Client
         public abstract SourceRepositoryManager SourceManager { get; }
 
         /// <summary>
-        /// Gets the names of all the projects in the context.
+        /// Gets the currently active solution.
         /// </summary>
-        public abstract IEnumerable<string> ProjectNames { get; }
-
-        /// <summary>
-        /// Creates an Installation Target to install packages into the specified target project.
-        /// </summary>
-        /// <param name="projectName"></param>
-        /// <returns></returns>
-        public abstract ProjectInstallationTarget CreateProjectInstallationTarget(string projectName);
-
-        /// <summary>
-        /// Creates an Installation Target to install packages into the current solution.
-        /// </summary>
-        /// <returns></returns>
-        public abstract InstallationTarget CreateSolutionInstallationTarget();
+        public abstract Solution GetCurrentSolution();
     }
 }

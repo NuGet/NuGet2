@@ -20,13 +20,13 @@ namespace NuGet.Client.VisualStudio.UI
 
         private ServiceProvider vsServiceProvider;
         private readonly IUserInterfaceService _ui;
-        private readonly SourceRepositoryManager _repoManager;
+        private readonly VsPackageManagerContext _context;
         
         public PackageManagerEditorFactory(
-            SourceRepositoryManager repoManager, 
+            VsPackageManagerContext context,
             IUserInterfaceService ui)
         {
-            _repoManager = repoManager;
+            _context = context;
             _ui = ui;
         }
 
@@ -183,8 +183,8 @@ namespace NuGet.Client.VisualStudio.UI
                 out project));
 
             var myDoc = new PackageManagerModel(
-                _repoManager,
-                VsProjectInstallationTarget.Create((EnvDTE.Project)project));
+                _context.SourceManager, 
+                _context.GetCurrentVsSolution().GetProject((Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

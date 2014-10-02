@@ -10,34 +10,39 @@ namespace NuGet.Client.Installation
 {
     public class UninstallActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger)
         {
             return Task.Run(() =>
             {
-                // Use the core-interop feature to execute the action
-                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-                var package = interop.UninstallPackage(
-                    action.PackageIdentity,
-                    action.Target,
-                    logger);
+                // Get the project manager
+                var projectManager = action.Target.GetRequiredFeature<IProjectManager>();
+                
+                // Get the package out of the project manager
+                var package = projectManager.LocalRepository.FindPackage(
+                    action.PackageIdentity.Id,
+                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+                Debug.Assert(package != null);
+
+                // Add the package to the project
+                projectManager.Logger = new ShimLogger(logger);
+                projectManager.Execute(new PackageOperation(
+                    package,
+                    NuGet.PackageAction.Uninstall));
 
                 // Run uninstall.ps1 if present
                 ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
                     "uninstall.ps1",
-                    target,
                     action.Target,
                     package,
+                    projectManager.PackageManager.PathResolver.GetInstallPath(package),
                     logger);
-
-                // Not async yet :)
-                return Task.FromResult(0);
             });
         }
 
-        public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
+        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the install action to undo a uninstall
-            return new InstallActionHandler().Execute(action, target, logger);
+            return new InstallActionHandler().Execute(action, logger);
         }
     }
 }

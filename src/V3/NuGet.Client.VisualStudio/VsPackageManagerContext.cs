@@ -4,8 +4,9 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EnvDTE;
+using DteSolution = EnvDTE.Solution;
 using Microsoft.VisualStudio.Shell;
+using NuGet.Client.ProjectSystem;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
@@ -13,19 +14,14 @@ namespace NuGet.Client.VisualStudio
     [Export(typeof(VsPackageManagerContext))]
     public class VsPackageManagerContext : PackageManagerContext
     {
-        private ISolutionManager _solutionManager;
-        private Solution _solution;
-        private SourceRepositoryManager _sourceManager;
-        private IVsPackageManagerFactory _packageManagerFactory;
+        private readonly EnvDTE._DTE _dte;
+        private readonly SourceRepositoryManager _sourceManager;
+        private readonly ISolutionManager _solutionManager;
+        private readonly IVsPackageManagerFactory _packageManagerFactory;
 
         public override SourceRepositoryManager SourceManager
         {
             get { return _sourceManager; }
-        }
-
-        public override IEnumerable<string> ProjectNames
-        {
-            get { return _solutionManager.GetProjects().Select(p => p.GetCustomUniqueName()); }
         }
 
         [ImportingConstructor]
@@ -38,26 +34,25 @@ namespace NuGet.Client.VisualStudio
             _sourceManager = sourceManager;
             _solutionManager = solutionManager;
             _packageManagerFactory = packageManagerFactory;
-            _solution = ((_DTE)serviceProvider.GetService(typeof(_DTE))).Solution;
+
+            _dte = (EnvDTE._DTE)serviceProvider.GetService(typeof(EnvDTE._DTE));
         }
 
-        public override ProjectInstallationTarget CreateProjectInstallationTarget(string projectName)
+        public override Solution GetCurrentSolution()
         {
-            var project = _solutionManager.GetProject(projectName);
-            return CreateProjectInstallationTarget(project);
+            return GetCurrentVsSolution();
         }
 
-        public ProjectInstallationTarget CreateProjectInstallationTarget(Project project)
+        public virtual VsSolution GetCurrentVsSolution()
         {
-            return new VsProjectInstallationTarget(
-                project,
-                _packageManagerFactory.CreatePackageManagerToManageInstalledPackages().GetProjectManager(project));
-        }
+            if (!_solutionManager.IsSolutionOpen)
+            {
+                return null;
+            }
 
-        public override InstallationTarget CreateSolutionInstallationTarget()
-        {
-            return new VsSolutionInstallationTarget(
-                _solution,
+            return new VsSolution(
+                _dte.Solution,
+                _solutionManager,
                 _packageManagerFactory.CreatePackageManagerToManageInstalledPackages());
         }
     }

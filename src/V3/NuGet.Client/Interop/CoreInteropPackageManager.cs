@@ -10,7 +10,7 @@ namespace NuGet.Client.Interop
 {
     internal class CoreInteropPackageManager : IPackageManager
     {
-        private CoreInteropSharedRepository _sharedRepo;
+        private ISharedPackageRepository _sharedRepo;
         private CoreInteropSourceRepository _sourceRepo;
 
         public ISharedPackageRepository LocalRepository
@@ -23,7 +23,7 @@ namespace NuGet.Client.Interop
             get { return _sourceRepo; }
         }
 
-        public CoreInteropPackageManager(CoreInteropSharedRepository sharedRepo, CoreInteropSourceRepository sourceRepo)
+        public CoreInteropPackageManager(ISharedPackageRepository sharedRepo, CoreInteropSourceRepository sourceRepo)
         {
             _sharedRepo = sharedRepo;
             _sourceRepo = sourceRepo;
@@ -31,7 +31,6 @@ namespace NuGet.Client.Interop
 
         public bool IsProjectLevel(IPackage package)
         {
-            // TODO: Actually implement this!!
             NuGetTraceSources.CoreInterop.Verbose("isprojectlevel", "IsProjectLevel? {0} {1}", package.Id, package.Version);
 
             var v3Package = package as IV3PackageMetadata;

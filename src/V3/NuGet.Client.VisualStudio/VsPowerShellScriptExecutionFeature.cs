@@ -22,12 +22,14 @@ namespace NuGet.Client.VisualStudio
             _scriptExecutor = (PSScriptExecutor)scriptExecutor;
         }
 
-        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, TargetProject project, IExecutionLogger logger)
+        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, InstallationTarget target, IExecutionLogger logger)
         {
             // If we don't have a project, we're at solution level
-            string projectName = project == null ? "<Solution>" : project.Name;
-            FrameworkName targetFramework = project == null ? null : project.GetSupportedFramework();
-            Project dteProject = project == null ? null : ((VsTargetProject)project).Project;
+            string projectName = target.Name;
+            FrameworkName targetFramework = target.GetSupportedFramework();
+
+            VsProject targetProject = target as VsProject;
+            Project dteProject = targetProject == null ? null : targetProject.DteProject;
 
             string fullPath = Path.Combine(packageInstallPath, scriptRelativePath);
             if (!File.Exists(fullPath))

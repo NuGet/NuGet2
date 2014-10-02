@@ -20,7 +20,7 @@ namespace NuGet.Client
             _localRepository = localRepository;
         }
 
-        public override IEnumerable<InstalledPackageReference> GetInstalledPackageReferences()
+        public override IEnumerable<InstalledPackageReference> GetInstalledPackages()
         {
             return _localRepository.GetPackages()
                 .SelectMany(p => _localRepository.GetPackageReferences(p.Id))
@@ -29,21 +29,27 @@ namespace NuGet.Client
 
         public override InstalledPackageReference GetInstalledPackage(string packageId)
         {
-            NuGetTraceSources.ProjectInstalledPackagesList.Verbose("getver", "Getting installed version of {0}", packageId);
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("getver", "Getting installed version of {0}", packageId);
             return CoreConverters.SafeToInstalledPackageReference(_localRepository.GetPackageReference(packageId));
         }
 
         public override bool IsInstalled(string packageId, NuGetVersion packageVersion)
         {
-            NuGetTraceSources.ProjectInstalledPackagesList.Verbose("isinstalled", "IsInstalled? {0} {1}", packageId, packageVersion.ToNormalizedString());
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("isinstalled", "IsInstalled? {0} {1}", packageId, packageVersion.ToNormalizedString());
             return _localRepository.Exists(
                 packageId,
                 new SemanticVersion(packageVersion.Version, packageVersion.Release));
         }
 
+        public override bool IsInstalled(string packageId)
+        {
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("isinstalled", "IsInstalled? {0}", packageId);
+            return _localRepository.Exists(packageId);
+        }
+
         public override Task<IEnumerable<JObject>> Search(string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
-            NuGetTraceSources.ProjectInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
             return Task.FromResult(
                 _localRepository.Search(searchTerm, allowPrereleaseVersions: true)
                     .Skip(skip).Take(take).ToList()
@@ -52,7 +58,7 @@ namespace NuGet.Client
 
         public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()
         {
-            NuGetTraceSources.ProjectInstalledPackagesList.Verbose("getallmetadata", "Get all installed packages and metadata");
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("getallmetadata", "Get all installed packages and metadata");
             return Task.FromResult(
                 _localRepository
                     .GetPackages().ToList()

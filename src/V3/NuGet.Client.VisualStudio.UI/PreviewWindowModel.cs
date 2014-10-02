@@ -31,7 +31,7 @@ namespace NuGet.Client.VisualStudio.UI
                 .Distinct();
             foreach (var targetProject in projects)
             {
-                var packageStatus = targetProject.InstalledPackages.GetInstalledPackageReferences()
+                var packageStatus = targetProject.InstalledPackages.GetInstalledPackages()
                     .Select(p => p.Identity)
                     .ToDictionary(p => p, _ => PackagePreviewStatus.Unchanged);
 

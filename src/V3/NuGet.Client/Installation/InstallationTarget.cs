@@ -7,75 +7,62 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
+using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
-namespace NuGet.Client
+namespace NuGet.Client.Installation
 {
     /// <summary>
     /// Represents a target into which packages can be installed
     /// </summary>
-    public abstract class InstallationTarget
+    public abstract class InstallationTarget : IInstallationTarget
     {
 #if DEBUG
         // Helper list for debug builds only.
         private static readonly HashSet<Type> KnownFeatures = new HashSet<Type>()
         {
             typeof(PowerShellScriptExecutionFeature),
-            typeof(NuGetCoreInstallationFeature)
+            typeof(IProjectManager),
+            typeof(IPackageManager),
+            typeof(IProjectSystem),
+            typeof(IPackageCacheRepository),
+            typeof(ISharedPackageRepository),
         };
 #endif
 
         private readonly Dictionary<Type, Func<object>> _featureFactories = new Dictionary<Type, Func<object>>();
 
-        /// <summary>
-        /// Gets the name of the target in which packages will be installed (for example, the Project name when targetting a Project)
-        /// </summary>
-        public abstract string Name { get; }
-
-        /// <summary>
-        /// Gets a boolean indicating if the installation target is active and available for installation (i.e. is it open).
-        /// </summary>
-        public abstract bool IsActive { get; }
-
-        /// <summary>
-        /// Gets a boolean indicating if the installation target is a solution target.
-        /// </summary>
-        public virtual bool IsSolution
+        public abstract string Name
         {
-            get { return TargetProjects.Count() > 1; }
+            get;
+        }
+
+        public abstract bool IsAvailable
+        {
+            get;
+        }
+
+        public abstract bool IsSolution
+        {
+            get;
         }
 
         /// <summary>
-        /// Gets a list of installed packages in all projects in the solution, including those NOT targetted by this installation target.
+        /// Gets a list of packages DIRECTLY installed in this target (does not include any packages installed into sub-targets, for example Projects in a Solution)
         /// </summary>
-        public abstract IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects { get; }
-
-        /// <summary>
-        /// Gets a list of all projects targetted by this installation target.
-        /// </summary>
-        public abstract IEnumerable<TargetProject> TargetProjects { get; }
-
-        /// <summary>
-        /// Searches the installed packages list
-        /// </summary>
-        /// <param name="searchTerm"></param>
-        /// <param name="skip"></param>
-        /// <param name="take"></param>
-        /// <param name="cancelToken"></param>
-        /// <returns></returns>
-        public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchTerm, int skip, int take, CancellationToken cancelToken);
-
-        /// <summary>
-        /// Gets the project with the specified name, if it exists, otherwise returns null.
-        /// </summary>
-        /// <param name="projectName"></param>
-        /// <returns></returns>
-        public virtual TargetProject GetProject(string projectName)
+        public abstract InstalledPackagesList InstalledPackages
         {
-            return TargetProjects.FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+            get;
         }
+
+        /// <summary>
+        /// Gets the solution related to this target. If the current target is a solution, returns itself, otherwise, returns the parent solution.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Solution GetSolution();
 
         /// <summary>
         /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
@@ -104,6 +91,12 @@ namespace NuGet.Client
         public virtual object GetRequiredFeature(Type featureType)
         {
             var feature = TryGetFeature(featureType);
+            NuGetTraceSources.InstallationTarget.Error(
+                "missingfeature",
+                "[{0}] Required feature '{1}' was requested but is not provided",
+                Name,
+                featureType.FullName);
+            Debug.Assert(feature != null, "Required feature '" + featureType.FullName + "' not found for this installation target: " + Name);
             if (feature == null)
             {
                 throw new RequiredFeatureNotSupportedException(featureType);
@@ -138,9 +131,32 @@ namespace NuGet.Client
             // During development, there should NEVER be a feature type added that we don't know about :).
             Debug.Assert(
                 KnownFeatures.Contains(typeof(T)), 
-                "You tried to register a feature I'm not familiar with. This isn't generally a good thing...");
+                "You tried to register a feature ('" + typeof(T).FullName + "') I'm not familiar with. This isn't generally a good thing...");
 
             _featureFactories.Add(typeof(T), factory);
         }
+
+        /// <summary>
+        /// Gets the list of frameworks supported by this target.
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may require computation")]
+        public abstract FrameworkName GetSupportedFramework();
+
+        /// <summary>
+        /// Searches installed packages across this target and any sub-targets (Projects in a Solution, for example)
+        /// </summary>
+        /// <param name="searchText"></param>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <param name="cancelToken"></param>
+        /// <returns></returns>
+        public abstract Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken);
+
+        /// <summary>
+        /// Retrieves this target and all of it's sub-targets (Projects in a Solution, for example) in a single flat list.
+        /// </summary>
+        /// <returns></returns>
+        public abstract IEnumerable<InstallationTarget> GetAllTargetsRecursively();
     }
 }

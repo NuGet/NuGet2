@@ -9,12 +9,24 @@ using System.Windows.Input;
 using NuGet.Client.Resolution;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Installation;
+using NuGet.Client.ProjectSystem;
+using System.Diagnostics;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     public partial class PackageSolutionDetailControl : UserControl
     {
         public PackageManagerControl Control { get; set; }
+        
+        private Solution Solution
+        {
+            get
+            {
+                var solution = Control.Target as Solution;
+                Debug.Assert(solution != null, "Expected that the target would be a solution!");
+                return solution;
+            }
+        }
 
         public PackageSolutionDetailControl()
         {
@@ -49,7 +61,6 @@ namespace NuGet.Client.VisualStudio.UI
             var model = (PackageSolutionDetailControlModel)DataContext;
             var resolver = new ActionResolver(
                 Control.Sources.ActiveRepository,
-                Control.Target,
                 new ResolutionContext()
                 {
                     DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
@@ -67,7 +78,8 @@ namespace NuGet.Client.VisualStudio.UI
                 model.Package.Id,
                 model.Package.Version,
                 action,
-                targetProjects);
+                targetProjects,
+                Solution);
         }
 
         private async void ActionButtonClicked(object sender, RoutedEventArgs e)
@@ -94,7 +106,7 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progressDialog.Show();
 
-                await executor.ExecuteActionsAsync(actions, Control.Target, logger: progressDialog);
+                await executor.ExecuteActionsAsync(actions, logger: progressDialog);
 
                 Control.UpdatePackageStatus();
                 model.Refresh();

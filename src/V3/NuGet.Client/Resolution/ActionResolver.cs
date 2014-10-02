@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.Installation;
 using NuGet.Client.Interop;
+using NuGet.Client.ProjectSystem;
 using NuGet.Resolver;
 using NuGet.Versioning;
 using OldResolver = NuGet.Resolver.ActionResolver;
@@ -16,13 +18,11 @@ namespace NuGet.Client.Resolution
     public class ActionResolver
     {
         private readonly SourceRepository _source;
-        private readonly InstallationTarget _target;
         private readonly ResolutionContext _context;
 
-        public ActionResolver(SourceRepository source, InstallationTarget target, ResolutionContext context)
+        public ActionResolver(SourceRepository source, ResolutionContext context)
         {
             _source = source;
-            _target = target;
             _context = context;
         }
 
@@ -30,7 +30,8 @@ namespace NuGet.Client.Resolution
             string id,
             NuGetVersion version,
             PackageActionType operation,
-            IEnumerable<TargetProject> targetProjects)
+            IEnumerable<Project> targettedProjects,
+            Solution solution)
         {
             // Construct the Action Resolver
             var resolver = new OldResolver();
@@ -40,12 +41,12 @@ namespace NuGet.Client.Resolution
 
             // Add the operation request(s)
             NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), id, version.ToNormalizedString());
-            foreach (var project in targetProjects)
+            foreach (var project in targettedProjects)
             {
                 resolver.AddOperation(
                     MapNewToOldActionType(operation),
                     CreateVirtualPackage(id, version),
-                    new CoreInteropProjectManager(_target, project, _source));
+                    new CoreInteropProjectManager(project, _source));
             }
 
             // Resolve actions!
@@ -63,8 +64,13 @@ namespace NuGet.Client.Resolution
                                 action.Package.Version.SpecialVersion)),
                        UnwrapPackage(action.Package),
                        (projectAction != null ?
-                            _target.GetProject(projectAction.ProjectManager.Project.ProjectName) :
-                            null));
+                            FindProject(targettedProjects, projectAction.ProjectManager.Project.ProjectName) :
+                            (InstallationTarget)solution));
+        }
+
+        private Project FindProject(IEnumerable<Project> targets, string projectName)
+        {
+            return targets.FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static JObject UnwrapPackage(IPackage package)

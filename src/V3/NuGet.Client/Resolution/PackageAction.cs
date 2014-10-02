@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Installation;
+using NuGet.Client.ProjectSystem;
 
 namespace NuGet.Client.Resolution
 {
@@ -14,10 +16,10 @@ namespace NuGet.Client.Resolution
     {
         public PackageIdentity PackageIdentity { get; private set; }
         public JObject Package { get; private set; }
-        public TargetProject Target { get; private set; }
+        public InstallationTarget Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
 
-        public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, TargetProject target)
+        public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target)
         {
             ActionType = actionType;
             PackageIdentity = packageName;

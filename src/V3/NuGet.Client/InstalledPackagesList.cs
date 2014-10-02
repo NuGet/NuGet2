@@ -27,21 +27,28 @@ namespace NuGet.Client
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public abstract IEnumerable<InstalledPackageReference> GetInstalledPackageReferences();
+        public abstract IEnumerable<InstalledPackageReference> GetInstalledPackages();
 
         /// <summary>
-        /// Retrieves either a) null if the specified package is not installed or b) the version that is installed.
+        /// Retrieves a list of all versions of the specified package installed into this target.
         /// </summary>
-        /// <param name="packageId"></param>
+        /// <param name="packageId">The Id of the package to look for</param>
         /// <returns></returns>
         public abstract InstalledPackageReference GetInstalledPackage(string packageId);
 
         /// <summary>
-        /// Returns a boolean indicating if ANY package with the specific ID/Version pair is installed.
+        /// Returns a boolean indicating if ANY package with the specified ID/Version pair is installed.
         /// </summary>
         /// <param name="packageId"></param>
         /// <param name="packageVersion"></param>
         /// <returns></returns>
         public abstract bool IsInstalled(string packageId, NuGetVersion packageVersion);
+
+        /// <summary>
+        /// Returns a boolean indicating if ANY package with the specified ID is installed.
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <returns></returns>
+        public abstract bool IsInstalled(string packageId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -28,7 +29,7 @@ namespace NuGet.Client.VisualStudio.UI
             set;
         }
 
-        public TargetProject Project
+        public Project Project
         {
             get;
             private set;
@@ -42,7 +43,7 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        public PackageInstallationInfo(TargetProject project, NuGetVersion version, bool enabled)
+        public PackageInstallationInfo(Project project, NuGetVersion version, bool enabled)
         {
             Project = project;
             _name = Project.Name;
@@ -51,7 +52,7 @@ namespace NuGet.Client.VisualStudio.UI
             IsSolution = false;
         }
 
-        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, TargetProject project)
+        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, Project project)
         {
             _name = name;
             Version = version;

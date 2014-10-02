@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,9 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("search", "Searching for '{0}'", searchTerm);
             return Task.Factory.StartNew(() => _repository.Search(
-                searchTerm, new [] { filters.SupportedFramework.FullName }, filters.IncludePrerelease)
+                searchTerm, 
+                filters.SupportedFramework == null ? Enumerable.Empty<string>() : new [] { filters.SupportedFramework.FullName },
+                filters.IncludePrerelease)
                 .Skip(skip)
                 .Take(take)
                 .ToList()

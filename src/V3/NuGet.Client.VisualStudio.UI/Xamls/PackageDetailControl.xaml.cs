@@ -11,6 +11,7 @@ using NuGet.Client.Resolution;
 using System.Diagnostics;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Installation;
+using NuGet.Client.ProjectSystem;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -20,6 +21,16 @@ namespace NuGet.Client.VisualStudio.UI
     public partial class PackageDetailControl : UserControl
     {
         public PackageManagerControl Control { get; set; }
+
+        private Project Project
+        {
+            get
+            {
+                var solution = Control.Target as Project;
+                Debug.Assert(solution != null, "Expected that the target would be a project!");
+                return solution;
+            }
+        }
 
         public PackageDetailControl()
         {
@@ -76,7 +87,6 @@ namespace NuGet.Client.VisualStudio.UI
                 // Create a resolver
                 var resolver = new ActionResolver(
                     Control.Sources.ActiveRepository,
-                    Control.Target,
                     new ResolutionContext()
                     {
                         DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
@@ -88,7 +98,8 @@ namespace NuGet.Client.VisualStudio.UI
                     packageDetail.Package.Id, 
                     packageDetail.Package.Version, 
                     action,
-                    Control.Target.TargetProjects);
+                    new[] { Project },
+                    Project.GetSolution());
             }
             finally
             {
@@ -112,16 +123,12 @@ namespace NuGet.Client.VisualStudio.UI
                     return;
                 }
 
-                // This should only be called in cases where there is a single target
-                Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
-                Debug.Assert(Control.Target is ProjectInstallationTarget, "PackageDetailControl should only be used when there is only one target project!");
-
                 // Create the executor and execute the actions                
                 progressDialog.Owner = Window.GetWindow(Control);
                 progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progressDialog.Show();
                 var executor = new ActionExecutor();
-                await executor.ExecuteActionsAsync(actions, Control.Target, logger: progressDialog);
+                await executor.ExecuteActionsAsync(actions, logger: progressDialog);
 
                 Control.UpdatePackageStatus();
                 UpdatePackageStatus();
@@ -145,10 +152,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            // This should only be called in cases where there is a single target
-            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
-
-            var isInstalled = Control.Target.TargetProjects.Single().InstalledPackages.IsInstalled(model.Package.Id, model.Package.Version);
+            var isInstalled = Project.InstalledPackages.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
                 _dropdownButton.SetItems(
@@ -169,11 +173,8 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            // This should only be called in cases where there is a single target
-            Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
-
             UpdateInstallUninstallButton();
-            var installedPackage = Control.Target.TargetProjects.Single().InstalledPackages.GetInstalledPackage(model.Package.Id);
+            var installedPackage = Project.InstalledPackages.GetInstalledPackage(model.Package.Id);
             if (installedPackage != null)
             {
                 var installedVersion = installedPackage.Identity.Version;

@@ -8,6 +8,6 @@ namespace NuGet.Client.Installation
 {
     public abstract class PowerShellScriptExecutionFeature
     {
-        public abstract void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, TargetProject project, IExecutionLogger logger);
+        public abstract void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, InstallationTarget target, IExecutionLogger logger);
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.Installation;
 using NuGet.Versioning;
 
 namespace NuGet.Client
@@ -16,7 +17,7 @@ namespace NuGet.Client
         public FrameworkName TargetFramework { get; private set; }
         public bool IsDevelopmentDependency { get; private set; }
         public bool RequireReinstallation { get; private set; }
-
+        
         public InstalledPackageReference(PackageIdentity identity, VersionRange versionConstraint, FrameworkName targetFramework, bool isDevelopmentDependency, bool requireReinstallation = false)
         {
             Identity = identity;

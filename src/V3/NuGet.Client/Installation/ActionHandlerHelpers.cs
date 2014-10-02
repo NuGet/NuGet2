@@ -11,16 +11,16 @@ namespace NuGet.Client.Installation
     // Common code used by action handlers
     public static class ActionHandlerHelpers
     {
-        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, TargetProject project, LocalPackageInfo package, IExecutionLogger logger)
+        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, IPackage package, string installPath, IExecutionLogger logger)
         {
             // If we don't have a project, we're at solution level
             //  The <Solution> string is only for tracing so it probably doesn't need to be loc'ed
-            string projectName = project == null ? "<Solution>" : project.Name;
-            FrameworkName targetFramework = project == null ? null : project.GetSupportedFramework();
+            string projectName = target.Name;
+            FrameworkName targetFramework = target.GetSupportedFramework();
 
             // Get the install script
             var scriptFile = FindScript(
-                package.LocalPackage, 
+                package, 
                 scriptName,
                 targetFramework);
 
@@ -35,9 +35,9 @@ namespace NuGet.Client.Installation
                         "executingps1",
                         "[{0}] Running {2} for {1}",
                         projectName,
-                        package.LocalPackage.GetFullName(),
+                        package.GetFullName(),
                         scriptFile.Path);
-                    powershell.ExecuteScript(package.InstalledPath, scriptFile.Path, package.LocalPackage, project, logger);
+                    powershell.ExecuteScript(installPath, scriptFile.Path, package, target, logger);
                 }
                 else
                 {
@@ -45,7 +45,7 @@ namespace NuGet.Client.Installation
                         "missing_powershell_feature",
                         "[{0}] Unable to run PowerShell script {2} for {1} because install target does not support PowerShell scripts.",
                         projectName,
-                        package.LocalPackage.GetFullName(),
+                        package.GetFullName(),
                         scriptFile.Path);
                 }
             }
@@ -55,7 +55,7 @@ namespace NuGet.Client.Installation
                     "nops1",
                     "[{0}] No {2} script for {1}.",
                     projectName,
-                    package.LocalPackage.GetFullName(),
+                    package.GetFullName(),
                     scriptName);
             }
         }

@@ -6,7 +6,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.VisualStudio</RootNamespace>
-    <AssemblyName>NuGet.VisualStudio.Resources</AssemblyName>
+    <AssemblyName>NuGet.VisualStudioResources</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>

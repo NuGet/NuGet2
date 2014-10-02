@@ -10,20 +10,37 @@ namespace NuGet.Client.Installation
 {
     public class PurgeActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger)
         {
             // Use the core-interop feature to execute the action
             return Task.Run(() =>
             {
-                var interop = target.GetRequiredFeature<NuGetCoreInstallationFeature>();
-                interop.PurgePackage(action.PackageIdentity, logger);
+                var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
+
+                // Preconditions:
+                Debug.Assert(!packageManager.LocalRepository.IsReferenced(
+                    action.PackageIdentity.Id,
+                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version)),
+                    "Expected the purge operation would only be executed AFTER the package was no longer referenced!");
+
+                // Get the package out of the project manager
+                var package = packageManager.LocalRepository.FindPackage(
+                    action.PackageIdentity.Id,
+                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+                Debug.Assert(package != null);
+
+                // Purge the package from the local repository
+                packageManager.Logger = new ShimLogger(logger);
+                packageManager.Execute(new PackageOperation(
+                    package,
+                    NuGet.PackageAction.Uninstall));
             });
         }
 
-        public Task Rollback(NewPackageAction action, InstallationTarget target, IExecutionLogger logger)
+        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the download action to undo a purge
-            return new DownloadActionHandler().Execute(action, target, logger);
+            return new DownloadActionHandler().Execute(action, logger);
         }
     }
 }

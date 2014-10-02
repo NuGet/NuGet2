@@ -67,10 +67,9 @@
     <Compile Include="VsNuGetTraceSources.cs" />
     <Compile Include="VsPackageManagerContext.cs" />
     <Compile Include="VsPowerShellScriptExecutionFeature.cs" />
-    <Compile Include="VsProjectInstallationTarget.cs" />
-    <Compile Include="VsSolutionInstallationTarget.cs" />
+    <Compile Include="VsProject.cs" />
+    <Compile Include="VsSolution.cs" />
     <Compile Include="VsSourceRepositoryManager.cs" />
-    <Compile Include="VsTargetProject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

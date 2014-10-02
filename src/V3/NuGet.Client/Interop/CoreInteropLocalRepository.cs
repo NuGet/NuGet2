@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client.Interop
 {
@@ -69,8 +70,8 @@ namespace NuGet.Client.Interop
     {
         private readonly InstallationTarget _installTarget;
         
-        public CoreInteropSharedRepository(InstallationTarget installTarget, TargetProject targetProject) :
-            base(targetProject.InstalledPackages)
+        public CoreInteropSharedRepository(InstallationTarget installTarget) :
+            base(installTarget.InstalledPackages)
         {
             _installTarget = installTarget;
         }
@@ -98,8 +99,8 @@ namespace NuGet.Client.Interop
         public IEnumerable<IPackageRepository> LoadProjectRepositories()
         {
             NuGetTraceSources.CoreInterop.Verbose("loadprojectrepositories", "Project Repositories Loaded");
-            return _installTarget.InstalledPackagesInAllProjects
-                .Select(p => new CoreInteropLocalRepository(p));
+            return _installTarget.GetSolution().Projects
+                .Select(p => new CoreInteropLocalRepository(p.InstalledPackages));
         }
 
         public void AddPackage(string packageId, SemanticVersion version, bool developmentDependency, System.Runtime.Versioning.FrameworkName targetFramework)
