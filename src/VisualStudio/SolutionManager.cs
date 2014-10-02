@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace NuGet.VisualStudio
 {
@@ -344,7 +346,22 @@ namespace NuGet.VisualStudio
         {
             if (_initNeeded && _dte.Solution.IsOpen)
             {
-                OnSolutionOpened();
+                InvokeOnUIThread(() => OnSolutionOpened());
+            }
+        }
+
+        /// <summary>
+        /// Invokes the action on the UI thread if one exists.
+        /// </summary>
+        private void InvokeOnUIThread(Action action)
+        {
+            if (Application.Current != null)
+            {
+                Application.Current.Dispatcher.Invoke(action);
+            }
+            else
+            {
+                action();
             }
         }
 
