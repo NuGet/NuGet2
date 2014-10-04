@@ -53,10 +53,10 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
-            DataContext = model;
-
+            
             InitializeComponent();
 
+            _searchControl.Text = model.SearchText;
             _filter.Items.Add(Resx.Resources.Filter_All);
             _filter.Items.Add(Resx.Resources.Filter_Installed);
 
@@ -345,7 +345,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void SearchPackageInActivePackageSource()
         {
-            var searchText = _searchText.Text;
+            var searchText = _searchControl.Text;
             var supportedFrameworks = Target.IsSolution ?
                 Enumerable.Empty<FrameworkName>() :
                 Target.TargetProjects.Single().GetSupportedFrameworks();
@@ -415,14 +415,6 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, Target);
                 }
-            }
-        }
-
-        private void _searchText_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-                SearchPackageInActivePackageSource();
             }
         }
 
@@ -543,6 +535,11 @@ namespace NuGet.Client.VisualStudio.UI
             w.Owner = Window.GetWindow(this);
             w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             w.ShowDialog();
+        }
+
+        private void _searchControl_SearchStart(object sender, EventArgs e)
+        {
+            SearchPackageInActivePackageSource();
         }
     }
 }
