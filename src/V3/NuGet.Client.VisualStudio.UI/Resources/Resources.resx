@@ -273,7 +273,7 @@
   <data name="Filter_Installed" xml:space="preserve">
     <value>Installed</value>
   </data>
-  <data name="Label_WindowCaption" xml:space="preserve">
+  <data name="Label_NuGetWindowCaption" xml:space="preserve">
     <value>NuGet: {0}</value>
   </data>
 </root>

@@ -464,9 +464,6 @@ namespace NuGet.Tools
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            var parentHierarchy = GetProperty<IVsHierarchy>(vsProject, __VSHPROPID.VSHPROPID_ParentHierarchy);
-            var itemIdInParent = GetProperty<int>(vsProject, __VSHPROPID.VSHPROPID_ParentHierarchyItemid);
-
             var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
             var myDoc = new PackageManagerModel(
                 context.SourceManager, 
@@ -480,18 +477,15 @@ namespace NuGet.Tools
             var guidCommandUI = Guid.Empty;
             var caption = String.Format(
                 CultureInfo.CurrentCulture,
-                Resx.Resources.Label_WindowCaption,
-                project.Name);
-            var documentName = String.Format(
-                CultureInfo.CurrentCulture,
-                Resx.Resources.Label_PackageManager,
-                project.Name);
+                Resx.Resources.Label_NuGetWindowCaption,
+                myDoc.Target.Name);
+            var documentName = project.UniqueName;
             IVsWindowFrame windowFrame;
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,
                 documentName,
-                (IVsUIHierarchy)parentHierarchy,
-                (uint)itemIdInParent,
+                (IVsUIHierarchy)vsProject,
+                (uint)VSConstants.VSITEMID.Root,
                 ppunkDocView,
                 ppunkDocData,
                 ref guidEditorType,
@@ -614,12 +608,9 @@ namespace NuGet.Tools
                 var guidCommandUI = Guid.Empty;
                 var caption = String.Format(
                     CultureInfo.CurrentCulture,
-                    Resx.Resources.Label_WindowCaption,
-                    _dte.Solution.GetName()); 
-                var documentName = String.Format(
-                    CultureInfo.CurrentCulture,
-                    Resx.Resources.Label_PackageManager, 
-                    _dte.Solution.GetName());
+                    Resx.Resources.Label_NuGetWindowCaption,
+                    myDoc.Target.Name);
+                var documentName = _dte.Solution.FullName;
                 int hr = uiShell.CreateDocumentWindow(
                     windowFlags,
                     documentName,

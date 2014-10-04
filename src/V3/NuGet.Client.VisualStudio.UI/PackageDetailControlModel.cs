@@ -30,7 +30,14 @@ namespace NuGet.Client.VisualStudio.UI
                 _allPackages[p.Version] = p;
             }
 
-            _package = _allPackages[searchResultPackage.Version];
+            if (_allPackages.ContainsKey(searchResultPackage.Version))
+            {
+                _package = _allPackages[searchResultPackage.Version];
+            }
+            else
+            {
+                _package = _allPackages.Values.OrderByDescending(p => p.Version).FirstOrDefault();
+            }
             CreateVersions(installedVersion);
             CreateFileConflictActions();
             CreateDependencyBehaviors();
@@ -139,7 +146,10 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            Package = _allPackages[version];
+            if (_allPackages.ContainsKey(version))
+            {
+                Package = _allPackages[version];
+            }
         }
 
         public IEnumerable<FileConflictActionItem> FileConflictActions

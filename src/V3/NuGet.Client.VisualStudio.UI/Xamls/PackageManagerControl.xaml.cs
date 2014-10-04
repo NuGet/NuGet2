@@ -208,13 +208,17 @@ namespace NuGet.Client.VisualStudio.UI
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
                     searchResultPackage.Id = package.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));
-                    searchResultPackage.Summary = package.Value<string>("summary");
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));                    
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
-
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
-
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
+
+                    var self = searchResultPackage.AllVersions.First(p => p.Version == searchResultPackage.Version);
+                    searchResultPackage.Summary = 
+                        self == null ?
+                        package.Value<string>("summary") :
+                        self.Description;
+
                     packages.Add(searchResultPackage);
                 }
 

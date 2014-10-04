@@ -239,7 +239,7 @@ namespace NuGet.VisualStudio
                     object project;
                     if (hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out project) >= 0)
                     {
-                        return (Project)project;
+                        return project as Project;
                     }
                 }
 
