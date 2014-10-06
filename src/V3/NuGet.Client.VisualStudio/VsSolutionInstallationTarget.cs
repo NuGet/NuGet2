@@ -26,13 +26,18 @@ namespace NuGet.Client.VisualStudio
                 return _solution.IsOpen;
             }
         }
-
+       
         public override string Name
         {
             get
             {
                 return _name;
             }
+        }
+
+        public override bool IsSolution
+        {
+            get { return true; }
         }
 
         public override IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects

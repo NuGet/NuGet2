@@ -28,6 +28,11 @@ namespace NuGet.Client.VisualStudio
             get { return true; }
         }
 
+        public override bool IsSolution
+        {
+            get { return false; }
+        }
+
         public override IEnumerable<InstalledPackagesList> InstalledPackagesInAllProjects
         {
             get

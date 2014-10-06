@@ -29,10 +29,7 @@ namespace NuGet.Client
         /// <summary>
         /// Gets a boolean indicating if the installation target is a solution target.
         /// </summary>
-        public virtual bool IsSolution
-        {
-            get { return TargetProjects.Count() > 1; }
-        }
+        public abstract bool IsSolution { get; }
 
         /// <summary>
         /// Gets a list of installed packages in all projects in the solution, including those NOT targetted by this installation target.
