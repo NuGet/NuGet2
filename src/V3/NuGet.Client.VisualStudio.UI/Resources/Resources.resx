@@ -144,14 +144,8 @@
   <data name="DependencyBehavior_Lowest" xml:space="preserve">
     <value>Lowest</value>
   </data>
-  <data name="FileConflictAction_Ignore" xml:space="preserve">
-    <value>Ignore</value>
-  </data>
   <data name="FileConflictAction_IgnoreAll" xml:space="preserve">
     <value>Ignore All</value>
-  </data>
-  <data name="FileConflictAction_Overwrite" xml:space="preserve">
-    <value>Overwrite</value>
   </data>
   <data name="FileConflictAction_OverwriteAll" xml:space="preserve">
     <value>Overwrite All</value>
@@ -278,5 +272,23 @@
   </data>
   <data name="Button_Preview" xml:space="preserve">
     <value>Preview</value>
+  </data>
+  <data name="WindowTitle_FileConflict" xml:space="preserve">
+    <value>File Conflict</value>
+  </data>
+  <data name="Button_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Button_NoToAll" xml:space="preserve">
+    <value>No to All</value>
+  </data>
+  <data name="Button_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Button_YesToAll" xml:space="preserve">
+    <value>Yes to All</value>
+  </data>
+  <data name="FileConfictAction_Prompt" xml:space="preserve">
+    <value>Prompt</value>
   </data>
 </root>

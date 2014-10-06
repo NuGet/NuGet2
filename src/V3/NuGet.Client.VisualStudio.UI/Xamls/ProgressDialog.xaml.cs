@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -145,8 +146,47 @@ namespace NuGet.Client.VisualStudio.UI
             MessagePane.ScrollToEnd();
         }
 
+        private FileConflictAction ShowFileConflictResolution(string message)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
+                object result = _uiDispatcher.Invoke(
+                    new Func<string, FileConflictAction>(ShowFileConflictResolution),
+                    message);
+                return (FileConflictAction)result;
+            }
+
+            var fileConflictDialog = new FileConflictDialog()
+            {
+                Question = message
+            };
+            fileConflictDialog.Owner = Window.GetWindow(this);
+            fileConflictDialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+
+            if (fileConflictDialog.ShowDialog() == true)
+            {
+                return fileConflictDialog.UserSelection;
+            }
+            else
+            {
+                return FileConflictAction.IgnoreAll;
+            }
+        }
+
         public FileConflictAction ResolveFileConflict(string message)
         {
+            if (_fileConflictAction == FileConflictAction.PromptUser)
+            {
+                var resolution = ShowFileConflictResolution(message);
+
+                if (resolution == FileConflictAction.IgnoreAll ||
+                    resolution == FileConflictAction.OverwriteAll)
+                {
+                    _fileConflictAction = resolution;
+                }
+                return resolution;
+            }
+
             return _fileConflictAction;
         }
     }

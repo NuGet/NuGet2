@@ -60,13 +60,12 @@ namespace NuGet.Client.VisualStudio.UI
         {
             _fileConflicActions = new []
             {
-                new FileConflictActionItem(Resx.Resources.FileConflictAction_Ignore, FileConflictAction.Ignore),
+                new FileConflictActionItem(Resx.Resources.FileConflictAction_Prompt, FileConflictAction.PromptUser),
                 new FileConflictActionItem(Resx.Resources.FileConflictAction_IgnoreAll, FileConflictAction.IgnoreAll),
-                new FileConflictActionItem(Resx.Resources.FileConflictAction_Overwrite, FileConflictAction.Overwrite),
                 new FileConflictActionItem(Resx.Resources.FileConflictAction_OverwriteAll, FileConflictAction.OverwriteAll)
             };
 
-            SelectedFileConflictAction = _fileConflicActions[3];
+            SelectedFileConflictAction = _fileConflicActions[0];
         }
 
         public UiDetailedPackage Package

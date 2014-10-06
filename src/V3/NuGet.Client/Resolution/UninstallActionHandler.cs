@@ -17,6 +17,11 @@ namespace NuGet.Client.Resolution
         public Task Execute(PackageAction action, ExecutionContext context, IExecutionLogger logger)
         {
             var projectManager = context.GetProjectManager(action.Target);
+
+            var shimLogger = new ShimLogger(logger);
+            projectManager.Logger = shimLogger;
+            projectManager.Project.Logger = shimLogger;
+
 #if VS14
             var nugetAwareProject = projectManager.Project as INuGetPackageManager;
             if (nugetAwareProject != null)
