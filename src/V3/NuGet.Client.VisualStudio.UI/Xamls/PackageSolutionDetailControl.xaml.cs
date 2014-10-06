@@ -79,8 +79,7 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 IEnumerable<PackageAction> actions = await ResolveActions();
-                Control.PreviewActions(actions);
-
+                
                 // show license agreeement
                 bool acceptLicense = Control.ShowLicenseAgreement(actions);
                 if (!acceptLicense)
@@ -98,6 +97,29 @@ namespace NuGet.Client.VisualStudio.UI
 
                 Control.UpdatePackageStatus();
                 model.Refresh();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                progressDialog.RequestToClose();
+                Control.SetBusy(false);
+            }
+        }
+
+        private async void PreviewButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+
+            Control.SetBusy(true);
+            var progressDialog = new ProgressDialog(
+                model.SelectedFileConflictAction.Action);
+            try
+            {
+                IEnumerable<PackageAction> actions = await ResolveActions();
+                Control.PreviewActions(actions);
             }
             catch (Exception ex)
             {

@@ -151,15 +151,14 @@ namespace NuGet.Client.VisualStudio.UI
             Debug.Assert(Control.Target.TargetProjects.Count() == 1, "PackageDetailControl should only be used when there is only one target project!");
 
             var isInstalled = Control.Target.TargetProjects.Single().InstalledPackages.IsInstalled(model.Package.Id, model.Package.Version);
+
             if (isInstalled)
             {
-                _dropdownButton.SetItems(
-                    new[] { Resx.Resources.Button_Uninstall, Resx.Resources.Button_UninstallPreview });
+                _actionButton.Content = Resx.Resources.Button_Uninstall;
             }
             else
             {
-                _dropdownButton.SetItems(
-                    new[] { Resx.Resources.Button_Install, Resx.Resources.Button_InstallPreview });
+                _actionButton.Content = Resx.Resources.Button_Install;
             }
         }
 
@@ -193,24 +192,29 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void _dropdownButton_Clicked(object sender, DropdownButtonClickEventArgs e)
+        private void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (e.ButtonText == Resx.Resources.Button_Install)
+            if ((string)_actionButton.Content == Resx.Resources.Button_Install)
             {
                 PerformPackageAction(PackageActionType.Install);
             }
-            else if (e.ButtonText == Resx.Resources.Button_InstallPreview)
-            {
-                Preview(PackageActionType.Install);
-            }
-            else if (e.ButtonText == Resx.Resources.Button_Uninstall)
+            else
             {
                 PerformPackageAction(PackageActionType.Uninstall);
             }
-            else if (e.ButtonText == Resx.Resources.Button_UninstallPreview)
+        }
+
+        private void PreviewButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if ((string)_actionButton.Content == Resx.Resources.Button_Install)
+            {
+                Preview(PackageActionType.Install);
+            }
+            else
             {
                 Preview(PackageActionType.Uninstall);
             }
+
         }
     }
 }

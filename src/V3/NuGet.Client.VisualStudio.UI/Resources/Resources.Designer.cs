@@ -142,6 +142,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preview.
+        /// </summary>
+        public static string Button_Preview {
+            get {
+                return ResourceManager.GetString("Button_Preview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error occurred. Retry.
         /// </summary>
         public static string Button_Retry {

@@ -276,4 +276,7 @@
   <data name="Label_NuGetWindowCaption" xml:space="preserve">
     <value>NuGet: {0}</value>
   </data>
+  <data name="Button_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
 </root>
