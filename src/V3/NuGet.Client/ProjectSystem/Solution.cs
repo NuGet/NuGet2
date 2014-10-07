@@ -38,9 +38,12 @@ namespace NuGet.Client.ProjectSystem
             return null;
         }
 
-        public override Solution GetSolution()
+        public override Solution OwnerSolution
         {
-            return this;
+            get
+            {
+                return this;
+            }
         }
 
         public override IEnumerable<InstallationTarget> GetAllTargetsRecursively()

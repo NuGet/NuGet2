@@ -99,7 +99,7 @@ namespace NuGet.Client.VisualStudio
                 new VsProject(this, dteProject, packageManager.GetProjectManager(dteProject)));
         }
 
-        public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken ct)
+        public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)
         {
             return Task.FromResult(
                 _packageManager.LocalRepository.Search(searchText, allowPrereleaseVersions: true)

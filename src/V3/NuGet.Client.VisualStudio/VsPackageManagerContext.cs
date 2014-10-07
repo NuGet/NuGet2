@@ -8,6 +8,7 @@ using DteSolution = EnvDTE.Solution;
 using Microsoft.VisualStudio.Shell;
 using NuGet.Client.ProjectSystem;
 using NuGet.VisualStudio;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -43,6 +44,7 @@ namespace NuGet.Client.VisualStudio
             return GetCurrentVsSolution();
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "It is not idempotent. Each call generates a new object.")]
         public virtual VsSolution GetCurrentVsSolution()
         {
             if (!_solutionManager.IsSolutionOpen)

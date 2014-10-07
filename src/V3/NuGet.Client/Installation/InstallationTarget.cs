@@ -62,7 +62,10 @@ namespace NuGet.Client.Installation
         /// Gets the solution related to this target. If the current target is a solution, returns itself, otherwise, returns the parent solution.
         /// </summary>
         /// <returns></returns>
-        public abstract Solution GetSolution();
+        public abstract Solution OwnerSolution
+        {
+            get;
+        }
 
         /// <summary>
         /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
@@ -159,6 +162,7 @@ namespace NuGet.Client.Installation
         /// Retrieves this target and all of it's sub-targets (Projects in a Solution, for example) in a single flat list.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method can be expensive")]
         public abstract IEnumerable<InstallationTarget> GetAllTargetsRecursively();
     }
 }

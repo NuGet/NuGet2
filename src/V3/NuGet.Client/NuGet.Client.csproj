@@ -87,7 +87,6 @@
     <Compile Include="Interop\CoreInteropSourceRepository.cs" />
     <Compile Include="Interop\PackageJsonLd.cs" />
     <Compile Include="Interop\V2SourceRepository.cs" />
-    <Compile Include="Interop\CoreInteropLocalRepository.cs" />
     <Compile Include="Interop\CoreInteropPackage.cs" />
     <Compile Include="Interop\CoreInteropPackageManager.cs" />
     <Compile Include="Interop\CoreInteropProjectManager.cs" />

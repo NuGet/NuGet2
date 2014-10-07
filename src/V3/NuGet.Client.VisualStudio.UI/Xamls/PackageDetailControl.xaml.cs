@@ -100,7 +100,7 @@ namespace NuGet.Client.VisualStudio.UI
                     packageDetail.Package.Version, 
                     action,
                     new[] { Project },
-                    Project.GetSolution());
+                    Project.OwnerSolution);
             }
             finally
             {

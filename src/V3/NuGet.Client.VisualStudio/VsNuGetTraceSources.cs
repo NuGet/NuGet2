@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -19,6 +20,7 @@ namespace NuGet.Client.VisualStudio
         /// Retrieves a list of all sources defined in this class. Uses reflection, store the result!
         /// </summary>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is expensive")]
         public static IEnumerable<TraceSource> GetAllSources()
         {
             return typeof(VsNuGetTraceSources).GetFields(BindingFlags.Public | BindingFlags.Static)

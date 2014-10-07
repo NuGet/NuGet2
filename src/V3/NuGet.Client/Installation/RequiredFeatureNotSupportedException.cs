@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +32,15 @@ namespace NuGet.Client.Installation
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         {
+        }
+
+        public RequiredFeatureNotSupportedException(string message) : base(message) { }
+        public RequiredFeatureNotSupportedException(string message, Exception inner) : base(message, inner) { }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
         }
     }
 }

@@ -91,12 +91,15 @@ namespace NuGet.Client.VisualStudio
 
         public override int GetHashCode()
         {
-            return DteProject.FileName.ToLowerInvariant().GetHashCode();
+            return DteProject.FileName.ToUpperInvariant().GetHashCode();
         }
 
-        public override Solution GetSolution()
+        public override Solution OwnerSolution
         {
-            return _solution;
+            get
+            {
+                return _solution;
+            }
         }
 
         public override FrameworkName GetSupportedFramework()

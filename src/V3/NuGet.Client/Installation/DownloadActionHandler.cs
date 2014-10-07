@@ -78,7 +78,7 @@ namespace NuGet.Client.Installation
             return new PurgeActionHandler().Execute(action, logger, CancellationToken.None);
         }
 
-        private IPackage GetPackage(IPackageCacheRepository packageCache, PackageIdentity packageIdentity, Uri downloadUri)
+        private static IPackage GetPackage(IPackageCacheRepository packageCache, PackageIdentity packageIdentity, Uri downloadUri)
         {
             var packageSemVer = CoreConverters.SafeToSemVer(packageIdentity.Version);
             var packageName = CoreConverters.SafeToPackageName(packageIdentity);

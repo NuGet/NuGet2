@@ -30,7 +30,7 @@ namespace NuGet.Client.Resolution
             string id,
             NuGetVersion version,
             PackageActionType operation,
-            IEnumerable<Project> targettedProjects,
+            IEnumerable<Project> targetedProjects,
             Solution solution)
         {
             // Construct the Action Resolver
@@ -41,7 +41,7 @@ namespace NuGet.Client.Resolution
 
             // Add the operation request(s)
             NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), id, version.ToNormalizedString());
-            foreach (var project in targettedProjects)
+            foreach (var project in targetedProjects)
             {
                 resolver.AddOperation(
                     MapNewToOldActionType(operation),
@@ -64,11 +64,11 @@ namespace NuGet.Client.Resolution
                                 action.Package.Version.SpecialVersion)),
                        UnwrapPackage(action.Package),
                        (projectAction != null ?
-                            FindProject(targettedProjects, projectAction.ProjectManager.Project.ProjectName) :
+                            FindProject(targetedProjects, projectAction.ProjectManager.Project.ProjectName) :
                             (InstallationTarget)solution));
         }
 
-        private Project FindProject(IEnumerable<Project> targets, string projectName)
+        private static Project FindProject(IEnumerable<Project> targets, string projectName)
         {
             return targets.FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
         }
