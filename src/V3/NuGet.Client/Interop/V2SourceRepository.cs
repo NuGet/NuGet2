@@ -41,8 +41,13 @@ namespace NuGet.Client.Interop
         private JObject CreatePackageSearchResult(IPackage package)
         {
             NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
-            var versions = _repository.FindPackagesById(package.Id);
-            return PackageJsonLd.CreatePackageSearchResult(package, versions);
+            var allVersions = _repository.FindPackagesById(package.Id).ToList();
+            var filteredVersions = allVersions
+                .OrderByDescending(p => p.Version)
+                .Take(4)
+                .ToList();
+
+            return PackageJsonLd.CreatePackageSearchResult(package, filteredVersions, hasAdditionalVersions: allVersions.Count > filteredVersions.Count);
         }
 
         public override Task<JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
@@ -60,6 +65,13 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("findpackagebyid", "Getting metadata for all versions of {0}", packageId);
             return Task.FromResult(_repository.FindPackagesById(packageId).Select(PackageJsonLd.CreatePackage));
+        }
+
+        public override Task<IEnumerable<JObject>> GetAllVersions(JObject packageSearchResult)
+        {
+            var id = packageSearchResult.Value<string>(Properties.Id);
+            var versions = _repository.FindPackagesById(id);
+            return Task.FromResult(versions.Select(p => PackageJsonLd.CreatePackage(p)));
         }
     }
 }

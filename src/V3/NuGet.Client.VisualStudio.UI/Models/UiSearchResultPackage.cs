@@ -25,6 +25,8 @@ namespace NuGet.Client.VisualStudio.UI
 
         public string Summary { get; set; }
 
+        public bool HasAdditionalVersions { get; set; }
+
         private PackageStatus _status;
 
         public PackageStatus Status
@@ -45,7 +47,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public Uri IconUrl { get; set; }
 
-        public IEnumerable<UiDetailedPackage> AllVersions { get; set; }
+        public IEnumerable<UiDetailedPackage> Versions { get; set; }
 
         protected void OnPropertyChanged(string propertyName)
         {

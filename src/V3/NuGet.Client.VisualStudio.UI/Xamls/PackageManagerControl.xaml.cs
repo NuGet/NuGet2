@@ -208,13 +208,14 @@ namespace NuGet.Client.VisualStudio.UI
 
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
-                    searchResultPackage.Id = package.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));                    
-                    searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
+                    searchResultPackage.Id = package.Value<string>(Properties.Id);
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
+                    searchResultPackage.IconUrl = package.Value<Uri>(Properties.IconUrl);
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
-                    searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
+                    
+                    LoadVersions(searchResultPackage, package.Value<JObject>(Properties.PackageVersionList));
 
-                    var self = searchResultPackage.AllVersions.First(p => p.Version == searchResultPackage.Version);
+                    var self = searchResultPackage.Versions.First(p => p.Version == searchResultPackage.Version);
                     searchResultPackage.Summary = 
                         self == null ?
                         package.Value<string>("summary") :
@@ -232,8 +233,15 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             // Get all versions of the package
-            private List<UiDetailedPackage> LoadVersions(JArray versions)
+            private void LoadVersions(UiSearchResultPackage package, JObject versionList)
             {
+                if (versionList.Value<bool>(Properties.HasAdditionalVersions))
+                {
+                    package.HasAdditionalVersions = true;
+                }
+
+                var versions = versionList.Value<JArray>(Properties.Packages);
+
                 var retValue = new List<UiDetailedPackage>();
 
                 // If repo is AggregateRepository, the package duplicates can be returned by
@@ -243,21 +251,21 @@ namespace NuGet.Client.VisualStudio.UI
                     JObject version = (JObject)token;
                     var detailedPackage = new UiDetailedPackage()
                     {
-                        Id = version.Value<string>("id"),
-                        Version = NuGetVersion.Parse(version.Value<string>("version")),
-                        Summary = version.Value<string>("summary"),
-                        Description = version.Value<string>("description"),
-                        Authors = StringCollectionToString(version.Value<JArray>("authors")),
-                        Owners = StringCollectionToString(version.Value<JArray>("owners")),
-                        IconUrl = version.Value<Uri>("iconUrl"),
-                        LicenseUrl = version.Value<Uri>("licenseUrl"),
-                        ProjectUrl = version.Value<Uri>("projectUrl"),
-                        Tags = String.Join(" ", (version.Value<JArray>("tags") ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
-                        DownloadCount = version.Value<int>("downloadCount"),
-                        DependencySets = (version.Value<JArray>("dependencyGroups") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
+                        Id = version.Value<string>(Properties.Id),
+                        Version = NuGetVersion.Parse(version.Value<string>(Properties.Version)),
+                        Summary = version.Value<string>(Properties.Summary),
+                        Description = version.Value<string>(Properties.Description),
+                        Authors = StringCollectionToString(version.Value<JArray>(Properties.Authors)),
+                        Owners = StringCollectionToString(version.Value<JArray>(Properties.Owners)),
+                        IconUrl = version.Value<Uri>(Properties.IconUrl),
+                        LicenseUrl = version.Value<Uri>(Properties.LicenseUrl),
+                        ProjectUrl = version.Value<Uri>(Properties.ProjectUrl),
+                        Tags = String.Join(" ", (version.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
+                        DownloadCount = version.Value<int>(Properties.DownloadCount),
+                        DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
                     };
 
-                    string publishedStr = version.Value<string>("published");
+                    string publishedStr = version.Value<string>(Properties.Published);
                     if (!String.IsNullOrEmpty(publishedStr))
                     {
                         detailedPackage.Published = DateTime.Parse(publishedStr);
@@ -267,8 +275,7 @@ namespace NuGet.Client.VisualStudio.UI
 
                     retValue.Add(detailedPackage);
                 }
-
-                return retValue;
+                package.Versions = retValue;
             }
 
             private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)

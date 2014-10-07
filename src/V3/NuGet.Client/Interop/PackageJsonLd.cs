@@ -13,26 +13,29 @@ namespace NuGet.Client.Interop
     public static class PackageJsonLd
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions)
+        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions, bool hasAdditionalVersions)
         {
             var value = new JObject();
-            value.Add(new JProperty(Properties.Type, new JArray(Types.PackageSearchResult.ToString())));
+            AddProp(value, Properties.Type, Types.PackageSearchResult);
             AddProp(value, Properties.Id, package.Id);
             AddProp(value, Properties.LatestVersion, package.Version.ToString());
             AddProp(value, Properties.Summary, package.Summary);
             AddProp(value, Properties.IconUrl, package.IconUrl);
-            AddProp(value, Properties.Packages, versions.Select(v => CreatePackage(v)));
+
+
+            var versionList = new JObject();
+            AddProp(versionList, Properties.Type, Types.PackageVersionList);
+            AddProp(versionList, Properties.HasAdditionalVersions, hasAdditionalVersions);
+            AddProp(versionList, Properties.Packages, versions.Select(v => CreatePackage(v)));
+            AddProp(value, Properties.PackageVersionList, versionList);
+
             return value;
         }
 
         public static JObject CreatePackage(IPackage version)
         {
             var value = new JObject();
-            AddProp(value, Properties.Type, new JArray(
-                Types.PackageIdentity.ToString(),
-                Types.PackageDescription.ToString(),
-                Types.PackageDependencies.ToString(),
-                Types.PackageLicensing.ToString()));
+            AddProp(value, Properties.Type, Types.PackageVersion);
 
             AddProp(value, Properties.Id, version.Id);
             AddProp(value, Properties.Version, version.Version.ToString());

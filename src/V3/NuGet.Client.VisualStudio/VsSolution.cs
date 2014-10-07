@@ -106,7 +106,7 @@ namespace NuGet.Client.VisualStudio
                     .Skip(skip)
                     .Take(take)
                     .ToList()
-                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
+                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p }, hasAdditionalVersions: false)));
         }
     }
 }

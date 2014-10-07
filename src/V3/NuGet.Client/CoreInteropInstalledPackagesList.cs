@@ -53,7 +53,7 @@ namespace NuGet.Client
             return Task.FromResult(
                 _localRepository.Search(searchTerm, allowPrereleaseVersions: true)
                     .Skip(skip).Take(take).ToList()
-                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
+                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p }, hasAdditionalVersions: false)));
         }
 
         public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()

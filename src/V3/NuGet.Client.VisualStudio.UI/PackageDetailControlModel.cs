@@ -25,7 +25,7 @@ namespace NuGet.Client.VisualStudio.UI
             NuGetVersion installedVersion)
         {
             _allPackages = new Dictionary<NuGetVersion, UiDetailedPackage>();
-            foreach (var p in searchResultPackage.AllVersions)
+            foreach (var p in searchResultPackage.Versions)
             {
                 _allPackages[p.Version] = p;
             }
