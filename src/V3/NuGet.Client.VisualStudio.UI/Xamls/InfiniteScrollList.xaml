@@ -3,36 +3,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              xmlns:self="clr-namespace:NuGet.Client.VisualStudio.UI"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
-             mc:Ignorable="d" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type self:LoadingStatusIndicator}">
             <Grid Margin="0,8">
-                <TextBlock Name="_noMoreItems" 
-                           FontStyle="Italic"                           
+                <TextBlock Name="_noMoreItems"
+                           FontStyle="Italic"
                            Visibility="Collapsed">No more items</TextBlock>
-                
-                <TextBlock Name="_ready" 
+
+                <TextBlock Name="_ready"
                            Visibility="Collapsed" >Ready</TextBlock>
-                
-                <StackPanel Orientation="Horizontal" 
-                            Name="_progressBar"  
-                            HorizontalAlignment="Center"
+
+                <StackPanel Orientation="Vertical"
+                            Name="_progressBar"
                             Visibility="Collapsed">
-                    <ProgressBar 
-                        Height="20" IsIndeterminate="True" Width="40" />
-                    <TextBlock Margin="10,0,0,0">Loading...</TextBlock>
+                    <ProgressBar
+                        Margin="24,0"
+                        Height="15" IsIndeterminate="True" />
+                    <TextBlock Margin="0,8"
+                               HorizontalAlignment="Center">Loading...</TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Name="_errorOccurred"
                             Visibility="Collapsed">
-                    <Button Click="RetryButtonClicked" 
-                            Content="{x:Static resx:Resources.Button_Retry}"                            
+                    <Button Click="RetryButtonClicked"
+                            Content="{x:Static resx:Resources.Button_Retry}"
                             Width="150" />
-                    <TextBox Margin="0,8,0,0" 
-                             IsReadOnly="True" 
-                             TextWrapping="Wrap" 
+                    <TextBox Margin="0,8,0,0"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
                              Text="{Binding ErrorMessage}" />
                 </StackPanel>
             </Grid>
@@ -40,33 +41,33 @@
                 <DataTrigger Binding="{Binding Path=Status}" Value="Loading">
                     <Setter TargetName="_progressBar"
                             Property="Visibility"
-                            Value="Visible"/>
+                            Value="Visible" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Status}" Value="Ready">
                     <Setter TargetName="_ready"
                             Property="Visibility"
-                            Value="Visible"/>
+                            Value="Visible" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Status}" Value="NoMoreItems">
                     <Setter TargetName="_noMoreItems"
                             Property="Visibility"
-                            Value="Visible"/>
+                            Value="Visible" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Status}" Value="ErrorOccured">
                     <Setter TargetName="_errorOccurred"
                             Property="Visibility"
-                            Value="Visible"/>
+                            Value="Visible" />
                 </DataTrigger>
             </DataTemplate.Triggers>
-        </DataTemplate>        
+        </DataTemplate>
     </UserControl.Resources>
-    <ListBox x:Name="_list" 
+    <ListBox x:Name="_list"
              Background="{DynamicResource {x:Static resx:Brushes.ListPaneBackground}}"
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
              HorizontalContentAlignment="Stretch"
-             SelectionChanged="_list_SelectionChanged"              
-             Loaded="_list_Loaded">         
+             SelectionChanged="_list_SelectionChanged"
+             Loaded="_list_Loaded">
         <!-- Get rid of padding of ListBoxItem -->
         <ListBox.ItemContainerStyle>
             <Style TargetType="{x:Type ListBoxItem}">
