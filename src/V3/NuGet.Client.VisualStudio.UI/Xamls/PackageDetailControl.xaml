@@ -14,7 +14,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml" />
-            </ResourceDictionary.MergedDictionaries>            
+            </ResourceDictionary.MergedDictionaries>
             <Tools:VersionToVersionForDisplayConverter x:Key="VersionToVersionForDisplayConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
@@ -42,7 +42,7 @@
                 Grid.Row="0"
                 Orientation="Horizontal"
                 Margin="0,8">
-                <Image                    
+                <Image
                     Source="{Binding Path=Package.IconUrl}"
                     Style="{StaticResource PackageIconStyle}" />
                 <TextBlock
@@ -54,52 +54,58 @@
 
             <!-- Version dropdown and the install/uninstall button -->
             <Grid Grid.Row="1" Margin="0,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="0,0,0,8"
-                    Text="{x:Static resx:Resources.Label_Version}" />
-                <ComboBox
-                    x:Name="_versions"
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Width="150"
-                    ItemsSource="{Binding Path=Versions}"
-                    SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
-                    SelectionChanged="Versions_SelectionChanged">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
-                            <Style.Triggers>
-                                <!-- generate a separator if value is null -->
-                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                                                <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
-                </ComboBox>
-                <Tools:DropdownButton
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Width="100"
-                    Margin="12,0,0,0"
-                    x:Name="_dropdownButton"
-                    Clicked="_dropdownButton_Clicked" />
+                <StackPanel Orientation="Horizontal" Grid.Row="0">
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Margin="0,0,0,8"
+                        VerticalAlignment="Center"
+                        Text="{x:Static resx:Resources.Label_Version}" />
+                    <ComboBox
+                        Margin="12,0,0,0"
+                        x:Name="_versions"
+                        VerticalAlignment="Center"
+                        Width="150"
+                        ItemsSource="{Binding Path=Versions}"
+                        SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
+                        SelectionChanged="Versions_SelectionChanged">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                <Style.Triggers>
+                                    <!-- generate a separator if value is null -->
+                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                                    <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Width="100"
+                        x:Name="_actionButton"
+                        Click="ActionButtonClicked">Action</Button>
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="12,0,0,0"
+                        Content="{x:Static resx:Resources.Button_Preview}"
+                        Click="PreviewButtonClicked"
+                        Width="100"/>
+                </StackPanel>
             </Grid>
 
             <!-- installation options -->
@@ -110,7 +116,7 @@
                 <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition />
-                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="8" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -122,16 +128,16 @@
                         Margin="0,0,6,0"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
-                    <ComboBox Grid.Row="0" Grid.Column="1" 
+                    <ComboBox Grid.Row="0" Grid.Column="1"
                               ItemsSource="{Binding Path=DependencyBehaviors}"
-                              SelectedItem="{Binding Path=SelectedDependencyBehavior}"/>
+                              SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
                     <TextBlock
                         Grid.Row="2" Grid.Column="0"
                         Margin="0,0,6,0"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_FileConflictAction}" />
-                    <ComboBox Grid.Row="2" Grid.Column="1" 
-                              ItemsSource="{Binding Path=FileConflictActions}" 
+                    <ComboBox Grid.Row="2" Grid.Column="1"
+                              ItemsSource="{Binding Path=FileConflictActions}"
                               SelectedItem="{Binding Path=SelectedFileConflictAction}" />
                 </Grid>
             </Expander>
@@ -147,7 +153,7 @@
                 x:Name="_description"
                 Margin="0,8,0,0"
                 TextWrapping="Wrap"
-                Text="{Binding Path=Package.Description}"/>
+                Text="{Binding Path=Package.Description}" />
 
             <!-- metadata -->
             <Grid
@@ -277,17 +283,16 @@
                 Text="{x:Static resx:Resources.Label_Dependencies}" />
 
             <ItemsControl
-                    Grid.Row="7"                    
+                    Grid.Row="7"
                     ItemsSource="{Binding Path=Package.DependencySets}"
                     Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0,8,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock 
+                            <TextBlock
                                 Text="{Binding TargetFramework}" FontWeight="Bold"
-                                Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}"
-                                />
+                                Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
                             <ItemsControl ItemsSource="{Binding Dependencies}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>

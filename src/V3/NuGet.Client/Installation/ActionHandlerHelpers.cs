@@ -28,7 +28,7 @@ namespace NuGet.Client.Installation
             if (scriptFile != null)
             {
                 // Get the powershell execution feature
-                var powershell = target.TryGetFeature<PowerShellScriptExecutionFeature>();
+                var powershell = target.TryGetFeature<PowerShellScriptExecutor>();
                 if (powershell != null)
                 {
                     NuGetTraceSources.ActionExecutor.Info(

@@ -9,13 +9,14 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 using OldPackageAction = NuGet.Resolver.PackageAction;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Resolution;
+using System.Threading;
 
 namespace NuGet.Client.Installation
 {
     public interface IActionHandler
     {
-        Task Execute(NewPackageAction action, IExecutionLogger logger);
-        Task Rollback(NewPackageAction action, IExecutionLogger logger);
+        Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken);
+        Task Rollback(NewPackageAction action, IExecutionLogger logger); // Rollbacks should not be cancelled, it's a Bad Idea(TM)
     }
 
     public class ActionExecutor
@@ -28,12 +29,12 @@ namespace NuGet.Client.Installation
             { PackageActionType.Purge, new PurgeActionHandler() },
         };
 
-        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions)
+        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, CancellationToken cancelToken)
         {
-            return ExecuteActionsAsync(actions, NullExecutionLogger.Instance);
+            return ExecuteActionsAsync(actions, NullExecutionLogger.Instance, cancelToken);
         }
 
-        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, IExecutionLogger logger)
+        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, IExecutionLogger logger, CancellationToken cancelToken)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
@@ -57,7 +58,7 @@ namespace NuGet.Client.Installation
                             "[{0}] Executing action: {1}",
                             action.PackageIdentity,
                             action.ToString());
-                        await handler.Execute(action, logger);
+                        await handler.Execute(action, logger, cancelToken);
                         executedActions.Add(action);
                     }
                 }

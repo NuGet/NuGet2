@@ -77,7 +77,8 @@
     <Compile Include="Installation\InstallationTarget.cs" />
     <Compile Include="Installation\ActionHandlerHelpers.cs" />
     <Compile Include="Installation\IInstallationTarget.cs" />
-    <Compile Include="Installation\PowerShellScriptExecutionFeature.cs" />
+    <Compile Include="Installation\NuGetAwareProject.cs" />
+    <Compile Include="Installation\PowerShellScriptExecutor.cs" />
     <Compile Include="Installation\RequiredFeatureNotSupportedException.cs" />
     <Compile Include="InstalledPackageReference.cs" />
     <Compile Include="InstalledPackagesList.cs" />
@@ -95,7 +96,6 @@
     <Compile Include="Installation\InstallActionHandler.cs" />
     <Compile Include="ExecutionLogger.cs" />
     <Compile Include="ProjectSystem\Solution.cs" />
-    <Compile Include="Resolution\InstallActionHandler.cs" />
     <Compile Include="Resolution\PackageAction.cs" />
     <Compile Include="PackageIdentity.cs" />
     <Compile Include="PackageSource.cs" />
@@ -103,7 +103,6 @@
     <Compile Include="Installation\PurgeActionHandler.cs" />
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
-    <Compile Include="Resolution\UninstallActionHandler.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />
     <Compile Include="Strings.Designer.cs">

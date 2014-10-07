@@ -10,13 +10,13 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
 {
-    internal class VsPowerShellScriptExecutionFeature : PowerShellScriptExecutionFeature
+    internal class VsPowerShellScriptExecutor : PowerShellScriptExecutor
     {
         // V3TODO: Move script execution logic entirely into this class or revamp IScriptExecutor to be more general purpose.
 
         private readonly PSScriptExecutor _scriptExecutor;
 
-        public VsPowerShellScriptExecutionFeature(IScriptExecutor scriptExecutor)
+        public VsPowerShellScriptExecutor(IScriptExecutor scriptExecutor)
         {
             // We only work in VS where we know it's a PSScriptExecutor.
             _scriptExecutor = (PSScriptExecutor)scriptExecutor;

@@ -1,16 +1,3 @@
-#if VS11 || VS10
-extern alias dialog10;
-extern alias dialog11;
-#endif
-
-#if VS12
-extern alias dialog12;
-#endif
-
-#if VS14
-extern alias dialog14;
-#endif
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -35,19 +22,7 @@ using NuGet.Client;
 using NuGetConsole.Implementation;
 using NuGet.Client.VisualStudio;
 using NuGet.Client.VisualStudio.UI;
-
-#if VS11 || VS10
-using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
-using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
-#endif
-
-#if VS12
-using VS12ManagePackageDialog = dialog12::NuGet.Dialog.PackageManagerWindow;
-#endif
-
-#if VS14
-using VS14ManagePackageDialog = dialog14::NuGet.Dialog.PackageManagerWindow;
-#endif
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Tools
 {
@@ -458,12 +433,12 @@ namespace NuGet.Tools
             return null;
         }
 
-        private void ShowDocWindow(Project project)
+        private void ShowDocWindow(Project project, string searchText)
         {
             var windowFrame = FindExistingWindowFrame(project);
             if (windowFrame == null)
             {
-                windowFrame = CreateNewWindowFrame(project);
+                windowFrame = CreateNewWindowFrame(project, searchText);
             }
 
             if (windowFrame != null)
@@ -471,8 +446,17 @@ namespace NuGet.Tools
                 windowFrame.Show();
             }
         }
+        private static T GetProperty<T>(IVsHierarchy hier, __VSHPROPID propertyId)
+        {
+            object propertyValue;
+            hier.GetProperty(
+                (uint)VSConstants.VSITEMID.Root,
+                (int)propertyId,
+                out propertyValue);
+            return (T)propertyValue;
+        }
 
-        private IVsWindowFrame CreateNewWindowFrame(Project project)
+        private IVsWindowFrame CreateNewWindowFrame(Project project, string searchText)
         {
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
 
@@ -481,20 +465,22 @@ namespace NuGet.Tools
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            object firstChild;
-            vsProject.GetProperty((uint)VSConstants.VSITEMID.Root, (int)__VSHPROPID.VSHPROPID_FirstChild, out firstChild);
-
             var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
             var myDoc = new PackageManagerModel(
                 context.SourceManager, 
                 context.GetCurrentVsSolution().GetProject(project));
+            myDoc.SearchText = searchText;
+
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
             var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
             var guidCommandUI = Guid.Empty;
-            var caption = "PackageManager";
-            var documentName = String.Format("Package Manager: {0}", project.Name);
+            var caption = String.Format(
+                CultureInfo.CurrentCulture,
+                Resx.Resources.Label_NuGetWindowCaption,
+                myDoc.Target.Name);
+            var documentName = project.UniqueName;
             IVsWindowFrame windowFrame;
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,
@@ -517,10 +503,18 @@ namespace NuGet.Tools
 
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
         {
+            string parameterString = null;
+            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
+            if (null != args)
+            {
+                parameterString = args.InValue as string;
+            }
+            var searchText = GetSearchText(parameterString);
+
             Project project = VsMonitorSelection.GetActiveProject();
             if (project != null && !project.IsUnloaded() && project.IsSupported())
             {
-                ShowDocWindow(project);
+                ShowDocWindow(project, searchText);
             }
             else
             {
@@ -557,8 +551,40 @@ namespace NuGet.Tools
             return null;
         }
 
+        private static string GetSearchText(string parameterString)
+        {
+            if (parameterString == null)
+            {
+                return null;
+            }
+
+            // The parameterString looks like:
+            //     "jquery /searchin:online"
+            // or just "jquery"
+
+            parameterString = parameterString.Trim();
+            int lastIndexOfSearchInSwitch = parameterString.LastIndexOf("/searchin:", StringComparison.OrdinalIgnoreCase);
+
+            if (lastIndexOfSearchInSwitch == -1)
+            {
+                return parameterString;
+            }
+            else
+            {
+                return parameterString.Substring(0, lastIndexOfSearchInSwitch);
+            }
+        }
+
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
         {
+            string parameterString = null;
+            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
+            if (args != null)
+            {
+                parameterString = args.InValue as string;
+            }
+            var searchText = GetSearchText(parameterString);
+
             var windowFrame = FindExistingSolutionWindowFrame();
             if (windowFrame == null)
             {
@@ -570,7 +596,6 @@ namespace NuGet.Tools
                     (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                     (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-                _dte.Solution.GetName();
                 var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
                 var myDoc = new PackageManagerModel(context.SourceManager, context.GetCurrentSolution());
                 var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
@@ -578,8 +603,11 @@ namespace NuGet.Tools
                 var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
                 var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
                 var guidCommandUI = Guid.Empty;
-                var caption = "PackageManager";
-                var documentName = String.Format("Package Manager: {0}", _dte.Solution.GetName());
+                var caption = String.Format(
+                    CultureInfo.CurrentCulture,
+                    Resx.Resources.Label_NuGetWindowCaption,
+                    myDoc.Target.Name);
+                var documentName = _dte.Solution.FullName;
                 int hr = uiShell.CreateDocumentWindow(
                     windowFlags,
                     documentName,
@@ -598,82 +626,7 @@ namespace NuGet.Tools
                 ErrorHandler.ThrowOnFailure(hr);
             }
             windowFrame.Show();
-
-            /* +++
-            string parameterString = null;
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null)
-            {
-                parameterString = args.InValue as string;
-            }
-            ShowManageLibraryPackageDialog(null, parameterString); */
         }
-
-        private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
-        {
-            try
-            {
-                DialogWindow window;
-
-#if VS10 || VS11
-                if (VsVersionHelper.IsVisualStudio2010)
-                {
-                    window = GetVS10PackageManagerWindow(project, parameterString);
-                }
-                else 
-                {
-                    // VS 2012
-                    window = GetVS11PackageManagerWindow(project, parameterString);
-                }
-#endif
-                
-#if VS12
-				window = GetVS12PackageManagerWindow(project, parameterString);
-#endif
-
-#if VS14
-				window = GetVS14PackageManagerWindow(project, parameterString);
-#endif
-                
-
-                window.ShowModal();
-            }
-            catch (Exception exception)
-            {
-                MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
-                ExceptionHelper.WriteToActivityLog(exception);
-            }
-        }
-
-#if VS10 || VS11
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
-        {
-            return new VS10ManagePackageDialog(project, parameterString);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS11PackageManagerWindow(Project project, string parameterString)
-        {
-            return new VS11ManagePackageDialog(project, parameterString);
-        }
-#endif
-
-#if VS12
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS12PackageManagerWindow(Project project, string parameterString)
-        {
-            return new VS12ManagePackageDialog(project, parameterString);
-        }
-#endif
-
-#if VS14
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS14PackageManagerWindow(Project project, string parameterString)
-        {
-            return new VS14ManagePackageDialog(project, parameterString);
-        }
-#endif
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {

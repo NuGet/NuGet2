@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
@@ -10,7 +11,7 @@ namespace NuGet.Client.Installation
 {
     public class UninstallActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
             return Task.Run(() =>
             {
@@ -42,7 +43,7 @@ namespace NuGet.Client.Installation
         public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the install action to undo a uninstall
-            return new InstallActionHandler().Execute(action, logger);
+            return new InstallActionHandler().Execute(action, logger, CancellationToken.None);
         }
     }
 }

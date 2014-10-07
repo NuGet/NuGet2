@@ -63,7 +63,9 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+	    <!-- This is the version number of nupkg files produced -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
+        <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -99,7 +101,7 @@
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\**\*.nuspec">
             <Find><![CDATA[<version>\d+\.\d+\.\d+\.\d+</version>]]></Find>
-            <ReplaceWith><![CDATA[<version>$(Version)</version>]]></ReplaceWith>
+            <ReplaceWith><![CDATA[<version>$(PackageVersion)</version>]]></ReplaceWith>
         </RegexTransform>
     </ItemGroup>
 

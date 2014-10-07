@@ -65,12 +65,12 @@
                     Width="186"
                     SelectionChanged="_filter_SelectionChanged"/>
 
-                <TextBox
+                <Tools:SearchControl
                     Grid.Column="5"
                     Margin="6,0,0,0"
-                    x:Name="_searchText"
-                    Width="224"
-                    KeyDown="_searchText_KeyDown" />
+                    x:Name="_searchControl"
+                    SearchStart="_searchControl_SearchStart"
+                    Width="224" />
 
                 <Button
                     Margin="24,0"

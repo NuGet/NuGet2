@@ -217,7 +217,7 @@
     <value>No dependencies</value>
   </data>
   <data name="Label_PackageManager" xml:space="preserve">
-    <value>Package Manager: {0}</value>
+    <value>NuGet Package Manager: {0}</value>
   </data>
   <data name="Button_OK" xml:space="preserve">
     <value>OK</value>
@@ -272,5 +272,11 @@
   </data>
   <data name="Filter_Installed" xml:space="preserve">
     <value>Installed</value>
+  </data>
+  <data name="Label_NuGetWindowCaption" xml:space="preserve">
+    <value>NuGet: {0}</value>
+  </data>
+  <data name="Button_Preview" xml:space="preserve">
+    <value>Preview</value>
   </data>
 </root>

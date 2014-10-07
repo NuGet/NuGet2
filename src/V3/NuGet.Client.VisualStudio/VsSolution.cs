@@ -76,8 +76,8 @@ namespace NuGet.Client.VisualStudio
             AddFeature<IPackageCacheRepository>(() => MachineCache.Default);
 
             // Add PowerShell feature
-            AddFeature<PowerShellScriptExecutionFeature>(() =>
-                new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>()));
+            AddFeature<PowerShellScriptExecutor>(() =>
+                new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>()));
         }
 
         public override bool Equals(Solution other)

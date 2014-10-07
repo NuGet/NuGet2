@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
@@ -10,7 +11,7 @@ namespace NuGet.Client.Installation
 {
     public class PurgeActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
             // Use the core-interop feature to execute the action
             return Task.Run(() =>
@@ -40,7 +41,7 @@ namespace NuGet.Client.Installation
         public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the download action to undo a purge
-            return new DownloadActionHandler().Execute(action, logger);
+            return new DownloadActionHandler().Execute(action, logger, CancellationToken.None);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
@@ -16,7 +17,7 @@ namespace NuGet.Client.Installation
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
             Uri downloadUri;
             try
@@ -74,7 +75,7 @@ namespace NuGet.Client.Installation
         public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the purge action to undo a download
-            return new PurgeActionHandler().Execute(action, logger);
+            return new PurgeActionHandler().Execute(action, logger, CancellationToken.None);
         }
 
         private IPackage GetPackage(IPackageCacheRepository packageCache, PackageIdentity packageIdentity, Uri downloadUri)

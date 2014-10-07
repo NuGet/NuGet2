@@ -10,6 +10,10 @@ using DteProject = EnvDTE.Project;
 using System;
 using System.Runtime.Versioning;
 
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
+
 namespace NuGet.Client.VisualStudio
 {
     public class VsProject : Project
@@ -52,8 +56,17 @@ namespace NuGet.Client.VisualStudio
             AddFeature<IPackageCacheRepository>(() => MachineCache.Default);
 
             // Add PowerShell feature
-            AddFeature<PowerShellScriptExecutionFeature>(() =>
-                new VsPowerShellScriptExecutionFeature(ServiceLocator.GetInstance<IScriptExecutor>()));
+            AddFeature<PowerShellScriptExecutor>(() =>
+                new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>()));
+
+#if VS14
+            // Add NuGetAwareProject if the project system is nuget-aware.
+            INuGetPackageManager nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (nugetAwareProject != null)
+            {
+                AddFeature<NuGetAwareProject>(() => new VsNuGetAwareProject(nugetAwareProject));
+            }
+#endif
         }
 
         public static VsProject Create(VsSolution solution, DteProject dteProject)

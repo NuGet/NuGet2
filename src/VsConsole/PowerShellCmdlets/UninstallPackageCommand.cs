@@ -72,19 +72,21 @@ namespace NuGet.PowerShell.Commands
                 args["SourceRepository"] = PackageManager.SourceRepository; ;
                 args["SharedRepository"] = PackageManager.LocalRepository; ;
 
-                CancellationTokenSource cts = new CancellationTokenSource();
-                var task = nugetAwareProject.UninstallPackageAsync(
-                    new NuGetPackageMoniker
-                    {
-                        Id = package.Id,
-                        Version = package.Version.ToString()
-                    },
-                    args,
-                    logger: null,
-                    progress: null,
-                    cancellationToken: cts.Token);
-                task.Wait();
-                return;
+                using (var cts = new CancellationTokenSource())
+                {
+                    var task = nugetAwareProject.UninstallPackageAsync(
+                        new NuGetPackageMoniker
+                        {
+                            Id = package.Id,
+                            Version = package.Version.ToString()
+                        },
+                        args,
+                        logger: null,
+                        progress: null,
+                        cancellationToken: cts.Token);
+                    task.Wait();
+                    return;
+                }
             }
 #endif
 

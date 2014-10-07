@@ -54,9 +54,10 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
-
+            
             InitializeComponent();
 
+            _searchControl.Text = model.SearchText;
             _filter.Items.Add(Resx.Resources.Filter_All);
             _filter.Items.Add(Resx.Resources.Filter_Installed);
 
@@ -208,13 +209,17 @@ namespace NuGet.Client.VisualStudio.UI
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
                     searchResultPackage.Id = package.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));
-                    searchResultPackage.Summary = package.Value<string>("summary");
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));                    
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
-
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
-
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
+
+                    var self = searchResultPackage.AllVersions.First(p => p.Version == searchResultPackage.Version);
+                    searchResultPackage.Summary = 
+                        self == null ?
+                        package.Value<string>("summary") :
+                        self.Description;
+
                     packages.Add(searchResultPackage);
                 }
 
@@ -334,7 +339,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void SearchPackageInActivePackageSource()
         {
-            var searchText = _searchText.Text;
+            var searchText = _searchControl.Text;
             var supportedFramework = Target.GetSupportedFramework();
 
             if (ShowOnlyInstalled())
@@ -402,14 +407,6 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, (VsSolution)Target);
                 }
-            }
-        }
-
-        private void _searchText_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-                SearchPackageInActivePackageSource();
             }
         }
 
@@ -532,6 +529,11 @@ namespace NuGet.Client.VisualStudio.UI
             w.Owner = Window.GetWindow(this);
             w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             w.ShowDialog();
+        }
+
+        private void _searchControl_SearchStart(object sender, EventArgs e)
+        {
+            SearchPackageInActivePackageSource();
         }
     }
 }

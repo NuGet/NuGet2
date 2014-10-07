@@ -146,6 +146,16 @@ namespace NuGet.VisualStudio
             _excludedCodeFiles.Clear();
         }
 
+        public override void AddImport(string targetPath, ProjectImportLocation location)
+        {
+            // Web sites are not msbuild based and do not support imports.
+        }
+
+        public override void RemoveImport(string targetPath)
+        {
+            // Web sites are not msbuild based and do not support imports.
+        }
+
         /// <summary>
         /// Determines if we need a source file to be under the App_Code folder
         /// </summary>

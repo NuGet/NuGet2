@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.Installation
 {
-    public abstract class PowerShellScriptExecutionFeature
+    public abstract class PowerShellScriptExecutor
     {
         public abstract void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, InstallationTarget target, IExecutionLogger logger);
     }

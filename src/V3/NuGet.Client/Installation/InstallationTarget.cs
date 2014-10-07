@@ -24,7 +24,7 @@ namespace NuGet.Client.Installation
         // Helper list for debug builds only.
         private static readonly HashSet<Type> KnownFeatures = new HashSet<Type>()
         {
-            typeof(PowerShellScriptExecutionFeature),
+            typeof(PowerShellScriptExecutor),
             typeof(IProjectManager),
             typeof(IPackageManager),
             typeof(IProjectSystem),

@@ -1,3 +1,8 @@
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -5,11 +10,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace NuGet.VisualStudio
 {
@@ -22,6 +25,7 @@ namespace NuGet.VisualStudio
         private readonly IVsMonitorSelection _vsMonitorSelection;
         private readonly uint _solutionLoadedUICookie;
         private readonly IVsSolution _vsSolution;
+        private bool _initNeeded;
 
         private ProjectCache _projectCache;
 
@@ -40,6 +44,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("dte");
             }
 
+            _initNeeded = true;
             _dte = dte;
             _vsSolution = vsSolution;
             _vsMonitorSelection = vsMonitorSelection;
@@ -64,10 +69,8 @@ namespace NuGet.VisualStudio
             _solutionEvents.ProjectRemoved += OnProjectRemoved;
             _solutionEvents.ProjectRenamed += OnProjectRenamed;
 
-            if (_dte.Solution.IsOpen)
-            {
-                OnSolutionOpened();
-            }
+            // Run the init on another thread to avoid an endless loop of SolutionManager -> Project System -> VSPackageManager -> SolutionManager
+            ThreadPool.QueueUserWorkItem(new WaitCallback(Init));
         }
 
         public string DefaultProjectName
@@ -339,8 +342,34 @@ namespace NuGet.VisualStudio
             }
         }
 
+        private void Init(object state)
+        {
+            if (_initNeeded && _dte.Solution.IsOpen)
+            {
+                InvokeOnUIThread(() => OnSolutionOpened());
+            }
+        }
+
+        /// <summary>
+        /// Invokes the action on the UI thread if one exists.
+        /// </summary>
+        private void InvokeOnUIThread(Action action)
+        {
+            if (Application.Current != null)
+            {
+                Application.Current.Dispatcher.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
         private void OnSolutionOpened()
         {
+            // we can skip the init if this has already been called
+            _initNeeded = false;
+
             // although the SolutionOpened event fires, the solution may be only in memory (e.g. when
             // doing File - New File). In that case, we don't want to act on the event.
             if (!IsSolutionOpen)

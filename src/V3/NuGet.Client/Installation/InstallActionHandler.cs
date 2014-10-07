@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
@@ -12,8 +13,17 @@ namespace NuGet.Client.Installation
 {
     public class InstallActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger)
+        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
+            var nugetAware = action.Target.TryGetFeature<NuGetAwareProject>();
+            if (nugetAware != null)
+            {
+                return nugetAware.InstallPackage(
+                    action.PackageIdentity,
+                    logger,
+                    cancelToken);
+            }
+
             return Task.Run(() =>
             {
                 // Get the package manager and project manager from the target
@@ -44,7 +54,7 @@ namespace NuGet.Client.Installation
         public Task Rollback(NewPackageAction action, IExecutionLogger logger)
         {
             // Just run the uninstall action to undo a install
-            return new UninstallActionHandler().Execute(action, logger);
+            return new UninstallActionHandler().Execute(action, logger, CancellationToken.None);
         }
     }
 }
