@@ -17,10 +17,24 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
+        public event EventHandler SelectedChanged;
+
+        private bool _selected;
+
         public bool Selected
         {
-            get;
-            set;
+            get
+            {
+                return _selected;
+            }
+            set
+            {
+                _selected = value;
+                if (SelectedChanged != null)
+                {
+                    SelectedChanged(this, EventArgs.Empty);
+                }
+            }
         }
 
         public bool Enabled
@@ -47,16 +61,19 @@ namespace NuGet.Client.VisualStudio.UI
         {
             Project = project;
             _name = Project.Name;
+            _selected = false;
             Version = version;
             Enabled = enabled;
             IsSolution = false;
         }
 
+        // Create PackageInstallationInfo for the solution.
         public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, Project project)
         {
             _name = name;
             Version = version;
             Enabled = enabled;
+            _selected = false;
             IsSolution = true;
 
             // this is just a placeholder and will not be really used. It's used to avoid

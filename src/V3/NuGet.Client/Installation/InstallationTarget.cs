@@ -128,10 +128,12 @@ namespace NuGet.Client.Installation
 
         protected virtual void AddFeature<T>(Func<T> factory) where T : class
         {
+#if DEBUG
             // During development, there should NEVER be a feature type added that we don't know about :).
             Debug.Assert(
                 KnownFeatures.Contains(typeof(T)), 
                 "You tried to register a feature ('" + typeof(T).FullName + "') I'm not familiar with. This isn't generally a good thing...");
+#endif
 
             _featureFactories.Add(typeof(T), factory);
         }

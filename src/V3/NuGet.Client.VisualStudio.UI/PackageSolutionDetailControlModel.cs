@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using NuGet.Client.ProjectSystem;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -45,6 +43,22 @@ namespace NuGet.Client.VisualStudio.UI
 
                 CreateVersions();
                 OnPropertyChanged("SelectedAction");
+            }
+        }
+
+        private bool _actionEnabled;
+
+        // Indicates if the action button and preview button is enabled.
+        public bool ActionEnabled
+        {
+            get
+            {
+                return _actionEnabled;
+            }
+            set
+            {
+                _actionEnabled = value;
+                OnPropertyChanged("ActionEnabled");
             }
         }
 
@@ -187,6 +201,7 @@ namespace NuGet.Client.VisualStudio.UI
         private void CreateProjectList()
         {
             _projects = new List<PackageInstallationInfo>();
+            ActionEnabled = false;
 
             if (_selectedAction == Resources.Resources.Action_Consolidate)
             {
@@ -198,7 +213,8 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null)
                     {
                         var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled));
+                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled);
+                        _projects.Add(info);
                     }
                 }
             }
@@ -213,7 +229,8 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null)
                     {
                         var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled));
+                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled);
+                        _projects.Add(info);
                     }
                 }
 
@@ -221,11 +238,12 @@ namespace NuGet.Client.VisualStudio.UI
                 if (v != null)
                 {
                     var enabled = v.Identity.Version != SelectedVersion.Version;
-                    _projects.Add(new PackageInstallationInfo(
+                    var info = new PackageInstallationInfo(
                         _solution.Name,
                         SelectedVersion.Version,
                         enabled,
-                        _solution.Projects.First()));
+                        _solution.Projects.First());
+                    _projects.Add(info);
                 }
             }
             else if (_selectedAction == Resources.Resources.Action_Install)
@@ -236,7 +254,8 @@ namespace NuGet.Client.VisualStudio.UI
                     var installed = project.InstalledPackages.GetInstalledPackage(Package.Id);
                     if (installed == null)
                     {
-                        _projects.Add(new PackageInstallationInfo(project, null, enabled: true));
+                        var info = new PackageInstallationInfo(project, null, enabled: true);
+                        _projects.Add(info);
                     }
                 }
             }
@@ -249,7 +268,8 @@ namespace NuGet.Client.VisualStudio.UI
                     if (installed != null &&
                         installed.Identity.Version == SelectedVersion.Version)
                     {
-                        _projects.Add(new PackageInstallationInfo(project, installed.Identity.Version, enabled: true));
+                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled: true);
+                        _projects.Add(info);
                     }
                 }
 
@@ -257,12 +277,21 @@ namespace NuGet.Client.VisualStudio.UI
                 if (v != null)
                 {
                     var enabled = v.Identity.Version == SelectedVersion.Version;
-                    _projects.Add(new PackageInstallationInfo(
+                    var info = new PackageInstallationInfo(
                         _solution.Name,
                         SelectedVersion.Version,
                         enabled,
-                        _solution.Projects.First()));
+                        _solution.Projects.First());
+                    _projects.Add(info);
                 }
+            }
+
+            foreach (var p in _projects)
+            {
+                p.SelectedChanged += (sender, e) =>
+                {
+                    ActionEnabled = _projects.Any(i => i.Selected);
+                };
             }
 
             OnPropertyChanged("Projects");
