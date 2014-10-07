@@ -36,7 +36,7 @@ namespace NuGet.Client.VisualStudio.UI
                     .ToDictionary(p => p, _ => PackagePreviewStatus.Unchanged);
 
                 foreach (var action in actions.Where(a => targetProject.Equals(a.Target)))
-                {   
+                {
                     if (action.ActionType == PackageActionType.Install)
                     {
                         packageStatus[action.PackageIdentity] = PackagePreviewStatus.Added;
@@ -47,17 +47,23 @@ namespace NuGet.Client.VisualStudio.UI
                     }
                 }
 
-                _previewResults.Add(new PreviewResult(
-                    targetProject.Name,
-                    unchanged: packageStatus
+                var unchanged = packageStatus
                     .Where(v => v.Value == PackagePreviewStatus.Unchanged)
-                    .Select(v => v.Key),
-                deleted: packageStatus
+                    .Select(v => v.Key);
+                var deleted = packageStatus
                     .Where(v => v.Value == PackagePreviewStatus.Deleted)
-                    .Select(v => v.Key),
-                added: packageStatus
+                    .Select(v => v.Key);
+                var added = packageStatus
                     .Where(v => v.Value == PackagePreviewStatus.Added)
-                    .Select(v => v.Key)));
+                    .Select(v => v.Key);
+                if (deleted.Any() || added.Any())
+                {
+                    _previewResults.Add(new PreviewResult(
+                        targetProject.Name,
+                        unchanged: unchanged,
+                        deleted: deleted,
+                        added: added));
+                }
             }
         }
     }
