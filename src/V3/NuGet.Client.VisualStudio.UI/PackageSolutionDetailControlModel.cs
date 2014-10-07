@@ -201,7 +201,6 @@ namespace NuGet.Client.VisualStudio.UI
         private void CreateProjectList()
         {
             _projects = new List<PackageInstallationInfo>();
-            ActionEnabled = false;
 
             if (_selectedAction == Resources.Resources.Action_Consolidate)
             {
@@ -293,6 +292,7 @@ namespace NuGet.Client.VisualStudio.UI
                     ActionEnabled = _projects.Any(i => i.Selected);
                 };
             }
+            ActionEnabled = _projects.Any(i => i.Selected);
 
             OnPropertyChanged("Projects");
         }

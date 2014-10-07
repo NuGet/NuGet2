@@ -61,7 +61,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             Project = project;
             _name = Project.Name;
-            _selected = false;
+            _selected = enabled;
             Version = version;
             Enabled = enabled;
             IsSolution = false;
@@ -73,7 +73,7 @@ namespace NuGet.Client.VisualStudio.UI
             _name = name;
             Version = version;
             Enabled = enabled;
-            _selected = false;
+            _selected = enabled;
             IsSolution = true;
 
             // this is just a placeholder and will not be really used. It's used to avoid
