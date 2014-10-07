@@ -79,6 +79,9 @@
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xamls\FileConflictDialog.xaml.cs">
+      <DependentUpon>FileConflictDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\InstalledIndicator.xaml.cs">
       <DependentUpon>InstalledIndicator.xaml</DependentUpon>
     </Compile>
@@ -129,6 +132,10 @@
     <Page Include="Xamls\BusyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Xamls\FileConflictDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xamls\InstalledIndicator.xaml">
       <SubType>Designer</SubType>

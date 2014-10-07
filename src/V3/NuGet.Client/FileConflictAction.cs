@@ -8,9 +8,11 @@ namespace NuGet.Client
 {
     public enum FileConflictAction
     {
+        PromptUser,
+
         Overwrite,
-        Ignore,
         OverwriteAll,
+        Ignore,
         IgnoreAll
     }
 }

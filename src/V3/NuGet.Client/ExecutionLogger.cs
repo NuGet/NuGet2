@@ -1,4 +1,5 @@
-﻿namespace NuGet.Client
+﻿using System.Diagnostics;
+namespace NuGet.Client
 {
     public enum MessageLevel
     {
@@ -33,7 +34,7 @@
 
         public FileConflictAction ResolveFileConflict(string message)
         {
-            return FileConflictAction.Ignore;
+            return FileConflictAction.IgnoreAll;
         }
     }
 
@@ -53,7 +54,18 @@
 
         public NuGet.FileConflictResolution ResolveFileConflict(string message)
         {
-            return (NuGet.FileConflictResolution)(int)_logger.ResolveFileConflict(message);
+            var action = _logger.ResolveFileConflict(message);
+            Debug.Assert(action != FileConflictAction.PromptUser);
+
+            if (action == FileConflictAction.Overwrite ||
+                action == FileConflictAction.OverwriteAll)
+            {
+                return FileConflictResolution.Overwrite;
+            }
+            else
+            {
+                return FileConflictResolution.Ignore;
+            }
         }
     }
 }
