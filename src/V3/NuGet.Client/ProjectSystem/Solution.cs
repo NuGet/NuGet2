@@ -21,7 +21,7 @@ namespace NuGet.Client.ProjectSystem
         /// <summary>
         /// Gets a list of all projects targetted by this installation target.
         /// </summary>
-        public abstract IReadOnlyList<Project> Projects { get; }
+        public abstract IEnumerable<Project> Projects { get; }
 
         /// <summary>
         /// Gets the project with the specified name, if it exists, otherwise returns null.

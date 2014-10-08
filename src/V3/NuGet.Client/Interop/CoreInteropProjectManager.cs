@@ -9,12 +9,13 @@ namespace NuGet.Client.Interop
         private readonly InstallationTarget _target;
         private readonly IProjectSystem _projectSystem;
         private readonly ISharedPackageRepository _sharedRepo;
+        private readonly IPackageRepository _refRepo;
         private readonly CoreInteropPackageManager _pacman;
         private readonly CoreInteropSourceRepository _sourceRepo;
 
         public IPackageRepository LocalRepository
         {
-            get { return _sharedRepo; }
+            get { return _refRepo; }
         }
 
         public IPackageManager PackageManager
@@ -43,6 +44,7 @@ namespace NuGet.Client.Interop
         {
             // Get the required features from the target
             _sharedRepo = target.GetRequiredFeature<ISharedPackageRepository>();
+            _refRepo = target.GetRequiredFeature<IProjectManager>().LocalRepository;
             _projectSystem = target.TryGetFeature<IProjectSystem>();
             _target = target;
 

@@ -16,7 +16,7 @@ namespace NuGet.Client.VisualStudio
 {
     public class VsSolution : Solution
     {
-        private readonly List<VsProject> _projects;
+        private readonly ISolutionManager _solution;
         private readonly string _name;
         private readonly InstalledPackagesList _installedSolutionLevelPackages;
         private readonly IVsPackageManager _packageManager;
@@ -37,11 +37,12 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        public override IReadOnlyList<Project> Projects
+        public override IEnumerable<Project> Projects
         {
             get
             {
-                return _projects.AsReadOnly();
+                return _solution.GetProjects()
+                    .Select(dteProject => new VsProject(this, dteProject, _packageManager.GetProjectManager(dteProject)));
             }
         }
 
@@ -61,7 +62,7 @@ namespace NuGet.Client.VisualStudio
                 CultureInfo.CurrentCulture,
                 Strings.Label_Solution,
                 dteSolution.GetName());
-            _projects = LoadProjects(solutionManager, packageManager).ToList();
+            _solution = solutionManager;
             _packageManager = packageManager;
 
             var repo = (SharedPackageRepository)packageManager.LocalRepository;
@@ -89,14 +90,8 @@ namespace NuGet.Client.VisualStudio
 
         public VsProject GetProject(DteProject dteProject)
         {
-            return _projects.FirstOrDefault(
+            return Projects.Cast<VsProject>().FirstOrDefault(
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private IEnumerable<VsProject> LoadProjects(ISolutionManager solutionManager, IVsPackageManager packageManager)
-        {
-            return solutionManager.GetProjects().Select(dteProject =>
-                new VsProject(this, dteProject, packageManager.GetProjectManager(dteProject)));
         }
 
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)
