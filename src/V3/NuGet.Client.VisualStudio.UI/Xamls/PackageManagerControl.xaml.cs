@@ -214,7 +214,7 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
 
-                    var self = searchResultPackage.AllVersions.First(p => p.Version == searchResultPackage.Version);
+                    var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
                     searchResultPackage.Summary = 
                         self == null ?
                         package.Value<string>("summary") :

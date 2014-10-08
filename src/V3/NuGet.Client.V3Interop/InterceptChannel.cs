@@ -605,7 +605,7 @@ namespace NuGet.Client.V3Shim
         {
             string feedArg = feedName == null ? string.Empty : string.Format(CultureInfo.InvariantCulture, "&feed={0}", feedName);
 
-            Uri searchAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}?q={1}&targetFramework={2}&prerelease={3}&skip={4}&sortBy={5}&take={6}{7}",
+            Uri searchAddress = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}?q={1}&luceneQuery=false&targetFramework={2}&prerelease={3}&skip={4}&sortBy={5}&take={6}{7}",
                 _searchAddress, searchTerm, targetFramework, includePrerelease, skip, sortBy, take, feedArg));
             return searchAddress;
         }

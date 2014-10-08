@@ -67,6 +67,9 @@ namespace NuGet.Client.VisualStudio
 
             // The Urls should be equal but if they aren't, there's nothing the user can do about it :(
             Debug.Assert(String.Equals(source.Source, newSource.Url, StringComparison.Ordinal));
+
+            // Update the active package source
+            _sourceProvider.ActivePackageSource = source;
         }
     }
 }
