@@ -129,7 +129,7 @@ namespace NuGet.Client.Installation
             return factory();
         }
 
-        protected virtual void AddFeature<T>(Func<T> factory) where T : class
+        protected void AddFeature<T>(Func<T> factory) where T : class
         {
 #if DEBUG
             // During development, there should NEVER be a feature type added that we don't know about :).
