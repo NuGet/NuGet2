@@ -1,5 +1,6 @@
 ﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.BusyControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -15,9 +16,14 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <ProgressBar Height="20" IsIndeterminate="True" Grid.Row="0"></ProgressBar>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" x:Name="_text">Working...</TextBlock>
-            <Button Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Center" Padding="20,0" Visibility="Collapsed" 
-                    Click="CancelButton_Click" x:Name="_cancelButton">Cancel</Button>
+            <TextBlock Grid.Row="0" 
+                       Text="{x:Static resx:Resources.Text_Working}"
+                       HorizontalAlignment="Center" 
+                       x:Name="_text"/>
+            <Button Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Center" Padding="20,0" 
+                    Visibility="Collapsed" 
+                    Content="{x:Static resx:Resources.Button_Cancel}"
+                    Click="CancelButton_Click" x:Name="_cancelButton"/>
         </Grid>
     </Grid>
 </UserControl>

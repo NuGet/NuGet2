@@ -12,10 +12,20 @@
             <Grid Margin="0,8">
                 <TextBlock Name="_noMoreItems"
                            FontStyle="Italic"
-                           Visibility="Collapsed">No more items</TextBlock>
+                           HorizontalAlignment="Center"
+                           Text="{x:Static resx:Resources.Text_NoMoreItems}"
+                           Visibility="Collapsed"/>
+                
+                <TextBlock Name="_noItemsFound"
+                           FontStyle="Italic"
+                           HorizontalAlignment="Center"
+                           Text="{x:Static resx:Resources.Text_NoItemsFound}"
+                           Visibility="Collapsed"/>
 
                 <TextBlock Name="_ready"
-                           Visibility="Collapsed" >Ready</TextBlock>
+                           HorizontalAlignment="Center"
+                           Text="{x:Static resx:Resources.Text_Ready}"
+                           Visibility="Collapsed" />
 
                 <StackPanel Orientation="Vertical"
                             Name="_progressBar"
@@ -24,7 +34,8 @@
                         Margin="24,0"
                         Height="15" IsIndeterminate="True" />
                     <TextBlock Margin="0,8"
-                               HorizontalAlignment="Center">Loading...</TextBlock>
+                               Text="{x:Static resx:Resources.Text_Loading}"
+                               HorizontalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Name="_errorOccurred"
                             Visibility="Collapsed">
@@ -50,6 +61,11 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Status}" Value="NoMoreItems">
                     <Setter TargetName="_noMoreItems"
+                            Property="Visibility"
+                            Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Status}" Value="NoItemsFound">
+                    <Setter TargetName="_noItemsFound"
                             Property="Visibility"
                             Value="Visible" />
                 </DataTrigger>

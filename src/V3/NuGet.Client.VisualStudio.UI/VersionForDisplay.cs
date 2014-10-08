@@ -23,7 +23,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public override string ToString()
         {
-            return _additionalInfo + Version.ToString();
+            return _additionalInfo + Version.ToNormalizedString();
         }
 
         public override bool Equals(object obj)

@@ -97,6 +97,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Button_Cancel {
+            get {
+                return ResourceManager.GetString("Button_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I Accept.
         /// </summary>
         public static string Button_IAccept {
@@ -259,15 +268,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Prompt.
-        /// </summary>
-        public static string FileConflictAction_Prompt {
-            get {
-                return ResourceManager.GetString("FileConfictAction_Prompt", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Ignore All.
         /// </summary>
         public static string FileConflictAction_IgnoreAll {
@@ -282,6 +282,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string FileConflictAction_OverwriteAll {
             get {
                 return ResourceManager.GetString("FileConflictAction_OverwriteAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prompt.
+        /// </summary>
+        public static string FileConflictAction_Prompt {
+            get {
+                return ResourceManager.GetString("FileConflictAction_Prompt", resourceCulture);
             }
         }
         
@@ -556,11 +565,56 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Loading....
+        /// </summary>
+        public static string Text_Loading {
+            get {
+                return ResourceManager.GetString("Text_Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No dependencies.
         /// </summary>
         public static string Text_NoDependencies {
             get {
                 return ResourceManager.GetString("Text_NoDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No items found.
+        /// </summary>
+        public static string Text_NoItemsFound {
+            get {
+                return ResourceManager.GetString("Text_NoItemsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No more items.
+        /// </summary>
+        public static string Text_NoMoreItems {
+            get {
+                return ResourceManager.GetString("Text_NoMoreItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready.
+        /// </summary>
+        public static string Text_Ready {
+            get {
+                return ResourceManager.GetString("Text_Ready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Working....
+        /// </summary>
+        public static string Text_Working {
+            get {
+                return ResourceManager.GetString("Text_Working", resourceCulture);
             }
         }
         

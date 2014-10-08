@@ -85,7 +85,14 @@ namespace NuGet.Client.VisualStudio.UI
 
                 if (!r.HasMoreItems)
                 {
-                    _loadingStatusIndicator.Status = LoadingStatus.NoMoreItems;
+                    if (_items.Count == 0)
+                    {
+                        _loadingStatusIndicator.Status = LoadingStatus.NoItemsFound;
+                    }
+                    else
+                    {
+                        _loadingStatusIndicator.Status = LoadingStatus.NoMoreItems;
+                    }
                 }
                 else
                 {
@@ -202,6 +209,7 @@ namespace NuGet.Client.VisualStudio.UI
         Ready,
         Loading,
         NoMoreItems,
+        NoItemsFound,
         ErrorOccured
     }
 
