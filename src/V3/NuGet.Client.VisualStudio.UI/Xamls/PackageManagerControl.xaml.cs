@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
@@ -26,6 +25,10 @@ namespace NuGet.Client.VisualStudio.UI
         private const int PageSize = 15;
 
         private bool _initialized;
+
+        // used to prevent starting new search when we update the package sources
+        // list in response to PackageSourcesChanged event.
+        private bool _dontStartNewSearch;
 
         public PackageManagerModel Model { get; private set; }
 
@@ -54,7 +57,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
-            
+
             InitializeComponent();
 
             _searchControl.Text = model.SearchText;
@@ -80,9 +83,55 @@ namespace NuGet.Client.VisualStudio.UI
                 _packageDetail.Visibility = System.Windows.Visibility.Visible;
             }
 
-            Update();
+            InitSourceRepoList();
             this.Unloaded += PackageManagerControl_Unloaded;
             _initialized = true;
+
+            Model.Sources.PackageSourcesChanged += Sources_PackageSourcesChanged;
+        }
+
+        private void Sources_PackageSourcesChanged(object sender, EventArgs e)
+        {
+            // Set _dontStartNewSearch to true to prevent a new search started in 
+            // _sourceRepoList_SelectionChanged(). This method will start the new
+            // search when needed by itself.
+            _dontStartNewSearch = true;
+            try
+            {
+
+                var oldActiveSource = _sourceRepoList.SelectedItem as PackageSource;
+                var newSources = new List<PackageSource>(Sources.AvailableSources);
+
+                // Update the source repo list with the new value.
+                _sourceRepoList.Items.Clear();
+
+                foreach (var source in newSources)
+                {
+                    _sourceRepoList.Items.Add(source);
+                }
+
+                if (oldActiveSource != null && newSources.Contains(oldActiveSource))
+                {
+                    // active source is not changed. Set _dontStartNewSearch to true
+                    // to prevent a new search when _sourceRepoList.SelectedItem is set.
+                    _sourceRepoList.SelectedItem = oldActiveSource;
+                }
+                else
+                {
+                    // active source changed.
+                    _sourceRepoList.SelectedItem =
+                        newSources.Count > 0 ?
+                        newSources[0] :
+                        null;
+
+                    // start search explicitly.
+                    SearchPackageInActivePackageSource();
+                }
+            }
+            finally
+            {
+                _dontStartNewSearch = false;
+            }
         }
 
         private void PackageManagerControl_Unloaded(object sender, RoutedEventArgs e)
@@ -117,18 +166,16 @@ namespace NuGet.Client.VisualStudio.UI
                 // packages are restored. Update the UI
                 if (Target.IsSolution)
                 {
-                    // !!! TODO: update UI here
+                    // TODO: update UI here
                 }
                 else
                 {
-                    /* !!!
-                    _solutionTarget.CreateInstalledPackages();
-                    UpdateDetailPane(); */
+                    // TODO: update UI here
                 }
             }
         }
 
-        private void Update()
+        private void InitSourceRepoList()
         {
             _label.Text = string.Format(
                 CultureInfo.CurrentCulture,
@@ -141,9 +188,11 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 _sourceRepoList.Items.Add(source);
             }
-            _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
 
-            SearchPackageInActivePackageSource();
+            if (Sources.ActiveRepository != null)
+            {
+            _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
+            }                
         }
 
         public void SetBusy(bool busy)
@@ -209,13 +258,13 @@ namespace NuGet.Client.VisualStudio.UI
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
                     searchResultPackage.Id = package.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));                    
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));
                     searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
 
                     var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
-                    searchResultPackage.Summary = 
+                    searchResultPackage.Summary =
                         self == null ?
                         package.Value<string>("summary") :
                         self.Description;
@@ -337,6 +386,17 @@ namespace NuGet.Client.VisualStudio.UI
             return Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem);
         }
 
+        internal SourceRepository CreateActiveRepository()
+        {
+            var activeSource = _sourceRepoList.SelectedItem as PackageSource;
+            if (activeSource == null)
+            {
+                return null;
+            }
+
+            return Sources.CreateSourceRepository(activeSource);
+        }
+
         private void SearchPackageInActivePackageSource()
         {
             var searchText = _searchControl.Text;
@@ -357,9 +417,26 @@ namespace NuGet.Client.VisualStudio.UI
             else
             {
                 // search online
+                var activeSource = _sourceRepoList.SelectedItem as PackageSource;
+                if (activeSource == null)
+                {
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
-                        Sources.ActiveRepository.Search(
+                        {
+                            return Task.Factory.StartNew(() =>
+                            {
+                                return Enumerable.Empty<JObject>();
+                            });
+                        },
+                        Target);
+                    _packageList.Loader = loader;
+                }
+                else
+                {
+                    var sourceRepository = Sources.CreateSourceRepository(activeSource);
+                    var loader = new PackageLoader(
+                        (startIndex, ct) =>
+                            sourceRepository.Search(
                             searchText,
                             new SearchFilter()
                             {
@@ -372,6 +449,7 @@ namespace NuGet.Client.VisualStudio.UI
                     Target);
                 _packageList.Loader = loader;
             }
+        }
         }
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
@@ -412,13 +490,16 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _sourceRepoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var newSource = _sourceRepoList.SelectedItem as PackageSource;
-            if (newSource == null)
+            if (_dontStartNewSearch)
             {
                 return;
             }
 
-            Sources.ChangeActiveSource(newSource);
+            var newSource = _sourceRepoList.SelectedItem as PackageSource;
+            if (newSource != null)
+            {
+                Sources.ChangeActiveSource(newSource); 
+            }            
             SearchPackageInActivePackageSource();
         }
 
@@ -474,7 +555,7 @@ namespace NuGet.Client.VisualStudio.UI
                     {
                         uninstalledPackages.Add(package);
                     }
-                }                
+            }
             }
 
             if (showOnlyInstalled)

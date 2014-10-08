@@ -268,6 +268,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No repository is selected.
+        /// </summary>
+        public static string Error_NoActiveRepository {
+            get {
+                return ResourceManager.GetString("Error_NoActiveRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore All.
         /// </summary>
         public static string FileConflictAction_IgnoreAll {
@@ -615,6 +624,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Text_Working {
             get {
                 return ResourceManager.GetString("Text_Working", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string WindowTitle_Error {
+            get {
+                return ResourceManager.GetString("WindowTitle_Error", resourceCulture);
             }
         }
         

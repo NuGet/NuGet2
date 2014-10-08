@@ -155,6 +155,11 @@ namespace NuGet.VisualStudio
             _packageSources.AddRange(sources);
 
             PersistPackageSources(_packageSourceProvider, _vsShellInfo, _packageSources);
+
+            if (PackageSourcesSaved != null)
+            {
+                PackageSourcesSaved(this, EventArgs.Empty);
+            }
         }
 
         public void DisablePackageSource(PackageSource source)
@@ -337,5 +342,8 @@ namespace NuGet.VisualStudio
             return packageSource != null &&
                 IsAggregateSource(packageSource.Name, packageSource.Source);
         }
+
+
+        public event EventHandler PackageSourcesSaved;
     }
 }

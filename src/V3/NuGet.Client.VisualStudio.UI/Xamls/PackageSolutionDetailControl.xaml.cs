@@ -60,8 +60,13 @@ namespace NuGet.Client.VisualStudio.UI
         private async Task<IEnumerable<PackageAction>> ResolveActions()
         {
             var model = (PackageSolutionDetailControlModel)DataContext;
+            var repo = Control.CreateActiveRepository();
+            if (repo == null)
+            {
+                throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
+            }
             var resolver = new ActionResolver(
-                Control.Sources.ActiveRepository,
+                repo,
                 new ResolutionContext()
                 {
                     DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
@@ -113,7 +118,12 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(
+                    Window.GetWindow(Control),
+                    ex.Message,
+                    Resx.Resources.WindowTitle_Error,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
             finally
             {

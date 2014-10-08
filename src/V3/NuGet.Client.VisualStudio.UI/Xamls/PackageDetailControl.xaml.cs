@@ -71,7 +71,7 @@ namespace NuGet.Client.VisualStudio.UI
                 var actions = await ResolveActions(action);
                 Control.PreviewActions(actions);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 // TODO: Is this the only reason for this exception???
                 MessageBox.Show("Temporary Message! Clean this up!" + Environment.NewLine + ex.Message, "Temporary Message");
@@ -86,8 +86,14 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 // Create a resolver
+                var repo = Control.CreateActiveRepository();
+                if (repo == null)
+                {
+                    throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
+                }
+
                 var resolver = new ActionResolver(
-                    Control.Sources.ActiveRepository,
+                    repo,
                     new ResolutionContext()
                     {
                         DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
@@ -136,7 +142,12 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(
+                    Window.GetWindow(Control),
+                    ex.Message,
+                    Resx.Resources.WindowTitle_Error,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
             finally
             {
@@ -213,7 +224,6 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 Preview(PackageActionType.Uninstall);
             }
-
         }
     }
 }

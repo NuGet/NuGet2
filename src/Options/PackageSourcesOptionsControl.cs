@@ -213,8 +213,9 @@ namespace NuGet.Options
             // find the enabled package source 
             var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
 
-            // restore current active source if it still exists, or reset to aggregate source
-            _packageSourceProvider.ActivePackageSource = updatedActiveSource ?? AggregatePackageSource.Instance;
+            // restore current active source if it still exists, or reset to the first enabled source
+            _packageSourceProvider.ActivePackageSource = updatedActiveSource ?? 
+                packageSources.Find(p => p.IsEnabled);
             return true;
         }
 

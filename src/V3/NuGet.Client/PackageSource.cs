@@ -39,5 +39,10 @@ namespace NuGet.Client
                 .Add(Url)
                 .CombinedHash;
         }
+
+        public override string ToString()
+        {
+            return Name + ": " + Url;
+        }
     }
 }

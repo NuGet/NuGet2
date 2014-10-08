@@ -26,11 +26,23 @@ namespace NuGet.Client.VisualStudio
             {
                 Debug.Assert(!_sourceProvider.ActivePackageSource.IsAggregate(), "Active source is the aggregate source! This shouldn't happen!");
 
+                if (_sourceProvider.ActivePackageSource == null)
+                {
+                    return null;
+                }
+
                 return new V2SourceRepository(
                     new PackageSource(_sourceProvider.ActivePackageSource.Name, _sourceProvider.ActivePackageSource.Source),
                     _repoFactory.CreateRepository(
                         _sourceProvider.ActivePackageSource.Source));
             }
+        }
+
+        public override SourceRepository CreateSourceRepository(PackageSource packageSource)
+        {
+            return new V2SourceRepository(
+                packageSource,
+                _repoFactory.CreateRepository(packageSource.Url));
         }
 
         public override IEnumerable<PackageSource> AvailableSources
@@ -48,6 +60,13 @@ namespace NuGet.Client.VisualStudio
         public VsSourceRepositoryManager(IVsPackageSourceProvider sourceProvider, IPackageRepositoryFactory repoFactory)
         {
             _sourceProvider = sourceProvider;
+            _sourceProvider.PackageSourcesSaved += (sender, e) =>
+            {
+                if (PackageSourcesChanged != null)
+                {
+                    PackageSourcesChanged(this, EventArgs.Empty);
+                }
+            };
             _repoFactory = repoFactory;
         }
 
@@ -71,5 +90,7 @@ namespace NuGet.Client.VisualStudio
             // Update the active package source
             _sourceProvider.ActivePackageSource = source;
         }
+
+        public override event EventHandler PackageSourcesChanged;
     }
 }

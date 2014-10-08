@@ -320,6 +320,11 @@ namespace NuGet
                     ReadPasswordValues(source)
                 });
             }
+
+            if (PackageSourcesSaved != null)
+            {
+                PackageSourcesSaved(this, EventArgs.Empty);
+            }
         }
 
         private static KeyValuePair<string, string> ReadPasswordValues(PackageSource source)
@@ -367,5 +372,7 @@ namespace NuGet
                 IsPasswordClearText = isPasswordClearText;
             }
         }
+
+        public event EventHandler PackageSourcesSaved;
     }
 }

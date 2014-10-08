@@ -12,6 +12,11 @@ namespace NuGet.Client
     public abstract class SourceRepositoryManager
     {
         public abstract SourceRepository ActiveRepository { get; }
+
+        public abstract event EventHandler PackageSourcesChanged;
+
+        public abstract SourceRepository CreateSourceRepository(PackageSource packageSource);
+
         public abstract IEnumerable<PackageSource> AvailableSources { get; }
 
         /// <summary>
