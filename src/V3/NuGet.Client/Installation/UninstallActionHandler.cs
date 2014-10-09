@@ -13,6 +13,15 @@ namespace NuGet.Client.Installation
     {
         public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
+            var nugetAware = action.Target.TryGetFeature<NuGetAwareProject>();
+            if (nugetAware != null)
+            {
+                return nugetAware.UninstallPackage(
+                    action.PackageIdentity,
+                    logger,
+                    cancelToken);
+            }
+
             return Task.Run(() =>
             {
                 // Get the project manager
