@@ -43,8 +43,11 @@ namespace NuGet.Resolver
 
         public IPackageConstraintProvider ConstraintProvider
         {
-            get;
-            set;
+            get { return NullConstraintProvider.Instance; }
+            set 
+            { 
+                // no-op 
+            }
         }
 
         // Disable warnings that those events are never used since this is intentional.

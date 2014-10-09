@@ -52,6 +52,7 @@ namespace NuGet.Server.DataServices
             FullPath = derivedData.FullPath;
             MinClientVersion = package.MinClientVersion == null ? null : package.MinClientVersion.ToString();
             Listed = package.Listed;
+            Language = package.Language;
 
             // set the latest flags based on the derived data
             IsAbsoluteLatestVersion = derivedData.IsAbsoluteLatestVersion;
@@ -233,6 +234,12 @@ namespace NuGet.Server.DataServices
         }
 
         public string MinClientVersion
+        {
+            get;
+            set;
+        }
+
+        public string Language
         {
             get;
             set;

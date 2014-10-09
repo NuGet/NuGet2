@@ -41,7 +41,9 @@ namespace NuGet.Commands
             ".csproj",
             ".vbproj",
             ".fsproj",
-            ".nproj"
+            ".nproj",
+            ".btproj",
+            ".dxjsproj"
         };
 
         private Version _minClientVersionValue;
@@ -66,6 +68,9 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "PackageCommandSymbolsDescription")]
         public bool Symbols { get; set; }
+
+        [Option(typeof(NuGetCommand), "PackageCommandExcludeSourceCodeDescription")]
+        public bool ExcludeSourceCode { get; set; }
 
         [Option(typeof(NuGetCommand), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
@@ -97,6 +102,12 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandMinClientVersion")]
         public string MinClientVersion { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandBaseTargetPath")]
+        public string BaseTargetPath { get; set; }
+
+        [Option(typeof(NuGetCommand), "PackageCommandSolutionName")]
+        public string SolutionName { get; set; }
+
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
@@ -119,6 +130,22 @@ namespace NuGet.Commands
 
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
             BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
+
+            // Validate the BaseTargetPath, if it is provided
+            if (!string.IsNullOrWhiteSpace(BaseTargetPath))
+            {
+                if (Build)
+                {
+                    // Providing BaseTargetPath only makes sense when the NuGet is not building the solution,
+                    // i.e. the solution is built by TFS Team Build.
+                    throw new CommandLineException(LocalizedResourceManager.GetString("PackageCommandIrrelevantBaseTargetPath"));
+                }
+
+                if (!Directory.Exists(BaseTargetPath))
+                {
+                    throw new CommandLineException(LocalizedResourceManager.GetString("PackageCommandInvalidBaseTargetPath"));
+                }
+            }
 
             if (!String.IsNullOrEmpty(MinClientVersion))
             {
@@ -344,7 +371,9 @@ namespace NuGet.Commands
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
-                IncludeReferencedProjects = IncludeReferencedProjects
+                IncludeReferencedProjects = IncludeReferencedProjects,
+                BaseTargetPath = BaseTargetPath,
+                SolutionName = SolutionName
             };
 
             // Add the additional Properties to the properties of the Project Factory
@@ -373,6 +402,7 @@ namespace NuGet.Commands
             Console.WriteLine(LocalizedResourceManager.GetString("PackageCommandAttemptingToBuildSymbolsPackage"), Path.GetFileName(path));
 
             factory.IncludeSymbols = true;
+            factory.ExcludeSourceCode = ExcludeSourceCode;
             PackageBuilder symbolsBuilder = factory.CreateBuilder(BasePath);
             symbolsBuilder.Version = mainPackageBuilder.Version;
 

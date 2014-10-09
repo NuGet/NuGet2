@@ -6024,4 +6024,88 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="HelpCommandForMoreInfo_cht" xml:space="preserve">
     <value>如需詳細資訊，請造訪 {0}</value>
   </data>
+  <data name="PackageCommandInvalidBaseTargetPath" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_chs" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_cht" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_csy" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_deu" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_esp" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_fra" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_ita" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_jpn" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_kor" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_plk" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_ptb" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_rus" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandInvalidBaseTargetPath_trk" xml:space="preserve">
+    <value>The value of BaseTargetPath argument is not a valid path.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_chs" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_cht" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_csy" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_deu" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_esp" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_fra" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_ita" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_jpn" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_kor" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_plk" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_ptb" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_rus" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
+  <data name="PackageCommandIrrelevantBaseTargetPath_trk" xml:space="preserve">
+    <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
+  </data>
 </root>

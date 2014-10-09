@@ -23,12 +23,13 @@ namespace NuGet.Versioning
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
             string formattedString = null;
-            if (TryFormatter(format, formatProvider, out formattedString))
+
+            if (formatProvider == null || !TryFormatter(format, formatProvider, out formattedString))
             {
-                return formattedString;
+                formattedString = ToString();
             }
 
-            return null;
+            return formattedString;
         }
 
         protected bool TryFormatter(string format, IFormatProvider formatProvider, out string formattedString)

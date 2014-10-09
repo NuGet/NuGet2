@@ -68,5 +68,5 @@ namespace NuGet
             }
             return value;
         }
-    }    
+    }       
 }

@@ -899,5 +899,55 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Util.DeleteDirectory(source);
             }
         }
+
+        [Fact]
+        public void InstallCommand_DependencyResolutionFailure()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var outputDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+
+            try
+            {
+                // Arrange            
+                Util.CreateDirectory(source);
+                Util.CreateDirectory(outputDirectory);
+
+                var packageFileName = PackageCreater.CreatePackage(
+                    "testPackage1", "1.1.0", source,
+                    (builder) =>
+                    {
+                        var dependencySet = new PackageDependencySet(null, 
+                            new [] { 
+                                new PackageDependency(
+                                    "non_existing", 
+                                    VersionUtility.ParseVersionSpec("1.1"))
+                            });
+                        builder.DependencySets.Add(dependencySet);
+                    });
+
+                // Act
+                var args = String.Format(
+                    CultureInfo.InvariantCulture,
+                    "install testPackage1 -OutputDirectory {0} -Source {1}", outputDirectory, source);
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    Directory.GetCurrentDirectory(),
+                    args,
+                    waitForExit: true);
+
+                // Assert
+                Assert.NotEqual(0, r.Item1);
+                Assert.Contains("Attempting to resolve dependency 'non_existing (≥ 1.1)'", r.Item2);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(outputDirectory);
+                Util.DeleteDirectory(source);
+            }
+        }
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Build.Evaluation;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Evaluation;
 
 namespace NuGet.Common
 {
@@ -81,18 +81,35 @@ namespace NuGet.Common
             }
         }
 
-        private IEnumerable<ProjectItem> GetItems(string itemType, string name)
+        private IEnumerable<ProjectItem> GetItemsStartsWith(string itemType, string name)
         {
             return Project.GetItems(itemType).Where(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
         }
 
+        private IEnumerable<ProjectItem> GetItemsEndsWith(string itemType, string name)
+        {
+            return Project.GetItems(itemType).Where(i => i.EvaluatedInclude.EndsWith(name, StringComparison.OrdinalIgnoreCase));
+        }
+
         public ProjectItem GetReference(string name)
         {
-            name = Path.GetFileNameWithoutExtension(name);
-            return GetItems("Reference", name)
+            var nameNoExtension = Path.GetFileNameWithoutExtension(name);
+            // First hint references, such as:
+            // <Reference Include="Microsoft.VisualStudio.Threading, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+            var nonFullyQualified = GetItemsStartsWith("Reference", nameNoExtension)
                 .FirstOrDefault(
                     item =>
-                    new AssemblyName(item.EvaluatedInclude).Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    new AssemblyName(item.EvaluatedInclude).Name.Equals(nameNoExtension, StringComparison.OrdinalIgnoreCase));
+            if (nonFullyQualified != null)
+            {
+                return nonFullyQualified;
+            }
+            // Then try explicit references, such as:
+            // <Reference Include="full\path\to\Microsoft.VisualStudio.Threading.dll">
+            return GetItemsEndsWith("Reference", name).FirstOrDefault(
+                    item =>
+                        FileExists(item.EvaluatedInclude) && // verified looking at assembly code that File.Exists does not throw on invalid paths
+                        string.Equals(Path.GetFileName(item.EvaluatedInclude), name, StringComparison.OrdinalIgnoreCase));
         }
 
         public FrameworkName TargetFramework
