@@ -33,9 +33,9 @@ namespace NuGet.Client.ProjectSystem
 
         public abstract bool Equals(Solution other);
 
-        public override FrameworkName GetSupportedFramework()
+        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
-            return null;
+            return Enumerable.Empty<FrameworkName>();
         }
 
         public override Solution OwnerSolution

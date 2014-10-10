@@ -147,7 +147,7 @@ namespace NuGet.Client.Installation
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may require computation")]
-        public abstract FrameworkName GetSupportedFramework();
+        public abstract IEnumerable<FrameworkName> GetSupportedFrameworks();
 
         /// <summary>
         /// Searches installed packages across this target and any sub-targets (Projects in a Solution, for example)

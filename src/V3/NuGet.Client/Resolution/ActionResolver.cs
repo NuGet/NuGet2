@@ -45,7 +45,7 @@ namespace NuGet.Client.Resolution
             {
                 resolver.AddOperation(
                     MapNewToOldActionType(operation),
-                    CreateVirtualPackage(id, version),
+                    await CreateVirtualPackage(id, version),
                     new CoreInteropProjectManager(project, _source));
             }
 
@@ -80,10 +80,10 @@ namespace NuGet.Client.Resolution
             return interopPackage.Json;
         }
 
-        private IPackage CreateVirtualPackage(string id, NuGetVersion version)
+        private async Task<IPackage> CreateVirtualPackage(string id, NuGetVersion version)
         {
             // Load JSON from source
-            var package = _source.GetPackageMetadata(id, version).Result;
+            var package = await _source.GetPackageMetadata(id, version);
 
             return new CoreInteropPackage(package);
         }

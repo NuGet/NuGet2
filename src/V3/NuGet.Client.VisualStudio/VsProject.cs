@@ -102,9 +102,9 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        public override FrameworkName GetSupportedFramework()
+        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
-            return DteProject.GetTargetFrameworkName();
+            yield return DteProject.GetTargetFrameworkName();
         }
 
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)

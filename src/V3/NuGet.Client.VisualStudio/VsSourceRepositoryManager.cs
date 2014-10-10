@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client.Interop;
 using NuGet.VisualStudio;
+using System.Collections.Concurrent;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -19,6 +20,7 @@ namespace NuGet.Client.VisualStudio
     {
         private readonly IVsPackageSourceProvider _sourceProvider;
         private readonly IPackageRepositoryFactory _repoFactory;
+        private readonly ConcurrentDictionary<string, SourceRepository> _repos = new ConcurrentDictionary<string, SourceRepository>();
 
         public override SourceRepository ActiveRepository
         {
@@ -26,23 +28,15 @@ namespace NuGet.Client.VisualStudio
             {
                 Debug.Assert(!_sourceProvider.ActivePackageSource.IsAggregate(), "Active source is the aggregate source! This shouldn't happen!");
 
-                if (_sourceProvider.ActivePackageSource == null)
-                {
-                    return null;
-                }
-
-                return new V2SourceRepository(
-                    new PackageSource(_sourceProvider.ActivePackageSource.Name, _sourceProvider.ActivePackageSource.Source),
-                    _repoFactory.CreateRepository(
-                        _sourceProvider.ActivePackageSource.Source));
+                return GetRepo(new PackageSource(
+                    _sourceProvider.ActivePackageSource.Name,
+                    _sourceProvider.ActivePackageSource.Source));
             }
         }
 
         public override SourceRepository CreateSourceRepository(PackageSource packageSource)
         {
-            return new V2SourceRepository(
-                packageSource,
-                _repoFactory.CreateRepository(packageSource.Url));
+            return GetRepo(packageSource);
         }
 
         public override IEnumerable<PackageSource> AvailableSources
@@ -92,5 +86,22 @@ namespace NuGet.Client.VisualStudio
         }
 
         public override event EventHandler PackageSourcesChanged;
+        private SourceRepository GetRepo(PackageSource p)
+        {
+            return _repos.GetOrAdd(p.Url, _ => CreateRepo(p));
+        }
+
+        private SourceRepository CreateRepo(PackageSource source)
+        {
+            // For now, be awful. Detect V3 via the source URL itself
+            Uri url;
+            if (Uri.TryCreate(source.Url, UriKind.RelativeOrAbsolute, out url) &&
+                url.Host.Equals("preview.nuget.org", StringComparison.OrdinalIgnoreCase))
+            {
+                return new V3SourceRepository(source);
+            }
+
+            return new V2SourceRepository(source, _repoFactory.CreateRepository(source.Url));
+        }
     }
 }

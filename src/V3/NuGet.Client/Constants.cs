@@ -17,11 +17,22 @@ namespace NuGet.Client
         public static readonly Uri Dependency = new Uri("http://schema.nuget.org/schema#Dependency");
     }
 
+    public static class ServiceUris
+    {
+        private const string Root = "http://schema.nuget.org/services#";
+        public static readonly Uri SearchQueryService = new Uri(Root + "SearchQueryService");
+        public static readonly Uri RegistrationsBaseUrl = new Uri(Root + "RegistrationsBaseUrl");
+
+        public static readonly Uri Resources = new Uri(Root + "resources");
+        public static readonly Uri Version = new Uri(Root + "version");
+    }
+
     public static class Properties
     {
+        public static readonly string SubjectId = "@id";
         public static readonly string Type = "@type";
-
-        public static readonly string Id = "id";
+        
+        public static readonly string PackageId = "id";
         public static readonly string Version = "version";
         public static readonly string Summary = "summary";
         public static readonly string Description = "description";

@@ -20,7 +20,7 @@ namespace NuGet.Client.VisualStudio.UI
         private ObservableCollection<object> _items;
         private LoadingStatusIndicator _loadingStatusIndicator;
         private ScrollViewer _scrollViewer;
-
+        
         public event SelectionChangedEventHandler SelectionChanged;
 
         private CancellationTokenSource _cts;

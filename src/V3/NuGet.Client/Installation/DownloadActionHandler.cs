@@ -19,27 +19,24 @@ namespace NuGet.Client.Installation
     {
         public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
+            string downloadUriStr = action.Package[Properties.NupkgUrl].ToString();
             Uri downloadUri;
-            try
-            {
-                downloadUri = action.Package.Value<Uri>(Properties.NupkgUrl);
-            }
-            catch (UriFormatException urifx)
-            {
-                throw new InvalidOperationException(String.Format(
-                    CultureInfo.CurrentCulture,
-                    Strings.DownloadActionHandler_InvalidDownloadUrl,
-                    action.PackageIdentity,
-                    action.Package[Properties.NupkgUrl].ToString(),
-                    urifx.Message));
-            }
-            if (downloadUri == null)
+            if (String.IsNullOrEmpty(downloadUriStr))
             {
                 throw new InvalidOperationException(String.Format(
                     CultureInfo.CurrentCulture,
                     Strings.DownloadActionHandler_NoDownloadUrl,
                     action.PackageIdentity));
             }
+            else if (!Uri.TryCreate(downloadUriStr, UriKind.Absolute, out downloadUri))
+            {
+                throw new InvalidOperationException(String.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.DownloadActionHandler_InvalidDownloadUrl,
+                    action.PackageIdentity,
+                    downloadUriStr));
+            }
+            
 
             return Task.Run(() =>
             {

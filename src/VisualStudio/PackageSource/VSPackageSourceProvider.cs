@@ -113,7 +113,8 @@ namespace NuGet.VisualStudio
                     !_packageSources.Contains(value) &&
                     !value.Name.Equals(NuGetOfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
+                    _activePackageSource = _packageSources.FirstOrDefault();
+                    //throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
 
                 _activePackageSource = value;

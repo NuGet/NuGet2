@@ -127,7 +127,7 @@
     <value>Unsupported Dependency Behavior '{0}'.</value>
   </data>
   <data name="DownloadActionHandler_InvalidDownloadUrl" xml:space="preserve">
-    <value>The download URL for {0} '{1}' is invalid. {2}</value>
+    <value>The download URL for {0} '{1}' is invalid.</value>
   </data>
   <data name="DownloadActionHandler_NoDownloadUrl" xml:space="preserve">
     <value>No download URL could be found for {0}.</value>
@@ -143,6 +143,15 @@
   </data>
   <data name="ProjectInstallationTarget_ProjectIsNotTargetted" xml:space="preserve">
     <value>The project '{0}' is not one of the projects targetted by this object.</value>
+  </data>
+  <data name="Protocol_IndexMissingResourcesNode" xml:space="preserve">
+    <value>Service index document is missing the 'resources' property.</value>
+  </data>
+  <data name="Protocol_MissingRegistrationBase" xml:space="preserve">
+    <value>The source does not have a Registration Base Url defined!</value>
+  </data>
+  <data name="Protocol_MissingSearchService" xml:space="preserve">
+    <value>The source does not have a Search service!</value>
   </data>
   <data name="RequiredFeatureUnsupportedException_DefaultMessageWithFeature" xml:space="preserve">
     <value>The '{0}' installation feature was required by a package but is not supported on the current host.</value>
