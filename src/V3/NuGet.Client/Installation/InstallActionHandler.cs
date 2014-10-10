@@ -18,8 +18,20 @@ namespace NuGet.Client.Installation
             var nugetAware = action.Target.TryGetFeature<NuGetAwareProject>();
             if (nugetAware != null)
             {
+                // TODO: this is a hack to get the supported frameworks. Since action.Package 
+                // does not contain this info for now, we have to download the package to 
+                // get this info.
+                var downloadUri = action.Package.Value<Uri>(Properties.NupkgUrl);
+                var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
+                var package = DownloadActionHandler.GetPackage(
+                    packageCache,
+                    action.PackageIdentity,
+                    downloadUri);
+                var frameworks = package.GetSupportedFrameworks();
+                
                 return nugetAware.InstallPackage(
                     action.PackageIdentity,
+                    frameworks,
                     logger,
                     cancelToken);
             }

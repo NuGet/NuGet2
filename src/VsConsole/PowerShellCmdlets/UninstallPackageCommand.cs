@@ -69,8 +69,8 @@ namespace NuGet.PowerShell.Commands
             {
                 var args = new Dictionary<string, object>();
                 args["WhatIf"] = WhatIf;
-                args["SourceRepository"] = PackageManager.SourceRepository; ;
-                args["SharedRepository"] = PackageManager.LocalRepository; ;
+                args["SourceRepository"] = PackageManager.SourceRepository;
+                args["SharedRepository"] = PackageManager.LocalRepository;
 
                 using (var cts = new CancellationTokenSource())
                 {

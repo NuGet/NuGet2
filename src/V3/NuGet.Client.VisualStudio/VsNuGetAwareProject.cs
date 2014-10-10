@@ -9,6 +9,7 @@ using NuGet.Client.Installation;
 
 using Microsoft.VisualStudio.ProjectSystem.Interop;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -21,9 +22,17 @@ namespace NuGet.Client.VisualStudio
             _nugetAwareProject = nugetAwareProject;
         }
 
-        public override Task InstallPackage(PackageIdentity id, IExecutionLogger logger, CancellationToken cancelToken)
+        public override Task InstallPackage(
+            PackageIdentity id, 
+            IEnumerable<FrameworkName> frameworks,
+            IExecutionLogger logger, 
+            CancellationToken cancelToken)
         {
             var args = new Dictionary<string, object>();
+            args["Frameworks"] = frameworks != null ?
+                frameworks.ToArray() :
+                new FrameworkName[] { };
+
             var task = _nugetAwareProject.InstallPackageAsync(
                 new NuGetPackageMoniker
                 {

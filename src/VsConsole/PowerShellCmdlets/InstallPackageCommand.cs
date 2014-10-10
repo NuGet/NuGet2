@@ -10,6 +10,7 @@ using NuGet.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem.Interop;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 #endif
 
@@ -274,6 +275,11 @@ namespace NuGet.PowerShell.Commands
                 args["WhatIf"] = WhatIf;
                 args["SourceRepository"] = packageManager.SourceRepository;
                 args["SharedRepository"] = packageManager.LocalRepository;
+
+                var frameworks = package.GetSupportedFrameworks();
+                args["Frameworks"] = frameworks != null ?
+                    frameworks.ToArray() :
+                    new System.Runtime.Versioning.FrameworkName[] { };
 
                 using (var cts = new CancellationTokenSource())
                 {
