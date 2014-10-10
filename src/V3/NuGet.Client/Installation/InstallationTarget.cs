@@ -143,7 +143,8 @@ namespace NuGet.Client.Installation
         }
 
         /// <summary>
-        /// Gets the list of frameworks supported by this target.
+        /// Gets the list of frameworks supported by this target. Also, the first one 
+        /// is assumed to be the current target framework.
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may require computation")]

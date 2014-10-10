@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -11,7 +10,9 @@ using System;
 using System.Runtime.Versioning;
 
 #if VS14
+
 using Microsoft.VisualStudio.ProjectSystem.Interop;
+
 #endif
 
 namespace NuGet.Client.VisualStudio
@@ -41,13 +42,17 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
+#if VS14
+        private INuGetPackageManager _nugetAwareProject;
+#endif
+
         public VsProject(VsSolution solution, DteProject dteProject, IProjectManager projectManager)
             : base()
         {
             _solution = solution;
             _installed = new CoreInteropInstalledPackagesList((IPackageReferenceRepository2)projectManager.LocalRepository);
             DteProject = dteProject;
-            
+
             // Add V2-related interop features
             AddFeature(() => projectManager);
             AddFeature(() => projectManager.PackageManager);
@@ -61,10 +66,10 @@ namespace NuGet.Client.VisualStudio
 
 #if VS14
             // Add NuGetAwareProject if the project system is nuget-aware.
-            INuGetPackageManager nugetAwareProject = projectManager.Project as INuGetPackageManager;
-            if (nugetAwareProject != null)
+            _nugetAwareProject = projectManager.Project as INuGetPackageManager;
+            if (_nugetAwareProject != null)
             {
-                AddFeature<NuGetAwareProject>(() => new VsNuGetAwareProject(nugetAwareProject));
+                AddFeature<NuGetAwareProject>(() => new VsNuGetAwareProject(_nugetAwareProject));
             }
 #endif
         }
@@ -104,7 +109,18 @@ namespace NuGet.Client.VisualStudio
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
-            yield return DteProject.GetTargetFrameworkName();
+#if VS14
+            if (_nugetAwareProject != null)
+            {
+                using (var cts = new CancellationTokenSource())
+                {
+                    var task = _nugetAwareProject.GetSupportedFrameworksAsync(cts.Token);
+                    return task.Result;
+                }
+            }
+#endif
+
+            return new FrameworkName[] { DteProject.GetTargetFrameworkName() };
         }
 
         public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)

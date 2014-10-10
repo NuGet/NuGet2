@@ -273,16 +273,16 @@ namespace NuGet.PowerShell.Commands
                 args["DependencyVersion"] = DependencyVersion;
                 args["IgnoreDependencies"] = IgnoreDependencies;
                 args["WhatIf"] = WhatIf;
-                args["SourceRepository"] = packageManager.SourceRepository;
-                args["SharedRepository"] = packageManager.LocalRepository;
-
-                var frameworks = package.GetSupportedFrameworks();
-                args["Frameworks"] = frameworks != null ?
-                    frameworks.ToArray() :
-                    new System.Runtime.Versioning.FrameworkName[] { };
 
                 using (var cts = new CancellationTokenSource())
                 {
+                    var packageSupportedFrameworks = package.GetSupportedFrameworks();
+                    var projectFrameworks = nugetAwareProject.GetSupportedFrameworksAsync(cts.Token).Result;
+                    args["Frameworks"] = projectFrameworks.Where(
+                        projectFramework =>
+                            NuGet.VersionUtility.IsCompatible(
+                                projectFramework,
+                                packageSupportedFrameworks)).ToArray();
                     var task = nugetAwareProject.InstallPackageAsync(
                         new NuGetPackageMoniker
                         {

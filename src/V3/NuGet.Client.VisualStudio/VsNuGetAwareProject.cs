@@ -24,15 +24,17 @@ namespace NuGet.Client.VisualStudio
 
         public override Task InstallPackage(
             PackageIdentity id, 
-            IEnumerable<FrameworkName> frameworks,
+            IEnumerable<FrameworkName> packageSupportedFrameworks,
             IExecutionLogger logger, 
             CancellationToken cancelToken)
         {
             var args = new Dictionary<string, object>();
-            args["Frameworks"] = frameworks != null ?
-                frameworks.ToArray() :
-                new FrameworkName[] { };
-
+            var projectFrameworks = _nugetAwareProject.GetSupportedFrameworksAsync(cancelToken).Result;
+            args["Frameworks"] = projectFrameworks.Where(
+                projectFramework =>
+                    NuGet.VersionUtility.IsCompatible(
+                        projectFramework,
+                        packageSupportedFrameworks)).ToArray();
             var task = _nugetAwareProject.InstallPackageAsync(
                 new NuGetPackageMoniker
                 {

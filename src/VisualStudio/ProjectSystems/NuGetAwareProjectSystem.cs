@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -222,6 +223,11 @@ namespace NuGet.VisualStudio
         public Task UninstallPackageAsync(INuGetPackageMoniker package, IReadOnlyDictionary<string, object> options, System.IO.TextWriter logger, IProgress<INuGetPackageInstallProgress> progress, CancellationToken cancellationToken)
         {
             return _nugetProject.UninstallPackageAsync(package, options, logger, progress, cancellationToken);
+        }
+
+        public Task<IReadOnlyCollection<FrameworkName>> GetSupportedFrameworksAsync(CancellationToken cancellationToken)
+        {
+            return _nugetProject.GetSupportedFrameworksAsync(cancellationToken);
         }
     }
 }

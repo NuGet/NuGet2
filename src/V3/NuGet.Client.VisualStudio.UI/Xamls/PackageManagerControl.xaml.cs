@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
