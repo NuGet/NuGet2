@@ -29,12 +29,6 @@ namespace NuGet.Client
             new Uri("http://schema.nuget.org/schema#catalogEntry")
         };
 
-        private static readonly Uri[] CatalogPackageRequiredProperties = new Uri[] {
-            new Uri("http://schema.nuget.org/schema#id"),
-            new Uri("http://schema.nuget.org/schema#nupkgUrl"),
-            new Uri("http://schema.nuget.org/schema#version")
-        };
-
         public override PackageSource Source
         {
             get { return _source; }
@@ -48,7 +42,6 @@ namespace NuGet.Client
                 new System.Net.Http.HttpClient(),
                 new BrowserFileCache(),
                 context: null);
-
         }
 
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
@@ -110,30 +103,56 @@ namespace NuGet.Client
 
             // Resolve all the objects
             List<JObject> resolvedResults = new List<JObject>();
-            foreach (var result in data)
+            foreach (var result in data.Take(take)) // The search service might actually return more than `take` items :)
             {
+                NuGetTraceSources.V3SourceRepository.Verbose(
+                    "resolving_package",
+                    "Resolving Package: {0}",
+                    result[Properties.SubjectId]);
+
                 // Get the full blob
                 var package = (JObject)(await _client.Ensure(result, PackageRequiredProperties));
                 cancellationToken.ThrowIfCancellationRequested();
                 var catalogPackage = package["catalogEntry"];
-                var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, CatalogPackageRequiredProperties));
+                var resolvedPackage = catalogPackage; // For now, skip Ensure on this object.
+                //var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, CatalogPackageRequiredProperties));
+
+                // Find all the other versions of this package
+                var packageUri = new Uri((package["url"] ?? package[Properties.SubjectId]).ToString());
+                var registrationUri = packageUri.AbsoluteUri.Substring(0, packageUri.AbsoluteUri.Length - packageUri.Fragment.Length);
+
+                NuGetTraceSources.V3SourceRepository.Verbose(
+                    "resolving_registration",
+                    "Resolving Package Registration: {0}",
+                    registrationUri);
+                var registration = await _client.GetEntity(new Uri(registrationUri));
+
+                // Descend through the pages until we find all Packages
+                var packages = await Descend((JArray)registration["items"]);
 
                 // Construct a result object
-                resolvedResults.Add(new JObject()
+                var searchResult = new JObject()
                 {
                     {Properties.PackageId, resolvedPackage[Properties.PackageId] },
                     {Properties.LatestVersion, resolvedPackage[Properties.Version] },
                     {Properties.Summary, resolvedPackage[Properties.Summary] },
-                    {Properties.IconUrl, resolvedPackage[Properties.IconUrl] },
-                    {Properties.Packages, new JArray(
-                        new JObject() {
-                            {Properties.PackageId, resolvedPackage[Properties.PackageId]},
-                            {Properties.Version, resolvedPackage[Properties.Version]},
-                            {Properties.Summary, resolvedPackage[Properties.Summary]},
-                            {Properties.Description, resolvedPackage[Properties.Description]}
-                        }
-                    ) }
-                });
+                    {Properties.IconUrl, resolvedPackage[Properties.IconUrl] }
+                };
+
+                // Fill in the package entries
+                var versions = new JArray();
+                foreach (var version in packages)
+                {
+                    NuGetTraceSources.V3SourceRepository.Verbose(
+                        "resolving_version",
+                        "Resolving Package Version: {0}",
+                        version[Properties.SubjectId]);
+                    var resolvedVersion = await _client.Ensure(version, PackageRequiredProperties);
+                    versions.Add(resolvedVersion["catalogEntry"]);
+                }
+                searchResult[Properties.Packages] = versions;
+
+                resolvedResults.Add(searchResult);
             }
             return resolvedResults;
         }
@@ -146,6 +165,32 @@ namespace NuGet.Client
         public override Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task<IEnumerable<JObject>> Descend(JArray json)
+        {
+            List<IEnumerable<JObject>> lists = new List<IEnumerable<JObject>>();
+            List<JObject> items = new List<JObject>();
+            lists.Add(items);
+            foreach (var item in json)
+            {
+                string type = item["@type"].ToString();
+                if (Equals(type, "catalog:CatalogPage"))
+                {
+                    var resolved = await _client.Ensure(item, new[] {
+                        new Uri("http://schema.nuget.org/schema#items")
+                    });
+                    lists.Add(await Descend((JArray)resolved["items"]));
+                }
+                else if(Equals(type, "Package"))
+                {
+                    // Yield this item
+                    items.Add((JObject)item);
+                }
+            }
+
+            // Flatten the list and return it
+            return lists.SelectMany(j => j);
         }
 
         private async Task<string> GetServiceUri(Uri type, VersionRange requiredVersionRange)

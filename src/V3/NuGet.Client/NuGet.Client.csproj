@@ -78,6 +78,7 @@
     <Compile Include="Diagnostics\NuGetTraceSources.cs" />
     <Compile Include="Diagnostics\TraceSourceExtensions.cs" />
     <Compile Include="FileConflictAction.cs" />
+    <Compile Include="FrameworkNameHelper.cs" />
     <Compile Include="Installation\InstallationTarget.cs" />
     <Compile Include="Installation\ActionHandlerHelpers.cs" />
     <Compile Include="Installation\IInstallationTarget.cs" />

@@ -241,21 +241,19 @@ namespace NuGet.Client.VisualStudio.UI
                 foreach (var token in versions)
                 {
                     JObject version = (JObject)token;
-                    var detailedPackage = new UiDetailedPackage()
-                    {
-                        Id = version.Value<string>(Properties.PackageId),
-                        Version = NuGetVersion.Parse(version.Value<string>(Properties.Version)),
-                        Summary = version.Value<string>(Properties.Summary),
-                        Description = version.Value<string>(Properties.Description),
-                        Authors = StringCollectionToString(version.Value<JArray>(Properties.Authors)),
-                        Owners = StringCollectionToString(version.Value<JArray>(Properties.Owners)),
-                        IconUrl = GetUri(version, Properties.IconUrl),
-                        LicenseUrl = GetUri(version, Properties.LicenseUrl),
-                        ProjectUrl = GetUri(version, Properties.ProjectUrl),
-                        Tags = String.Join(" ", (version.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
-                        DownloadCount = version.Value<int>(Properties.DownloadCount),
-                        DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
-                    };
+                    var detailedPackage = new UiDetailedPackage();
+                    detailedPackage.Id = version.Value<string>(Properties.PackageId);
+                    detailedPackage.Version = NuGetVersion.Parse(version.Value<string>(Properties.Version));
+                    detailedPackage.Summary = version.Value<string>(Properties.Summary);
+                    detailedPackage.Description = version.Value<string>(Properties.Description);
+                    detailedPackage.Authors = version.Value<string>(Properties.Authors);
+                    detailedPackage.Owners = version.Value<string>(Properties.Owners);
+                    detailedPackage.IconUrl = GetUri(version, Properties.IconUrl);
+                    detailedPackage.LicenseUrl = GetUri(version, Properties.LicenseUrl);
+                    detailedPackage.ProjectUrl = GetUri(version, Properties.ProjectUrl);
+                    detailedPackage.Tags = String.Join(" ", (version.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString()));
+                    detailedPackage.DownloadCount = version.Value<int>(Properties.DownloadCount);
+                    detailedPackage.DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj));
 
                     string publishedStr = version.Value<string>(Properties.Published);
                     if (!String.IsNullOrEmpty(publishedStr))
@@ -317,7 +315,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var fxName = set.Value<string>(Properties.TargetFramework);
                 return new UiPackageDependencySet(
-                    String.IsNullOrEmpty(fxName) ? null : new FrameworkName(fxName),
+                    String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelper.ParsePossiblyShortenedFrameworkName(fxName),
                     (set.Value<JArray>(Properties.Dependencies) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
