@@ -208,16 +208,16 @@ namespace NuGet.Client.VisualStudio.UI
 
                     // As a debugging aide, I am intentionally NOT using an object initializer -anurse
                     var searchResultPackage = new UiSearchResultPackage();
-                    searchResultPackage.Id = package.Value<string>("id");
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>("latestVersion"));                    
-                    searchResultPackage.IconUrl = package.Value<Uri>("iconUrl");
+                    searchResultPackage.Id = package.Value<string>(Properties.PackageId);
+                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
+                    searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
                     searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
-                    searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>("packages"));
+                    searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>(Properties.Packages));
 
                     var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
                     searchResultPackage.Summary = 
                         self == null ?
-                        package.Value<string>("summary") :
+                        package.Value<string>(Properties.Summary) :
                         self.Description;
 
                     packages.Add(searchResultPackage);
@@ -243,21 +243,21 @@ namespace NuGet.Client.VisualStudio.UI
                     JObject version = (JObject)token;
                     var detailedPackage = new UiDetailedPackage()
                     {
-                        Id = version.Value<string>("id"),
-                        Version = NuGetVersion.Parse(version.Value<string>("version")),
-                        Summary = version.Value<string>("summary"),
-                        Description = version.Value<string>("description"),
-                        Authors = StringCollectionToString(version.Value<JArray>("authors")),
-                        Owners = StringCollectionToString(version.Value<JArray>("owners")),
-                        IconUrl = version.Value<Uri>("iconUrl"),
-                        LicenseUrl = version.Value<Uri>("licenseUrl"),
-                        ProjectUrl = version.Value<Uri>("projectUrl"),
-                        Tags = String.Join(" ", (version.Value<JArray>("tags") ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
-                        DownloadCount = version.Value<int>("downloadCount"),
-                        DependencySets = (version.Value<JArray>("dependencyGroups") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
+                        Id = version.Value<string>(Properties.PackageId),
+                        Version = NuGetVersion.Parse(version.Value<string>(Properties.Version)),
+                        Summary = version.Value<string>(Properties.Summary),
+                        Description = version.Value<string>(Properties.Description),
+                        Authors = StringCollectionToString(version.Value<JArray>(Properties.Authors)),
+                        Owners = StringCollectionToString(version.Value<JArray>(Properties.Owners)),
+                        IconUrl = GetUri(version, Properties.IconUrl),
+                        LicenseUrl = GetUri(version, Properties.LicenseUrl),
+                        ProjectUrl = GetUri(version, Properties.ProjectUrl),
+                        Tags = String.Join(" ", (version.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString())),
+                        DownloadCount = version.Value<int>(Properties.DownloadCount),
+                        DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj))
                     };
 
-                    string publishedStr = version.Value<string>("published");
+                    string publishedStr = version.Value<string>(Properties.Published);
                     if (!String.IsNullOrEmpty(publishedStr))
                     {
                         detailedPackage.Published = DateTime.Parse(publishedStr);
@@ -269,6 +269,20 @@ namespace NuGet.Client.VisualStudio.UI
                 }
 
                 return retValue;
+            }
+
+            private Uri GetUri(JObject json, string property)
+            {
+                if (json[property] == null)
+                {
+                    return null;
+                }
+                string str = json[property].ToString();
+                if (String.IsNullOrEmpty(str))
+                {
+                    return null;
+                }
+                return new Uri(str);
             }
 
             private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)
@@ -301,17 +315,17 @@ namespace NuGet.Client.VisualStudio.UI
 
             private UiPackageDependencySet LoadDependencySet(JObject set)
             {
-                var fxName = set.Value<string>("targetFramework");
+                var fxName = set.Value<string>(Properties.TargetFramework);
                 return new UiPackageDependencySet(
                     String.IsNullOrEmpty(fxName) ? null : new FrameworkName(fxName),
-                    (set.Value<JArray>("dependencies") ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
+                    (set.Value<JArray>(Properties.Dependencies) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
             }
 
             private UiPackageDependency LoadDependency(JObject dep)
             {
-                var ver = dep.Value<string>("range");
+                var ver = dep.Value<string>(Properties.Range);
                 return new UiPackageDependency(
-                    dep.Value<string>("id"),
+                    dep.Value<string>(Properties.PackageId),
                     String.IsNullOrEmpty(ver) ? null : VersionRange.Parse(ver));
             }
 
@@ -340,7 +354,7 @@ namespace NuGet.Client.VisualStudio.UI
         private void SearchPackageInActivePackageSource()
         {
             var searchText = _searchControl.Text;
-            var supportedFramework = Target.GetSupportedFramework();
+            var supportedFrameworks = Target.GetSupportedFrameworks();
 
             if (ShowOnlyInstalled())
             {
@@ -363,7 +377,7 @@ namespace NuGet.Client.VisualStudio.UI
                             searchText,
                             new SearchFilter()
                             {
-                                SupportedFramework = supportedFramework,
+                                SupportedFrameworks = supportedFrameworks,
                                 IncludePrerelease = false
                             },
                             startIndex,

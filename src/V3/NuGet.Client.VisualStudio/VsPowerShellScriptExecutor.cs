@@ -26,7 +26,7 @@ namespace NuGet.Client.VisualStudio
         {
             // If we don't have a project, we're at solution level
             string projectName = target.Name;
-            FrameworkName targetFramework = target.GetSupportedFramework();
+            FrameworkName targetFramework = target.GetSupportedFrameworks().FirstOrDefault();
 
             VsProject targetProject = target as VsProject;
             Project dteProject = targetProject == null ? null : targetProject.DteProject;

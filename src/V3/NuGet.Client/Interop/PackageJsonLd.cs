@@ -17,7 +17,7 @@ namespace NuGet.Client.Interop
         {
             var value = new JObject();
             value.Add(new JProperty(Properties.Type, new JArray(Types.PackageSearchResult.ToString())));
-            AddProp(value, Properties.Id, package.Id);
+            AddProp(value, Properties.PackageId, package.Id);
             AddProp(value, Properties.LatestVersion, package.Version.ToString());
             AddProp(value, Properties.Summary, package.Summary);
             AddProp(value, Properties.IconUrl, package.IconUrl);
@@ -34,7 +34,7 @@ namespace NuGet.Client.Interop
                 Types.PackageDependencies.ToString(),
                 Types.PackageLicensing.ToString()));
 
-            AddProp(value, Properties.Id, version.Id);
+            AddProp(value, Properties.PackageId, version.Id);
             AddProp(value, Properties.Version, version.Version.ToString());
             AddProp(value, Properties.Summary, version.Summary);
             AddProp(value, Properties.Description, version.Description);
@@ -71,7 +71,7 @@ namespace NuGet.Client.Interop
         {
             var value = new JObject();
             AddProp(value, Properties.Type, Types.Dependency);
-            AddProp(value, Properties.Id, dependency.Id);
+            AddProp(value, Properties.PackageId, dependency.Id);
             AddProp(value, Properties.Range, dependency.VersionSpec == null ? null : dependency.VersionSpec.ToString());
             return value;
         }
@@ -79,7 +79,7 @@ namespace NuGet.Client.Interop
         public static PackageDependency DependencyFromJson(JObject dependency)
         {
             return new PackageDependency(
-                dependency.Value<string>(Properties.Id),
+                dependency.Value<string>(Properties.PackageId),
                 VersionUtility.ParseVersionSpec(dependency.Value<string>(Properties.Range)));
         }
 

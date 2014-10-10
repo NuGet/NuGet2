@@ -144,6 +144,9 @@
   <data name="ProjectInstallationTarget_ProjectIsNotTargetted" xml:space="preserve">
     <value>The project '{0}' is not one of the projects targetted by this object.</value>
   </data>
+  <data name="Protocol_IndexMissingResourcesNode" xml:space="preserve">
+    <value>Service index document is missing the 'resources' property.</value>
+  </data>
   <data name="RequiredFeatureUnsupportedException_DefaultMessageWithFeature" xml:space="preserve">
     <value>The '{0}' installation feature was required by a package but is not supported on the current host.</value>
   </data>

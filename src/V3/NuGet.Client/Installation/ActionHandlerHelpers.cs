@@ -16,7 +16,7 @@ namespace NuGet.Client.Installation
             // If we don't have a project, we're at solution level
             //  The <Solution> string is only for tracing so it probably doesn't need to be loc'ed
             string projectName = target.Name;
-            FrameworkName targetFramework = target.GetSupportedFramework();
+            var targetFramework = target.GetSupportedFrameworks().FirstOrDefault();
 
             // Get the install script
             var scriptFile = FindScript(

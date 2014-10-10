@@ -8,7 +8,7 @@ namespace NuGet.Client
 {
     public class SearchFilter
     {
-        public FrameworkName SupportedFramework { get; set; }
+        public IEnumerable<FrameworkName> SupportedFrameworks { get; set; }
         public bool IncludePrerelease { get; set; }
     }
 }

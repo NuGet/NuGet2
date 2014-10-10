@@ -25,6 +25,8 @@ namespace NuGet.Client.Diagnostics
         public static readonly TraceSource V2SourceRepository = new TraceSource(typeof(V2SourceRepository).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource InstallationTarget = new TraceSource(typeof(InstallationTarget).FullName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
+        public static readonly TraceSource V3SourceRepository = new TraceSource(typeof(V3SourceRepository).FullName);
 
         /// <summary>
         /// Retrieves a list of all sources defined in this class. Uses reflection, store the result!
@@ -33,9 +35,11 @@ namespace NuGet.Client.Diagnostics
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method uses reflection and the results should be cached.")]
         public static IEnumerable<TraceSource> GetAllSources()
         {
-            return typeof(NuGetTraceSources).GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Where(f => typeof(TraceSource).IsAssignableFrom(f.FieldType))
-                .Select(f => (TraceSource)f.GetValue(null));
+            return Enumerable.Concat(
+                typeof(NuGetTraceSources).GetFields(BindingFlags.Public | BindingFlags.Static)
+                    .Where(f => typeof(TraceSource).IsAssignableFrom(f.FieldType))
+                    .Select(f => (TraceSource)f.GetValue(null)),
+                NuGet.Data.DataTraceSources.GetAllSources());
         }
     }
 }
