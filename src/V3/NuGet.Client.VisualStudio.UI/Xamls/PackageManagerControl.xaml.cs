@@ -513,15 +513,16 @@ namespace NuGet.Client.VisualStudio.UI
                     .Select(g =>
                     {
                         dynamic p = g.First().Package;
-                        var authors = String.Join(", ",
-                            ((JArray)(p.authors)).Cast<JValue>()
-                            .Select(author => author.Value as string));
+                        string licenseUrl = (string)p.licenseUrl;
+                        string id = (string)p.id;
+                        string authors = (string)p.authors;
 
                         return new PackageLicenseInfo(
-                            p.id.Value,
-                            p.licenseUrl.Value,
+                            id,
+                            licenseUrl == null ? null : new Uri(licenseUrl),
                             authors);
-                    });
+                    })
+                    .Where(pli => pli.LicenseUrl != null); // Shouldn't get nulls, but just in case
 
                 var ownerWindow = Window.GetWindow(this);
                 bool accepted = this.UI.PromptForLicenseAcceptance(licenseModels, ownerWindow);

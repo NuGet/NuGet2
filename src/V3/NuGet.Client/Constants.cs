@@ -21,6 +21,7 @@ namespace NuGet.Client
     {
         private const string Root = "http://schema.nuget.org/services#";
         public static readonly Uri SearchQueryService = new Uri(Root + "SearchQueryService");
+        public static readonly Uri RegistrationsBaseUrl = new Uri(Root + "RegistrationsBaseUrl");
 
         public static readonly Uri Resources = new Uri(Root + "resources");
         public static readonly Uri Version = new Uri(Root + "version");

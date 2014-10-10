@@ -88,7 +88,7 @@ namespace NuGet.Client {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The download URL for {0} &apos;{1}&apos; is invalid. {2}.
+        ///   Looks up a localized string similar to The download URL for {0} &apos;{1}&apos; is invalid..
         /// </summary>
         internal static string DownloadActionHandler_InvalidDownloadUrl {
             get {
@@ -147,6 +147,24 @@ namespace NuGet.Client {
         internal static string Protocol_IndexMissingResourcesNode {
             get {
                 return ResourceManager.GetString("Protocol_IndexMissingResourcesNode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source does not have a Registration Base Url defined!.
+        /// </summary>
+        internal static string Protocol_MissingRegistrationBase {
+            get {
+                return ResourceManager.GetString("Protocol_MissingRegistrationBase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source does not have a Search service!.
+        /// </summary>
+        internal static string Protocol_MissingSearchService {
+            get {
+                return ResourceManager.GetString("Protocol_MissingSearchService", resourceCulture);
             }
         }
         
