@@ -44,6 +44,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NuGet.Data.1.0.0-alpha005\lib\net45\NuGet.Data.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
@@ -134,10 +138,6 @@
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGet.Data\Data\Data.csproj">
-      <Project>{7e69cb0e-4819-45fe-ab28-11efb81f81c0}</Project>
-      <Name>Data</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
