@@ -38,12 +38,12 @@ namespace NuGet.Client.Interop
             AddProp(value, Properties.Version, version.Version.ToString());
             AddProp(value, Properties.Summary, version.Summary);
             AddProp(value, Properties.Description, version.Description);
-            AddProp(value, Properties.Authors, version.Authors);
-            AddProp(value, Properties.Owners, version.Owners);
+            AddProp(value, Properties.Authors, String.Join(", ", version.Authors));
+            AddProp(value, Properties.Owners, String.Join(", ", version.Owners));
             AddProp(value, Properties.IconUrl, version.IconUrl);
             AddProp(value, Properties.LicenseUrl, version.LicenseUrl);
             AddProp(value, Properties.ProjectUrl, version.ProjectUrl);
-            AddProp(value, Properties.Tags, (version.Tags ?? String.Empty).Split(' '));
+            AddProp(value, Properties.Tags, version.Tags == null ? null : version.Tags.Split(' '));
             AddProp(value, Properties.DownloadCount, version.DownloadCount);
             AddProp(value, Properties.Published, version.Published.HasValue ? version.Published.Value.ToString("O", CultureInfo.InvariantCulture) : null);
             AddProp(value, Properties.RequireLicenseAcceptance, version.RequireLicenseAcceptance);
