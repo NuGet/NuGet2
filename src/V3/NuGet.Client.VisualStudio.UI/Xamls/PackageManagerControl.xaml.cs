@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -286,6 +287,7 @@ namespace NuGet.Client.VisualStudio.UI
                 // FindPackagesById(), so Distinct is needed here to remove the duplicates.
                 foreach (var token in versions)
                 {
+                    Debug.Assert(token.Type == JTokenType.Object);
                     JObject version = (JObject)token;
                     var detailedPackage = new UiDetailedPackage();
                     detailedPackage.Id = version.Value<string>(Properties.PackageId);
