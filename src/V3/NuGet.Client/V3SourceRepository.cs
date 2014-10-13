@@ -9,13 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using JsonLD.Core;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.Client
 {
     public class V3SourceRepository : SourceRepository
     {
-        private object _lock = new object();
-
         private DataClient _client;
         private PackageSource _source;
         private Uri _root;
@@ -39,6 +38,7 @@ namespace NuGet.Client
             get { return _source; }
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public V3SourceRepository(PackageSource source)
         {
             _source = source;
