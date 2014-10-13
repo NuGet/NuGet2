@@ -538,13 +538,9 @@ namespace NuGet.Tools
                 int hr = windowFrame.GetProperty(
                     (int)__VSFPROPID.VSFPROPID_DocData,
                     out property);
-                if (hr == VSConstants.S_OK && property is PackageManagerModel)
+                if (hr == VSConstants.S_OK && property is IVsSolution)
                 {
-                    var packageManagerDocData = (PackageManagerModel)property;
-                    if (packageManagerDocData.Target.IsSolution)
-                    {
-                        return windowFrame;
-                    }
+                    return windowFrame;
                 }
             }
 

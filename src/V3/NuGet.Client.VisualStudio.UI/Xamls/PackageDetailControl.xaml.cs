@@ -73,8 +73,12 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                // TODO: Is this the only reason for this exception???
-                MessageBox.Show("Temporary Message! Clean this up!" + Environment.NewLine + ex.Message, "Temporary Message");
+                MessageBox.Show(
+                    Window.GetWindow(Control),
+                    ex.Message,
+                    Resx.Resources.WindowTitle_Error,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -167,11 +171,19 @@ namespace NuGet.Client.VisualStudio.UI
             var isInstalled = Project.InstalledPackages.IsInstalled(model.Package.Id, model.Package.Version);
             if (isInstalled)
             {
-                _actionButton.Content = Resx.Resources.Button_Uninstall;
+                _actionButton.Content = Resx.Resources.Action_Uninstall;
             }
             else
             {
-                _actionButton.Content = Resx.Resources.Button_Install;
+                var isOtherVersionInstalled = Project.InstalledPackages.IsInstalled(model.Package.Id);
+                if (isOtherVersionInstalled)
+                {
+                    _actionButton.Content = Resx.Resources.Action_Update;
+                }
+                else
+                {
+                    _actionButton.Content = Resx.Resources.Action_Install;
+                }
             }
         }
 
@@ -204,7 +216,8 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if ((string)_actionButton.Content == Resx.Resources.Button_Install)
+            if ((string)_actionButton.Content == Resx.Resources.Action_Install ||
+                (string)_actionButton.Content == Resx.Resources.Action_Update)
             {
                 PerformPackageAction(PackageActionType.Install);
             }
@@ -216,7 +229,8 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void PreviewButtonClicked(object sender, RoutedEventArgs e)
         {
-            if ((string)_actionButton.Content == Resx.Resources.Button_Install)
+            if ((string)_actionButton.Content == Resx.Resources.Action_Install ||
+                (string)_actionButton.Content == Resx.Resources.Action_Update)
             {
                 Preview(PackageActionType.Install);
             }

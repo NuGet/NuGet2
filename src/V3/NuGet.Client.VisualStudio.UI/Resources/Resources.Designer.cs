@@ -124,24 +124,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Install.
-        /// </summary>
-        public static string Button_Install {
-            get {
-                return ResourceManager.GetString("Button_Install", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Install Preview.
-        /// </summary>
-        public static string Button_InstallPreview {
-            get {
-                return ResourceManager.GetString("Button_InstallPreview", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
         public static string Button_No {
@@ -183,24 +165,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Button_Retry {
             get {
                 return ResourceManager.GetString("Button_Retry", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uninstall.
-        /// </summary>
-        public static string Button_Uninstall {
-            get {
-                return ResourceManager.GetString("Button_Uninstall", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uninstall Preview.
-        /// </summary>
-        public static string Button_UninstallPreview {
-            get {
-                return ResourceManager.GetString("Button_UninstallPreview", resourceCulture);
             }
         }
         

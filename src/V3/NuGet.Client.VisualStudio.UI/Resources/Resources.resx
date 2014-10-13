@@ -237,18 +237,6 @@
   <data name="Text_LicenseText" xml:space="preserve">
     <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
   </data>
-  <data name="Button_Install" xml:space="preserve">
-    <value>Install</value>
-  </data>
-  <data name="Button_InstallPreview" xml:space="preserve">
-    <value>Install Preview</value>
-  </data>
-  <data name="Button_Uninstall" xml:space="preserve">
-    <value>Uninstall</value>
-  </data>
-  <data name="Button_UninstallPreview" xml:space="preserve">
-    <value>Uninstall Preview</value>
-  </data>
   <data name="Button_Retry" xml:space="preserve">
     <value>Error occurred. Retry</value>
   </data>
