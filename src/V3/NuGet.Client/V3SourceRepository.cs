@@ -154,6 +154,9 @@ namespace NuGet.Client
                                 "Resolving Package: {0}",
                                 result[Properties.SubjectId]);
 
+            // Patch the URL
+            result["@id"] = result["@id"].ToString().ToLowerInvariant();
+
             // Get the full blob
             var package = (JObject)(await _client.Ensure(result, PackageRequiredProperties));
             Debug.Assert(package != null, "DataClient returned null from Ensure :(");
@@ -161,8 +164,9 @@ namespace NuGet.Client
             var catalogPackage = package["catalogEntry"];
             var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, PackageDetailsRequiredProperties));
 
-            // Find all the other versions of this package
-            var registrationUri = package["registration"].ToString();
+            // Rewrite the URL to get the registration root url
+            var idx = result["@id"].ToString().LastIndexOf('/');
+            var registrationUri = result["@id"].ToString().Substring(0, idx) + "/index.json";
 
             NuGetTraceSources.V3SourceRepository.Verbose(
                 "resolving_registration",
@@ -243,8 +247,9 @@ namespace NuGet.Client
                 }
                 else if(Equals(type, "Package"))
                 {
-                    // Yield this item with catalogEntry ensured
+                    // Yield this item with catalogEntry and it's subfields ensured
                     var resolved = await _client.Ensure(item, PackageRequiredProperties);
+                    resolved["catalogEntry"] = await _client.Ensure(resolved["catalogEntry"], PackageDetailsRequiredProperties);
                     items.Add((JObject)resolved);
                 }
             }

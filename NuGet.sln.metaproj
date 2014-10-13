@@ -62,6 +62,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
     </CurrentSolutionConfigurationContents>
   </PropertyGroup>
@@ -118,6 +119,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Coverage|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -172,6 +174,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Coverage|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -226,6 +229,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -280,6 +284,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -334,6 +339,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Mono Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -388,6 +394,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Mono Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -442,6 +449,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Mono Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -496,6 +504,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Mono Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -550,6 +559,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -604,6 +614,7 @@
   <ProjectConfiguration Project="{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
   <ProjectConfiguration Project="{9FE9B712-F684-43EC-8F20-F452C60437CB}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{7E69CB0E-4819-45FE-AB28-11EFB81F81C0}" AbsolutePath="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>
       </Content>
     </SolutionConfiguration>
@@ -969,6 +980,14 @@
       <Platform>AnyCPU</Platform>
     </ProjectReference>
     <ProjectReference Include="C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Debug; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj">
       <ToolsVersion>
       </ToolsVersion>
       <SkipNonexistentProjects>False</SkipNonexistentProjects>
@@ -1796,5 +1815,21 @@
   </Target>
   <Target Name="V3\NuGet_Client_V3Interop:Publish">
     <MSBuild Condition="'%(ProjectReference.Identity)' == 'C:\Code\Git\NuGet\Client\src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="V3\Data" Outputs="@(V3_DataBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="V3_DataBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="V3\Data:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="V3\Data:Rebuild" Outputs="@(V3_DataBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="V3_DataBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="V3\Data:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'C:\Code\Git\NuGet\Client\src\V3\NuGet.Data\Data\Data.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
   </Target>
 </Project>
