@@ -52,7 +52,7 @@ namespace NuGet.Client.Interop
             var dsPackage = version as DataServicePackage;
             if (dsPackage != null)
             {
-                AddProp(value, Properties.NupkgUrl, dsPackage.DownloadUrl);
+                AddProp(value, Properties.PackageContent, dsPackage.DownloadUrl);
             }
 
             return value;

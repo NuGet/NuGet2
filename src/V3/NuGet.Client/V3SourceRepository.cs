@@ -33,12 +33,29 @@ namespace NuGet.Client
             new Uri("http://schema.nuget.org/schema#items")
         };
 
+        private static readonly Uri[] PackageDetailsRequiredProperties = new Uri[] {
+            new Uri("http://schema.nuget.org/schema#authors"),
+            new Uri("http://schema.nuget.org/schema#description"),
+            new Uri("http://schema.nuget.org/schema#iconUrl"),
+            new Uri("http://schema.nuget.org/schema#id"),
+            new Uri("http://schema.nuget.org/schema#language"),
+            new Uri("http://schema.nuget.org/schema#licenseUrl"),
+            new Uri("http://schema.nuget.org/schema#minClientVersion"),
+            new Uri("http://schema.nuget.org/schema#projectUrl"),
+            new Uri("http://schema.nuget.org/schema#published"),
+            new Uri("http://schema.nuget.org/schema#requireLicenseAcceptance"),
+            new Uri("http://schema.nuget.org/schema#summary"),
+            new Uri("http://schema.nuget.org/schema#tags"),
+            new Uri("http://schema.nuget.org/schema#title"),
+            new Uri("http://schema.nuget.org/schema#version"),
+        };
+
         public override PackageSource Source
         {
             get { return _source; }
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The HttpClient can be left open until VS shuts down.")]
         public V3SourceRepository(PackageSource source)
         {
             _source = source;
@@ -142,12 +159,10 @@ namespace NuGet.Client
             Debug.Assert(package != null, "DataClient returned null from Ensure :(");
             cancellationToken.ThrowIfCancellationRequested();
             var catalogPackage = package["catalogEntry"];
-            var resolvedPackage = catalogPackage; // For now, skip Ensure on this object.
-                                                  //var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, CatalogPackageRequiredProperties));
+            var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, PackageDetailsRequiredProperties));
 
             // Find all the other versions of this package
-            var packageUri = new Uri((package["url"] ?? package[Properties.SubjectId]).ToString());
-            var registrationUri = packageUri.AbsoluteUri.Substring(0, packageUri.AbsoluteUri.Length - packageUri.Fragment.Length);
+            var registrationUri = package["registration"].ToString();
 
             NuGetTraceSources.V3SourceRepository.Verbose(
                 "resolving_registration",
