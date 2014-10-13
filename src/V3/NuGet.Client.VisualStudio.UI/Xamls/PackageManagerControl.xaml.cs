@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -92,13 +91,12 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void Sources_PackageSourcesChanged(object sender, EventArgs e)
         {
-            // Set _dontStartNewSearch to true to prevent a new search started in 
+            // Set _dontStartNewSearch to true to prevent a new search started in
             // _sourceRepoList_SelectionChanged(). This method will start the new
             // search when needed by itself.
             _dontStartNewSearch = true;
             try
             {
-
                 var oldActiveSource = _sourceRepoList.SelectedItem as PackageSource;
                 var newSources = new List<PackageSource>(Sources.AvailableSources);
 
@@ -191,8 +189,8 @@ namespace NuGet.Client.VisualStudio.UI
 
             if (Sources.ActiveRepository != null)
             {
-            _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
-            }                
+                _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
+            }
         }
 
         public void SetBusy(bool busy)
@@ -432,8 +430,8 @@ namespace NuGet.Client.VisualStudio.UI
                 var activeSource = _sourceRepoList.SelectedItem as PackageSource;
                 if (activeSource == null)
                 {
-                var loader = new PackageLoader(
-                    (startIndex, ct) =>
+                    var loader = new PackageLoader(
+                        (startIndex, ct) =>
                         {
                             return Task.Factory.StartNew(() =>
                             {
@@ -446,6 +444,7 @@ namespace NuGet.Client.VisualStudio.UI
                 else
                 {
                     var sourceRepository = Sources.CreateSourceRepository(activeSource);
+                    var includePrerelease = _checkboxPrerelease.IsChecked == true;
                     var loader = new PackageLoader(
                         (startIndex, ct) =>
                             sourceRepository.Search(
@@ -453,15 +452,15 @@ namespace NuGet.Client.VisualStudio.UI
                             new SearchFilter()
                             {
                                 SupportedFrameworks = supportedFrameworks,
-                                IncludePrerelease = false
+                                IncludePrerelease = includePrerelease                               
                             },
                             startIndex,
                             PageSize,
                             ct),
                     Target);
-                _packageList.Loader = loader;
+                    _packageList.Loader = loader;
+                }
             }
-        }
         }
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
@@ -510,8 +509,8 @@ namespace NuGet.Client.VisualStudio.UI
             var newSource = _sourceRepoList.SelectedItem as PackageSource;
             if (newSource != null)
             {
-                Sources.ChangeActiveSource(newSource); 
-            }            
+                Sources.ChangeActiveSource(newSource);
+            }
             SearchPackageInActivePackageSource();
         }
 
@@ -567,7 +566,7 @@ namespace NuGet.Client.VisualStudio.UI
                     {
                         uninstalledPackages.Add(package);
                     }
-            }
+                }
             }
 
             if (showOnlyInstalled)
@@ -626,6 +625,11 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         private void _searchControl_SearchStart(object sender, EventArgs e)
+        {
+            SearchPackageInActivePackageSource();
+        }
+
+        private void _checkboxPrerelease_CheckChanged(object sender, RoutedEventArgs e)
         {
             SearchPackageInActivePackageSource();
         }

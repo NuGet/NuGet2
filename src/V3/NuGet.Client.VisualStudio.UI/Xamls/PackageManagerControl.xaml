@@ -62,9 +62,16 @@
                     Margin="6,0,0,0"
                     SelectedIndex="0"
                     x:Name="_filter"
-                    Width="186"
+                    Width="100"
                     SelectionChanged="_filter_SelectionChanged"/>
-
+                
+                <CheckBox x:Name="_checkboxPrerelease" 
+                          Grid.Column="4" Margin="24,0,0,0"
+                          VerticalAlignment="Center"
+                          Content="{x:Static resx:Resources.Checkbox_IncludePrerelease}"
+                          Checked="_checkboxPrerelease_CheckChanged"
+                          Unchecked="_checkboxPrerelease_CheckChanged"/>
+                
                 <Tools:SearchControl
                     Grid.Column="5"
                     Margin="6,0,0,0"

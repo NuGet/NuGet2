@@ -196,7 +196,7 @@
     <value>Publisher(s):</value>
   </data>
   <data name="Label_Repository" xml:space="preserve">
-    <value>Repository:</value>
+    <value>Package source:</value>
   </data>
   <data name="Label_Tags" xml:space="preserve">
     <value>Tags:</value>
@@ -314,5 +314,11 @@
   </data>
   <data name="WindowTitle_Error" xml:space="preserve">
     <value>Error</value>
+  </data>
+  <data name="Label_Search" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="Checkbox_IncludePrerelease" xml:space="preserve">
+    <value>Include Prerelease</value>
   </data>
 </root>

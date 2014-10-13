@@ -223,6 +223,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Include Prerelease.
+        /// </summary>
+        public static string Checkbox_IncludePrerelease {
+            get {
+                return ResourceManager.GetString("Checkbox_IncludePrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highest.
         /// </summary>
         public static string DependencyBehavior_Highest {
@@ -493,11 +502,20 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Repository:.
+        ///   Looks up a localized string similar to Package source:.
         /// </summary>
         public static string Label_Repository {
             get {
                 return ResourceManager.GetString("Label_Repository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search:.
+        /// </summary>
+        public static string Label_Search {
+            get {
+                return ResourceManager.GetString("Label_Search", resourceCulture);
             }
         }
         
