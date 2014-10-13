@@ -53,6 +53,6 @@ namespace NuGet.Client
         public static readonly string Range = "range";
         public static readonly string MinimumClientVersion = "minClientVersion";
         public static readonly string Language = "language";
-        public static readonly string NupkgUrl = "nupkgUrl";
+        public static readonly string PackageContent = "packageContent";
     }
 }

@@ -19,7 +19,7 @@ namespace NuGet.Client.Installation
     {
         public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
         {
-            string downloadUriStr = action.Package[Properties.NupkgUrl].ToString();
+            string downloadUriStr = action.Package[Properties.PackageContent].ToString();
             Uri downloadUri;
             if (String.IsNullOrEmpty(downloadUriStr))
             {
