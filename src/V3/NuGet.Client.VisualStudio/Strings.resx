@@ -126,4 +126,7 @@
   <data name="VsPackageManagerSession_UnknownSource" xml:space="preserve">
     <value>Unknown Package Source: '{0}'. It is not present in the list of available sources.</value>
   </data>
+  <data name="VsSourceRepositoryManager_V3SourceName" xml:space="preserve">
+    <value>preview.nuget.org</value>
+  </data>
 </root>

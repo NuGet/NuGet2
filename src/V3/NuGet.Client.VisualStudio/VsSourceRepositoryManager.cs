@@ -18,6 +18,10 @@ namespace NuGet.Client.VisualStudio
     [Export(typeof(SourceRepositoryManager))]
     public class VsSourceRepositoryManager : SourceRepositoryManager
     {
+        private static readonly PackageSource NuGetV3PreviewSource = new PackageSource(
+            Strings.VsSourceRepositoryManager_V3SourceName,
+            "http://preview.nuget.org/ver3-preview/index.json");
+
         private readonly IVsPackageSourceProvider _sourceProvider;
         private readonly IPackageRepositoryFactory _repoFactory;
         private readonly ConcurrentDictionary<string, SourceRepository> _repos = new ConcurrentDictionary<string, SourceRepository>();
@@ -43,10 +47,15 @@ namespace NuGet.Client.VisualStudio
         {
             get
             {
-                return _sourceProvider
+                yield return NuGetV3PreviewSource;
+
+                var coreSources = _sourceProvider
                     .GetEnabledPackageSources()
-                    .Select(
-                        s => new PackageSource(s.Name, s.Source));
+                    .Select(s => new PackageSource(s.Name, s.Source));
+                foreach (var source in coreSources)
+                {
+                    yield return source;
+                }
             }
         }
 
@@ -66,6 +75,11 @@ namespace NuGet.Client.VisualStudio
 
         public override void ChangeActiveSource(PackageSource newSource)
         {
+            if (newSource.Equals(NuGetV3PreviewSource))
+            {
+                return; // Can't set it as default
+            }
+
             var source = _sourceProvider.GetEnabledPackageSources()
                 .FirstOrDefault(s => String.Equals(s.Name, newSource.Name, StringComparison.OrdinalIgnoreCase));
             if (source == null)

@@ -125,7 +125,7 @@ namespace NuGet.VisualStudio
 
         internal static IEnumerable<PackageSource> DefaultSources
         {
-            get { return new[] { NuGetV3Source, NuGetDefaultSource }; }
+            get { return new[] { NuGetDefaultSource }; }
         }
 
         internal static Dictionary<PackageSource, PackageSource> FeedsToMigrate
@@ -192,6 +192,17 @@ namespace NuGet.VisualStudio
                 }
 
                 _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
+
+                // Remove the V3 CTP feed if present
+                var ctpFeed = _packageSources.FirstOrDefault(ps => NuGetV3Source.Equals(ps));
+                if (ctpFeed != null)
+                {
+                    _packageSources.Remove(ctpFeed);
+                    PersistPackageSources(
+                            _packageSourceProvider,
+                            _vsShellInfo,
+                            _packageSources);
+                }
 
                 // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
                 if (_vsShellInfo.IsVisualStudioExpressForWindows8)
