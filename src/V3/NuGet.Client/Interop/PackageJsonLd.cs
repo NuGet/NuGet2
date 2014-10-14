@@ -78,9 +78,12 @@ namespace NuGet.Client.Interop
 
         public static PackageDependency DependencyFromJson(JObject dependency)
         {
+            var range = dependency.Value<string>(Properties.Range);
+            var versionSpec = range != null ? VersionUtility.ParseVersionSpec(range) : null;
+
             return new PackageDependency(
                 dependency.Value<string>(Properties.PackageId),
-                VersionUtility.ParseVersionSpec(dependency.Value<string>(Properties.Range)));
+                versionSpec);
         }
 
         public static PackageDependencySet DependencySetFromJson(JObject dependencySet)
