@@ -25,6 +25,10 @@ namespace NuGet.Client
             includeMaxVersion: true,
             includeMinVersion: true);
 
+        private static readonly Uri[] ResultItemRequiredProperties = new Uri[] {
+            new Uri("http://schema.nuget.org/schema#registration")
+        };
+
         private static readonly Uri[] PackageRequiredProperties = new Uri[] {
             new Uri("http://schema.nuget.org/schema#catalogEntry")
         };
@@ -102,8 +106,6 @@ namespace NuGet.Client
                 queryUrl.ToString());
             var results = await _client.GetFile(queryUrl.Uri);
             cancellationToken.ThrowIfCancellationRequested();
-            results[Properties.SubjectId] = queryUrl.Uri.ToString();
-            results["url"] = results[Properties.SubjectId];
             if (results == null)
             {
                 NuGetTraceSources.V3SourceRepository.Warning(
@@ -154,37 +156,32 @@ namespace NuGet.Client
                                 "Resolving Package: {0}",
                                 result[Properties.SubjectId]);
 
-            // Patch the URL
-            result["@id"] = result["@id"].ToString().ToLowerInvariant();
+            // Get the registration
+            result = (JObject)(await _client.Ensure(result, ResultItemRequiredProperties));
+            var registrationUrl = new Uri(result["registration"].ToString());
 
-            // Get the full blob
-            var package = (JObject)(await _client.Ensure(result, PackageRequiredProperties));
-            Debug.Assert(package != null, "DataClient returned null from Ensure :(");
-            cancellationToken.ThrowIfCancellationRequested();
-            var catalogPackage = package["catalogEntry"];
-            var resolvedPackage = (JObject)(await _client.Ensure(catalogPackage, PackageDetailsRequiredProperties));
-
-            // Rewrite the URL to get the registration root url
-            var idx = result["@id"].ToString().LastIndexOf('/');
-            var registrationUri = result["@id"].ToString().Substring(0, idx) + "/index.json";
-
+            // Fetch the registration
             NuGetTraceSources.V3SourceRepository.Verbose(
                 "resolving_registration",
                 "Resolving Package Registration: {0}",
-                registrationUri);
-            var registration = await _client.GetEntity(new Uri(registrationUri));
+                registrationUrl);
+            var registration = await _client.GetEntity(registrationUrl);
 
             // Descend through the pages until we find all Packages
             var packages = await Descend((JArray)registration["items"]);
 
+            // Find the recommended package
+            var primaryResult = packages.FirstOrDefault(
+                p => NuGetVersion.Parse(p["catalogEntry"]["version"].ToString()).Equals(NuGetVersion.Parse(result["version"].ToString())));
+
             // Construct a result object
             var searchResult = new JObject()
-                {
-                    {Properties.PackageId, resolvedPackage[Properties.PackageId] },
-                    {Properties.LatestVersion, resolvedPackage[Properties.Version] },
-                    {Properties.Summary, resolvedPackage[Properties.Summary] },
-                    {Properties.IconUrl, resolvedPackage[Properties.IconUrl] }
-                };
+            {
+                {Properties.PackageId, primaryResult["catalogEntry"][Properties.PackageId] },
+                {Properties.LatestVersion, primaryResult["catalogEntry"][Properties.Version] },
+                {Properties.Summary, primaryResult["catalogEntry"][Properties.Summary] },
+                {Properties.IconUrl, primaryResult["catalogEntry"][Properties.IconUrl] }
+            };
 
             // Fill in the package entries
             var versions = new JArray();
