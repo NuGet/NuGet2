@@ -82,7 +82,7 @@ namespace NuGet.Client.VisualStudio.UI
                 .Select(p => p.Project);
             return await resolver.ResolveActionsAsync(
                 model.Package.Id,
-                model.Package.Version,
+                model.SelectedVersion.Version,
                 action,
                 targetProjects,
                 Solution);

@@ -40,7 +40,7 @@ namespace NuGet.Client
 
         public override string ToString()
         {
-            return Id + " " + Version.ToString();
+            return Id + " " + Version.ToNormalizedString();
         }
     }
 }
