@@ -19,12 +19,20 @@ namespace NuGet.Client.Resolution
         public InstallationTarget Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
 
+        internal IPackage CorePackage { get; private set; }
+
         public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target)
+            : this(actionType, packageName, package, target, corePackage: null)
+        {
+        }
+
+        internal PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target, IPackage corePackage)
         {
             ActionType = actionType;
             PackageIdentity = packageName;
             Package = package;
             Target = target;
+            CorePackage = corePackage;
         }
 
         public override string ToString()

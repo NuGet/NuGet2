@@ -36,7 +36,6 @@ namespace NuGet.Client.Installation
                     action.PackageIdentity,
                     downloadUriStr));
             }
-            
 
             return Task.Run(() =>
             {
@@ -45,7 +44,15 @@ namespace NuGet.Client.Installation
                 var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
 
                 // Load the package
-                var package = GetPackage(packageCache, action.PackageIdentity, downloadUri);
+                IPackage package;
+                if (downloadUri.IsFile)
+                {
+                    package = new OptimizedZipPackage(downloadUri.LocalPath);
+                }
+                else
+                {
+                    package = GetPackage(packageCache, action.PackageIdentity, downloadUri);
+                }
 
                 NuGetTraceSources.ActionExecutor.Verbose(
                     "download/loadedpackage",

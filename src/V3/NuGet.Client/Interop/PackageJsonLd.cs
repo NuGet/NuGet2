@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
@@ -15,17 +16,28 @@ namespace NuGet.Client.Interop
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions)
         {
+            return CreatePackageSearchResult(package, versions, repoRoot: null, pathResolver: null);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions, string repoRoot, IPackagePathResolver pathResolver)
+        {
             var value = new JObject();
             value.Add(new JProperty(Properties.Type, new JArray(Types.PackageSearchResult.ToString())));
             AddProp(value, Properties.PackageId, package.Id);
             AddProp(value, Properties.LatestVersion, package.Version.ToString());
             AddProp(value, Properties.Summary, package.Summary);
             AddProp(value, Properties.IconUrl, package.IconUrl);
-            AddProp(value, Properties.Packages, versions.Select(v => CreatePackage(v)));
+            AddProp(value, Properties.Packages, versions.Select(v => CreatePackage(v, repoRoot, pathResolver)));
             return value;
         }
 
         public static JObject CreatePackage(IPackage version)
+        {
+            return CreatePackage(version, repoRoot: null, pathResolver: null);
+        }
+
+        public static JObject CreatePackage(IPackage version, string repoRoot, IPackagePathResolver pathResolver)
         {
             var value = new JObject();
             AddProp(value, Properties.Type, new JArray(
@@ -53,6 +65,13 @@ namespace NuGet.Client.Interop
             if (dsPackage != null)
             {
                 AddProp(value, Properties.PackageContent, dsPackage.DownloadUrl);
+            }
+            else if (pathResolver != null)
+            {
+                AddProp(
+                    value,
+                    Properties.PackageContent,
+                    Path.Combine(repoRoot, pathResolver.GetPackageFileName(version)));
             }
 
             return value;

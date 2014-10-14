@@ -14,6 +14,7 @@ namespace NuGet.Client.Interop
     public class V2SourceRepository : SourceRepository
     {
         private readonly IPackageRepository _repository;
+        private readonly LocalPackageRepository _lprepo;
         private readonly PackageSource _source;
 
         public override PackageSource Source { get { return _source; } }
@@ -23,6 +24,7 @@ namespace NuGet.Client.Interop
             _source = source;
 
             _repository = repository;
+            _lprepo = _repository as LocalPackageRepository;
         }
 
         public override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
@@ -42,7 +44,16 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
             var versions = _repository.FindPackagesById(package.Id);
-            return PackageJsonLd.CreatePackageSearchResult(package, versions);
+
+            string repoRoot = null;
+            IPackagePathResolver resolver = null;
+            if (_lprepo != null)
+            {
+                repoRoot = _lprepo.Source;
+                resolver = _lprepo.PathResolver;
+            }
+
+            return PackageJsonLd.CreatePackageSearchResult(package, versions, repoRoot, resolver);
         }
 
         public override Task<JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
@@ -53,13 +64,29 @@ namespace NuGet.Client.Interop
             {
                 return Task.FromResult<JObject>(null);
             }
-            return Task.FromResult(PackageJsonLd.CreatePackage(package));
+
+            string repoRoot = null;
+            IPackagePathResolver resolver = null;
+            if (_lprepo != null)
+            {
+                repoRoot = _lprepo.Source;
+                resolver = _lprepo.PathResolver;
+            }
+
+            return Task.FromResult(PackageJsonLd.CreatePackage(package, repoRoot, resolver));
         }
 
         public override Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
             NuGetTraceSources.V2SourceRepository.Verbose("findpackagebyid", "Getting metadata for all versions of {0}", packageId);
-            return Task.FromResult(_repository.FindPackagesById(packageId).Select(PackageJsonLd.CreatePackage));
+            string repoRoot = null;
+            IPackagePathResolver resolver = null;
+            if (_lprepo != null)
+            {
+                repoRoot = _lprepo.Source;
+                resolver = _lprepo.PathResolver;
+            }
+            return Task.FromResult(_repository.FindPackagesById(packageId).Select(p => PackageJsonLd.CreatePackage(p, repoRoot, resolver)));
         }
     }
 }

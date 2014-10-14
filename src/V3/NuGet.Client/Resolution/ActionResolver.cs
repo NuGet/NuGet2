@@ -65,7 +65,8 @@ namespace NuGet.Client.Resolution
                        UnwrapPackage(action.Package),
                        (projectAction != null ?
                             FindProject(targetedProjects, projectAction.ProjectManager.Project.ProjectName) :
-                            (InstallationTarget)solution));
+                            (InstallationTarget)solution),
+                       action.Package);
         }
 
         private static Project FindProject(IEnumerable<Project> targets, string projectName)
