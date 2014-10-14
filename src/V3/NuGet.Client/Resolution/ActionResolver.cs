@@ -76,7 +76,10 @@ namespace NuGet.Client.Resolution
         private static JObject UnwrapPackage(IPackage package)
         {
             CoreInteropPackage interopPackage = package as CoreInteropPackage;
-            Debug.Assert(interopPackage != null, "Expected a CoreInteropPackage!");
+            if (interopPackage == null)
+            {
+                return PackageJsonLd.CreatePackage(package);
+            }
             return interopPackage.Json;
         }
 

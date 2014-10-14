@@ -194,6 +194,7 @@ namespace NuGet.Client
                     "resolving_version",
                     "Resolving Package Version: {0}",
                     version[Properties.SubjectId]);
+                version["catalogEntry"][Properties.PackageContent] = version[Properties.PackageContent];
                 versions.Add(version["catalogEntry"]);
             }
             searchResult[Properties.Packages] = versions;
@@ -226,7 +227,11 @@ namespace NuGet.Client
             var versions = await Descend((JArray)catalogPackage["items"]);
 
             // Return the catalogEntry values
-            return versions.Select(o => (JObject)o["catalogEntry"]);
+            return versions.Select(o => {
+                var result = (JObject)o["catalogEntry"];
+                result[Properties.PackageContent] = o[Properties.PackageContent];
+                return result;
+            });
         }
 
         private async Task<IEnumerable<JObject>> Descend(JArray json)
