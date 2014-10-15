@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
 
@@ -90,7 +91,7 @@ namespace NuGet.Client.VisualStudio.UI
             else
             {
                 return string.Format("{0} ({1})", _name,
-                    Version.ToString());
+                    Version.ToNormalizedString());
             }
         }
     }
