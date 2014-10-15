@@ -44,6 +44,10 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
             var versions = _repository.FindPackagesById(package.Id);
+            if (!versions.Any())
+            {
+                versions = new[] { package };
+            }
 
             string repoRoot = null;
             IPackagePathResolver resolver = null;

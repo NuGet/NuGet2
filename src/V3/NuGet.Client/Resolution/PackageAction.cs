@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace NuGet.Client.Resolution
         public InstallationTarget Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal IPackage CorePackage { get; private set; }
 
         public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target)

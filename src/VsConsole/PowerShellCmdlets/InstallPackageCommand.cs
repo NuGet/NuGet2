@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.ProjectSystem.Interop;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 #endif
 
@@ -19,7 +20,7 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// This command installs the specified package into the specified project.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Install, "Package")]
+    [Cmdlet(VerbsLifecycle.Install, "Package")]    
     public class InstallPackageCommand : ProcessPackageBaseCommand
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
@@ -250,6 +251,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void InstallPackage(IVsPackageManager packageManager)
         {
             if (packageManager == null)

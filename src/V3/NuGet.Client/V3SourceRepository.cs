@@ -187,6 +187,8 @@ namespace NuGet.Client
             var versions = new JArray();
             foreach (var version in packages)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 NuGetTraceSources.V3SourceRepository.Verbose(
                     "resolving_version",
                     "Resolving Package Version: {0}",
