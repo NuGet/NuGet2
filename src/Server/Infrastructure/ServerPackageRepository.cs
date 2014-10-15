@@ -461,7 +461,7 @@ namespace NuGet.Server.Infrastructure
         {
             try
             {
-                Elmah.ErrorSignal.FromContext(context).Raise(new Exception(message, innerException));
+                // Elmah.ErrorSignal.FromContext(context).Raise(new Exception(message, innerException));                
             }
             catch
             {
