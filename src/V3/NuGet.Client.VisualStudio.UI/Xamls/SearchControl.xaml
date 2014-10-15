@@ -17,6 +17,7 @@
                    />
         <TextBox x:Name="_textBox" 
                  Grid.Column="1"
+                 VerticalAlignment="Center"
                  Text="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
                  Margin="6,0,0,0"
                  TextChanged="_textBox_TextChanged" 

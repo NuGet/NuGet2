@@ -35,6 +35,7 @@ namespace NuGet.Client.Installation
 
                 // Add the package to the project
                 projectManager.Logger = new ShimLogger(logger);
+                projectManager.Project.Logger = projectManager.Logger;
                 projectManager.Execute(new PackageOperation(
                     package,
                     NuGet.PackageAction.Uninstall));

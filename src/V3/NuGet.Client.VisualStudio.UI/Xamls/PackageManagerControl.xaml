@@ -34,6 +34,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -47,6 +48,7 @@
                 <ComboBox
                     Margin="6,0,0,0"
                     x:Name="_sourceRepoList"
+                    VerticalAlignment="Center"
                     DisplayMemberPath="Name"
                     Width="186"
                     Grid.Column="1"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
@@ -60,6 +62,7 @@
                 <ComboBox
                     Grid.Column="3"
                     Margin="6,0,0,0"
+                    VerticalAlignment="Center"
                     SelectedIndex="0"
                     x:Name="_filter"
                     Width="100"
@@ -73,15 +76,17 @@
                           Unchecked="_checkboxPrerelease_CheckChanged"/>
                 
                 <Tools:SearchControl
-                    Grid.Column="5"
-                    Margin="6,0,0,0"
+                    Grid.Column="6"
+                    Margin="24,0,0,0"
+                    VerticalAlignment="Center"
                     x:Name="_searchControl"
                     SearchStart="_searchControl_SearchStart"
                     Width="224" />
 
                 <Button
                     Margin="24,0"
-                    Grid.Column="6"
+                    VerticalAlignment="Center"
+                    Grid.Column="7"
                     Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
                     Click="SettingsButtonClick" x:Name="_settingsButton">
                     <Rectangle Width="16" Height="16">
