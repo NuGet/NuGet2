@@ -593,7 +593,15 @@ namespace NuGet.Tools
                     (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
                 var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-                var myDoc = new PackageManagerModel(context.SourceManager, context.GetCurrentSolution());
+                var currentSolution = context.GetCurrentSolution();
+                if (!currentSolution.Projects.Any())
+                {
+                    // there are no supported projects.
+                    MessageHelper.ShowWarningMessage(VsResources.NoSupportedProjectsInSolution, Resources.ErrorDialogBoxTitle);
+                    return;
+                }
+
+                var myDoc = new PackageManagerModel(context.SourceManager, currentSolution);
                 var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
                 var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
                 var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

@@ -194,7 +194,10 @@ namespace NuGet.Client.VisualStudio.UI
                 _actions.Add(Resources.Resources.Action_Consolidate);
             }
 
-            SelectedAction = _actions[0];
+            if (_actions.Count > 0)
+            {
+                SelectedAction = _actions[0];
+            }
             OnPropertyChanged("Actions");
         }
 
