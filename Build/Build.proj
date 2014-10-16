@@ -55,6 +55,7 @@
         <MajorVersion>3</MajorVersion>
         <MinorVersion>0</MinorVersion>
         <Patch>0</Patch>
+	<PrereleaseTag>ctp2</PrereleaseTag>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -63,7 +64,9 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+	<!-- This is the version number of nupkg files produced -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
+        <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
