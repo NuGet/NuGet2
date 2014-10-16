@@ -66,7 +66,7 @@ namespace NuGet.Client
             _root = new Uri(source.Url);
             _client = new DataClient(
                 new System.Net.Http.HttpClient(),
-                new BrowserFileCache(),
+                new NullFileCache(),
                 context: null);
         }
 
@@ -134,7 +134,11 @@ namespace NuGet.Client
             List<JObject> outputs = new List<JObject>(take);
             foreach (var result in data.Take(take).Cast<JObject>())
             {
-                outputs.Add(await ProcessSearchResult(cancellationToken, result));
+                var output = await ProcessSearchResult(cancellationToken, result);
+                if (output != null)
+                {
+                    outputs.Add(output);
+                }
             }
 
             //var input = data.Take(take).Cast<JObject>().ToList();
@@ -168,6 +172,16 @@ namespace NuGet.Client
             var registration = await _client.GetEntity(registrationUrl);
 
             // Descend through the pages until we find all Packages
+            Debug.Assert(registration != null, "Got a null value from GetEntity(" + registrationUrl.ToString() + ")!");
+            Debug.Assert(registration["items"] != null, "Registration has no items? " + registrationUrl.ToString());
+            if (registration == null || registration["items"] == null)
+            {
+                NuGetTraceSources.V3SourceRepository.Error(
+                    "null_registration",
+                    "Got a null registration back from {0}!",
+                    registrationUrl);
+                return null;
+            }
             var packages = await Descend((JArray)registration["items"]);
 
             // Find the recommended package
