@@ -88,8 +88,8 @@ namespace NuGet.Client
                 "&skip=" + skip.ToString() +
                 "&take=" + take.ToString() +
                 "&includePrerelease=" + filters.IncludePrerelease.ToString().ToLowerInvariant();
-            string frameworks = 
-                String.Join("&", 
+            string frameworks =
+                String.Join("&",
                     filters.SupportedFrameworks.Select(
                         fx => "supportedFramework=" + VersionUtility.GetShortFrameworkName(fx)));
 
@@ -123,7 +123,7 @@ namespace NuGet.Client
                     queryUrl.ToString());
                 return Enumerable.Empty<JObject>();
             }
-            
+
             NuGetTraceSources.V3SourceRepository.Verbose(
                 "results_received",
                 "Received {1} hits from {0}",
@@ -187,6 +187,10 @@ namespace NuGet.Client
             // Find the recommended package
             var primaryResult = packages.FirstOrDefault(
                 p => NuGetVersion.Parse(p["catalogEntry"]["version"].ToString()).Equals(NuGetVersion.Parse(result["version"].ToString())));
+            if (primaryResult == null)
+            {
+                primaryResult = packages.OrderByDescending(p => NuGetVersion.Parse(p["catalogEntry"][Properties.Version].ToString())).FirstOrDefault();
+            }
 
             // Construct a result object
             var searchResult = new JObject()
@@ -240,7 +244,8 @@ namespace NuGet.Client
             var versions = await Descend((JArray)catalogPackage["items"]);
 
             // Return the catalogEntry values
-            return versions.Select(o => {
+            return versions.Select(o =>
+            {
                 var result = (JObject)o["catalogEntry"];
                 result[Properties.PackageContent] = o[Properties.PackageContent];
                 return result;
@@ -263,7 +268,7 @@ namespace NuGet.Client
                     Debug.Assert(resolved != null, "DataClient returned null from Ensure :(");
                     lists.Add(await Descend((JArray)resolved["items"]));
                 }
-                else if(Equals(type, "Package"))
+                else if (Equals(type, "Package"))
                 {
                     // Yield this item with catalogEntry and it's subfields ensured
                     var resolved = await _client.Ensure(item, PackageRequiredProperties);
