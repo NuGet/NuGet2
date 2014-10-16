@@ -66,7 +66,7 @@ namespace NuGet.Client
             _root = new Uri(source.Url);
             _client = new DataClient(
                 new System.Net.Http.HttpClient(),
-                new NullFileCache(),
+                new BrowserFileCache(),
                 context: null);
         }
 
