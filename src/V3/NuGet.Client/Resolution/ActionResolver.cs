@@ -27,8 +27,7 @@ namespace NuGet.Client.Resolution
         }
 
         public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(
-            string id,
-            NuGetVersion version,
+            PackageIdentity packageIdentity,
             PackageActionType operation,
             IEnumerable<Project> targetedProjects,
             Solution solution)
@@ -40,33 +39,49 @@ namespace NuGet.Client.Resolution
             ApplyContext(resolver);
 
             // Add the operation request(s)
-            NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), id, version.ToNormalizedString());
+            NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), packageIdentity.Id, packageIdentity.Version.ToNormalizedString());
             foreach (var project in targetedProjects)
             {
                 resolver.AddOperation(
                     MapNewToOldActionType(operation),
-                    await CreateVirtualPackage(id, version),
+                    await CreateVirtualPackage(packageIdentity.Id, packageIdentity.Version),
                     new CoreInteropProjectManager(project, _source));
             }
 
             // Resolve actions!
             var actions = await Task.Factory.StartNew(() => resolver.ResolveActions());
 
-            // Convert the actions and return them
-            return from action in actions
-                   let projectAction = action as PackageProjectAction
-                   select new PackageAction(
-                       MapOldToNewActionType(action.ActionType),
-                       new PackageIdentity(
-                           action.Package.Id,
-                           new NuGetVersion(
-                                action.Package.Version.Version,
-                                action.Package.Version.SpecialVersion)),
-                       UnwrapPackage(action.Package),
-                       (projectAction != null ?
-                            FindProject(targetedProjects, projectAction.ProjectManager.Project.ProjectName) :
-                            (InstallationTarget)solution),
-                       action.Package);
+            // Convert the actions
+            var converted = 
+                from action in actions
+                let projectAction = action as PackageProjectAction
+                select new PackageAction(
+                    MapOldToNewActionType(action.ActionType),
+                    new PackageIdentity(
+                        action.Package.Id,
+                        new NuGetVersion(
+                            action.Package.Version.Version,
+                            action.Package.Version.SpecialVersion)),
+                    UnwrapPackage(action.Package),
+                    (projectAction != null ?
+                        FindProject(targetedProjects, projectAction.ProjectManager.Project.ProjectName) :
+                        (InstallationTarget)solution),
+                    _source,
+                    packageIdentity);
+
+            // Identify update operations so we can mark them as such.
+            foreach (var group in converted.GroupBy(c => c.PackageIdentity.Id))
+            {
+                var installs = group.Where(p => p.ActionType == PackageActionType.Install).ToList();
+                var uninstalls = group.Where(p => p.ActionType == PackageActionType.Uninstall).ToList();
+                if (installs.Count > 0 && uninstalls.Count > 0)
+                {
+                    var maxInstall = installs.OrderByDescending(a => a.PackageIdentity.Version).First();
+                    maxInstall.IsUpdate = true;
+                }
+            }
+
+            return converted;
         }
 
         private static Project FindProject(IEnumerable<Project> targets, string projectName)

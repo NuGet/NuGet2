@@ -81,7 +81,7 @@ namespace NuGet.Client.Interop
         {
             var value = new JObject();
             AddProp(value, Properties.Type, Types.DependencyGroup);
-            AddProp(value, Properties.TargetFramework, set.TargetFramework == null ? null : set.TargetFramework.FullName);
+            AddProp(value, Properties.TargetFramework, set.TargetFramework == null ? null : VersionUtility.GetShortFrameworkName(set.TargetFramework));
             AddProp(value, Properties.Dependencies, set.Dependencies.Select(d => CreateDependency(d)));
             return value;
         }
@@ -121,7 +121,7 @@ namespace NuGet.Client.Interop
             string fxName = dependencySet.Value<string>(Properties.TargetFramework);
 
             return new PackageDependencySet(
-                String.IsNullOrEmpty(fxName) ? null : new FrameworkName(fxName),
+                String.IsNullOrEmpty(fxName) ? null : VersionUtility.ParseFrameworkName(fxName),
                 depEnum);
         }
 

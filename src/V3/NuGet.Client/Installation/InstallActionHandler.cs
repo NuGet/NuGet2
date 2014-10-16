@@ -47,6 +47,14 @@ namespace NuGet.Client.Installation
                     action.PackageIdentity.Id, CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
                 Debug.Assert(package != null); // The package had better be in the local repository!!
 
+                // Ping the metrics service
+                action.Source.RecordMetric(
+                    action.ActionType,
+                    action.PackageIdentity,
+                    action.DependentPackage,
+                    action.IsUpdate,
+                    action.Target.GetMetricsMetadata());
+
                 // Add the package to the project
                 projectManager.Logger = new ShimLogger(logger);
                 projectManager.Project.Logger = projectManager.Logger;

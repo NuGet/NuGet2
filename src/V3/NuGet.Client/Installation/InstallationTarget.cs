@@ -69,6 +69,16 @@ namespace NuGet.Client.Installation
         }
 
         /// <summary>
+        /// Retrieves a JSON object containing metadata to be sent up to the metrics service when packages are installed in this target.
+        /// </summary>
+        /// <returns></returns>
+        public virtual JObject GetMetricsMetadata()
+        {
+            return null;
+        }
+
+
+        /// <summary>
         /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
         /// if the feature is not supported by this host.
         /// </summary>

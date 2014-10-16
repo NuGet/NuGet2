@@ -19,22 +19,19 @@ namespace NuGet.Client.Resolution
         public JObject Package { get; private set; }
         public InstallationTarget Target { get; private set; }
         public PackageActionType ActionType { get; private set; }
+        public SourceRepository Source { get; private set; }
+        public PackageIdentity DependentPackage { get; private set; }
+        public bool IsUpdate { get; set; }
 
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal IPackage CorePackage { get; private set; }
-
-        public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target)
-            : this(actionType, packageName, package, target, corePackage: null)
-        {
-        }
-
-        internal PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target, IPackage corePackage)
+        public PackageAction(PackageActionType actionType, PackageIdentity packageName, JObject package, InstallationTarget target, SourceRepository source, PackageIdentity dependentPackage)
         {
             ActionType = actionType;
             PackageIdentity = packageName;
             Package = package;
             Target = target;
-            CorePackage = corePackage;
+            Source = source;
+            DependentPackage = dependentPackage;
+            IsUpdate = false;
         }
 
         public override string ToString()
