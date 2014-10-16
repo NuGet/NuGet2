@@ -238,7 +238,7 @@ namespace NuGet.Tools
             // Add the v3 shim client
             if (ShimControllerProvider != null)
             {
-                ShimControllerProvider.Controller.Enable(VsPackageSourceProvider);
+                //ShimControllerProvider.Controller.Enable(VsPackageSourceProvider);
             }
 
             // when NuGet loads, if the current solution has package 

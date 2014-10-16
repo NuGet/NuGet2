@@ -24,20 +24,35 @@ namespace NuGet.Client.Interop
             _source = source;
 
             _repository = repository;
+
+            var events = _repository as IHttpClientEvents;
+            if (events != null)
+            {
+                events.SendingRequest += (sender, args) =>
+                {
+                    NuGetTraceSources.V2SourceRepository.Verbose("http", "{0} {1}", args.Request.Method, args.Request.RequestUri.ToString());
+                };
+            }
+
             _lprepo = _repository as LocalPackageRepository;
         }
 
         public override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
         {
             NuGetTraceSources.V2SourceRepository.Verbose("search", "Searching for '{0}'", searchTerm);
-            return Task.Factory.StartNew(() => _repository.Search(
-                searchTerm, 
-                filters.SupportedFrameworks.Select(fx => fx.FullName),
-                filters.IncludePrerelease)
-                .Skip(skip)
-                .Take(take)
-                .ToList()
-                .Select(p => CreatePackageSearchResult(p)), cancellationToken);
+            return Task.Factory.StartNew(() => {
+                return (IEnumerable<JObject>)_repository.Search(
+                    searchTerm,
+                    filters.SupportedFrameworks.Select(fx => fx.FullName),
+                    filters.IncludePrerelease)
+                    .Skip(skip)
+                    .Take(take)
+                    .ToList()
+                    .AsParallel()
+                    .AsOrdered()
+                    .Select(p => CreatePackageSearchResult(p))
+                    .ToList();
+             } , cancellationToken);
         }
 
         private JObject CreatePackageSearchResult(IPackage package)
