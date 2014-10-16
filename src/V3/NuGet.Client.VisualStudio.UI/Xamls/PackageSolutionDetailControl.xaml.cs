@@ -81,8 +81,7 @@ namespace NuGet.Client.VisualStudio.UI
                 .Where(p => p.Selected)
                 .Select(p => p.Project);
             return await resolver.ResolveActionsAsync(
-                model.Package.Id,
-                model.SelectedVersion.Version,
+                new PackageIdentity(model.Package.Id, model.SelectedVersion.Version),
                 action,
                 targetProjects,
                 Solution);

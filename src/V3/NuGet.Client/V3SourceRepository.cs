@@ -10,20 +10,31 @@ using System.Threading.Tasks;
 using JsonLD.Core;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using NuGet.Client.Resolution;
+using System.Net.Http;
+using System.Globalization;
 
 namespace NuGet.Client
 {
     public class V3SourceRepository : SourceRepository
     {
-        private DataClient _client;
-        private PackageSource _source;
-        private Uri _root;
         private static readonly NuGetVersion DefaultVersion = new NuGetVersion("2.0.0");
         private static readonly VersionRange ServiceVersionRange = new VersionRange(
             minVersion: new NuGetVersion("3.0.0-preview.1"),
             maxVersion: new NuGetVersion("3.0.0-preview.1"),
             includeMaxVersion: true,
             includeMinVersion: true);
+        private static readonly VersionRange LegacyServiceVersionRange = new VersionRange(
+            minVersion: new NuGetVersion("2.0.0"), // >= 2.0.0
+            maxVersion: new NuGetVersion("3.0.0"), // <  3.0.0
+            includeMaxVersion: false,
+            includeMinVersion: true);
+
+        private DataClient _client;
+        private PackageSource _source;
+        private Uri _root;
+        private string _userAgent;
+        private System.Net.Http.HttpClient _http;
 
         private static readonly Uri[] ResultItemRequiredProperties = new Uri[] {
             new Uri("http://schema.nuget.org/schema#registration")
@@ -60,13 +71,31 @@ namespace NuGet.Client
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The HttpClient can be left open until VS shuts down.")]
-        public V3SourceRepository(PackageSource source)
+        public V3SourceRepository(PackageSource source, string host)
         {
             _source = source;
             _root = new Uri(source.Url);
+
+            // TODO: Get context from current UI activity (PowerShell, Dialog, etc.)
+            _userAgent = UserAgentUtil.GetUserAgent("NuGet.Client", host);
+
+            _http = new System.Net.Http.HttpClient(
+                new TracingHttpHandler(
+                    NuGetTraceSources.V3SourceRepository,
+                    new SetUserAgentHandler(
+                        _userAgent,
+                        new HttpClientHandler())));
+
+            // Check if we should disable the browser file cache
+            FileCacheBase cache = new BrowserFileCache();
+            if (String.Equals(Environment.GetEnvironmentVariable("NUGET_DISABLE_IE_CACHE"), "true", StringComparison.OrdinalIgnoreCase))
+            {
+                cache = new NullFileCache();
+            }
+
             _client = new DataClient(
-                new System.Net.Http.HttpClient(),
-                new BrowserFileCache(),
+                _http,
+                cache,
                 context: null);
         }
 
@@ -151,6 +180,33 @@ namespace NuGet.Client
             //});
 
             return outputs;
+        }
+
+        // Async void because we don't want metric recording to block anything at all
+        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, JObject additionalMetadata)
+        {
+            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService, LegacyServiceVersionRange);
+
+            if (metricsUrl == null)
+            {
+                // Nothing to do!
+                return;
+            }
+
+            // Create the JSON payload
+            var payload = additionalMetadata ?? new JObject();
+            payload.Add("id", packageIdentity.Id);
+            payload.Add("version", packageIdentity.Version.ToNormalizedString());
+            payload.Add("operation", isUpdate ? "Update" : "Install");
+            payload.Add("userAgent", _userAgent);
+            if (dependentPackage != null)
+            {
+                payload.Add("dependentPackage", dependentPackage.Id);
+                payload.Add("dependentPackageVersion", dependentPackage.Version.ToNormalizedString());
+            }
+
+            // Post the message
+            await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));
         }
 
         private async Task<JObject> ProcessSearchResult(System.Threading.CancellationToken cancellationToken, JObject result)

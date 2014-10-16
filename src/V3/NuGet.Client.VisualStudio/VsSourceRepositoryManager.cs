@@ -112,10 +112,10 @@ namespace NuGet.Client.VisualStudio
             if (Uri.TryCreate(source.Url, UriKind.RelativeOrAbsolute, out url) &&
                 url.Host.Equals("preview.nuget.org", StringComparison.OrdinalIgnoreCase))
             {
-                return new V3SourceRepository(source);
+                return new V3SourceRepository(source, VsVersionHelper.FullVsEdition);
             }
 
-            return new V2SourceRepository(source, _repoFactory.CreateRepository(source.Url));
+            return new V2SourceRepository(source, _repoFactory.CreateRepository(source.Url), VsVersionHelper.FullVsEdition);
         }
     }
 }

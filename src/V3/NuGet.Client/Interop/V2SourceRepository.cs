@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using JsonLD.Core;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
+using NuGet.Client.Resolution;
 
 namespace NuGet.Client.Interop
 {
@@ -16,14 +18,17 @@ namespace NuGet.Client.Interop
         private readonly IPackageRepository _repository;
         private readonly LocalPackageRepository _lprepo;
         private readonly PackageSource _source;
+        private readonly string _userAgent;
 
         public override PackageSource Source { get { return _source; } }
 
-        public V2SourceRepository(PackageSource source, IPackageRepository repository)
+        public V2SourceRepository(PackageSource source, IPackageRepository repository, string host)
         {
             _source = source;
-
             _repository = repository;
+            
+            // TODO: Get context from current UI activity (PowerShell, Dialog, etc.)
+            _userAgent = UserAgentUtil.GetUserAgent("NuGet.Client.Interop", host);
 
             var events = _repository as IHttpClientEvents;
             if (events != null)
@@ -106,6 +111,11 @@ namespace NuGet.Client.Interop
                 resolver = _lprepo.PathResolver;
             }
             return Task.FromResult(_repository.FindPackagesById(packageId).Select(p => PackageJsonLd.CreatePackage(p, repoRoot, resolver)));
+        }
+
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, JObject additionalMetadata)
+        {
+            // No-op, V2 doesn't support this.
         }
     }
 }

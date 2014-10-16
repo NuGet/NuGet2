@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NuGet.Client.Resolution;
 using NuGet.Versioning;
 
 namespace NuGet.Client
@@ -27,5 +28,6 @@ namespace NuGet.Client
 
         public abstract Task<JObject> GetPackageMetadata(string id, NuGetVersion version);
         public abstract Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId);
+        public abstract void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, JObject additionalMetadata);
     }
 }

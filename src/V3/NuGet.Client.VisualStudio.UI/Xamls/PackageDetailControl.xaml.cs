@@ -106,8 +106,7 @@ namespace NuGet.Client.VisualStudio.UI
 
                 // Resolve actions
                 return await resolver.ResolveActionsAsync(
-                    packageDetail.Package.Id, 
-                    packageDetail.Package.Version, 
+                    new PackageIdentity(packageDetail.Package.Id, packageDetail.Package.Version),
                     action,
                     new[] { Project },
                     Project.OwnerSolution);
