@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
 using System.Net.NetworkInformation;
@@ -6,13 +7,10 @@ using NuGet.Resolver;
 using NuGet.VisualStudio;
 
 #if VS14
-
 using Microsoft.VisualStudio.ProjectSystem.Interop;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
-using System.Diagnostics.CodeAnalysis;
-
 #endif
 
 namespace NuGet.PowerShell.Commands
