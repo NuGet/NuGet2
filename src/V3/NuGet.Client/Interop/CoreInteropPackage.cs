@@ -105,102 +105,105 @@ namespace NuGet.Client.Interop
         #region Unimplemented Parts
         public bool IsAbsoluteLatestVersion
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public bool IsLatestVersion
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public DateTimeOffset? Published
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IEnumerable<IPackageFile> GetFiles()
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 
         public IEnumerable<System.Runtime.Versioning.FrameworkName> GetSupportedFrameworks()
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 
         public System.IO.Stream GetStream()
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 
         public string Title
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IEnumerable<string> Authors
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IEnumerable<string> Owners
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public Uri IconUrl
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public Uri LicenseUrl
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public Uri ProjectUrl
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public bool RequireLicenseAcceptance
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public bool DevelopmentDependency
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public string Description
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public string Summary
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public string ReleaseNotes
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public string Tags
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public string Copyright
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies
@@ -213,17 +216,17 @@ namespace NuGet.Client.Interop
 
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public Uri ReportAbuseUrl
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public int DownloadCount
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
         #endregion
     }

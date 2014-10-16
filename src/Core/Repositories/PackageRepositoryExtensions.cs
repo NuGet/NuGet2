@@ -153,7 +153,17 @@ namespace NuGet
                 throw new ArgumentNullException("packageIds");
             }
 
-            return FindPackages(repository, packageIds, GetFilterExpression);
+            // If we're in V3-land, find packages using that API
+            var v3Repo = repository as IV3InteropRepository;
+            if (v3Repo != null)
+            {
+                return packageIds.SelectMany(id => v3Repo.FindPackagesById(id)).ToList();
+            }
+            else
+            {
+                return FindPackages(repository, packageIds, GetFilterExpression);
+            }
+
         }
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)

@@ -58,16 +58,19 @@ namespace NuGet.Client.Interop
         {
             get
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
             set
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
         }
 
         public void Execute(PackageOperation operation)
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 

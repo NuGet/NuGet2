@@ -43,10 +43,12 @@ namespace NuGet.Client.Interop
         {
             get
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
             set
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
         }
@@ -55,10 +57,12 @@ namespace NuGet.Client.Interop
         {
             get
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
             set
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
         }
@@ -67,17 +71,19 @@ namespace NuGet.Client.Interop
         {
             get
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
             set
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
         }
 
         public IPackagePathResolver PathResolver
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         // Suppress 'The event ... is never used' warning
@@ -93,6 +99,7 @@ namespace NuGet.Client.Interop
 
         public void Execute(PackageOperation operation)
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 
@@ -100,21 +107,25 @@ namespace NuGet.Client.Interop
         {
             get
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
             set
             {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
                 throw new NotImplementedException();
             }
         }
 
         public void AddBindingRedirects(IProjectManager projectManager)
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
 
         public IPackage LocatePackageToUninstall(IProjectManager projectManager, string id, SemanticVersion version)
         {
+            System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
         #endregion

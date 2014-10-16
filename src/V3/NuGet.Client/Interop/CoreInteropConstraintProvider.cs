@@ -16,7 +16,7 @@ namespace NuGet.Client.Interop
 
         public string Source
         {
-            get { throw new NotImplementedException(); }
+            get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
         public IVersionSpec GetConstraint(string packageId)
