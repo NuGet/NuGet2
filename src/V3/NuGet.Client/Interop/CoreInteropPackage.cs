@@ -49,7 +49,7 @@ namespace NuGet.Client.Interop
         {
             get
             {
-                NuGetTraceSources.CoreInterop.Error("packagetarget", "Returning dummy package target value. Need to fill this in with the right data!");
+                NuGetTraceSources.CoreInterop.Verbose("packagetarget", "Returning dummy package target value. Need to fill this in with the right data!");
                 return PackageTargets.Project;
             }
         }
