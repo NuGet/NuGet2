@@ -53,7 +53,7 @@ namespace NuGet.Client.Installation
                     action.PackageIdentity,
                     action.DependentPackage,
                     action.IsUpdate,
-                    action.Target.GetMetricsMetadata());
+                    action.Target);
 
                 // Add the package to the project
                 projectManager.Logger = new ShimLogger(logger);

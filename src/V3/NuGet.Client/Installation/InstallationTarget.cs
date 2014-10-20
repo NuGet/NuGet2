@@ -69,12 +69,10 @@ namespace NuGet.Client.Installation
         }
 
         /// <summary>
-        /// Retrieves a JSON object containing metadata to be sent up to the metrics service when packages are installed in this target.
+        /// Allows the installation target to add data to a metrics record.
         /// </summary>
-        /// <returns></returns>
-        public virtual JObject GetMetricsMetadata()
+        public virtual void AddMetricsMetadata(JObject metricsRecord)
         {
-            return null;
         }
 
 
