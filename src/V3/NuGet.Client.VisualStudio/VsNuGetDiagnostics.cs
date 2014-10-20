@@ -14,9 +14,12 @@ namespace NuGet.Client.VisualStudio
     {
         public static void Initialize(IDebugConsoleController console)
         {
+            var consoleListener = new DebugConsoleTraceListener(console, ThreadHelper.Generic);
+            var activityLogListener = new ActivityLogTraceListener();
             foreach (var source in AllSources())
             {
-                source.Listeners.Add(new DebugConsoleTraceListener(console, ThreadHelper.Generic));
+                source.Listeners.Add(consoleListener);
+                source.Listeners.Add(activityLogListener);
                 source.Switch.Level = SourceLevels.All;
             }
         }
