@@ -189,6 +189,14 @@ namespace NuGet.Client.VisualStudio.UI
         {
             Load();
         }
+
+        internal void SelectFirstItem()
+        {
+            if (_list.Items.Count > 0)
+            {
+                _list.SelectedIndex = 0;
+            }
+        }
     }
 
     public class LoadResult

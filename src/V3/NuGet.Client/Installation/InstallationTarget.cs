@@ -30,6 +30,7 @@ namespace NuGet.Client.Installation
             typeof(IProjectSystem),
             typeof(IPackageCacheRepository),
             typeof(ISharedPackageRepository),
+            typeof(SourceRepository),
             typeof(NuGetAwareProject)
         };
 #endif

@@ -576,6 +576,11 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     _packageList.Items.Remove(item);
                 }
+
+                if (_packageList.SelectedItem == null)
+                {
+                    _packageList.SelectFirstItem();
+                }
             }
         }
 

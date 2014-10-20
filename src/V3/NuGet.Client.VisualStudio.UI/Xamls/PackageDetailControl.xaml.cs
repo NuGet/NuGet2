@@ -91,6 +91,11 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 // Create a resolver
                 var repo = Control.CreateActiveRepository();
+                if (action == PackageActionType.Uninstall)
+                {
+                    repo = Project.TryGetFeature<SourceRepository>();
+                }
+
                 if (repo == null)
                 {
                     throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
