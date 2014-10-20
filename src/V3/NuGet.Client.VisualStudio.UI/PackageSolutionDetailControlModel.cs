@@ -105,7 +105,10 @@ namespace NuGet.Client.VisualStudio.UI
                 }
             }
 
-            SelectedVersion = _versions[0];
+            if (_versions.Count > 0)
+            {
+                SelectedVersion = _versions[0];
+            }
             OnPropertyChanged("Versions");
         }
 

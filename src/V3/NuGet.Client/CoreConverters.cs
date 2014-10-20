@@ -56,18 +56,9 @@ namespace NuGet.Client
             if (ver == null)
             {
                 return null;
-            }
-            NuGet.Versioning.SemanticVersion semVer = ver as NuGet.Versioning.SemanticVersion;
-            if (semVer == null)
-            {
-                return new NuGet.SemanticVersion(ver.ToString());
-            }
-            NuGetVersion nugetVer = ver as NuGetVersion;
-            if (nugetVer != null)
-            {
-                return new NuGet.SemanticVersion(nugetVer.Version, nugetVer.Release);
-            }
-            return new NuGet.SemanticVersion(new Version(semVer.Major, semVer.Minor, semVer.Patch), semVer.Release);
+            }            
+                    
+            return new NuGet.SemanticVersion(ver.ToNormalizedString());
         }
 
         internal static IVersionSpec SafeToVerSpec(VersionRange versionRange)
