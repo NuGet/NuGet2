@@ -127,5 +127,10 @@ namespace NuGet.Client.VisualStudio
         {
             return InstalledPackages.Search(searchText, skip, take, cancelToken);
         }
+
+        public override void AddMetricsMetadata(JObject metricsRecord)
+        {
+            metricsRecord.Add("projectGuids", DteProject.GetAllProjectTypeGuid());
+        }
     }
 }

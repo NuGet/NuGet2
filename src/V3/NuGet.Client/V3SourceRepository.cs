@@ -13,6 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using NuGet.Client.Resolution;
 using System.Net.Http;
 using System.Globalization;
+using NuGet.Client.Installation;
 
 namespace NuGet.Client
 {
@@ -183,7 +184,7 @@ namespace NuGet.Client
         }
 
         // Async void because we don't want metric recording to block anything at all
-        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, JObject additionalMetadata)
+        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
         {
             var metricsUrl = await GetServiceUri(ServiceUris.MetricsService, LegacyServiceVersionRange);
 
@@ -194,16 +195,18 @@ namespace NuGet.Client
             }
 
             // Create the JSON payload
-            var payload = additionalMetadata ?? new JObject();
+            var payload = new JObject();
             payload.Add("id", packageIdentity.Id);
             payload.Add("version", packageIdentity.Version.ToNormalizedString());
             payload.Add("operation", isUpdate ? "Update" : "Install");
             payload.Add("userAgent", _userAgent);
+            payload.Add("targetFrameworks", new JArray(target.GetSupportedFrameworks().Select(fx => VersionUtility.GetShortFrameworkName(fx))));
             if (dependentPackage != null)
             {
                 payload.Add("dependentPackage", dependentPackage.Id);
                 payload.Add("dependentPackageVersion", dependentPackage.Version.ToNormalizedString());
             }
+            target.AddMetricsMetadata(payload);
 
             // Post the message
             await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));
