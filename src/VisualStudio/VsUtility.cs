@@ -25,6 +25,7 @@ namespace NuGet.VisualStudio
             VsConstants.VbProjectTypeGuid,
             VsConstants.CppProjectTypeGuid,
             VsConstants.JsProjectTypeGuid,
+            VsConstants.CpsProjectTypeGuid,
             VsConstants.FsharpProjectTypeGuid,
             VsConstants.NemerleProjectTypeGuid,
             VsConstants.WixProjectTypeGuid,
