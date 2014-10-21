@@ -61,6 +61,11 @@ namespace NuGet.Client.Interop
             AddProp(value, Properties.RequireLicenseAcceptance, version.RequireLicenseAcceptance);
             AddProp(value, Properties.DependencyGroups, version.DependencySets.Select(set => CreateDependencyGroup(set)));
 
+            if (version.MinClientVersion != null)
+            {
+                AddProp(value, Properties.MinimumClientVersion, version.MinClientVersion.ToString());
+            }
+
             var dsPackage = version as DataServicePackage;
             if (dsPackage != null)
             {
