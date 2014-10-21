@@ -29,7 +29,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources
         {
             get
             {
-                return VsBrushes.BrandedUIFillKey;
+                return VsBrushes.BrandedUIBackgroundKey;
             }
         }
 
@@ -37,7 +37,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources
         {
             get
             {
-                return VsBrushes.BrandedUIFillKey;
+                return VsBrushes.BrandedUIBackgroundKey;
             }
         }
 
