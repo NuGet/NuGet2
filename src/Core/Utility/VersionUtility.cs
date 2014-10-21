@@ -17,8 +17,8 @@ namespace NuGet
         private const string NetFrameworkIdentifier = ".NETFramework";
         private const string NetCoreFrameworkIdentifier = ".NETCore";
         private const string PortableFrameworkIdentifier = ".NETPortable";
-        private const string AspNetFrameworkIdentifier = "ASP.Net";
-        private const string AspNetCoreFrameworkIdentifier = "ASP.NetCore";
+        private const string AspNetFrameworkIdentifier = "ASP.NET";
+        private const string AspNetCoreFrameworkIdentifier = "ASP.NETCore";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
