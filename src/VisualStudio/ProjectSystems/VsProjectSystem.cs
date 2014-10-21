@@ -503,6 +503,10 @@ namespace NuGet.VisualStudio
             // Always set copy local to true for references that we add
             try
             {
+                // In order to properly write this to MSBuild in ALL cases, we have to trigger the Property Change
+                // notification with a new value of "true". However, "true" is the default value, so in order to
+                // cause a notification to fire, we have to set it to false and then back to true
+                reference.CopyLocal = false;
                 reference.CopyLocal = true;
             }
             catch (NotSupportedException)
