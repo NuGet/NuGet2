@@ -19,18 +19,6 @@ namespace NuGet.Client
 {
     public class V3SourceRepository : SourceRepository
     {
-        private static readonly NuGetVersion DefaultVersion = new NuGetVersion("2.0.0");
-        private static readonly VersionRange ServiceVersionRange = new VersionRange(
-            minVersion: new NuGetVersion("3.0.0-preview.1"),
-            maxVersion: new NuGetVersion("3.0.0-preview.1"),
-            includeMaxVersion: true,
-            includeMinVersion: true);
-        private static readonly VersionRange LegacyServiceVersionRange = new VersionRange(
-            minVersion: new NuGetVersion("2.0.0"), // >= 2.0.0
-            maxVersion: new NuGetVersion("3.0.0"), // <  3.0.0
-            includeMaxVersion: false,
-            includeMinVersion: true);
-
         private DataClient _client;
         private PackageSource _source;
         private Uri _root;
@@ -104,7 +92,7 @@ namespace NuGet.Client
         {
             // Get the search service URL from the service
             cancellationToken.ThrowIfCancellationRequested();
-            var searchService = await GetServiceUri(ServiceUris.SearchQueryService, ServiceVersionRange);
+            var searchService = await GetServiceUri(ServiceUris.SearchQueryService);
             if (String.IsNullOrEmpty(searchService))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingSearchService);
@@ -186,7 +174,7 @@ namespace NuGet.Client
         // Async void because we don't want metric recording to block anything at all
         public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
         {
-            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService, LegacyServiceVersionRange);
+            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService);
 
             if (metricsUrl == null)
             {
@@ -287,7 +275,7 @@ namespace NuGet.Client
         public override async Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
             // Get the base URL
-            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl, ServiceVersionRange);
+            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl);
             if (String.IsNullOrEmpty(baseUrl))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingRegistrationBase);
@@ -340,7 +328,7 @@ namespace NuGet.Client
             return lists.SelectMany(j => j);
         }
 
-        private async Task<string> GetServiceUri(Uri type, VersionRange requiredVersionRange)
+        private async Task<string> GetServiceUri(Uri type)
         {
             // Read the root document (usually out of the cache :))
             var doc = await _client.GetFile(new Uri(_source.Url));
@@ -358,22 +346,14 @@ namespace NuGet.Client
             // Query it for the requested service
             var candidates = (from resource in resources.OfType<JObject>()
                               let resourceType = resource["@type"].Select(t => t.ToString()).FirstOrDefault()
-                              let resourceVersion = resource
-                                    .Value<JArray>(ServiceUris.Version.ToString())
-                                    .Select(v => v.Value<string>("@value"))
-                                    .FirstOrDefault()
                               where resourceType != null && Equals(resourceType, type.ToString())
-                              let parsedVersion = (resourceVersion == null ? null : NuGetVersion.Parse(resourceVersion.ToString()))
-                                 ?? DefaultVersion
-                              where requiredVersionRange.Satisfies(parsedVersion)
                               select resource)
                              .ToList();
             NuGetTraceSources.V3SourceRepository.Verbose(
                 "service_candidates",
-                "Found {0} candidates for {1} ({2}) service: [{3}]",
+                "Found {0} candidates for {1} service: [{2}]",
                 candidates.Count,
                 type,
-                requiredVersionRange,
                 String.Join(", ", candidates.Select(c => c.Value<string>("@id"))));
 
             var selected = candidates.FirstOrDefault();
@@ -382,9 +362,8 @@ namespace NuGet.Client
             {
                 NuGetTraceSources.V3SourceRepository.Info(
                     "getserviceuri",
-                    "Found {0} {1} service at {2}",
+                    "Found {0} service at {1}",
                     selected["@type"][0],
-                    selected[ServiceUris.Version.ToString()][0]["@value"],
                     selected["@id"]);
                 return selected.Value<string>("@id");
             }
@@ -392,9 +371,8 @@ namespace NuGet.Client
             {
                 NuGetTraceSources.V3SourceRepository.Error(
                     "getserviceuri_failed",
-                    "Unable to find compatible {0} service (range {1}) on {2}",
+                    "Unable to find compatible {0} service on {1}",
                     type,
-                    requiredVersionRange,
                     _root);
                 return null;
             }
