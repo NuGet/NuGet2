@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\EmptyEnumerableToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
     <Compile Include="FileConflictActionItem.cs" />
     <Compile Include="IUserInterfaceService.cs" />

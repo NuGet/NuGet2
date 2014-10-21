@@ -292,13 +292,16 @@
                             <TextBlock
                                 Text="{Binding TargetFramework}" FontWeight="Bold"
                                 Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
-                            <ItemsControl ItemsSource="{Binding Dependencies}">
+                            <ItemsControl ItemsSource="{Binding Dependencies}" >
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}"></TextBlock>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            <TextBlock FontStyle="Italic"
+                                       Text="{x:Static resx:Resources.Text_NoDependencies}"
+                                       Visibility="{Binding Dependencies,Converter={StaticResource EmptyEnumerableToVisibilityConverter}}" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

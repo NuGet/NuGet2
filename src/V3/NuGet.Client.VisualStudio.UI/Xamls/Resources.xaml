@@ -8,6 +8,7 @@
     <Tools:PackageStatusToUpdateImageConverter x:Key="PackageStatusToUpdateImageConverter" />
 
     <Tools:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    <Tools:EmptyEnumerableToVisibilityConverter x:Key="EmptyEnumerableToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter Inverted="True" x:Key="InvertedBooleanToVisibilityConverter" />
 
