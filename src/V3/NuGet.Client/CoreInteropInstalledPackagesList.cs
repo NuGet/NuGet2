@@ -60,8 +60,16 @@ namespace NuGet.Client
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
             var result = PackageJsonLd.CreatePackageSearchResult(package, Enumerable.Empty<IPackage>());
-            var versions = source.GetPackageMetadataById(package.Id).Result;
-            result[Properties.Packages] = new JArray(versions);
+            var versions = new JArray(source.GetPackageMetadataById(package.Id).Result);
+
+            // Need to ensure that the version list has the installed version in it as well
+            var currentVersion = versions.FirstOrDefault(t => SemanticVersion.Parse(t["version"].ToString()).Equals(package.Version));
+            if(currentVersion == null) {
+                currentVersion = PackageJsonLd.CreatePackage(package);
+                versions.Add(currentVersion);
+            }
+
+            result[Properties.Packages] = versions;
             return result;
         }
 
