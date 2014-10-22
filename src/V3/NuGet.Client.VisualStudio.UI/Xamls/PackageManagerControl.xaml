@@ -72,6 +72,7 @@
                           Grid.Column="4" Margin="24,0,0,0"
                           VerticalAlignment="Center"
                           Content="{x:Static resx:Resources.Checkbox_IncludePrerelease}"
+                          Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                           Checked="_checkboxPrerelease_CheckChanged"
                           Unchecked="_checkboxPrerelease_CheckChanged"/>
                 
