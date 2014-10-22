@@ -81,6 +81,7 @@
              Background="{DynamicResource {x:Static resx:Brushes.ListPaneBackground}}"
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             BorderThickness="0,0,0,1"
              HorizontalContentAlignment="Stretch"
              SelectionChanged="_list_SelectionChanged"
              Loaded="_list_Loaded">

@@ -108,46 +108,50 @@
                     </Rectangle>
                 </Button>
             </Grid>
-            <Grid Grid.Row="3" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Tools:InfiniteScrollList x:Name="_packageList" SelectionChanged="PackageList_SelectionChanged">
-                </Tools:InfiniteScrollList>
+            <Border Grid.Row="3" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Tools:InfiniteScrollList x:Name="_packageList" SelectionChanged="PackageList_SelectionChanged">
+                    </Tools:InfiniteScrollList>
 
-                <StackPanel                    
+                    <StackPanel                    
                     Grid.Row="1" 
                     Grid.Column="0" 
                     Orientation="Vertical"
                     Background="{DynamicResource {x:Static resx:Brushes.LegalMessageBackground}}"
                     >
-                    <TextBlock                         
+                        <TextBlock                         
                         Margin="24,12"
                         TextWrapping="Wrap"
                         Text="{x:Static resx:Resources.Text_LegalDisclaimer}"/>
-                </StackPanel>               
+                    </StackPanel>
 
-                <GridSplitter Grid.Column="0" Width="5" Grid.RowSpan="2" />
-                
-                <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
-                </Tools:BusyControl>
+                    <GridSplitter Grid.Column="0" Width="5" Grid.RowSpan="2" 
+                                  BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                  BorderThickness="1,0" />
 
-                <Tools:PackageDetailControl 
+                    <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
+                    </Tools:BusyControl>
+
+                    <Tools:PackageDetailControl 
                     x:Name="_packageDetail" 
                     Grid.Column="1"
                     Grid.RowSpan="2" 
                     Visibility="Collapsed"/>
-                <Tools:PackageSolutionDetailControl 
+                    <Tools:PackageSolutionDetailControl 
                     x:Name="_packageSolutionDetail" 
                     Grid.Column="1" 
                     Grid.RowSpan="2"
                     Visibility="Collapsed"/>
-            </Grid>            
+                </Grid>
+            </Border>
         </Grid>
         <Tools:BusyControl x:Name="_busyControl" Visibility="Collapsed"></Tools:BusyControl>
     </Grid>
