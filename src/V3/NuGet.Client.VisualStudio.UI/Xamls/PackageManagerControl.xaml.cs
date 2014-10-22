@@ -29,6 +29,8 @@ namespace NuGet.Client.VisualStudio.UI
         // list in response to PackageSourcesChanged event.
         private bool _dontStartNewSearch;
 
+        private int _busyCount;
+
         public PackageManagerModel Model { get; private set; }
 
         public SourceRepositoryManager Sources
@@ -72,6 +74,8 @@ namespace NuGet.Client.VisualStudio.UI
 
             _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageSolutionDetail.Control = this;
+
+            _busyCount = 0;
 
             if (Target.IsSolution)
             {
@@ -197,11 +201,21 @@ namespace NuGet.Client.VisualStudio.UI
         {
             if (busy)
             {
-                _busyControl.Visibility = System.Windows.Visibility.Visible;
+                _busyCount++;
+                if (_busyCount > 0)
+                {
+                    _busyControl.Visibility = System.Windows.Visibility.Visible;
+                    this.IsEnabled = false;
+                }
             }
             else
             {
-                _busyControl.Visibility = System.Windows.Visibility.Collapsed;
+                _busyCount--;
+                if (_busyCount <= 0)
+                {
+                    _busyControl.Visibility = System.Windows.Visibility.Collapsed;
+                    this.IsEnabled = true;
+                }
             }
         }
 
