@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using NuGet.Client.Resolution;
+using NuGetConsole;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -28,11 +18,14 @@ namespace NuGet.Client.VisualStudio.UI
         private DateTime _loadedTime;
         private readonly TimeSpan minimumVisibleTime = TimeSpan.FromMilliseconds(500);
         private FileConflictAction _fileConflictAction;
+        private IConsole _outputConsole;
 
-        public ProgressDialog(FileConflictAction fileConflictAction)
+        public ProgressDialog(FileConflictAction fileConflictAction,
+            IConsole outputConsole)
         {
             _fileConflictAction = fileConflictAction;
             _uiDispatcher = Dispatcher.CurrentDispatcher;
+            _outputConsole = outputConsole;
             this.Loaded += ProgressDialog_Loaded;
             InitializeComponent();
         }
@@ -78,6 +71,16 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         private void AddMessage(MessageLevel level, string message)
+        {
+            // for the dialog we ignore debug messages
+            if (level != MessageLevel.Debug)
+            {
+                AddMessageToDialog(level, message);
+            }
+            _outputConsole.WriteLine(message);
+        }
+
+        private void AddMessageToDialog(MessageLevel level, string message)
         {
             Brush messageBrush;
 

@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client.Interop;
-using NewPackageAction = NuGet.Client.Resolution.PackageAction;
-using OldPackageAction = NuGet.Resolver.PackageAction;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Resolution;
-using System.Threading;
+using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.Installation
 {
     public interface IActionHandler
     {
         Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken);
+
         Task Rollback(NewPackageAction action, IExecutionLogger logger); // Rollbacks should not be cancelled, it's a Bad Idea(TM)
     }
 
@@ -69,7 +65,6 @@ namespace NuGet.Client.Installation
                 Rollback(executedActions, logger);
                 throw;
             }
-
         }
 
         protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)

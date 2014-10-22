@@ -68,6 +68,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             try
             {
+                Control.OutputConsole.Clear();
                 var actions = await ResolveActions(action);
                 Control.PreviewActions(actions);
             }
@@ -126,7 +127,10 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var model = (PackageDetailControlModel)DataContext;
             Control.SetBusy(true);
-            var progressDialog = new ProgressDialog(model.SelectedFileConflictAction.Action);
+            Control.OutputConsole.Clear();
+            var progressDialog = new ProgressDialog(
+                model.SelectedFileConflictAction.Action,
+                Control.OutputConsole);
             try
             {
                 var actions = await ResolveActions(action);

@@ -12,6 +12,7 @@ using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
+using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -47,6 +48,12 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 return Model.Target;
             }
+        }
+
+        public IConsole OutputConsole
+        {
+            get;
+            private set;
         }
 
         internal IUserInterfaceService UI { get; private set; }
@@ -85,6 +92,9 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 _packageDetail.Visibility = System.Windows.Visibility.Visible;
             }
+
+            var outputConsoleProvider = ServiceLocator.GetInstance<IOutputConsoleProvider>();
+            OutputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
 
             InitSourceRepoList();
             this.Unloaded += PackageManagerControl_Unloaded;
@@ -469,7 +479,7 @@ namespace NuGet.Client.VisualStudio.UI
                             new SearchFilter()
                             {
                                 SupportedFrameworks = supportedFrameworks,
-                                IncludePrerelease = includePrerelease                               
+                                IncludePrerelease = includePrerelease
                             },
                             startIndex,
                             PageSize,

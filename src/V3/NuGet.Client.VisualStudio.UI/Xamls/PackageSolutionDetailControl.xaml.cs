@@ -92,8 +92,10 @@ namespace NuGet.Client.VisualStudio.UI
             var model = (PackageSolutionDetailControlModel)DataContext;
 
             Control.SetBusy(true);
+            Control.OutputConsole.Clear();
             var progressDialog = new ProgressDialog(
-                model.SelectedFileConflictAction.Action);
+                model.SelectedFileConflictAction.Action,
+                Control.OutputConsole);
             try
             {
                 IEnumerable<PackageAction> actions = await ResolveActions();
@@ -136,8 +138,10 @@ namespace NuGet.Client.VisualStudio.UI
             var model = (PackageSolutionDetailControlModel)DataContext;
 
             Control.SetBusy(true);
+            Control.OutputConsole.Clear();
             var progressDialog = new ProgressDialog(
-                model.SelectedFileConflictAction.Action);
+                model.SelectedFileConflictAction.Action,
+                Control.OutputConsole);
             try
             {
                 IEnumerable<PackageAction> actions = await ResolveActions();
