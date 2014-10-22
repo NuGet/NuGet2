@@ -47,10 +47,20 @@ namespace NuGet.Client.Interop
         {
             NuGetTraceSources.V2SourceRepository.Verbose("search", "Searching for '{0}'", searchTerm);
             return Task.Factory.StartNew(() => {
-                return (IEnumerable<JObject>)_repository.Search(
+                var query = _repository.Search(
                     searchTerm,
                     filters.SupportedFrameworks.Select(fx => fx.FullName),
-                    filters.IncludePrerelease)
+                    filters.IncludePrerelease);
+
+                // V2 sometimes requires that we also use an OData filter for latest/latest prerelease version
+                if(filters.IncludePrerelease) {
+                    query = query.Where(p => p.IsAbsoluteLatestVersion);
+                } else {
+                    query = query.Where(p => p.IsLatestVersion);
+                }
+                
+                // Now apply skip and take and the rest of the party
+                return (IEnumerable<JObject>)query
                     .Skip(skip)
                     .Take(take)
                     .ToList()
