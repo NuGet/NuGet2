@@ -94,18 +94,19 @@ namespace NuGet.Client.VisualStudio
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public override async Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)
+        public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
-            List<JObject> result = new List<JObject>();
-            foreach (var proj in Projects)
-            {
-                var packages = await proj.InstalledPackages.Search(searchText, 0, int.MaxValue, cancelToken);
-                result.AddRange(packages);
-            }
-            var solutionLevelPackages = await InstalledPackages.Search(searchText, 0, int.MaxValue, cancelToken);
-            result.AddRange(solutionLevelPackages);
-
-            return result.Skip(skip).Take(take);
+            return Task.Run(async () => {
+                List<JObject> result = new List<JObject>();
+                foreach (var proj in Projects)
+                {
+                    var packages = await proj.InstalledPackages.Search(source, searchText, 0, int.MaxValue, cancelToken);
+                    result.AddRange(packages);
+                }
+                var solutionLevelPackages = await InstalledPackages.Search(source, searchText, 0, int.MaxValue, cancelToken);
+                result.AddRange(solutionLevelPackages);
+                return result.Skip(skip).Take(take);
+            });
         }
     }
 }

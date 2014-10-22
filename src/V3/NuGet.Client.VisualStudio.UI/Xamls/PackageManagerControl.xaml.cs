@@ -427,11 +427,16 @@ namespace NuGet.Client.VisualStudio.UI
             var searchText = _searchControl.Text;
             var supportedFrameworks = Target.GetSupportedFrameworks();
 
+            // search online
+            var activeSource = _sourceRepoList.SelectedItem as PackageSource;
+            var sourceRepository = Sources.CreateSourceRepository(activeSource);
+
             if (ShowOnlyInstalled())
             {
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
                         Target.SearchInstalled(
+                            sourceRepository,
                             searchText,
                             startIndex,
                             PageSize,
@@ -441,8 +446,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                // search online
-                var activeSource = _sourceRepoList.SelectedItem as PackageSource;
                 if (activeSource == null)
                 {
                     var loader = new PackageLoader(
@@ -458,7 +461,6 @@ namespace NuGet.Client.VisualStudio.UI
                 }
                 else
                 {
-                    var sourceRepository = Sources.CreateSourceRepository(activeSource);
                     var includePrerelease = _checkboxPrerelease.IsChecked == true;
                     var loader = new PackageLoader(
                         (startIndex, ct) =>

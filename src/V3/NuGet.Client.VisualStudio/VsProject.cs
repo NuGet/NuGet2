@@ -133,9 +133,9 @@ namespace NuGet.Client.VisualStudio
             return new FrameworkName[] { DteProject.GetTargetFrameworkName() };
         }
 
-        public override Task<IEnumerable<JObject>> SearchInstalled(string searchText, int skip, int take, CancellationToken cancelToken)
+        public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
-            return InstalledPackages.Search(searchText, skip, take, cancelToken);
+            return InstalledPackages.Search(source, searchText, skip, take, cancelToken);
         }
 
         public override void AddMetricsMetadata(JObject metricsRecord)

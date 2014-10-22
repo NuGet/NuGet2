@@ -47,13 +47,22 @@ namespace NuGet.Client
             return _localRepository.Exists(packageId);
         }
 
-        public override Task<IEnumerable<JObject>> Search(string searchTerm, int skip, int take, CancellationToken cancelToken)
+        public override Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
-            return Task.FromResult(
+            return Task.Run(() =>
                 _localRepository.Search(searchTerm, allowPrereleaseVersions: true)
                     .Skip(skip).Take(take).ToList()
-                    .Select(p => PackageJsonLd.CreatePackageSearchResult(p, new[] { p })));
+                    .Select(p => CreatePackageSearchResult(source, p)));
+        }
+
+        private JObject CreatePackageSearchResult(SourceRepository source, IPackage package)
+        {
+            NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
+            var result = PackageJsonLd.CreatePackageSearchResult(package, Enumerable.Empty<IPackage>());
+            var versions = source.GetPackageMetadataById(package.Id).Result;
+            result[Properties.Packages] = new JArray(versions);
+            return result;
         }
 
         public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()

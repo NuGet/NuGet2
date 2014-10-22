@@ -69,6 +69,7 @@ namespace NuGet.Client.Installation
                 Rollback(executedActions, logger);
                 throw;
             }
+
         }
 
         protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)
