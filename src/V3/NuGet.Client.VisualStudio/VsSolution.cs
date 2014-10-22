@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Interop;
+using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -93,20 +94,57 @@ namespace NuGet.Client.VisualStudio
             return Projects.Cast<VsProject>().FirstOrDefault(
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
         }
-
+        
         public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
             return Task.Run(async () => {
-                List<JObject> result = new List<JObject>();
+                Dictionary<string, JObject> result = new Dictionary<string, JObject>(
+                    StringComparer.OrdinalIgnoreCase);
                 foreach (var proj in Projects)
                 {
                     var packages = await proj.InstalledPackages.Search(source, searchText, 0, int.MaxValue, cancelToken);
-                    result.AddRange(packages);
+                    foreach (var package in packages)
+                    {
+                        AddToResult(result, package);
+                    }
                 }
                 var solutionLevelPackages = await InstalledPackages.Search(source, searchText, 0, int.MaxValue, cancelToken);
-                result.AddRange(solutionLevelPackages);
-                return result.Skip(skip).Take(take);
+                foreach (var package in solutionLevelPackages)
+                {
+                    AddToResult(result, package);
+                }
+
+                var list = result.Values.ToList();
+                return list.Skip(skip).Take(take);
             });
+        }
+
+        private void AddToResult(Dictionary<string, JObject> result, JObject package)
+        {
+            var idVersion = GetIdVersion(package);
+
+            JObject existingValue;
+            if (result.TryGetValue(idVersion.Item1, out existingValue))
+            {
+                // if package has higher version, replace the old value with 
+                // this package.
+                var existingIdVersion = GetIdVersion(existingValue);
+                if (idVersion.Item2 > existingIdVersion.Item2)
+                {
+                    result[idVersion.Item1] = package;
+                }
+            }
+            else
+            {
+                result[idVersion.Item1] = package;
+            }
+        }
+
+        private Tuple<string, NuGetVersion> GetIdVersion(JObject searchResult)
+        {
+            string id = searchResult.Value<string>(Properties.PackageId);
+            var version = NuGetVersion.Parse(searchResult.Value<string>(Properties.LatestVersion));
+            return Tuple.Create(id, version);
         }
     }
 }
