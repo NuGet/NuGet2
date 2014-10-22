@@ -108,7 +108,9 @@
             </Grid>
 
             <!-- installation options -->
-            <Expander Grid.Row="2" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
+            <Expander Grid.Row="2" Margin="0,8" 
+                      x:Name="_options"
+                      Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
                 <Expander.Header>
                     <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>

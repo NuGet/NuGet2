@@ -141,7 +141,9 @@
             </StackPanel>
 
             <!-- installation options -->
-            <Expander Grid.Row="3" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
+            <Expander Grid.Row="3" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                      Visibility="{Binding Path=InstallOptionsVisible,Converter={StaticResource BooleanToVisibilityConverter}}"
+                      >
                 <Expander.Header>
                     <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>

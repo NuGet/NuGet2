@@ -176,6 +176,7 @@ namespace NuGet.Client.VisualStudio.UI
             if (isInstalled)
             {
                 _actionButton.Content = Resx.Resources.Action_Uninstall;
+                _options.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -188,6 +189,7 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     _actionButton.Content = Resx.Resources.Action_Install;
                 }
+                _options.Visibility = Visibility.Visible;
             }
         }
 
