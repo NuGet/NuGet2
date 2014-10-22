@@ -282,8 +282,10 @@ namespace NuGet.Client.VisualStudio.UI
                     searchResultPackage.Id = package.Value<string>(Properties.PackageId);
                     searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
                     searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
-                    searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, searchResultPackage.Version);
                     searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>(Properties.Packages));
+
+                    var maxVersion = searchResultPackage.AllVersions.Max(v => v.Version);
+                    searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, maxVersion);
 
                     var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
                     searchResultPackage.Summary =
@@ -355,7 +357,8 @@ namespace NuGet.Client.VisualStudio.UI
                 return new Uri(str);
             }
 
-            private PackageStatus GetPackageStatus(string id, NuGetVersion currentVersion)
+            // Get the package status, given the maxVersion of the package.
+            private PackageStatus GetPackageStatus(string id, NuGetVersion maxVersion)
             {
                 // Get the minimum version installed in any target project/solution
                 var minimumInstalledPackage = _target.GetAllTargetsRecursively()
@@ -367,7 +370,7 @@ namespace NuGet.Client.VisualStudio.UI
                 PackageStatus status;
                 if (minimumInstalledPackage != null)
                 {
-                    if (minimumInstalledPackage.Identity.Version < currentVersion)
+                    if (minimumInstalledPackage.Identity.Version < maxVersion)
                     {
                         status = PackageStatus.UpdateAvailable;
                     }
