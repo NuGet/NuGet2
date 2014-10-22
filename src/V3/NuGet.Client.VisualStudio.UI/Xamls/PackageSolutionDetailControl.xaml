@@ -311,8 +311,8 @@
             <!-- dependencies -->
             <StackPanel Grid.Row="6" Margin="0,8">
                 <TextBlock
-                FontWeight="Bold"
-                Text="{x:Static resx:Resources.Label_Dependencies}" />
+                    FontWeight="Bold"
+                    Text="{x:Static resx:Resources.Label_Dependencies}" />
 
                 <ItemsControl
                     x:Name="_dependencies"

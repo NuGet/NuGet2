@@ -103,12 +103,12 @@
                         Margin="12,0,0,0"
                         Content="{x:Static resx:Resources.Button_Preview}"
                         Click="PreviewButtonClicked"
-                        Width="100"/>
+                        Width="100" />
                 </StackPanel>
             </Grid>
 
             <!-- installation options -->
-            <Expander Grid.Row="2" Margin="0,8" 
+            <Expander Grid.Row="2" Margin="0,8"
                       x:Name="_options"
                       Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
                 <Expander.Header>
@@ -160,7 +160,7 @@
             <Grid
                 Grid.Row="5"
                 x:Name="_metadataGrid"
-                Margin="0,8,0,0">
+                Margin="0,8">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
@@ -278,43 +278,43 @@
             </Grid>
 
             <!-- dependencies -->
-            <TextBlock
-                Grid.Row="6"
-                FontWeight="Bold" Margin="0,16,0,0"
-                Text="{x:Static resx:Resources.Label_Dependencies}" />
+            <StackPanel Grid.Row="6"
+                        Margin="0,8">
+                <TextBlock
+                    FontWeight="Bold" Margin="0,8,0,0"
+                    Text="{x:Static resx:Resources.Label_Dependencies}" />
 
-            <ItemsControl
-                    Grid.Row="7"
+                <ItemsControl
                     ItemsSource="{Binding Path=Package.DependencySets}"
                     Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0,8,0,0">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
                                 Text="{Binding TargetFramework}" FontWeight="Bold"
                                 Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
-                            <ItemsControl ItemsSource="{Binding Dependencies}" >
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}"></TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <TextBlock FontStyle="Italic"
+                                <ItemsControl ItemsSource="{Binding Dependencies}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"></TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock FontStyle="Italic"
                                        Text="{x:Static resx:Resources.Text_NoDependencies}"
                                        Visibility="{Binding Dependencies,Converter={StaticResource EmptyEnumerableToVisibilityConverter}}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-            <TextBlock
-                Grid.Row="7"
-                Margin="0,8,0,0"
-                Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
-                FontStyle="Italic"
-                Text="{x:Static resx:Resources.Text_NoDependencies}" />
+                <TextBlock
+                    Margin="0,8,0,0"
+                    Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
+                    FontStyle="Italic"
+                    Text="{x:Static resx:Resources.Text_NoDependencies}" />
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </UserControl>
