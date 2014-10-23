@@ -87,14 +87,14 @@ namespace NuGet.Client.VisualStudio.UI
 
             if (installedVersion != null)
             {
-                _versions.Add(new VersionForDisplay(installedVersion, "Installed "));
+                _versions.Add(new VersionForDisplay(installedVersion, Resx.Resources.Version_Installed));
             }
 
             var allVersions = _allPackages.Keys.OrderByDescending(v => v);
             var latestStableVersion = allVersions.FirstOrDefault(v => !v.IsPrerelease);
             if (latestStableVersion != null)
             {
-                _versions.Add(new VersionForDisplay(latestStableVersion, "Latest stable "));
+                _versions.Add(new VersionForDisplay(latestStableVersion, Resx.Resources.Version_LatestStable));
             }
 
             // add a separator

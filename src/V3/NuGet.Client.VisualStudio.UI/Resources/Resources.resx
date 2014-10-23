@@ -309,4 +309,19 @@
   <data name="Checkbox_IncludePrerelease" xml:space="preserve">
     <value>Include Prerelease</value>
   </data>
+  <data name="Filter_UpdateAvailable" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="Version_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Version_LatestStable" xml:space="preserve">
+    <value>Latest stable</value>
+  </data>
+  <data name="Tooltip_PackageInstalled" xml:space="preserve">
+    <value>Latest stable version is installed</value>
+  </data>
+  <data name="Tooltip_UpdateAvailable" xml:space="preserve">
+    <value>Update available</value>
+  </data>
 </root>

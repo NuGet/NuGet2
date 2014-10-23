@@ -53,10 +53,16 @@ namespace NuGet.Client.VisualStudio.UI
             set
             {
                 _loader = value;
-                _items.Clear();
-                _items.Add(_loadingStatusIndicator);
-                Load();
+                Reload();
             }
+        }
+
+        // Reload items starting with index 0
+        public void Reload()
+        {
+            _items.Clear();
+            _items.Add(_loadingStatusIndicator);
+            Load();
         }
 
         private async void Load()

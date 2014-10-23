@@ -71,6 +71,7 @@ namespace NuGet.Client.VisualStudio.UI
             _searchControl.Text = model.SearchText;
             _filter.Items.Add(Resx.Resources.Filter_All);
             _filter.Items.Add(Resx.Resources.Filter_Installed);
+            _filter.Items.Add(Resx.Resources.Filter_UpdateAvailable);
 
             // TODO: Relocate to v3 API.
             _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
@@ -241,6 +242,13 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        private class PackageLoaderOption
+        {
+            public bool IncludePrerelease { get; set; }
+
+            public bool ShowUpdatesAvailable { get; set; }
+        }
+
         private class PackageLoader : ILoader
         {
             // where to get the package list
@@ -248,12 +256,16 @@ namespace NuGet.Client.VisualStudio.UI
 
             private InstallationTarget _target;
 
+            private PackageLoaderOption _option;
+
             public PackageLoader(
                 Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
-                InstallationTarget target)
+                InstallationTarget target,
+                PackageLoaderOption option)
             {
                 _loader = loader;
                 _target = target;
+                _option = option;
             }
 
             private Task<List<JObject>> InternalLoadItems(
@@ -281,11 +293,23 @@ namespace NuGet.Client.VisualStudio.UI
                     var searchResultPackage = new UiSearchResultPackage();
                     searchResultPackage.Id = package.Value<string>(Properties.PackageId);
                     searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
-                    searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
-                    searchResultPackage.AllVersions = LoadVersions(package.Value<JArray>(Properties.Packages));
 
-                    var maxVersion = searchResultPackage.AllVersions.Max(v => v.Version);
-                    searchResultPackage.Status = GetPackageStatus(searchResultPackage.Id, maxVersion);
+                    if (searchResultPackage.Version.IsPrerelease && !_option.IncludePrerelease)
+                    {
+                        // don't include prerelease version if includePrerelease is false
+                        continue;
+                    }
+
+                    searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
+                    searchResultPackage.AllVersions = LoadVersions(
+                        package.Value<JArray>(Properties.Packages));
+
+                    SetPackageStatus(searchResultPackage, _target);
+                    if (_option.ShowUpdatesAvailable &&
+                        searchResultPackage.Status != PackageStatus.UpdateAvailable)
+                    {
+                        continue;
+                    }
 
                     var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
                     searchResultPackage.Summary =
@@ -318,6 +342,13 @@ namespace NuGet.Client.VisualStudio.UI
                     var detailedPackage = new UiDetailedPackage();
                     detailedPackage.Id = version.Value<string>(Properties.PackageId);
                     detailedPackage.Version = NuGetVersion.Parse(version.Value<string>(Properties.Version));
+
+                    if (detailedPackage.Version.IsPrerelease && !_option.IncludePrerelease)
+                    {
+                        // don't include prerelease version if includePrerelease is false
+                        continue;
+                    }
+
                     detailedPackage.Summary = version.Value<string>(Properties.Summary);
                     detailedPackage.Description = version.Value<string>(Properties.Description);
                     detailedPackage.Authors = version.Value<string>(Properties.Authors);
@@ -357,35 +388,6 @@ namespace NuGet.Client.VisualStudio.UI
                 return new Uri(str);
             }
 
-            // Get the package status, given the maxVersion of the package.
-            private PackageStatus GetPackageStatus(string id, NuGetVersion maxVersion)
-            {
-                // Get the minimum version installed in any target project/solution
-                var minimumInstalledPackage = _target.GetAllTargetsRecursively()
-                    .Select(t => t.InstalledPackages.GetInstalledPackage(id))
-                    .Where(p => p != null)
-                    .OrderBy(r => r.Identity.Version)
-                    .FirstOrDefault();
-
-                PackageStatus status;
-                if (minimumInstalledPackage != null)
-                {
-                    if (minimumInstalledPackage.Identity.Version < maxVersion)
-                    {
-                        status = PackageStatus.UpdateAvailable;
-                    }
-                    else
-                    {
-                        status = PackageStatus.Installed;
-                    }
-                }
-                else
-                {
-                    status = PackageStatus.NotInstalled;
-                }
-                return status;
-            }
-
             private UiPackageDependencySet LoadDependencySet(JObject set)
             {
                 var fxName = set.Value<string>(Properties.TargetFramework);
@@ -419,9 +421,28 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private bool ShowOnlyInstalled()
+        private bool ShowInstalled
         {
-            return Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem);
+            get
+            {
+                return Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem);
+            }
+        }
+
+        private bool ShowUpdatesAvailable
+        {
+            get
+            {
+                return Resx.Resources.Filter_UpdateAvailable.Equals(_filter.SelectedItem);
+            }
+        }
+
+        private bool IncludePrerelease
+        {
+            get
+            {
+                return _checkboxPrerelease.IsChecked == true;
+            }
         }
 
         internal SourceRepository CreateActiveRepository()
@@ -444,8 +465,15 @@ namespace NuGet.Client.VisualStudio.UI
             var activeSource = _sourceRepoList.SelectedItem as PackageSource;
             var sourceRepository = Sources.CreateSourceRepository(activeSource);
 
-            if (ShowOnlyInstalled())
+            PackageLoaderOption option = new PackageLoaderOption()
             {
+                IncludePrerelease = this.IncludePrerelease,
+                ShowUpdatesAvailable = this.ShowUpdatesAvailable
+            };
+
+            if (ShowInstalled || ShowUpdatesAvailable)
+            {
+                // search installed packages
                 var loader = new PackageLoader(
                     (startIndex, ct) =>
                         Target.SearchInstalled(
@@ -454,11 +482,13 @@ namespace NuGet.Client.VisualStudio.UI
                             startIndex,
                             PageSize,
                             ct),
-                    Target);
+                    Target,
+                    option);
                 _packageList.Loader = loader;
             }
             else
             {
+                // search in active package source
                 if (activeSource == null)
                 {
                     var loader = new PackageLoader(
@@ -469,12 +499,12 @@ namespace NuGet.Client.VisualStudio.UI
                                 return Enumerable.Empty<JObject>();
                             });
                         },
-                        Target);
+                        Target,
+                        option);
                     _packageList.Loader = loader;
                 }
                 else
                 {
-                    var includePrerelease = _checkboxPrerelease.IsChecked == true;
                     var loader = new PackageLoader(
                         (startIndex, ct) =>
                             sourceRepository.Search(
@@ -482,12 +512,13 @@ namespace NuGet.Client.VisualStudio.UI
                             new SearchFilter()
                             {
                                 SupportedFrameworks = supportedFrameworks,
-                                IncludePrerelease = includePrerelease
+                                IncludePrerelease = option.IncludePrerelease
                             },
                             startIndex,
                             PageSize,
                             ct),
-                    Target);
+                        Target,
+                        option);
                     _packageList.Loader = loader;
                 }
             }
@@ -554,63 +585,62 @@ namespace NuGet.Client.VisualStudio.UI
 
         internal void UpdatePackageStatus()
         {
-            var installedPackages = new Dictionary<string, NuGetVersion>(StringComparer.OrdinalIgnoreCase);
-
-            var groups = Target
-                .GetAllTargetsRecursively()
-                .SelectMany(p => p.InstalledPackages.GetInstalledPackages())
-                .GroupBy(r => r.Identity.Id);
-
-            foreach (var group in groups)
+            if (ShowInstalled || ShowUpdatesAvailable)
             {
-                installedPackages[group.Key] = group.Min(r => r.Identity.Version);
+                // refresh the whole package list
+                _packageList.Reload();
             }
-
-            var showOnlyInstalled = ShowOnlyInstalled();
-            var uninstalledPackages = new List<UiSearchResultPackage>();
-
-            foreach (var item in _packageList.Items)
+            else
             {
-                var package = item as UiSearchResultPackage;
-                if (package == null)
+                // in this case, we only need to update PackageStatus of
+                // existing items in the package list
+                foreach (var item in _packageList.Items)
                 {
-                    continue;
-                }
+                    var package = item as UiSearchResultPackage;
+                    if (package == null)
+                    {
+                        continue;
+                    }
 
-                NuGetVersion installedVersion;
-                if (installedPackages.TryGetValue(package.Id, out installedVersion))
+                    SetPackageStatus(package, Target);
+                }
+            }
+        }
+
+        // Set the PackageStatus property of the given package.
+        private static void SetPackageStatus(
+            UiSearchResultPackage package,
+            InstallationTarget target)
+        {
+            var latestStableVersion = package.AllVersions
+                .Where(p => !p.Version.IsPrerelease)
+                .Max(p => p.Version);
+
+            // Get the minimum version installed in any target project/solution
+            var minimumInstalledPackage = target.GetAllTargetsRecursively()
+                .Select(t => t.InstalledPackages.GetInstalledPackage(package.Id))
+                .Where(p => p != null)
+                .OrderBy(r => r.Identity.Version)
+                .FirstOrDefault();
+
+            PackageStatus status;
+            if (minimumInstalledPackage != null)
+            {
+                if (minimumInstalledPackage.Identity.Version < latestStableVersion)
                 {
-                    if (installedVersion < package.Version)
-                    {
-                        package.Status = PackageStatus.UpdateAvailable;
-                    }
-                    else
-                    {
-                        package.Status = PackageStatus.Installed;
-                    }
+                    status = PackageStatus.UpdateAvailable;
                 }
                 else
                 {
-                    package.Status = PackageStatus.NotInstalled;
-                    if (showOnlyInstalled)
-                    {
-                        uninstalledPackages.Add(package);
-                    }
+                    status = PackageStatus.Installed;
                 }
             }
-
-            if (showOnlyInstalled)
+            else
             {
-                foreach (var item in uninstalledPackages)
-                {
-                    _packageList.Items.Remove(item);
-                }
-
-                if (_packageList.SelectedItem == null)
-                {
-                    _packageList.SelectFirstItem();
-                }
+                status = PackageStatus.NotInstalled;
             }
+
+            package.Status = status;
         }
 
         public bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
@@ -661,11 +691,21 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _searchControl_SearchStart(object sender, EventArgs e)
         {
+            if (!_initialized)
+            {
+                return;
+            }
+
             SearchPackageInActivePackageSource();
         }
 
         private void _checkboxPrerelease_CheckChanged(object sender, RoutedEventArgs e)
         {
+            if (!_initialized)
+            {
+                return;
+            }
+
             SearchPackageInActivePackageSource();
         }
     }

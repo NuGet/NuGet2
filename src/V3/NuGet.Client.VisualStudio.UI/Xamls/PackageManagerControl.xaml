@@ -50,7 +50,7 @@
                     x:Name="_sourceRepoList"
                     VerticalAlignment="Center"
                     DisplayMemberPath="Name"
-                    Width="186"
+                    Width="130"
                     Grid.Column="1"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
 
                 <TextBlock
@@ -65,7 +65,7 @@
                     VerticalAlignment="Center"
                     SelectedIndex="0"
                     x:Name="_filter"
-                    Width="100"
+                    Width="130"
                     SelectionChanged="_filter_SelectionChanged"/>
                 
                 <CheckBox x:Name="_checkboxPrerelease" 
@@ -74,7 +74,7 @@
                           Content="{x:Static resx:Resources.Checkbox_IncludePrerelease}"
                           Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                           Checked="_checkboxPrerelease_CheckChanged"
-                          Unchecked="_checkboxPrerelease_CheckChanged"/>
+                          Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True"/>
                 
                 <Tools:SearchControl
                     Grid.Column="6"

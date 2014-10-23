@@ -77,14 +77,16 @@
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
-                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" />
+                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" 
+                    ToolTip="{x:Static resx:Resources.Tooltip_PackageInstalled}" />
                 <Tools:UpdateAvailableIndicator
                     Name="_updateMark"
                     Grid.Column="2"
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
-                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToUpdateImageConverter}}" />
+                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToUpdateImageConverter}}"
+                    ToolTip="{x:Static resx:Resources.Tooltip_UpdateAvailable}" />
             </Grid>
         </Border>
         <DataTemplate.Triggers>
