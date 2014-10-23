@@ -84,8 +84,7 @@ namespace NuGet.Client
 
             _client = new DataClient(
                 _http,
-                cache,
-                context: null);
+                cache);
         }
 
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
@@ -285,7 +284,7 @@ namespace NuGet.Client
             var packageUrl = baseUrl.TrimEnd('/') + "/" + packageId.ToLowerInvariant() + "/index.json";
 
             // Resolve the catalog root
-            var catalogPackage = await _client.Ensure(await _client.GetEntity(new Uri(packageUrl)), CatalogRequiredProperties);
+            var catalogPackage = await _client.Ensure(new Uri(packageUrl), CatalogRequiredProperties);
 
             // Descend through the items to find all the versions
             var versions = await Descend((JArray)catalogPackage["items"]);
