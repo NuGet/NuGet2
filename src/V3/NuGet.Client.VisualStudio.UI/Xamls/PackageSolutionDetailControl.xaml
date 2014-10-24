@@ -252,12 +252,12 @@
 
                 <!-- downloads -->
                 <TextBlock
-                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
+                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource DownloadCountToVisibilityConverter}}"
                         Grid.Row="3" Grid.Column="0" FontWeight="Bold"
                         Margin="0,8,0,0"
                         Text="{x:Static resx:Resources.Label_Downloads}" />
                 <TextBlock
-                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource NullToVisibilityConverter}}"
+                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource DownloadCountToVisibilityConverter}}"
                         Text="{Binding Path=Package.DownloadCount}"
                         Margin="8,8,0,0"
                         TextWrapping="Wrap"
