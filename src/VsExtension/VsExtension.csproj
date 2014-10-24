@@ -199,6 +199,14 @@
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
       <Name>NuGet.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\V3\NuGet.Resolution\NuGet.Resolution.csproj">
+      <Project>{a0c44841-3f2d-431c-bea4-036df02085fc}</Project>
+      <Name>NuGet.Resolution</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Versioning\Versioning.csproj">
+      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
+      <Name>Versioning</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
       <Name>VisualStudio.Interop</Name>

@@ -13,6 +13,7 @@ using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
 using System.Threading;
+using NuGet.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {

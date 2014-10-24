@@ -108,9 +108,7 @@
     <Compile Include="Resolution\PackageAction.cs" />
     <Compile Include="PackageIdentity.cs" />
     <Compile Include="PackageSource.cs" />
-    <Compile Include="Resolution\ActionResolver.cs" />
     <Compile Include="Installation\PurgeActionHandler.cs" />
-    <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
     <Compile Include="SourceRepository.cs" />

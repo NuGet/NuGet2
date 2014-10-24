@@ -13,7 +13,7 @@ using OldSemVer = NuGet.SemanticVersion;
 
 namespace NuGet.Client.Interop
 {
-    internal class CoreInteropPackage : IPackage, IV3PackageMetadata
+    public class CoreInteropPackage : IPackage, IV3PackageMetadata
     {
         private readonly OldSemVer _oldVer;
         

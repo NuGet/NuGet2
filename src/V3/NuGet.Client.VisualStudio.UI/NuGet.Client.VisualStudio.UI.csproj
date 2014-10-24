@@ -43,7 +43,6 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -59,39 +58,35 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
-
   <Choose>
     <When Condition="$(VisualStudioVersion)=='14.0'">
       <ItemGroup>
-	<Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-	  <HintPath>..\..\lib\VS14\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-	  <SpecificVersion>False</SpecificVersion>
-	  <Private>False</Private>
-	</Reference>
+        <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\..\lib\VS14\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
+          <SpecificVersion>False</SpecificVersion>
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </When>
-    
     <When Condition="$(VisualStudioVersion)=='12.0'">
       <ItemGroup>
-	<Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-	  <HintPath>..\..\lib\VS12\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-	  <SpecificVersion>False</SpecificVersion>
-	  <Private>False</Private>
-	</Reference>
+        <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\..\lib\VS12\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
+          <SpecificVersion>False</SpecificVersion>
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </When>
-
     <When Condition="$(VisualStudioVersion)=='11.0'">
       <ItemGroup>
-	<Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-	  <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-	  <SpecificVersion>False</SpecificVersion>
-	  <Private>False</Private>
-	</Reference>
+        <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
+          <SpecificVersion>False</SpecificVersion>
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </When>
   </Choose>
-    
   <ItemGroup>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\EmptyEnumerableToVisibilityConverter.cs" />
@@ -244,6 +239,10 @@
     <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
       <Name>NuGet.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Resolution\NuGet.Resolution.csproj">
+      <Project>{a0c44841-3f2d-431c-bea4-036df02085fc}</Project>
+      <Name>NuGet.Resolution</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

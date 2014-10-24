@@ -14,8 +14,6 @@ namespace NuGet.Client.Diagnostics
     public static class NuGetTraceSources
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource ActionResolver = new TraceSource(typeof(ActionResolver).FullName);
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource ActionExecutor = new TraceSource(typeof(ActionExecutor).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource CoreInterop = new TraceSource(typeof(CoreInteropProjectManager).Namespace);

@@ -4,7 +4,7 @@ using NuGet.Client.Installation;
 
 namespace NuGet.Client.Interop
 {
-    internal class CoreInteropProjectManager : IProjectManager
+    public class CoreInteropProjectManager : IProjectManager
     {
         private readonly InstallationTarget _target;
         private readonly IProjectSystem _projectSystem;

@@ -12,6 +12,7 @@ using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
 using System.Diagnostics;
 using System.Threading;
+using NuGet.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {
