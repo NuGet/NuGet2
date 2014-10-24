@@ -40,7 +40,7 @@
             BorderThickness="0,0,0,1"
             BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}" 
             Padding="0,16">
-            <Grid Margin="24,0" Height="70">
+            <Grid Margin="24,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
@@ -67,6 +67,7 @@
                     <TextBlock
                         Grid.Row="1"
                         Text="{Binding Summary}"
+                        MaxHeight="44"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap"></TextBlock>
                 </Grid>

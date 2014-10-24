@@ -22,7 +22,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
-        private const int PageSize = 15;
+        private const int PageSize = 10;
 
         private bool _initialized;
 
