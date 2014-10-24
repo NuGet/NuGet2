@@ -20,12 +20,11 @@ namespace NuGet.Resolution
 
         public void AddOperation(PackageActionType operation, IPackage package, IProjectManager projectManager)
         {
-            throw new NotImplementedException();
         }
 
         public IEnumerable<NewPackageAction> ResolveActions()
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<NewPackageAction>();
         }
 
         public async Task<IEnumerable<NewPackageAction>> ResolveActionsAsync(
