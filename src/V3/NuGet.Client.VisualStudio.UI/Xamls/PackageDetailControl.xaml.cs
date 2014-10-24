@@ -151,7 +151,7 @@ namespace NuGet.Client.VisualStudio.UI
                 await executor.ExecuteActionsAsync(actions, logger: progressDialog, cancelToken: CancellationToken.None);
 
                 Control.UpdatePackageStatus();
-                UpdatePackageStatus();
+                Refresh();
             }
             catch (Exception ex)
             {
@@ -198,7 +198,8 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void UpdatePackageStatus()
+        // Refresh the control after package install/uninstall.
+        private void Refresh()
         {
             var model = (PackageDetailControlModel)DataContext;
             if (model == null)

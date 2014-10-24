@@ -5,7 +5,7 @@
         Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
         Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
         Title="{x:Static resx:Resources.WindowTitle_Preview}"
-        Height="300" Width="300">
+        Height="300" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -13,7 +13,7 @@
         </Grid.RowDefinitions>
         <Border BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
                 BorderThickness="1">
-            <ScrollViewer>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Path=PreviewResults}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -26,17 +26,27 @@
                                 <StackPanel Margin="10,8,0,8">
                                     <TextBlock
                         FontWeight="Bold"
-                        Text="{x:Static resx:Resources.Label_AddedPackages}" />
+                        Text="{x:Static resx:Resources.Label_UpdatedPackages}" />
+                                    <ItemsControl
+                        Margin="10,0,0,0"
+                        ItemsSource="{Binding Path=Updated}">
+                                    </ItemsControl>
+                                </StackPanel>
+                                
+                                <StackPanel Margin="10,8,0,8">
+                                    <TextBlock
+                        FontWeight="Bold"
+                        Text="{x:Static resx:Resources.Label_InstalledPackages}" />
                                     <ItemsControl
                         Margin="10,0,0,0"
                         ItemsSource="{Binding Path=Added}">
                                     </ItemsControl>
                                 </StackPanel>
-
+                                
                                 <StackPanel Margin="10,8,0,8">
                                     <TextBlock
                         FontWeight="Bold"
-                        Text="{x:Static resx:Resources.Label_DeletedPackages}" />
+                        Text="{x:Static resx:Resources.Label_UninstalledPackages}" />
                                     <ItemsControl
                         Margin="10,0,0,0"
                         ItemsSource="{Binding Path=Deleted}">

@@ -94,7 +94,17 @@ namespace NuGet.Client.Interop
         public override Task<JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
         {
             NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);
-            var package = _repository.FindPackage(id, CoreConverters.SafeToSemVer(version));
+            var semver = CoreConverters.SafeToSemVer(version);
+            var package = _repository.FindPackage(id, semver);
+
+            // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
+            if (package == null)
+            {
+                var packages = _repository.FindPackagesById(id);
+                package = packages.FirstOrDefault(p => Equals(p.Version, semver));
+            }
+
+            // If still null, fail
             if (package == null)
             {
                 return Task.FromResult<JObject>(null);

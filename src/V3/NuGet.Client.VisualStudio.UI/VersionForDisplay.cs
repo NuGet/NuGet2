@@ -7,12 +7,18 @@ namespace NuGet.Client.VisualStudio.UI
     {
         private string _additionalInfo;
 
+        private string _toString;
+
         public VersionForDisplay(
             NuGetVersion version,
             string additionalInfo)
         {
             Version = version;
             _additionalInfo = additionalInfo;
+
+            _toString = string.IsNullOrEmpty(_additionalInfo) ?
+                Version.ToNormalizedString() :
+                _additionalInfo + " " + Version.ToNormalizedString();
         }
 
         public NuGetVersion Version
@@ -23,7 +29,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public override string ToString()
         {
-            return _additionalInfo + Version.ToNormalizedString();
+            return _toString;
         }
 
         public override bool Equals(object obj)

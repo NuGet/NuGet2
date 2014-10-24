@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    public enum PackagePreviewStatus
-    {
-        Unchanged,
-        Deleted,
-        Added
-    }
-
     public class PreviewWindowModel
     {
         private List<PreviewResult> _previewResults;
@@ -23,48 +18,112 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public PreviewWindowModel(IEnumerable<PackageAction> actions)
+        public PreviewWindowModel(IEnumerable<PackageAction> actions, Installation.InstallationTarget target)
         {
             _previewResults = new List<PreviewResult>();
-            var projects = actions.Select(a => a.Target)
-                .Where(p => p != null)
-                .Distinct();
-            foreach (var targetProject in projects)
+
+            foreach (var targetProject in target.GetAllTargetsRecursively())
             {
-                var packageStatus = targetProject.InstalledPackages.GetInstalledPackages()
-                    .Select(p => p.Identity)
-                    .ToDictionary(p => p, _ => PackagePreviewStatus.Unchanged);
+                CalculatePreviewForProject(actions, targetProject);
+            }
+        }
 
-                foreach (var action in actions.Where(a => targetProject.Equals(a.Target)))
+
+        // Calulates the prevew result for the target project and adds the result to _previewResults.
+        private void CalculatePreviewForProject(
+            IEnumerable<PackageAction> actions,
+            Installation.InstallationTarget targetProject)
+        {
+            var existingPackages = targetProject.InstalledPackages.GetInstalledPackages()
+                .Select(p => p.Identity)
+                .ToList();
+
+            var installed = new Dictionary<string, PackageIdentity>(StringComparer.OrdinalIgnoreCase);
+            var uninstalled = new Dictionary<string, PackageIdentity>(StringComparer.OrdinalIgnoreCase);
+            foreach (var action in actions.Where(a => targetProject.Equals(a.Target)))
+            {
+                if (action.ActionType == PackageActionType.Install)
                 {
-                    if (action.ActionType == PackageActionType.Install)
-                    {
-                        packageStatus[action.PackageIdentity] = PackagePreviewStatus.Added;
-                    }
-                    else if (action.ActionType == PackageActionType.Uninstall)
-                    {
-                        packageStatus[action.PackageIdentity] = PackagePreviewStatus.Deleted;
-                    }
+                    installed[action.PackageIdentity.Id] = action.PackageIdentity;
                 }
-
-                var unchanged = packageStatus
-                    .Where(v => v.Value == PackagePreviewStatus.Unchanged)
-                    .Select(v => v.Key);
-                var deleted = packageStatus
-                    .Where(v => v.Value == PackagePreviewStatus.Deleted)
-                    .Select(v => v.Key);
-                var added = packageStatus
-                    .Where(v => v.Value == PackagePreviewStatus.Added)
-                    .Select(v => v.Key);
-                if (deleted.Any() || added.Any())
+                else if (action.ActionType == PackageActionType.Uninstall)
                 {
-                    _previewResults.Add(new PreviewResult(
-                        targetProject.Name,
-                        unchanged: unchanged,
-                        deleted: deleted,
-                        added: added));
+                    uninstalled[action.PackageIdentity.Id] = action.PackageIdentity;
                 }
             }
+
+            var addedPackages = new List<PackageIdentity>();
+            var deletedPackages = new List<PackageIdentity>();
+            var unchangedPackages = new List<PackageIdentity>();
+            var updatedPackges = new List<UpdateResult>();
+
+            // process existing packages to get updatedPackages, deletedPackages
+            // and unchangedPackages
+            foreach (var package in existingPackages)
+            {
+                var isInstalled = installed.ContainsKey(package.Id);
+                var isUninstalled = uninstalled.ContainsKey(package.Id);
+
+                if (isInstalled && isUninstalled)
+                {
+                    // the package is updated
+                    updatedPackges.Add(new UpdateResult(package, installed[package.Id]));
+                    installed.Remove(package.Id);
+                }
+                else if (isInstalled && !isUninstalled)
+                {
+                    // this can't happen
+                    Debug.Assert(false, "We should never reach here");
+                }
+                else if (!isInstalled && isUninstalled)
+                {
+                    // the package is uninstalled
+                    deletedPackages.Add(package);
+                }
+                else if (!isInstalled && !isUninstalled)
+                {
+                    // the package is unchanged
+                    unchangedPackages.Add(package);
+                }
+            }
+
+            // now calculate addedPackages
+            foreach (var package in installed.Values)
+            {
+                if (!existingPackages.Contains(package))
+                {
+                    addedPackages.Add(package);
+                }
+            }
+
+            if (addedPackages.Any() ||
+                deletedPackages.Any() ||
+                updatedPackges.Any())
+            {
+                _previewResults.Add(new PreviewResult(
+                    targetProject.Name,
+                    added: addedPackages,
+                    deleted: deletedPackages,
+                    unchanged: unchangedPackages,
+                    updated: updatedPackges));
+            }
+        }
+    }
+
+    public class UpdateResult
+    {
+        public PackageIdentity Old { get; private set; }
+        public PackageIdentity New { get; private set; }
+
+        public UpdateResult(PackageIdentity oldPackage, PackageIdentity newPackage)
+        {
+            Old = oldPackage;
+            New = newPackage;
+        }
+
+        public override string ToString()
+        {
+            return Old.ToString() + " -> " + New.ToString();
         }
     }
 
@@ -88,6 +147,12 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
+        public IEnumerable<UpdateResult> Updated
+        {
+            get;
+            private set;
+        }
+
         public string Name
         {
             get;
@@ -98,12 +163,14 @@ namespace NuGet.Client.VisualStudio.UI
             string name,
             IEnumerable<PackageIdentity> added,
             IEnumerable<PackageIdentity> deleted,
-            IEnumerable<PackageIdentity> unchanged)
+            IEnumerable<PackageIdentity> unchanged,
+            IEnumerable<UpdateResult> updated)
         {
             Name = name;
             Added = added;
             Deleted = deleted;
             Unchanged = unchanged;
+            Updated = updated;
         }
     }
 }

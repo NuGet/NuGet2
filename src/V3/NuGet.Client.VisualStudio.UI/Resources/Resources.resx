@@ -216,14 +216,14 @@
   <data name="Button_OK" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="Label_AddedPackages" xml:space="preserve">
-    <value>Added packages:</value>
+  <data name="Label_InstalledPackages" xml:space="preserve">
+    <value>Installed:</value>
   </data>
-  <data name="Label_DeletedPackages" xml:space="preserve">
-    <value>Deleted packages:</value>
+  <data name="Label_UninstalledPackages" xml:space="preserve">
+    <value>Uninstalled:</value>
   </data>
   <data name="Label_UnchangedPackages" xml:space="preserve">
-    <value>Unchanged packages:</value>
+    <value>Unchanged:</value>
   </data>
   <data name="Button_IAccept" xml:space="preserve">
     <value>I Accept</value>
@@ -308,5 +308,23 @@
   </data>
   <data name="Checkbox_IncludePrerelease" xml:space="preserve">
     <value>Include Prerelease</value>
+  </data>
+  <data name="Filter_UpdateAvailable" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="Version_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Version_LatestStable" xml:space="preserve">
+    <value>Latest stable</value>
+  </data>
+  <data name="Tooltip_PackageInstalled" xml:space="preserve">
+    <value>Latest stable version is installed</value>
+  </data>
+  <data name="Tooltip_UpdateAvailable" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="Label_UpdatedPackages" xml:space="preserve">
+    <value>Updated:</value>
   </data>
 </root>
