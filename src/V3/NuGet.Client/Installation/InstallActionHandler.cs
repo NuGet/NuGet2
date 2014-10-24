@@ -21,12 +21,21 @@ namespace NuGet.Client.Installation
                 // TODO: this is a hack to get the supported frameworks. Since action.Package 
                 // does not contain this info for now, we have to download the package to 
                 // get this info.
-                var downloadUri = action.Package.Value<Uri>(Properties.PackageContent);
-                var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
-                var package = DownloadActionHandler.GetPackage(
-                    packageCache,
-                    action.PackageIdentity,
-                    downloadUri);
+                var packageContent = action.Package.Value<string>(Properties.PackageContent);
+                var downloadUri = new Uri(packageContent);
+                IPackage package;
+                if (downloadUri.IsFile)
+                {
+                    package = new OptimizedZipPackage(packageContent);
+                }
+                else
+                {
+                    var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
+                    package = DownloadActionHandler.GetPackage(
+                        packageCache,
+                        action.PackageIdentity,
+                        downloadUri);
+                }
                 var frameworks = package.GetSupportedFrameworks();
                 
                 return nugetAware.InstallPackage(
