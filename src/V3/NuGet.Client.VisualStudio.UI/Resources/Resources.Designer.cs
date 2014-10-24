@@ -313,15 +313,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Added packages:.
-        /// </summary>
-        public static string Label_AddedPackages {
-            get {
-                return ResourceManager.GetString("Label_AddedPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Author(s):.
         /// </summary>
         public static string Label_Authors {
@@ -336,15 +327,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_DatePublished {
             get {
                 return ResourceManager.GetString("Label_DatePublished", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleted packages:.
-        /// </summary>
-        public static string Label_DeletedPackages {
-            get {
-                return ResourceManager.GetString("Label_DeletedPackages", resourceCulture);
             }
         }
         
@@ -408,6 +390,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_InstallationOptions {
             get {
                 return ResourceManager.GetString("Label_InstallationOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed:.
+        /// </summary>
+        public static string Label_InstalledPackages {
+            get {
+                return ResourceManager.GetString("Label_InstalledPackages", resourceCulture);
             }
         }
         
@@ -511,11 +502,29 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unchanged packages:.
+        ///   Looks up a localized string similar to Unchanged:.
         /// </summary>
         public static string Label_UnchangedPackages {
             get {
                 return ResourceManager.GetString("Label_UnchangedPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstalled:.
+        /// </summary>
+        public static string Label_UninstalledPackages {
+            get {
+                return ResourceManager.GetString("Label_UninstalledPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updated:.
+        /// </summary>
+        public static string Label_UpdatedPackages {
+            get {
+                return ResourceManager.GetString("Label_UpdatedPackages", resourceCulture);
             }
         }
         

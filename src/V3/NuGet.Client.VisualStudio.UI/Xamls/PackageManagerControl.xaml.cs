@@ -683,7 +683,7 @@ namespace NuGet.Client.VisualStudio.UI
         public void PreviewActions(IEnumerable<PackageAction> actions)
         {
             var w = new PreviewWindow();
-            w.DataContext = new PreviewWindowModel(actions);
+            w.DataContext = new PreviewWindowModel(actions, Target);
             w.Owner = Window.GetWindow(this);
             w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             w.ShowDialog();
