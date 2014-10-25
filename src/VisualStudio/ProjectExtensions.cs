@@ -302,7 +302,16 @@ namespace NuGet.VisualStudio
 
         public static bool IsNativeProject(this Project project)
         {
-            return project != null && VsConstants.CppProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            return project != null && VsConstants.CppProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase) && !project.IsClr();
+        }
+
+        /// <summary>
+        /// Checks if a native project type really is a managed project, by checking the CLRSupport item. 
+        /// </summary>
+        public static bool IsClr(this Project project)
+        {
+            var vcx = new VcxProject(project.FullName);
+            return vcx.HasClrSupport(project.ConfigurationManager.ActiveConfiguration);
         }
 
         // TODO: Return null for library projects
