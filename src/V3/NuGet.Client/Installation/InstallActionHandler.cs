@@ -21,7 +21,7 @@ namespace NuGet.Client.Installation
                 // TODO: this is a hack to get the supported frameworks. Since action.Package 
                 // does not contain this info for now, we have to download the package to 
                 // get this info.
-                var packageContent = action.Package.Value<string>(Properties.PackageContent);
+                var packageContent = action.Package[Properties.PackageContent].ToString();
                 var downloadUri = new Uri(packageContent);
                 IPackage package;
                 if (downloadUri.IsFile)
