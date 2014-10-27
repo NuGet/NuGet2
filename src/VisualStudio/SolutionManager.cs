@@ -344,9 +344,15 @@ namespace NuGet.VisualStudio
 
         private void Init(object state)
         {
-            if (_initNeeded && _dte.Solution.IsOpen)
+            try
             {
-                InvokeOnUIThread(() => OnSolutionOpened());
+                if (_initNeeded && _dte.Solution.IsOpen)
+                {
+                    InvokeOnUIThread(() => OnSolutionOpened());
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 
