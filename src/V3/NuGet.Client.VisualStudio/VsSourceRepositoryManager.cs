@@ -105,6 +105,7 @@ namespace NuGet.Client.VisualStudio
             return _repos.GetOrAdd(p.Url, _ => CreateRepo(p));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects live until end of process, at which point they will be disposed automatically")]
         private SourceRepository CreateRepo(PackageSource source)
         {
             // For now, be awful. Detect V3 via the source URL itself

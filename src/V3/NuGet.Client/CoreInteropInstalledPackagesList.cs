@@ -56,7 +56,7 @@ namespace NuGet.Client
                     .Select(p => CreatePackageSearchResult(source, p)));
         }
 
-        private JObject CreatePackageSearchResult(SourceRepository source, IPackage package)
+        private static JObject CreatePackageSearchResult(SourceRepository source, IPackage package)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
             var result = PackageJsonLd.CreatePackageSearchResult(package, Enumerable.Empty<IPackage>());

@@ -12,6 +12,7 @@ namespace NuGet.Client.VisualStudio
 {
     public static class VsNuGetDiagnostics
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The listeners don't need to disposed until the process ends, at which point they will be automatically disposed")]
         public static void Initialize(IDebugConsoleController console)
         {
             var consoleListener = new DebugConsoleTraceListener(console, ThreadHelper.Generic);
