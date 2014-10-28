@@ -569,11 +569,11 @@ namespace NuGet.VisualStudio
                 return null;
             }
 
-            Microsoft.VisualStudio.OLE.Interop.IServiceProvider serviceProvider;
-            int hr = vsProject.GetItemContext(
+            Microsoft.VisualStudio.OLE.Interop.IServiceProvider serviceProvider = null;
+            vsProject.GetItemContext(
                 (uint)VSConstants.VSITEMID.Root,
                 out serviceProvider);
-            if (hr < 0)
+            if (serviceProvider == null)
             {
                 return null;
             }
