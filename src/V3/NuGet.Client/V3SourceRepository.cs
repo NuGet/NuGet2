@@ -285,7 +285,11 @@ namespace NuGet.Client
 
             // Resolve the catalog root
             var catalogPackage = await _client.Ensure(new Uri(packageUrl), CatalogRequiredProperties);
-
+            if (catalogPackage["HttpStatusCode"] != null)
+            {
+                // Got an error response from the data client, so just return an empty array
+                return Enumerable.Empty<JObject>();
+            }
             // Descend through the items to find all the versions
             var versions = await Descend((JArray)catalogPackage["items"]);
 
