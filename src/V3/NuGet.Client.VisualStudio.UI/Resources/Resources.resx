@@ -327,4 +327,7 @@
   <data name="Label_UpdatedPackages" xml:space="preserve">
     <value>Updated:</value>
   </data>
+  <data name="Text_ErrorDetails" xml:space="preserve">
+    <value>Error details</value>
+  </data>
 </root>

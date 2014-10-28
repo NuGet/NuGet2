@@ -437,7 +437,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private bool IncludePrerelease
+        public bool IncludePrerelease
         {
             get
             {
