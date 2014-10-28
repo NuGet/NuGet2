@@ -13,7 +13,7 @@ namespace NuGet.Client.VisualStudio.UI
 {
     public class PackageManagerWindowPane : WindowPane
     {
-        private object _content;
+        private PackageManagerControl _content;
 
         /// <summary>
         /// Initializes a new instance of the EditorPane class.
@@ -23,6 +23,14 @@ namespace NuGet.Client.VisualStudio.UI
         {
             PackageManagerControl control = new PackageManagerControl(myDoc, ui);
             _content = control;
+        }
+
+        public PackageManagerModel Model
+        {
+            get
+            {
+                return _content.Model;
+            }
         }
 
         ///-----------------------------------------------------------------------------

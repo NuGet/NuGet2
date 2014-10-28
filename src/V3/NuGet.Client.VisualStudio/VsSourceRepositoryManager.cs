@@ -20,7 +20,7 @@ namespace NuGet.Client.VisualStudio
     {
         private static readonly PackageSource NuGetV3PreviewSource = new PackageSource(
             Strings.VsSourceRepositoryManager_V3SourceName,
-            "http://preview.nuget.org/ver3-preview/index.json");
+            "https://az320820.vo.msecnd.net/ver3-preview/index.json");
 
         private readonly IVsPackageSourceProvider _sourceProvider;
         private readonly IPackageRepositoryFactory _repoFactory;
@@ -110,7 +110,7 @@ namespace NuGet.Client.VisualStudio
             // For now, be awful. Detect V3 via the source URL itself
             Uri url;
             if (Uri.TryCreate(source.Url, UriKind.RelativeOrAbsolute, out url) &&
-                url.Host.Equals("preview.nuget.org", StringComparison.OrdinalIgnoreCase))
+                url.Host.Equals("az320820.vo.msecnd.net", StringComparison.OrdinalIgnoreCase))
             {
                 return new V3SourceRepository(source, VsVersionHelper.FullVsEdition);
             }

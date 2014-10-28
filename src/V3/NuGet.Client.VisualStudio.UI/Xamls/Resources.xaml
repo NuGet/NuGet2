@@ -11,6 +11,7 @@
     <Tools:EmptyEnumerableToVisibilityConverter x:Key="EmptyEnumerableToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter Inverted="True" x:Key="InvertedBooleanToVisibilityConverter" />
+    <Tools:DownloadCountToVisibilityConverter x:Key="DownloadCountToVisibilityConverter" />
 
     <Style x:Key="PackageIconStyle" TargetType="{x:Type Image}">
         <Setter Property="Height" Value="32" />
