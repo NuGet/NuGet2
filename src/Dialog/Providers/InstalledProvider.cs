@@ -140,12 +140,21 @@ namespace NuGet.Dialog.Providers
 
         protected override bool ExecuteCore(PackageItem item)
         {
+            if (_project.SupportsINuGetProjectSystem())
+            {
+                ShowProgressWindow();
+                UninstallPackageFromProject(_project, item, (bool)false);
+                HideProgressWindow();
+                return true;
+            }
+            else
+            {
             CheckDependentPackages(item.PackageIdentity, LocalRepository, _targetFramework);
 
             bool? removeDependencies = AskRemoveDependency(
                 item.PackageIdentity,
-                new [] { LocalRepository },
-                new [] { _targetFramework });
+                    new[] { LocalRepository },
+                    new[] { _targetFramework });
 
             if (removeDependencies == null)
             {
@@ -157,6 +166,7 @@ namespace NuGet.Dialog.Providers
             UninstallPackageFromProject(_project, item, (bool)removeDependencies);
             HideProgressWindow();
             return true;
+        }
         }
 
         protected void CheckDependentPackages(

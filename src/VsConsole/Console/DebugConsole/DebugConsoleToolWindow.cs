@@ -16,6 +16,9 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Editor;
 using NuGet;
+using System.Diagnostics;
+using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGetConsole.Implementation
 {
@@ -28,6 +31,7 @@ namespace NuGetConsole.Implementation
         private bool _active;
         private IEnumerable<IDebugConsoleController> _sources;
         private EventHandler<DebugConsoleMessageEventArgs> _handler;
+        private DebugConsoleViewModel _viewModel;
 
         public const string ContentType = "PackageManagerDebugConsole";
 
@@ -41,9 +45,10 @@ namespace NuGetConsole.Implementation
             this.BitmapIndex = 0;
 
             _active = false;
+            _viewModel = new DebugConsoleViewModel();
 
             _handler = new EventHandler<DebugConsoleMessageEventArgs>(HandleMessage);
-            _debugWindow = new DebugWindow();
+            _debugWindow = new DebugWindow() { DataContext = _viewModel };
             this.Content = _debugWindow;
         }
 
@@ -112,51 +117,69 @@ namespace NuGetConsole.Implementation
             AttachEvents();
         }
 
-        public void Log(string message, ConsoleColor color)
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGetConsole.IConsole.Write(System.String,System.Nullable<System.Windows.Media.Color>,System.Nullable<System.Windows.Media.Color>)", Justification="String does not require localization.")]
+        public void Log(DateTime timestamp, string message, TraceEventType level, string source)
         {
             if (IsActive)
             {
-                _console.Write(message + Environment.NewLine, ConvertColor(color), null);
+                // Map the type
+                var mapped = MapType(level);
+
+                // Check if we should write the message
+                if (mapped >= _viewModel.ActiveLevel)
+                {
+                    _console.Write(
+                        String.Format(CultureInfo.CurrentCulture, "[{0:O}][{1}]{2}", timestamp, Shorten(source), message) + Environment.NewLine, 
+                        ConvertColor(mapped), null);
+                }
+
+                // TODO: Allow source filtering?
             }
         }
 
-        private static Color ConvertColor(ConsoleColor color)
+        // Shortens NuGet. trace source names.
+        private static string Shorten(string source)
         {
-            switch (color)
+            if (source.StartsWith("NuGet.", StringComparison.OrdinalIgnoreCase))
             {
-                case ConsoleColor.Red:
-                    return Colors.Red;
-                case ConsoleColor.Blue:
-                    return Colors.Blue;
-                case ConsoleColor.Cyan:
-                    return Colors.Cyan;
-                case ConsoleColor.DarkBlue:
-                    return Colors.DarkBlue;
-                case ConsoleColor.DarkCyan:
-                    return Colors.DarkCyan;
-                case ConsoleColor.DarkGray:
-                    return Colors.DarkGray;
-                case ConsoleColor.DarkGreen:
-                    return Colors.DarkGreen;
-                case ConsoleColor.DarkMagenta:
-                    return Colors.DarkMagenta;
-                case ConsoleColor.DarkRed:
-                    return Colors.DarkRed;
-                case ConsoleColor.DarkYellow:
-                    return Colors.DarkOrange;
-                case ConsoleColor.Gray:
-                    return Colors.Gray;
-                case ConsoleColor.Green:
-                    return Colors.Green;
-                case ConsoleColor.Magenta:
-                    return Colors.Magenta;
-                case ConsoleColor.White:
-                    return Colors.White;
-                case ConsoleColor.Yellow:
-                    return Colors.Yellow;
+                return source.Split('.').Last();
+            }
+            return source;
+        }
 
-                default:
-                    return Colors.White;
+        private static DebugConsoleLevel MapType(TraceEventType level)
+        {
+            switch (level)
+            {
+            case TraceEventType.Critical:
+                return DebugConsoleLevel.Critical;
+            case TraceEventType.Error:
+                return DebugConsoleLevel.Error;
+            case TraceEventType.Information:
+                return DebugConsoleLevel.Info;
+            case TraceEventType.Warning:
+                return DebugConsoleLevel.Warning;
+            default:
+                return DebugConsoleLevel.Trace;
+            }
+        }
+
+        private static Color ConvertColor(DebugConsoleLevel level)
+        {
+            switch (level)
+            {
+            case DebugConsoleLevel.Critical:
+                return Colors.Red;
+            case DebugConsoleLevel.Error:
+                return Colors.Red;
+            case DebugConsoleLevel.Warning:
+                return Colors.Yellow;
+            case DebugConsoleLevel.Info:
+                return Colors.Green;
+            case DebugConsoleLevel.Trace:
+                return Colors.Silver;
+            default:
+                return Colors.White;
             }
         }
 
@@ -186,7 +209,7 @@ namespace NuGetConsole.Implementation
 
         private void HandleMessage(object sender, DebugConsoleMessageEventArgs args)
         {
-            Log(args.Message, args.Color);
+            Log(args.Timestamp, args.Message, args.Level, args.Source);
         }
 
         protected override void Dispose(bool disposing)

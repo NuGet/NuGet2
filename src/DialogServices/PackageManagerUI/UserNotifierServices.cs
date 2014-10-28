@@ -9,7 +9,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
-    internal class UserNotifierServices : IUserNotifierServices
+    public sealed class UserNotifierServices : IUserNotifierServices
     {
         private readonly Dispatcher _uiDispatcher;
 
@@ -19,6 +19,11 @@ namespace NuGet.Dialog.PackageManagerUI
         }
 
         bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<IPackage> packages)
+        {
+            return ShowLicenseWindow(PackageLicenseModel.FromV2Packages(packages));
+        }
+
+        bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<PackageLicenseModel> packages)
         {
             if (_uiDispatcher.CheckAccess())
             {
@@ -151,19 +156,19 @@ namespace NuGet.Dialog.PackageManagerUI
             return MessageHelper.ShowQueryMessage(message, title: null, showCancelButton: true);
         }
 
-        public FileConflictResolution ShowFileConflictResolution(string question)
+        public FileConflictResolution ShowFileConflictResolution(string message)
         {
             if (!_uiDispatcher.CheckAccess())
             {
                 object result = _uiDispatcher.Invoke(
                     new Func<string, FileConflictResolution>(ShowFileConflictResolution),
-                    question);
+                    message);
                 return (FileConflictResolution)result;
             }
 
             var window = new FileConflictDialog
             {
-                Question = question
+                Question = message
             };
 
             if (window.ShowModal() ?? false)

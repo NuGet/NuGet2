@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
+
 namespace NuGet.Resolver
 {
     public class ActionResolver
@@ -256,6 +260,21 @@ namespace NuGet.Resolver
         private IEnumerable<PackageAction> ResolveActionsForOperation(Operation operation)
         {
             IEnumerable<PackageOperation> projectOperations = Enumerable.Empty<PackageOperation>();
+#if VS14
+            if (operation.ProjectManager.Project is INuGetPackageManager)
+            {
+                var action = operation.OperationType == NuGet.PackageAction.Install ?
+                    PackageActionType.Install :
+                    PackageActionType.Uninstall;
+
+                return new[] {
+                    new PackageProjectAction(
+                        action,
+                        operation.Package,
+                        operation.ProjectManager)
+                };
+            }
+#endif
             bool isProjectLevel = operation.ProjectManager.PackageManager.IsProjectLevel(operation.Package);
             if (operation.OperationType == NuGet.PackageAction.Install)
             {

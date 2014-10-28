@@ -17,6 +17,8 @@ namespace NuGet
         private const string NetFrameworkIdentifier = ".NETFramework";
         private const string NetCoreFrameworkIdentifier = ".NETCore";
         private const string PortableFrameworkIdentifier = ".NETPortable";
+        private const string AspNetFrameworkIdentifier = "ASP.NET";
+        private const string AspNetCoreFrameworkIdentifier = "ASP.NETCore";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -40,30 +42,55 @@ namespace NuGet
         private static readonly Version _emptyVersion = new Version();
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            // FYI, the keys are CASE-INSENSITIVE
+
+            // .NET Desktop
             { "NET", NetFrameworkIdentifier },
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
+
+            // .NET Core
             { "NETCore", NetCoreFrameworkIdentifier},
             { ".NETCore", NetCoreFrameworkIdentifier},
             { "WinRT", NetCoreFrameworkIdentifier},     // 'WinRT' is now deprecated. Use 'Windows' or 'win' instead.
+
+            // .NET Micro Framework
             { ".NETMicroFramework", ".NETMicroFramework" },
             { "netmf", ".NETMicroFramework" },
+
+            // Silverlight
             { "SL", "Silverlight" },
             { "Silverlight", "Silverlight" },
+
+            // Portable Class Libraries
             { ".NETPortable", PortableFrameworkIdentifier },
             { "NETPortable", PortableFrameworkIdentifier },
             { "portable", PortableFrameworkIdentifier },
+
+            // Windows Phone
             { "wp", "WindowsPhone" },
             { "WindowsPhone", "WindowsPhone" },
+            { "WindowsPhoneApp", "WindowsPhoneApp"},
+            { "wpa", "WindowsPhoneApp"},
+            
+            // Windows
             { "Windows", "Windows" },
             { "win", "Windows" },
+
+            // ASP.Net
+            { "aspnet", AspNetFrameworkIdentifier },
+            { "aspnetcore", AspNetCoreFrameworkIdentifier },
+            { "asp.net", AspNetFrameworkIdentifier },
+            { "asp.netcore", AspNetCoreFrameworkIdentifier },
+
+            // Native
+            { "native", "native"},
+            
+            // Mono/Xamarin
             { "MonoAndroid", "MonoAndroid" },
             { "MonoTouch", "MonoTouch" },
             { "MonoMac", "MonoMac" },
-            { "native", "native"},
-            { "WindowsPhoneApp", "WindowsPhoneApp"},
-            { "wpa", "WindowsPhoneApp"},
             { "Xamarin.iOS", "Xamarin.iOS" },
             { "XamariniOS", "Xamarin.iOS" },
             { "Xamarin.Mac", "Xamarin.Mac" },
@@ -94,6 +121,8 @@ namespace NuGet
         private static readonly Dictionary<string, string> _identifierToFrameworkFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { NetFrameworkIdentifier, "net" },
             { ".NETMicroFramework", "netmf" },
+            { AspNetFrameworkIdentifier, "aspnet" },
+            { AspNetCoreFrameworkIdentifier, "aspnetcore" },
             { "Silverlight", "sl" },
             { ".NETCore", "win"},
             { "Windows", "win"},
@@ -143,6 +172,15 @@ namespace NuGet
             { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
             { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") },
             { new FrameworkName("Windows, Version=v8.1"), new FrameworkName(".NETCore, Version=v4.5.1") }
+        };
+
+        // See IsCompatible
+        // The ASP.Net framework authors desire complete compatibility between 'aspnet50' and all 'net' versions
+        // So we use this MaxVersion value to achieve complete compatiblilty.
+        private static readonly Version MaxVersion = new Version(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue);
+        private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
+        {
+            { AspNetFrameworkIdentifier, new FrameworkName(".NETFramework", MaxVersion) },
         };
 
         public static Version DefaultTargetFrameworkVersion
@@ -758,7 +796,7 @@ namespace NuGet
                                Math.Max(version.Revision, 0));
         }
 
-        internal static FrameworkName NormalizeFrameworkName(FrameworkName framework)
+        public static FrameworkName NormalizeFrameworkName(FrameworkName framework)
         {
             FrameworkName aliasFramework;
             if (_frameworkNameAlias.TryGetValue(framework, out aliasFramework))
@@ -834,7 +872,23 @@ namespace NuGet
 
             if (!projectFrameworkName.Identifier.Equals(packageTargetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
+                // Try to convert the project framework into an equivalent target framework
+                // If the identifiers didn't match, we need to see if this framework has an equivalent framework that DOES match.
+                // If it does, we use that from here on.
+                // Example:
+                //  If the Project Targets ASP.Net, Version=5.0. It can accept Packages targetting .NETFramework, Version=4.5.1
+                //  so since the identifiers don't match, we need to "translate" the project target framework to .NETFramework
+                //  however, we still want direct ASP.Net == ASP.Net matches, so we do this ONLY if the identifiers don't already match
+                FrameworkName equivalentFramework;
+                if (_equivalentProjectFrameworks.TryGetValue(projectFrameworkName.Identifier, out equivalentFramework) &&
+                    equivalentFramework.Identifier.Equals(packageTargetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+                {
+                    projectFrameworkName = equivalentFramework;
+                }
+                else
+                {
                 return false;
+            }
             }
 
             if (NormalizeVersion(projectFrameworkName.Version) <
@@ -1138,7 +1192,7 @@ namespace NuGet
             return version != null;
         }
 
-        internal static bool IsPortableFramework(this FrameworkName framework)
+        public static bool IsPortableFramework(this FrameworkName framework)
         {
             // The profile part has been verified in the ParseFrameworkName() method. 
             // By the time it is called here, it's guaranteed to be valid.

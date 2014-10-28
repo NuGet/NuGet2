@@ -1,7 +1,7 @@
 ﻿<UserControl x:Class="NuGet.VisualStudio.RestartRequestBar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio.Resources"
+             xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudioResources"
              xmlns:vsfx="clr-namespace:NuGet.VisualStudio">
     <Grid x:Name="RestartBar" Visibility="Collapsed">
         <Grid.ColumnDefinitions>

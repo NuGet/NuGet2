@@ -36,5 +36,7 @@ namespace NuGet.Common
         {
             return source.IsEnabled;
         }
+
+        public event EventHandler PackageSourcesSaved = delegate { };
     }
 }

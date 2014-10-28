@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Versioning;
 using NuGet.Resources;
+using NuGet.V3Interop;
 
 namespace NuGet
 {
@@ -152,11 +153,27 @@ namespace NuGet
                 throw new ArgumentNullException("packageIds");
             }
 
-            return FindPackages(repository, packageIds, GetFilterExpression);
+            // If we're in V3-land, find packages using that API
+            var v3Repo = repository as IV3InteropRepository;
+            if (v3Repo != null)
+            {
+                return packageIds.SelectMany(id => v3Repo.FindPackagesById(id)).ToList();
+            }
+            else
+            {
+                return FindPackages(repository, packageIds, GetFilterExpression);
+            }
+
         }
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
         {
+            var directRepo = repository as IV3InteropRepository;
+            if (directRepo != null)
+            {
+                return directRepo.FindPackagesById(packageId);
+            }
+
             var serviceBasedRepository = repository as IPackageLookup;
             if (serviceBasedRepository != null)
             {
@@ -303,9 +320,16 @@ namespace NuGet
             }
 
             // Ignore the target framework if the repository doesn't support searching
-            return repository.GetPackages().Find(searchTerm)
-                                           .FilterByPrerelease(allowPrereleaseVersions)
-                                           .AsQueryable();
+            var result = repository
+                .GetPackages()
+                .Find(searchTerm)
+                .FilterByPrerelease(allowPrereleaseVersions)
+                .OrderBy(p => p.Id)
+                .ThenByDescending(p => p.Version)
+                .GroupBy(p => p.Id)
+                .Select(g => g.First())
+                .AsQueryable();
+            return result;
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions, bool preferListedPackages)

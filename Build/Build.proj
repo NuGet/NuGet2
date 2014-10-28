@@ -55,7 +55,7 @@
         <MajorVersion>3</MajorVersion>
         <MinorVersion>0</MinorVersion>
         <Patch>0</Patch>
-	<PrereleaseTag>ctp2</PrereleaseTag>
+	    <PrereleaseTag>preview</PrereleaseTag>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
@@ -64,7 +64,7 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-	<!-- This is the version number of nupkg files produced -->
+	    <!-- This is the version number of nupkg files produced -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
         <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
@@ -102,7 +102,7 @@
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\**\*.nuspec">
             <Find><![CDATA[<version>\d+\.\d+\.\d+\.\d+</version>]]></Find>
-            <ReplaceWith><![CDATA[<version>$(Version)</version>]]></ReplaceWith>
+            <ReplaceWith><![CDATA[<version>$(PackageVersion)</version>]]></ReplaceWith>
         </RegexTransform>
     </ItemGroup>
 
@@ -198,6 +198,7 @@
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog11.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio14.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer10.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer11.dll"></UnwantedAssembly>
         </ItemGroup>
@@ -205,6 +206,7 @@
         <ItemGroup Condition=" $(VisualStudioVersion) == '11.0' or $(VisualStudioVersion) == '10.0' ">
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio12.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio14.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer.dll"></UnwantedAssembly>
         </ItemGroup>
         

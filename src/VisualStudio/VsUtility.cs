@@ -25,13 +25,15 @@ namespace NuGet.VisualStudio
             VsConstants.VbProjectTypeGuid,
             VsConstants.CppProjectTypeGuid,
             VsConstants.JsProjectTypeGuid,
+            VsConstants.CpsProjectTypeGuid,
             VsConstants.FsharpProjectTypeGuid,
             VsConstants.NemerleProjectTypeGuid,
             VsConstants.WixProjectTypeGuid,
             VsConstants.SynergexProjectTypeGuid,
             VsConstants.NomadForVisualStudioProjectTypeGuid,
             VsConstants.TDSProjectTypeGuid,
-            VsConstants.DxJsProjectTypeGuid
+            VsConstants.DxJsProjectTypeGuid,
+            VsConstants.DeploymentProjectTypeGuid
         };
 
         /// <summary>
@@ -93,6 +95,11 @@ namespace NuGet.VisualStudio
         public static bool IsSupported(Project project)
         {
             Debug.Assert(project != null);
+
+            if (project.SupportsINuGetProjectSystem())
+            {
+                return true;
+            }
 
             return project.Kind != null && _supportedProjectTypes.Contains(project.Kind) && !project.IsSharedProject();
         }
@@ -235,7 +242,7 @@ namespace NuGet.VisualStudio
                     object project;
                     if (hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out project) >= 0)
                     {
-                        return (Project)project;
+                        return project as Project;
                     }
                 }
 

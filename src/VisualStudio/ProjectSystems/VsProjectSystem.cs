@@ -486,7 +486,7 @@ namespace NuGet.VisualStudio
         protected static void UpdateImportStamp(Project project)
         {
             // There is no reason to call this for pre-Dev12 project systems.
-            if (VsVersionHelper.IsVisualStudio2013)
+            if (VsVersionHelper.VsMajorVersion >= 12)
             {
                 IVsBuildPropertyStorage propStore = project.ToVsHierarchy() as IVsBuildPropertyStorage;
                 if (propStore != null)

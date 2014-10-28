@@ -143,7 +143,7 @@ namespace NuGet
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null)
             {
-                httpRequest.UserAgent = HttpUtility.CreateUserAgentString("NuGet");
+                httpRequest.UserAgent = HttpUtility.CreateUserAgentString("NuGet Shim");
                 httpRequest.CookieContainer = new CookieContainer();
                 httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             }

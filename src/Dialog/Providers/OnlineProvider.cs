@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Resolver;
 using NuGet.VisualStudio;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows;
 
 namespace NuGet.Dialog.Providers
 {
@@ -85,7 +84,7 @@ namespace NuGet.Dialog.Providers
         protected override void FillRootNodes()
         {
             var packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregate();
-           
+
             // create one tree node per package source
             foreach (var source in packageSources)
             {
@@ -107,7 +106,7 @@ namespace NuGet.Dialog.Providers
 
             if (RootNode.Nodes.Count >= 2)
             {
-                // Bug #628 : Do not set aggregate source as default because it 
+                // Bug #628 : Do not set aggregate source as default because it
                 // will slow down the dialog when querying two or more sources.
                 RootNode.Nodes[1].IsSelected = true;
             }
@@ -190,12 +189,13 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+
         public override bool CanExecute(PackageItem item)
         {
             var latestPackageLookup = LocalRepository as ILatestPackageLookup;
             if (latestPackageLookup != null)
             {
-                // in this case, we mark this package as installed if the current project has 
+                // in this case, we mark this package as installed if the current project has
                 // any lower-or-equal-versioned package with the same id installed.
                 SemanticVersion installedVersion;
                 return !latestPackageLookup.TryFindLatestPackageById(item.Id, out installedVersion) ||

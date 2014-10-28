@@ -22,9 +22,11 @@
   <Content>
     <MefComponent>|PowerShellHostProvider|</MefComponent>
     <MefComponent>|Console|</MefComponent>
-    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>|VisualStudio|</MefComponent>
-	<MefComponent>|ShimV3|</MefComponent>
+    <MefComponent>|NuGet.Client.VisualStudio|</MefComponent>
+    <MefComponent>|NuGet.Client.VisualStudio.UI|</MefComponent>
+    <MefComponent>|NuGet.Client.V3Interop|</MefComponent>
+    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
   </Content>
 </Vsix>

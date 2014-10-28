@@ -137,9 +137,9 @@
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ShimV3\ShimV3.csproj">
+    <ProjectReference Include="..\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj">
       <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
-      <Name>ShimV3</Name>
+      <Name>NuGet.Client.V3Interop</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +158,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Properties\NuGet.CommandLine.nuspec" />
   </ItemGroup>
   <ItemGroup>
@@ -178,8 +179,8 @@
       <ILMergeOutputFilePathSigned>$(OutputPath)Signed\$(ILMergeOutputFile)</ILMergeOutputFilePathSigned>
       <FrameworkPath>$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5</FrameworkPath>
       <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5</FrameworkPath>
-      <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /ndebug /allowDup NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.ShimV3.dll NuGet.Console.Types.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgs>
-      <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /ndebug /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll NuGet.VisualStudio.Resources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.ShimV3.dll NuGet.Console.Types.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgsSigned>
+      <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /closed /ndebug /allowDup NuGet.exe NuGet.Core.dll NuGet.VisualStudioResources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.Client.V3Shim.dll NuGet.Client.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgs>
+      <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /closed /ndebug /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll NuGet.VisualStudioResources.dll Microsoft.Web.XmlTransform.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll System.Spatial.dll NuGet.Client.V3Shim.dll NuGet.Client.dll Newtonsoft.Json.dll NuGet.Versioning.dll</ILMergeCommandArgsSigned>
     </PropertyGroup>
     <ItemGroup>
       <ILMergeItems Include="$(OutputPath)\*.dll;$(OutputPath)\*.exe" />

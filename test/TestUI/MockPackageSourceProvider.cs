@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NuGet.VisualStudio;
@@ -32,6 +33,11 @@ namespace NuGet.TestUI
         public void SavePackageSources(IEnumerable<PackageSource> sources)
         {
             _packageSources = sources.ToList();
+
+            if (PackageSourcesSaved != null)
+            {
+                PackageSourcesSaved(this, EventArgs.Empty);
+            }
         }
 
         public void DisablePackageSource(PackageSource source)
@@ -48,5 +54,8 @@ namespace NuGet.TestUI
             var sourceInUse = _packageSources.Find(p => p.Equals(source));
             return sourceInUse != null && sourceInUse.IsEnabled;
         }
+
+
+        public event System.EventHandler PackageSourcesSaved;
     }
 }

@@ -4,9 +4,16 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using EnvDTE;
+
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+#endif
+
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Resources;
+using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -83,18 +90,30 @@ namespace NuGet.VisualStudio
             // Create the project system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
 
-            var repository = new PackageReferenceRepository(projectSystem, project.GetProperName(), _sharedRepository);
+            /* +++???
+            // The source repository of the project is an aggregate since it might need to look for all
+            // available packages to perform updates on dependent packages
+            var sourceRepository = CreateProjectManagerSourceRepository(); */
+
+#if VS14
+            if (projectSystem is INuGetPackageManager)
+            {
+                var nugetAwareRepo = new NuGetAwareProjectPackageRepository((INuGetPackageManager)projectSystem, _sharedRepository);
+                return new ProjectManager(this, PathResolver, projectSystem, nugetAwareRepo);
+            }
+#endif
+
+            PackageReferenceRepository repository = new PackageReferenceRepository(projectSystem, project.GetProperName(), _sharedRepository);
 
             // Ensure the logger is null while registering the repository
             FileSystem.Logger = null;
             Logger = null;
 
             // Ensure that this repository is registered with the shared repository if it needs to be
+            if (repository != null)
+            {
             repository.RegisterIfNecessary();
-
-            // The source repository of the project is an aggregate since it might need to look for all
-            // available packages to perform updates on dependent packages
-            var sourceRepository = CreateProjectManagerSourceRepository();
+            }
 
             var projectManager = new VsProjectManager(this, PathResolver, projectSystem, repository);
 
@@ -159,7 +178,12 @@ namespace NuGet.VisualStudio
                     VsResources.UnknownPackage, packageId));
             }
 
-            appliesToProject = IsProjectLevel(package);
+#if VS14
+            bool isNuGetAwareProjectSystem = (projectManager != null && projectManager.Project is NuGetAwareProjectSystem);
+#else
+            bool isNuGetAwareProjectSystem = false;
+#endif
+            appliesToProject = isNuGetAwareProjectSystem || IsProjectLevel(package);
 
             if (appliesToProject)
             {

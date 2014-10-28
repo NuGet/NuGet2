@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="Exported to VS MEF Land">
+    <Position X="8.76" Y="2.229" Height="0.333" Width="2.002" />
+  </Comment>
+  <Comment CommentText="NuGet.Core Land">
+    <Position X="3.458" Y="7.948" Height="0.312" Width="5.065" />
+  </Comment>
+  <Class Name="NuGet.Client.VisualStudio.UI.PackageManagerModel" Collapsed="true">
+    <Position X="1.5" Y="3" Width="2" />
+    <AssociationLine Name="Target" Type="NuGet.Client.Installation.InstallationTarget">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.339" Y="0.081" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAQCAAAAACAAAAQAhAAAACAAAAAQAAgQQAAAAACAAAA=</HashCode>
+      <FileName>PackageManagerModel.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Sources" />
+      <Property Name="Target" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NuGet.Client.PackageManagerContext">
+    <Position X="8.75" Y="2.75" Width="2" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="SourceManager" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="NuGet.Client.SourceRepositoryManager" Collapsed="true">
+    <Position X="5" Y="3" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.Installation.InstallationTarget" Collapsed="true">
+    <Position X="5.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="InstalledPackages" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsSolution" Collapsed="true">
+    <Position X="3.5" Y="7" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.ProjectSystem.Solution" Collapsed="true">
+    <Position X="3.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Property Name="Projects" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="1.2" />
+  </Class>
+  <Class Name="NuGet.Client.ProjectSystem.Project" Collapsed="true">
+    <Position X="7" Y="5.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="1.242" />
+  </Class>
+  <Class Name="NuGet.Client.VisualStudio.VsProject" Collapsed="true">
+    <Position X="7" Y="7" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NuGet.Client.InstalledPackagesList" Collapsed="true">
+    <Position X="8.75" Y="4.25" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

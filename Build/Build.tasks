@@ -55,7 +55,8 @@
 				"Microsoft.Data.Edm",
 				"Microsoft.Data.OData",
 				"Microsoft.Data.Services.Client",
-				"Newtonsoft.Json"
+				"Newtonsoft.Json",
+				"JsonLD"
 			};				
 				
             var outputItems = new List<ITaskItem>();

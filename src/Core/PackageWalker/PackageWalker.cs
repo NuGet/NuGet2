@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
+using NuGet.V3Interop;
 
 namespace NuGet
 {
@@ -251,17 +252,25 @@ namespace NuGet
 
         protected static PackageTargets GetPackageTarget(IPackage package)
         {
-            if (package.HasProjectContent())
+            IV3PackageMetadata v3package = package as IV3PackageMetadata;
+            if (v3package != null)
             {
-                return PackageTargets.Project;
+                return v3package.PackageTarget;
             }
-
-            if (IsDependencyOnly(package))
+            else
             {
-                return PackageTargets.None;
-            }
+                if (package.HasProjectContent())
+                {
+                    return PackageTargets.Project;
+                }
 
-            return PackageTargets.External;
+                if (IsDependencyOnly(package))
+                {
+                    return PackageTargets.None;
+                }
+
+                return PackageTargets.External;
+            }
         }
 
         /// <summary>

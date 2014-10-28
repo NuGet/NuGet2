@@ -80,7 +80,6 @@ namespace NuGet.Test.Mocks
         }
     }
 
-
     public class MockSharedPackageRepository2 : ISharedPackageRepository
     {
         // Contains the id & version of the solution level packages.

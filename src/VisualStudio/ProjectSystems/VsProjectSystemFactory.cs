@@ -16,7 +16,8 @@ namespace NuGet.VisualStudio
             { VsConstants.FsharpProjectTypeGuid, (project, fileSystemProvider) => new FSharpProjectSystem(project, fileSystemProvider) },
             { VsConstants.WixProjectTypeGuid, (project, fileSystemProvider) => new WixProjectSystem(project, fileSystemProvider) },
             { VsConstants.JsProjectTypeGuid, (project, fileSystemProvider) => new JsProjectSystem(project, fileSystemProvider) },
-            { VsConstants.WindowsStoreProjectTypeGuid, (project, fileSystemProvider) => new WindowsStoreProjectSystem(project, fileSystemProvider) }
+            { VsConstants.WindowsStoreProjectTypeGuid, (project, fileSystemProvider) => new WindowsStoreProjectSystem(project, fileSystemProvider) },
+            { VsConstants.DeploymentProjectTypeGuid, (project, fileSystemProvider) => new VsProjectSystem(project, fileSystemProvider) }
         };
 
         public static IProjectSystem CreateProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
@@ -32,6 +33,13 @@ namespace NuGet.VisualStudio
                     String.Format(CultureInfo.CurrentCulture,
                     VsResources.DTE_ProjectUnsupported, project.GetName()));
             }
+
+#if VS14
+            if (project.SupportsINuGetProjectSystem())
+            {
+                return new NuGetAwareProjectSystem(project);
+            }
+#endif
 
             // Try to get a factory for the project type guid            
             foreach (var guid in project.GetProjectTypeGuids())
