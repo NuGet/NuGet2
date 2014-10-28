@@ -129,15 +129,15 @@
     </ItemGroup>
 
     <Target Name="Go"
-        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
+        DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
                                     CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
 
-    <Target Name="GoMono" DependsOnTargets="RestorePackages; BuildMono; RunTests" />
-    <Target Name="GoMonoNoTests" DependsOnTargets="RestorePackages; BuildMono" />
+    <Target Name="GoMono" DependsOnTargets="BuildMono; RunTests" />
+    <Target Name="GoMonoNoTests" DependsOnTargets="BuildMono" />
 
     <Target Name="CheckFxCop">
         <Error
@@ -147,16 +147,6 @@
 
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
         <RegexTransform Items="@(RegexTransform)" />
-    </Target>
-
-    <Target Name="RestorePackages">
-        <PropertyGroup>
-            <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
-        </PropertyGroup>
-        
-        <Message Text="Restoring NuGet packages" Importance="High" />
-        <Exec Command="&quot;$(NuGetLibRoot)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
-        <Exec Command="mono $(NuGetLibRoot)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
     </Target>
 
     <Target Name="Build">
