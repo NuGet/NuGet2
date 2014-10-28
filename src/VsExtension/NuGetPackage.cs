@@ -414,15 +414,14 @@ namespace NuGet.Tools
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
             foreach (var windowFrame in EnumDocumentWindows(uiShell))
             {
-                object property;
+                object docView;
                 int hr = windowFrame.GetProperty(
-                    (int)__VSFPROPID.VSFPROPID_DocData,
-                    out property);
-                if (hr == VSConstants.S_OK && property is PackageManagerModel)
+                    (int)__VSFPROPID.VSFPROPID_DocView,
+                    out docView);
+                if (hr == VSConstants.S_OK && docView is PackageManagerWindowPane)
                 {
-                    // TODO: Find a cleaner way to do this.
-                    var packageManagerDocData = (PackageManagerModel)property;
-                    var target = packageManagerDocData.Target as VsProject;
+                    var packageManagerWindowPane = (PackageManagerWindowPane)docView;
+                    var target = packageManagerWindowPane.Model.Target as VsProject;
                     if (target != null && target.DteProject == project)
                     {
                         return windowFrame;
@@ -458,9 +457,55 @@ namespace NuGet.Tools
 
         private IVsWindowFrame CreateNewWindowFrame(Project project, string searchText)
         {
-            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-
             var vsProject = project.ToVsHierarchy();
+            var documentName = project.UniqueName;
+
+            // Find existing hierarchy and item id of the document window if it's
+            // already registered.
+            var rdt = (IVsRunningDocumentTable)GetService(typeof(IVsRunningDocumentTable));
+            IVsHierarchy hier;
+            uint itemId;            
+            IntPtr docData = IntPtr.Zero;
+            int hr;
+
+            try
+            {
+                uint cookie;
+                hr = rdt.FindAndLockDocument(
+                    (uint)_VSRDTFLAGS.RDT_NoLock,
+                    documentName,
+                    out hier,
+                    out itemId,
+                    out docData,
+                    out cookie);
+                if (hr != VSConstants.S_OK)
+                {
+                    // the docuemnt window is not registered yet. So use the project as the
+                    // hierarchy.
+                    hier = (IVsHierarchy)vsProject;
+                    itemId = (uint)VSConstants.VSITEMID.Root;
+                }
+            }
+            finally
+            {
+                if (docData != IntPtr.Zero)
+                {
+                    Marshal.Release(docData);
+                    docData = IntPtr.Zero;
+                }
+            }
+
+            // Create the doc window using the hiearchy & item id.
+            return CreateDocWindow(project, searchText, documentName, hier, itemId);
+        }
+
+        private IVsWindowFrame CreateDocWindow(
+            Project project,
+            string searchText,
+            string documentName,
+            IVsHierarchy hier,
+            uint itemId)
+        {
             uint windowFlags =
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
@@ -480,13 +525,14 @@ namespace NuGet.Tools
                 CultureInfo.CurrentCulture,
                 Resx.Resources.Label_NuGetWindowCaption,
                 myDoc.Target.Name);
-            var documentName = project.UniqueName;
+            
             IVsWindowFrame windowFrame;
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
             int hr = uiShell.CreateDocumentWindow(
                 windowFlags,
                 documentName,
-                (IVsUIHierarchy)vsProject,
-                (uint)VSConstants.VSITEMID.Root,
+                (IVsUIHierarchy)hier,
+                itemId,
                 ppunkDocView,
                 ppunkDocData,
                 ref guidEditorType,
