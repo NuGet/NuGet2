@@ -32,6 +32,11 @@ namespace NuGet.Client.VisualStudio
             {
                 Debug.Assert(!_sourceProvider.ActivePackageSource.IsAggregate(), "Active source is the aggregate source! This shouldn't happen!");
 
+                if (_sourceProvider.ActivePackageSource == null)
+                {
+                    return null;
+                }
+
                 return GetRepo(new PackageSource(
                     _sourceProvider.ActivePackageSource.Name,
                     _sourceProvider.ActivePackageSource.Source));
