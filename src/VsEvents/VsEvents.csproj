@@ -58,9 +58,6 @@
     <Compile Include="..\VisualStudio\VSConstants.cs">
       <Link>VSConstants.cs</Link>
     </Compile>
-    <Compile Include="..\VisualStudio\VsUtility.cs">
-      <Link>VsUtility.cs</Link>
-    </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PackageReferenceFileList.cs" />
     <Compile Include="PackageRestorer.cs" />
