@@ -35,7 +35,7 @@ namespace NuGet.Client.VisualStudio
         {
         }
 
-        private IVsActivityLog GetActivityLog()
+        private static IVsActivityLog GetActivityLog()
         {
             return ServiceLocator.GetGlobalService<SVsActivityLog, IVsActivityLog>();
         }

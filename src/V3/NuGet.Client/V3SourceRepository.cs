@@ -17,7 +17,7 @@ using NuGet.Client.Installation;
 
 namespace NuGet.Client
 {
-    public class V3SourceRepository : SourceRepository
+    public class V3SourceRepository : SourceRepository, IDisposable
     {
         private DataClient _client;
         private PackageSource _source;
@@ -86,6 +86,7 @@ namespace NuGet.Client
                 _http,
                 cache);
         }
+
 
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
@@ -285,7 +286,11 @@ namespace NuGet.Client
 
             // Resolve the catalog root
             var catalogPackage = await _client.Ensure(new Uri(packageUrl), CatalogRequiredProperties);
-
+            if (catalogPackage["HttpStatusCode"] != null)
+            {
+                // Got an error response from the data client, so just return an empty array
+                return Enumerable.Empty<JObject>();
+            }
             // Descend through the items to find all the versions
             var versions = await Descend((JArray)catalogPackage["items"]);
 
@@ -376,5 +381,32 @@ namespace NuGet.Client
                 return null;
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _http.Dispose();
+                    _client.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
+
     }
 }

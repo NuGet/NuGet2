@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -36,6 +37,11 @@ namespace NuGet.Client.Interop
             {
                 events.SendingRequest += (sender, args) =>
                 {
+                    var httpReq = args.Request as HttpWebRequest;
+                    if (httpReq != null)
+                    {
+                        httpReq.UserAgent = _userAgent;
+                    }
                     NuGetTraceSources.V2SourceRepository.Verbose("http", "{0} {1}", args.Request.Method, args.Request.RequestUri.ToString());
                 };
             }

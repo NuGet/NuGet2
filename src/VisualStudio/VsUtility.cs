@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio
 {
     // The class is also added as a link to VsEvents project
     // Don't add any code in this class that will result in loading of NuGet.VisualStudio.dll from VsEvents
-    internal static class VsUtility
+    public static class VsUtility
     {
         public const string NuGetSolutionSettingsFolder = ".nuget";
         public const string PackageReferenceFile = "packages.config";

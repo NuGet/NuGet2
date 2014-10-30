@@ -119,7 +119,7 @@ namespace NuGet.Client.VisualStudio
             });
         }
 
-        private void AddToResult(Dictionary<string, JObject> result, JObject package)
+        private static void AddToResult(Dictionary<string, JObject> result, JObject package)
         {
             var idVersion = GetIdVersion(package);
 
@@ -140,7 +140,7 @@ namespace NuGet.Client.VisualStudio
             }
         }
 
-        private Tuple<string, NuGetVersion> GetIdVersion(JObject searchResult)
+        private static Tuple<string, NuGetVersion> GetIdVersion(JObject searchResult)
         {
             string id = searchResult.Value<string>(Properties.PackageId);
             var version = NuGetVersion.Parse(searchResult.Value<string>(Properties.LatestVersion));

@@ -26,7 +26,7 @@ namespace NuGet.Client.VisualStudio
 
         public override string Name
         {
-            get { return DteProject.Name; }
+            get { return DteProject.GetName(); }
         }
 
         public override bool IsAvailable

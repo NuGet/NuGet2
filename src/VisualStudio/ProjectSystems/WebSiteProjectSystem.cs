@@ -27,15 +27,6 @@ namespace NuGet.VisualStudio
         {
         }
 
-        public override string ProjectName
-        {
-            get
-            {
-                string path = Project.GetFullPath();
-                return Path.GetFileName(path);
-            }
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public override void AddReference(string referencePath)
         {

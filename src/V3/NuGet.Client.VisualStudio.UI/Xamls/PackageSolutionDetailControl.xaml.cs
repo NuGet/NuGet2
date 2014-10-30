@@ -71,7 +71,7 @@ namespace NuGet.Client.VisualStudio.UI
                 new ResolutionContext()
                 {
                     DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
-                    AllowPrerelease = false
+                    AllowPrerelease = Control.IncludePrerelease
                 });
 
             var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?

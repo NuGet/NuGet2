@@ -13,7 +13,7 @@ namespace NuGet.Client
     {
         private static readonly Lazy<NuGetVersion> NuGetClientVersion = new Lazy<NuGetVersion>(GetNuGetVersion);
 
-        private static readonly string UserAgentFormat = "NuGet/{0} ({1}, {2}, {3})";
+        private const string UserAgentFormat = "NuGet/{0} ({1}, {2}, {3})";
 
         public static string GetUserAgent(string context, string host)
         {

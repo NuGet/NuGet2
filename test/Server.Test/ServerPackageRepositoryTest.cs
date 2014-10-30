@@ -8,27 +8,25 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Server.Infrastructure
 {
     public class ServerPackageRepositoryTest
     {
-
-        private Dictionary<string, MemoryStream> _packageStreams;
+        private const string EnablePersistNupkgHash = "enablePersistNupkgHash";
 
         [Fact]
         public void ServerPackageRepositoryRemovePackage()
         {
             // Arrange
-            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var mockProjectSystem = new Mock<MockProjectSystem>() {CallBase = true};
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "1.11");
             AddPackage(mockProjectSystem, "test", "1.9");
             AddPackage(mockProjectSystem, "test", "2.0-alpha");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             var package = CreatePackage("test", "1.11");
             var package2 = CreatePackage("test", "2.0-alpha");
@@ -56,14 +54,12 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "1.0");
             AddPackage(mockProjectSystem, "test2", "1.0");
             AddPackage(mockProjectSystem, "test3", "1.0-alpha");
             AddPackage(mockProjectSystem, "test4", "2.0");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var valid = serverRepository.Search("test3", true);
@@ -80,14 +76,12 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "1.0");
             AddPackage(mockProjectSystem, "test2", "1.0");
             AddPackage(mockProjectSystem, "test3", "1.0-alpha");
             AddPackage(mockProjectSystem, "test4", "2.0");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var valid = serverRepository.FindPackagesById("test");
@@ -98,20 +92,72 @@ namespace NuGet.Test.Server.Infrastructure
             Assert.Equal(0, invalid.Count());
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ServerPackageRepositoryPersistHashTest(bool enablePersistNupkgHash)
+        {
+            const int NbInvalidate = 3;
+            const int NbPackages = 2;
+
+            var settings = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+            {
+               { EnablePersistNupkgHash, enablePersistNupkgHash }
+            };
+
+            // Arrange.
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var hashProvider = GetHashProvider();
+
+            AddPackage(mockProjectSystem, "test", "1.11");
+            AddPackage(mockProjectSystem, "test", "1.3");
+
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem, hashProvider.Object, settings);
+            // First call.
+            var packagesFirstCall = serverRepository.GetPackagesWithDerivedData().OrderBy(p => p.Id + "." + p.Version).ToList();
+            Assert.Equal(NbPackages, packagesFirstCall.Count);
+
+            // Subsequent calls where we invalidate the cache.
+            for (var j = 0; j < NbInvalidate; j++)
+            {
+                // Invalidate cache.
+                serverRepository.InvalidatePackages();
+
+                var packagesSubsequentCall = serverRepository.GetPackagesWithDerivedData().OrderBy(p => p.Id + "." + p.Version).ToList();
+                Assert.Equal(NbPackages, packagesSubsequentCall.Count);
+
+                for (var i = 0; i < NbPackages; i++)
+                {
+                    // Verify that we're getting the same values for hash and size after invalidating cache (both lists are sorted).
+                    Assert.Equal(packagesFirstCall[i].PackageHash, packagesSubsequentCall[i].PackageHash);
+                    Assert.Equal(packagesFirstCall[i].PackageSize, packagesSubsequentCall[i].PackageSize);
+                }
+
+                // Verify that when and only when hash persisting is turned on, the hash is preserved to disk, 
+                // ensuring the information is preserved when process is recycled.
+                var hashFiles = mockProjectSystem.Object.GetFiles(string.Empty, "*hash", true);
+                Assert.Equal(enablePersistNupkgHash ? NbPackages : 0, hashFiles.Count());
+            }
+
+            // Verify that hashes are always (re)computed when enablePersistNupkgHash is turned off, and at most once per package otherwise.
+            // also verify that Streams are used instead of byte arrays (prone to OOM) to compute hashes.
+            var expectedHashProviderCallCount = enablePersistNupkgHash ? NbPackages : NbPackages*(NbInvalidate + 1);
+            hashProvider.Verify(h => h.CalculateHash(It.IsAny<Stream>()), Times.Exactly(expectedHashProviderCallCount));
+            hashProvider.Verify(h => h.CalculateHash(It.IsAny<byte[]>()), Times.Never);
+        }
+
         [Fact]
         public void ServerPackageRepositoryFindPackage()
         {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "1.0");
             AddPackage(mockProjectSystem, "test2", "1.0");
             AddPackage(mockProjectSystem, "test3", "1.0-alpha");
             AddPackage(mockProjectSystem, "test4", "2.0");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var valid = serverRepository.FindPackage("test", new SemanticVersion("1.0"));
@@ -128,15 +174,13 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "0.9");
             AddPackage(mockProjectSystem, "test", "1.0");
             AddPackage(mockProjectSystem, "test2", "1.0");
             AddPackage(mockProjectSystem, "test3", "1.0-alpha");
             AddPackage(mockProjectSystem, "test4", "2.0");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var packages = serverRepository.GetPackagesWithDerivedData();
@@ -154,14 +198,12 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "2.0-alpha");
             AddPackage(mockProjectSystem, "test", "2.1-alpha");
             AddPackage(mockProjectSystem, "test", "2.2-beta");
             AddPackage(mockProjectSystem, "test", "2.3");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var packages = serverRepository.GetPackagesWithDerivedData();
@@ -177,13 +219,11 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "2.0-alpha");
             AddPackage(mockProjectSystem, "test", "2.1-alpha");
             AddPackage(mockProjectSystem, "test", "2.2-beta");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var packages = serverRepository.GetPackagesWithDerivedData();
@@ -198,13 +238,11 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
             AddPackage(mockProjectSystem, "test", "1.11");
             AddPackage(mockProjectSystem, "test", "1.9");
             AddPackage(mockProjectSystem, "test", "2.0-alpha");
 
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var packages = serverRepository.GetPackagesWithDerivedData();
@@ -230,8 +268,7 @@ namespace NuGet.Test.Server.Infrastructure
             memoryStream.Seek(0, SeekOrigin.Begin);
             mockProjectSystem.Object.AddFile("foo.nupkg");
             mockProjectSystem.Setup(c => c.OpenFile(It.IsAny<string>())).Returns(() => new MemoryStream(memoryStream.ToArray()));
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             // Act
             var packages = serverRepository.GetPackagesWithDerivedData();
@@ -251,10 +288,7 @@ namespace NuGet.Test.Server.Infrastructure
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
-            _packageStreams = new Dictionary<string, MemoryStream>();
-
-            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
-            serverRepository.HashProvider = GetHashProvider();
+            var serverRepository = CreateServerPackageRepository(mockProjectSystem);
 
             var package = CreatePackage("test", "1.0");
 
@@ -278,6 +312,23 @@ namespace NuGet.Test.Server.Infrastructure
             Assert.Empty(getUpdates);
             Assert.Empty(search);
             Assert.NotEmpty(source);
+        }
+
+        private static ServerPackageRepository CreateServerPackageRepository(Mock<MockProjectSystem> mockProjectSystem, IHashProvider hashProvider = null, IDictionary<string, bool> settings = null)
+        {
+            Func<string, bool, bool> settingsFunc = null;
+            if (settings != null)
+            {
+                settingsFunc = (key, defaultValue) =>
+                {
+                    bool ret;
+                    return settings.TryGetValue(key, out ret) ? ret : defaultValue;
+                };
+            }
+            return new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, settingsFunc)
+            {
+                HashProvider = hashProvider ?? GetHashProvider().Object
+            };
         }
 
         private static IPackage CreatePackage(string id, string version)
@@ -304,21 +355,16 @@ namespace NuGet.Test.Server.Infrastructure
             var memoryStream = new MemoryStream();
             package.Save(memoryStream);
             memoryStream.Seek(0, SeekOrigin.Begin);
-
-            _packageStreams.Add(name, memoryStream);
-
-            mockProjectSystem.Object.AddFile(name);
-
-            mockProjectSystem.Setup(c => c.OpenFile(It.IsAny<string>())).Returns<string>((s) => new MemoryStream(_packageStreams[s].ToArray()));
+            mockProjectSystem.Object.AddFile(name, memoryStream);
         }
 
-        private static IHashProvider GetHashProvider()
+        private static Mock<IHashProvider> GetHashProvider()
         {
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(c => c.CalculateHash(It.IsAny<byte[]>())).Returns((byte[] value) => value.Select(Invert).ToArray());
             hashProvider.Setup(c => c.CalculateHash(It.IsAny<Stream>())).Returns((Stream value) => value.ReadAllBytes().Select(Invert).ToArray());
 
-            return hashProvider.Object;
+            return hashProvider;
         }
 
         private static byte Invert(byte value)

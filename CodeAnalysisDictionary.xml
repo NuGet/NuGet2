@@ -52,7 +52,7 @@
       <Term CompoundAlternate="WebSite">WebSite</Term>
     </Compound>
     <DiscreteExceptions>
-      <Term></Term>
+      <Term>nuget</Term>
     </DiscreteExceptions>
   </Words>
   <Acronyms>

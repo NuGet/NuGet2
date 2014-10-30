@@ -108,7 +108,7 @@ namespace NuGet.Client.VisualStudio.UI
                     new ResolutionContext()
                     {
                         DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
-                        AllowPrerelease = false
+                        AllowPrerelease = Control.IncludePrerelease
                     });
 
                 // Resolve actions

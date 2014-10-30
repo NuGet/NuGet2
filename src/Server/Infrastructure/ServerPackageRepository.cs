@@ -1,4 +1,6 @@
-﻿using Ninject;
+﻿using System.Text;
+using System.Web;
+using Ninject;
 using NuGet.Resources;
 using NuGet.Server.DataServices;
 using System;
@@ -25,9 +27,12 @@ namespace NuGet.Server.Infrastructure
         private readonly object _lockObj = new object();
         private readonly IFileSystem _fileSystem;
         private readonly IPackagePathResolver _pathResolver;
+        private readonly Func<string, bool, bool> _getSetting;
         private FileSystemWatcher _fileWatcher;
         private readonly string _filter = String.Format(CultureInfo.InvariantCulture, "*{0}", Constants.PackageExtension);
         private bool _monitoringFiles = false;
+        private const string NupkgHashExtension = ".hash";
+        private const string NupkgTempHashExtension = ".thash";
 
         public ServerPackageRepository(string path)
             : this(new DefaultPackagePathResolver(path), new PhysicalFileSystem(path))
@@ -35,7 +40,7 @@ namespace NuGet.Server.Infrastructure
 
         }
 
-        public ServerPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
+        public ServerPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem, Func<string, bool, bool> getSetting = null)
         {
             if (pathResolver == null)
             {
@@ -49,6 +54,7 @@ namespace NuGet.Server.Infrastructure
 
             _fileSystem = fileSystem;
             _pathResolver = pathResolver;
+            _getSetting = getSetting ?? GetBooleanAppSetting;
         }
 
         [Inject]
@@ -179,6 +185,8 @@ namespace NuGet.Server.Infrastructure
                         if (File.Exists(fullPath))
                         {
                             File.SetAttributes(fullPath, File.GetAttributes(fullPath) | FileAttributes.Hidden);
+                            // Delisted files can still be queried, therefore not deleting persisted hashes if present.
+                            // Also, no need to flip hidden attribute on these since only the one from the nupkg is queried.
                         }
                         else
                         {
@@ -188,6 +196,11 @@ namespace NuGet.Server.Infrastructure
                     else
                     {
                         _fileSystem.DeleteFile(fileName);
+                        if (EnablePersistNupkgHash)
+                        {
+                            _fileSystem.DeleteFile(GetHashFile(fileName, false));
+                            _fileSystem.DeleteFile(GetHashFile(fileName, true));
+                        }
                     }
 
                     InvalidatePackages();
@@ -258,12 +271,23 @@ namespace NuGet.Server.Infrastructure
         /// <summary>
         /// Sets the current cache to null so it will be regenerated next time.
         /// </summary>
-        private void InvalidatePackages()
+        public void InvalidatePackages()
         {
             lock (_lockObj)
             {
                 _packages = null;
             }
+        }
+
+        private string GetHashFile(string pathToNupkg, bool isTempFile)
+        {
+            // path_to_nupkg\package.nupkg => path_to_nupkg\package.hash or path_to_nupkg\package.thash
+            // reason for replacing extension instead of appending: elimination potential file-system file name length limits.
+            if (string.IsNullOrEmpty(pathToNupkg))
+            {
+                return pathToNupkg;
+            }
+            return Path.ChangeExtension(pathToNupkg, isTempFile ? NupkgTempHashExtension : NupkgHashExtension);
         }
 
         /// <summary>
@@ -282,66 +306,84 @@ namespace NuGet.Server.Infrastructure
             // get settings
             bool checkFrameworks = EnableFrameworkFiltering;
             bool enableDelisting = EnableDelisting;
+            // we need to save the current context because it's stored in TLS and we're computing hashes on different threads.
+            var context = HttpContext.Current;
 
-            // load and cache all packages
-            Parallel.ForEach(GetPackageFiles(), opts, path =>
+            // load and cache all packages.
+            // Note that we can't pass GetPackageFiles() to Parallel.ForEach() because
+            // the file could be added/deleted from _fileSystem, and if this happens,
+            // we'll get error "Collection was modified; enumeration operation may not execute."
+            // So we have to materialize the IEnumerable into a list first.
+            var packageFiles = GetPackageFiles().ToList();
+
+            Parallel.ForEach(packageFiles, opts, path =>
             {
                 OptimizedZipPackage zip = OpenPackage(path);
 
                 Debug.Assert(zip != null, "Unable to open " + path);
-                if (zip != null)
+                if (zip == null)
                 {
-                    if (enableDelisting)
-                    {
-                        // hidden packages are considered delisted
-                        zip.Listed = !File.GetAttributes(_fileSystem.GetFullPath(path)).HasFlag(FileAttributes.Hidden);
-                    }
-
-                    byte[] hashBytes;
-                    long fileLength;
-                    using (Stream stream = _fileSystem.OpenFile(path))
-                    {
-                        fileLength = stream.Length;
-                        hashBytes = HashProvider.CalculateHash(stream);
-                    }
-
-                    var data = new DerivedPackageData
-                    {
-                        PackageSize = fileLength,
-                        PackageHash = Convert.ToBase64String(hashBytes),
-                        LastUpdated = _fileSystem.GetLastModified(path),
-                        Created = _fileSystem.GetCreated(path),
-                        Path = path,
-                        FullPath = _fileSystem.GetFullPath(path),
-
-                        // default to false, these will be set later
-                        IsAbsoluteLatestVersion = false,
-                        IsLatestVersion = false
-                    };
-
-                    if (checkFrameworks)
-                    {
-                        data.SupportedFrameworks = zip.GetSupportedFrameworks();
-                    }
-
-                    Tuple<IPackage, DerivedPackageData> entry = new Tuple<IPackage, DerivedPackageData>(zip, data);
-
-                    // find the latest versions
-                    string id = zip.Id.ToLowerInvariant();
-
-                    // update with the highest version
-                    absoluteLatest.AddOrUpdate(id, entry, (oldId, oldEntry) => oldEntry.Item1.Version < entry.Item1.Version ? entry : oldEntry);
-
-                    // update latest for release versions
-                    if (zip.IsReleaseVersion())
-                    {
-                        latest.AddOrUpdate(id, entry, (oldId, oldEntry) => oldEntry.Item1.Version < entry.Item1.Version ? entry : oldEntry);
-                    }
-
-                    // add the package to the cache, it should not exist already
-                    Debug.Assert(packages.ContainsKey(zip) == false, "duplicate package added");
-                    packages.AddOrUpdate(zip, entry.Item2, (oldPkg, oldData) => oldData);
+                    return;
                 }
+                if (enableDelisting)
+                {
+                    // hidden packages are considered delisted
+                    zip.Listed = !File.GetAttributes(_fileSystem.GetFullPath(path)).HasFlag(FileAttributes.Hidden);
+                }
+
+                string packageHash = null;
+                long packageSize = 0;
+                string persistedHashFile = EnablePersistNupkgHash ? GetHashFile(path, false) : null;
+                bool hashComputeNeeded = true;
+
+                ReadHashFile(context, path, persistedHashFile, ref packageSize, ref packageHash, ref hashComputeNeeded);
+
+                if (hashComputeNeeded)
+                {
+                    using (var stream = _fileSystem.OpenFile(path))
+                    {
+                        packageSize = stream.Length;
+                        packageHash = Convert.ToBase64String(HashProvider.CalculateHash(stream));
+                    }
+                    WriteHashFile(context, path, persistedHashFile, packageSize, packageHash);
+                }
+
+                var data = new DerivedPackageData
+                {
+                    PackageSize = packageSize,
+                    PackageHash = packageHash,
+                    LastUpdated = _fileSystem.GetLastModified(path),
+                    Created = _fileSystem.GetCreated(path),
+                    Path = path,
+                    FullPath = _fileSystem.GetFullPath(path),
+
+                    // default to false, these will be set later
+                    IsAbsoluteLatestVersion = false,
+                    IsLatestVersion = false
+                };
+
+                if (checkFrameworks)
+                {
+                    data.SupportedFrameworks = zip.GetSupportedFrameworks();
+                }
+
+                var entry = new Tuple<IPackage, DerivedPackageData>(zip, data);
+
+                // find the latest versions
+                string id = zip.Id.ToLowerInvariant();
+
+                // update with the highest version
+                absoluteLatest.AddOrUpdate(id, entry, (oldId, oldEntry) => oldEntry.Item1.Version < entry.Item1.Version ? entry : oldEntry);
+
+                // update latest for release versions
+                if (zip.IsReleaseVersion())
+                {
+                    latest.AddOrUpdate(id, entry, (oldId, oldEntry) => oldEntry.Item1.Version < entry.Item1.Version ? entry : oldEntry);
+                }
+
+                // add the package to the cache, it should not exist already
+                Debug.Assert(packages.ContainsKey(zip) == false, "duplicate package added");
+                packages.AddOrUpdate(zip, entry.Item2, (oldPkg, oldData) => oldData);
             });
 
             // Set additional attributes after visiting all packages
@@ -356,6 +398,75 @@ namespace NuGet.Server.Infrastructure
             }
 
             return packages;
+        }
+
+        private void WriteHashFile(HttpContext context, string nupkgPath, string hashFilePath, long packageSize, string packageHash)
+        {
+            if (hashFilePath == null)
+            {
+                return; // feature not enabled.
+            }
+            try
+            {
+                var tempHashFilePath = GetHashFile(nupkgPath, true);
+                _fileSystem.DeleteFile(tempHashFilePath);
+                _fileSystem.DeleteFile(hashFilePath);
+
+                var content = new StringBuilder();
+                content.AppendLine(packageSize.ToString(CultureInfo.InvariantCulture));
+                content.AppendLine(packageHash);
+
+                using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content.ToString())))
+                {
+                    _fileSystem.AddFile(tempHashFilePath, stream);
+                }
+                // move temp file to official location when previous operation completed successfully to minimize impact of potential errors (ex: machine crash in the middle of saving the file).
+                _fileSystem.MoveFile(tempHashFilePath, hashFilePath);
+            }
+            catch (Exception e)
+            {
+                // Hashing persistence is a perf optimization feature; we chose to degrade perf over degrading functionality in case of failure.
+                Log(context, string.Format("Unable to create hash file '{0}'.", hashFilePath), e);
+            }
+        }
+
+        private void ReadHashFile(HttpContext context, string nupkgPath, string hashFilePath, ref long packageSize, ref string packageHash, ref bool hashComputeNeeded)
+        {
+            if (hashFilePath == null)
+            {
+                return; // feature not enabled.
+            }
+            try
+            {
+                if (!_fileSystem.FileExists(hashFilePath) || _fileSystem.GetLastModified(hashFilePath) < _fileSystem.GetLastModified(nupkgPath))
+                {
+                    return; // hash does not exist or is not current.
+                }
+                using (var stream = _fileSystem.OpenFile(hashFilePath))
+                {
+                    var reader = new StreamReader(stream);
+                    packageSize = long.Parse(reader.ReadLine(), CultureInfo.InvariantCulture);
+                    packageHash = reader.ReadLine();
+                }
+                hashComputeNeeded = false;
+            }
+            catch (Exception e)
+            {
+                // Hashing persistence is a perf optimization feature; we chose to degrade perf over degrading functionality in case of failure.
+                Log(context, string.Format("Unable to read hash file '{0}'.", hashFilePath), e);
+            }
+        }
+
+        private static void Log(HttpContext context, string message, Exception innerException)
+        {
+            try
+            {
+                // Elmah.ErrorSignal.FromContext(context).Raise(new Exception(message, innerException));                
+            }
+            catch
+            {
+                // best effort
+            }
         }
 
         private OptimizedZipPackage OpenPackage(string path)
@@ -385,7 +496,7 @@ namespace NuGet.Server.Infrastructure
             // skip invalid paths
             if (_fileWatcher == null && !String.IsNullOrEmpty(Source) && Directory.Exists(Source))
             {
-                _fileWatcher = new FileSystemWatcher(_fileSystem.Root);
+                _fileWatcher = new FileSystemWatcher(Source);
                 _fileWatcher.Filter = _filter;
                 _fileWatcher.IncludeSubdirectories = false;
 
@@ -416,33 +527,44 @@ namespace NuGet.Server.Infrastructure
         private void FileChanged(object sender, FileSystemEventArgs e)
         {
             // invalidate the cache when a nupkg in the root folder changes
+            // TODO: invalidating *all* packages for every nupkg change under this folder seems more expensive than it should.
+            // Recommend using e.FullPath to figure out which nupkgs need to be (re)computed.
             InvalidatePackages();
         }
 
-        private static bool AllowOverrideExistingPackageOnPush
+        private bool AllowOverrideExistingPackageOnPush
         {
             get
             {
                 // If the setting is misconfigured, treat it as success (backwards compatibility).
-                return GetBooleanAppSetting("allowOverrideExistingPackageOnPush", true);
+                return _getSetting("allowOverrideExistingPackageOnPush", true);
             }
         }
 
-        private static bool EnableDelisting
+        private bool EnableDelisting
         {
             get
             {
                 // If the setting is misconfigured, treat it as off (backwards compatibility).
-                return GetBooleanAppSetting("enableDelisting", false);
+                return _getSetting("enableDelisting", false);
             }
         }
 
-        private static bool EnableFrameworkFiltering
+        private bool EnableFrameworkFiltering
         {
             get
             {
                 // If the setting is misconfigured, treat it as off (backwards compatibility).
-                return GetBooleanAppSetting("enableFrameworkFiltering", false);
+                return _getSetting("enableFrameworkFiltering", false);
+            }
+        }
+
+        private bool EnablePersistNupkgHash
+        {
+            get
+            {
+                // If the setting is misconfigured, treat it as off (backwards compatibility).
+                return _getSetting("enablePersistNupkgHash", false);
             }
         }
 
