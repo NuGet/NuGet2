@@ -47,13 +47,14 @@ namespace NuGet.Resolution
             {
                 resolver.AddOperation(
                     operation,
-                    await CreateVirtualPackage(packageIdentity.Id, packageIdentity.Version),
-                    new CoreInteropProjectManager(project, _source));
+                    packageIdentity,
+                    project,
+                    _source);
             }
 
             // Resolve actions!
-            var actions = await Task.Factory.StartNew(() => resolver.ResolveActions());
-
+            var actions = await resolver.ResolveActionsAsync();
+            
             // Identify update operations so we can mark them as such.
             foreach (var group in actions.GroupBy(c => c.PackageIdentity.Id))
             {

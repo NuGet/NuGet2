@@ -181,6 +181,7 @@ namespace NuGet.Versioning
             return result;
         }
 
+        private static Lazy<IVersionComparer> defaultInstance = new Lazy<IVersionComparer>(() => new VersionComparer(VersionComparison.Default));
         /// <summary>
         /// A default comparer that compares metadata as strings.
         /// </summary>
@@ -188,10 +189,11 @@ namespace NuGet.Versioning
         {
             get
             {
-                return new VersionComparer(VersionComparison.Default);
+                return defaultInstance.Value;
             }
         }
 
+        private static Lazy<IVersionComparer> versionInstance = new Lazy<IVersionComparer>(() => new VersionComparer(VersionComparison.Version));
         /// <summary>
         /// A comparer that uses only the version numbers.
         /// </summary>
@@ -199,10 +201,11 @@ namespace NuGet.Versioning
         {
             get
             {
-                return new VersionComparer(VersionComparison.Version);
+                return versionInstance.Value;
             }
         }
 
+        private static Lazy<IVersionComparer> versionReleaseInstance = new Lazy<IVersionComparer>(() => new VersionComparer(VersionComparison.VersionRelease));
         /// <summary>
         /// Compares versions without comparing the metadata.
         /// </summary>
@@ -210,10 +213,11 @@ namespace NuGet.Versioning
         {
             get
             {
-                return new VersionComparer(VersionComparison.VersionRelease);
+                return versionReleaseInstance.Value;
             }
         }
 
+        private static Lazy<IVersionComparer> versionReleaseMetadataInstance = new Lazy<IVersionComparer>(() => new VersionComparer(VersionComparison.VersionReleaseMetadata));
         /// <summary>
         /// A version comparer that follows SemVer 2.0.0 rules.
         /// </summary>
@@ -221,7 +225,7 @@ namespace NuGet.Versioning
         {
             get
             {
-                return new VersionComparer(VersionComparison.VersionReleaseMetadata);
+                return versionReleaseMetadataInstance.Value;
             }
         }
 
