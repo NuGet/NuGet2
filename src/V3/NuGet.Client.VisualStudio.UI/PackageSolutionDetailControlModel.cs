@@ -65,6 +65,16 @@ namespace NuGet.Client.VisualStudio.UI
         protected override void OnSelectedVersionChanged()
         {
             CreateProjectList();
+
+            UiDetailedPackage selectedPackage = null;
+            if (_allPackages.TryGetValue(SelectedVersion.Version, out selectedPackage))
+            {
+                Package = selectedPackage;
+            }
+            else
+            {
+                Package = null;
+            }
         }
 
         private void CreateVersions()

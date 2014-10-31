@@ -24,6 +24,7 @@ if exist %nugetmsbuildpathtmp% set nugetmsbuildpath=%nugetmsbuildpathtmp%
 set nugetmsbuildpathtmp="%ProgramFiles(x86)%\MSBuild\14.0\bin\msbuild"
 if exist %nugetmsbuildpathtmp% set nugetmsbuildpath=%nugetmsbuildpathtmp%
 
-set EnableNuGetPackageRestore=true 
+set EnableNuGetPackageRestore=true
+lib\nuget.exe restore
 %nugetmsbuildpath% Build\Build.proj /p:Configuration="%config%" /p:Platform="Any CPU" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Detailed /nr:false 
 ENDLOCAL

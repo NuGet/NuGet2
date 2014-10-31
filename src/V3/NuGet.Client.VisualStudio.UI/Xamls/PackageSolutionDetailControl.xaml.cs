@@ -119,12 +119,24 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    Window.GetWindow(Control),
-                    ex.Message,
-                    Resx.Resources.WindowTitle_Error,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                var controlWindow = Window.GetWindow(Control);
+                if (controlWindow != null)
+                {
+                    MessageBox.Show(
+                        controlWindow,
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
             finally
             {

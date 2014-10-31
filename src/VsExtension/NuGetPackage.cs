@@ -422,7 +422,8 @@ namespace NuGet.Tools
                 {
                     var packageManagerWindowPane = (PackageManagerWindowPane)docView;
                     var target = packageManagerWindowPane.Model.Target as VsProject;
-                    if (target != null && target.DteProject == project)
+                    if (target != null && 
+                        String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
                     {
                         return windowFrame;
                     }

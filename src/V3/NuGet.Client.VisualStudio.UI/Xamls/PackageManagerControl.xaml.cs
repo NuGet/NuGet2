@@ -24,6 +24,11 @@ namespace NuGet.Client.VisualStudio.UI
     {
         private const int PageSize = 10;
 
+        // Copied from file Constants.cs in NuGet.Core:
+        // This is temporary until we fix the gallery to have proper first class support for this.
+        // The magic unpublished date is 1900-01-01T00:00:00
+        public static readonly DateTimeOffset Unpublished = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.FromHours(-8));
+
         private bool _initialized;
 
         // used to prevent starting new search when we update the package sources
@@ -342,11 +347,21 @@ namespace NuGet.Client.VisualStudio.UI
                     var detailedPackage = new UiDetailedPackage();
                     detailedPackage.Id = version.Value<string>(Properties.PackageId);
                     detailedPackage.Version = NuGetVersion.Parse(version.Value<string>(Properties.Version));
-
                     if (detailedPackage.Version.IsPrerelease && !_option.IncludePrerelease)
                     {
                         // don't include prerelease version if includePrerelease is false
                         continue;
+                    }
+
+                    string publishedStr = version.Value<string>(Properties.Published);
+                    if (!String.IsNullOrEmpty(publishedStr))
+                    {
+                        detailedPackage.Published = DateTime.Parse(publishedStr);
+                        if (detailedPackage.Published <= Unpublished)
+                        {
+                            // don't include unlisted package
+                            continue;
+                        }
                     }
 
                     detailedPackage.Summary = version.Value<string>(Properties.Summary);
@@ -360,11 +375,6 @@ namespace NuGet.Client.VisualStudio.UI
                     detailedPackage.DownloadCount = version.Value<int>(Properties.DownloadCount);
                     detailedPackage.DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj));
 
-                    string publishedStr = version.Value<string>(Properties.Published);
-                    if (!String.IsNullOrEmpty(publishedStr))
-                    {
-                        detailedPackage.Published = DateTime.Parse(publishedStr);
-                    }
                     detailedPackage.HasDependencies = detailedPackage.DependencySets.Any(
                         set => set.Dependencies != null && set.Dependencies.Count > 0);
 
