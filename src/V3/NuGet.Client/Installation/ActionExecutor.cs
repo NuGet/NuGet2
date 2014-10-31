@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
@@ -34,6 +36,8 @@ namespace NuGet.Client.Installation
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
+
+            ExceptionDispatchInfo capturedException = null;
             try
             {
                 foreach (var action in actions)
@@ -59,15 +63,20 @@ namespace NuGet.Client.Installation
                     }
                 }
             }
-            catch
+            catch (Exception ex)
+            {
+                capturedException = ExceptionDispatchInfo.Capture(ex);
+            }
+
+            if (capturedException != null)
             {
                 // Roll back the actions and rethrow
-                Rollback(executedActions, logger);
-                throw;
+                await Rollback(executedActions, logger);
+                capturedException.Throw();
             }
         }
 
-        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)
+        protected virtual async Task Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)
         {
             if (executedActions.Count > 0)
             {
@@ -93,7 +102,7 @@ namespace NuGet.Client.Installation
                         "[{0}] Executing action: {1}",
                         action.PackageIdentity,
                         action.ToString());
-                    handler.Rollback(action, logger).Wait();
+                    await handler.Rollback(action, logger);
                 }
             }
         }

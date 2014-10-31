@@ -8,6 +8,11 @@ using System.Runtime.Versioning;
 using System.Xml.Linq;
 using NuGet.Resources;
 
+#if VS14
+using Microsoft.VisualStudio.ProjectSystem.Interop;
+using System.Threading;
+#endif
+
 namespace NuGet
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
@@ -127,23 +132,77 @@ namespace NuGet
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Error caused by conditional compilation")]
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "package", Justification = "Error caused by conditional compilation")]
+        void AddPackageReferenceToNuGetAwareProject(IPackage package)
+        {
+#if VS14
+            var nugetAwareProject = Project as INuGetPackageManager;
+            var args = new Dictionary<string, object>();
+            using (var cts = new CancellationTokenSource())
+            {
+                var packageSupportedFrameworks = package.GetSupportedFrameworks();
+                var projectFrameworks = nugetAwareProject.GetSupportedFrameworksAsync(cts.Token).Result;
+                args["Frameworks"] = projectFrameworks.Where(
+                    projectFramework =>
+                        NuGet.VersionUtility.IsCompatible(
+                            projectFramework,
+                            packageSupportedFrameworks)).ToArray();
+                var task = nugetAwareProject.InstallPackageAsync(
+                    new NuGetPackageMoniker
+                    {
+                        Id = package.Id,
+                        Version = package.Version.ToString()
+                    },
+                    args,
+                    logger: null,
+                    progress: null,
+                    cancellationToken: cts.Token);
+                task.Wait();
+                return;
+            }
+#else
+            // no-op
+#endif
+        }
+
+        // Returns a value indicating if the Project is a nuget aware project.
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Error caused by conditional compilation")]
+        private bool IsNuGetAwareProject()
+        {
+#if VS14
+            var nugetAwareProject = Project as INuGetPackageManager;
+            return nugetAwareProject != null;
+
+#else
+            return false;
+#endif
+        }
+
         protected void AddPackageReferenceToProject(IPackage package)
         {
             string packageFullName = package.GetFullName();
             Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginAddPackageReference, packageFullName, Project.ProjectName);
 
-            PackageOperationEventArgs args = CreateOperation(package);
-            OnPackageReferenceAdding(args);
-
-            if (args.Cancel)
+            if (IsNuGetAwareProject())
             {
-                return;
+                AddPackageReferenceToNuGetAwareProject(package);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, packageFullName, Project.ProjectName);
             }
-            
-            ExtractPackageFilesToProject(package);
+            else
+            {
+                PackageOperationEventArgs args = CreateOperation(package);
+                OnPackageReferenceAdding(args);
 
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, packageFullName, Project.ProjectName);
-            OnPackageReferenceAdded(args);
+                if (args.Cancel)
+                {
+                    return;
+                }
+
+                ExtractPackageFilesToProject(package);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, packageFullName, Project.ProjectName);
+                OnPackageReferenceAdded(args);
+            }            
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
@@ -281,9 +340,46 @@ namespace NuGet
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Error caused by conditional compilation")]
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "package", Justification = "Error caused by conditional compilation")]
+        private void RemovePackageReferenceFromNuGetAwareProject(IPackage package)
+        {
+#if VS14
+            var nugetAwareProject = Project as INuGetPackageManager;
+            string packageFullName = package.GetFullName();
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginRemovePackageReference, packageFullName, Project.ProjectName);
+
+            var args = new Dictionary<string, object>();
+            using (var cts = new CancellationTokenSource())
+            {
+                var task = nugetAwareProject.UninstallPackageAsync(
+                    new NuGetPackageMoniker
+                    {
+                        Id = package.Id,
+                        Version = package.Version.ToString()
+                    },
+                    args,
+                    logger: null,
+                    progress: null,
+                    cancellationToken: cts.Token);
+                task.Wait();
+            }
+
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
+#else
+            // no-op
+#endif
+        }
+
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void RemovePackageReferenceFromProject(IPackage package)
         {
+            if (IsNuGetAwareProject())
+            {
+                RemovePackageReferenceFromNuGetAwareProject(package);
+                return;
+            }
+
             string packageFullName = package.GetFullName();
             Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginRemovePackageReference, packageFullName, Project.ProjectName);
 
