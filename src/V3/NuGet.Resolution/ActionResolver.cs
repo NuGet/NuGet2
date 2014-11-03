@@ -10,7 +10,7 @@ using NuGet.Client.Installation;
 using NuGet.Client.Interop;
 using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
-using OldResolver = NuGet.Resolver.ActionResolver;
+//using OldResolver = NuGet.Resolver.ActionResolver;
 using NewResolver = NuGet.Resolution.Resolver;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 using NuGet.Client;
@@ -36,7 +36,7 @@ namespace NuGet.Resolution
             Solution solution)
         {
             // Construct the Action Resolver
-            var resolver = new NewResolver();
+            var resolver = new NewResolver(operation, packageIdentity, _source);
 
             // Apply context settings
             ApplyContext(resolver);
@@ -45,11 +45,7 @@ namespace NuGet.Resolution
             NuGetTraceSources.ActionResolver.Verbose("resolving", "Resolving {0} of {1} {2}", operation.ToString(), packageIdentity.Id, packageIdentity.Version.ToNormalizedString());
             foreach (var project in targetedProjects)
             {
-                resolver.AddOperation(
-                    operation,
-                    packageIdentity,
-                    project,
-                    _source);
+                resolver.AddOperationTarget(project);
             }
 
             // Resolve actions!

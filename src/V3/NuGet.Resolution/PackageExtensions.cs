@@ -34,6 +34,12 @@ namespace NuGet.Resolution
             return NuGetVersion.Parse(package.GetVersionAsString());
         }
 
+        /// <summary>
+        /// Extension method to extract the dependency for a given package id
+        /// </summary>
+        /// <param name="package">The package object to inspect.</param>
+        /// <param name="id">The dependency id to look for.</param>
+        /// <returns>The VersionRange for the dependency.</returns>
         public static VersionRange FindDependencyRange(this JObject package, string id)
         {
             var dependencies = package.GetDependencies();
@@ -51,7 +57,7 @@ namespace NuGet.Resolution
             string rangeString = dependency.Value<string>(Properties.Range);
             if (string.IsNullOrEmpty(rangeString))
             {
-                return null;
+                return VersionRange.Parse("0.0"); //Any version allowed
             }
 
             VersionRange range = null;
