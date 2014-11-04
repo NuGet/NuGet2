@@ -55,7 +55,7 @@ namespace NuGet
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version)
         {
-            // Default allow pre release versions to true here because the caller typically wants to find all packages in this scenario for e.g when checking if a 
+            // Default allow pre release versions to true here because the caller typically wants to find all packages in this scenario for e.g when checking if a
             // a package is already installed in the local repository. The same applies to allowUnlisted.
             return FindPackage(repository, packageId, version, NullConstraintProvider.Instance, allowPrereleaseVersions: true, allowUnlisted: true);
         }
@@ -163,7 +163,6 @@ namespace NuGet
             {
                 return FindPackages(repository, packageIds, GetFilterExpression);
             }
-
         }
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
@@ -208,8 +207,8 @@ namespace NuGet
         /// and return the full list of packages.
         /// </summary>
         private static IEnumerable<IPackage> FindPackages<T>(
-            this IPackageRepository repository, 
-            IEnumerable<T> items, 
+            this IPackageRepository repository,
+            IEnumerable<T> items,
             Func<IEnumerable<T>, Expression<Func<IPackage, bool>>> filterSelector)
         {
             const int batchSize = 10;
@@ -324,10 +323,6 @@ namespace NuGet
                 .GetPackages()
                 .Find(searchTerm)
                 .FilterByPrerelease(allowPrereleaseVersions)
-                .OrderBy(p => p.Id)
-                .ThenByDescending(p => p.Version)
-                .GroupBy(p => p.Id)
-                .Select(g => g.First())
                 .AsQueryable();
             return result;
         }
@@ -382,7 +377,7 @@ namespace NuGet
                 // pick among Listed packages first
                 IPackage listedSelectedPackage = ResolveDependencyCore(
                     candidates.Where(PackageExtensions.IsListed),
-                    dependency, 
+                    dependency,
                     dependencyVersion);
                 if (listedSelectedPackage != null)
                 {
@@ -394,17 +389,17 @@ namespace NuGet
         }
 
         /// <summary>
-        /// From the list of packages <paramref name="packages"/>, selects the package that best 
+        /// From the list of packages <paramref name="packages"/>, selects the package that best
         /// matches the <paramref name="dependency"/>.
         /// </summary>
         /// <param name="packages">The list of packages.</param>
         /// <param name="dependency">The dependency used to select package from the list.</param>
-        /// <param name="dependencyVersion">Indicates the method used to select dependency. 
+        /// <param name="dependencyVersion">Indicates the method used to select dependency.
         /// Applicable only when dependency.VersionSpec is not null.</param>
         /// <returns>The selected package.</returns>
         private static IPackage ResolveDependencyCore(
-            IEnumerable<IPackage> packages, 
-            PackageDependency dependency, 
+            IEnumerable<IPackage> packages,
+            PackageDependency dependency,
             DependencyVersion dependencyVersion)
         {
             // If version info was specified then use it
@@ -422,7 +417,7 @@ namespace NuGet
         }
 
         /// <summary>
-        /// Returns updates for packages from the repository 
+        /// Returns updates for packages from the repository
         /// </summary>
         /// <param name="repository">The repository to search for updates</param>
         /// <param name="packages">Packages to look for updates</param>
@@ -462,11 +457,11 @@ namespace NuGet
             }
 
             IList<IVersionSpec> versionConstraintList;
-            if (versionConstraints == null) 
+            if (versionConstraints == null)
             {
                 versionConstraintList = new IVersionSpec[packageList.Count];
             }
-            else 
+            else
             {
                 versionConstraintList = versionConstraints.ToList();
             }
@@ -527,7 +522,6 @@ namespace NuGet
             IEnumerable<IPackageName> packages,
             bool includePrerelease)
         {
-
             var query = FindPackages(repository, packages, GetFilterExpression);
             if (!includePrerelease)
             {
@@ -595,14 +589,14 @@ namespace NuGet
         }
 
         /// <summary>
-        /// Selects the dependency package from the list of candidate packages 
+        /// Selects the dependency package from the list of candidate packages
         /// according to <paramref name="dependencyVersion"/>.
         /// </summary>
         /// <param name="packages">The list of candidate packages.</param>
-        /// <param name="dependencyVersion">The rule used to select the package from 
+        /// <param name="dependencyVersion">The rule used to select the package from
         /// <paramref name="packages"/> </param>
         /// <returns>The selected package.</returns>
-        /// <remarks>Precondition: <paramref name="packages"/> are ordered by ascending version.</remarks>        
+        /// <remarks>Precondition: <paramref name="packages"/> are ordered by ascending version.</remarks>
         internal static IPackage SelectDependency(this IEnumerable<IPackage> packages, DependencyVersion dependencyVersion)
         {
             if (packages == null || !packages.Any())
@@ -637,7 +631,7 @@ namespace NuGet
                 return (from p in groups.First()
                         orderby p.Version descending
                         select p).FirstOrDefault();
-            }            
+            }
 
             throw new ArgumentOutOfRangeException("dependencyVersion");
         }

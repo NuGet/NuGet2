@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.Versioning;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using JsonLD.Core;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
@@ -28,7 +23,7 @@ namespace NuGet.Client.Interop
         {
             _source = source;
             _repository = repository;
-            
+
             // TODO: Get context from current UI activity (PowerShell, Dialog, etc.)
             _userAgent = UserAgentUtil.GetUserAgent("NuGet.Client.Interop", host);
 
@@ -49,22 +44,37 @@ namespace NuGet.Client.Interop
             _lprepo = _repository as LocalPackageRepository;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
         {
             NuGetTraceSources.V2SourceRepository.Verbose("search", "Searching for '{0}'", searchTerm);
-            return Task.Factory.StartNew(() => {
+            return Task.Factory.StartNew(() =>
+            {
                 var query = _repository.Search(
                     searchTerm,
                     filters.SupportedFrameworks.Select(fx => fx.FullName),
-                    filters.IncludePrerelease);
+                    filters.IncludePrerelease);                
 
                 // V2 sometimes requires that we also use an OData filter for latest/latest prerelease version
-                if(filters.IncludePrerelease) {
+                if (filters.IncludePrerelease)
+                {
                     query = query.Where(p => p.IsAbsoluteLatestVersion);
-                } else {
+                }
+                else
+                {
                     query = query.Where(p => p.IsLatestVersion);
                 }
-                
+
+                if (_repository is LocalPackageRepository)
+                {
+                    // if the repository is a local repo, then query contains all versions of packages.
+                    // we need to explicitly select the latest version.
+                    query = query.OrderBy(p => p.Id)
+                        .ThenByDescending(p => p.Version)
+                        .GroupBy(p => p.Id)
+                        .Select(g => g.First());
+                }
+
                 // Now apply skip and take and the rest of the party
                 return (IEnumerable<JObject>)query
                     .Skip(skip)
@@ -74,7 +84,7 @@ namespace NuGet.Client.Interop
                     .AsOrdered()
                     .Select(p => CreatePackageSearchResult(p))
                     .ToList();
-             } , cancellationToken);
+            }, cancellationToken);
         }
 
         private JObject CreatePackageSearchResult(IPackage package)

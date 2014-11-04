@@ -353,18 +353,18 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("aspnet50", "5.0", "ASP.Net")]
-        [InlineData("aspnetcore50", "5.0", "ASP.NetCore")]
-        [InlineData("asp.net50", "5.0", "ASP.Net")]
-        [InlineData("asp.netcore50", "5.0", "ASP.NetCore")]
-        [InlineData("ASPNET50", "5.0", "ASP.Net")]
-        [InlineData("ASPNETCORE50", "5.0", "ASP.NetCore")]
-        [InlineData("ASP.NET50", "5.0", "ASP.Net")]
-        [InlineData("ASP.NETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData("aspnet50", "5.0", "ASP.NET")]
+        [InlineData("aspnetcore50", "5.0", "ASP.NETCore")]
+        [InlineData("asp.net50", "5.0", "ASP.NET")]
+        [InlineData("asp.netcore50", "5.0", "ASP.NETCore")]
+        [InlineData("ASPNET50", "5.0", "ASP.NET")]
+        [InlineData("ASPNETCORE50", "5.0", "ASP.NETCore")]
+        [InlineData("ASP.NET50", "5.0", "ASP.NET")]
+        [InlineData("ASP.NETCORE50", "5.0", "ASP.NETCore")]
 
         // 5.1 doesn't exist (at least at time of writing), just verifying the logic
-        [InlineData("aspnet51", "5.1", "ASP.Net")]
-        [InlineData("aspnetcore51", "5.1", "ASP.NetCore")]
+        [InlineData("aspnet51", "5.1", "ASP.NET")]
+        [InlineData("aspnetcore51", "5.1", "ASP.NETCore")]
         public void ParseFrameworkNameNormalizesSupportedASPNetFrameworkNames(string shortName, string version, string identifier)
         {
             // Arrange
@@ -575,8 +575,8 @@ namespace NuGet.Test
         [InlineData(@"SL20\sub1\sub2\foo.dll", "Silverlight", "2.0")]
         [InlineData(@"net\foo.dll", ".NETFramework", "")]
         [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
-        [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
-        [InlineData(@"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
+        [InlineData(@"aspnet50\foo.dll", "ASP.NET", "5.0")]
+        [InlineData(@"aspnetcore50\foo.dll", "ASP.NETCore", "5.0")]
         public void ParseFrameworkFolderName(string path, string identifier, string version)
         {
             // Arrange
