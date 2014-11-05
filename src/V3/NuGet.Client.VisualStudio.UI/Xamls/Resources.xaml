@@ -2,7 +2,7 @@
                     xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
                     xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="../Resources/packageicon.png" />    
+    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="../Resources/packageicon.png" />
 
     <Tools:PackageStatusToInstallImageConverter x:Key="PackageStatusToInstallImageVis" />
     <Tools:PackageStatusToUpdateImageConverter x:Key="PackageStatusToUpdateImageConverter" />
@@ -17,7 +17,7 @@
         <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="32" />
         <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
-        
+
         <!--
         <Style.Triggers>
             <EventTrigger RoutedEvent="ImageFailed">
@@ -35,11 +35,11 @@
     <DataTemplate DataType="{x:Type Tools:UiPackageDependency}">
         <TextBlock Text="{Binding}" />
     </DataTemplate>
-    
+
     <DataTemplate DataType="{x:Type Tools:UiSearchResultPackage}">
         <Border
             BorderThickness="0,0,0,1"
-            BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}" 
+            BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
             Padding="0,16">
             <Grid Margin="24,0">
                 <Grid.ColumnDefinitions>
@@ -47,12 +47,27 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Image
-                    Grid.Column="0"
+
+                <Grid Grid.Column="0" VerticalAlignment="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Image
+                    Grid.Row="0"
                     Source="{Binding IconUrl}"
                     Style="{StaticResource PackageIconStyle}"
                     VerticalAlignment="Top"
                     Margin="0,0,16,0" />
+
+                    <TextBlock Grid.Row="1"
+                    Text="{x:Static resx:Resources.Label_PackagePrerelease}"
+                    FontStyle="Italic"
+                    FontSize="9"
+                    Margin="0,4"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding Version.IsPrerelease, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
 
                 <Grid Grid.Column="1" VerticalAlignment="Top">
                     <Grid.RowDefinitions>
@@ -79,7 +94,7 @@
                     Width="16"
                     Height="16"
                     VerticalAlignment="Top"
-                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}" 
+                    Visibility="{Binding Status, Converter={StaticResource PackageStatusToInstallImageVis}}"
                     ToolTip="{x:Static resx:Resources.Tooltip_PackageInstalled}" />
                 <Tools:UpdateAvailableIndicator
                     Name="_updateMark"

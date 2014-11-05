@@ -439,6 +439,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Prerelease.
+        /// </summary>
+        public static string Label_PackagePrerelease {
+            get {
+                return ResourceManager.GetString("Label_PackagePrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select which projects to apply changes to:.
         /// </summary>
         public static string Label_Projects {
