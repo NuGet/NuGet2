@@ -93,6 +93,7 @@
     <Compile Include="Converters\EmptyEnumerableToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
     <Compile Include="FileConflictActionItem.cs" />
+    <Compile Include="IDetailControl.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
@@ -133,6 +134,9 @@
     <Compile Include="PackageManagerControlCommands.cs" />
     <Compile Include="PackageManagerModel.cs" />
     <Compile Include="Converters\PackageStatusToInstallImageConverter.cs" />
+    <Compile Include="Xamls\PackageMetadataControl.xaml.cs">
+      <DependentUpon>PackageMetadataControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\PackageSolutionDetailControl.xaml.cs">
       <DependentUpon>PackageSolutionDetailControl.xaml</DependentUpon>
     </Compile>
@@ -187,6 +191,10 @@
     <Page Include="Xamls\PackageManagerControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Xamls\PackageMetadataControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xamls\PackageSolutionDetailControl.xaml">
       <SubType>Designer</SubType>

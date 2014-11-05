@@ -1,24 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using NuGet.Client.Resolution;
-using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
-using System.Diagnostics;
-using System.Threading;
+using NuGet.Client.Resolution;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    public partial class PackageSolutionDetailControl : UserControl
+    public partial class PackageSolutionDetailControl : UserControl, IDetailControl
     {
         public PackageManagerControl Control { get; set; }
-        
+
         private Solution Solution
         {
             get
@@ -57,7 +57,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private async Task<IEnumerable<PackageAction>> ResolveActions()
+        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync()
         {
             var model = (PackageSolutionDetailControlModel)DataContext;
             var repo = Control.CreateActiveRepository();
@@ -87,87 +87,32 @@ namespace NuGet.Client.VisualStudio.UI
                 Solution);
         }
 
-        private async void ActionButtonClicked(object sender, RoutedEventArgs e)
+        public void Refresh()
         {
             var model = (PackageSolutionDetailControlModel)DataContext;
-
-            Control.SetBusy(true);
-            Control.OutputConsole.Clear();
-            var progressDialog = new ProgressDialog(
-                model.SelectedFileConflictAction.Action,
-                Control.OutputConsole);
-            try
+            if (model != null)
             {
-                IEnumerable<PackageAction> actions = await ResolveActions();
-                
-                // show license agreeement
-                bool acceptLicense = Control.ShowLicenseAgreement(actions);
-                if (!acceptLicense)
-                {
-                    return;
-                }
-
-                var executor = new ActionExecutor();
-                progressDialog.Owner = Window.GetWindow(Control);
-                progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progressDialog.Show();
-
-                await executor.ExecuteActionsAsync(actions, logger: progressDialog, cancelToken: CancellationToken.None);
-
-                Control.UpdatePackageStatus();
                 model.Refresh();
             }
-            catch (Exception ex)
-            {
-                var controlWindow = Window.GetWindow(Control);
-                if (controlWindow != null)
-                {
-                    MessageBox.Show(
-                        controlWindow,
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-            }
-            finally
-            {
-                progressDialog.RequestToClose();
-                Control.SetBusy(false);
-            }
         }
 
-        private async void PreviewButtonClicked(object sender, RoutedEventArgs e)
+        private void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
-            var model = (PackageSolutionDetailControlModel)DataContext;
-
-            Control.SetBusy(true);
-            Control.OutputConsole.Clear();
-            var progressDialog = new ProgressDialog(
-                model.SelectedFileConflictAction.Action,
-                Control.OutputConsole);
-            try
-            {
-                IEnumerable<PackageAction> actions = await ResolveActions();
-                Control.PreviewActions(actions);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                progressDialog.RequestToClose();
-                Control.SetBusy(false);
-            }
+            Control.PerformAction(this);
         }
+
+        private void PreviewButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Control.Preview(this);
+        }
+
+        public FileConflictAction FileConflictAction
+        {
+            get
+            {
+                var model = (PackageSolutionDetailControlModel)DataContext;
+                return model.SelectedFileConflictAction.Action;
+            }
+        }    
     }
 }

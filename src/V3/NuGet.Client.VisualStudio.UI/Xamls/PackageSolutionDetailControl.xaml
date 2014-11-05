@@ -30,10 +30,6 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Icon and Id -->
@@ -125,12 +121,12 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <Button Width="100"
+                    <Button Width="100"
                         HorizontalAlignment="Left"
                         IsEnabled="{Binding Path=ActionEnabled}"
                         Content="{Binding ElementName=_actions,Path=SelectedItem}" Click="ActionButtonClicked"
                         ></Button>
-                <Button Margin="12,0,0,0"
+                    <Button Margin="12,0,0,0"
                         Width="100"
                         IsEnabled="{Binding Path=ActionEnabled}"
                         HorizontalAlignment="Left"
@@ -142,8 +138,7 @@
 
             <!-- installation options -->
             <Expander Grid.Row="3" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                      Visibility="{Binding Path=InstallOptionsVisible,Converter={StaticResource BooleanToVisibilityConverter}}"
-                      >
+                      Visibility="{Binding Path=InstallOptionsVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Expander.Header>
                     <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
                 </Expander.Header>
@@ -176,176 +171,8 @@
                 </Grid>
             </Expander>
 
-            <!-- descriptions -->
-            <StackPanel Grid.Row="4"
-                        Margin="0,8">
-                <TextBlock
-                    Text="{x:Static resx:Resources.Label_Description}"
-                    FontWeight="Bold" />
-                <TextBlock
-                    x:Name="_description"
-                    Margin="0,8,0,0"
-                    TextWrapping="Wrap"
-                    Text="{Binding Path=Package.Description}" />
-            </StackPanel>
-
-            <!-- metadata -->
-            <Grid Grid.Row="5"
-                  Margin="0,8">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <!-- Publisher(s) -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.Owners,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="0" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_Publishers}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.Owners,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Package.Owners}"
-                        Margin="8,8,0,0"
-                        TextWrapping="Wrap"
-                        Grid.Row="0" Grid.Column="1" />
-
-                <!-- Author(s) -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.Authors,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="1" Grid.Column="0"
-                        Margin="0,8,0,0"
-                        FontWeight="Bold"
-                        Text="{x:Static resx:Resources.Label_Authors}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.Authors,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Package.Authors}"
-                        Margin="8,8,0,0"
-                        TextWrapping="Wrap"
-                        Grid.Row="1" Grid.Column="1"></TextBlock>
-
-                <!-- License -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="2" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_License}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.LicenseUrl,Converter={StaticResource NullToVisibilityConverter}}"
-                        TextWrapping="Wrap"
-                        Margin="8,8,0,0"
-                        Grid.Row="2" Grid.Column="1">
-                        <Hyperlink NavigateUri="{Binding Path=Package.LicenseUrl}"
-                                   Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
-                            <Run Text="{Binding Path=Package.LicenseUrl}" />
-                        </Hyperlink>
-                </TextBlock>
-
-                <!-- downloads -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource DownloadCountToVisibilityConverter}}"
-                        Grid.Row="3" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_Downloads}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.DownloadCount,Converter={StaticResource DownloadCountToVisibilityConverter}}"
-                        Text="{Binding Path=Package.DownloadCount}"
-                        Margin="8,8,0,0"
-                        TextWrapping="Wrap"
-                        Grid.Row="3" Grid.Column="1"></TextBlock>
-
-                <!--Date Published -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.Published,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="4" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_DatePublished}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.Published,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Package.Published}"
-                        Margin="8,8,0,0"
-                        TextWrapping="Wrap"
-                        Grid.Row="4" Grid.Column="1"></TextBlock>
-
-                <!-- Project Url -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="5" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_ProjectUrl}" />
-
-                <TextBlock
-                        Visibility="{Binding Path=Package.ProjectUrl,Converter={StaticResource NullToVisibilityConverter}}"
-                        TextWrapping="Wrap"
-                        Margin="8,8,0,0"
-                        Grid.Row="5" Grid.Column="1">
-                        <Hyperlink NavigateUri="{Binding Path=Package.ProjectUrl}"
-                                   Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
-                            <Run Text="{Binding Path=Package.ProjectUrl}" />
-                        </Hyperlink>
-                </TextBlock>
-
-                <!-- Tags -->
-                <TextBlock
-                        Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
-                        Grid.Row="6" Grid.Column="0" FontWeight="Bold"
-                        Margin="0,8,0,0"
-                        Text="{x:Static resx:Resources.Label_Tags}" />
-                <TextBlock
-                        Visibility="{Binding Path=Package.Tags,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Package.Tags}"
-                        Margin="8,8,0,0"
-                        TextWrapping="Wrap"
-                        Grid.Row="6" Grid.Column="1"></TextBlock>
-            </Grid>
-
-            <!-- dependencies -->
-            <StackPanel Grid.Row="6" Margin="0,8">
-                <TextBlock
-                    FontWeight="Bold"
-                    Text="{x:Static resx:Resources.Label_Dependencies}" />
-
-                <ItemsControl
-                    x:Name="_dependencies"
-                    ItemsSource="{Binding Path=Package.DependencySets}"
-                    Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Margin="0,8,0,0">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock
-                                Text="{Binding TargetFramework}" FontWeight="Bold"
-                                Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
-                                <ItemsControl ItemsSource="{Binding Dependencies}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding}"></TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock FontStyle="Italic"
-                                       Text="{x:Static resx:Resources.Text_NoDependencies}"
-                                       Visibility="{Binding Dependencies,Converter={StaticResource EmptyEnumerableToVisibilityConverter}}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <TextBlock
-                    Margin="0,8,0,0"
-                    Visibility="{Binding Path=Package.HasDependencies,Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
-                    FontStyle="Italic"
-                    Text="{x:Static resx:Resources.Text_NoDependencies}" />
-            </StackPanel>
+            <Tools:PackageMetadataControl Grid.Row="4" Margin="0,8,0,0"
+                                   DataContext="{Binding Package}" />
         </Grid>
     </ScrollViewer>
 </UserControl>

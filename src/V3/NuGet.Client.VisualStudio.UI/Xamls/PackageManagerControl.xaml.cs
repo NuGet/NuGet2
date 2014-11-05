@@ -55,11 +55,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public IConsole OutputConsole
-        {
-            get;
-            private set;
-        }
+        private IConsole _outputConsole;
 
         internal IUserInterfaceService UI { get; private set; }
 
@@ -100,7 +96,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             var outputConsoleProvider = ServiceLocator.GetInstance<IOutputConsoleProvider>();
-            OutputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+            _outputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
 
             InitSourceRepoList();
             this.Unloaded += PackageManagerControl_Unloaded;
@@ -213,7 +209,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public void SetBusy(bool busy)
+        private void SetBusy(bool busy)
         {
             if (busy)
             {
@@ -232,18 +228,6 @@ namespace NuGet.Client.VisualStudio.UI
                     _busyControl.Visibility = System.Windows.Visibility.Collapsed;
                     this.IsEnabled = true;
                 }
-            }
-        }
-
-        private void SetPackageListBusy(bool busy)
-        {
-            if (busy)
-            {
-                _listBusyControl.Visibility = System.Windows.Visibility.Visible;
-            }
-            else
-            {
-                _listBusyControl.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
 
@@ -690,7 +674,7 @@ namespace NuGet.Client.VisualStudio.UI
             return true;
         }
 
-        public void PreviewActions(IEnumerable<PackageAction> actions)
+        private void PreviewActions(IEnumerable<PackageAction> actions)
         {
             var w = new PreviewWindow();
             w.DataContext = new PreviewWindowModel(actions, Target);
@@ -698,6 +682,102 @@ namespace NuGet.Client.VisualStudio.UI
             w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             w.ShowDialog();
         }
+
+        // preview user selected action
+        internal async void Preview(IDetailControl detailControl)
+        {
+            SetBusy(true);
+            try
+            {
+                _outputConsole.Clear();
+                var actions = await detailControl.ResolveActionsAsync();
+                PreviewActions(actions);
+            }
+            catch (Exception ex)
+            {
+                var window = Window.GetWindow(this);
+                if (window != null)
+                {
+                    MessageBox.Show(
+                        window,
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                SetBusy(false);
+            }
+        }
+
+
+        // perform the user selected action
+        internal async void PerformAction(IDetailControl detailControl)
+        {
+            SetBusy(true);
+            _outputConsole.Clear();
+            var progressDialog = new ProgressDialog(_outputConsole);
+            progressDialog.Owner = Window.GetWindow(this);
+            progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+            try
+            {
+                var actions = await detailControl.ResolveActionsAsync();
+
+                // show license agreeement
+                bool acceptLicense = ShowLicenseAgreement(actions);
+                if (!acceptLicense)
+                {
+                    return;
+                }
+
+                // Create the executor and execute the actions
+                progressDialog.FileConflictAction = detailControl.FileConflictAction;
+                progressDialog.Show();
+                var executor = new ActionExecutor();
+                await executor.ExecuteActionsAsync(actions, logger: progressDialog, cancelToken: CancellationToken.None);
+
+                UpdatePackageStatus();
+                detailControl.Refresh();
+            }
+            catch (Exception ex)
+            {
+                var controlWindow = Window.GetWindow(this);
+                if (controlWindow != null)
+                {
+                    MessageBox.Show(
+                        controlWindow,
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        ex.Message,
+                        Resx.Resources.WindowTitle_Error,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                progressDialog.RequestToClose();
+                SetBusy(false);
+            }
+        }
+
 
         private void _searchControl_SearchStart(object sender, EventArgs e)
         {

@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using Newtonsoft.Json.Linq;
-using NuGet.Client.Resolution;
-using System.Diagnostics;
-using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
-using System.Threading;
+using NuGet.Client.Resolution;
+using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     /// <summary>
     /// Interaction logic for PackageDetail.xaml
     /// </summary>
-    public partial class PackageDetailControl : UserControl
+    public partial class PackageDetailControl : UserControl, IDetailControl
     {
         public PackageManagerControl Control { get; set; }
 
@@ -64,120 +62,41 @@ namespace NuGet.Client.VisualStudio.UI
             UpdateInstallUninstallButton();
         }
 
-        private async void Preview(PackageActionType action)
+        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync()
         {
-            try
-            {
-                Control.OutputConsole.Clear();
-                var actions = await ResolveActions(action);
-                Control.PreviewActions(actions);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    Window.GetWindow(Control),
-                    ex.Message,
-                    Resx.Resources.WindowTitle_Error,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
-
-        private async Task<IEnumerable<PackageAction>> ResolveActions(PackageActionType action)
-        {
+            PackageActionType action =
+                ((string)_actionButton.Content == Resx.Resources.Action_Install ||
+                (string)_actionButton.Content == Resx.Resources.Action_Update) ?
+                PackageActionType.Install :
+                PackageActionType.Uninstall;
             var packageDetail = (PackageDetailControlModel)DataContext;
 
-            Control.SetBusy(true);
-            try
+            // Create a resolver
+            var repo = Control.CreateActiveRepository();
+            if (action == PackageActionType.Uninstall)
             {
-                // Create a resolver
-                var repo = Control.CreateActiveRepository();
-                if (action == PackageActionType.Uninstall)
-                {
-                    repo = Project.TryGetFeature<SourceRepository>();
-                }
-
-                if (repo == null)
-                {
-                    throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
-                }
-
-                var resolver = new ActionResolver(
-                    repo,
-                    new ResolutionContext()
-                    {
-                        DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
-                        AllowPrerelease = Control.IncludePrerelease
-                    });
-
-                // Resolve actions
-                return await resolver.ResolveActionsAsync(
-                    new PackageIdentity(packageDetail.Package.Id, packageDetail.Package.Version),
-                    action,
-                    new[] { Project },
-                    Project.OwnerSolution);
+                repo = Project.TryGetFeature<SourceRepository>();
             }
-            finally
+
+            if (repo == null)
             {
-                Control.SetBusy(false);
+                throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
             }
-        }
 
-        private async void PerformPackageAction(PackageActionType action)
-        {
-            var model = (PackageDetailControlModel)DataContext;            
-            Control.SetBusy(true);
-            Control.OutputConsole.Clear();
-            var progressDialog = new ProgressDialog(
-                model.SelectedFileConflictAction.Action,
-                Control.OutputConsole);
-            try
-            {
-                var actions = await ResolveActions(action);
-
-                // show license agreeement
-                bool acceptLicense = Control.ShowLicenseAgreement(actions);
-                if (!acceptLicense)
+            var resolver = new ActionResolver(
+                repo,
+                new ResolutionContext()
                 {
-                    return;
-                }
+                    DependencyBehavior = packageDetail.SelectedDependencyBehavior.Behavior,
+                    AllowPrerelease = Control.IncludePrerelease
+                });
 
-                // Create the executor and execute the actions                
-                progressDialog.Owner = Window.GetWindow(Control);
-                progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progressDialog.Show();
-                var executor = new ActionExecutor();
-                await executor.ExecuteActionsAsync(actions, logger: progressDialog, cancelToken: CancellationToken.None);
-
-                Control.UpdatePackageStatus();
-                Refresh();
-            }
-            catch (Exception ex)
-            {
-                var controlWindow = Window.GetWindow(Control);
-                if (controlWindow != null)
-                {
-                    MessageBox.Show(
-                        controlWindow,
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-            }
-            finally
-            {
-                progressDialog.RequestToClose();
-                Control.SetBusy(false);
-            }
+            // Resolve actions
+            return await resolver.ResolveActionsAsync(
+                new PackageIdentity(packageDetail.Package.Id, packageDetail.Package.Version),
+                action,
+                new[] { Project },
+                Project.OwnerSolution);
         }
 
         private void UpdateInstallUninstallButton()
@@ -210,7 +129,7 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         // Refresh the control after package install/uninstall.
-        private void Refresh()
+        public void Refresh()
         {
             var model = (PackageDetailControlModel)DataContext;
             if (model == null)
@@ -239,27 +158,20 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void ActionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if ((string)_actionButton.Content == Resx.Resources.Action_Install ||
-                (string)_actionButton.Content == Resx.Resources.Action_Update)
-            {
-                PerformPackageAction(PackageActionType.Install);
-            }
-            else
-            {
-                PerformPackageAction(PackageActionType.Uninstall);
-            }
+            Control.PerformAction(this);
         }
 
         private void PreviewButtonClicked(object sender, RoutedEventArgs e)
         {
-            if ((string)_actionButton.Content == Resx.Resources.Action_Install ||
-                (string)_actionButton.Content == Resx.Resources.Action_Update)
+            Control.Preview(this);
+        }
+
+        public FileConflictAction FileConflictAction
+        {
+            get
             {
-                Preview(PackageActionType.Install);
-            }
-            else
-            {
-                Preview(PackageActionType.Uninstall);
+                var model = (PackageDetailControlModel)DataContext;
+                return model.SelectedFileConflictAction.Action;
             }
         }
     }

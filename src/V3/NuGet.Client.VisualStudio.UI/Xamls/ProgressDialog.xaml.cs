@@ -17,13 +17,10 @@ namespace NuGet.Client.VisualStudio.UI
         private readonly Dispatcher _uiDispatcher;
         private DateTime _loadedTime;
         private readonly TimeSpan minimumVisibleTime = TimeSpan.FromMilliseconds(500);
-        private FileConflictAction _fileConflictAction;
         private IConsole _outputConsole;
 
-        public ProgressDialog(FileConflictAction fileConflictAction,
-            IConsole outputConsole)
+        public ProgressDialog(IConsole outputConsole)
         {
-            _fileConflictAction = fileConflictAction;
             _uiDispatcher = Dispatcher.CurrentDispatcher;
             _outputConsole = outputConsole;
             this.Loaded += ProgressDialog_Loaded;
@@ -33,6 +30,12 @@ namespace NuGet.Client.VisualStudio.UI
         void ProgressDialog_Loaded(object sender, RoutedEventArgs e)
         {
             _loadedTime = DateTime.UtcNow;
+        }
+
+        public FileConflictAction FileConflictAction
+        {
+            get;
+            set;
         }
 
         public void RequestToClose()
@@ -178,19 +181,19 @@ namespace NuGet.Client.VisualStudio.UI
 
         public FileConflictAction ResolveFileConflict(string message)
         {
-            if (_fileConflictAction == FileConflictAction.PromptUser)
+            if (FileConflictAction == FileConflictAction.PromptUser)
             {
                 var resolution = ShowFileConflictResolution(message);
 
                 if (resolution == FileConflictAction.IgnoreAll ||
                     resolution == FileConflictAction.OverwriteAll)
                 {
-                    _fileConflictAction = resolution;
+                    FileConflictAction = resolution;
                 }
                 return resolution;
             }
 
-            return _fileConflictAction;
+            return FileConflictAction;
         }
     }
 }
