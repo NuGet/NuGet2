@@ -5323,4 +5323,7 @@ nuget update -Self</value>
   <data name="PackageCommandSolutionName_trk" xml:space="preserve">
     <value>The name of the solution that includes the project for which to build the package.</value>
   </data>
+  <data name="PackageCommandDisableRules" xml:space="preserve">
+    <value>';' delimited list of package analysis rules to disable. Specify '-Verbosity Detailed' to view the list of currently enabled rules.</value>
+  </data>
 </root>

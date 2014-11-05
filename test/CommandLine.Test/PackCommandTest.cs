@@ -5,6 +5,7 @@ using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
@@ -347,6 +348,44 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0-alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ",
                 builder.ToString());
+        }
+
+        [Theory]
+        [InlineData(null, true)]
+        [InlineData("", true)]
+        [InlineData("StrictSemanticVersionValidationRule", false)]
+        [InlineData("rule1;rule2;StrictSemanticVersionValidationRule;rule3", false)]
+        [InlineData("rule1;rule2;rule3", true)]
+        public void PackCommandSupportsDisablingRules(string disabledRules, bool isEnabled)
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("A", "1.0-alpha");
+            var builder = new StringBuilder();
+            var console = new Mock<IConsole>();
+
+            console.Setup(c => c.WriteWarning(It.IsAny<string>(), It.IsAny<object[]>())).Callback<string, object[]>((text, p) => builder.AppendFormat(text, p));
+            console.Setup(c => c.WriteWarning(It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback<bool, string, object[]>((b, text, p) => builder.AppendFormat(text, p));
+            var packCommand = new PackCommand
+            {
+                Console = console.Object,
+                Rules = Enumerable.Empty<IPackageRule>()
+            };
+
+            packCommand.DisableRules = disabledRules;
+
+            // Act
+            packCommand.AnalyzePackage(package);
+
+            // Assert
+            if (isEnabled)
+            {
+                Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0-alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ",
+                    builder.ToString());
+            }
+            else
+            {
+                Assert.Equal(string.Empty, builder.ToString());
+            }
         }
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths)

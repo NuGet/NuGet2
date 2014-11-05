@@ -6108,4 +6108,7 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="PackageCommandIrrelevantBaseTargetPath_trk" xml:space="preserve">
     <value>Argument 'BaseTargetPath' is irrelevant when argument 'Build' is specified.</value>
   </data>
+  <data name="PackageCommandEnabledRules" xml:space="preserve">
+    <value>Enabled rules: {0}.</value>
+  </data>
 </root>

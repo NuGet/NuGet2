@@ -1,10 +1,10 @@
+using NuGet.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using NuGet.Common;
 
 namespace NuGet.Commands
 {
@@ -108,6 +108,10 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandSolutionName")]
         public string SolutionName { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandDisableRules")]
+        public string DisableRules { get; set; }
+
+
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
@@ -121,7 +125,7 @@ namespace NuGet.Commands
             {
                 Console.WriteWarning(LocalizedResourceManager.GetString("Option_VerboseDeprecated"));
                 Verbosity = Verbosity.Detailed;
-            }            
+            }
 
             // Get the input file
             string path = GetInputFile();
@@ -155,14 +159,10 @@ namespace NuGet.Commands
                 }
             }
 
-            IPackage package = BuildPackage(path);
-            if (package != null && !NoPackageAnalysis)
-            {
-                AnalyzePackage(package);
-            }
+            BuildPackage(path);
         }
 
-        private IPackage BuildPackage(PackageBuilder builder, string outputPath = null)
+        private void BuildPackage(PackageBuilder builder, bool analyzePackage, string outputPath = null)
         {
             if (!String.IsNullOrEmpty(Version))
             {
@@ -200,9 +200,13 @@ namespace NuGet.Commands
                 PrintVerbose(outputPath);
             }
 
-            Console.WriteLine(LocalizedResourceManager.GetString("PackageCommandSuccess"), outputPath);
+            var package = new OptimizedZipPackage(outputPath);
+            if (analyzePackage)
+            {
+                AnalyzePackage(package);
+            }
 
-            return new OptimizedZipPackage(outputPath);
+            Console.WriteLine(LocalizedResourceManager.GetString("PackageCommandSuccess"), outputPath);
         }
 
         private void PrintVerbose(string outputPath)
@@ -280,21 +284,21 @@ namespace NuGet.Commands
             return Path.Combine(outputDirectory, outputFile);
         }
 
-        private IPackage BuildPackage(string path)
+        private void BuildPackage(string path)
         {
             string extension = Path.GetExtension(path);
 
             if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
             {
-                return BuildFromNuspec(path);
+                BuildFromNuspec(path);
             }
             else
             {
-                return BuildFromProjectFile(path);
+                BuildFromProjectFile(path);
             }
         }
 
-        private IPackage BuildFromNuspec(string path)
+        private void BuildFromNuspec(string path)
         {
             PackageBuilder packageBuilder = CreatePackageBuilderFromNuspec(path);
 
@@ -310,14 +314,12 @@ namespace NuGet.Commands
                 }
             }
 
-            IPackage package = BuildPackage(packageBuilder);
+            BuildPackage(packageBuilder, !NoPackageAnalysis);
 
             if (Symbols)
             {
                 BuildSymbolsPackage(path);
             }
-
-            return package;
         }
 
         private void BuildSymbolsPackage(string path)
@@ -333,7 +335,7 @@ namespace NuGet.Commands
             }
 
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
-            BuildPackage(symbolsBuilder, outputPath);
+            BuildPackage(symbolsBuilder, false, outputPath);
         }
 
         internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files)
@@ -364,7 +366,7 @@ namespace NuGet.Commands
             return new PackageBuilder(path, BasePath, propertyProvider, !ExcludeEmptyDirectories);
         }
 
-        private IPackage BuildFromProjectFile(string path)
+        private void BuildFromProjectFile(string path)
         {
             var factory = new ProjectFactory(path, Properties)
             {
@@ -390,12 +392,12 @@ namespace NuGet.Commands
             PackageBuilder mainPackageBuilder = factory.CreateBuilder(BasePath);
 
             // Build the main package
-            IPackage package = BuildPackage(mainPackageBuilder);
+            BuildPackage(mainPackageBuilder, !NoPackageAnalysis);
 
             // If we're excluding symbols then do nothing else
             if (!Symbols)
             {
-                return package;
+                return;
             }
 
             Console.WriteLine();
@@ -408,19 +410,42 @@ namespace NuGet.Commands
 
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
-            BuildPackage(symbolsBuilder, outputPath);
+            BuildPackage(symbolsBuilder, false, outputPath);
 
-            // this is the real package, not the symbol package
-            return package;
         }
 
         internal void AnalyzePackage(IPackage package)
         {
-            IEnumerable<IPackageRule> packageRules = Rules;
+            var packageRules = new List<IPackageRule>();
+            foreach (var rule in Rules)
+            {
+                // Convert the aggregate DefaultPackageRules into a set of individual rules to allow for filtering.
+                // We cannot modify the DefaultPackageRules.Rules since it may be used by extensions, such as the "analyze" one.
+                if (rule is DefaultPackageRules)
+                {
+                    packageRules.AddRange(DefaultPackageRules.RuleSet);
+                }
+                else
+                {
+                    packageRules.Add(rule);
+                }
+            }
+
             if (!String.IsNullOrEmpty(package.Version.SpecialVersion))
             {
                 // If a package contains a special token, we'll warn users if it does not strictly follow semver guidelines.
-                packageRules = packageRules.Concat(new[] { new StrictSemanticVersionValidationRule() });
+                packageRules.Add(new StrictSemanticVersionValidationRule());
+            }
+
+            if (!String.IsNullOrWhiteSpace(DisableRules))
+            {
+                var disabledRulesList = DisableRules.Split(new [] {';'}, StringSplitOptions.RemoveEmptyEntries);
+                packageRules.RemoveAll(rule => disabledRulesList.Any(disabled => string.Equals(rule.GetType().Name, disabled, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (Verbosity == Verbosity.Detailed)
+            {
+                Console.WriteLine(LocalizedResourceManager.GetString("PackageCommandEnabledRules"), string.Join(";", packageRules.Select(rule => rule.GetType().Name)));
             }
 
             IList<PackageIssue> issues = package.Validate(packageRules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
