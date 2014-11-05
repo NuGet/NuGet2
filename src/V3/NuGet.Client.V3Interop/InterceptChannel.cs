@@ -613,8 +613,6 @@ namespace NuGet.Client.V3Shim
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         private async Task<JObject> FetchJson(InterceptCallContext context, Uri address)
         {
-            string url = address.ToString().ToLowerInvariant();
-
             JObject fromCache = null;
             if (_cache.TryGet(address, out fromCache))
             {

@@ -26,12 +26,12 @@ namespace NuGet
                 FormatMessage(eventName, format, args));
         }
 
-        public static void EnterMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        public static void EnterMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = -1)
         {
             self.Verbose(method, "[{0}] ({1}:{2})", method, file, line);
         }
 
-        public static IDisposable TraceMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        public static IDisposable TraceMethod(this TraceSource self, [CallerMemberName] string method = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = -1)
         {
             DateTime enterTime = DateTime.UtcNow;
             self.Verbose(method, "[{0}] ({1}:{2}) Entered @ {3}", method, file, line, enterTime.ToString("O", CultureInfo.CurrentCulture));

@@ -1,4 +1,11 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- There's no client profile on Mono -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
+        <MonoBuild>true</MonoBuild>
+        <DefineConstants>$(DefineConstants);MONO;</DefineConstants>
+	<VisualStudioVersion>11.0</VisualStudioVersion>
+    </PropertyGroup>    
+
     <!-- Common Build Settings and Configurations -->
     <PropertyGroup>
         <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -97,12 +104,6 @@
         <Coverage>true</Coverage>
         <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants> 
     </PropertyGroup>
-
-    <!-- There's no client profile on Mono -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
-        <MonoBuild>true</MonoBuild>
-        <DefineConstants>$(DefineConstants);MONO;</DefineConstants>
-    </PropertyGroup>    
 
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
 </Project>

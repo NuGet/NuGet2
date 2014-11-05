@@ -76,7 +76,7 @@ namespace NuGet.Client.V3Shim
 
                             using (var httpClient = new System.Net.Http.HttpClient())
                             {
-                                var response = await httpClient.PostAsync(new Uri(_metricServiceBaseUrl.AbsoluteUri.TrimEnd('/') + MetricsDownloadEventMethod), new StringContent(jObject.ToString(), Encoding.UTF8, ContentTypeJson));
+                                await httpClient.PostAsync(new Uri(_metricServiceBaseUrl.AbsoluteUri.TrimEnd('/') + MetricsDownloadEventMethod), new StringContent(jObject.ToString(), Encoding.UTF8, ContentTypeJson));
                             }
                         }
                         else

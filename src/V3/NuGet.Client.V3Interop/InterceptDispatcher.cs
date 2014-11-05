@@ -123,7 +123,7 @@ namespace NuGet.Client.V3Shim
                 }
 
                 // report metrics if the headers exist
-                Task metricsTask = ReportMetrics(context.Request);
+                await ReportMetrics(context.Request);
 
                 string unescapedAbsolutePath = Uri.UnescapeDataString(context.RequestUri.AbsolutePath);
 
