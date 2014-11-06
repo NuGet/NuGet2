@@ -108,6 +108,7 @@
     <Compile Include="Models\UiSearchResultPackage.cs" />
     <Compile Include="Resources\Colors.cs" />
     <Compile Include="VersionForDisplay.cs" />
+    <Compile Include="VsDialogWindow.cs" />
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>

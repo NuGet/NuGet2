@@ -18,7 +18,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class LicenseAcceptanceWindow : Window
+    public partial class LicenseAcceptanceWindow :  VsDialogWindow
     {
         public LicenseAcceptanceWindow()
         {

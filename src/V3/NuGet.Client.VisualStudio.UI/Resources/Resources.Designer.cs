@@ -691,6 +691,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to License Acceptance.
+        /// </summary>
+        public static string WindowTitle_LicenseAcceptance {
+            get {
+                return ResourceManager.GetString("WindowTitle_LicenseAcceptance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Preview.
         /// </summary>
         public static string WindowTitle_Preview {

@@ -330,4 +330,7 @@
   <data name="Text_ErrorDetails" xml:space="preserve">
     <value>Error details</value>
   </data>
+  <data name="WindowTitle_LicenseAcceptance" xml:space="preserve">
+    <value>License Acceptance</value>
+  </data>
 </root>

@@ -678,9 +678,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var w = new PreviewWindow();
             w.DataContext = new PreviewWindowModel(actions, Target);
-            w.Owner = Window.GetWindow(this);
-            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            w.ShowDialog();
+            w.ShowModal();
         }
 
         // preview user selected action

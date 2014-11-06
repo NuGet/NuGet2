@@ -44,9 +44,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var licenseWindow = new LicenseAcceptanceWindow()
             {
-                DataContext = packages,
-                Owner = ownerWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
+                DataContext = packages
             };
 
             using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(

@@ -17,7 +17,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for InstallPreviewWindow.xaml
     /// </summary>
-    public partial class PreviewWindow : Window
+    public partial class PreviewWindow : VsDialogWindow
     {
         public PreviewWindow()
         {
@@ -26,7 +26,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.DialogResult = true;
         }
     }
 }
