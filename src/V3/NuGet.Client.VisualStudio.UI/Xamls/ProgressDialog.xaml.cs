@@ -166,10 +166,8 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 Question = message
             };
-            fileConflictDialog.Owner = Window.GetWindow(this);
-            fileConflictDialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
 
-            if (fileConflictDialog.ShowDialog() == true)
+            if (fileConflictDialog.ShowModal() == true)
             {
                 return fileConflictDialog.UserSelection;
             }

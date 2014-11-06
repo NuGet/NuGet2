@@ -109,45 +109,51 @@ namespace NuGet.Client.Interop
 
         public override Task<JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
         {
-            NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);
-            var semver = CoreConverters.SafeToSemVer(version);
-            var package = _repository.FindPackage(id, semver);
-
-            // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
-            if (package == null)
+            return Task.Factory.StartNew(() =>
             {
-                var packages = _repository.FindPackagesById(id);
-                package = packages.FirstOrDefault(p => Equals(p.Version, semver));
-            }
+                NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);                
+                var semver = CoreConverters.SafeToSemVer(version);
+                var package = _repository.FindPackage(id, semver);
 
-            // If still null, fail
-            if (package == null)
-            {
-                return Task.FromResult<JObject>(null);
-            }
+                // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
+                if (package == null)
+                {
+                    var packages = _repository.FindPackagesById(id);
+                    package = packages.FirstOrDefault(p => Equals(p.Version, semver));
+                }
 
-            string repoRoot = null;
-            IPackagePathResolver resolver = null;
-            if (_lprepo != null)
-            {
-                repoRoot = _lprepo.Source;
-                resolver = _lprepo.PathResolver;
-            }
+                // If still null, fail
+                if (package == null)
+                {
+                    return null;
+                }
 
-            return Task.FromResult(PackageJsonLd.CreatePackage(package, repoRoot, resolver));
+                string repoRoot = null;
+                IPackagePathResolver resolver = null;
+                if (_lprepo != null)
+                {
+                    repoRoot = _lprepo.Source;
+                    resolver = _lprepo.PathResolver;
+                }
+
+                return PackageJsonLd.CreatePackage(package, repoRoot, resolver);
+            });
         }
 
         public override Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
-            NuGetTraceSources.V2SourceRepository.Verbose("findpackagebyid", "Getting metadata for all versions of {0}", packageId);
-            string repoRoot = null;
-            IPackagePathResolver resolver = null;
-            if (_lprepo != null)
+            return Task.Factory.StartNew(() =>
             {
-                repoRoot = _lprepo.Source;
-                resolver = _lprepo.PathResolver;
-            }
-            return Task.FromResult(_repository.FindPackagesById(packageId).Select(p => PackageJsonLd.CreatePackage(p, repoRoot, resolver)));
+                NuGetTraceSources.V2SourceRepository.Verbose("findpackagebyid", "Getting metadata for all versions of {0}", packageId);
+                string repoRoot = null;
+                IPackagePathResolver resolver = null;
+                if (_lprepo != null)
+                {
+                    repoRoot = _lprepo.Source;
+                    resolver = _lprepo.PathResolver;
+                }
+                return _repository.FindPackagesById(packageId).Select(p => PackageJsonLd.CreatePackage(p, repoRoot, resolver));
+            });
         }
 
         public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)

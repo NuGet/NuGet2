@@ -663,8 +663,7 @@ namespace NuGet.Client.VisualStudio.UI
                     })
                     .Where(pli => pli.LicenseUrl != null); // Shouldn't get nulls, but just in case
 
-                var ownerWindow = Window.GetWindow(this);
-                bool accepted = this.UI.PromptForLicenseAcceptance(licenseModels, ownerWindow);
+                bool accepted = this.UI.PromptForLicenseAcceptance(licenseModels);
                 if (!accepted)
                 {
                     return false;
@@ -693,24 +692,10 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                var window = Window.GetWindow(this);
-                if (window != null)
-                {
-                    MessageBox.Show(
-                        window,
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+                var errorDialog = new ErrorReportingDialog(
+                    ex.Message,
+                    ex.ToString());
+                errorDialog.ShowModal();
             }
             finally
             {
@@ -750,24 +735,10 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                var controlWindow = Window.GetWindow(this);
-                if (controlWindow != null)
-                {
-                    MessageBox.Show(
-                        controlWindow,
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        ex.Message,
-                        Resx.Resources.WindowTitle_Error,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+                var errorDialog = new ErrorReportingDialog(
+                    ex.Message,
+                    ex.ToString());
+                errorDialog.ShowModal();
             }
             finally
             {

@@ -18,7 +18,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for FileConflictDialog.xaml
     /// </summary>
-    public partial class FileConflictDialog : Window
+    public partial class FileConflictDialog : VsDialogWindow
     {
         public FileConflictDialog()
         {

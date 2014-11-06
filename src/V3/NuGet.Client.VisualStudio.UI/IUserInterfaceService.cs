@@ -10,7 +10,7 @@ namespace NuGet.Client.VisualStudio.UI
 {
     public interface IUserInterfaceService
     {
-        bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages, Window ownerWindow);
+        bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages);
         void LaunchExternalLink(Uri url);
         void LaunchNuGetOptionsDialog();
     }

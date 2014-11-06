@@ -21,26 +21,24 @@ namespace NuGet.Client.VisualStudio.UI
             _uiDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        public bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages, Window ownerWindow)
+        public bool PromptForLicenseAcceptance(IEnumerable<PackageLicenseInfo> packages)
         {
             if (_uiDispatcher.CheckAccess())
             {
-                return PromptForLicenseAcceptanceImpl(packages, ownerWindow);
+                return PromptForLicenseAcceptanceImpl(packages);
             }
             else
             {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
-                    new Func<IEnumerable<PackageLicenseInfo>, Window, bool>(PromptForLicenseAcceptanceImpl),
-                    packages,
-                    ownerWindow);
+                    new Func<IEnumerable<PackageLicenseInfo>, bool>(PromptForLicenseAcceptanceImpl),
+                    packages);
                 return (bool)result;
             }
         }
 
         private bool PromptForLicenseAcceptanceImpl(
-            IEnumerable<PackageLicenseInfo> packages,
-            Window ownerWindow)
+            IEnumerable<PackageLicenseInfo> packages)
         {
             var licenseWindow = new LicenseAcceptanceWindow()
             {
@@ -51,7 +49,7 @@ namespace NuGet.Client.VisualStudio.UI
                 NuGetEvent.LicenseWindowBegin,
                 NuGetEvent.LicenseWindowEnd))
             {
-                bool? dialogResult = licenseWindow.ShowDialog();
+                bool? dialogResult = licenseWindow.ShowModal();
                 return dialogResult ?? false;
             }
         }
