@@ -91,6 +91,7 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DownloadCountToVisibilityConverter.cs" />
     <Compile Include="Converters\EmptyEnumerableToVisibilityConverter.cs" />
+    <Compile Include="Converters\IconUrlToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
     <Compile Include="FileConflictActionItem.cs" />
     <Compile Include="IDetailControl.cs" />
@@ -132,6 +133,9 @@
       <DependentUpon>PackageDetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageDetailControlModel.cs" />
+    <Compile Include="Xamls\PackageItemControl.xaml.cs">
+      <DependentUpon>PackageItemControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\PackageManagerControl.xaml.cs">
       <DependentUpon>PackageManagerControl.xaml</DependentUpon>
     </Compile>
@@ -195,6 +199,10 @@
     <Page Include="Xamls\PackageDetailControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Xamls\PackageItemControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xamls\PackageManagerControl.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -37,27 +37,29 @@
                     Margin="24,0,0,0" />
 
                     <ComboBox
-                    Margin="6,0,0,0"
-                    x:Name="_sourceRepoList"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Name"
-                    Width="130"
+                        Margin="6,0,0,0"
+                        x:Name="_sourceRepoList"
+                        VerticalAlignment="Center"
+                        DisplayMemberPath="Name"
+                        Width="130"
+                        Height="24"
                     Grid.Column="1"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
 
                     <TextBlock
-                    Grid.Column="2"
-                    Margin="24,0,0,0"
-                    VerticalAlignment="Center"
-                    Text="{x:Static resx:Resources.Label_Filter}" />
+                        Grid.Column="2"
+                        Margin="24,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{x:Static resx:Resources.Label_Filter}" />
 
                     <ComboBox
-                    Grid.Column="3"
-                    Margin="6,0,0,0"
-                    VerticalAlignment="Center"
-                    SelectedIndex="0"
-                    x:Name="_filter"
-                    Width="130"
-                    SelectionChanged="_filter_SelectionChanged" />
+                        Grid.Column="3"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        SelectedIndex="0"
+                        x:Name="_filter"
+                        Width="130"
+                        Height="24"
+                        SelectionChanged="_filter_SelectionChanged" />
 
                     <CheckBox x:Name="_checkboxPrerelease"
                           Grid.Column="4" Margin="24,0,0,0"
@@ -68,21 +70,23 @@
                           Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,8">
+                <StackPanel Orientation="Horizontal" Margin="0,8" Height="24">
                     <Tools:SearchControl
-                    Grid.Column="6"
-                    Margin="24,0,0,0"
-                    VerticalAlignment="Center"
-                    x:Name="_searchControl"
-                    SearchStart="_searchControl_SearchStart"
-                    Width="224" />
+                        Grid.Column="6"
+                        Margin="24,0,0,0"
+                        VerticalAlignment="Center"
+                        x:Name="_searchControl"
+                        SearchStart="_searchControl_SearchStart"
+                        Height="24"
+                        Width="224" />
 
                     <Button
-                    Margin="24,0"
-                    VerticalAlignment="Center"
-                    Grid.Column="7"
-                    Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                    Click="SettingsButtonClick" x:Name="_settingsButton">
+                        Margin="24,0"
+                        VerticalAlignment="Center"
+                        Padding="0"
+                        Grid.Column="7"
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        Click="SettingsButtonClick" x:Name="_settingsButton">
                         <Rectangle Width="16" Height="16">
                             <Rectangle.Fill>
                                 <DrawingBrush>
@@ -107,7 +111,8 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MinWidth="300" />
-                        <ColumnDefinition MinWidth="300"/>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition MinWidth="300" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -117,17 +122,20 @@
                     </Tools:InfiniteScrollList>
 
                     <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Orientation="Vertical"
-                    Background="{DynamicResource {x:Static resx:Brushes.LegalMessageBackground}}">
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Orientation="Vertical"
+                        Background="{DynamicResource {x:Static resx:Brushes.LegalMessageBackground}}">
                         <TextBlock
                         Margin="24,12"
                         TextWrapping="Wrap"
                         Text="{x:Static resx:Resources.Text_LegalDisclaimer}" />
                     </StackPanel>
 
-                    <GridSplitter Grid.Column="0" Width="5" Grid.RowSpan="2"
+                    <GridSplitter Grid.Column="1" Width="5"
+                                  Grid.RowSpan="2"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Stretch"
                                   BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                   BorderThickness="1,0" />
 
@@ -135,15 +143,15 @@
                     </Tools:BusyControl>
 
                     <Tools:PackageDetailControl
-                    x:Name="_packageDetail"
-                    Grid.Column="1"
-                    Grid.RowSpan="2"
-                    Visibility="Collapsed" />
+                        x:Name="_packageDetail"
+                        Grid.Column="2"
+                        Grid.RowSpan="2"
+                        Visibility="Collapsed" />
                     <Tools:PackageSolutionDetailControl
-                    x:Name="_packageSolutionDetail"
-                    Grid.Column="1"
-                    Grid.RowSpan="2"
-                    Visibility="Collapsed" />
+                        x:Name="_packageSolutionDetail"
+                        Grid.Column="2"
+                        Grid.RowSpan="2"
+                        Visibility="Collapsed" />
                 </Grid>
             </Border>
         </Grid>

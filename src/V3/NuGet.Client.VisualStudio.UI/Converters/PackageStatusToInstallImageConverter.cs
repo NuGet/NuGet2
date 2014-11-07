@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    class PackageStatusToInstallImageConverter : IValueConverter
+    class PackageStatusToInstallImageVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -18,7 +18,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return Visibility.Visible;
             }
 
-            return Visibility.Collapsed;
+            return Visibility.Hidden;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -27,7 +27,7 @@ namespace NuGet.Client.VisualStudio.UI
         }
     }
 
-    class PackageStatusToUpdateImageConverter : IValueConverter
+    class PackageStatusToUpdateImageVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -37,7 +37,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return Visibility.Visible;
             }
 
-            return Visibility.Collapsed;
+            return Visibility.Hidden;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

@@ -35,14 +35,18 @@
             <!-- Icon and Id -->
             <StackPanel Grid.Row="0"
                         Orientation="Horizontal"
+                        Height="32"
                         Margin="0,8">
                 <Image
                     Source="{Binding Path=Package.IconUrl}"
-                    Style="{StaticResource PackageIconStyle}" />
+                    Margin="0,0,8,0"
+                    Height="32"
+                    Width="32"
+                    RenderOptions.BitmapScalingMode="HighQuality"
+                    Visibility="{Binding Path=Package.IconUrl, Converter={StaticResource IconUrlToVisibilityConverter}}"
+                    />
                 <TextBlock
-                    Margin="8, 0, 0, 0"
                     Text="{Binding Path=Package.Id}"
-                    TextWrapping="Wrap"
                     FontSize="20"></TextBlock>
             </StackPanel>
 
@@ -67,6 +71,7 @@
                     Grid.Row="1"
                     Grid.Column="0"
                     Width="150"
+                    Height="24"
                     ItemsSource="{Binding Path=Actions}"
                     SelectedItem="{Binding Path=SelectedAction}" />
 
@@ -122,12 +127,14 @@
                 </ItemsControl>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <Button Width="100"
+                            Height="24"
                         HorizontalAlignment="Left"
                         IsEnabled="{Binding Path=ActionEnabled}"
                         Content="{Binding ElementName=_actions,Path=SelectedItem}" Click="ActionButtonClicked"
                         ></Button>
                     <Button Margin="12,0,0,0"
-                        Width="100"
+                            Width="100"
+                            Height="24"
                         IsEnabled="{Binding Path=ActionEnabled}"
                         HorizontalAlignment="Left"
                         Content="{x:Static resx:Resources.Button_Preview}"

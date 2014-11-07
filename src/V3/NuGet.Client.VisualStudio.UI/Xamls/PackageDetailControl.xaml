@@ -35,15 +35,18 @@
             <!-- Icon and Id -->
             <StackPanel
                 Grid.Row="0"
-                Orientation="Horizontal"
-                Margin="0,8">
+                Orientation="Horizontal"               
+                Margin="0,8" Height="32">
                 <Image
                     Source="{Binding Path=Package.IconUrl}"
-                    Style="{StaticResource PackageIconStyle}" />
+                    Margin="0,0,8,0"
+                    Height="32"
+                    Width="32"
+                    Visibility="{Binding Path=Package.IconUrl, Converter={StaticResource IconUrlToVisibilityConverter}}"
+                    RenderOptions.BitmapScalingMode="HighQuality" />
+                
                 <TextBlock
-                    Margin="8, 0, 0, 0"
                     Text="{Binding Path=Package.Id}"
-                    TextWrapping="Wrap"
                     FontSize="20"></TextBlock>
             </StackPanel>
 
@@ -64,6 +67,7 @@
                         x:Name="_versions"
                         VerticalAlignment="Center"
                         Width="150"
+                        Height="24"
                         ItemsSource="{Binding Path=Versions}"
                         SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
                         SelectionChanged="Versions_SelectionChanged">
@@ -90,6 +94,7 @@
                         Grid.Row="1"
                         Grid.Column="1"
                         Width="100"
+                        Height="24"
                         x:Name="_actionButton"
                         Click="ActionButtonClicked">Action</Button>
                     <Button
@@ -125,6 +130,7 @@
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
                     <ComboBox Grid.Row="0" Grid.Column="1"
+                              Height="24"
                               ItemsSource="{Binding Path=DependencyBehaviors}"
                               SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
                     <TextBlock
@@ -133,6 +139,7 @@
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_FileConflictAction}" />
                     <ComboBox Grid.Row="2" Grid.Column="1"
+                              Height="24"
                               ItemsSource="{Binding Path=FileConflictActions}"
                               SelectedItem="{Binding Path=SelectedFileConflictAction}" />
                 </Grid>

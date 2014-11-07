@@ -171,8 +171,20 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _list_Loaded(object sender, RoutedEventArgs e)
         {
-            var c = VisualTreeHelper.GetChild(_list, 0);
+            var c = VisualTreeHelper.GetChild(_list, 0) as Border;
+            if (c == null)
+            {
+                return;
+            }
+
+            c.Padding = new Thickness(0);
             _scrollViewer = VisualTreeHelper.GetChild(c, 0) as ScrollViewer;
+            if (_scrollViewer == null)
+            {
+                return;
+            }
+
+            _scrollViewer.Padding = new Thickness(0);
             _scrollViewer.ScrollChanged += _scrollViewer_ScrollChanged;
         }
 
