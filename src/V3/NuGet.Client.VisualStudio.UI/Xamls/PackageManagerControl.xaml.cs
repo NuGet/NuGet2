@@ -300,11 +300,16 @@ namespace NuGet.Client.VisualStudio.UI
                         continue;
                     }
 
-                    var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
-                    searchResultPackage.Summary =
-                        self == null ?
-                        package.Value<string>(Properties.Summary) :
-                        self.Description;
+                    searchResultPackage.Summary = package.Value<string>(Properties.Summary);
+                    if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
+                    {
+                        // summary is empty. Use its description instead.
+                        var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
+                        if (self != null)
+                        {
+                            searchResultPackage.Summary = self.Description;
+                        }
+                    }
 
                     packages.Add(searchResultPackage);
                 }
