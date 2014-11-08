@@ -57,5 +57,10 @@ namespace NuGet.Client.VisualStudio.UI
                 }
             }
         }
+
+        private void _clearButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _textBox.Text = string.Empty;
+        }
     }
 }

@@ -15,12 +15,38 @@
                    VerticalAlignment="Center"
                    Text="{x:Static resx:Resources.Label_Search}"
                    />
-        <TextBox x:Name="_textBox" 
-                 Grid.Column="1"
-                 VerticalAlignment="Center"
-                 Text="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
-                 Margin="6,0,0,0"
-                 TextChanged="_textBox_TextChanged" 
-                 KeyDown="_textBox_KeyDown"></TextBox>    
+        
+        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="6,0, 0, 0" >
+            <Border HorizontalAlignment="Stretch" BorderBrush="LightGray" BorderThickness="1" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="_textBox" Grid.Column="0"
+                             BorderThickness="0"
+                             BorderBrush="Transparent"
+                         Text="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
+                         TextChanged="_textBox_TextChanged" 
+                         KeyDown="_textBox_KeyDown"></TextBox>
+
+                    <Button x:Name="_clearButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
+                            BorderBrush="Transparent" Click="_clearButton_Click" >
+                        <Button.Content>
+                            <TextBlock Width="16">
+                                <TextBlock.Background>
+                                    <VisualBrush Stretch="None" AlignmentX="Center">
+                                        <VisualBrush.Visual>
+                                            <TextBlock Text="X" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}" FontWeight="Bold" Background="Transparent"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
