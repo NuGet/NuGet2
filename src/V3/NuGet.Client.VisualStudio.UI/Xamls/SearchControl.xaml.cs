@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -49,6 +50,17 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void _textBox_KeyDown(object sender, KeyEventArgs e)
         {
+            if (Text == string.Empty)
+            {
+                _searchButton.Visibility = Visibility.Visible;
+                _clearButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                _searchButton.Visibility = Visibility.Collapsed;
+                _clearButton.Visibility = Visibility.Visible;
+            }
+
             if (e.Key == Key.Return)
             {
                 if (SearchStart != null)
@@ -56,6 +68,13 @@ namespace NuGet.Client.VisualStudio.UI
                     SearchStart(this, EventArgs.Empty);
                 }
             }
+        }
+
+        private void _clearButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _textBox.Text = string.Empty;
+            _searchButton.Visibility = Visibility.Visible;
+            _clearButton.Visibility = Visibility.Collapsed;
         }
     }
 }
