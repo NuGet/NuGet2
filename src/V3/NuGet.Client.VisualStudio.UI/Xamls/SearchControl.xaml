@@ -16,7 +16,7 @@
                    Text="{x:Static resx:Resources.Label_Search}"
                    />
         
-        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="6,0, 0, 0" >
+        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0" >
             <Border HorizontalAlignment="Stretch" BorderBrush="LightGray" BorderThickness="1" >
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -24,7 +24,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="_textBox" Grid.Column="0"
+                    <TextBox x:Name="_textBox" Grid.Column="0" Margin="0,0,0,1"
                              BorderThickness="0"
                              BorderBrush="Transparent"
                          Text="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
