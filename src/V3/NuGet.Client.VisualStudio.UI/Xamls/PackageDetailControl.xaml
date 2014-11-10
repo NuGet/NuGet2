@@ -9,7 +9,7 @@
              Background="{DynamicResource {x:Static resx:Brushes.DetailPaneBackground}}"
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="400">
+             d:DesignHeight="600" d:DesignWidth="500">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -30,12 +30,13 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Icon and Id -->
             <StackPanel
                 Grid.Row="0"
-                Orientation="Horizontal"               
+                Orientation="Horizontal"
                 Margin="0,8" Height="32">
                 <Image
                     Source="{Binding Path=Package.IconUrl}"
@@ -44,7 +45,7 @@
                     Width="32"
                     Visibility="{Binding Path=Package.IconUrl, Converter={StaticResource IconUrlToVisibilityConverter}}"
                     RenderOptions.BitmapScalingMode="HighQuality" />
-                
+
                 <TextBlock
                     Text="{Binding Path=Package.Id}"
                     FontSize="20"></TextBlock>
@@ -53,101 +54,66 @@
             <!-- Version dropdown and the install/uninstall button -->
             <Grid Grid.Row="1" Margin="0,8">
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="24" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="24" />
                 </Grid.RowDefinitions>
-                <StackPanel Orientation="Horizontal" Grid.Row="0">
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        VerticalAlignment="Center"
-                        Text="{x:Static resx:Resources.Label_Version}" />
-                    <ComboBox
-                        Margin="12,0,0,0"
-                        x:Name="_versions"
-                        VerticalAlignment="Center"
-                        Width="150"
-                        Height="24"
-                        ItemsSource="{Binding Path=Versions}"
-                        SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
-                        SelectionChanged="Versions_SelectionChanged">
-                        <ComboBox.ItemContainerStyle>
-                            <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
-                                <Style.Triggers>
-                                    <!-- generate a separator if value is null -->
-                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                                                    <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ComboBox.ItemContainerStyle>
-                    </ComboBox>
-                </StackPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-                    <Button
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Width="100"
-                        Height="24"
-                        x:Name="_actionButton"
-                        Click="ActionButtonClicked">Action</Button>
-                    <Button
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Margin="12,0,0,0"
-                        Content="{x:Static resx:Resources.Button_Preview}"
-                        Click="PreviewButtonClicked"
-                        Width="100" />
-                </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{x:Static resx:Resources.Label_Version}" />
+                <ComboBox
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    x:Name="_versions"
+                    ItemsSource="{Binding Path=Versions}"
+                    SelectedItem="{Binding Path=Package.Version,Mode=OneWay,Converter={StaticResource VersionToVersionForDisplayConverter}}"
+                    SelectionChanged="Versions_SelectionChanged">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                            <Style.Triggers>
+                                <!-- generate a separator if value is null -->
+                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                                <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
             </Grid>
 
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0, 8">
+                <Button
+                    Width="100"
+                    Height="24"
+                    x:Name="_actionButton"
+                    Click="ActionButtonClicked">Action</Button>
+
+                <Button Margin="12,0,0,0"
+                    Width="100"
+                    Height="24"
+                    Content="{x:Static resx:Resources.Button_Preview}"
+                    Click="PreviewButtonClicked" />
+            </StackPanel>
+
             <!-- installation options -->
-            <Expander Grid.Row="2" Margin="0,8"
-                      x:Name="_options"
-                      Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}">
-                <Expander.Header>
-                    <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
-                </Expander.Header>
-                <Grid Margin="0,8,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition Height="8" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        Grid.Row="0" Grid.Column="0"
-                        Margin="0,0,6,0"
-                        VerticalAlignment="Center"
-                        Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
-                    <ComboBox Grid.Row="0" Grid.Column="1"
-                              Height="24"
-                              ItemsSource="{Binding Path=DependencyBehaviors}"
-                              SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
-                    <TextBlock
-                        Grid.Row="2" Grid.Column="0"
-                        Margin="0,0,6,0"
-                        VerticalAlignment="Center"
-                        Text="{x:Static resx:Resources.Label_FileConflictAction}" />
-                    <ComboBox Grid.Row="2" Grid.Column="1"
-                              Height="24"
-                              ItemsSource="{Binding Path=FileConflictActions}"
-                              SelectedItem="{Binding Path=SelectedFileConflictAction}" />
-                </Grid>
-            </Expander>
+            <Tools:Options Grid.Row="3" Margin="0,8"
+                      x:Name="_options" />
 
-            <Tools:PackageMetadataControl Grid.Row="3" Margin="0,8,0,0"
-                                   DataContext="{Binding Package}"/>
-
+            <Tools:PackageMetadataControl Grid.Row="4" Margin="0,8,0,0"
+                                   DataContext="{Binding Package}" />
         </Grid>
     </ScrollViewer>
 </UserControl>

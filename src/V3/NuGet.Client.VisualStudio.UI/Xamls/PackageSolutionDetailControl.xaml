@@ -65,6 +65,7 @@
                     Grid.Row="0"
                     Grid.Column="0"
                     Margin="0,0,0,8"
+                    FontWeight="Bold"
                     Text="{x:Static resx:Resources.Label_Action}" />
                 <ComboBox
                     x:Name="_actions"
@@ -78,6 +79,7 @@
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="2"
+                    FontWeight="Bold"
                     Margin="0,0,0,8"
                     Text="{x:Static resx:Resources.Label_Version}" />
                 <ComboBox
@@ -144,39 +146,7 @@
             </StackPanel>
 
             <!-- installation options -->
-            <Expander Grid.Row="3" Margin="0,8" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                      Visibility="{Binding Path=InstallOptionsVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Expander.Header>
-                    <TextBlock Text="{x:Static resx:Resources.Label_InstallationOptions }" />
-                </Expander.Header>
-                <Grid Margin="0,8,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition Height="8" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        Grid.Row="0" Grid.Column="0"
-                        VerticalAlignment="Center"
-                        Margin="0,0,6,0"
-                        Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
-                    <ComboBox Grid.Row="0" Grid.Column="1"
-                              ItemsSource="{Binding Path=DependencyBehaviors}"
-                              SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
-                    <TextBlock
-                        Grid.Row="2" Grid.Column="0"
-                        VerticalAlignment="Center"
-                        Margin="0,0,6,0"
-                        Text="{x:Static resx:Resources.Label_FileConflictAction}" />
-                    <ComboBox Grid.Row="2" Grid.Column="1"
-                              ItemsSource="{Binding Path=FileConflictActions}"
-                              SelectedItem="{Binding Path=SelectedFileConflictAction}" />
-                </Grid>
-            </Expander>
+            <Tools:Options Grid.Row="3" Margin="0,8"/>
 
             <Tools:PackageMetadataControl Grid.Row="4" Margin="0,8,0,0"
                                    DataContext="{Binding Package}" />

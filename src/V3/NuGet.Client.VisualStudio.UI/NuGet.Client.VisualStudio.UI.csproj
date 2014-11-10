@@ -129,6 +129,9 @@
       <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="Xamls\Options.xaml.cs">
+      <DependentUpon>Options.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\PackageDetailControl.xaml.cs">
       <DependentUpon>PackageDetailControl.xaml</DependentUpon>
     </Compile>
@@ -195,6 +198,10 @@
     <Page Include="Xamls\InfiniteScrollList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Xamls\Options.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xamls\PackageDetailControl.xaml">
       <Generator>MSBuild:Compile</Generator>

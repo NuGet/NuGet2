@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="NuGet.Client.VisualStudio.UI.Options"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
+             Background="{DynamicResource {x:Static resx:Brushes.DetailPaneBackground}}"
+             Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Expander>
+        <Expander.Header>
+            <TextBlock FontWeight="Bold" Text="{x:Static resx:Resources.Label_InstallationOptions }" />
+        </Expander.Header>
+        <Grid Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Row="0" Grid.Column="0"
+                Margin="0,0,6,0"
+                VerticalAlignment="Center"
+                Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
+            <ComboBox 
+                Grid.Row="0"
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                Height="24"
+                Width="150"
+                ItemsSource="{Binding Path=DependencyBehaviors}"
+                SelectedItem="{Binding Path=SelectedDependencyBehavior}" />
+            <TextBlock
+                Grid.Row="2" Grid.Column="0"
+                Margin="0,0,6,0"
+                VerticalAlignment="Center"
+                Text="{x:Static resx:Resources.Label_FileConflictAction}" />
+            <ComboBox 
+                Grid.Row="2" Grid.Column="1"
+                Height="24"
+                Width="150"
+                HorizontalAlignment="Left"
+                ItemsSource="{Binding Path=FileConflictActions}"
+                SelectedItem="{Binding Path=SelectedFileConflictAction}" />
+        </Grid>
+    </Expander>
+</UserControl>

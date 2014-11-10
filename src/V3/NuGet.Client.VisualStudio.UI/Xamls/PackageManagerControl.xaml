@@ -8,7 +8,7 @@
              Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              mc:Ignorable="d"
-             d:DesignHeight="523" d:DesignWidth="958">
+             d:DesignHeight="523" d:DesignWidth="900">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -28,13 +28,12 @@
 
             <TextBlock Grid.Row="1" x:Name="_label" FontSize="15" Margin="8,8">Package Manager</TextBlock>
 
-            <WrapPanel Grid.Row="2" Margin="0, 16" Orientation="Horizontal">
-                <StackPanel Orientation="Horizontal" Margin="0,8">
+            <WrapPanel Grid.Row="2" Margin="0,12,0,20" Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Margin="24,8,0,0">
                     <TextBlock
                     Grid.Column="0"
                     VerticalAlignment="Center"
-                    Text="{x:Static resx:Resources.Label_Repository}"
-                    Margin="24,0,0,0" />
+                    Text="{x:Static resx:Resources.Label_Repository}" />
 
                     <ComboBox
                         Margin="6,0,0,0"
@@ -70,10 +69,9 @@
                           Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,8" Height="24">
+                <StackPanel Orientation="Horizontal" Margin="24,8,0,0" Height="24">
                     <Tools:SearchControl
                         Grid.Column="6"
-                        Margin="24,0,0,0"
                         VerticalAlignment="Center"
                         x:Name="_searchControl"
                         SearchStart="_searchControl_SearchStart"
