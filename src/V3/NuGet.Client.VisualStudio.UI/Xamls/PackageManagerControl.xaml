@@ -70,7 +70,7 @@
                           Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,8" Height="24">
+                <StackPanel Orientation="Horizontal" Margin="0,8">
                     <Tools:SearchControl
                         Grid.Column="6"
                         Margin="24,0,0,0"

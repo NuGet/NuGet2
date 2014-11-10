@@ -5,18 +5,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             x:Name="_self"
+             d:DesignHeight="24" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="{x:Static resx:Resources.Label_Search}"
-                   />
-        
-        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0" >
+        <Grid Grid.Column="1" VerticalAlignment="Center">
             <Border HorizontalAlignment="Stretch" BorderBrush="LightGray" BorderThickness="1" >
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -24,17 +20,21 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="_textBox" Grid.Column="0" Margin="0,0,0,1"
+                    <TextBox x:Name="_textBox" Grid.Column="0" 
+                             VerticalContentAlignment="Center"
+                             Height="{Binding ElementName=_self, Path=Height}"
                              BorderThickness="0"
                              BorderBrush="Transparent"
                          Text="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
                          TextChanged="_textBox_TextChanged" 
                          KeyDown="_textBox_KeyDown"></TextBox>
 
-                    <Button x:Name="_searchButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
-                            BorderBrush="Transparent" Click="_searchButton_Click" Visibility="Visible">
+                    <Button x:Name="_searchButton" Grid.Column="1" VerticalAlignment="Center" BorderThickness="0" 
+                            Background="{Binding ElementName=_textBox, Path=Background}"  
+                            Visibility="Visible">
                         <Button.Content>
-                            <Rectangle Width="16" Height="16">
+                            <Rectangle Width="{Binding ElementName=_self, Path=Height}" 
+                                       Height="{Binding ElementName=_self, Path=Height}">
                                 <Rectangle.Fill>
                                     <DrawingBrush>
                                         <DrawingBrush.Drawing>
@@ -53,14 +53,17 @@
                         </Button.Content>
                     </Button>
 
-                    <Button x:Name="_clearButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
-                            BorderBrush="Transparent" Click="_clearButton_Click" Visibility="Collapsed">
+                    <Button x:Name="_clearButton" Grid.Column="1" VerticalAlignment="Center" 
+                            Background="{Binding ElementName=_textBox, Path=Background}" 
+                            BorderThickness="0" Click="_clearButton_Click" Visibility="Collapsed">
                         <Button.Content>
-                            <TextBlock Width="16" Height="16">
+                            <TextBlock Width="{Binding ElementName=_self, Path=Height}"
+                                       Height="{Binding ElementName=_self, Path=Height}"
+                                       VerticalAlignment="Center">
                                 <TextBlock.Background>
                                     <VisualBrush Stretch="None" AlignmentX="Center">
                                         <VisualBrush.Visual>
-                                            <TextBlock Text="X" FontFamily="Comic Sans MS" Foreground="Gray" FontWeight="SemiBold"  Background="Transparent" />
+                                            <TextBlock Text="X" VerticalAlignment="Center" FontFamily="Comic Sans MS" Foreground="Gray" FontWeight="SemiBold"/>
                                         </VisualBrush.Visual>
                                     </VisualBrush>
                                 </TextBlock.Background>
