@@ -31,14 +31,36 @@
                          TextChanged="_textBox_TextChanged" 
                          KeyDown="_textBox_KeyDown"></TextBox>
 
-                    <Button x:Name="_clearButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
-                            BorderBrush="Transparent" Click="_clearButton_Click" >
+                    <Button x:Name="_searchButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
+                            BorderBrush="Transparent" Click="_searchButton_Click" Visibility="Visible">
                         <Button.Content>
-                            <TextBlock Width="16">
+                            <Rectangle Width="16" Height="16">
+                                <Rectangle.Fill>
+                                    <DrawingBrush>
+                                        <DrawingBrush.Drawing>
+                                            <DrawingGroup>
+                                                <DrawingGroup.Children>
+                                                    <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                    <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M11.1084,0L9.0894,0C6.3164,0.481 4.1984,2.898 4.1984,5.808 4.1984,6.454 4.2884,7.092 4.5084,7.715L0.000399999999999068,12.203 0.000399999999999068,13.359 2.6814,16 3.5694,16 8.1934,11.378C8.8164,11.598 9.4544,11.709 10.0994,11.709 13.3524,11.709 16.0004,9.063 16.0004,5.808 16.0004,2.898 13.8814,0.481 11.1084,0" />
+                                                    <GeometryDrawing Brush="Gray" Geometry="F1M6.4404,5.8281C6.4404,3.7361 8.0704,2.0731 10.1634,2.0731 12.2544,2.0731 13.9504,3.7361 13.9504,5.8281 13.9504,7.9201 12.2544,9.5821 10.1634,9.5821 8.0704,9.5821 6.4404,7.9201 6.4404,5.8281 M1.3234,13.0701L2.9304,14.6801 7.7524,9.8591C8.4014,10.1851 8.7204,10.6561 10.1714,10.6561 12.8394,10.6561 15.0004,8.4941 15.0004,5.8281 15.0004,3.1611 12.8394,1.0001 10.1714,1.0001 7.5064,1.0001 5.3674,3.1611 5.3674,5.8281 5.3674,7.4371 5.8144,7.5991 6.1434,8.2501z" />
+                                                    <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M6.4404,5.8281C6.4404,3.7361 8.0704,2.0731 10.1634,2.0731 12.2544,2.0731 13.9504,3.7361 13.9504,5.8281 13.9504,7.9201 12.2544,9.5821 10.1634,9.5821 8.0704,9.5821 6.4404,7.9201 6.4404,5.8281" />
+                                                </DrawingGroup.Children>
+                                            </DrawingGroup>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button.Content>
+                    </Button>
+
+                    <Button x:Name="_clearButton" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" 
+                            BorderBrush="Transparent" Click="_clearButton_Click" Visibility="Collapsed">
+                        <Button.Content>
+                            <TextBlock Width="16" Height="16">
                                 <TextBlock.Background>
                                     <VisualBrush Stretch="None" AlignmentX="Center">
                                         <VisualBrush.Visual>
-                                            <TextBlock Text="X" Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}" FontWeight="Bold" Background="Transparent"/>
+                                            <TextBlock Text="X" FontFamily="Comic Sans MS" Foreground="Gray" FontWeight="SemiBold"  Background="Transparent" />
                                         </VisualBrush.Visual>
                                     </VisualBrush>
                                 </TextBlock.Background>

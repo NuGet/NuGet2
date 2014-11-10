@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -45,6 +47,8 @@ namespace NuGet.Client.VisualStudio.UI
         private void _textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             _timer.Start();
+            _searchButton.Visibility = Visibility.Collapsed;
+            _clearButton.Visibility = Visibility.Visible;
         }
 
         private void _textBox_KeyDown(object sender, KeyEventArgs e)
@@ -61,6 +65,13 @@ namespace NuGet.Client.VisualStudio.UI
         private void _clearButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             _textBox.Text = string.Empty;
+            _searchButton.Visibility = Visibility.Visible;
+            _clearButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void _searchButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
         }
     }
 }
