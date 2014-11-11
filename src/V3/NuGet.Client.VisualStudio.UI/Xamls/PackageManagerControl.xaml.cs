@@ -269,6 +269,15 @@ namespace NuGet.Client.VisualStudio.UI
                 });
             }
 
+            private UiDetailedPackage ToDetailedPackage(UiSearchResultPackage package)
+            {
+                var detailedPackage = new UiDetailedPackage();
+                detailedPackage.Id = package.Id;
+                detailedPackage.Version = package.Version;
+                detailedPackage.Summary = package.Summary;
+                return detailedPackage;
+            }
+
             public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
                 var results = await InternalLoadItems(startIndex, ct, _loader);
@@ -290,8 +299,16 @@ namespace NuGet.Client.VisualStudio.UI
                     }
 
                     searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
-                    searchResultPackage.AllVersions = LoadVersions(
-                        package.Value<JArray>(Properties.Packages));
+                    
+                    var allVersions = LoadVersions(
+                        package.Value<JArray>(Properties.Packages), 
+                        searchResultPackage.Version);
+                    if (!allVersions.Select(v => v.Version).Contains(searchResultPackage.Version))
+                    {
+                        // make sure allVersions contains searchResultPackage itself.
+                        allVersions.Add(ToDetailedPackage(searchResultPackage));
+                    }
+                    searchResultPackage.AllVersions = allVersions;
 
                     SetPackageStatus(searchResultPackage, _target);
                     if (_option.ShowUpdatesAvailable &&
@@ -323,7 +340,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             // Get all versions of the package
-            private List<UiDetailedPackage> LoadVersions(JArray versions)
+            private List<UiDetailedPackage> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
             {
                 var retValue = new List<UiDetailedPackage>();
 
@@ -336,7 +353,9 @@ namespace NuGet.Client.VisualStudio.UI
                     var detailedPackage = new UiDetailedPackage();
                     detailedPackage.Id = version.Value<string>(Properties.PackageId);
                     detailedPackage.Version = NuGetVersion.Parse(version.Value<string>(Properties.Version));
-                    if (detailedPackage.Version.IsPrerelease && !_option.IncludePrerelease)
+                    if (detailedPackage.Version.IsPrerelease && 
+                        !_option.IncludePrerelease &&
+                        detailedPackage.Version != searchResultVersion)
                     {
                         // don't include prerelease version if includePrerelease is false
                         continue;
@@ -346,7 +365,8 @@ namespace NuGet.Client.VisualStudio.UI
                     if (!String.IsNullOrEmpty(publishedStr))
                     {
                         detailedPackage.Published = DateTime.Parse(publishedStr);
-                        if (detailedPackage.Published <= Unpublished)
+                        if (detailedPackage.Published <= Unpublished &&
+                            detailedPackage.Version != searchResultVersion)
                         {
                             // don't include unlisted package
                             continue;
