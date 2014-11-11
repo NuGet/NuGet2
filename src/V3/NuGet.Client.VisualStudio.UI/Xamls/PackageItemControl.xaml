@@ -14,7 +14,7 @@
         <ui:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <Border
-            BorderThickness="0,1,0,0"
+            BorderThickness="0,0,0,1"
             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
             Padding="0,16,0,15">
         <Grid Margin="24,0,7,0">

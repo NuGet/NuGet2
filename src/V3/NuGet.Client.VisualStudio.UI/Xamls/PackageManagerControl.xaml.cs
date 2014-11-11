@@ -250,11 +250,25 @@ namespace NuGet.Client.VisualStudio.UI
             public PackageLoader(
                 Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
                 InstallationTarget target,
-                PackageLoaderOption option)
+                PackageLoaderOption option,
+                string searchText)
             {
                 _loader = loader;
                 _target = target;
                 _option = option;
+
+                LoadingMessage = string.IsNullOrWhiteSpace(searchText) ?
+                    Resx.Resources.Text_Loading :
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        Resx.Resources.Text_Searching,
+                        searchText);
+            }
+
+            public string LoadingMessage
+            {
+                get;
+                private set;
             }
 
             private Task<List<JObject>> InternalLoadItems(
@@ -502,7 +516,8 @@ namespace NuGet.Client.VisualStudio.UI
                             PageSize,
                             ct),
                     Target,
-                    option);
+                    option,
+                    searchText);
                 _packageList.Loader = loader;
             }
             else
@@ -519,7 +534,8 @@ namespace NuGet.Client.VisualStudio.UI
                             });
                         },
                         Target,
-                        option);
+                        option,
+                        searchText);
                     _packageList.Loader = loader;
                 }
                 else
@@ -537,7 +553,8 @@ namespace NuGet.Client.VisualStudio.UI
                             PageSize,
                             ct),
                         Target,
-                        option);
+                        option,
+                        searchText);
                     _packageList.Loader = loader;
                 }
             }

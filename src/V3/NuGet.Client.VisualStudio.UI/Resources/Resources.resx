@@ -336,4 +336,7 @@
   <data name="Label_PackagePrerelease" xml:space="preserve">
     <value>Prerelease</value>
   </data>
+  <data name="Text_Searching" xml:space="preserve">
+    <value>Searching '{0}'</value>
+  </data>
 </root>

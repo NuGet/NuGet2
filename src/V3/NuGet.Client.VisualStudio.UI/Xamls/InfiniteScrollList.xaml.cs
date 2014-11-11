@@ -53,6 +53,7 @@ namespace NuGet.Client.VisualStudio.UI
             set
             {
                 _loader = value;
+                _loadingStatusIndicator.LoadingMessage = _loader.LoadingMessage;
                 Reload();
             }
         }
@@ -228,6 +229,8 @@ namespace NuGet.Client.VisualStudio.UI
     {
         // The second value tells us whether there are more items to load
         Task<LoadResult> LoadItems(int startIndex, CancellationToken ct);
+
+        string LoadingMessage { get; }
     }
 
     public enum LoadingStatus
@@ -257,6 +260,24 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
         
+        private string _loadingMessage;
+
+        public string LoadingMessage
+        {
+            get
+            {
+                return _loadingMessage;
+            }
+            set
+            {
+                if (_loadingMessage != value)
+                {
+                    _loadingMessage = value;
+                    OnPropertyChanged("LoadingMessage");
+                }
+            }
+        }
+
         public string ErrorMessage
         {
             get
