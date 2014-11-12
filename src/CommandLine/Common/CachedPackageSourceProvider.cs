@@ -24,6 +24,7 @@ namespace NuGet.Common
 
         public void SavePackageSources(IEnumerable<PackageSource> sources)
         {
+            PackageSourcesSaved(this, EventArgs.Empty);
             throw new NotSupportedException();
         }
 
