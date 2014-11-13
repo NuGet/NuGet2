@@ -13,22 +13,28 @@ namespace NuGet.Client.Interop
 {
     public static class PackageJsonLd
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions)
-        {
-            return CreatePackageSearchResult(package, versions, repoRoot: null, pathResolver: null);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-        public static JObject CreatePackageSearchResult(IPackage package, IEnumerable<IPackage> versions, string repoRoot, IPackagePathResolver pathResolver)
+        /// <summary>
+        /// Create JObject representing UiSearchResultPackage.
+        /// </summary>
+        /// <param name="package"></param>
+        /// <param name="versions">all versions of this package.</param>
+        /// <returns></returns>
+        public static JObject CreatePackageSearchResult(IPackageMetadata package, IEnumerable<SemanticVersion> versions)
         {
             var value = new JObject();
             value.Add(new JProperty(Properties.Type, new JArray(Types.PackageSearchResult.ToString())));
             AddProp(value, Properties.PackageId, package.Id);
             AddProp(value, Properties.LatestVersion, package.Version.ToString());
             AddProp(value, Properties.Summary, package.Summary);
+            AddProp(value, Properties.Description, package.Description);
             AddProp(value, Properties.IconUrl, package.IconUrl);
-            AddProp(value, Properties.Packages, versions.Select(v => CreatePackage(v, repoRoot, pathResolver)));
+
+            var allVersions = versions.ToList();
+            if (!allVersions.Contains(package.Version))
+            {
+                allVersions.Add(package.Version);
+            }
+            AddProp(value, Properties.Versions, new JArray(allVersions.Select(v => v.ToString())));
             return value;
         }
 

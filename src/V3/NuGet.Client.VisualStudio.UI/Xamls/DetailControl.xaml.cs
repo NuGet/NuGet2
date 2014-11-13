@@ -15,21 +15,13 @@ using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    public partial class PackageSolutionDetailControl : UserControl, IDetailControl
+    // The DataContext of this control is DetailControlModel, i.e. either 
+    // PackageSolutionDetailControlModel or PackageDetailControlModel.
+    public partial class DetailControl : UserControl, IDetailControl
     {
         public PackageManagerControl Control { get; set; }
 
-        private Solution Solution
-        {
-            get
-            {
-                var solution = Control.Target as Solution;
-                Debug.Assert(solution != null, "Expected that the target would be a solution!");
-                return solution;
-            }
-        }
-
-        public PackageSolutionDetailControl()
+        public DetailControl()
         {
             InitializeComponent();
             this.DataContextChanged += PackageSolutionDetailControl_DataContextChanged;
@@ -37,7 +29,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void PackageSolutionDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is PackageSolutionDetailControlModel)
+            if (DataContext is DetailControlModel)
             {
                 _root.Visibility = System.Windows.Visibility.Visible;
             }
@@ -59,8 +51,18 @@ namespace NuGet.Client.VisualStudio.UI
 
         public async Task<IEnumerable<PackageAction>> ResolveActionsAsync()
         {
-            var model = (PackageSolutionDetailControlModel)DataContext;
+            var model = (DetailControlModel)DataContext;
+            var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
+                PackageActionType.Uninstall :
+                PackageActionType.Install;
+
+            // Create resolver
             var repo = Control.CreateActiveRepository();
+            if (action == PackageActionType.Uninstall)
+            {
+                // for uninstall, use local repo
+                repo = Control.Target.TryGetFeature<SourceRepository>();
+            }
             if (repo == null)
             {
                 throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
@@ -69,27 +71,35 @@ namespace NuGet.Client.VisualStudio.UI
                 repo,
                 new ResolutionContext()
                 {
-                    DependencyBehavior = model.SelectedDependencyBehavior.Behavior,
+                    DependencyBehavior = model.Options.SelectedDependencyBehavior.Behavior,
                     AllowPrerelease = Control.IncludePrerelease
                 });
 
-            var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
-                PackageActionType.Uninstall :
-                PackageActionType.Install;
+            IEnumerable<Project> targetProjects;
+            var solutionModel = DataContext as PackageSolutionDetailControlModel;
+            if (solutionModel != null)
+            {
+                targetProjects = solutionModel.Projects
+                   .Where(p => p.Selected)
+                   .Select(p => p.Project);
+            }
+            else
+            {
+                var project = Control.Target as Project;
+                targetProjects = new[] { project };
+                Debug.Assert(project != null);
+            }
 
-            var targetProjects = model.Projects
-                .Where(p => p.Selected)
-                .Select(p => p.Project);
             return await resolver.ResolveActionsAsync(
-                new PackageIdentity(model.Package.Id, model.SelectedVersion.Version),
+                new PackageIdentity(model.Id, model.SelectedVersion.Version),
                 action,
                 targetProjects,
-                Solution);
+                Control.Target.OwnerSolution);
         }
 
         public void Refresh()
         {
-            var model = (PackageSolutionDetailControlModel)DataContext;
+            var model = (DetailControlModel)DataContext;
             if (model != null)
             {
                 model.Refresh();
@@ -101,17 +111,12 @@ namespace NuGet.Client.VisualStudio.UI
             Control.PerformAction(this);
         }
 
-        private void PreviewButtonClicked(object sender, RoutedEventArgs e)
-        {
-            Control.Preview(this);
-        }
-
         public FileConflictAction FileConflictAction
         {
             get
             {
-                var model = (PackageSolutionDetailControlModel)DataContext;
-                return model.SelectedFileConflictAction.Action;
+                var model = (DetailControlModel)DataContext;
+                return model.Options.SelectedFileConflictAction.Action;
             }
         }    
     }

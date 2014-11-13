@@ -339,4 +339,10 @@
   <data name="Text_Searching" xml:space="preserve">
     <value>Searching '{0}'</value>
   </data>
+  <data name="Checkbox_ShowPreviewWindow" xml:space="preserve">
+    <value>Show preview window</value>
+  </data>
+  <data name="Text_PreviewChange" xml:space="preserve">
+    <value>We are about to make the following changes:</value>
+  </data>
 </root>

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace NuGet.Client.VisualStudio.UI
 {
     /// <summary>
-    /// The DataContext of this control is PackageDetailControlModel
+    /// The DataContext of this control is Options
     /// </summary>
-    public partial class Options : UserControl
+    public partial class OptionsControl : UserControl
     {
-        public Options()
+        public OptionsControl()
         {
             InitializeComponent();
         }

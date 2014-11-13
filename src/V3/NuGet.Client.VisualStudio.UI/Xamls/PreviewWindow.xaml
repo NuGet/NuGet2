@@ -20,11 +20,19 @@
     </Window.Resources>    
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
-                BorderThickness="1">
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,8"
+            Text="{x:Static resx:Resources.Text_PreviewChange}"
+            />
+        <Border 
+            Grid.Row="1"
+            BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
+            BorderThickness="1">
             <ScrollViewer HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Path=PreviewResults}">
                     <ItemsControl.ItemTemplate>
@@ -91,13 +99,22 @@
                 </ItemsControl>
             </ScrollViewer>
         </Border>
-        <Grid Grid.Row="1" Margin="8,8">
+        <Grid Grid.Row="2" Margin="8,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Width="50"
-                    Content="{x:Static resx:Resources.Button_OK}" Click="Button_Click" />
+            <Button Grid.Column="1" 
+                    Width="50"
+                    Height="24"
+                    AutomationProperties.AutomationId="OK"
+                    Content="{x:Static resx:Resources.Button_OK}" Click="OkButtonClicked" />
+            <Button Grid.Column="3" 
+                    Width="50"
+                    AutomationProperties.AutomationId="Cancel"
+                    Content="{x:Static resx:Resources.Button_Cancel}" Click="CancelButtonClicked" />
         </Grid>
     </Grid>
 </ui:VsDialogWindow>

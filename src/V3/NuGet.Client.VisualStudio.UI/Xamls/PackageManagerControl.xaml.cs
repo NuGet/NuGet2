@@ -66,6 +66,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
+            _busyCount = 0;
 
             InitializeComponent();
 
@@ -78,22 +79,7 @@ namespace NuGet.Client.VisualStudio.UI
             _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
             AddRestoreBar();
 
-            _packageDetail.Visibility = System.Windows.Visibility.Collapsed;
             _packageDetail.Control = this;
-
-            _packageSolutionDetail.Visibility = System.Windows.Visibility.Collapsed;
-            _packageSolutionDetail.Control = this;
-
-            _busyCount = 0;
-
-            if (Target.IsSolution)
-            {
-                _packageSolutionDetail.Visibility = System.Windows.Visibility.Visible;
-            }
-            else
-            {
-                _packageDetail.Visibility = System.Windows.Visibility.Visible;
-            }
 
             var outputConsoleProvider = ServiceLocator.GetInstance<IOutputConsoleProvider>();
             _outputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
@@ -246,9 +232,12 @@ namespace NuGet.Client.VisualStudio.UI
             private InstallationTarget _target;
 
             private PackageLoaderOption _option;
+                        
+            private SourceRepository _source;
 
             public PackageLoader(
                 Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
+                SourceRepository source,
                 InstallationTarget target,
                 PackageLoaderOption option,
                 string searchText)
@@ -256,6 +245,7 @@ namespace NuGet.Client.VisualStudio.UI
                 _loader = loader;
                 _target = target;
                 _option = option;
+                _source = source;
 
                 LoadingMessage = string.IsNullOrWhiteSpace(searchText) ?
                     Resx.Resources.Text_Loading :
@@ -271,38 +261,16 @@ namespace NuGet.Client.VisualStudio.UI
                 private set;
             }
 
-            private Task<List<JObject>> InternalLoadItems(
-                int startIndex,
-                CancellationToken ct,
-                Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader)
-            {
-                return Task.Factory.StartNew(() =>
-                {
-                    var r1 = _loader(startIndex, ct);
-                    return r1.Result.ToList();
-                });
-            }
-
-            private UiDetailedPackage ToDetailedPackage(UiSearchResultPackage package)
-            {
-                var detailedPackage = new UiDetailedPackage();
-                detailedPackage.Id = package.Id;
-                detailedPackage.Version = package.Version;
-                detailedPackage.Summary = package.Summary;
-                return detailedPackage;
-            }
-
             public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
             {
-                var results = await InternalLoadItems(startIndex, ct, _loader);
+                var results = await _loader(startIndex, ct);
 
                 List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
                 foreach (var package in results)
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    // As a debugging aide, I am intentionally NOT using an object initializer -anurse
-                    var searchResultPackage = new UiSearchResultPackage();
+                    var searchResultPackage = new UiSearchResultPackage(_source);
                     searchResultPackage.Id = package.Value<string>(Properties.PackageId);
                     searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
 
@@ -313,18 +281,25 @@ namespace NuGet.Client.VisualStudio.UI
                     }
 
                     searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
-                    
-                    var allVersions = LoadVersions(
-                        package.Value<JArray>(Properties.Packages), 
-                        searchResultPackage.Version);
-                    if (!allVersions.Select(v => v.Version).Contains(searchResultPackage.Version))
-                    {
-                        // make sure allVersions contains searchResultPackage itself.
-                        allVersions.Add(ToDetailedPackage(searchResultPackage));
-                    }
-                    searchResultPackage.AllVersions = allVersions;
 
-                    SetPackageStatus(searchResultPackage, _target);
+                    var versionList = new List<NuGetVersion>();
+                    var versions = package.Value<JArray>(Properties.Versions);
+                    if (versions != null)
+                    {
+                        versionList = versions
+                            .Select(v => NuGetVersion.Parse(v.Value<string>()))
+                            .ToList();
+                    }
+                    if (!versionList.Contains(searchResultPackage.Version))
+                    {
+                        versionList.Add(searchResultPackage.Version);
+                    }
+                    searchResultPackage.Versions = versionList;
+
+                    searchResultPackage.Status = PackageManagerControl.GetPackageStatus(
+                        searchResultPackage.Id,
+                        _target,
+                        searchResultPackage.Versions);
                     if (_option.ShowUpdatesAvailable &&
                         searchResultPackage.Status != PackageStatus.UpdateAvailable)
                     {
@@ -335,11 +310,7 @@ namespace NuGet.Client.VisualStudio.UI
                     if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
                     {
                         // summary is empty. Use its description instead.
-                        var self = searchResultPackage.AllVersions.FirstOrDefault(p => p.Version == searchResultPackage.Version);
-                        if (self != null)
-                        {
-                            searchResultPackage.Summary = self.Description;
-                        }
+                        searchResultPackage.Summary = package.Value<string>(Properties.Description);
                     }
 
                     packages.Add(searchResultPackage);
@@ -354,9 +325,13 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             // Get all versions of the package
-            private List<UiDetailedPackage> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
+            private List<UiPackageMetadata> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
             {
-                var retValue = new List<UiDetailedPackage>();
+                var retValue = new List<UiPackageMetadata>();
+                if (versions == null)
+                {
+                    return retValue;
+                }
 
                 // If repo is AggregateRepository, the package duplicates can be returned by
                 // FindPackagesById(), so Distinct is needed here to remove the duplicates.
@@ -364,10 +339,9 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     Debug.Assert(token.Type == JTokenType.Object);
                     JObject version = (JObject)token;
-                    var detailedPackage = new UiDetailedPackage();
-                    detailedPackage.Id = version.Value<string>(Properties.PackageId);
-                    detailedPackage.Version = NuGetVersion.Parse(version.Value<string>(Properties.Version));
-                    if (detailedPackage.Version.IsPrerelease && 
+                    var detailedPackage = DetailControlModel.CreateDetailedPackage(version);
+
+                    if (detailedPackage.Version.IsPrerelease &&
                         !_option.IncludePrerelease &&
                         detailedPackage.Version != searchResultVersion)
                     {
@@ -375,31 +349,12 @@ namespace NuGet.Client.VisualStudio.UI
                         continue;
                     }
 
-                    string publishedStr = version.Value<string>(Properties.Published);
-                    if (!String.IsNullOrEmpty(publishedStr))
+                    if (detailedPackage.Published <= Unpublished &&
+                        detailedPackage.Version != searchResultVersion)
                     {
-                        detailedPackage.Published = DateTime.Parse(publishedStr);
-                        if (detailedPackage.Published <= Unpublished &&
-                            detailedPackage.Version != searchResultVersion)
-                        {
-                            // don't include unlisted package
-                            continue;
-                        }
+                        // don't include unlisted package
+                        continue;
                     }
-
-                    detailedPackage.Summary = version.Value<string>(Properties.Summary);
-                    detailedPackage.Description = version.Value<string>(Properties.Description);
-                    detailedPackage.Authors = version.Value<string>(Properties.Authors);
-                    detailedPackage.Owners = version.Value<string>(Properties.Owners);
-                    detailedPackage.IconUrl = GetUri(version, Properties.IconUrl);
-                    detailedPackage.LicenseUrl = GetUri(version, Properties.LicenseUrl);
-                    detailedPackage.ProjectUrl = GetUri(version, Properties.ProjectUrl);
-                    detailedPackage.Tags = String.Join(" ", (version.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString()));
-                    detailedPackage.DownloadCount = version.Value<int>(Properties.DownloadCount);
-                    detailedPackage.DependencySets = (version.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj));
-
-                    detailedPackage.HasDependencies = detailedPackage.DependencySets.Any(
-                        set => set.Dependencies != null && set.Dependencies.Count > 0);
 
                     retValue.Add(detailedPackage);
                 }
@@ -419,38 +374,6 @@ namespace NuGet.Client.VisualStudio.UI
                     return null;
                 }
                 return new Uri(str);
-            }
-
-            private UiPackageDependencySet LoadDependencySet(JObject set)
-            {
-                var fxName = set.Value<string>(Properties.TargetFramework);
-                return new UiPackageDependencySet(
-                    String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelper.ParsePossiblyShortenedFrameworkName(fxName),
-                    (set.Value<JArray>(Properties.Dependencies) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
-            }
-
-            private UiPackageDependency LoadDependency(JObject dep)
-            {
-                var ver = dep.Value<string>(Properties.Range);
-                return new UiPackageDependency(
-                    dep.Value<string>(Properties.PackageId),
-                    String.IsNullOrEmpty(ver) ? null : VersionRange.Parse(ver));
-            }
-
-            private string StringCollectionToString(JArray v)
-            {
-                if (v == null)
-                {
-                    return null;
-                }
-
-                string retValue = String.Join(", ", v.Select(t => t.ToString()));
-                if (retValue == String.Empty)
-                {
-                    return null;
-                }
-
-                return retValue;
             }
         }
 
@@ -515,6 +438,7 @@ namespace NuGet.Client.VisualStudio.UI
                             startIndex,
                             PageSize,
                             ct),
+                    sourceRepository,
                     Target,
                     option,
                     searchText);
@@ -533,6 +457,7 @@ namespace NuGet.Client.VisualStudio.UI
                                 return Enumerable.Empty<JObject>();
                             });
                         },
+                        sourceRepository,
                         Target,
                         option,
                         searchText);
@@ -552,6 +477,7 @@ namespace NuGet.Client.VisualStudio.UI
                             startIndex,
                             PageSize,
                             ct),
+                        sourceRepository,
                         Target,
                         option,
                         searchText);
@@ -579,20 +505,29 @@ namespace NuGet.Client.VisualStudio.UI
             if (selectedPackage == null)
             {
                 _packageDetail.DataContext = null;
-                _packageSolutionDetail.DataContext = null;
             }
             else
             {
-                if (!Target.IsSolution)
+                DetailControlModel newModel;
+                if (Target.IsSolution)
                 {
-                    var installedPackage = Target.InstalledPackages.GetInstalledPackage(selectedPackage.Id);
-                    var installedVersion = installedPackage == null ? null : installedPackage.Identity.Version;
-                    _packageDetail.DataContext = new PackageDetailControlModel(selectedPackage, installedVersion);
+                    newModel = new PackageSolutionDetailControlModel(
+                        (VsSolution)Target,
+                        selectedPackage);
                 }
                 else
                 {
-                    _packageSolutionDetail.DataContext = new PackageSolutionDetailControlModel(selectedPackage, (VsSolution)Target);
+                    newModel = new PackageDetailControlModel(
+                        Target,
+                        selectedPackage);
                 }
+
+                var oldModel = _packageDetail.DataContext as DetailControlModel;
+                if (oldModel != null)
+                {
+                    newModel.Options = oldModel.Options;
+                }
+                _packageDetail.DataContext = newModel;                
             }
         }
 
@@ -638,23 +573,34 @@ namespace NuGet.Client.VisualStudio.UI
                         continue;
                     }
 
-                    SetPackageStatus(package, Target);
+                    package.Status = PackageManagerControl.GetPackageStatus(
+                        package.Id,
+                        Target,
+                        package.Versions);
                 }
             }
         }
 
-        // Set the PackageStatus property of the given package.
-        private static void SetPackageStatus(
-            UiSearchResultPackage package,
-            InstallationTarget target)
+        /// <summary>
+        /// Gets the status of the package specified by <paramref name="packageId"/> in
+        /// the specified installation target.
+        /// </summary>
+        /// <param name="packageId">package id.</param>
+        /// <param name="target">The installation target.</param>
+        /// <param name="allVersions">List of all versions of the package.</param>
+        /// <returns>The status of the package in the installation target.</returns>
+        private static PackageStatus GetPackageStatus(
+            string packageId,
+            InstallationTarget target,
+            IEnumerable<NuGetVersion> allVersions)
         {
-            var latestStableVersion = package.AllVersions
-                .Where(p => !p.Version.IsPrerelease)
-                .Max(p => p.Version);
+            var latestStableVersion = allVersions
+                .Where(p => !p.IsPrerelease)
+                .Max(p => p);
 
             // Get the minimum version installed in any target project/solution
             var minimumInstalledPackage = target.GetAllTargetsRecursively()
-                .Select(t => t.InstalledPackages.GetInstalledPackage(package.Id))
+                .Select(t => t.InstalledPackages.GetInstalledPackage(packageId))
                 .Where(p => p != null)
                 .OrderBy(r => r.Identity.Version)
                 .FirstOrDefault();
@@ -676,7 +622,7 @@ namespace NuGet.Client.VisualStudio.UI
                 status = PackageStatus.NotInstalled;
             }
 
-            package.Status = status;
+            return status;
         }
 
         public bool ShowLicenseAgreement(IEnumerable<PackageAction> operations)
@@ -715,36 +661,17 @@ namespace NuGet.Client.VisualStudio.UI
             return true;
         }
 
-        private void PreviewActions(IEnumerable<PackageAction> actions)
+        /// <summary>
+        /// Shows the preveiw window for the actions.
+        /// </summary>
+        /// <param name="actions">actions to preview.</param>
+        /// <returns>True if nuget should continue to perform the actions. Otherwise false.</returns>
+        private bool PreviewActions(IEnumerable<PackageAction> actions)
         {
             var w = new PreviewWindow();
             w.DataContext = new PreviewWindowModel(actions, Target);
-            w.ShowModal();
+            return w.ShowModal() == true;
         }
-
-        // preview user selected action
-        internal async void Preview(IDetailControl detailControl)
-        {
-            SetBusy(true);
-            try
-            {
-                _outputConsole.Clear();
-                var actions = await detailControl.ResolveActionsAsync();
-                PreviewActions(actions);
-            }
-            catch (Exception ex)
-            {
-                var errorDialog = new ErrorReportingDialog(
-                    ex.Message,
-                    ex.ToString());
-                errorDialog.ShowModal();
-            }
-            finally
-            {
-                SetBusy(false);
-            }
-        }
-
 
         // perform the user selected action
         internal async void PerformAction(IDetailControl detailControl)
@@ -758,6 +685,17 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 var actions = await detailControl.ResolveActionsAsync();
+
+                // show preview
+                var model = (DetailControlModel)_packageDetail.DataContext;
+                if (model.Options.ShowPreviewWindow)
+                {
+                    var shouldContinue = PreviewActions(actions);
+                    if (!shouldContinue)
+                    {
+                        return;
+                    }
+                }
 
                 // show license agreeement
                 bool acceptLicense = ShowLicenseAgreement(actions);
@@ -788,7 +726,6 @@ namespace NuGet.Client.VisualStudio.UI
                 SetBusy(false);
             }
         }
-
 
         private void _searchControl_SearchStart(object sender, EventArgs e)
         {

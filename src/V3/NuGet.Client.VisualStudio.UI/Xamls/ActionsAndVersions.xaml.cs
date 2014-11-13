@@ -10,28 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     /// <summary>
-    /// Interaction logic for InstallPreviewWindow.xaml
+    /// Interaction logic for ActionsAndVersions.xaml
     /// </summary>
-    public partial class PreviewWindow : VsDialogWindow
+    public partial class ActionsAndVersions : UserControl
     {
-        public PreviewWindow()
+        public ActionsAndVersions()
         {
             InitializeComponent();
-        }
-
-        private void CancelButtonClicked(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
-
-        private void OkButtonClicked(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
         }
     }
 }

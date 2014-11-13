@@ -47,29 +47,34 @@ namespace NuGet.Client
             return _localRepository.Exists(packageId);
         }
 
-        public override Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
+        public override async Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
-            return Task.Run(() =>
+            var installedPackages = await Task.Factory.StartNew(() =>
                 _localRepository.Search(searchTerm, allowPrereleaseVersions: true)
-                    .Skip(skip).Take(take).ToList()
-                    .Select(p => CreatePackageSearchResult(source, p)));
+                    .Skip(skip).Take(take).ToList());
+            var result = new List<JObject>();
+            foreach (var p in installedPackages)
+            {
+                var searchResult = await CreatePackageSearchResult(source, p);
+                result.Add(searchResult);
+            }
+            return result;
         }
 
-        private static JObject CreatePackageSearchResult(SourceRepository source, IPackage package)
+        private static async Task<JObject> CreatePackageSearchResult(SourceRepository source, IPackage package)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
-            var result = PackageJsonLd.CreatePackageSearchResult(package, Enumerable.Empty<IPackage>());
-            var versions = new JArray(source.GetPackageMetadataById(package.Id).Result);
 
-            // Need to ensure that the version list has the installed version in it as well
-            var currentVersion = versions.FirstOrDefault(t => SemanticVersion.Parse(t["version"].ToString()).Equals(package.Version));
-            if(currentVersion == null) {
-                currentVersion = PackageJsonLd.CreatePackage(package);
-                versions.Add(currentVersion);
+            var versions = new List<SemanticVersion>();
+            var packages = await source.GetPackageMetadataById(package.Id);
+            foreach (var p in packages)
+            {
+                var v = SemanticVersion.Parse(p.Value<string>(Properties.Version));
+                versions.Add(v);
             }
-
-            result[Properties.Packages] = versions;
+            
+            var result = PackageJsonLd.CreatePackageSearchResult(package, versions);
             return result;
         }
 

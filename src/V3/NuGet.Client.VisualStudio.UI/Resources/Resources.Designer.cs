@@ -196,6 +196,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show preview window.
+        /// </summary>
+        public static string Checkbox_ShowPreviewWindow {
+            get {
+                return ResourceManager.GetString("Checkbox_ShowPreviewWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highest.
         /// </summary>
         public static string DependencyBehavior_Highest {
@@ -624,6 +633,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Text_NoMoreItems {
             get {
                 return ResourceManager.GetString("Text_NoMoreItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to We are about to make the following changes:.
+        /// </summary>
+        public static string Text_PreviewChange {
+            get {
+                return ResourceManager.GetString("Text_PreviewChange", resourceCulture);
             }
         }
         

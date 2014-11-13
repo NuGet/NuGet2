@@ -29,12 +29,14 @@
                          TextChanged="_textBox_TextChanged" 
                          KeyDown="_textBox_KeyDown"></TextBox>
 
-                    <Button x:Name="_searchButton" Grid.Column="1" VerticalAlignment="Center" BorderThickness="0" 
+                    <Button x:Name="_searchButton" Grid.Column="1" VerticalAlignment="Center" 
+                            BorderThickness="0" 
                             Background="{Binding ElementName=_textBox, Path=Background}"  
                             Visibility="Visible">
                         <Button.Content>
-                            <Rectangle Width="{Binding ElementName=_self, Path=Height}" 
-                                       Height="{Binding ElementName=_self, Path=Height}">
+                            <Rectangle 
+                                Width="18" 
+                                Height="18" >
                                 <Rectangle.Fill>
                                     <DrawingBrush>
                                         <DrawingBrush.Drawing>

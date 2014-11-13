@@ -76,8 +76,14 @@
                    Text="{x:Static resx:Resources.Text_LicenseText}"
                    TextWrapping="Wrap" ></TextBlock>
         <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{x:Static resx:Resources.Button_IDecline}" Click="OnDeclineButtonClick" />
-            <Button Content="{x:Static resx:Resources.Button_IAccept}" Click="OnAcceptButtonClick" />
+            <Button 
+                Content="{x:Static resx:Resources.Button_IAccept}" 
+                AutomationProperties.AutomationId="AcceptButton"
+                Click="OnAcceptButtonClick" />
+            <Button 
+                Content="{x:Static resx:Resources.Button_IDecline}" 
+                AutomationProperties.AutomationId="DeclineButton"
+                Click="OnDeclineButtonClick" />            
         </StackPanel>
     </Grid>
 </ui:VsDialogWindow>

@@ -93,12 +93,14 @@
     <Compile Include="Converters\EnumerableToVisibilityConverter.cs" />
     <Compile Include="Converters\IconUrlToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
+    <Compile Include="DetailControlModel.cs" />
     <Compile Include="FileConflictActionItem.cs" />
     <Compile Include="IDetailControl.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
     <Compile Include="Models\UiPackageDependency.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
     <Compile Include="PackageSolutionDetailControlModel.cs" />
@@ -110,6 +112,9 @@
     <Compile Include="Resources\Colors.cs" />
     <Compile Include="VersionForDisplay.cs" />
     <Compile Include="VsDialogWindow.cs" />
+    <Compile Include="Xamls\ActionsAndVersions.xaml.cs">
+      <DependentUpon>ActionsAndVersions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>
@@ -129,11 +134,8 @@
       <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
-    <Compile Include="Xamls\Options.xaml.cs">
-      <DependentUpon>Options.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Xamls\PackageDetailControl.xaml.cs">
-      <DependentUpon>PackageDetailControl.xaml</DependentUpon>
+    <Compile Include="Xamls\OptionsControl.xaml.cs">
+      <DependentUpon>OptionsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageDetailControlModel.cs" />
     <Compile Include="Xamls\PackageItemControl.xaml.cs">
@@ -148,8 +150,8 @@
     <Compile Include="Xamls\PackageMetadataControl.xaml.cs">
       <DependentUpon>PackageMetadataControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xamls\PackageSolutionDetailControl.xaml.cs">
-      <DependentUpon>PackageSolutionDetailControl.xaml</DependentUpon>
+    <Compile Include="Xamls\DetailControl.xaml.cs">
+      <DependentUpon>DetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xamls\PreviewWindow.xaml.cs">
       <DependentUpon>PreviewWindow.xaml</DependentUpon>
@@ -175,6 +177,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Xamls\ActionsAndVersions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Xamls\BusyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -199,13 +205,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Xamls\Options.xaml">
+    <Page Include="Xamls\OptionsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Xamls\PackageDetailControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Xamls\PackageItemControl.xaml">
       <SubType>Designer</SubType>
@@ -219,7 +221,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xamls\PackageSolutionDetailControl.xaml">
+    <Page Include="Xamls\DetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

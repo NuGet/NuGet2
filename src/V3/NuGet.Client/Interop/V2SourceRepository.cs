@@ -53,7 +53,7 @@ namespace NuGet.Client.Interop
                 var query = _repository.Search(
                     searchTerm,
                     filters.SupportedFrameworks.Select(fx => fx.FullName),
-                    filters.IncludePrerelease);                
+                    filters.IncludePrerelease);
 
                 // V2 sometimes requires that we also use an OData filter for latest/latest prerelease version
                 if (filters.IncludePrerelease)
@@ -82,13 +82,14 @@ namespace NuGet.Client.Interop
                     .ToList()
                     .AsParallel()
                     .AsOrdered()
-                    .Select(p => CreatePackageSearchResult(p))
+                    .Select(p => CreatePackageSearchResult(p, cancellationToken))
                     .ToList();
             }, cancellationToken);
         }
 
-        private JObject CreatePackageSearchResult(IPackage package)
+        private JObject CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
             var versions = _repository.FindPackagesById(package.Id);
             if (!versions.Any())
@@ -96,22 +97,14 @@ namespace NuGet.Client.Interop
                 versions = new[] { package };
             }
 
-            string repoRoot = null;
-            IPackagePathResolver resolver = null;
-            if (_lprepo != null)
-            {
-                repoRoot = _lprepo.Source;
-                resolver = _lprepo.PathResolver;
-            }
-
-            return PackageJsonLd.CreatePackageSearchResult(package, versions, repoRoot, resolver);
+            return PackageJsonLd.CreatePackageSearchResult(package, versions.Select(p => p.Version));
         }
 
         public override Task<JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
         {
             return Task.Factory.StartNew(() =>
             {
-                NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);                
+                NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);
                 var semver = CoreConverters.SafeToSemVer(version);
                 var package = _repository.FindPackage(id, semver);
 

@@ -31,9 +31,10 @@
             <WrapPanel Grid.Row="2" Margin="0,12,0,20" Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal" Margin="24,8,0,0">
                     <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Text="{x:Static resx:Resources.Label_Repository}" />
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        VerticalAlignment="Center"
+                        Text="{x:Static resx:Resources.Label_Repository}" />
 
                     <ComboBox
                         Margin="6,0,0,0"
@@ -47,6 +48,7 @@
                     <TextBlock
                         Grid.Column="2"
                         Margin="24,0,0,0"
+                        FontWeight="Bold"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_Filter}" />
 
@@ -140,16 +142,10 @@
                     <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
                     </Tools:BusyControl>
 
-                    <Tools:PackageDetailControl
+                    <Tools:DetailControl
                         x:Name="_packageDetail"
                         Grid.Column="2"
-                        Grid.RowSpan="2"
-                        Visibility="Collapsed" />
-                    <Tools:PackageSolutionDetailControl
-                        x:Name="_packageSolutionDetail"
-                        Grid.Column="2"
-                        Grid.RowSpan="2"
-                        Visibility="Collapsed" />
+                        Grid.RowSpan="2" />
                 </Grid>
             </Border>
         </Grid>

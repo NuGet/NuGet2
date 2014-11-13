@@ -77,6 +77,16 @@ namespace NuGet.Client.VisualStudio
             AddFeature<IPackageManager>(() => packageManager);
             AddFeature<IPackageCacheRepository>(() => MachineCache.Default);
 
+            // the source repository of the local repo of the solution
+            AddFeature<SourceRepository>(() =>
+            {
+                var localRepo = new NuGet.Client.Interop.V2SourceRepository(
+                    null,
+                    packageManager.LocalRepository,
+                    "");
+                return localRepo;
+            });
+
             // Add PowerShell feature
             AddFeature<PowerShellScriptExecutor>(() =>
                 new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>()));

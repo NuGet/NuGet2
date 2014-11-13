@@ -32,7 +32,7 @@ namespace NuGet.Client.VisualStudio.UI
             return String.Format(
                 CultureInfo.InvariantCulture,
                 "{0} {1}",
-                Id, Range);
+                Id, Range.PrettyPrint());
         }
     }
 }
