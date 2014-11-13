@@ -720,7 +720,11 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.FileConflictAction = detailControl.FileConflictAction;
                 progressDialog.Show();
                 var executor = new ActionExecutor();
-                await executor.ExecuteActionsAsync(actions, logger: progressDialog, cancelToken: CancellationToken.None);
+                await Task.Run(
+                    () => 
+                    { 
+                        executor.ExecuteActions(actions, progressDialog); 
+                    });
 
                 UpdatePackageStatus();
                 detailControl.Refresh();

@@ -11,37 +11,34 @@ namespace NuGet.Client.Installation
 {
     public class PurgeActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
+        public void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken)
         {
             // Use the core-interop feature to execute the action
-            return Task.Run(() =>
-            {
-                var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
+            var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
 
-                // Preconditions:
-                Debug.Assert(!packageManager.LocalRepository.IsReferenced(
-                    action.PackageIdentity.Id,
-                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version)),
-                    "Expected the purge operation would only be executed AFTER the package was no longer referenced!");
+            // Preconditions:
+            Debug.Assert(!packageManager.LocalRepository.IsReferenced(
+                action.PackageIdentity.Id,
+                CoreConverters.SafeToSemVer(action.PackageIdentity.Version)),
+                "Expected the purge operation would only be executed AFTER the package was no longer referenced!");
 
-                // Get the package out of the project manager
-                var package = packageManager.LocalRepository.FindPackage(
-                    action.PackageIdentity.Id,
-                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
-                Debug.Assert(package != null);
+            // Get the package out of the project manager
+            var package = packageManager.LocalRepository.FindPackage(
+                action.PackageIdentity.Id,
+                CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+            Debug.Assert(package != null);
 
-                // Purge the package from the local repository
-                packageManager.Logger = new ShimLogger(logger);
-                packageManager.Execute(new PackageOperation(
-                    package,
-                    NuGet.PackageAction.Uninstall));
-            });
+            // Purge the package from the local repository
+            packageManager.Logger = new ShimLogger(context);
+            packageManager.Execute(new PackageOperation(
+                package,
+                NuGet.PackageAction.Uninstall));
         }
 
-        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
+        public void Rollback(NewPackageAction action, IExecutionContext context)
         {
             // Just run the download action to undo a purge
-            return new DownloadActionHandler().Execute(action, logger, CancellationToken.None);
+            new DownloadActionHandler().Execute(action, context, CancellationToken.None);
         }
     }
 }

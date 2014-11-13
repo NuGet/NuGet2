@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{37465016-5F91-478B-B4E3-DC78B025797A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet.Client.VisualStudio.PowerShell</RootNamespace>
+    <AssemblyName>NuGet.Client.VisualStudio.PowerShell</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Common\CommonResources.cs">
+      <Link>CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Common\CommonResources.designer.cs">
+      <Link>CommonResources.designer.cs</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\IErrorHandler.cs">
+      <Link>IErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\NuGetErrorId.cs">
+      <Link>NuGetErrorId.cs</Link>
+    </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\ProgressActivityIds.cs">
+      <Link>ProgressActivityIds.cs</Link>
+    </Compile>
+    <Compile Include="ConsolidatePackageCommand.cs" />
+    <Compile Include="GetPackageCommand.cs" />
+    <Compile Include="GetProjectCommand.cs" />
+    <Compile Include="InstallPackageCommand.cs" />
+    <Compile Include="NuGetPowerShellBaseCommand.cs" />
+    <Compile Include="OpenPackagePageCommand.cs" />
+    <Compile Include="PackageRepositoryHelper.cs" />
+    <Compile Include="PackageActionBaseCommand.cs" />
+    <Compile Include="PackagesConfigReader.cs" />
+    <Compile Include="PowerShellPackageViewModel.cs" />
+    <Compile Include="PowerShellPreviewResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SetProjectCommand.cs" />
+    <Compile Include="UninstallPackageCommand.cs" />
+    <Compile Include="UpdatePackageCommand.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.csproj">
+      <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Versioning\Versioning.csproj">
+      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
+      <Name>Versioning</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VisualStudioResources\VisualStudioResources.csproj">
+      <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+      <Name>VisualStudioResources</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
+      <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>
+      <Name>VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VsConsole\Console.Types\Console.Types.csproj">
+      <Project>{6fd11460-39a3-4a10-ba63-7541b0a7d053}</Project>
+      <Name>Console.Types</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VsConsole\Console\Console.csproj">
+      <Project>{50e33da2-af14-486d-81b8-bd8409744a38}</Project>
+      <Name>Console</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VsConsole\PowerShellHost\PowerShellHost.csproj">
+      <Project>{5a79eef3-51c0-4a14-8d37-50ef38ad835d}</Project>
+      <Name>PowerShellHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
+      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
+      <Name>NuGet.Client.VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
+      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
+      <Name>NuGet.Client</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\Common\CommonResources.resx">
+      <Link>CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

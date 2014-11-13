@@ -17,7 +17,7 @@ namespace NuGet.Client.Installation
     /// </summary>
     public class DownloadActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
+        public void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken)
         {
             string downloadUriStr = action.Package[Properties.PackageContent].ToString();
             Uri downloadUri;
@@ -37,49 +37,46 @@ namespace NuGet.Client.Installation
                     downloadUriStr));
             }
 
-            return Task.Run(() =>
+            // Get required features from the target
+            var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
+            var packageCache = action.Target.TryGetFeature<IPackageCacheRepository>();
+
+            // Load the package
+            IPackage package;
+            if (downloadUri.IsFile)
             {
-                // Get required features from the target
-                var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
-                var packageCache = action.Target.TryGetFeature<IPackageCacheRepository>();
+                package = new OptimizedZipPackage(downloadUri.LocalPath);
+            }
+            else
+            {
+                package = GetPackage(packageCache, action.PackageIdentity, downloadUri);
+            }
 
-                // Load the package
-                IPackage package;
-                if (downloadUri.IsFile)
-                {
-                    package = new OptimizedZipPackage(downloadUri.LocalPath);
-                }
-                else
-                {
-                    package = GetPackage(packageCache, action.PackageIdentity, downloadUri);
-                }
+            NuGetTraceSources.ActionExecutor.Verbose(
+                "download/loadedpackage",
+                "[{0}] Loaded package.",
+                action.PackageIdentity);
 
-                NuGetTraceSources.ActionExecutor.Verbose(
-                    "download/loadedpackage",
-                    "[{0}] Loaded package.",
-                    action.PackageIdentity);
-                
-                // Now convert the action and use the V2 Execution logic since we
-                // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
-                packageManager.Logger = new ShimLogger(logger);
-                packageManager.Execute(new PackageOperation(
-                    package,
-                    NuGet.PackageAction.Install));
+            // Now convert the action and use the V2 Execution logic since we
+            // have a true V2 IPackage (either from the cache or an in-memory ZipPackage).
+            packageManager.Logger = new ShimLogger(context);
+            packageManager.Execute(new PackageOperation(
+                package,
+                NuGet.PackageAction.Install));
 
-                // Run init.ps1 if present. Init is run WITHOUT specifying a target framework.
-                ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
-                    "init.ps1",
-                    action.Target,
-                    package,
-                    packageManager.PathResolver.GetInstallPath(package),
-                    logger);
-            });
+            // Run init.ps1 if present. Init is run WITHOUT specifying a target framework.
+            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                "init.ps1",
+                action.Target,
+                package,
+                packageManager.PathResolver.GetInstallPath(package),
+                context);
         }
 
-        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
+        public void Rollback(NewPackageAction action, IExecutionContext context)
         {
             // Just run the purge action to undo a download
-            return new PurgeActionHandler().Execute(action, logger, CancellationToken.None);
+            new PurgeActionHandler().Execute(action, context, CancellationToken.None);
         }
 
         internal static IPackage GetPackage(IPackageCacheRepository packageCache, PackageIdentity packageIdentity, Uri downloadUri)

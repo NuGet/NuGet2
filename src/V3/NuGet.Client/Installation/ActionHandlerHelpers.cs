@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
@@ -11,8 +12,10 @@ namespace NuGet.Client.Installation
     // Common code used by action handlers
     public static class ActionHandlerHelpers
     {
-        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, IPackage package, string installPath, IExecutionLogger logger)
+        public static void ExecutePowerShellScriptIfPresent(string scriptName, InstallationTarget target, IPackage package, string installPath, IExecutionContext context)
         {
+            Debug.Assert(context != null);
+
             // If we don't have a project, we're at solution level
             //  The <Solution> string is only for tracing so it probably doesn't need to be loc'ed
             string projectName = target.Name;
@@ -27,27 +30,13 @@ namespace NuGet.Client.Installation
             // If there is a script to run
             if (scriptFile != null)
             {
-                // Get the powershell execution feature
-                var powershell = target.TryGetFeature<PowerShellScriptExecutor>();
-                if (powershell != null)
-                {
-                    NuGetTraceSources.ActionExecutor.Info(
-                        "executingps1",
-                        "[{0}] Running {2} for {1}",
-                        projectName,
-                        package.GetFullName(),
-                        scriptFile.Path);
-                    powershell.ExecuteScript(installPath, scriptFile.Path, package, target, logger);
-                }
-                else
-                {
-                    NuGetTraceSources.ActionExecutor.Warning(
-                        "missing_powershell_feature",
-                        "[{0}] Unable to run PowerShell script {2} for {1} because install target does not support PowerShell scripts.",
-                        projectName,
-                        package.GetFullName(),
-                        scriptFile.Path);
-                }
+                NuGetTraceSources.ActionExecutor.Info(
+                    "executingps1",
+                    "[{0}] Running {2} for {1}",
+                    projectName,
+                    package.GetFullName(),
+                    scriptFile.Path);
+                context.ExecuteScript(installPath, scriptFile.Path, package, target);
             }
             else
             {

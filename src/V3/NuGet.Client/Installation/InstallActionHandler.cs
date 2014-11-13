@@ -13,7 +13,7 @@ namespace NuGet.Client.Installation
 {
     public class InstallActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
+        public void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken)
         {
             var nugetAware = action.Target.TryGetFeature<NuGetAwareProject>();
             if (nugetAware != null)
@@ -37,16 +37,18 @@ namespace NuGet.Client.Installation
                         downloadUri);
                 }
                 var frameworks = package.GetSupportedFrameworks();
-                
-                return nugetAware.InstallPackage(
+                var task = nugetAware.InstallPackage(
                     action.PackageIdentity,
                     frameworks,
-                    logger,
+                    context,
                     cancelToken);
+                task.Wait();
             }
-
-            return Task.Run(() =>
+            else
             {
+                // TODO: PMC - Write Disclamer Texts
+                // TODO: Dialog & PMC - open Readme.txt
+
                 // Get the package manager and project manager from the target
                 var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
                 var projectManager = action.Target.GetRequiredFeature<IProjectManager>();
@@ -65,7 +67,7 @@ namespace NuGet.Client.Installation
                     action.Target);
 
                 // Add the package to the project
-                projectManager.Logger = new ShimLogger(logger);
+                projectManager.Logger = new ShimLogger(context);
                 projectManager.Project.Logger = projectManager.Logger;
                 projectManager.Execute(new PackageOperation(
                     package,
@@ -77,14 +79,14 @@ namespace NuGet.Client.Installation
                     action.Target,
                     package,
                     packageManager.PathResolver.GetInstallPath(package),
-                    logger);
-            });
+                    context);
+            }
         }
 
-        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
+        public void Rollback(NewPackageAction action, IExecutionContext context)
         {
             // Just run the uninstall action to undo a install
-            return new UninstallActionHandler().Execute(action, logger, CancellationToken.None);
+            new UninstallActionHandler().Execute(action, context, CancellationToken.None);
         }
     }
 }

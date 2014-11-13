@@ -9,8 +9,8 @@ namespace NuGet.VisualStudio.Test
 {
     public class VsPackageSourceProviderTest
     {
-        private const string NuGetOfficialFeedUrlV3 = "http://preview.nuget.org/ver3-ctp1/";
-        private const string NuGetOfficialFeedNameV3 = "nuget.org (3.0.0-ctp1) preview";
+        private const string NuGetOfficialFeedUrlV3 = "https://az320820.vo.msecnd.net/ver3-preview/index.json";
+        private const string NuGetOfficialFeedNameV3 = "preview.nuget.org";
 
         private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
         private const string NuGetOfficialFeedName = "nuget.org";

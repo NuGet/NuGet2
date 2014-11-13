@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace NuGet.Client
         }
 
         public static IEnumerable<PreviewResult> CreatePreview(
-            IEnumerable<NuGet.Client.Resolution.PackageAction> actions, 
+            IEnumerable<NuGet.Client.Resolution.PackageAction> actions,
             Installation.InstallationTarget target)
         {
             var previewResults = new List<PreviewResult>();

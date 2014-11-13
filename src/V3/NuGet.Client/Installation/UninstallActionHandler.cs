@@ -11,49 +11,48 @@ namespace NuGet.Client.Installation
 {
     public class UninstallActionHandler : IActionHandler
     {
-        public Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken)
+        public void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken)
         {
             var nugetAware = action.Target.TryGetFeature<NuGetAwareProject>();
             if (nugetAware != null)
             {
-                return nugetAware.UninstallPackage(
+                var task = nugetAware.UninstallPackage(
                     action.PackageIdentity,
-                    logger,
+                    context,
                     cancelToken);
+                task.Wait();
+                return;
             }
 
-            return Task.Run(() =>
-            {
-                // Get the project manager
-                var projectManager = action.Target.GetRequiredFeature<IProjectManager>();
-                
-                // Get the package out of the project manager
-                var package = projectManager.LocalRepository.FindPackage(
-                    action.PackageIdentity.Id,
-                    CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
-                Debug.Assert(package != null);
+            // Get the project manager
+            var projectManager = action.Target.GetRequiredFeature<IProjectManager>();
 
-                // Add the package to the project
-                projectManager.Logger = new ShimLogger(logger);
-                projectManager.Project.Logger = projectManager.Logger;
-                projectManager.Execute(new PackageOperation(
-                    package,
-                    NuGet.PackageAction.Uninstall));
+            // Get the package out of the project manager
+            var package = projectManager.LocalRepository.FindPackage(
+                action.PackageIdentity.Id,
+                CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+            Debug.Assert(package != null);
 
-                // Run uninstall.ps1 if present
-                ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
-                    "uninstall.ps1",
-                    action.Target,
-                    package,
-                    projectManager.PackageManager.PathResolver.GetInstallPath(package),
-                    logger);
-            });
+            // Add the package to the project
+            projectManager.Logger = new ShimLogger(context);
+            projectManager.Project.Logger = projectManager.Logger;
+            projectManager.Execute(new PackageOperation(
+                package,
+                NuGet.PackageAction.Uninstall));
+
+            // Run uninstall.ps1 if present
+            ActionHandlerHelpers.ExecutePowerShellScriptIfPresent(
+                "uninstall.ps1",
+                action.Target,
+                package,
+                projectManager.PackageManager.PathResolver.GetInstallPath(package),
+                context);
         }
 
-        public Task Rollback(NewPackageAction action, IExecutionLogger logger)
+        public void Rollback(NewPackageAction action, IExecutionContext context)
         {
             // Just run the install action to undo a uninstall
-            return new InstallActionHandler().Execute(action, logger, CancellationToken.None);
+            new InstallActionHandler().Execute(action, context, CancellationToken.None);
         }
     }
 }
