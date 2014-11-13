@@ -8,6 +8,8 @@ namespace NuGet.Client.Installation
 {
     public abstract class PowerShellScriptExecutor
     {
-        public abstract void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, InstallationTarget target, IExecutionLogger logger);
+        // The type of parameter package should be IPackage but we use object instead since we
+        // don't want to expose IPackage.
+        public abstract void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, InstallationTarget target, IExecutionLogger logger);
     }
 }

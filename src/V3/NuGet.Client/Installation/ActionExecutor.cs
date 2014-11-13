@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Resolution;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
@@ -12,11 +12,13 @@ namespace NuGet.Client.Installation
 {
     public interface IActionHandler
     {
-        Task Execute(NewPackageAction action, IExecutionLogger logger, CancellationToken cancelToken);
+        //!!! TODO: remove cancelToken
+        void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken);
 
-        Task Rollback(NewPackageAction action, IExecutionLogger logger); // Rollbacks should not be cancelled, it's a Bad Idea(TM)
+        void Rollback(NewPackageAction action, IExecutionContext context); // Rollbacks should not be cancelled, it's a Bad Idea(TM)
     }
 
+    // TODO: need to consider which actions can be executed async and how.
     public class ActionExecutor
     {
         private static readonly Dictionary<PackageActionType, IActionHandler> _actionHandlers = new Dictionary<PackageActionType, IActionHandler>()
@@ -27,12 +29,8 @@ namespace NuGet.Client.Installation
             { PackageActionType.Purge, new PurgeActionHandler() },
         };
 
-        public virtual Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, CancellationToken cancelToken)
-        {
-            return ExecuteActionsAsync(actions, NullExecutionLogger.Instance, cancelToken);
-        }
-
-        public virtual async Task ExecuteActionsAsync(IEnumerable<NewPackageAction> actions, IExecutionLogger logger, CancellationToken cancelToken)
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By defintion we want to catch all exceptions")]
+        public void ExecuteActions(IEnumerable<NewPackageAction> actions, IExecutionContext context)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
@@ -58,7 +56,7 @@ namespace NuGet.Client.Installation
                             "[{0}] Executing action: {1}",
                             action.PackageIdentity,
                             action.ToString());
-                        await handler.Execute(action, logger, cancelToken);
+                        handler.Execute(action, context, CancellationToken.None);
                         executedActions.Add(action);
                     }
                 }
@@ -71,17 +69,17 @@ namespace NuGet.Client.Installation
             if (capturedException != null)
             {
                 // Roll back the actions and rethrow
-                await Rollback(executedActions, logger);
+                Rollback(executedActions, context);
                 capturedException.Throw();
             }
         }
 
-        protected virtual async Task Rollback(ICollection<NewPackageAction> executedActions, IExecutionLogger logger)
+        protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionContext context)
         {
             if (executedActions.Count > 0)
             {
                 // Only print the rollback warning if we have something to rollback
-                logger.Log(MessageLevel.Warning, Strings.ActionExecutor_RollingBack);
+                context.Log(MessageLevel.Warning, Strings.ActionExecutor_RollingBack);
             }
 
             foreach (var action in executedActions.Reverse())
@@ -102,7 +100,7 @@ namespace NuGet.Client.Installation
                         "[{0}] Executing action: {1}",
                         action.PackageIdentity,
                         action.ToString());
-                    await handler.Rollback(action, logger);
+                    handler.Rollback(action, context);
                 }
             }
         }

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-using System.Text;
 using EnvDTE;
 using NuGet.Client.Installation;
 using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio
 {
-    internal class VsPowerShellScriptExecutor : PowerShellScriptExecutor
+    public class VsPowerShellScriptExecutor : PowerShellScriptExecutor
     {
         // V3TODO: Move script execution logic entirely into this class or revamp IScriptExecutor to be more general purpose.
 
@@ -22,8 +19,10 @@ namespace NuGet.Client.VisualStudio
             _scriptExecutor = (PSScriptExecutor)scriptExecutor;
         }
 
-        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, IPackage package, InstallationTarget target, IExecutionLogger logger)
+        public override void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, InstallationTarget target, IExecutionLogger logger)
         {
+            IPackage packageObject = (IPackage)package;
+
             // If we don't have a project, we're at solution level
             string projectName = target.Name;
             FrameworkName targetFramework = target.GetSupportedFrameworks().FirstOrDefault();
@@ -51,7 +50,7 @@ namespace NuGet.Client.VisualStudio
                 _scriptExecutor.ExecuteResolvedScript(
                     fullPath,
                     packageInstallPath,
-                    package,
+                    packageObject,
                     dteProject,
                     targetFramework,
                     new ShimLogger(logger));

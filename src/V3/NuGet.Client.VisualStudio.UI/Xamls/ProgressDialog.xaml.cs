@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
+using NuGet.VisualStudio;
 using NuGetConsole;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -12,7 +13,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for ProgressDialog.xaml
     /// </summary>
-    public partial class ProgressDialog : VsDialogWindow, IExecutionLogger
+    public partial class ProgressDialog : VsDialogWindow, IExecutionContext
     {
         private readonly Dispatcher _uiDispatcher;
         private DateTime _loadedTime;
@@ -192,6 +193,12 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             return FileConflictAction;
+        }
+
+        public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, Installation.InstallationTarget target)
+        {
+            var executor = new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>());
+            executor.ExecuteScript(packageInstallPath, scriptRelativePath, package, target, this);
         }
     }
 }

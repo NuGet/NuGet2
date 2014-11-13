@@ -55,13 +55,13 @@ TypesToProcess = @('NuGet.Types.ps1xml')
 FormatsToProcess = @('NuGet.Format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-NestedModules = @('NuGet.Cmdlets.dll')
+NestedModules = @('NuGet.Client.VisualStudio.PowerShell.dll')
 
 # Functions to export from this module
 FunctionsToExport = @('Register-TabExpansion')
 
 # Cmdlets to export from this module
-CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'Get-Project', 'Add-BindingRedirect', 'Open-PackagePage')
+CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'Get-Project', 'Set-Project', 'Open-PackagePage', 'Consolidate-Package')
 
 # Variables to export from this module
 VariablesToExport = ''
