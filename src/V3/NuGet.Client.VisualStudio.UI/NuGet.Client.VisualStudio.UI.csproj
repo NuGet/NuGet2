@@ -90,7 +90,7 @@
   <ItemGroup>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DownloadCountToVisibilityConverter.cs" />
-    <Compile Include="Converters\EmptyEnumerableToVisibilityConverter.cs" />
+    <Compile Include="Converters\EnumerableToVisibilityConverter.cs" />
     <Compile Include="Converters\IconUrlToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
     <Compile Include="FileConflictActionItem.cs" />

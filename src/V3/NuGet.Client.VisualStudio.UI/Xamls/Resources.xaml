@@ -9,7 +9,8 @@
     <Tools:IconUrlToVisibilityConverter x:Key="IconUrlToVisibilityConverter" />
 
     <Tools:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-    <Tools:EmptyEnumerableToVisibilityConverter x:Key="EmptyEnumerableToVisibilityConverter" />
+    <Tools:EnumerableToVisibilityConverter Inverted="true" x:Key="EmptyEnumerableToVisibilityConverter" />
+    <Tools:EnumerableToVisibilityConverter x:Key="EnumerableToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter Inverted="True" x:Key="InvertedBooleanToVisibilityConverter" />
     <Tools:DownloadCountToVisibilityConverter x:Key="DownloadCountToVisibilityConverter" />
