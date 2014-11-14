@@ -8,6 +8,8 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -27,7 +29,7 @@ namespace NuGet.PowerShell.Commands
     /// This command installs the specified package into the specified project.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
-    public class InstallPackageCommand
+    public class InstallPackageCommand : PSCmdlet, IExecutionLogger //, IErrorHandler
     {
         private ActionResolver _actionResolver;
         private VsSourceRepositoryManager _repoManager;
@@ -40,6 +42,12 @@ namespace NuGet.PowerShell.Commands
         private PackageIdentity _identity;
         private ResolutionContext _context;
         private readonly EnvDTE._DTE _dte;
+        private readonly IHttpClientEvents _httpClientEvents;
+        private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
+        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
+        private ProgressRecordCollection _progressRecordCache;
+        private VsSolution _solution;
 
         public InstallPackageCommand()
         {
@@ -51,8 +59,7 @@ namespace NuGet.PowerShell.Commands
             _solutionManager = new SolutionManager();
             _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
             _actionResolver = new ActionResolver(_repoManager.ActiveRepository, _context);
-
-            ExecuteCommmand();
+            _solution = _VsContext.GetCurrentVsSolution();
         }
 
         public ResolutionContext ResolutionContext
@@ -75,29 +82,100 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        public VsSolution Solution
-        {
-            get
-            {
-                return _VsContext.GetCurrentVsSolution();
-            }
-        }
-
         public IEnumerable<VsProject> TargetedProject
         {
             get
             {
-                EnvDTE.Project project = Solution.DteSolution.GetAllProjects().FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
-                VsProject vsProject = Solution.GetProject(project);
+                
+                EnvDTE.Project project = _solution.DteSolution.GetAllProjects()
+                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
+                VsProject vsProject = _solution.GetProject(project);
                 List<VsProject> targetedProjects = new List<VsProject> {vsProject};
                 return targetedProjects;
             }
         }
-      
-        private void ExecuteCommmand()
+
+        internal bool IsSyncMode
+        {
+            get
+            {
+                if (Host == null || Host.PrivateData == null)
+                {
+                    return false;
+                }
+
+                PSObject privateData = Host.PrivateData;
+                var syncModeProp = privateData.Properties["IsSyncMode"];
+                return syncModeProp != null && (bool)syncModeProp.Value;
+            }
+        }
+
+        internal void Execute()
+        {
+            BeginProcessing();
+            ProcessRecord();
+            EndProcessing();
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
+        protected sealed override void ProcessRecord()
+        {
+            try
+            {
+                ProcessRecordCore();
+            }
+            catch (Exception ex)
+            {
+                // unhandled exceptions should be terminating
+                // ErrorHandler.HandleException(ex, terminating: true);
+            }
+            finally
+            {
+                UnsubscribeEvents();
+            }
+        }
+
+        protected override void BeginProcessing()
+        {
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.SendingRequest += OnSendingRequest;
+            }
+        }
+
+        protected override void StopProcessing()
+        {
+            UnsubscribeEvents();
+            base.StopProcessing();
+        }
+
+        private void UnsubscribeEvents()
+        {
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.SendingRequest -= OnSendingRequest;
+            }
+        }
+
+        protected virtual void OnSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
+        }
+
+        /*
+        protected IErrorHandler ErrorHandler
+        {
+            get
+            {
+                return this;
+            }
+        } */
+
+        private void ProcessRecordCore()
         {
             // Resolve Actions
-            Task<IEnumerable<NuGet.Client.Resolution.PackageAction>> actions = _actionResolver.ResolveActionsAsync(_identity, PackageActionType.Install, TargetedProject, Solution);
+            Task<IEnumerable<NuGet.Client.Resolution.PackageAction>> actions = _actionResolver.ResolveActionsAsync(
+                _identity, PackageActionType.Install, TargetedProject, _solution);
 
             // Execute Actions
             ActionExecutor executor = new ActionExecutor();
@@ -120,5 +198,109 @@ namespace NuGet.PowerShell.Commands
 
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
+
+        public void Log(Client.MessageLevel level, string message, params object[] args)
+        {
+        }
+
+        public FileConflictAction ResolveFileConflict(string message)
+        {
+            return FileConflictAction.IgnoreAll;
+        }
+
+        /*
+        void IErrorHandler.HandleError(ErrorRecord errorRecord, bool terminating)
+        {
+            if (terminating)
+            {
+                ThrowTerminatingError(errorRecord);
+            }
+            else
+            {
+                WriteError(errorRecord);
+            }
+        }
+
+        void IErrorHandler.HandleException(Exception exception, bool terminating,
+            string errorId, ErrorCategory category, object target)
+        {
+
+            exception = ExceptionUtility.Unwrap(exception);
+
+            var error = new ErrorRecord(exception, errorId, category, target);
+
+            ErrorHandler.HandleError(error, terminating: terminating);
+        } */
+
+        protected void WriteLine(string message = null)
+        {
+            if (Host == null)
+            {
+                // Host is null when running unit tests. Simply return in this case
+                return;
+            }
+
+            if (message == null)
+            {
+                Host.UI.WriteLine();
+            }
+            else
+            {
+                Host.UI.WriteLine(message);
+            }
+        }
+
+        protected void WriteProgress(int activityId, string operation, int percentComplete)
+        {
+            if (IsSyncMode)
+            {
+                // don't bother to show progress if we are in synchronous mode
+                return;
+            }
+
+            ProgressRecord progressRecord;
+
+            // retrieve the ProgressRecord object for this particular activity id from the cache.
+            if (ProgressRecordCache.Contains(activityId))
+            {
+                progressRecord = ProgressRecordCache[activityId];
+            }
+            else
+            {
+                progressRecord = new ProgressRecord(activityId, operation, operation);
+                ProgressRecordCache.Add(progressRecord);
+            }
+
+            progressRecord.CurrentOperation = operation;
+            progressRecord.PercentComplete = percentComplete;
+
+            WriteProgress(progressRecord);
+        }
+
+        private void OnProgressAvailable(object sender, ProgressEventArgs e)
+        {
+            WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
+        }
+
+        private ProgressRecordCollection ProgressRecordCache
+        {
+            get
+            {
+                if (_progressRecordCache == null)
+                {
+                    _progressRecordCache = new ProgressRecordCollection();
+                }
+
+                return _progressRecordCache;
+            }
+        }
+    }
+
+    public  class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>
+    {
+        protected override int GetKeyForItem(ProgressRecord item)
+        {
+            return item.ActivityId;
+        }
     }
 }
