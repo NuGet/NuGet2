@@ -35,6 +35,10 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -61,8 +65,17 @@
     <Compile Include="..\..\Core\SemanticVersionTypeConverter.cs">
       <Link>SemanticVersionTypeConverter.cs</Link>
     </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\IErrorHandler.cs">
+      <Link>IErrorHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\NuGetErrorId.cs">
+      <Link>NuGetErrorId.cs</Link>
+    </Compile>
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\ProgressActivityIds.cs">
       <Link>ProgressActivityIds.cs</Link>
+    </Compile>
+    <Compile Include="..\..\VsConsole\PowerShellCmdlets\Resources.Designer.cs">
+      <Link>Resources.Designer.cs</Link>
     </Compile>
     <Compile Include="InstallPackageCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -94,6 +107,13 @@
       <Link>CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\..\VsConsole\PowerShellCmdlets\Resources.resx">
+      <Link>Resources.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

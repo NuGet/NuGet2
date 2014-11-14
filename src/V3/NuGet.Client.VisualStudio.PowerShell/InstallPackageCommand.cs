@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Newtonsoft.Json.Linq;
 using NuGet.Client;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
@@ -7,9 +8,11 @@ using NuGet.Client.VisualStudio;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -29,7 +32,7 @@ namespace NuGet.PowerShell.Commands
     /// This command installs the specified package into the specified project.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
-    public class InstallPackageCommand : PSCmdlet, IExecutionLogger //, IErrorHandler
+    public class InstallPackageCommand : PSCmdlet, IExecutionLogger, IErrorHandler
     {
         private ActionResolver _actionResolver;
         private VsSourceRepositoryManager _repoManager;
@@ -48,6 +51,61 @@ namespace NuGet.PowerShell.Commands
             () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
         private ProgressRecordCollection _progressRecordCache;
         private VsSolution _solution;
+        private string _projectName;
+        private string _version;
+
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
+        public virtual string Id { get; set; }
+
+        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
+        public virtual string ProjectName
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_projectName))
+                {
+                    _projectName = _solutionManager.DefaultProjectName;
+                }
+                return _projectName;
+            }
+            set
+            {
+                _projectName = value;
+            }
+        }
+
+        [Parameter(Position = 2)]
+        public string Version
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_version))
+                {
+                    try
+                    {
+                        Task<IEnumerable<JObject>> packages = _repoManager.ActiveRepository.GetPackageMetadataById(Id);
+                        var r = packages.Result;
+                        var allVersions = r.Select(p => NuGetVersion.Parse(p.Value<string>(Properties.Version)));
+                        _version = allVersions.OrderByDescending(v => v).FirstOrDefault().ToNormalizedString();
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorHandler.HandleException(ex, false);
+                    }
+                }
+                return _version;
+            }
+            set
+            {
+                _version = value;
+            }
+        }
+
+        [Parameter]
+        public DependencyBehavior DependencyBehavior { get; set; }
+
+        [Parameter, Alias("Prerelease")]
+        public SwitchParameter IncludePrerelease { get; set; }
 
         public InstallPackageCommand()
         {
@@ -58,7 +116,7 @@ namespace NuGet.PowerShell.Commands
             _repoManager = new VsSourceRepositoryManager(_packageSourceProvider, _repositoryFactory);
             _solutionManager = new SolutionManager();
             _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
-            _actionResolver = new ActionResolver(_repoManager.ActiveRepository, _context);
+            _actionResolver = new ActionResolver(_repoManager.ActiveRepository, ResolutionContext);
             _solution = _VsContext.GetCurrentVsSolution();
         }
 
@@ -82,11 +140,10 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        public IEnumerable<VsProject> TargetedProject
+        public IEnumerable<VsProject> TargetedProjects
         {
             get
-            {
-                
+            {         
                 EnvDTE.Project project = _solution.DteSolution.GetAllProjects()
                     .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
                 VsProject vsProject = _solution.GetProject(project);
@@ -127,11 +184,40 @@ namespace NuGet.PowerShell.Commands
             catch (Exception ex)
             {
                 // unhandled exceptions should be terminating
-                // ErrorHandler.HandleException(ex, terminating: true);
+                ErrorHandler.HandleException(ex, terminating: true);
             }
             finally
             {
                 UnsubscribeEvents();
+            }
+        }
+
+        private async void ProcessRecordCore()
+        {
+            if (!_solutionManager.IsSolutionOpen)
+            {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+
+            try
+            {
+                SubscribeToProgressEvents();
+
+                // Resolve Actions
+                Task<IEnumerable<NuGet.Client.Resolution.PackageAction>> actions = _actionResolver.ResolveActionsAsync(
+                    Identity, PackageActionType.Install, TargetedProjects, _solution);
+
+                // Execute Actions
+                ActionExecutor executor = new ActionExecutor();                
+                await executor.ExecuteActionsAsync(actions.Result, this, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                this.Log(Client.MessageLevel.Warning, ex.Message);
+            }
+            finally
+            {
+                UnsubscribeFromProgressEvents();
             }
         }
 
@@ -162,45 +248,18 @@ namespace NuGet.PowerShell.Commands
             HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
 
-        /*
         protected IErrorHandler ErrorHandler
         {
             get
             {
                 return this;
             }
-        } */
-
-        private void ProcessRecordCore()
-        {
-            // Resolve Actions
-            Task<IEnumerable<NuGet.Client.Resolution.PackageAction>> actions = _actionResolver.ResolveActionsAsync(
-                _identity, PackageActionType.Install, TargetedProject, _solution);
-
-            // Execute Actions
-            ActionExecutor executor = new ActionExecutor();
-            executor.ExecuteActionsAsync(actions.Result, CancellationToken.None);
-        }
-
-        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
-        public virtual string Id { get; set; }
-
-        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
-        [ValidateNotNullOrEmpty]
-        public virtual string ProjectName { get; set; }
-
-        [Parameter(Position = 2)]
-        [ValidateNotNull]
-        public string Version { get; set; }
-
-        [Parameter]
-        public DependencyBehavior DependencyBehavior { get; set; }
-
-        [Parameter, Alias("Prerelease")]
-        public SwitchParameter IncludePrerelease { get; set; }
+        } 
 
         public void Log(Client.MessageLevel level, string message, params object[] args)
         {
+            string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
+            LogCore(level, formattedMessage);
         }
 
         public FileConflictAction ResolveFileConflict(string message)
@@ -208,7 +267,6 @@ namespace NuGet.PowerShell.Commands
             return FileConflictAction.IgnoreAll;
         }
 
-        /*
         void IErrorHandler.HandleError(ErrorRecord errorRecord, bool terminating)
         {
             if (terminating)
@@ -230,7 +288,7 @@ namespace NuGet.PowerShell.Commands
             var error = new ErrorRecord(exception, errorId, category, target);
 
             ErrorHandler.HandleError(error, terminating: terminating);
-        } */
+        } 
 
         protected void WriteLine(string message = null)
         {
@@ -282,6 +340,58 @@ namespace NuGet.PowerShell.Commands
             WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 
+        protected void SubscribeToProgressEvents()
+        {
+            if (!IsSyncMode && _httpClientEvents != null)
+            {
+                _httpClientEvents.ProgressAvailable += OnProgressAvailable;
+            }
+        }
+
+        protected void UnsubscribeFromProgressEvents()
+        {
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.ProgressAvailable -= OnProgressAvailable;
+            }
+        }
+
+        protected virtual void LogCore(Client.MessageLevel level, string formattedMessage)
+        {
+            switch (level)
+            {
+                case Client.MessageLevel.Debug:
+                    WriteVerbose(formattedMessage);
+                    break;
+
+                case Client.MessageLevel.Warning:
+                    WriteWarning(formattedMessage);
+                    break;
+
+                case Client.MessageLevel.Info:
+                    WriteLine(formattedMessage);
+                    break;
+
+                case Client.MessageLevel.Error:
+                    WriteError(formattedMessage);
+                    break;
+            }
+        }
+
+        [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
+        protected void WriteError(string message)
+        {
+            if (!String.IsNullOrEmpty(message))
+            {
+                WriteError(new Exception(message));
+            }
+        }
+
+        protected void WriteError(Exception exception)
+        {
+            ErrorHandler.HandleException(exception, terminating: false);
+        }
+
         private ProgressRecordCollection ProgressRecordCache
         {
             get
@@ -294,6 +404,41 @@ namespace NuGet.PowerShell.Commands
                 return _progressRecordCache;
             }
         }
+
+        void IErrorHandler.WriteProjectNotFoundError(string projectName, bool terminating)
+        {
+            var notFoundException =
+                new ItemNotFoundException(
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.Cmdlet_ProjectNotFound, projectName));
+
+            ErrorHandler.HandleError(
+                new ErrorRecord(
+                    notFoundException,
+                    NuGetErrorId.ProjectNotFound, // This is your locale-agnostic error id.
+                    ErrorCategory.ObjectNotFound,
+                    projectName),
+                    terminating: terminating);
+        }
+
+        void IErrorHandler.ThrowSolutionNotOpenTerminatingError()
+        {
+            ErrorHandler.HandleException(
+                new InvalidOperationException(Resources.Cmdlet_NoSolution),
+                terminating: true,
+                errorId: NuGetErrorId.NoActiveSolution,
+                category: ErrorCategory.InvalidOperation);
+        }
+
+        void IErrorHandler.ThrowNoCompatibleProjectsTerminatingError()
+        {
+            ErrorHandler.HandleException(
+                new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
+                terminating: true,
+                errorId: NuGetErrorId.NoCompatibleProjects,
+                category: ErrorCategory.InvalidOperation);
+        }
     }
 
     public  class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>
@@ -303,4 +448,4 @@ namespace NuGet.PowerShell.Commands
             return item.ActivityId;
         }
     }
-}
+} 
