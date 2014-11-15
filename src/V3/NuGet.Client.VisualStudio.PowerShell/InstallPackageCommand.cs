@@ -192,7 +192,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        private async void ProcessRecordCore()
+        private void ProcessRecordCore()
         {
             if (!_solutionManager.IsSolutionOpen)
             {
@@ -209,7 +209,8 @@ namespace NuGet.PowerShell.Commands
 
                 // Execute Actions
                 ActionExecutor executor = new ActionExecutor();                
-                await executor.ExecuteActionsAsync(actions.Result, this, CancellationToken.None);
+                Task task = executor.ExecuteActionsAsync(actions.Result, this, CancellationToken.None);
+                task.Wait();
             }
             catch (Exception ex)
             {
