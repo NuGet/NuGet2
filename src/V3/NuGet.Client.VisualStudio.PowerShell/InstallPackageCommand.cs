@@ -2,13 +2,11 @@
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
 using NuGet.Client.Installation;
-using NuGet.Client.ProjectSystem;
 using NuGet.Client.Resolution;
 using NuGet.Client.VisualStudio;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;

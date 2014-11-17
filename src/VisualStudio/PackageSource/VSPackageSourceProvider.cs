@@ -193,11 +193,9 @@ namespace NuGet.VisualStudio
 
                 _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
 
-                // Remove the V3 CTP feed if present
-                var ctpFeed = _packageSources.FirstOrDefault(ps => NuGetV3Source.Equals(ps));
-                if (ctpFeed != null)
+                var previewFeed = _packageSources.FirstOrDefault(ps => NuGetV3Source.Equals(ps));
+                if (previewFeed != null)
                 {
-                    _packageSources.Remove(ctpFeed);
                     PersistPackageSources(
                             _packageSourceProvider,
                             _vsShellInfo,

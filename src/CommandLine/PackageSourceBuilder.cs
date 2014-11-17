@@ -15,6 +15,7 @@ namespace NuGet
             var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
             var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
             var legacyV2PackageSource = new PackageSource(NuGetConstants.V2LegacyFeedUrl, LocalizedResourceManager.GetString("OfficialPackageSourceName"));
+            //var v3PackageSource = new PackageSource(NuGetConstants.V3FeedUrl, LocalizedResourceManager.GetString("NuGetOfficialPreviewSourceName"));
 
             var packageSourceProvider = new PackageSourceProvider(
                 settings,
