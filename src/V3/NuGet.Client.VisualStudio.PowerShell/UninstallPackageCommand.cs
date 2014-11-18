@@ -26,36 +26,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                 ServiceLocator.GetInstance<IHttpClientEvents>(),
                  PackageActionType.Uninstall)
         {
             this.PackageActionResolver = new ActionResolver(this.RepoManager.ActiveRepository, ResContext);
-        }
-
-        [Parameter(Position = 2)]
-        public string Version
-        {
-            get
-            {
-                if (String.IsNullOrEmpty(_version))
-                {
-                    try
-                    {
-                        Task<IEnumerable<JObject>> packages = this.RepoManager.ActiveRepository.GetPackageMetadataById(Id);
-                        var r = packages.Result;
-                        var allVersions = r.Select(p => NuGetVersion.Parse(p.Value<string>(Properties.Version)));
-                        _version = allVersions.OrderByDescending(v => v).FirstOrDefault().ToNormalizedString();
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorHandler.HandleException(ex, false);
-                    }
-                }
-                return _version;
-            }
-            set
-            {
-                _version = value;
-            }
         }
 
         [Parameter]

@@ -3,6 +3,7 @@ using NuGet.Client;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Client.VisualStudio;
+using NuGet.Client.VisualStudio.PowerShell;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
@@ -38,7 +39,6 @@ namespace NuGet.PowerShell.Commands
         private ISolutionManager _solutionManager;
         private VsPackageManagerContext _VsContext;
         private PackageIdentity _identity;
-        private readonly EnvDTE._DTE _dte;
         private readonly IHttpClientEvents _httpClientEvents;
         private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
@@ -48,21 +48,10 @@ namespace NuGet.PowerShell.Commands
         private string _projectName;
         private PackageActionType _actionType;
         private string _id;
+        private string _version;
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
-        [ValidateNotNullOrEmpty]
-        public virtual string Id
-        {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
-        }
-
+        public virtual string Id { get; set; }
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         public virtual string ProjectName
@@ -81,8 +70,23 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
+        [Parameter(Position = 2)]
+        public string Version
+        {
+            get
+            {
+                _version = VersionUtil.GetLastestVersionForPackage(this.RepoManager.ActiveRepository, this.Id);
+                return _version;
+            }
+            set
+            {
+                _version = value;
+            }
+        }
+
+
         public ProcessPackageBaseCommand(IVsPackageSourceProvider psProvider, IPackageRepositoryFactory prFactory,
-                      SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, PackageActionType actionType)
+                      SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, IHttpClientEvents clientEvents, PackageActionType actionType)
         {
             _packageSourceProvider = psProvider;
             _repositoryFactory = prFactory;
@@ -91,6 +95,7 @@ namespace NuGet.PowerShell.Commands
             _solutionManager = new SolutionManager();
             _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
             _solution = _VsContext.GetCurrentVsSolution();
+            _httpClientEvents = clientEvents;
             _actionType = actionType;
         }
 
@@ -98,7 +103,7 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                _identity = new PackageIdentity(Id, NuGetVersion.Parse(PackageVersion));
+                _identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
                 return _identity;
             }
         }
@@ -117,8 +122,6 @@ namespace NuGet.PowerShell.Commands
                 _repoManager = value;
             }
         }
-
-        public string PackageVersion { get; set; }
 
         public IEnumerable<VsProject> TargetedProjects
         {

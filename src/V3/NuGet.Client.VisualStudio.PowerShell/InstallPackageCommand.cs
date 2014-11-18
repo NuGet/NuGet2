@@ -35,24 +35,10 @@ namespace NuGet.PowerShell.Commands
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                 ServiceLocator.GetInstance<IHttpClientEvents>(),
                  PackageActionType.Install)
         {
             this.PackageActionResolver = new ActionResolver(this.RepoManager.ActiveRepository, ResContext);
-            this.PackageVersion = Version;
-        }
-
-        [Parameter(Position = 2)]
-        public string Version
-        {
-            get
-            {
-                _version = VersionUtil.GetLastestVersionForPackage(this.RepoManager.ActiveRepository, this.Id);
-                return _version;
-            }
-            set
-            {
-                _version = value;
-            }
         }
 
         [Parameter]
