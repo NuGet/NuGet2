@@ -47,7 +47,6 @@ namespace NuGet.PowerShell.Commands
         private VsSolution _solution;
         private string _projectName;
         private PackageActionType _actionType;
-        private string _id;
         private string _version;
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -83,7 +82,6 @@ namespace NuGet.PowerShell.Commands
                 _version = value;
             }
         }
-
 
         public ProcessPackageBaseCommand(IVsPackageSourceProvider psProvider, IPackageRepositoryFactory prFactory,
                       SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, IHttpClientEvents clientEvents, PackageActionType actionType)

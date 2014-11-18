@@ -28,7 +28,6 @@ namespace NuGet.PowerShell.Commands
     public class InstallPackageCommand : ProcessPackageBaseCommand
     {
         private ResolutionContext _context;
-        private string _version;
 
         public InstallPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -46,7 +45,6 @@ namespace NuGet.PowerShell.Commands
 
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
-
 
         public ResolutionContext ResContext
         {

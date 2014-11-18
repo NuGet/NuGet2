@@ -19,7 +19,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public class UninstallPackageCommand : ProcessPackageBaseCommand
     {
         private ResolutionContext _context;
-        private string _version;
 
         public UninstallPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -37,7 +36,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
-
 
         public ResolutionContext ResContext
         {
