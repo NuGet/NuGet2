@@ -33,11 +33,11 @@ namespace NuGet.VisualStudio
             }
         }
 
-        protected override void AddGacReference(string name)
-        {
-            // The F# project system expects assemblies that start with * to be framework assemblies.
-            base.AddGacReference("*" + name);
-        }
+        //protected override void AddGacReference(string name)
+        //{
+        //    // The F# project system expects assemblies that start with * to be framework assemblies.
+        //    base.AddGacReference("*" + name);
+        //}
 
         public override bool FileExistsInProject(string path)
         {

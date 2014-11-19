@@ -17,21 +17,21 @@ namespace NuGet.VisualStudio
         {
         }
 
-        public override bool ReferenceExists(string name)
-        {
-            // We disable assembly reference for native projects
-            return true;
-        }
+        //public override bool ReferenceExists(string name)
+        //{
+        //    // We disable assembly reference for native projects
+        //    return true;
+        //}
 
-        public override void AddReference(string referencePath)
-        {
-            // We disable assembly reference for native projects
-        }
+        //public override void AddReference(string referencePath)
+        //{
+        //    // We disable assembly reference for native projects
+        //}
 
-        public override void RemoveReference(string name)
-        {
-            // We disable assembly reference for native projects
-        }
+        //public override void RemoveReference(string name)
+        //{
+        //    // We disable assembly reference for native projects
+        //}
 
         public override IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {

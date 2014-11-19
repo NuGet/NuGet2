@@ -157,131 +157,131 @@ namespace NuGet.VisualStudio
 
         public void AddFrameworkReference(string name)
         {
-            try
-            {
-                // Add a reference to the project
-                AddGacReference(name);
+            //try
+            //{
+            //    // Add a reference to the project
+            //    AddGacReference(name);
 
-                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddGacReference, name), e);
-            }
+            //    Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+            //}
+            //catch (Exception e)
+            //{
+            //    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddGacReference, name), e);
+            //}
         }
 
-        protected virtual void AddGacReference(string name)
+        protected void AddGacReference(string name)
         {
-            Project.GetReferences().Add(name);
+            // Project.GetReferences().Add(name);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public virtual void AddReference(string referencePath)
+        public void AddReference(string referencePath)
         {
-            string name = Path.GetFileNameWithoutExtension(referencePath);
+            //string name = Path.GetFileNameWithoutExtension(referencePath);
 
-            try
-            {
-                // Get the full path to the reference
-                string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
+            //try
+            //{
+            //    // Get the full path to the reference
+            //    string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
 
-                string assemblyPath = fullPath;
-                bool usedTempFile = false;
+            //    string assemblyPath = fullPath;
+            //    bool usedTempFile = false;
 
-                // There is a bug in Visual Studio whereby if the fullPath contains a comma, 
-                // then calling Project.Object.References.Add() on it will throw a COM exception.
-                // To work around it, we copy the assembly into temp folder and add reference to the copied assembly
-                if (fullPath.Contains(","))
-                {
-                    string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(fullPath));
-                    File.Copy(fullPath, tempFile, true);
-                    assemblyPath = tempFile;
-                    usedTempFile = true;
-                }
+            //    // There is a bug in Visual Studio whereby if the fullPath contains a comma, 
+            //    // then calling Project.Object.References.Add() on it will throw a COM exception.
+            //    // To work around it, we copy the assembly into temp folder and add reference to the copied assembly
+            //    if (fullPath.Contains(","))
+            //    {
+            //        string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(fullPath));
+            //        File.Copy(fullPath, tempFile, true);
+            //        assemblyPath = tempFile;
+            //        usedTempFile = true;
+            //    }
 
-                // Add a reference to the project
-                dynamic reference = Project.GetReferences().Add(assemblyPath);
+            //    // Add a reference to the project
+            //    dynamic reference = Project.GetReferences().Add(assemblyPath);
 
-                // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
-                if (usedTempFile)
-                {
-                    try
-                    {
-                        File.Delete(assemblyPath);
-                    }
-                    catch
-                    {
-                        // don't care if we fail to delete a temp file
-                    }
-                }
+            //    // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
+            //    if (usedTempFile)
+            //    {
+            //        try
+            //        {
+            //            File.Delete(assemblyPath);
+            //        }
+            //        catch
+            //        {
+            //            // don't care if we fail to delete a temp file
+            //        }
+            //    }
 
-                if (reference != null)
-                {
-                    TrySetCopyLocal(reference);
+            //    if (reference != null)
+            //    {
+            //        TrySetCopyLocal(reference);
 
-                    // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
-                    // Most commonly, it happens if this assembly is in the GAC or in the output path.
-                    if (reference.Path != null && !reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Get the msbuild project for this project
-                        MsBuildProject buildProject = Project.AsMSBuildProject();
+            //        // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
+            //        // Most commonly, it happens if this assembly is in the GAC or in the output path.
+            //        if (reference.Path != null && !reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase))
+            //        {
+            //            // Get the msbuild project for this project
+            //            MsBuildProject buildProject = Project.AsMSBuildProject();
 
-                        if (buildProject != null)
-                        {
-                            // Get the assembly name of the reference we are trying to add
-                            AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
+            //            if (buildProject != null)
+            //            {
+            //                // Get the assembly name of the reference we are trying to add
+            //                AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
 
-                            // Try to find the item for the assembly name
-                            MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
-                                                       where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
-                                                       select assemblyReferenceNode.Item1).FirstOrDefault();
+            //                // Try to find the item for the assembly name
+            //                MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
+            //                                           where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
+            //                                           select assemblyReferenceNode.Item1).FirstOrDefault();
 
-                            if (item != null)
-                            {
-                                // Add the <HintPath> metadata item as a relative path
-                                item.SetMetadataValue("HintPath", referencePath);
+            //                if (item != null)
+            //                {
+            //                    // Add the <HintPath> metadata item as a relative path
+            //                    item.SetMetadataValue("HintPath", referencePath);
 
-                                // Save the project after we've modified it.
-                                Project.Save(this);
-                            }
-                        }
-                    }
-                }
+            //                    // Save the project after we've modified it.
+            //                    Project.Save(this);
+            //                }
+            //            }
+            //        }
+            //    }
 
-                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddReference, name), e);
-            }
+            //    Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+            //}
+            //catch (Exception e)
+            //{
+            //    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddReference, name), e);
+            //}
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public virtual void RemoveReference(string name)
         {
-            try
-            {
-                // Get the reference name without extension
-                string referenceName = Path.GetFileNameWithoutExtension(name);
+            //try
+            //{
+            //    // Get the reference name without extension
+            //    string referenceName = Path.GetFileNameWithoutExtension(name);
 
-                // Remove the reference from the project
-                // NOTE:- Project.Object.References.Item requires Reference.Identity
-                //        which is, the Assembly name without path or extension
-                //        But, we pass in the assembly file name. And, this works for
-                //        almost all the assemblies since Assembly Name is the same as the assembly file name
-                //        In case of F#, the input parameter is case-sensitive as well
-                //        Hence, an override to THIS function is added to take care of that
-                var reference = Project.GetReferences().Item(referenceName);
-                if (reference != null)
-                {
-                    reference.Remove();
-                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Log(MessageLevel.Warning, e.Message);
-            }
+            //    // Remove the reference from the project
+            //    // NOTE:- Project.Object.References.Item requires Reference.Identity
+            //    //        which is, the Assembly name without path or extension
+            //    //        But, we pass in the assembly file name. And, this works for
+            //    //        almost all the assemblies since Assembly Name is the same as the assembly file name
+            //    //        In case of F#, the input parameter is case-sensitive as well
+            //    //        Hence, an override to THIS function is added to take care of that
+            //    var reference = Project.GetReferences().Item(referenceName);
+            //    if (reference != null)
+            //    {
+            //        reference.Remove();
+            //        Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    Logger.Log(MessageLevel.Warning, e.Message);
+            //}
         }
 
         public virtual bool FileExistsInProject(string path)
@@ -348,24 +348,26 @@ namespace NuGet.VisualStudio
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail when checking for existance")]
-        public virtual bool ReferenceExists(string name)
+        public bool ReferenceExists(string name)
         {
-            try
-            {
-                string referenceName = name;
+            //try
+            //{
+            //    string referenceName = name;
 
-                if (Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(name), StringComparer.OrdinalIgnoreCase))
-                {
-                    // Get the reference name without extension
-                    referenceName = Path.GetFileNameWithoutExtension(name);
-                }
+            //    if (Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(name), StringComparer.OrdinalIgnoreCase))
+            //    {
+            //        // Get the reference name without extension
+            //        referenceName = Path.GetFileNameWithoutExtension(name);
+            //    }
 
-                return Project.GetReferences().Item(referenceName) != null;
-            }
-            catch
-            {
-            }
-            return false;
+            //    return Project.GetReferences().Item(referenceName) != null;
+            //}
+            //catch
+            //{
+            //}
+            //return false;
+
+            return true;
         }
 
         public virtual dynamic GetPropertyValue(string propertyName)
@@ -385,34 +387,34 @@ namespace NuGet.VisualStudio
             return null;
         }
 
-        public virtual void AddImport(string targetPath, ProjectImportLocation location)
+        public void AddImport(string targetPath, ProjectImportLocation location)
         {
-            if (String.IsNullOrEmpty(targetPath))
-            {
-                throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-            }
+            //if (String.IsNullOrEmpty(targetPath))
+            //{
+            //    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+            //}
 
-            string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-            Project.AddImportStatement(relativeTargetPath, location);
+            //string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
+            //Project.AddImportStatement(relativeTargetPath, location);
 
-            Project.Save(this);
+            //Project.Save(this);
 
-            // notify the project system of the change
-            UpdateImportStamp(Project);
+            //// notify the project system of the change
+            //UpdateImportStamp(Project);
         }
 
-        public virtual void RemoveImport(string targetPath)
+        public void RemoveImport(string targetPath)
         {
-            if (String.IsNullOrEmpty(targetPath))
-            {
-                throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
-            }
-            string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-            Project.RemoveImportStatement(relativeTargetPath);
-            Project.Save(this);
+            //if (String.IsNullOrEmpty(targetPath))
+            //{
+            //    throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+            //}
+            //string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
+            //Project.RemoveImportStatement(relativeTargetPath);
+            //Project.Save(this);
 
-            // notify the project system of the change
-            UpdateImportStamp(Project);
+            //// notify the project system of the change
+            //UpdateImportStamp(Project);
         }
 
         public virtual bool IsSupportedFile(string path)

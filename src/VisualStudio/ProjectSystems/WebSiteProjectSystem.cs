@@ -27,46 +27,46 @@ namespace NuGet.VisualStudio
         {
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public override void AddReference(string referencePath)
-        {
-            string name = Path.GetFileNameWithoutExtension(referencePath);
-            try
-            {
-                Project.GetAssemblyReferences().AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
+        //[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
+        //public override void AddReference(string referencePath)
+        //{
+        //    string name = Path.GetFileNameWithoutExtension(referencePath);
+        //    try
+        //    {
+        //        Project.GetAssemblyReferences().AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
                 
-                // Always create a refresh file. Vs does this for us in most cases, however for GACed binaries, it resorts to adding a web.config entry instead.
-                // This may result in deployment issues. To work around ths, we'll always attempt to add a file to the bin.
-                this.CreateRefreshFile(PathUtility.GetAbsolutePath(Root, referencePath));
+        //        // Always create a refresh file. Vs does this for us in most cases, however for GACed binaries, it resorts to adding a web.config entry instead.
+        //        // This may result in deployment issues. To work around ths, we'll always attempt to add a file to the bin.
+        //        this.CreateRefreshFile(PathUtility.GetAbsolutePath(Root, referencePath));
 
-                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddReference, name), e);
-            }
-        }
+        //        Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddReference, name), e);
+        //    }
+        //}
 
-        public override void RemoveReference(string name)
-        {
-            // Remove the reference via DTE.
-            RemoveDTEReference(name);
+        //public override void RemoveReference(string name)
+        //{
+        //    // Remove the reference via DTE.
+        //    RemoveDTEReference(name);
             
-            // For GACed binaries, VS would not clear the refresh files for us since it assumes the reference exists in web.config. 
-            // We'll clean up any remaining .refresh files.
-            var refreshFilePath = Path.Combine("bin", Path.GetFileName(name) + ".refresh");
-            if (FileExists(refreshFilePath))
-            {
-                try
-                {
-                    DeleteFile(refreshFilePath);
-                }
-                catch (Exception e)
-                {
-                    Logger.Log(MessageLevel.Warning, e.Message);
-                }
-            }
-        }
+        //    // For GACed binaries, VS would not clear the refresh files for us since it assumes the reference exists in web.config. 
+        //    // We'll clean up any remaining .refresh files.
+        //    var refreshFilePath = Path.Combine("bin", Path.GetFileName(name) + ".refresh");
+        //    if (FileExists(refreshFilePath))
+        //    {
+        //        try
+        //        {
+        //            DeleteFile(refreshFilePath);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Logger.Log(MessageLevel.Warning, e.Message);
+        //        }
+        //    }
+        //}
 
         public override string ResolvePath(string path)
         {
@@ -89,10 +89,10 @@ namespace NuGet.VisualStudio
             return base.GetDirectories(path);
         }
 
-        protected override void AddGacReference(string name)
-        {
-            Project.GetAssemblyReferences().AddFromGAC(name);
-        }
+        //protected override void AddGacReference(string name)
+        //{
+        //    Project.GetAssemblyReferences().AddFromGAC(name);
+        //}
 
         public override dynamic GetPropertyValue(string propertyName)
         {
@@ -137,15 +137,15 @@ namespace NuGet.VisualStudio
             _excludedCodeFiles.Clear();
         }
 
-        public override void AddImport(string targetPath, ProjectImportLocation location)
-        {
-            // Web sites are not msbuild based and do not support imports.
-        }
+        //public override void AddImport(string targetPath, ProjectImportLocation location)
+        //{
+        //    // Web sites are not msbuild based and do not support imports.
+        //}
 
-        public override void RemoveImport(string targetPath)
-        {
-            // Web sites are not msbuild based and do not support imports.
-        }
+        //public override void RemoveImport(string targetPath)
+        //{
+        //    // Web sites are not msbuild based and do not support imports.
+        //}
 
         /// <summary>
         /// Determines if we need a source file to be under the App_Code folder

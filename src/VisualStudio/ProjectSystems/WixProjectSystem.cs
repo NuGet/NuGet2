@@ -23,26 +23,26 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void AddReference(string referencePath)
-        {
-            // References aren't allowed for WiX projects
-        }
+        //public override void AddReference(string referencePath)
+        //{
+        //    // References aren't allowed for WiX projects
+        //}
 
         public override void RemoveReference(string name)
         {
             // References aren't allowed for WiX projects
         }
 
-        public override bool ReferenceExists(string name)
-        {
-            // References aren't allowed for WiX projects
-            return true;
-        }
+        //public override bool ReferenceExists(string name)
+        //{
+        //    // References aren't allowed for WiX projects
+        //    return true;
+        //}
 
-        protected override void AddGacReference(string name)
-        {
-            // GAC references aren't allowed for WiX projects
-        }
+        //protected override void AddGacReference(string name)
+        //{
+        //    // GAC references aren't allowed for WiX projects
+        //}
 
         public override bool IsSupportedFile(string path)
         {
