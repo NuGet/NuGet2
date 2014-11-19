@@ -61,7 +61,7 @@ NestedModules = @('NuGet.Client.VisualStudio.PowerShell.dll')
 FunctionsToExport = @('Register-TabExpansion')
 
 # Cmdlets to export from this module
-CmdletsToExport = @('Install-Package2', 'Uninstall-Package2')
+CmdletsToExport = @('Install-Package2', 'Uninstall-Package2', 'Update-Package2', 'Get-Package2', 'Get-Project2')
 
 # Variables to export from this module
 VariablesToExport = ''

@@ -71,11 +71,15 @@
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\Resources.Designer.cs">
       <Link>Resources.Designer.cs</Link>
     </Compile>
+    <Compile Include="GetPackageCommand.cs" />
+    <Compile Include="GetProjectCommand.cs" />
     <Compile Include="InstallPackageCommand.cs" />
+    <Compile Include="NuGetPowerShellBaseCommand.cs" />
     <Compile Include="PackageRepositoryHelper.cs" />
-    <Compile Include="ProcessPackageBaseCommand.cs" />
+    <Compile Include="PackageActionBaseCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UninstallPackageCommand.cs" />
+    <Compile Include="UpdatePackageCommand.cs" />
     <Compile Include="VersionUtil.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +90,10 @@
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VisualStudioResources\VisualStudioResources.csproj">
+      <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
+      <Name>VisualStudioResources</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
       <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>

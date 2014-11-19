@@ -1,21 +1,14 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client;
-using NuGet.Client.Installation;
-using NuGet.Client.Resolution;
 using NuGet.Client.VisualStudio;
-using NuGet.Client.VisualStudio.PowerShell;
-using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
-using System.Threading;
-using System.Threading.Tasks;
-using NuGet.PowerShell.Commands;
+
 
 
 #if VS14
@@ -30,7 +23,7 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// This command process the specified package against the specified project.
     /// </summary>
-    public abstract class ProcessPackageBaseCommand : PSCmdlet, IExecutionLogger, IErrorHandler
+    public abstract class NuGetPowerShellBaseCommand : PSCmdlet, IExecutionLogger, IErrorHandler
     {
         private VsSourceRepositoryManager _repoManager;
         private IVsPackageSourceProvider _packageSourceProvider;
@@ -39,7 +32,6 @@ namespace NuGet.PowerShell.Commands
         private IVsPackageManagerFactory _packageManagerFactory;
         private ISolutionManager _solutionManager;
         private VsPackageManagerContext _VsContext;
-        private PackageIdentity _identity;
         private readonly IHttpClientEvents _httpClientEvents;
         private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
@@ -47,11 +39,13 @@ namespace NuGet.PowerShell.Commands
         private ProgressRecordCollection _progressRecordCache;
         private VsSolution _solution;
         private string _projectName;
-        private PackageActionType _actionType;
-        private string _version;
 
-        public ProcessPackageBaseCommand(IVsPackageSourceProvider psProvider, IPackageRepositoryFactory prFactory,
-                      SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, IHttpClientEvents clientEvents, PackageActionType actionType)
+        public NuGetPowerShellBaseCommand(
+            IVsPackageSourceProvider psProvider,
+            IPackageRepositoryFactory prFactory,
+            SVsServiceProvider svcProvider,
+            IVsPackageManagerFactory pmFactory,
+            IHttpClientEvents clientEvents)
         {
             _packageSourceProvider = psProvider;
             _repositoryFactory = prFactory;
@@ -62,11 +56,7 @@ namespace NuGet.PowerShell.Commands
             _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
             _solution = _VsContext.GetCurrentVsSolution();
             _httpClientEvents = clientEvents;
-            _actionType = actionType;
         }
-
-        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
-        public virtual string Id { get; set; }
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         public virtual string ProjectName
@@ -85,71 +75,49 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        [Parameter(Position = 2)]
-        public string Version
+        internal VsSolution Solution
         {
             get
             {
-                if (string.IsNullOrEmpty(_version))
-                {
-                    IsVersionSpecified = false;
-                    _version = VersionUtil.GetLastestVersionForPackage(_repoManager.ActiveRepository, this.Id);
-                }
-                return _version;
+                return _solution;
             }
             set
             {
-                IsVersionSpecified = true;
-                _version = value;
+                _solution = value;
             }
         }
 
-        [Parameter(Position = 3)]
-        [ValidateNotNullOrEmpty]
-        public string Source { get; set; }
-
-
-        public PackageIdentity Identity
+        internal VsSourceRepositoryManager RepositoryManager
         {
             get
             {
-                _identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                return _identity;
+                return _repoManager;
+            }
+            set
+            {
+                _repoManager = value;
             }
         }
 
-        public ActionResolver PackageActionResolver { get; set; }
-
-        public SourceRepository V3SourceRepository
+        internal IVsPackageManagerFactory PackageManagerFactory
         {
             get
             {
-                return _repoManager.ActiveRepository;
+                return _packageManagerFactory;
             }
-        }
-
-        public IPackageRepository V2LocalRepository
-        {
-            get 
+            set
             {
-                var packageManager = _packageManagerFactory.CreatePackageManager();
-                return packageManager.LocalRepository;
+                _packageManagerFactory = value;
             }
         }
 
-        public IEnumerable<VsProject> TargetedProjects
+        internal ISolutionManager SolutionManager
         {
             get
             {
-                EnvDTE.Project project = _solution.DteSolution.GetAllProjects()
-                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
-                VsProject vsProject = _solution.GetProject(project);
-                List<VsProject> targetedProjects = new List<VsProject> { vsProject };
-                return targetedProjects;
+                return _solutionManager;
             }
         }
-
-        public bool IsVersionSpecified { get; set; }
 
         internal bool IsSyncMode
         {
@@ -178,8 +146,6 @@ namespace NuGet.PowerShell.Commands
         {
             try
             {
-                CheckForSolutionOpen();
-                ResolvePackageFromRepository();
                 ProcessRecordCore();
             }
             catch (Exception ex)
@@ -193,43 +159,30 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        protected void CheckForSolutionOpen()
+        /// <summary>
+        /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuGetBaseCmdlet.
+        /// </summary>
+        protected abstract void ProcessRecordCore();
+
+        public VsProject GetProject(bool throwIfNotExists)
         {
-            if (!_solutionManager.IsSolutionOpen)
-            {
-                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
-            }
-        }
+            VsProject project = null;
 
-        protected virtual void ResolvePackageFromRepository()
-        {
-        }
-
-        protected void ProcessRecordCore()
-        {
-            try
+            // If the user specified a project then use it
+            if (!String.IsNullOrEmpty(ProjectName))
             {
-                SubscribeToProgressEvents();
+                EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
+                project = Solution.GetProject(dteProject);
 
-                // Resolve Actions
-                var targetProjects = TargetedProjects.ToList();
-                var resolverAction = PackageActionResolver.ResolveActionsAsync(
-                    Identity, _actionType, targetProjects, _solution);
-                var actions = resolverAction.Result;
+                // If that project was invalid then throw
+                if (project == null && throwIfNotExists)
+                {
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+                }
+            }
 
-                // Execute Actions
-                ActionExecutor executor = new ActionExecutor();
-                Task task = executor.ExecuteActionsAsync(actions, this, CancellationToken.None);
-                task.Wait();
-            }
-            catch (Exception ex)
-            {
-                this.Log(Client.MessageLevel.Warning, ex.InnerException.Message);
-            }
-            finally
-            {
-                UnsubscribeFromProgressEvents();
-            }
+            return project;
         }
 
         protected override void BeginProcessing()
@@ -246,7 +199,7 @@ namespace NuGet.PowerShell.Commands
             base.StopProcessing();
         }
 
-        private void UnsubscribeEvents()
+        protected void UnsubscribeEvents()
         {
             if (_httpClientEvents != null)
             {

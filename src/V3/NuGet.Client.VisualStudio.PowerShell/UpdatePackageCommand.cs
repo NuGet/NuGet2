@@ -25,12 +25,12 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// This command installs the specified package into the specified project.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Install, "Package2")]
-    public class InstallPackageCommand : PackageActionBaseCommand
+    [Cmdlet(VerbsData.Update, "Package2", DefaultParameterSetName = "All")]
+    public class UpdatePackageCommand : PackageActionBaseCommand
     {
         private ResolutionContext _context;
 
-        public InstallPackageCommand() :
+        public UpdatePackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
@@ -66,4 +66,4 @@ namespace NuGet.PowerShell.Commands
             }
         }
     }
-} 
+}

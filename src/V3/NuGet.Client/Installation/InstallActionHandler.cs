@@ -47,6 +47,9 @@ namespace NuGet.Client.Installation
 
             return Task.Run(() =>
             {
+                // TODO: PMC - Write Disclamer Texts
+                // TODO: Dialog & PMC - open Readme.txt
+
                 // Get the package manager and project manager from the target
                 var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
                 var projectManager = action.Target.GetRequiredFeature<IProjectManager>();
