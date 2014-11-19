@@ -28,7 +28,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  PackageActionType.Uninstall)
         {
-            this.PackageActionResolver = new ActionResolver(this.RepoManager.ActiveRepository, ResContext);
+            this.PackageActionResolver = new ActionResolver(V3SourceRepository, ResContext);
         }
 
         [Parameter]

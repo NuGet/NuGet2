@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json.Linq;
 using NuGet.Client;
+using NuGet.Client.Interop;
 using NuGet.Client.Resolution;
 using NuGet.Client.VisualStudio.PowerShell;
 using NuGet.Versioning;
@@ -37,7 +38,7 @@ namespace NuGet.PowerShell.Commands
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  PackageActionType.Install)
         {
-            this.PackageActionResolver = new ActionResolver(this.RepoManager.ActiveRepository, ResContext);
+            this.PackageActionResolver = new ActionResolver(V3SourceRepository, ResContext);
         }
 
         [Parameter]
@@ -45,6 +46,14 @@ namespace NuGet.PowerShell.Commands
 
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
+
+        protected override void ResolvePackageFromRepository()
+        {
+            if (IsVersionSpecified)
+            {
+                Client.PackageRepositoryHelper.ResolvePackage(V3SourceRepository, V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+            }
+        }
 
         public ResolutionContext ResContext
         {

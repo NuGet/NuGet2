@@ -15,6 +15,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
+using NuGet.PowerShell.Commands;
 
 
 #if VS14
@@ -29,7 +30,7 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// This command process the specified package against the specified project.
     /// </summary>
-    public class ProcessPackageBaseCommand : PSCmdlet, IExecutionLogger, IErrorHandler
+    public abstract class ProcessPackageBaseCommand : PSCmdlet, IExecutionLogger, IErrorHandler
     {
         private VsSourceRepositoryManager _repoManager;
         private IVsPackageSourceProvider _packageSourceProvider;
@@ -48,6 +49,21 @@ namespace NuGet.PowerShell.Commands
         private string _projectName;
         private PackageActionType _actionType;
         private string _version;
+
+        public ProcessPackageBaseCommand(IVsPackageSourceProvider psProvider, IPackageRepositoryFactory prFactory,
+                      SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, IHttpClientEvents clientEvents, PackageActionType actionType)
+        {
+            _packageSourceProvider = psProvider;
+            _repositoryFactory = prFactory;
+            _serviceProvider = svcProvider;
+            _packageManagerFactory = pmFactory;
+            _solutionManager = new SolutionManager();
+            _repoManager = new VsSourceRepositoryManager(_packageSourceProvider, _repositoryFactory);
+            _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
+            _solution = _VsContext.GetCurrentVsSolution();
+            _httpClientEvents = clientEvents;
+            _actionType = actionType;
+        }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public virtual string Id { get; set; }
@@ -74,28 +90,24 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                _version = VersionUtil.GetLastestVersionForPackage(this.RepoManager.ActiveRepository, this.Id);
+                if (string.IsNullOrEmpty(_version))
+                {
+                    IsVersionSpecified = false;
+                    _version = VersionUtil.GetLastestVersionForPackage(_repoManager.ActiveRepository, this.Id);
+                }
                 return _version;
             }
             set
             {
+                IsVersionSpecified = true;
                 _version = value;
             }
         }
 
-        public ProcessPackageBaseCommand(IVsPackageSourceProvider psProvider, IPackageRepositoryFactory prFactory,
-                      SVsServiceProvider svcProvider, IVsPackageManagerFactory pmFactory, IHttpClientEvents clientEvents, PackageActionType actionType)
-        {
-            _packageSourceProvider = psProvider;
-            _repositoryFactory = prFactory;
-            _serviceProvider = svcProvider;
-            _packageManagerFactory = pmFactory;
-            _solutionManager = new SolutionManager();
-            _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
-            _solution = _VsContext.GetCurrentVsSolution();
-            _httpClientEvents = clientEvents;
-            _actionType = actionType;
-        }
+        [Parameter(Position = 3)]
+        [ValidateNotNullOrEmpty]
+        public string Source { get; set; }
+
 
         public PackageIdentity Identity
         {
@@ -108,16 +120,20 @@ namespace NuGet.PowerShell.Commands
 
         public ActionResolver PackageActionResolver { get; set; }
 
-        public VsSourceRepositoryManager RepoManager
+        public SourceRepository V3SourceRepository
         {
             get
             {
-                _repoManager = new VsSourceRepositoryManager(_packageSourceProvider, _repositoryFactory);
-                return _repoManager;
+                return _repoManager.ActiveRepository;
             }
-            set
+        }
+
+        public IPackageRepository V2LocalRepository
+        {
+            get 
             {
-                _repoManager = value;
+                var packageManager = _packageManagerFactory.CreatePackageManager();
+                return packageManager.LocalRepository;
             }
         }
 
@@ -132,6 +148,8 @@ namespace NuGet.PowerShell.Commands
                 return targetedProjects;
             }
         }
+
+        public bool IsVersionSpecified { get; set; }
 
         internal bool IsSyncMode
         {
@@ -160,6 +178,8 @@ namespace NuGet.PowerShell.Commands
         {
             try
             {
+                CheckForSolutionOpen();
+                ResolvePackageFromRepository();
                 ProcessRecordCore();
             }
             catch (Exception ex)
@@ -173,13 +193,20 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        protected void ProcessRecordCore()
+        protected void CheckForSolutionOpen()
         {
             if (!_solutionManager.IsSolutionOpen)
             {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
+        }
 
+        protected virtual void ResolvePackageFromRepository()
+        {
+        }
+
+        protected void ProcessRecordCore()
+        {
             try
             {
                 SubscribeToProgressEvents();
@@ -342,24 +369,28 @@ namespace NuGet.PowerShell.Commands
 
         protected virtual void LogCore(Client.MessageLevel level, string formattedMessage)
         {
-            switch (level)
+            try
             {
-                case Client.MessageLevel.Debug:
-                    WriteVerbose(formattedMessage);
-                    break;
+                switch (level)
+                {
+                    case Client.MessageLevel.Debug:
+                        WriteVerbose(formattedMessage);
+                        break;
 
-                case Client.MessageLevel.Warning:
-                    WriteWarning(formattedMessage);
-                    break;
+                    case Client.MessageLevel.Warning:
+                        WriteWarning(formattedMessage);
+                        break;
 
-                case Client.MessageLevel.Info:
-                    WriteLine(formattedMessage);
-                    break;
+                    case Client.MessageLevel.Info:
+                        WriteLine(formattedMessage);
+                        break;
 
-                case Client.MessageLevel.Error:
-                    WriteError(formattedMessage);
-                    break;
+                    case Client.MessageLevel.Error:
+                        WriteError(formattedMessage);
+                        break;
+                }
             }
+            catch (PSInvalidOperationException) { }
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]

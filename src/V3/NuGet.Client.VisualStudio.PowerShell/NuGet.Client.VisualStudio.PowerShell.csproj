@@ -59,12 +59,6 @@
       <Link>CommonResources.designer.cs</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </Compile>
-    <Compile Include="..\..\Core\SemanticVersion.cs">
-      <Link>SemanticVersion.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\SemanticVersionTypeConverter.cs">
-      <Link>SemanticVersionTypeConverter.cs</Link>
-    </Compile>
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\IErrorHandler.cs">
       <Link>IErrorHandler.cs</Link>
     </Compile>
@@ -78,6 +72,7 @@
       <Link>Resources.Designer.cs</Link>
     </Compile>
     <Compile Include="InstallPackageCommand.cs" />
+    <Compile Include="PackageRepositoryHelper.cs" />
     <Compile Include="ProcessPackageBaseCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UninstallPackageCommand.cs" />
