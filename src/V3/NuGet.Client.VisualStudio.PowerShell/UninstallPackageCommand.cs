@@ -39,7 +39,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void ResolvePackageFromRepository()
         {
-            Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+            PackageIdentity pIdentity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+            this.Identity = pIdentity;
         }
 
         public ResolutionContext ResContext

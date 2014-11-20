@@ -59,7 +59,7 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                if (string.IsNullOrEmpty(_version))
+                if (string.IsNullOrEmpty(_version) && _actionType == PackageActionType.Install)
                 {
                     IsVersionSpecified = false;
                     _version = VersionUtil.GetLastestVersionForPackage(RepositoryManager.ActiveRepository, this.Id);
@@ -81,8 +81,15 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                _identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                if (_identity == null)
+                {
+                    _identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                }
                 return _identity;
+            }
+            set
+            {
+                _identity = value;
             }
         }
 

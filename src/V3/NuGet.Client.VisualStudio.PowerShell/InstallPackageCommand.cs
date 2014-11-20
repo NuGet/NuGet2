@@ -51,7 +51,8 @@ namespace NuGet.PowerShell.Commands
         {
             if (IsVersionSpecified)
             {
-                Client.PackageRepositoryHelper.ResolvePackage(V3SourceRepository, V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+                PackageIdentity pIdentity = Client.PackageRepositoryHelper.ResolvePackage(V3SourceRepository, V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+                this.Identity = pIdentity;
             }
         }
 
