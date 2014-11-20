@@ -107,7 +107,7 @@ namespace NuGet.PowerShell.Commands
 
         public IVsPackageManager PackageManager
         {
-            get 
+            get
             {
                 return PackageManagerFactory.CreatePackageManager();
             }
@@ -166,18 +166,19 @@ namespace NuGet.PowerShell.Commands
                 SubscribeToProgressEvents();
 
                 // Resolve Actions
-                Task<IEnumerable<NuGet.Client.Resolution.PackageAction>> actions = PackageActionResolver.ResolveActionsAsync(
-                    Identity, PackageActionType.Install, TargetedProjects, Solution);
-                var actionsResult = actions.Result.ToList();
+                List<VsProject> targetProjects = TargetedProjects.ToList();
+                Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction = 
+                    PackageActionResolver.ResolveActionsAsync(Identity, _actionType, targetProjects, Solution);
+                IEnumerable<Client.Resolution.PackageAction> actions = resolverAction.Result;
 
                 // Execute Actions
                 ActionExecutor executor = new ActionExecutor();
-                Task task = executor.ExecuteActionsAsync(actionsResult, this, CancellationToken.None);
+                Task task = executor.ExecuteActionsAsync(actions, this, CancellationToken.None);
                 task.Wait();
             }
             catch (Exception ex)
             {
-                this.Log(Client.MessageLevel.Warning, ex.Message);
+                this.Log(Client.MessageLevel.Warning, ex.InnerException.Message);
             }
             finally
             {

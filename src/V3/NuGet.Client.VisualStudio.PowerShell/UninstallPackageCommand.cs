@@ -37,6 +37,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
+        protected override void ResolvePackageFromRepository()
+        {
+            Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
+        }
+
         public ResolutionContext ResContext
         {
             get
