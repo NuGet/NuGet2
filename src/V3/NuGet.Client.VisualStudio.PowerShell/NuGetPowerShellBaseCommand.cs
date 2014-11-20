@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client;
+using NuGet.Client.ProjectSystem;
 using NuGet.Client.VisualStudio;
 using NuGet.VisualStudio;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -164,27 +166,6 @@ namespace NuGet.PowerShell.Commands
         /// </summary>
         protected abstract void ProcessRecordCore();
 
-        public VsProject GetProject(bool throwIfNotExists)
-        {
-            VsProject project = null;
-
-            // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(ProjectName))
-            {
-                EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
-                project = Solution.GetProject(dteProject);
-
-                // If that project was invalid then throw
-                if (project == null && throwIfNotExists)
-                {
-                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-                }
-            }
-
-            return project;
-        }
-
         protected override void BeginProcessing()
         {
             if (_httpClientEvents != null)
@@ -220,6 +201,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
+        #region Logging
         public void Log(Client.MessageLevel level, string message, params object[] args)
         {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
@@ -407,6 +389,86 @@ namespace NuGet.PowerShell.Commands
                 errorId: NuGetErrorId.NoCompatibleProjects,
                 category: ErrorCategory.InvalidOperation);
         }
+        #endregion
+
+        #region Project APIs
+        public VsProject GetProject(bool throwIfNotExists)
+        {
+            VsProject project = null;
+
+            // If the user specified a project then use it
+            if (!String.IsNullOrEmpty(ProjectName))
+            {
+                EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase));
+                project = Solution.GetProject(dteProject);
+
+                // If that project was invalid then throw
+                if (project == null && throwIfNotExists)
+                {
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+                }
+            }
+
+            return project;
+        }
+
+        /// <summary>
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// This method will automatically generate error records for non-wildcarded project names that
+        /// are not found.
+        /// </summary>
+        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<Project> GetProjectsByName(string[] projectNames)
+        {
+            var allValidProjectNames = GetAllValidProjectNames().ToList();
+
+            foreach (string projectName in projectNames)
+            {
+                // if ctrl+c hit, leave immediately
+                if (Stopping)
+                {
+                    break;
+                }
+
+                // Treat every name as a wildcard; results in simpler code
+                var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
+
+                var matches = from s in allValidProjectNames
+                              where pattern.IsMatch(s)
+                              select _solutionManager.GetProject(s);
+
+                int count = 0;
+                foreach (var project in matches)
+                {
+                    count++;
+                    VsProject proj = Solution.GetProject(project);
+                    yield return proj;
+                }
+
+                // We only emit non-terminating error record if a non-wildcarded name was not found.
+                // This is consistent with built-in cmdlets that support wildcarded search.
+                // A search with a wildcard that returns nothing should not be considered an error.
+                if ((count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName))
+                {
+                    ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return all possibly valid project names in the current solution. This includes all 
+        /// unique names and safe names.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<string> GetAllValidProjectNames()
+        {
+            var safeNames = _solutionManager.GetProjects().Select(p => _solutionManager.GetProjectSafeName(p));
+            var uniqueNames = _solutionManager.GetProjects().Select(p => p.GetCustomUniqueName());
+            return uniqueNames.Concat(safeNames).Distinct();
+        }
+        #endregion
     }
 
     public class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>

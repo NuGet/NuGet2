@@ -18,8 +18,6 @@ namespace NuGet.PowerShell.Commands
         private const string ParameterSetByName = "ByName";
         private const string ParameterSetAllProjects = "AllProjects";
 
-        private readonly ISolutionManager _solutionManager;
-
         public GetProjectCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
@@ -46,14 +44,14 @@ namespace NuGet.PowerShell.Commands
 
             if (All.IsPresent)
             {
-                WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
+                WriteObject(SolutionManager.GetProjects(), enumerateCollection: true);
             }
             else
             {
                 // No name specified; return default project (if not null)
                 if (Name == null)
                 {
-                    Project defaultProject = _solutionManager.DefaultProject;
+                    Project defaultProject = SolutionManager.DefaultProject;
                     if (defaultProject != null)
                     {
                         WriteObject(defaultProject);
@@ -65,11 +63,6 @@ namespace NuGet.PowerShell.Commands
                     WriteObject(GetProjectsByName(Name), enumerateCollection: true);
                 }
             }
-        }
-
-        private object GetProjectsByName(string[] Name)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }
