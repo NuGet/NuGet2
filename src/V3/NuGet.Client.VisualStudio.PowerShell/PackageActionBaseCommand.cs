@@ -199,6 +199,7 @@ namespace NuGet.PowerShell.Commands
                 {
                     foreach (var action in actions)
                     {
+                        // TODO: Call new CalculatePreviewForProject Api after Fei moves it out to NuGet.Client
                         Log(Client.MessageLevel.Info, Resources.Log_OperationWhatIf, action);
                     }
 
