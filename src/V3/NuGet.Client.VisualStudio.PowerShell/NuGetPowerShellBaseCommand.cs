@@ -35,7 +35,7 @@ namespace NuGet.PowerShell.Commands
         private ISolutionManager _solutionManager;
         private VsPackageManagerContext _VsContext;
         private readonly IHttpClientEvents _httpClientEvents;
-        private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
+        internal const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
             () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
         private ProgressRecordCollection _progressRecordCache;

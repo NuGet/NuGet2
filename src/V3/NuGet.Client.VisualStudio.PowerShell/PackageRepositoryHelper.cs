@@ -14,6 +14,13 @@ namespace NuGet.Client
     // Used for Install-Package and Update-Package command to verify the specified package version exists in the repo.
     public static class PackageRepositoryHelper
     {
+        // TODO: Fix the logic here
+        public V3SourceRepository ResolvePackageRepository(string source)
+        {
+            Client.PackageSource packageSource = new Client.PackageSource(source, source);
+            return new V3SourceRepository(packageSource, "");
+        }
+
         public static PackageIdentity ResolvePackage(SourceRepository sourceRepository, IPackageRepository localRepository, string packageId, string version, bool allowPrereleaseVersions)
         {
             return ResolvePackage(sourceRepository, localRepository, constraintProvider: NullConstraintProvider.Instance, packageId: packageId, version: version, allowPrereleaseVersions: allowPrereleaseVersions);
