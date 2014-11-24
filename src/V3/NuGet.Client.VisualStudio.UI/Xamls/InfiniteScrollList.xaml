@@ -44,7 +44,7 @@
                             Visibility="Collapsed">
                     <Button Click="RetryButtonClicked"
                             Content="{x:Static resx:Resources.Button_Retry}"
-                            Width="150" />
+                            MinWidth="150" />
                     <Expander Margin="0,8,0,0"
                               Header="{x:Static resx:Resources.Text_ErrorDetails}"
                               >

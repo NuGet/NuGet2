@@ -17,7 +17,7 @@ namespace NuGet.Client.VisualStudio.UI
 {
     // The DataContext of this control is DetailControlModel, i.e. either 
     // PackageSolutionDetailControlModel or PackageDetailControlModel.
-    public partial class DetailControl : UserControl, IDetailControl
+    public partial class DetailControl : UserControl
     {
         public PackageManagerControl Control { get; set; }
 

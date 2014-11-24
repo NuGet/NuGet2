@@ -22,7 +22,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
-        private const int PageSize = 10;
+        private const int PageSize = 3;
 
         // Copied from file Constants.cs in NuGet.Core:
         // This is temporary until we fix the gallery to have proper first class support for this.
@@ -674,7 +674,7 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         // perform the user selected action
-        internal async void PerformAction(IDetailControl detailControl)
+        internal async void PerformAction(DetailControl detailControl)
         {
             SetBusy(true);
             _outputConsole.Clear();

@@ -18,9 +18,18 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public PreviewWindowModel(IEnumerable<PackageAction> actions, Installation.InstallationTarget target)
+        public string Title
+        {
+            get;
+            private set;
+        }
+
+        public PreviewWindowModel(
+            IEnumerable<PackageAction> actions, 
+            Installation.InstallationTarget target)
         {
             _previewResults = PreviewResult.CreatePreview(actions, target);
+            Title = Resources.Resources.WindowTitle_Preview;
         }
     }
 }

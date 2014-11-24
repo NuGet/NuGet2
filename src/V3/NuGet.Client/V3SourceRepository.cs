@@ -208,6 +208,7 @@ namespace NuGet.Client
                                 "resolving_package",
                                 "Resolving Package: {0}",
                                 result[Properties.SubjectId]);
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Get the registration
             result = (JObject)(await _client.Ensure(result, ResultItemRequiredProperties));

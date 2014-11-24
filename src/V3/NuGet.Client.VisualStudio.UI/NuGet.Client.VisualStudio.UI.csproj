@@ -62,27 +62,18 @@
     <When Condition="$(VisualStudioVersion)=='14.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS14\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(VisualStudioVersion)=='12.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS12\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(VisualStudioVersion)=='11.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
@@ -91,11 +82,11 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DownloadCountToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumerableToVisibilityConverter.cs" />
+    <Compile Include="Converters\FontSizeConverter.cs" />
     <Compile Include="Converters\IconUrlToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
     <Compile Include="DetailControlModel.cs" />
     <Compile Include="FileConflictActionItem.cs" />
-    <Compile Include="IDetailControl.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
@@ -126,9 +117,6 @@
     </Compile>
     <Compile Include="Xamls\InstalledIndicator.xaml.cs">
       <DependentUpon>InstalledIndicator.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Xamls\DropdownButton.xaml.cs">
-      <DependentUpon>DropdownButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xamls\InfiniteScrollList.xaml.cs">
       <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
@@ -196,10 +184,6 @@
     <Page Include="Xamls\InstalledIndicator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Xamls\DropdownButton.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Xamls\InfiniteScrollList.xaml">
       <Generator>MSBuild:Compile</Generator>

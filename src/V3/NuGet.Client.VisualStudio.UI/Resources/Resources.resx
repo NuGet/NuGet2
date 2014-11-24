@@ -217,13 +217,10 @@
     <value>OK</value>
   </data>
   <data name="Label_InstalledPackages" xml:space="preserve">
-    <value>Installed:</value>
+    <value>Installing:</value>
   </data>
   <data name="Label_UninstalledPackages" xml:space="preserve">
-    <value>Uninstalled:</value>
-  </data>
-  <data name="Label_UnchangedPackages" xml:space="preserve">
-    <value>Unchanged:</value>
+    <value>Uninstalling:</value>
   </data>
   <data name="Button_IAccept" xml:space="preserve">
     <value>I Accept</value>
@@ -232,7 +229,7 @@
     <value>I Decline</value>
   </data>
   <data name="Text_LicenseHeaderText" xml:space="preserve">
-    <value>The following package(s) require a click-to-accept license:</value>
+    <value>The following package(s) require that you accept their license terms before installing.</value>
   </data>
   <data name="Text_LicenseText" xml:space="preserve">
     <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
@@ -325,7 +322,7 @@
     <value>Update available</value>
   </data>
   <data name="Label_UpdatedPackages" xml:space="preserve">
-    <value>Updated:</value>
+    <value>Updates:</value>
   </data>
   <data name="Text_ErrorDetails" xml:space="preserve">
     <value>Error details</value>
@@ -342,7 +339,19 @@
   <data name="Checkbox_ShowPreviewWindow" xml:space="preserve">
     <value>Show preview window</value>
   </data>
-  <data name="Text_PreviewChange" xml:space="preserve">
-    <value>We are about to make the following changes:</value>
+  <data name="Text_ReviewChanges" xml:space="preserve">
+    <value>Review Changes</value>
+  </data>
+  <data name="Text_Changes" xml:space="preserve">
+    <value>Visual Studio is about to make changes to this solution. Click OK to proceed with the changes listed below.</value>
+  </data>
+  <data name="Text_LicenseAcceptance" xml:space="preserve">
+    <value>License Acceptance</value>
+  </data>
+  <data name="Text_Progress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="WindowTitle_Progress" xml:space="preserve">
+    <value>Progress</value>
   </data>
 </root>

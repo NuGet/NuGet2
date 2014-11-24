@@ -12,7 +12,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for ProgressDialog.xaml
     /// </summary>
-    public partial class ProgressDialog : Window, IExecutionLogger
+    public partial class ProgressDialog : VsDialogWindow, IExecutionLogger
     {
         private readonly Dispatcher _uiDispatcher;
         private DateTime _loadedTime;
