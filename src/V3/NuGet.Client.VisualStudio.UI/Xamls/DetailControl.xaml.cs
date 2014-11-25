@@ -72,7 +72,9 @@ namespace NuGet.Client.VisualStudio.UI
                 new ResolutionContext()
                 {
                     DependencyBehavior = model.Options.SelectedDependencyBehavior.Behavior,
-                    AllowPrerelease = Control.IncludePrerelease
+                    AllowPrerelease = Control.IncludePrerelease,
+                    ForceRemove = model.Options.ForceRemove,
+                    RemoveDependencies = model.Options.RemoveDependencies
                 });
 
             IEnumerable<Project> targetProjects;

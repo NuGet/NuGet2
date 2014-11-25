@@ -7,6 +7,104 @@
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock 
+            Grid.Row="0"
+            FontWeight="Bold"
+            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+            Text="{x:Static resx:Resources.Label_InstallationOptions }" />
+
+        <CheckBox 
+            Grid.Row="2"
+            IsChecked="{Binding Path=Options.ShowPreviewWindow}"
+            VerticalContentAlignment="Center"
+            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+            Content="{x:Static resx:Resources.Checkbox_ShowPreviewWindow}" />
+        
+        <!-- install options -->
+        <Grid Grid.Row="4" Visibility="{Binding SelectedActionIsInstall,Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Row="0" Grid.Column="0"
+                Margin="0,0,6,0"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                Text="{x:Static resx:Resources.Label_DependencyBehavior}"
+                />
+            <ComboBox
+                Grid.Row="0"
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                MinHeight="24"
+                MinWidth="150"
+                ItemsSource="{Binding Path=Options.DependencyBehaviors}"
+                SelectedItem="{Binding Path=Options.SelectedDependencyBehavior}"
+                Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
+
+            <TextBlock
+                Grid.Row="2" Grid.Column="0"
+                Margin="0,0,6,0"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                Text="{x:Static resx:Resources.Label_FileConflictAction}" />
+            <ComboBox
+                Grid.Row="6" Grid.Column="1"
+                MinHeight="24"
+                MinWidth="150"
+                HorizontalAlignment="Left"
+                ItemsSource="{Binding Path=Options.FileConflictActions}"
+                SelectedItem="{Binding Path=Options.SelectedFileConflictAction}"
+                Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
+        </Grid>
+        
+        <!-- uninstall options -->
+        <Grid Grid.Row="4" Visibility="{Binding SelectedActionIsInstall,Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <CheckBox 
+                Grid.Row="0"
+                IsChecked="{Binding Path=Options.RemoveDependencies}"
+                VerticalContentAlignment="Center"
+                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                Content="{x:Static resx:Resources.Checkbox_RemoveDependencies}" />
+
+            <CheckBox 
+                Grid.Row="3"
+                IsChecked="{Binding Path=Options.ForceRemove}"
+                VerticalContentAlignment="Center"
+                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                Content="{x:Static resx:Resources.Checkbox_ForceRemove}" />
+        </Grid>
+    </Grid>
+    
+    <!--
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -21,47 +119,12 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <TextBlock 
-            Grid.Row="0"
-            Grid.ColumnSpan="2"
-            FontWeight="Bold"
-            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-            Text="{x:Static resx:Resources.Label_InstallationOptions }" />
-        <CheckBox 
-            Grid.Row="2"
-            Grid.ColumnSpan="2"
-            IsChecked="{Binding Path=ShowPreviewWindow}"
-            VerticalContentAlignment="Center"
-            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-            Content="{x:Static resx:Resources.Checkbox_ShowPreviewWindow}" />
-        <TextBlock
-            Grid.Row="4" Grid.Column="0"
-            Margin="0,0,6,0"
-            VerticalAlignment="Center"
-            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-            Text="{x:Static resx:Resources.Label_DependencyBehavior}" />
-        <ComboBox
-            Grid.Row="4"
-            Grid.Column="1"
-            HorizontalAlignment="Left"
-            MinHeight="24"
-            MinWidth="150"
-            ItemsSource="{Binding Path=DependencyBehaviors}"
-            SelectedItem="{Binding Path=SelectedDependencyBehavior}"
-            Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
-        <TextBlock
-            Grid.Row="6" Grid.Column="0"
-            Margin="0,0,6,0"
-            VerticalAlignment="Center"
-            Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-            Text="{x:Static resx:Resources.Label_FileConflictAction}" />
-        <ComboBox
-            Grid.Row="6" Grid.Column="1"
-            MinHeight="24"
-            MinWidth="150"
-            HorizontalAlignment="Left"
-            ItemsSource="{Binding Path=FileConflictActions}"
-            SelectedItem="{Binding Path=SelectedFileConflictAction}"
-            Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
-    </Grid>
+        
+        
+        
+        
+        
+       
+       
+    </Grid> -->
 </UserControl>

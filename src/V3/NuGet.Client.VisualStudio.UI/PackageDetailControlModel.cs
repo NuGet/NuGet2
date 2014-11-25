@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using NuGet.Client.Installation;
 using NuGet.Versioning;
@@ -12,13 +11,22 @@ namespace NuGet.Client.VisualStudio.UI
     // The DataContext of the PackageDetail control is this class
     // It has two mode: Project, or Solution
     public class PackageDetailControlModel : DetailControlModel
-    {   
+    {
         public PackageDetailControlModel(
             InstallationTarget target,
-            UiSearchResultPackage searchResultPackage) 
+            UiSearchResultPackage searchResultPackage)
             : base(target, searchResultPackage)
         {
-            Debug.Assert(!target.IsSolution);            
+            Debug.Assert(!target.IsSolution);
+
+            var installed = _target.InstalledPackages.GetInstalledPackage(searchResultPackage.Id);
+            if (installed != null)
+            {
+                InstalledVersion = string.Format(
+                    CultureInfo.CurrentCulture,
+                    Resx.Resources.Text_InstalledVersion,
+                    installed.Identity.Version.ToNormalizedString());         
+            }
         }
 
         protected override bool CanUpdate()
@@ -50,11 +58,11 @@ namespace NuGet.Client.VisualStudio.UI
             var latestStableVersion = allVersions.FirstOrDefault(v => !v.IsPrerelease);
 
             if (SelectedAction == Resx.Resources.Action_Uninstall)
-            {   
+            {
                 _versions.Add(new VersionForDisplay(installedVersion.Identity.Version, string.Empty));
             }
             else if (SelectedAction == Resx.Resources.Action_Install)
-            {   
+            {
                 if (latestStableVersion != null)
                 {
                     _versions.Add(new VersionForDisplay(latestStableVersion, Resx.Resources.Version_LatestStable));
@@ -71,7 +79,7 @@ namespace NuGet.Client.VisualStudio.UI
             else
             {
                 // update
-                if (latestStableVersion != null && 
+                if (latestStableVersion != null &&
                     latestStableVersion != installedVersion.Identity.Version)
                 {
                     _versions.Add(new VersionForDisplay(latestStableVersion, Resx.Resources.Version_LatestStable));
@@ -97,6 +105,12 @@ namespace NuGet.Client.VisualStudio.UI
         protected override void OnSelectedVersionChanged()
         {
             // no-op
-        } 
+        }
+
+        public string InstalledVersion
+        {
+            get;
+            private set;
+        }
     }
 }

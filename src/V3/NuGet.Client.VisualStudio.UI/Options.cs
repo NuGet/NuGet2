@@ -11,7 +11,7 @@ namespace NuGet.Client.VisualStudio.UI
             CreateFileConflictActions();
             CreateDependencyBehaviors();
         }
-
+        
         private void CreateFileConflictActions()
         {
             _fileConflicActions = new[]
@@ -70,6 +70,18 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         public bool ShowPreviewWindow
+        {
+            get;
+            set;
+        }
+
+        public bool RemoveDependencies
+        {
+            get;
+            set;
+        }
+
+        public bool ForceRemove
         {
             get;
             set;

@@ -232,7 +232,7 @@ namespace NuGet.Client.VisualStudio.UI
             private InstallationTarget _target;
 
             private PackageLoaderOption _option;
-                        
+
             private SourceRepository _source;
 
             public PackageLoader(
@@ -266,22 +266,19 @@ namespace NuGet.Client.VisualStudio.UI
                 var results = await _loader(startIndex, ct);
 
                 List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
+                int resultCount = 0;
                 foreach (var package in results)
                 {
                     ct.ThrowIfCancellationRequested();
+                    ++resultCount;
 
                     var searchResultPackage = new UiSearchResultPackage(_source);
                     searchResultPackage.Id = package.Value<string>(Properties.PackageId);
                     searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
 
-                    if (searchResultPackage.Version.IsPrerelease && !_option.IncludePrerelease)
-                    {
-                        // don't include prerelease version if includePrerelease is false
-                        continue;
-                    }
-
                     searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
 
+                    // get other versions
                     var versionList = new List<NuGetVersion>();
                     var versions = package.Value<JArray>(Properties.Versions);
                     if (versions != null)
@@ -289,17 +286,31 @@ namespace NuGet.Client.VisualStudio.UI
                         versionList = versions
                             .Select(v => NuGetVersion.Parse(v.Value<string>()))
                             .ToList();
+                        if (!_option.IncludePrerelease)
+                        {
+                            // remove prerelease version if includePrelease is false
+                            versionList.RemoveAll(v => v.IsPrerelease);
+                        }
                     }
                     if (!versionList.Contains(searchResultPackage.Version))
                     {
                         versionList.Add(searchResultPackage.Version);
                     }
-                    searchResultPackage.Versions = versionList;
 
+                    searchResultPackage.Versions = versionList;
                     searchResultPackage.Status = PackageManagerControl.GetPackageStatus(
                         searchResultPackage.Id,
                         _target,
                         searchResultPackage.Versions);
+
+                    // filter out prerelease version when needed.
+                    if (searchResultPackage.Version.IsPrerelease &&
+                       !_option.IncludePrerelease &&
+                        searchResultPackage.Status == PackageStatus.NotInstalled)
+                    {
+                        continue;
+                    }
+
                     if (_option.ShowUpdatesAvailable &&
                         searchResultPackage.Status != PackageStatus.UpdateAvailable)
                     {
@@ -320,7 +331,8 @@ namespace NuGet.Client.VisualStudio.UI
                 return new LoadResult()
                 {
                     Items = packages,
-                    HasMoreItems = packages.Count == PageSize
+                    HasMoreItems = resultCount == PageSize,
+                    NextStartIndex = startIndex + resultCount
                 };
             }
 
@@ -527,7 +539,7 @@ namespace NuGet.Client.VisualStudio.UI
                 {
                     newModel.Options = oldModel.Options;
                 }
-                _packageDetail.DataContext = newModel;                
+                _packageDetail.DataContext = newModel;
             }
         }
 

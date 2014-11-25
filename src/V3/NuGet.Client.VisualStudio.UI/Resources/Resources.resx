@@ -354,4 +354,13 @@
   <data name="WindowTitle_Progress" xml:space="preserve">
     <value>Progress</value>
   </data>
+  <data name="Text_InstalledVersion" xml:space="preserve">
+    <value>Installed version: {0}</value>
+  </data>
+  <data name="Checkbox_ForceRemove" xml:space="preserve">
+    <value>Force uninstall, even if there are dependencies on it</value>
+  </data>
+  <data name="Checkbox_RemoveDependencies" xml:space="preserve">
+    <value>Remove dependencies</value>
+  </data>
 </root>

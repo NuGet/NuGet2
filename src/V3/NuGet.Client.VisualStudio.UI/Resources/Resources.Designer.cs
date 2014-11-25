@@ -187,11 +187,29 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Force uninstall, even if there are dependencies on it.
+        /// </summary>
+        public static string Checkbox_ForceRemove {
+            get {
+                return ResourceManager.GetString("Checkbox_ForceRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Include Prerelease.
         /// </summary>
         public static string Checkbox_IncludePrerelease {
             get {
                 return ResourceManager.GetString("Checkbox_IncludePrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove dependencies.
+        /// </summary>
+        public static string Checkbox_RemoveDependencies {
+            get {
+                return ResourceManager.GetString("Checkbox_RemoveDependencies", resourceCulture);
             }
         }
         
@@ -570,6 +588,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Text_ErrorOccurred {
             get {
                 return ResourceManager.GetString("Text_ErrorOccurred", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed version: {0}.
+        /// </summary>
+        public static string Text_InstalledVersion {
+            get {
+                return ResourceManager.GetString("Text_InstalledVersion", resourceCulture);
             }
         }
         

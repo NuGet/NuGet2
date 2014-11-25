@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace NuGet.Client.VisualStudio.UI
 {
     /// <summary>
-    /// The DataContext of this control is Options
+    /// The DataContext of this control is DetailControlModel
     /// </summary>
     public partial class OptionsControl : UserControl
     {

@@ -76,7 +76,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                InstallOptionsVisible = false;
+                SelectedActionIsInstall = false;
             }
 
             OnPropertyChanged("Actions");
@@ -145,7 +145,7 @@ namespace NuGet.Client.VisualStudio.UI
             set
             {
                 _selectedAction = value;
-                InstallOptionsVisible = SelectedAction != Resources.Resources.Action_Uninstall;
+                SelectedActionIsInstall = SelectedAction != Resources.Resources.Action_Uninstall;
                 CreateVersions();
                 OnPropertyChanged("SelectedAction");
             }
@@ -153,21 +153,21 @@ namespace NuGet.Client.VisualStudio.UI
 
         protected abstract void CreateVersions();
         
-        // indicates if the install options expander is visible or not
-        bool _installOptionsVisible;
+        // indicates whether the selected action is install or uninstall.
+        bool _selectedActionIsInstall;
 
-        public bool InstallOptionsVisible
+        public bool SelectedActionIsInstall
         {
             get
             {
-                return _installOptionsVisible;
+                return _selectedActionIsInstall;
             }
             set
             {
-                if (_installOptionsVisible != value)
+                if (_selectedActionIsInstall != value)
                 {
-                    _installOptionsVisible = value;
-                    OnPropertyChanged("InstallOptionsVisible");
+                    _selectedActionIsInstall = value;
+                    OnPropertyChanged("SelectedActionIsInstall");
                 }
             }
         }
