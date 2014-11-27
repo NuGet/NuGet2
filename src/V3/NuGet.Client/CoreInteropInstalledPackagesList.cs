@@ -53,10 +53,20 @@ namespace NuGet.Client
             var installedPackages = await Task.Factory.StartNew(() =>
                 _localRepository.Search(searchTerm, allowPrereleaseVersions: true)
                     .Skip(skip).Take(take).ToList());
-            var result = new List<JObject>();
+
+            // start CreatePackageSearchResult() for all packages in parallel
+            var createPackageSearchResultTasks = new List<Task<JObject>>();
             foreach (var p in installedPackages)
             {
-                var searchResult = await CreatePackageSearchResult(source, p);
+                var task = CreatePackageSearchResult(source, p);
+                createPackageSearchResultTasks.Add(task);
+            }
+
+            // collect results
+            var result = new List<JObject>();
+            foreach (var task in createPackageSearchResultTasks)
+            {
+                var searchResult = await task;
                 result.Add(searchResult);
             }
             return result;

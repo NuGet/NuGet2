@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Versioning;
@@ -30,8 +31,6 @@ namespace NuGet.Client.VisualStudio.UI
             _searchResultPackage = searchResultPackage;
             _allPackages = new List<NuGetVersion>(searchResultPackage.Versions);
             _options = new UI.Options();
-
-            LoadPackageMetada();
             CreateActions();
         }
 
@@ -202,13 +201,17 @@ namespace NuGet.Client.VisualStudio.UI
                     {
                         PackageMetadata = packageMetadata;
                     }
+                    else
+                    {
+                        PackageMetadata = null;
+                    }
                     OnSelectedVersionChanged();
                     OnPropertyChanged("SelectedVersion");
                 }
             }
         }
 
-        private async void LoadPackageMetada()
+        public async Task LoadPackageMetadaAsync()
         {
             var metadata = await _searchResultPackage.GetPackageMetadataAsync();
             var dict = new Dictionary<NuGetVersion, UiPackageMetadata>();

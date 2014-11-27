@@ -34,7 +34,13 @@ namespace NuGet.Client.Interop
             {
                 allVersions.Add(package.Version);
             }
-            AddProp(value, Properties.Versions, new JArray(allVersions.Select(v => v.ToString())));
+            
+            AddProp(value, Properties.Versions, 
+                new JArray(allVersions.Select(v => {
+                    var obj = new JObject(); 
+                    obj.Add("version", v.ToString());
+                    return obj;
+                })));
             return value;
         }
 

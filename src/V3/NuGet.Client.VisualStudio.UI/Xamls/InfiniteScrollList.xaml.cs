@@ -74,7 +74,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             if (_cts != null)
             {
-                // cancel existing async process
+                // There is another async loading process. Cancel it.
                 _cts.Cancel();
             }
 
@@ -82,6 +82,7 @@ namespace NuGet.Client.VisualStudio.UI
             _cts = newCts;
 
             _loadingStatusIndicator.Status = LoadingStatus.Loading;
+            var currentLoader = _loader;
             try
             {
                 var r = await Loader.LoadItems(_startIndex, _cts.Token);
@@ -118,11 +119,10 @@ namespace NuGet.Client.VisualStudio.UI
             }
             catch (Exception ex)
             {
-                if (ex is OperationCanceledException ||
-                    (ex is AggregateException &&
-                    ex.GetBaseException() is OperationCanceledException))
+                if (currentLoader != _loader)
                 {
-                    // do nothing
+                    // loader has been changed so the result of this process
+                    // is no longer needed. do nothing.
                 }
                 else
                 {

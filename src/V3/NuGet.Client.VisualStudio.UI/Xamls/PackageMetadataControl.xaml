@@ -107,7 +107,7 @@
                         Text="{x:Static resx:Resources.Label_Downloads}" />
             <TextBlock
                         Visibility="{Binding Path=DownloadCount,Converter={StaticResource DownloadCountToVisibilityConverter}}"
-                        Text="{Binding Path=DownloadCount}"
+                        Text="{Binding Path=DownloadCount,StringFormat={}{0:N0}}"
                         Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="3" Grid.Column="1"></TextBlock>
@@ -120,7 +120,7 @@
                         Text="{x:Static resx:Resources.Label_DatePublished}" />
             <TextBlock
                         Visibility="{Binding Path=Published,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Published}"
+                        Text="{Binding Path=Published,StringFormat={}{0:F}}"
                         Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="4" Grid.Column="1"></TextBlock>

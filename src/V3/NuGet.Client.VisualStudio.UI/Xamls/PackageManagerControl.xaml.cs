@@ -22,7 +22,7 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public partial class PackageManagerControl : UserControl
     {
-        private const int PageSize = 3;
+        private const int PageSize = 10;
 
         // Copied from file Constants.cs in NuGet.Core:
         // This is temporary until we fix the gallery to have proper first class support for this.
@@ -282,10 +282,21 @@ namespace NuGet.Client.VisualStudio.UI
                     var versionList = new List<NuGetVersion>();
                     var versions = package.Value<JArray>(Properties.Versions);
                     if (versions != null)
-                    {
-                        versionList = versions
-                            .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                            .ToList();
+                    {   
+                        if (versions[0].Type == JTokenType.String)
+                        {
+                            // TODO: this part should be removed once the new end point is up and running.
+                            versionList = versions
+                                .Select(v => NuGetVersion.Parse(v.Value<string>()))
+                                .ToList();
+                        }
+                        else
+                        {
+                            versionList = versions
+                                .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
+                                .ToList();
+                        }
+
                         if (!_option.IncludePrerelease)
                         {
                             // remove prerelease version if includePrelease is false
@@ -511,7 +522,7 @@ namespace NuGet.Client.VisualStudio.UI
         /// <summary>
         /// Updates the detail pane based on the selected package
         /// </summary>
-        private void UpdateDetailPane()
+        private async void UpdateDetailPane()
         {
             var selectedPackage = _packageList.SelectedItem as UiSearchResultPackage;
             if (selectedPackage == null)
@@ -540,6 +551,7 @@ namespace NuGet.Client.VisualStudio.UI
                     newModel.Options = oldModel.Options;
                 }
                 _packageDetail.DataContext = newModel;
+                await newModel.LoadPackageMetadaAsync();
             }
         }
 
