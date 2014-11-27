@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
 using EnvDTE;
 using Moq;
 using NuGet.Test.Mocks;
@@ -73,7 +77,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var silverlightProject = TestUtils.GetProject(
-                "Silverlight", 
+                "Silverlight",
                 propertyGetter: name => GetTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
             mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
@@ -119,7 +123,7 @@ namespace NuGet.VisualStudio.Test
             return null;
         }
 
-        [Fact(Skip="EnvDTE is not available.")]
+        [Fact(Skip = "EnvDTE is not available.")]
         public void FSharpProjectSystemRemoveReference()
         {
             var project = new Mock<Project>();
@@ -222,6 +226,69 @@ namespace NuGet.VisualStudio.Test
             reference2.Verify(r => r.Remove(), Times.Never());
             var message = String.Format(CultureInfo.CurrentCulture, VsResources.FailedToRemoveReference, "aBc");
             logger.Verify(l => l.Log(MessageLevel.Error, message));
+        }
+    }
+
+
+    public class VcxProjectTest
+    {
+
+        public VcxProjectTest()
+        {
+            var resourcereader = new ResourceLoader();
+            Loader.Instance = resourcereader;
+        }
+
+
+        [Theory]
+        [InlineData("ManCpp.vcxproj", true)]
+        [InlineData("ManCppClrFalse.vcxproj", false)]
+        [InlineData("NativeCpp.vcxproj", false)]
+        [InlineData("ManCppWithOverrideFalse.vcxproj", true)]
+        [InlineData("ManCppWithOverride.vcxproj", false)]
+        public void VerifyReadingManagedVcxprojFile(string name, bool expected)
+        {
+
+            var config = new Mock<Configuration>();
+            config.Setup(s => s.ConfigurationName).Returns("Debug");
+            config.Setup(s => s.PlatformName).Returns("Win32");
+
+
+            var cut = new VcxProject(name);
+            var result = cut.HasClrSupport(config.Object);
+
+            Assert.True(result == expected);
+
+        }
+    }
+
+
+
+    public class ResourceLoader : ILoader
+    {
+        public XDocument LoadXml(string resourcename)
+        {
+            var content = ReadResource(resourcename);
+            return XDocument.Parse(content);
+        }
+
+        private string ReadResource(string resourcename)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var resource =
+                assembly.GetManifestResourceNames()
+                    .FirstOrDefault(res => res.ToUpper().EndsWith(resourcename.ToUpper()));
+
+            if (resource != null) using (var stream = assembly.GetManifestResourceStream(resource))
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+
+            return "";
         }
     }
 }
