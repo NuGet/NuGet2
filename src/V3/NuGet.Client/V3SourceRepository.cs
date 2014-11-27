@@ -14,6 +14,7 @@ using NuGet.Client.Resolution;
 using System.Net.Http;
 using System.Globalization;
 using NuGet.Client.Installation;
+using System.Threading;
 
 namespace NuGet.Client
 {
@@ -82,7 +83,7 @@ namespace NuGet.Client
                 cache = new NullFileCache();
             }
 
-            cache = new NullFileCache(); // +++
+            cache = new NullFileCache(); // +++ Disable caching for testing
 
             _client = new DataClient(
                 _http,
@@ -97,11 +98,11 @@ namespace NuGet.Client
             }
         }
 
-        public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
         {
             // Get the search service URL from the service
             cancellationToken.ThrowIfCancellationRequested();
-            var searchService = await GetServiceUri(ServiceUris.SearchQueryService);
+            var searchService = await GetServiceUri(ServiceUris.SearchQueryService, cancellationToken);
             if (String.IsNullOrEmpty(searchService))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingSearchService);
@@ -131,8 +132,7 @@ namespace NuGet.Client
                 "searching",
                 "Executing Query: {0}",
                 queryUrl.ToString());
-            var queryUri = queryUrl.Uri;
-            var results = await _client.GetFile(queryUri);
+            var results = await _client.GetFile(queryUrl.Uri);
             cancellationToken.ThrowIfCancellationRequested();
             if (results == null)
             {
@@ -175,7 +175,7 @@ namespace NuGet.Client
         // Async void because we don't want metric recording to block anything at all
         public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
         {
-            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService);
+            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService, CancellationToken.None);
 
             if (metricsUrl == null)
             {
@@ -202,7 +202,7 @@ namespace NuGet.Client
         }
 
         // +++ this would not be needed once the result matches searchResult.
-        private async Task<JObject> ProcessSearchResult(System.Threading.CancellationToken cancellationToken, JObject result)
+        private async Task<JObject> ProcessSearchResult(CancellationToken cancellationToken, JObject result)
         {
             NuGetTraceSources.V3SourceRepository.Verbose(
                                 "resolving_package",
@@ -217,22 +217,25 @@ namespace NuGet.Client
             searchResult["id"] = result["id"];
             searchResult[Properties.LatestVersion] = result[Properties.Version];
             searchResult[Properties.Versions] = result[Properties.Versions];
-            searchResult[Properties.Summary] = "Please add summary !!!";
-            // +++ summary, iconUrl, description            
+            searchResult[Properties.Summary] = result[Properties.Summary];
+            searchResult[Properties.Description] = result[Properties.Description];
+            searchResult[Properties.IconUrl] = result[Properties.IconUrl];
 
             return searchResult;
         }
 
         public override async Task<JObject> GetPackageMetadata(string id, NuGetVersion version)
         {
-            return (await GetPackageMetadataById(id))
-                .FirstOrDefault(p => String.Equals(p["version"].ToString(), version.ToNormalizedString(), StringComparison.OrdinalIgnoreCase));
+            var data = await GetPackageMetadataById(id);
+            return data.FirstOrDefault(p => StringComparer.OrdinalIgnoreCase.Equals(
+                p["version"].ToString(),
+                version.ToNormalizedString()));
         }
 
         public override async Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
             // Get the base URL
-            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl);
+            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl, CancellationToken.None);
             if (String.IsNullOrEmpty(baseUrl))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingRegistrationBase);
@@ -242,7 +245,9 @@ namespace NuGet.Client
             var packageUrl = baseUrl.TrimEnd('/') + "/" + packageId.ToLowerInvariant() + "/index.json";
 
             // Resolve the catalog root
-            var catalogPackage = await _client.Ensure(new Uri(packageUrl), CatalogRequiredProperties);
+            var catalogPackage = await _client.Ensure(
+                new Uri(packageUrl), 
+                CatalogRequiredProperties);
             if (catalogPackage["HttpStatusCode"] != null)
             {
                 // Got an error response from the data client, so just return an empty array
@@ -270,9 +275,9 @@ namespace NuGet.Client
                 string type = item["@type"].ToString();
                 if (Equals(type, "catalog:CatalogPage"))
                 {
-                    var resolved = await _client.Ensure(item, new[] {
-                        new Uri("http://schema.nuget.org/schema#items")
-                    });
+                    var resolved = await _client.Ensure(
+                        item, 
+                        new[] { new Uri("http://schema.nuget.org/schema#items") });
                     Debug.Assert(resolved != null, "DataClient returned null from Ensure :(");
                     lists.Add(await Descend((JArray)resolved["items"]));
                 }
@@ -289,10 +294,25 @@ namespace NuGet.Client
             return lists.SelectMany(j => j);
         }
 
-        private async Task<string> GetServiceUri(Uri type)
+        private async Task<string> GetServiceUri(Uri type, CancellationToken cancellationToken)
         {
             // Read the root document (usually out of the cache :))
-            var doc = await _client.GetFile(new Uri(_source.Url));
+            JObject doc;
+            var sourceUrl = new Uri(_source.Url);
+            if (sourceUrl.IsFile)
+            {
+                using (var reader = new System.IO.StreamReader(
+                    sourceUrl.LocalPath))
+                {
+                    string json = await reader.ReadToEndAsync();
+                    doc = JObject.Parse(json);
+                }
+            }
+            else
+            {
+                doc = await _client.GetFile(sourceUrl);
+            }
+
             var obj = JsonLdProcessor.Expand(doc).FirstOrDefault();
             if (obj == null)
             {

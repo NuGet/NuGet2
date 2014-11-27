@@ -12,8 +12,9 @@ using NuGet.Versioning;
 namespace NuGet.Client
 {
     /// <summary>
-    /// Represents a place where packages can be retrieved
+    /// Represents a place where packages can be retrieved.
     /// </summary>
+    // TODO: it needs to implement IDisposable.
     public abstract class SourceRepository
     {
         public abstract PackageSource Source { get; }

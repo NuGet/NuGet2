@@ -37,17 +37,17 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JsonLD, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\JsonLD.dll</HintPath>
+    <Reference Include="JsonLD">
+      <HintPath>..\..\..\packages\json-ld.net.1.0.4\lib\net40-Client\JsonLD.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NuGet.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\NuGet.Data.dll</HintPath>
+    <Reference Include="NuGet.Data">
+      <HintPath>..\..\..\packages\NuGet.Data.1.0.1-master-43390058\lib\net45\NuGet.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,6 +76,7 @@
     <Compile Include="..\..\..\Common\HashCodeCombiner.cs">
       <Link>HashCodeCombiner.cs</Link>
     </Compile>
+    <Compile Include="AutoDetectSourceRepository.cs" />
     <Compile Include="CoreConverters.cs" />
     <Compile Include="CoreInteropInstalledPackagesList.cs" />
     <Compile Include="DependencyBehavior.cs" />

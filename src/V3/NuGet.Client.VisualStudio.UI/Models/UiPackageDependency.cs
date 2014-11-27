@@ -29,10 +29,17 @@ namespace NuGet.Client.VisualStudio.UI
 
         public override string ToString()
         {
-            return String.Format(
-                CultureInfo.InvariantCulture,
-                "{0} {1}",
-                Id, Range.PrettyPrint());
+            if (Range == null)
+            {
+                return Id;
+            }
+            else
+            {
+                return String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0} {1}",
+                    Id, Range.PrettyPrint());
+            }
         }
     }
 }
