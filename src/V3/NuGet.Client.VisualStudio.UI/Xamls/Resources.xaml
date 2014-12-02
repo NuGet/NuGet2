@@ -14,6 +14,8 @@
     <Tools:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Tools:BooleanToVisibilityConverter Inverted="True" x:Key="InvertedBooleanToVisibilityConverter" />
     <Tools:DownloadCountToVisibilityConverter x:Key="DownloadCountToVisibilityConverter" />
+    <Tools:FontSizeConverter Scale="122" x:Key="Font122PercentSizeConverter" />
+    <Tools:FontSizeConverter Scale="155" x:Key="Font155PercentSizeConverter" />
 
     <DataTemplate DataType="{x:Type Tools:UiPackageDependency}">
         <TextBlock Text="{Binding}" />

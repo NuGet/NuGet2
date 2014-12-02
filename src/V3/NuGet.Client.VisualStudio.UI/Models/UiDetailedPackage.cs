@@ -4,12 +4,9 @@ using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
 {
-    public class UiDetailedPackage
+    public class UiPackageMetadata
     {
-        public string Id { get; set; }
-
         public NuGetVersion Version { get; set; }
-
         public string Summary { get; set; }
 
         public string Description { get; set; }
@@ -34,10 +31,5 @@ namespace NuGet.Client.VisualStudio.UI
 
         // This property is used by data binding to display text "No dependencies"
         public bool HasDependencies { get; set; }
-
-        public override string ToString()
-        {
-            return string.Format("{0} {1}", Id, Version);
-        }
     }
 }

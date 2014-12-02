@@ -10,28 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace NuGet.Client.VisualStudio.UI
 {
     /// <summary>
-    /// Interaction logic for InstallPreviewWindow.xaml
+    /// The DataContext of this control is DetailControlModel
     /// </summary>
-    public partial class PreviewWindow : VsDialogWindow
+    public partial class OptionsControl : UserControl
     {
-        public PreviewWindow()
+        public OptionsControl()
         {
             InitializeComponent();
-        }
-
-        private void CancelButtonClicked(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
-
-        private void OkButtonClicked(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
         }
     }
 }

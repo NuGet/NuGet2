@@ -116,7 +116,7 @@ namespace NuGet.Client.VisualStudio
             // For now, be awful. Detect V3 via the source URL itself
             Uri url;
             if (Uri.TryCreate(source.Url, UriKind.RelativeOrAbsolute, out url) &&
-                url.Host.Equals("az320820.vo.msecnd.net", StringComparison.OrdinalIgnoreCase))
+                StringComparer.OrdinalIgnoreCase.Equals(NuGetV3PreviewSource.Url, url.ToString()))
             {
                 return new V3SourceRepository(source, VsVersionHelper.FullVsEdition);
             }

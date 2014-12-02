@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -45,7 +44,9 @@ namespace NuGet.Client.VisualStudio.UI
 
         public Uri IconUrl { get; set; }
 
-        public IEnumerable<UiDetailedPackage> AllVersions { get; set; }
+        // +++ public IEnumerable<UiDetailedPackage> AllVersions { get; set; }
+
+        public IEnumerable<NuGetVersion> Versions { get; set; }
 
         protected void OnPropertyChanged(string propertyName)
         {
@@ -54,6 +55,19 @@ namespace NuGet.Client.VisualStudio.UI
                 PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
                 PropertyChanged(this, e);
             }
+        }
+
+        SourceRepository _source;
+
+        public UiSearchResultPackage(SourceRepository source)
+        {
+            _source = source;
+        }
+
+        public async Task<IEnumerable<JObject>> GetPackageMetadataAsync()
+        {
+            var metadata = await _source.GetPackageMetadataById(Id);
+            return metadata;
         }
     }
 }

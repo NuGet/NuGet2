@@ -82,11 +82,20 @@ namespace NuGet.Client
                 cache = new NullFileCache();
             }
 
+            cache = new NullFileCache(); // +++
+
             _client = new DataClient(
                 _http,
                 cache);
         }
 
+        public DataClient DataClient
+        {
+            get
+            {
+                return _client;
+            }
+        }
 
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
@@ -122,7 +131,8 @@ namespace NuGet.Client
                 "searching",
                 "Executing Query: {0}",
                 queryUrl.ToString());
-            var results = await _client.GetFile(queryUrl.Uri);
+            var queryUri = queryUrl.Uri;
+            var results = await _client.GetFile(queryUri);
             cancellationToken.ThrowIfCancellationRequested();
             if (results == null)
             {
@@ -159,15 +169,6 @@ namespace NuGet.Client
                 }
             }
 
-            //var input = data.Take(take).Cast<JObject>().ToList();
-            //JObject[] outputs = new JObject[input.Count];
-
-            //// The search service might actually return more than `take` items :)
-            //Parallel.ForEach(input, (result, state, index) =>
-            //{
-            //    outputs[index] = ProcessSearchResult(cancellationToken, result).Result;
-            //});
-
             return outputs;
         }
 
@@ -200,68 +201,24 @@ namespace NuGet.Client
             await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));
         }
 
+        // +++ this would not be needed once the result matches searchResult.
         private async Task<JObject> ProcessSearchResult(System.Threading.CancellationToken cancellationToken, JObject result)
         {
             NuGetTraceSources.V3SourceRepository.Verbose(
                                 "resolving_package",
                                 "Resolving Package: {0}",
                                 result[Properties.SubjectId]);
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Get the registration
             result = (JObject)(await _client.Ensure(result, ResultItemRequiredProperties));
-            var registrationUrl = new Uri(result["registration"].ToString());
 
-            // Fetch the registration
-            NuGetTraceSources.V3SourceRepository.Verbose(
-                "resolving_registration",
-                "Resolving Package Registration: {0}",
-                registrationUrl);
-            var registration = await _client.GetEntity(registrationUrl);
-
-            // Descend through the pages until we find all Packages
-            Debug.Assert(registration != null, "Got a null value from GetEntity(" + registrationUrl.ToString() + ")!");
-            Debug.Assert(registration["items"] != null, "Registration has no items? " + registrationUrl.ToString());
-            if (registration == null || registration["items"] == null)
-            {
-                NuGetTraceSources.V3SourceRepository.Error(
-                    "null_registration",
-                    "Got a null registration back from {0}!",
-                    registrationUrl);
-                return null;
-            }
-            var packages = await Descend((JArray)registration["items"]);
-
-            // Find the recommended package
-            var primaryResult = packages.FirstOrDefault(
-                p => NuGetVersion.Parse(p["catalogEntry"]["version"].ToString()).Equals(NuGetVersion.Parse(result["version"].ToString())));
-            if (primaryResult == null)
-            {
-                primaryResult = packages.OrderByDescending(p => NuGetVersion.Parse(p["catalogEntry"][Properties.Version].ToString())).FirstOrDefault();
-            }
-
-            // Construct a result object
-            var searchResult = new JObject()
-            {
-                {Properties.PackageId, primaryResult["catalogEntry"][Properties.PackageId] },
-                {Properties.LatestVersion, primaryResult["catalogEntry"][Properties.Version] },
-                {Properties.Summary, primaryResult["catalogEntry"][Properties.Summary] },
-                {Properties.IconUrl, primaryResult["catalogEntry"][Properties.IconUrl] }
-            };
-
-            // Fill in the package entries
-            var versions = new JArray();
-            foreach (var version in packages)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                NuGetTraceSources.V3SourceRepository.Verbose(
-                    "resolving_version",
-                    "Resolving Package Version: {0}",
-                    version[Properties.SubjectId]);
-                version["catalogEntry"][Properties.PackageContent] = version[Properties.PackageContent];
-                versions.Add(version["catalogEntry"]);
-            }
-            searchResult[Properties.Packages] = versions;
+            var searchResult = new JObject();
+            searchResult["id"] = result["id"];
+            searchResult[Properties.LatestVersion] = result[Properties.Version];
+            searchResult[Properties.Versions] = result[Properties.Versions];
+            searchResult[Properties.Summary] = "Please add summary !!!";
+            // +++ summary, iconUrl, description            
 
             return searchResult;
         }

@@ -28,27 +28,46 @@ namespace NuGet.Client.VisualStudio
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
         {
-            _helper.InvokeAsync(() =>
-            {
-                ConsoleColor color;
-                if (!_colorMap.TryGetValue(eventType, out color))
+#if VS11
+            _helper.BeginInvoke(
+#else
+            _helper.InvokeAsync(
+#endif
+                () =>
                 {
-                    color = ConsoleColor.White;
-                }
-                _console.Log(eventCache.DateTime, message, eventType, source);
-            });
+                    ConsoleColor color;
+                    if (!_colorMap.TryGetValue(eventType, out color))
+                    {
+                        color = ConsoleColor.White;
+                    }
+                    _console.Log(eventCache.DateTime, message, eventType, source);
+                });
         }
 
         public override void Write(string message)
         {
-            _helper.InvokeAsync(() =>
-                _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty));
+#if VS11
+            _helper.BeginInvoke(
+#else
+            _helper.InvokeAsync(
+#endif
+                () =>
+                {
+                    _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
+                });
         }
 
         public override void WriteLine(string message)
         {
-            _helper.InvokeAsync(() =>
-                _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty));
+#if VS11
+            _helper.BeginInvoke(
+#else
+            _helper.InvokeAsync(
+#endif
+                () =>
+                {
+                    _console.Log(DateTime.Now, message, TraceEventType.Verbose, String.Empty);
+                });
         }
     }
 }

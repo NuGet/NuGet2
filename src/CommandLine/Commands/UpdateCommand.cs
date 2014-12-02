@@ -105,35 +105,35 @@ namespace NuGet.Commands
             string[] packagesConfigFiles = Directory.GetFiles(
                 solutionDir, "*.config", SearchOption.AllDirectories);
 
-            var projects = packagesConfigFiles.Where(s => Path.GetFileName(s).StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
-                                              .Select(GetProject)
+            var projectSystems = packagesConfigFiles.Where(s => Path.GetFileName(s).StartsWith("packages.", StringComparison.OrdinalIgnoreCase))
+                                              .Select(GetProjectSystem)
                                               .Where(p => p != null)
                                               .Distinct()
                                               .ToList();
 
-            if (projects.Count == 0)
+            if (projectSystems.Count == 0)
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("NoProjectsFound"));
                 return;
             }
 
-            if (projects.Count == 1)
+            if (projectSystems.Count == 1)
             {
-                Console.WriteLine(LocalizedResourceManager.GetString("FoundProject"), projects.Single().ProjectName);
+                Console.WriteLine(LocalizedResourceManager.GetString("FoundProject"), projectSystems.Single().ProjectName);
             }
             else
             {
-                Console.WriteLine(LocalizedResourceManager.GetString("FoundProjects"), projects.Count, String.Join(", ", projects.Select(p => p.ProjectName)));
+                Console.WriteLine(LocalizedResourceManager.GetString("FoundProjects"), projectSystems.Count, String.Join(", ", projectSystems.Select(p => p.ProjectName)));
             }
 
             string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
             IPackageRepository sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
-            foreach (var project in projects)
+            foreach (var projectSystem in projectSystems)
             {
                 try
                 {
-                    UpdatePackages(project, repositoryPath, sourceRepository);
+                    UpdatePackages(projectSystem, repositoryPath, sourceRepository);
                     if (Verbose)
                     {
                         Console.WriteLine();
@@ -153,11 +153,11 @@ namespace NuGet.Commands
             }
         }
 
-        private static IMSBuildProjectSystem GetProject(string path)
+        private static IMSBuildProjectSystem GetProjectSystem(string path)
         {
             try
             {
-                return GetMSBuildProject(path);
+                return GetMSBuildProjectSystem(path);
             }
             catch (CommandLineException)
             {
@@ -205,26 +205,26 @@ namespace NuGet.Commands
 
         private void UpdatePackages(string packagesConfigPath)
         {
-            var project =  GetMSBuildProject(packagesConfigPath);
-            UpdatePackages(project);
+            var projectSystem =  GetMSBuildProjectSystem(packagesConfigPath);
+            UpdatePackages(projectSystem);
         }
 
-        private void UpdatePackages(IMSBuildProjectSystem project, string repositoryPath = null, IPackageRepository sourceRepository = null)
+        private void UpdatePackages(IMSBuildProjectSystem projectSystem, string repositoryPath = null, IPackageRepository sourceRepository = null)
         {
             // Resolve the repository path
-            repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
+            repositoryPath = repositoryPath ?? GetRepositoryPath(projectSystem.Root);
 
             var sharedRepositoryFileSystem = new PhysicalFileSystem(repositoryPath);
             var pathResolver = new DefaultPackagePathResolver(sharedRepositoryFileSystem);
 
             // Create the local and source repositories
             var sharedPackageRepository = new SharedPackageRepository(pathResolver, sharedRepositoryFileSystem, sharedRepositoryFileSystem);
-            var localRepository = new PackageReferenceRepository(project, project.ProjectName, sharedPackageRepository);
+            var localRepository = new PackageReferenceRepository(projectSystem, projectSystem.ProjectName, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
-            Console.WriteLine(LocalizedResourceManager.GetString("UpdatingProject"), project.ProjectName);
-            UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, localRepository, pathResolver, project);
-            project.Save();
+            Console.WriteLine(LocalizedResourceManager.GetString("UpdatingProject"), projectSystem.ProjectName);
+            UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, localRepository, pathResolver, projectSystem);
+            projectSystem.Save();
         }
 
         private string GetRepositoryPath(string projectRoot)
@@ -280,7 +280,7 @@ namespace NuGet.Commands
             throw new CommandLineException(LocalizedResourceManager.GetString("UnableToLocatePackagesFolder"));
         }
 
-        private static IMSBuildProjectSystem GetMSBuildProject(string packageReferenceFilePath)
+        private static IMSBuildProjectSystem GetMSBuildProjectSystem(string packageReferenceFilePath)
         {
             // Try to locate the project file associated with this packages.config file
             var directory = Path.GetDirectoryName(packageReferenceFilePath);
@@ -305,11 +305,11 @@ namespace NuGet.Commands
                                      IPackageRepository sourceRepository,
                                      IPackageConstraintProvider constraintProvider,
                                      IPackagePathResolver pathResolver,
-                                     IProjectSystem project)
+                                     IProjectSystem projectSystem)
         {
             var packageManager = new PackageManager(sourceRepository, pathResolver, sharedRepositoryFileSystem, sharedPackageRepository);
 
-            var projectManager = new ProjectManager(packageManager, pathResolver, project, localRepository)
+            var projectManager = new ProjectManager(packageManager, pathResolver, projectSystem, localRepository)
                                  {
                                      ConstraintProvider = constraintProvider
                                  };
@@ -322,7 +322,7 @@ namespace NuGet.Commands
                 PackageExtractor.InstallPackage(packageManager, eventArgs.Package);
             };
 
-            projectManager.Logger = project.Logger = this;
+            projectManager.Logger = projectSystem.Logger = this;
 
             foreach (var package in GetPackages(localRepository))
             {

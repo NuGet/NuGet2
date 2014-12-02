@@ -48,12 +48,12 @@ namespace NuGet.Client
         public static readonly string RequireLicenseAcceptance = "requireLicenseAcceptance";
         public static readonly string DependencyGroups = "dependencyGroups";
         public static readonly string LatestVersion = "latestVersion";
-        public static readonly string Packages = "packages";
         public static readonly string TargetFramework = "targetFramework";
         public static readonly string Dependencies = "dependencies";
         public static readonly string Range = "range";
         public static readonly string MinimumClientVersion = "minClientVersion";
         public static readonly string Language = "language";
         public static readonly string PackageContent = "packageContent";
+        public static readonly string Versions = "versions";
     }
 }

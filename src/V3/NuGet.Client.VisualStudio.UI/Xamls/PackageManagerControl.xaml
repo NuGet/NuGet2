@@ -5,8 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Tools="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
+             xmlns:tp="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
              Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+             x:Name="_self"
              mc:Ignorable="d"
              d:DesignHeight="523" d:DesignWidth="900">
     <UserControl.Resources>
@@ -26,27 +28,35 @@
             </Grid.RowDefinitions>
             <!-- Row 0 is used by restore bar -->
 
-            <TextBlock Grid.Row="1" x:Name="_label" FontSize="15" Margin="8,8">Package Manager</TextBlock>
+            <TextBlock 
+                Grid.Row="1" 
+                x:Name="_label" 
+                FontSize="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font155PercentSizeConverter}}" 
+                Margin="8,8">Package Manager</TextBlock>
 
             <WrapPanel Grid.Row="2" Margin="0,12,0,20" Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal" Margin="24,8,0,0">
                     <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Text="{x:Static resx:Resources.Label_Repository}" />
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        VerticalAlignment="Center"
+                        Text="{x:Static resx:Resources.Label_Repository}" />
 
                     <ComboBox
                         Margin="6,0,0,0"
                         x:Name="_sourceRepoList"
                         VerticalAlignment="Center"
                         DisplayMemberPath="Name"
-                        Width="130"
-                        Height="24"
-                    Grid.Column="1"  SelectionChanged="_sourceRepoList_SelectionChanged"></ComboBox>
+                        MinWidth="130"
+                        MinHeight="24"
+                        Grid.Column="1"
+                        SelectionChanged="_sourceRepoList_SelectionChanged"
+                        Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
 
                     <TextBlock
                         Grid.Column="2"
                         Margin="24,0,0,0"
+                        FontWeight="Bold"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_Filter}" />
 
@@ -56,27 +66,30 @@
                         VerticalAlignment="Center"
                         SelectedIndex="0"
                         x:Name="_filter"
-                        Width="130"
-                        Height="24"
-                        SelectionChanged="_filter_SelectionChanged" />
+                        MinWidth="130"
+                        MinHeight="24"
+                        SelectionChanged="_filter_SelectionChanged"
+                        Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
 
-                    <CheckBox x:Name="_checkboxPrerelease"
-                          Grid.Column="4" Margin="24,0,0,0"
-                          VerticalAlignment="Center"
-                          Content="{x:Static resx:Resources.Checkbox_IncludePrerelease}"
-                          Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                          Checked="_checkboxPrerelease_CheckChanged"
-                          Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True" />
+                    <CheckBox 
+                        x:Name="_checkboxPrerelease"
+                        Grid.Column="4" Margin="24,0,0,0"
+                        VerticalAlignment="Center"
+                        Content="{x:Static resx:Resources.Checkbox_IncludePrerelease}"
+                        Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                        VerticalContentAlignment="Center"
+                        Checked="_checkboxPrerelease_CheckChanged"
+                        Unchecked="_checkboxPrerelease_CheckChanged" IsChecked="True" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="24,8,0,0" Height="24">
+                <StackPanel Orientation="Horizontal" Margin="24,8,0,0" MinHeight="24">
                     <Tools:SearchControl
                         Grid.Column="6"
                         VerticalAlignment="Center"
                         x:Name="_searchControl"
                         SearchStart="_searchControl_SearchStart"
-                        Height="24"
-                        Width="224" />
+                        MinHeight="24"
+                        MinWidth="224" />
 
                     <Button
                         Margin="24,0"
@@ -85,7 +98,9 @@
                         Grid.Column="7"
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
                         Click="SettingsButtonClick" x:Name="_settingsButton">
-                        <Rectangle Width="16" Height="16">
+                        <Rectangle 
+                            Width="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font122PercentSizeConverter}}" 
+                            Height="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font122PercentSizeConverter}}">
                             <Rectangle.Fill>
                                 <DrawingBrush>
                                     <DrawingBrush.Drawing>
@@ -140,16 +155,10 @@
                     <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
                     </Tools:BusyControl>
 
-                    <Tools:PackageDetailControl
+                    <Tools:DetailControl
                         x:Name="_packageDetail"
                         Grid.Column="2"
-                        Grid.RowSpan="2"
-                        Visibility="Collapsed" />
-                    <Tools:PackageSolutionDetailControl
-                        x:Name="_packageSolutionDetail"
-                        Grid.Column="2"
-                        Grid.RowSpan="2"
-                        Visibility="Collapsed" />
+                        Grid.RowSpan="2" />
                 </Grid>
             </Border>
         </Grid>

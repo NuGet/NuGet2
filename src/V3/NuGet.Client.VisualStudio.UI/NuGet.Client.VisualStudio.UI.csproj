@@ -62,27 +62,18 @@
     <When Condition="$(VisualStudioVersion)=='14.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS14\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(VisualStudioVersion)=='12.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS12\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(VisualStudioVersion)=='11.0'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-          <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-          <SpecificVersion>False</SpecificVersion>
-          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </When>
@@ -91,14 +82,16 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DownloadCountToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumerableToVisibilityConverter.cs" />
+    <Compile Include="Converters\FontSizeConverter.cs" />
     <Compile Include="Converters\IconUrlToVisibilityConverter.cs" />
     <Compile Include="DependencyBehaviorItem.cs" />
+    <Compile Include="DetailControlModel.cs" />
     <Compile Include="FileConflictActionItem.cs" />
-    <Compile Include="IDetailControl.cs" />
     <Compile Include="IUserInterfaceService.cs" />
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
     <Compile Include="Models\UiPackageDependency.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
     <Compile Include="PackageSolutionDetailControlModel.cs" />
@@ -110,6 +103,9 @@
     <Compile Include="Resources\Colors.cs" />
     <Compile Include="VersionForDisplay.cs" />
     <Compile Include="VsDialogWindow.cs" />
+    <Compile Include="Xamls\ActionsAndVersions.xaml.cs">
+      <DependentUpon>ActionsAndVersions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xamls\BusyControl.xaml.cs">
       <DependentUpon>BusyControl.xaml</DependentUpon>
     </Compile>
@@ -122,18 +118,12 @@
     <Compile Include="Xamls\InstalledIndicator.xaml.cs">
       <DependentUpon>InstalledIndicator.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xamls\DropdownButton.xaml.cs">
-      <DependentUpon>DropdownButton.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Xamls\InfiniteScrollList.xaml.cs">
       <DependentUpon>InfiniteScrollList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
-    <Compile Include="Xamls\Options.xaml.cs">
-      <DependentUpon>Options.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Xamls\PackageDetailControl.xaml.cs">
-      <DependentUpon>PackageDetailControl.xaml</DependentUpon>
+    <Compile Include="Xamls\OptionsControl.xaml.cs">
+      <DependentUpon>OptionsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageDetailControlModel.cs" />
     <Compile Include="Xamls\PackageItemControl.xaml.cs">
@@ -148,8 +138,8 @@
     <Compile Include="Xamls\PackageMetadataControl.xaml.cs">
       <DependentUpon>PackageMetadataControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xamls\PackageSolutionDetailControl.xaml.cs">
-      <DependentUpon>PackageSolutionDetailControl.xaml</DependentUpon>
+    <Compile Include="Xamls\DetailControl.xaml.cs">
+      <DependentUpon>DetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xamls\PreviewWindow.xaml.cs">
       <DependentUpon>PreviewWindow.xaml</DependentUpon>
@@ -175,6 +165,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Xamls\ActionsAndVersions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Xamls\BusyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -191,21 +185,13 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xamls\DropdownButton.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Xamls\InfiniteScrollList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Xamls\Options.xaml">
+    <Page Include="Xamls\OptionsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Xamls\PackageDetailControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Xamls\PackageItemControl.xaml">
       <SubType>Designer</SubType>
@@ -219,7 +205,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xamls\PackageSolutionDetailControl.xaml">
+    <Page Include="Xamls\DetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

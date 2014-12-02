@@ -26,13 +26,19 @@
         <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuGetRoot)\Extended.Settings.targets</AdditionalSettingsImport>
     </PropertyGroup>
     
-    <PropertyGroup Condition=" $(VisualStudioVersion) == '10.0' Or $(VisualStudioVersion) == '11.0' ">
+    <PropertyGroup Condition=" $(VisualStudioVersion) == '10.0' ">
         <ShellAssembly>Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
         <ShellAssemblyHintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</ShellAssemblyHintPath>
     
         <MSBuildAssembly>Microsoft.Build</MSBuildAssembly>
         <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
         <VCProjectEngineAssemblyHintPath>..\..\lib\Microsoft.VisualStudio.VCProjectEngine.dll</VCProjectEngineAssemblyHintPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" $(VisualStudioVersion) == '11.0' ">
+        <ShellAssembly>Microsoft.VisualStudio.Shell.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
+        <MSBuildAssembly>Microsoft.Build</MSBuildAssembly>
+        <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
     </PropertyGroup>
 
     <PropertyGroup Condition=" $(VisualStudioVersion) == '12.0' ">        
@@ -42,7 +48,7 @@
         <MSBuildAssembly>Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</MSBuildAssembly>
         <VCProjectEngineAssembly>Microsoft.VisualStudio.VCProjectEngine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</VCProjectEngineAssembly>
     </PropertyGroup>
-    <PropertyGroup Condition=" $(VisualStudioVersion) == '14.0' ">        
+    <PropertyGroup Condition=" $(VisualStudioVersion) == '14.0' ">
         <ShellAssembly>Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ShellAssembly>
         <ShellAssemblyHintPath>..\..\lib\VS14\Microsoft.VisualStudio.Shell.14.0.dll</ShellAssemblyHintPath>
 

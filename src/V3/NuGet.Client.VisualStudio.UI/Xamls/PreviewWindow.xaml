@@ -4,39 +4,57 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
     xmlns:ui ="clr-namespace:NuGet.Client.VisualStudio.UI"
+    x:Name="_self"
     ShowInTaskbar="False"
-    WindowStyle="SingleBorderWindow"
+    WindowStyle="SingleBorderWindow"    
     WindowStartupLocation="CenterOwner"
-    Background="{DynamicResource {x:Static resx:Brushes.HeaderBackground}}"
-    Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-    Title="{x:Static resx:Resources.WindowTitle_Preview}"
-    Height="300" Width="400">
+    Title="{Binding Title}"
+    Height="500" Width="500">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-    </Window.Resources>    
-    <Grid>
+    </Window.Resources>
+
+    <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Border BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
-                BorderThickness="1">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto">
+        <TextBlock
+            Grid.Row="0"
+            Margin="12,8,12,0"
+            Text="{x:Static resx:Resources.Text_ReviewChanges}"
+            FontSize="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font122PercentSizeConverter}}" />
+
+        <TextBlock
+            Grid.Row="1"
+            Margin="12,4,12,0"
+            TextWrapping="Wrap"
+            Text="{x:Static resx:Resources.Text_Changes}"/>
+
+        <Border 
+            Grid.Row="2"
+            Margin="12,12"
+            BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
+            BorderThickness="1">
+            <ScrollViewer 
+                HorizontalScrollBarVisibility="Auto"
+                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
                 <ItemsControl ItemsSource="{Binding Path=PreviewResults}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0, 8">
+                            <StackPanel Margin="6, 6">
                                 <TextBlock
-                                    FontWeight="Bold"
-                                    FontStyle="Italic"
+                                    FontSize="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font122PercentSizeConverter}}"
                                     Text="{Binding Path=Name}" />
 
                                 <!-- Updated packages -->
-                                <StackPanel Margin="10,8,0,8" 
+                                <StackPanel Margin="0,8" 
                                             Visibility="{Binding Path=Updated,Converter={StaticResource EnumerableToVisibilityConverter}}"
                                             >
                                     <TextBlock
@@ -49,7 +67,7 @@
                                 </StackPanel>
 
                                 <!-- Installed packages -->
-                                <StackPanel Margin="10,8,0,8"
+                                <StackPanel Margin="0,8"
                                             Visibility="{Binding Path=Added,Converter={StaticResource EnumerableToVisibilityConverter}}">
                                     <TextBlock
                         FontWeight="Bold"
@@ -61,7 +79,7 @@
                                 </StackPanel>
 
                                 <!-- Uninstalled packages -->
-                                <StackPanel Margin="10,8,0,8"
+                                <StackPanel Margin="0,8"
                                             Visibility="{Binding Path=Deleted,Converter={StaticResource EnumerableToVisibilityConverter}}">
                                     <TextBlock
                         FontWeight="Bold"
@@ -71,33 +89,31 @@
                         ItemsSource="{Binding Path=Deleted}">
                                     </ItemsControl>
                                 </StackPanel>
-
-                                <!-- Unchanged -->
-                                <!--
-                                <StackPanel Margin="10,8,0,8">
-                                    <TextBlock
-                        FontWeight="Bold"
-                        Text="{x:Static resx:Resources.Label_UnchangedPackages}" />
-                                    <ItemsControl
-                        Margin="10,0,0,0"
-                        ItemsSource="{Binding Path=Unchanged}">
-                                    </ItemsControl>
-                                </StackPanel>
-                                -->
-                                
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
         </Border>
-        <Grid Grid.Row="1" Margin="8,8">
+
+        <Grid Grid.Row="3" Background="{Binding ElementName=_self, Path=Background}" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Width="50"
-                    Content="{x:Static resx:Resources.Button_OK}" Click="Button_Click" />
+            <Button Grid.Column="1" 
+                    MinWidth="86"
+                    MinHeight="24"
+                    Margin="0,12"
+                    AutomationProperties.AutomationId="OK"
+                    Content="{x:Static resx:Resources.Button_OK}" Click="OkButtonClicked" />
+            <Button Grid.Column="2" 
+                    MinWidth="86"
+                    MinHeight="24"
+                    Margin="6,12,12,12"
+                    AutomationProperties.AutomationId="Cancel"
+                    Content="{x:Static resx:Resources.Button_Cancel}" Click="CancelButtonClicked" />
         </Grid>
     </Grid>
 </ui:VsDialogWindow>

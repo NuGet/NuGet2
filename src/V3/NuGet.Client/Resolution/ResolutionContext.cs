@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NuGet.Client.Resolution
+﻿namespace NuGet.Client.Resolution
 {
     public class ResolutionContext
     {
         public DependencyBehavior DependencyBehavior { get; set; }
+
         public bool AllowPrerelease { get; set; }
+
+        public bool ForceRemove { get; set; }
+
+        public bool RemoveDependencies { get; set; }
     }
 }

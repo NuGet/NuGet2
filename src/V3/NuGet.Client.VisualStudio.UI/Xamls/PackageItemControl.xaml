@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              xmlns:ui="clr-namespace:NuGet.Client.VisualStudio.UI"
              xmlns:resx="clr-namespace:NuGet.Client.VisualStudio.UI.Resources"
-             Height="80"
+             MinHeight="80"             
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ui:PackageStatusToInstallImageVisibilityConverter x:Key="PackageStatusToInstallImageVisibilityConverter" />
@@ -49,22 +49,23 @@
             </Grid>
             
             <!-- title & summary-->
-            <Grid Grid.Column="1" VerticalAlignment="Top">
+            <Grid Grid.Column="1" VerticalAlignment="Top" MinHeight="48">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="16" />
-                    <RowDefinition Height="32"/>
+                    <RowDefinition />
+                    <RowDefinition Height="32" MaxHeight="32"/>
                 </Grid.RowDefinitions>
                 <TextBlock
-                        Grid.Row="0"
-                        FontWeight="Bold"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap"
-                        Text="{Binding Id}"></TextBlock>
+                    Grid.Row="0"
+                    FontWeight="Bold"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap"
+                    AutomationProperties.AutomationId="id"
+                    Text="{Binding Id}"></TextBlock>
                 <TextBlock
-                        Grid.Row="1"
-                        Text="{Binding Summary}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="Wrap"></TextBlock>
+                    Grid.Row="1"
+                    Text="{Binding Summary}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="Wrap"></TextBlock>
             </Grid>
 
             <ui:InstalledIndicator

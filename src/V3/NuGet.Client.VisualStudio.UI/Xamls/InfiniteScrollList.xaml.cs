@@ -25,6 +25,8 @@ namespace NuGet.Client.VisualStudio.UI
 
         private CancellationTokenSource _cts;
 
+        private int _startIndex;
+
         public InfiniteScrollList()
         {
             InitializeComponent();
@@ -32,6 +34,7 @@ namespace NuGet.Client.VisualStudio.UI
 
             _items = new ObservableCollection<object>();
             _list.ItemsSource = _items;
+            _startIndex = 0;
         }
 
         public ObservableCollection<object> Items
@@ -63,6 +66,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             _items.Clear();
             _items.Add(_loadingStatusIndicator);
+            _startIndex = 0;
             Load();
         }
 
@@ -80,9 +84,7 @@ namespace NuGet.Client.VisualStudio.UI
             _loadingStatusIndicator.Status = LoadingStatus.Loading;
             try
             {
-                // Note that the last item is _loadingStatusIndicator. So the start index of the
-                // items to load is _items.Count - 1.
-                var r = await Loader.LoadItems(_items.Count - 1, _cts.Token);
+                var r = await Loader.LoadItems(_startIndex, _cts.Token);
 
                 _items.RemoveAt(_items.Count - 1);
                 foreach (var obj in r.Items)
@@ -104,6 +106,7 @@ namespace NuGet.Client.VisualStudio.UI
                 else
                 {
                     _loadingStatusIndicator.Status = LoadingStatus.Ready;
+                    _startIndex = r.NextStartIndex;
                 }
                 _items.Add(_loadingStatusIndicator);
 
@@ -223,6 +226,8 @@ namespace NuGet.Client.VisualStudio.UI
         public IEnumerable Items { get; set; }
 
         public bool HasMoreItems { get; set; }
+
+        public int NextStartIndex { get; set; }
     }
 
     public interface ILoader

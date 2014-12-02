@@ -187,11 +187,38 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Force uninstall, even if there are dependencies on it.
+        /// </summary>
+        public static string Checkbox_ForceRemove {
+            get {
+                return ResourceManager.GetString("Checkbox_ForceRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Include Prerelease.
         /// </summary>
         public static string Checkbox_IncludePrerelease {
             get {
                 return ResourceManager.GetString("Checkbox_IncludePrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove dependencies.
+        /// </summary>
+        public static string Checkbox_RemoveDependencies {
+            get {
+                return ResourceManager.GetString("Checkbox_RemoveDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show preview window.
+        /// </summary>
+        public static string Checkbox_ShowPreviewWindow {
+            get {
+                return ResourceManager.GetString("Checkbox_ShowPreviewWindow", resourceCulture);
             }
         }
         
@@ -394,7 +421,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Installed:.
+        ///   Looks up a localized string similar to Installing:.
         /// </summary>
         public static string Label_InstalledPackages {
             get {
@@ -511,16 +538,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unchanged:.
-        /// </summary>
-        public static string Label_UnchangedPackages {
-            get {
-                return ResourceManager.GetString("Label_UnchangedPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uninstalled:.
+        ///   Looks up a localized string similar to Uninstalling:.
         /// </summary>
         public static string Label_UninstalledPackages {
             get {
@@ -529,7 +547,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Updated:.
+        ///   Looks up a localized string similar to Updates:.
         /// </summary>
         public static string Label_UpdatedPackages {
             get {
@@ -543,6 +561,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Label_Version {
             get {
                 return ResourceManager.GetString("Label_Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Visual Studio is about to make changes to this solution. Click OK to proceed with the changes listed below..
+        /// </summary>
+        public static string Text_Changes {
+            get {
+                return ResourceManager.GetString("Text_Changes", resourceCulture);
             }
         }
         
@@ -565,6 +592,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Installed version: {0}.
+        /// </summary>
+        public static string Text_InstalledVersion {
+            get {
+                return ResourceManager.GetString("Text_InstalledVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages..
         /// </summary>
         public static string Text_LegalDisclaimer {
@@ -574,7 +610,16 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following package(s) require a click-to-accept license:.
+        ///   Looks up a localized string similar to License Acceptance.
+        /// </summary>
+        public static string Text_LicenseAcceptance {
+            get {
+                return ResourceManager.GetString("Text_LicenseAcceptance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following package(s) require that you accept their license terms before installing..
         /// </summary>
         public static string Text_LicenseHeaderText {
             get {
@@ -628,11 +673,29 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Progress.
+        /// </summary>
+        public static string Text_Progress {
+            get {
+                return ResourceManager.GetString("Text_Progress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ready.
         /// </summary>
         public static string Text_Ready {
             get {
                 return ResourceManager.GetString("Text_Ready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Review Changes.
+        /// </summary>
+        public static string Text_ReviewChanges {
+            get {
+                return ResourceManager.GetString("Text_ReviewChanges", resourceCulture);
             }
         }
         
@@ -723,6 +786,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string WindowTitle_Preview {
             get {
                 return ResourceManager.GetString("WindowTitle_Preview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Progress.
+        /// </summary>
+        public static string WindowTitle_Progress {
+            get {
+                return ResourceManager.GetString("WindowTitle_Progress", resourceCulture);
             }
         }
     }

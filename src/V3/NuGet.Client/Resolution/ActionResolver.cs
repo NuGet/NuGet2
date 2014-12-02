@@ -110,6 +110,8 @@ namespace NuGet.Client.Resolution
         private void ApplyContext(OldResolver resolver)
         {
             resolver.AllowPrereleaseVersions = _context.AllowPrerelease;
+            resolver.ForceRemove = _context.ForceRemove;
+            resolver.RemoveDependencies = _context.RemoveDependencies;
 
             if (_context.DependencyBehavior == DependencyBehavior.Ignore)
             {
