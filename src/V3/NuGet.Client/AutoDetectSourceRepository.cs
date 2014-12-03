@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NuGet.Client;
 
 namespace NuGet.Client
 {
@@ -149,7 +150,7 @@ namespace NuGet.Client
             return await _repo.GetPackageMetadataById(packageId);
         }
 
-        public override async void RecordMetric(Resolution.PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, Installation.InstallationTarget target)
+        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
         {
             await DetectVersionWhenNeccessary();
             _repo.RecordMetric(actionType, packageIdentity, dependentPackage, isUpdate, target);

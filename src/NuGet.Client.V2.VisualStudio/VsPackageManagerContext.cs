@@ -57,5 +57,5 @@ namespace NuGet.Client.VisualStudio
                 _solutionManager,
                 _packageManagerFactory.CreatePackageManagerToManageInstalledPackages());
         }
-    }
+    }    
 }

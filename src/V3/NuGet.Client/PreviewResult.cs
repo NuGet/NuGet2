@@ -84,11 +84,11 @@ namespace NuGet.Client
             var uninstalled = new Dictionary<string, PackageIdentity>(StringComparer.OrdinalIgnoreCase);
             foreach (var action in actions.Where(a => targetProject.Equals(a.Target)))
             {
-                if (action.ActionType == NuGet.Client.Resolution.PackageActionType.Install)
+                if (action.ActionType == PackageActionType.Install)
                 {
                     installed[action.PackageIdentity.Id] = action.PackageIdentity;
                 }
-                else if (action.ActionType == NuGet.Client.Resolution.PackageActionType.Uninstall)
+                else if (action.ActionType == PackageActionType.Uninstall)
                 {
                     uninstalled[action.PackageIdentity.Id] = action.PackageIdentity;
                 }

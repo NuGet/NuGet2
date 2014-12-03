@@ -49,7 +49,7 @@ namespace NuGet.Client.ProjectSystem
         public override IEnumerable<InstallationTarget> GetAllTargetsRecursively()
         {
             yield return this;
-            
+
             // Recursive descent
             foreach (var project in Projects)
             {
