@@ -151,6 +151,14 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj">
+      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
+      <Name>NuGet.Client.V2.VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.V2\NuGet.Client.V2.csproj">
+      <Project>{07536c1c-85c7-4150-ada3-5705e7a9e3ca}</Project>
+      <Name>NuGet.Client.V2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Options\Options.csproj">
       <Project>{53ab7187-cdf3-48b5-b90e-8919d3cb904d}</Project>
       <Name>Options</Name>
@@ -187,17 +195,9 @@
       <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
       <Name>NuGet.Client.V3Interop</Name>
     </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.PowerShell\NuGet.Client.VisualStudio.PowerShell.csproj">
-      <Project>{37465016-5f91-478b-b4e3-dc78b025797a}</Project>
-      <Name>NuGet.Client.VisualStudio.PowerShell</Name>
-    </ProjectReference>
     <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj">
       <Project>{a8efbe54-4136-4d15-8db7-3ffecee50682}</Project>
       <Name>NuGet.Client.VisualStudio.UI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
-      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
-      <Name>NuGet.Client.VisualStudio</Name>
     </ProjectReference>
     <ProjectReference Include="..\V3\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
@@ -295,6 +295,17 @@
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Client.BaseTypes, Version=0.1.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Client.BaseTypes.0.1.0-master-43530230\lib\net45\NuGet.Client.BaseTypes.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Client.VisualStudio, Version=0.1.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Client.VisualStudio.0.1.0-master-43530238\lib\net45\NuGet.Client.VisualStudio.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Versioning">
+      <HintPath>..\..\packages\NuGet.Versioning.1.0.3\lib\portable-net40+win\NuGet.Versioning.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

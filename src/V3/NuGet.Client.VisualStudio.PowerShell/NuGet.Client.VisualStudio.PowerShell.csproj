@@ -35,6 +35,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Client.BaseTypes, Version=0.1.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NuGet.Client.BaseTypes.0.1.0-master-43530230\lib\net45\NuGet.Client.BaseTypes.dll</HintPath>
+    </Reference>
     <Reference Include="NuGet.Versioning, Version=1.0.3.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\NuGet.Versioning.1.0.3\lib\portable-net40+win\NuGet.Versioning.dll</HintPath>
       <Private>True</Private>
@@ -98,9 +102,9 @@
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Versioning\Versioning.csproj">
-      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
-      <Name>Versioning</Name>
+    <ProjectReference Include="..\..\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj">
+      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
+      <Name>NuGet.Client.V2.VisualStudio</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\VisualStudioResources\VisualStudioResources.csproj">
       <Project>{211c558c-1712-44e9-a959-fe2d2aa1de34}</Project>
@@ -121,10 +125,6 @@
     <ProjectReference Include="..\..\VsConsole\PowerShellHost\PowerShellHost.csproj">
       <Project>{5a79eef3-51c0-4a14-8d37-50ef38ad835d}</Project>
       <Name>PowerShellHost</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
-      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
-      <Name>NuGet.Client.VisualStudio</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>

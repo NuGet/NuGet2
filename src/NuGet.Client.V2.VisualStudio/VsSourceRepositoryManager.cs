@@ -117,7 +117,7 @@ namespace NuGet.Client.VisualStudio
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects live until end of process, at which point they will be disposed automatically")]
         private SourceRepository CreateRepo(PackageSource source)
         {
-            return new AutoDetectSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
+           return new AutoDetectSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);           
         }
     }
 }

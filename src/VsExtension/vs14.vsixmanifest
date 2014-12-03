@@ -24,7 +24,7 @@
     <MefComponent>|PowerShellHostProvider|</MefComponent>
     <MefComponent>|Console|</MefComponent>
     <MefComponent>|VisualStudio|</MefComponent>
-    <MefComponent>|NuGet.Client.VisualStudio|</MefComponent>
+    <MefComponent>|NuGet.Client.V2.VisualStudio|</MefComponent>
     <MefComponent>|NuGet.Client.VisualStudio.UI|</MefComponent>
     <MefComponent>|NuGet.Client.V3Interop|</MefComponent>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
