@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
+using Newtonsoft.Json.Linq;
+
 
 namespace NuGet.Client
 {

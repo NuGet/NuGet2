@@ -5,8 +5,5 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("V3VisualStudio")]
-[assembly: AssemblyDescription("")]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("971c901a-4184-4c15-8582-701c0524831f")]
+[assembly: AssemblyTitle("NuGet.Client.VisualStudio")]
+[assembly: AssemblyDescription("Contains the view models that are specific to visual studio scenarios.")]

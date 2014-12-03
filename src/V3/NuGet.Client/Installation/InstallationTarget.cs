@@ -11,6 +11,7 @@ using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
+using NuGet.Client;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.Installation
@@ -75,7 +76,6 @@ namespace NuGet.Client.Installation
         public virtual void AddMetricsMetadata(JObject metricsRecord)
         {
         }
-
 
         /// <summary>
         /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
@@ -144,7 +144,7 @@ namespace NuGet.Client.Installation
 #if DEBUG
             // During development, there should NEVER be a feature type added that we don't know about :).
             Debug.Assert(
-                KnownFeatures.Contains(typeof(T)), 
+                KnownFeatures.Contains(typeof(T)),
                 "You tried to register a feature ('" + typeof(T).FullName + "') I'm not familiar with. This isn't generally a good thing...");
 #endif
 
@@ -175,5 +175,6 @@ namespace NuGet.Client.Installation
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method can be expensive")]
         public abstract IEnumerable<InstallationTarget> GetAllTargetsRecursively();
+
     }
 }
