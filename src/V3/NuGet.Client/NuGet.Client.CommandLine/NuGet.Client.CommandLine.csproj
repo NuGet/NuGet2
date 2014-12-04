@@ -50,6 +50,8 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Common\CommandLineException.cs" />
+    <Compile Include="Common\Console.cs" />
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
     <Compile Include="Common\ICommandManager.cs" />
     <Compile Include="Common\IConsole.cs" />
@@ -58,7 +60,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceHelpers\LocalizedResourceManager.cs" />
     <Compile Include="ResourceHelpers\ResourceHelper.cs" />
+    <Compile Include="Utility\CommandLineParser.cs" />
     <Compile Include="Utility\PackageSourceBuilder.cs" />
+    <Compile Include="Utility\TypeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
