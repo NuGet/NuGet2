@@ -74,7 +74,7 @@ namespace NuGet.Client
             }
         }
 
-        private async Task<bool> IsV2Async(PackageSource source)
+        private static async Task<bool> IsV2Async(PackageSource source)
         {
             var url = new Uri(source.Url);
             if (url.IsFile || url.IsUnc)
@@ -100,7 +100,7 @@ namespace NuGet.Client
             }
         }
 
-        private async Task<bool> IsV3Async(PackageSource source)
+        private static async Task<bool> IsV3Async(PackageSource source)
         {
             var url = new Uri(source.Url);
             if (url.IsFile || url.IsUnc)

@@ -15,8 +15,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
     /// TODO List
-    /// 1. Confirm that -ListAvailable is cut.
-    /// 2. If ListAvailable is cut, then Source and Updates switch should be cut as well.
+    /// 1. Figure out the new behavior/Command that is similar to -ListAvailable
+    /// 2. For parameters that are cut/modified, emit useful message for directing users to the new useage pattern.
     [Cmdlet(VerbsCommon.Get, "Package2", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetPowerShellBaseCommand
@@ -24,7 +24,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private readonly IProductUpdateService _productUpdateService;
         private int _firstValue;
         private bool _firstValueSpecified;
-        private bool _projectNameSpecified;
 
         public GetPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -41,22 +40,30 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
-        //[Parameter(Mandatory = true, ParameterSetName = "Updates")]
-        //public SwitchParameter Updates { get; set; }
+        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Position = 1, ParameterSetName = "Updates")]
+        [ValidateNotNullOrEmpty]
+        public string Source { get; set; }
 
-        [Parameter]
-        public override string ProjectName
-        {
-            get
-            {
-                return base.ProjectName;
-            }
-            set
-            {
-                _projectNameSpecified = true;
-                base.ProjectName = value;
-            }
-        }
+        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
+        [ValidateNotNullOrEmpty]
+        public string ProjectName { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = "Remote")]
+        [Alias("Online", "Remote")]
+        public SwitchParameter ListAvailable { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = "Updates")]
+        public SwitchParameter Updates { get; set; }
+
+        [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Updates")]
+        public SwitchParameter AllVersions { get; set; }
+
+        [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Updates")]
+        [Alias("Prerelease")]
+        public SwitchParameter IncludePrerelease { get; set; }
 
         [Parameter]
         [ValidateRange(0, Int32.MaxValue)]
@@ -82,10 +89,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             List<InstallationTarget> targets = new List<InstallationTarget>();
             List<JObject> solutionInstalledPackages = new List<JObject>();
 
-            if (_projectNameSpecified)
+            if (!string.IsNullOrEmpty(ProjectName))
             {
                 // Get current project
-                VsProject target = this.GetProject(true);
+                Project project = SolutionManager.GetProject(ProjectName);
+                VsProject target = Solution.GetProject(project);
                 targets.Add(target);
             }
             else
@@ -124,7 +132,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             // Get the PowerShellPackageView
-            var view = PowerShellPackageViewModel.GetPowerShellPackageView(installedPackages);
+            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
             WriteObject(view, enumerateCollection: true);
         }
     }

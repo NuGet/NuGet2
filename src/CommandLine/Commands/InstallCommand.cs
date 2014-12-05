@@ -12,6 +12,7 @@ using NuGet.Resolver;
 
 namespace NuGet.Commands
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     [Command(typeof(NuGetCommand), "install", "InstallCommandDescription",
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
