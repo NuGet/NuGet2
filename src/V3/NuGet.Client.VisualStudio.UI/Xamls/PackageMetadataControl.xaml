@@ -120,7 +120,7 @@
                         Text="{x:Static resx:Resources.Label_DatePublished}" />
             <TextBlock
                         Visibility="{Binding Path=Published,Converter={StaticResource NullToVisibilityConverter}}"
-                        Text="{Binding Path=Published,StringFormat={}{0:F}}"
+                        Text="{Binding Path=Published,StringFormat={}{0:D} ({0:d})}"
                         Margin="8,8,0,0"
                         TextWrapping="Wrap"
                         Grid.Row="4" Grid.Column="1"></TextBlock>
