@@ -131,6 +131,7 @@
     <Compile Include="UpdatePreviewResult.cs" />
     <Compile Include="UserAgentUtil.cs" />
     <Compile Include="V3SourceRepository.cs" />
+    <Compile Include="V3SourceRepository2.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -145,6 +146,10 @@
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
+      <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>
+      <Name>NuGet.Client.V3</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
