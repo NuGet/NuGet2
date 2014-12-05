@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -49,11 +55,15 @@
     <Compile Include="Attributes\CommandAttribute.cs" />
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\DownloadCommandBase.cs" />
     <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\RestoreCommand.cs" />
+    <Compile Include="Common\CommandLineConstants.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="Common\CommandManager.cs" />
     <Compile Include="Common\Console.cs" />
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
+    <Compile Include="Common\FilesystemInstallationTarget.cs" />
     <Compile Include="Common\ICommandManager.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\Verbosity.cs" />
@@ -61,13 +71,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceHelpers\LocalizedResourceManager.cs" />
     <Compile Include="ResourceHelpers\ResourceHelper.cs" />
+    <Compile Include="SolutionParsers\ISolutionParser.cs" />
+    <Compile Include="SolutionParsers\MSBuildSolutionParser.cs" />
+    <Compile Include="SolutionParsers\ProjectInSolution.cs" />
+    <Compile Include="SolutionParsers\Solution.cs" />
+    <Compile Include="SolutionParsers\XBuildSolutionParser.cs" />
     <Compile Include="Utility\CommandLineParser.cs" />
+    <Compile Include="Utility\CommandLineUtility.cs" />
     <Compile Include="Utility\PackageSourceBuilder.cs" />
     <Compile Include="Utility\SourceRepositoryHelper.cs" />
     <Compile Include="Utility\TypeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\..\Common\CommonResources.resx">
@@ -80,9 +97,9 @@
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj">
-      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
-      <Name>NuGet.Client.V3Interop</Name>
+    <ProjectReference Include="..\..\..\Versioning\Versioning.csproj">
+      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
+      <Name>Versioning</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>

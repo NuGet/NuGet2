@@ -1,6 +1,9 @@
 ﻿using NuGet.Client;
 using NuGet.Client.Interop;
+using NuGet.Common;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NuGet
 {
@@ -10,17 +13,22 @@ namespace NuGet
             "preview.nuget.org",
             "https://az320820.vo.msecnd.net/ver3-preview/index.json");
 
-        const string HostName = "NuGet.CommandLine";
-        internal static SourceRepository CreateSourceRepository(IPackageSourceProvider packageSourceProvider)
+        internal static SourceRepository CreateSourceRepository(IPackageSourceProvider packageSourceProvider, IEnumerable<string> sources)
         {
-            // BUGBUG: Hard-coded to always use the first one
             PackageSource firstSource = null;
-            var packageSources = packageSourceProvider.LoadPackageSources();
-            foreach(var source in packageSources)
+            if (sources != null && sources.Any())
             {
-                firstSource = source;
+                // BUGBUG: Hard-coded to only use the first one
+                string firstSourceString = sources.FirstOrDefault();
+                firstSource = String.IsNullOrEmpty(firstSourceString) ? null : new PackageSource(firstSourceString);
             }
-            return CreateRepo(firstSource);
+            else
+            {
+                // BUGBUG: Hard-coded to only use the first one
+                firstSource = packageSourceProvider.LoadPackageSources().FirstOrDefault();                
+            }
+
+            return firstSource != null ? CreateRepo(firstSource) : null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects live until end of process, at which point they will be disposed automatically")]
@@ -31,7 +39,7 @@ namespace NuGet
             if (Uri.TryCreate(source.Source, UriKind.RelativeOrAbsolute, out url) &&
                 StringComparer.OrdinalIgnoreCase.Equals(NuGetV3PreviewSource.Source, url.ToString()))
             {
-                return new V3SourceRepository(new Client.PackageSource(source.Name, source.Source) , HostName);
+                return new V3SourceRepository(new Client.PackageSource(source.Name, source.Source) , CommandLineConstants.UserAgent);
             }
 
             return null;

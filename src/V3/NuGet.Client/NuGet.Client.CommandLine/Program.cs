@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace NuGet.Client.CommandLine
 
         public static int Main(string[] args)
         {
-            //DebugHelper.WaitForAttach(ref args);
+            WaitForAttach(ref args);
 
             // This is to avoid applying weak event pattern usage, which breaks under Mono or restricted environments, e.g. Windows Azure Web Sites.
             EnvironmentUtility.SetRunningFromCommandLine();
@@ -118,6 +119,19 @@ namespace NuGet.Client.CommandLine
             }
 
             return 0;
+        }
+
+        [Conditional("DEBUG")]
+        internal static void WaitForAttach(ref string[] args)
+        {
+            if (args.Length > 0 && (String.Equals(args[0], "dbg", StringComparison.OrdinalIgnoreCase) || String.Equals(args[0], "debug", StringComparison.OrdinalIgnoreCase)))
+            {
+                args = args.Skip(1).ToArray();
+                if (!Debugger.IsAttached)
+                {
+                    Debugger.Launch();
+                }
+            }
         }
 
         private static void SetConsoleOutputEncoding(System.Text.Encoding encoding)
