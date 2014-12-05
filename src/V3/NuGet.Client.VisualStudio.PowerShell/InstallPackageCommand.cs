@@ -23,7 +23,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 3. Add new path/package recognition feature
     /// 4. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
     /// 5. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
-    [Cmdlet(VerbsLifecycle.Install, "Package")]
+    [Cmdlet(VerbsLifecycle.Install, "Package2")]
     public class InstallPackageCommand : PackageActionBaseCommand
     {
         private ResolutionContext _context;
