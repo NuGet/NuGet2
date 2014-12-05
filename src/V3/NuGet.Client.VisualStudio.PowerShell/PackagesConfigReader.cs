@@ -13,6 +13,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public class PackagesConfigReader
     {
         private readonly Stream _stream;
+        private readonly string _text;
+
+        public PackagesConfigReader(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentNullException("text");
+            }
+
+            _text = text;
+        }
 
         public PackagesConfigReader(Stream stream)
         {
@@ -26,7 +37,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public IEnumerable<PackageIdentity> GetPackages()
         {
-            XDocument doc = XDocument.Load(_stream);
+            XDocument doc = new XDocument();
+            if (!string.IsNullOrEmpty(_text))
+            {
+                doc = XDocument.Parse(_text);
+            }
+            else if (_stream != null)
+            {
+                doc = XDocument.Load(_stream);
+            }
 
             List<PackageIdentity> packages = new List<PackageIdentity>();
 

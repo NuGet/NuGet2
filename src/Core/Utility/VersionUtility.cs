@@ -736,6 +736,8 @@ namespace NuGet
         {
             return TryGetCompatibleItems(projectFramework, items, NetPortableProfileTable.Default, out compatibleItems);
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static bool TryGetCompatibleItems<T>(FrameworkName projectFramework, IEnumerable<T> items, NetPortableProfileTable portableProfileTable, out IEnumerable<T> compatibleItems) where T : IFrameworkTargetable
         {
             if (!items.Any())

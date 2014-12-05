@@ -25,12 +25,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This command process the specified package against the specified project.
     /// </summary>
     /// TODO List
-    /// 1. exaction of Project/Solution such as PackageSolutionPowerShellModel
-    /// 2. exaction of LatestVersionViewModel for getting the latest version of a package Id.
+    /// 1. exaction of PowerShellPackage for getting the latest version of a package Id.
     public abstract class PackageActionBaseCommand : NuGetPowerShellBaseCommand
     {
         private PackageActionType _actionType;
-        private PackageIdentity _identity;
         private SourceRepository _activeSourceRepository;
 
         public PackageActionBaseCommand(
@@ -49,15 +47,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public virtual string Id { get; set; }
 
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
+        [ValidateNotNullOrEmpty]
+        public virtual string ProjectName { get; set; }
+
         [Parameter(Position = 2)]
-        public virtual string Version { get; set; }
+        [ValidateNotNullOrEmpty]
+        public string Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
-
-        [Parameter, Alias("Prerelease")]
-        public SwitchParameter IncludePrerelease { get; set; }
 
         [Parameter]
         public SwitchParameter WhatIf { get; set; }
@@ -93,57 +93,46 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public bool IterateProjects { get; set; }
+        public IEnumerable<VsProject> Projects { get; set; }
 
-        public bool IsConsolidating { get; set; }
+        public IEnumerable<PackageIdentity> Identities { get; set; }
 
-        public bool IsVersionSpecified { get; set; }
-
-        public IEnumerable<VsProject> TargetedProjects
+        /// <summary>
+        /// Get Installed Package References for a single project
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
         {
-            get
+            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
             {
-                IEnumerable<VsProject> targetedProjects;
-                if (IterateProjects)
-                {
-                    IEnumerable<string> projectNames = GetAllValidProjectNames();
-                    targetedProjects = GetProjectsByName(projectNames).ToList();
-                }
-                else
-                {
-                    VsProject vsProject = GetProject(true);
-                    targetedProjects = new List<VsProject> { vsProject };
-                }
-                return targetedProjects;
+                refs = installedList.GetInstalledPackages();
             }
-        }
-       
-        public PackageIdentity Identity
-        {
-            get
-            {
-                if (_identity == null && Version != null)
-                {
-                    _identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                }
-                return _identity;
-            }
-            set
-            {
-                _identity = value;
-            }
+            return refs;
         }
 
-        protected void CheckForSolutionOpen()
+        /// <summary>
+        /// Get Installed Package References a single project with specified packageId
+        /// </summary>
+        /// <returns></returns>
+        protected InstalledPackageReference GetInstalledReference(VsProject proj, string Id)
+        {
+            InstalledPackageReference packageRef = null;
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                packageRef = installedList.GetInstalledPackage(Id);
+            }
+            return packageRef;
+        }
+
+        private void CheckForSolutionOpen()
         {
             if (!SolutionManager.IsSolutionOpen)
             {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
-        }
-
-        protected virtual void ResolvePackageFromRepository()
-        {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
@@ -152,9 +141,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 CheckForSolutionOpen();
-                CalculatePackageVersion();
-                ResolvePackageFromRepository();
-                ExecutePackageAction();
+                PreprocessProjectAndIdentities();
+                ExecutePackageActions();
             }
             catch (Exception ex)
             {
@@ -167,36 +155,50 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected virtual void CalculatePackageVersion()
+        protected virtual void PreprocessProjectAndIdentities()
         {
-            if (!string.IsNullOrEmpty(Version))
+            VsProject vsProject = GetProject(true);
+            this.Projects = new List<VsProject> { vsProject };
+        }
+
+        protected NuGetVersion ParseUserInputForVersion(string version)
+        {
+            NuGetVersion nVersion;
+            bool success = NuGetVersion.TryParse(Version, out nVersion);
+            if (!success)
             {
-                IsVersionSpecified = true;
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
             }
-            // For Uninstall-Package and Consolidate-Package
-            else if (_actionType == PackageActionType.Uninstall || IsConsolidating)
+            return nVersion;
+        }
+
+        protected virtual void ExecutePackageActions()
+        {
+            SubscribeToProgressEvents();
+
+            foreach (PackageIdentity identity in Identities)
             {
-                VsProject target = this.GetProject(true);
-                InstalledPackageReference installedPackage = target.InstalledPackages.GetInstalledPackage(Id);
-                Version = installedPackage.Identity.Version.ToNormalizedString();
-            }
-            else
-            {
-                // For Install-Package and Update-Package
-                Version = PowerShellPackageViewModel.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
+                ExecuteSinglePackageAction(identity, Projects);
             }
         }
 
-        protected virtual void ExecutePackageAction()
+        /// <summary>
+        /// Resolve and execute actions for a single package
+        /// </summary>
+        /// <param name="identity"></param>
+        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects)
         {
+            if (identity == null)
+            {
+                return;
+            }
+
             try
             {
-                SubscribeToProgressEvents();
-
                 // Resolve Actions
-                List<VsProject> targetProjects = TargetedProjects.ToList();
-                Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction = 
-                    PackageActionResolver.ResolveActionsAsync(Identity, _actionType, targetProjects, Solution);
+                List<VsProject> targetProjects = projects.ToList();
+                Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction =
+                    PackageActionResolver.ResolveActionsAsync(identity, _actionType, targetProjects, Solution);
 
                 IEnumerable<Client.Resolution.PackageAction> actions = resolverAction.Result;
 
@@ -208,7 +210,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                         if (previewResults.Count() == 0)
                         {
                             PowerShellPreviewResult prResult = new PowerShellPreviewResult();
-                            prResult.Id = Identity.Id;
+                            prResult.Id = identity.Id;
                             prResult.Action = Resources.Log_NoActionsWhatIf;
                             prResult.ProjectName = proj.Name;
                             WriteObject(prResult);
@@ -224,20 +226,19 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
                     return;
                 }
+
+                // Execute Actions
+                if (actions.Count() == 0 && _actionType == PackageActionType.Install)
+                {
+                    Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, identity.Id);
+                }
                 else
                 {
-                    // Execute Actions
-                    if (actions.Count() == 0 && _actionType == PackageActionType.Install)
-                    {
-                        Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, Identity.Id);
-                    }
-                    else
-                    {
-                        ActionExecutor executor = new ActionExecutor();
-                        executor.ExecuteActions(actions, this);
-                    }                   
+                    ActionExecutor executor = new ActionExecutor();
+                    executor.ExecuteActions(actions, this);
                 }
             }
+            // TODO: Consider adding the rollback behavior if exception is thrown.
             catch (Exception ex)
             {
                 if (ex.InnerException != null)
@@ -255,7 +256,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public void LogPreviewResult(PreviewResult result, VsProject proj)
+        private void LogPreviewResult(PreviewResult result, VsProject proj)
         {
             IEnumerable<PowerShellPreviewResult> psResults = ConvertToPowerShellPreviewResult(result, proj);
             WriteObject(psResults);
@@ -320,6 +321,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Get the VsProject by ProjectName. 
+        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// </summary>
+        /// <param name="throwIfNotExists"></param>
+        /// <returns></returns>
+        public VsProject GetProject(bool throwIfNotExists)
+        {
+            VsProject project = null;
+
+            // If the user does not specify a project then use the Default project
+            if (String.IsNullOrEmpty(ProjectName))
+            {
+                ProjectName = SolutionManager.DefaultProjectName;
+            }
+
+            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
+                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
+            if (dteProject != null)
+            {
+                project = Solution.GetProject(dteProject);
+            }
+
+            // If that project was invalid then throw
+            if (project == null && throwIfNotExists)
+            {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+            }
+
+            return project;
         }
     }
 }

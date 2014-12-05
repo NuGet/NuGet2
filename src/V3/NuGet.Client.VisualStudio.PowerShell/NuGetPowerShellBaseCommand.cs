@@ -46,7 +46,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private ProgressRecordCollection _progressRecordCache;
-        private string _projectName;
         private bool _overwriteAll, _ignoreAll;
 
         public NuGetPowerShellBaseCommand(
@@ -65,23 +64,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _repoManager = new VsSourceRepositoryManager(_packageSourceProvider, _repositoryFactory);
             _VsContext = new VsPackageManagerContext(_repoManager, _serviceProvider, _solutionManager, _packageManagerFactory);
             _httpClientEvents = clientEvents;
-        }
-
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1), Alias("Project")]
-        public virtual string ProjectName
-        {
-            get
-            {
-                if (String.IsNullOrEmpty(_projectName))
-                {
-                    _projectName = _solutionManager.DefaultProjectName;
-                }
-                return _projectName;
-            }
-            set
-            {
-                _projectName = value;
-            }
         }
 
         internal VsSolution Solution 
@@ -430,30 +412,57 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #endregion Logging
 
         #region Project APIs
-
-        public VsProject GetProject(bool throwIfNotExists)
+        /// <summary>
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// This method will automatically generate error records for non-wildcarded project names that
+        /// are not found.
+        /// </summary>
+        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<EnvDTE.Project> GetProjectsByName(string[] projectNames)
         {
-            VsProject project = null;
+            var allValidProjectNames = GetAllValidProjectNames().ToList();
 
-            // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(ProjectName))
+            foreach (string projectName in projectNames)
             {
-                EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
-                                         String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
-                if (dteProject != null)
+                // if ctrl+c hit, leave immediately
+                if (Stopping)
                 {
-                    project = Solution.GetProject(dteProject);
+                    break;
                 }
 
-                // If that project was invalid then throw
-                if (project == null && throwIfNotExists)
+                // Treat every name as a wildcard; results in simpler code
+                var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
+
+                var matches = from s in allValidProjectNames
+                              where pattern.IsMatch(s)
+                              select _solutionManager.GetProject(s);
+
+                int count = 0;
+                foreach (var project in matches)
                 {
-                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+                    count++;
+                    yield return project;
+                }
+
+                // We only emit non-terminating error record if a non-wildcarded name was not found.
+                // This is consistent with built-in cmdlets that support wildcarded search.
+                // A search with a wildcard that returns nothing should not be considered an error.
+                if ((count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName))
+                {
+                    ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
                 }
             }
+        }
 
-            return project;
+        /// <summary>
+        /// Return all projects in current solution.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<VsProject> GetAllProjectsInSolution()
+        {
+            IEnumerable<string> projectNames = GetAllValidProjectNames();
+            return GetProjectsByName(projectNames);
         }
 
         /// <summary>
@@ -564,7 +573,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 PackageSource packageSource = new PackageSource(source, url);
-                V3SourceRepository sourceRepo = new V3SourceRepository(packageSource, PSCommandsUserAgentClient);
+                var sourceRepo = new AutoDetectSourceRepository(packageSource, PSCommandsUserAgentClient, _repositoryFactory);
                 return sourceRepo;
             }
             catch (UriFormatException ex)

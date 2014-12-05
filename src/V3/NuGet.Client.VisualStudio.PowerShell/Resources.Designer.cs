@@ -79,6 +79,24 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fail to parse package identities from file {0} with exception: {1}.
+        /// </summary>
+        internal static string Cmdlet_FailToParsePackages {
+            get {
+                return ResourceManager.GetString("Cmdlet_FailToParsePackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fail to parse the input of Version parameter: {0} to a valid Semantic version. .
+        /// </summary>
+        internal static string Cmdlet_FailToParseVersion {
+            get {
+                return ResourceManager.GetString("Cmdlet_FailToParseVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to set {0} as the Default Project for PowerShell Console. .
         /// </summary>
         internal static string Cmdlet_FailToSetProject {
@@ -309,6 +327,15 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         internal static string Cmdlet_PackageIdNotFound {
             get {
                 return ResourceManager.GetString("Cmdlet_PackageIdNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package with the Id &apos;{0}&apos; is not installed to the current project..
+        /// </summary>
+        internal static string Cmdlet_PackageNotInstalled {
+            get {
+                return ResourceManager.GetString("Cmdlet_PackageNotInstalled", resourceCulture);
             }
         }
         
