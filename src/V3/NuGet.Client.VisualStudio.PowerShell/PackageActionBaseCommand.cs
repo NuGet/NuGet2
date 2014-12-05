@@ -140,7 +140,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// or multiple identities for Install/Update-Package.
         /// </summary>
         /// <returns></returns>
-        protected IEnumerable<PackageIdentity> GetIdentitiesForResolver()
+        protected virtual IEnumerable<PackageIdentity> GetIdentitiesForResolver()
         {
             IEnumerable<PackageIdentity> identityList = null;
             identityList = GetPackageIdentityForResolver();
@@ -148,26 +148,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         /// <summary>
-        /// Returns the list of package identities installed to a project
-        /// </summary>
-        /// <param name="proj"></param>
-        /// <returns></returns>
-        private List<PackageIdentity> GetInstalledPackageIdentitiesForProject(VsProject proj)
-        {
-            List<PackageIdentity> identities = new List<PackageIdentity>();
-            IEnumerable<InstalledPackageReference> refs = GetInstalledReferences(proj);
-            foreach (InstalledPackageReference packageRef in refs)
-            {
-                identities.Add(packageRef.Identity);
-            }
-            return identities;
-        }
-
-        /// <summary>
-        /// Returns single package identity for resolve when Id is specified
+        /// Returns single package identity for resolver when Id is specified
         /// </summary>
         /// <returns></returns>
-        private List<PackageIdentity> GetPackageIdentityForResolver()
+        protected List<PackageIdentity> GetPackageIdentityForResolver()
         {
             PackageIdentity identity = null;
 
@@ -204,6 +188,22 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return new List<PackageIdentity>() { identity };
+        }
+
+        /// <summary>
+        /// Returns the list of package identities installed to a project
+        /// </summary>
+        /// <param name="proj"></param>
+        /// <returns></returns>
+        private List<PackageIdentity> GetInstalledPackageIdentitiesForProject(VsProject proj)
+        {
+            List<PackageIdentity> identities = new List<PackageIdentity>();
+            IEnumerable<InstalledPackageReference> refs = GetInstalledReferences(proj);
+            foreach (InstalledPackageReference packageRef in refs)
+            {
+                identities.Add(packageRef.Identity);
+            }
+            return identities;
         }
 
         /// <summary>
