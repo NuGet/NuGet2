@@ -102,7 +102,7 @@ namespace NuGet.Client
         {
             // Get the search service URL from the service
             cancellationToken.ThrowIfCancellationRequested();
-            var searchService = await GetServiceUri(ServiceUris.SearchQueryService, cancellationToken);
+            var searchService = await GetServiceUri(ServiceUris.SearchQueryService);
             if (String.IsNullOrEmpty(searchService))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingSearchService);
@@ -175,7 +175,7 @@ namespace NuGet.Client
         // Async void because we don't want metric recording to block anything at all
         public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
         {
-            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService, CancellationToken.None);
+            var metricsUrl = await GetServiceUri(ServiceUris.MetricsService);
 
             if (metricsUrl == null)
             {
@@ -235,7 +235,7 @@ namespace NuGet.Client
         public override async Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId)
         {
             // Get the base URL
-            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl, CancellationToken.None);
+            var baseUrl = await GetServiceUri(ServiceUris.RegistrationsBaseUrl);
             if (String.IsNullOrEmpty(baseUrl))
             {
                 throw new NuGetProtocolException(Strings.Protocol_MissingRegistrationBase);
@@ -294,7 +294,7 @@ namespace NuGet.Client
             return lists.SelectMany(j => j);
         }
 
-        private async Task<string> GetServiceUri(Uri type, CancellationToken cancellationToken)
+        private async Task<string> GetServiceUri(Uri type)
         {
             // Read the root document (usually out of the cache :))
             JObject doc;
