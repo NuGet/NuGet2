@@ -21,7 +21,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 1. Follow up with UpdateAll UI implementation (not done yet)
     /// 2. Figure out the Utility to get list of packages installed to a project - CoreInteropInstalledPackagesList?
     /// 3. Figure out the right API to use to get latest version, safe version etc. 
-    [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
+    [Cmdlet(VerbsData.Update, "Package2", DefaultParameterSetName = "All")]
     public class UpdatePackageCommand : PackageActionBaseCommand
     {
         private ResolutionContext _context;

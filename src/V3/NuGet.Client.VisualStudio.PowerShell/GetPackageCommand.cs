@@ -17,7 +17,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// TODO List
     /// 1. Confirm that -ListAvailable is cut.
     /// 2. If ListAvailable is cut, then Source and Updates switch should be cut as well.
-    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [Cmdlet(VerbsCommon.Get, "Package2", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetPowerShellBaseCommand
     {

@@ -4,7 +4,7 @@ using System.Management.Automation;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
-        [Cmdlet(VerbsCommon.Open, "PackagePage", DefaultParameterSetName = ParameterAttribute.AllParameterSets, SupportsShouldProcess = true)]
+        [Cmdlet(VerbsCommon.Open, "PackagePage2", DefaultParameterSetName = ParameterAttribute.AllParameterSets, SupportsShouldProcess = true)]
         public class OpenPackagePageCommand : NuGetPowerShellBaseCommand
         {
         public OpenPackagePageCommand() :

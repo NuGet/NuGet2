@@ -8,7 +8,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// <summary>
     /// This command uninstalls the specified package from the specified project.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
+    [Cmdlet(VerbsLifecycle.Uninstall, "Package2")]
     public class UninstallPackageCommand : PackageActionBaseCommand
     {
         private ResolutionContext _context;
