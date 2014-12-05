@@ -7,6 +7,7 @@ using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private PackageActionType _actionType;
         private IEnumerable<PackageIdentity> _identities;
         private SourceRepository _activeSourceRepository;
+        internal const string PackagesConfigName = "packages.config";
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,
@@ -138,20 +140,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// or multiple identities for Install/Update-Package.
         /// </summary>
         /// <returns></returns>
-        private IEnumerable<PackageIdentity> GetIdentitiesForResolver()
+        protected IEnumerable<PackageIdentity> GetIdentitiesForResolver()
         {
             IEnumerable<PackageIdentity> identityList = null;
-            // For Single package 
-            if (!IteratePackages)
-            {
-                identityList = GetPackageIdentityForResolver();
-            }
-            else if (IteratePackages)
-            {
-                VsProject target = this.GetProject(true);
-                identityList = GetInstalledPackageIdentitiesForProject(target);
-            }
-
+            identityList = GetPackageIdentityForResolver();
             return identityList;
         }
 
@@ -178,40 +170,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private List<PackageIdentity> GetPackageIdentityForResolver()
         {
             PackageIdentity identity = null;
-            if (!String.IsNullOrEmpty(Id))
+
+            // If Version is specified by commandline parameter
+            if (!string.IsNullOrEmpty(Version))
             {
-                // If Version is specified by commandline parameter
-                if (!string.IsNullOrEmpty(Version))
+                IsVersionSpecified = true;
+                identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                if (_actionType == PackageActionType.Uninstall || IsConsolidating)
                 {
-                    IsVersionSpecified = true;
-                    identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                    if (_actionType == PackageActionType.Uninstall || IsConsolidating)
-                    {
-                        identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, IncludePrerelease.IsPresent);
-                    }
-                    else
-                    {
-                        identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
-                    }
+                    identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, IncludePrerelease.IsPresent);
                 }
                 else
                 {
-                    // For Uninstall-Package and Consolidate-Package
-                    if (_actionType == PackageActionType.Uninstall || IsConsolidating)
-                    {
-                        VsProject target = this.GetProject(true);
-                        InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
-                        identity = installedPackage.Identity;
-                        Version = identity.Version.ToNormalizedString();
-                    }
-                    else
-                    {
-                        // For Install-Package and Update-Package
-                        Version = PowerShellPackageViewModel.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
-                        identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                    }
+                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
                 }
             }
+            else
+            {
+                // For Uninstall-Package and Consolidate-Package
+                if (_actionType == PackageActionType.Uninstall || IsConsolidating)
+                {
+                    VsProject target = this.GetProject(true);
+                    InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
+                    identity = installedPackage.Identity;
+                    Version = identity.Version.ToNormalizedString();
+                }
+                else
+                {
+                    // For Install-Package and Update-Package
+                    Version = PowerShellPackageViewModel.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
+                    identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                }
+            }
+
             return new List<PackageIdentity>() { identity };
         }
 
@@ -267,17 +258,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected virtual void ResolvePackageFromRepository()
-        {
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected override void ProcessRecordCore()
         {
             try
             {
                 CheckForSolutionOpen();
-                ResolvePackageFromRepository();
                 ExecutePackageAction();
             }
             catch (Exception ex)
