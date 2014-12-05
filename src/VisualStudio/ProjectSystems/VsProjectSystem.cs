@@ -218,6 +218,7 @@ namespace NuGet.VisualStudio
                 if (reference != null)
                 {
                     TrySetCopyLocal(reference);
+                    TrySetSpecificVersion(reference);
 
                     // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
                     // Most commonly, it happens if this assembly is in the GAC or in the output path.
@@ -508,6 +509,25 @@ namespace NuGet.VisualStudio
                 // cause a notification to fire, we have to set it to false and then back to true
                 reference.CopyLocal = false;
                 reference.CopyLocal = true;
+            }
+            catch (NotSupportedException)
+            {
+
+            }
+            catch (NotImplementedException)
+            {
+
+            }
+        }
+
+        // Set SpecificVersion to true
+        private static void TrySetSpecificVersion(dynamic reference)
+        {
+            // Always set SpecificVersion to true for references that we add
+            try
+            {
+                reference.SpecificVersion = false;
+                reference.SpecificVersion = true;
             }
             catch (NotSupportedException)
             {
