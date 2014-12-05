@@ -54,15 +54,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResContext);
         }
 
-        protected override void ResolvePackageFromRepository()
-        {
-            if (IsVersionSpecified)
-            {
-                PackageIdentity pIdentity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, Id, Version, IncludePrerelease.IsPresent);
-                this.Identity = pIdentity;
-            }
-        }
-
         public override FileConflictAction ResolveFileConflict(string message)
         {
             if (FileConflictAction == FileConflictAction.Overwrite)
