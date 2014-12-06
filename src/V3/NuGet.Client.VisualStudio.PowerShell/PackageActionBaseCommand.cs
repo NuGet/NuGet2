@@ -34,7 +34,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private PackageActionType _actionType;
         private IEnumerable<PackageIdentity> _identities;
         private SourceRepository _activeSourceRepository;
-        private IVsPackageSourceProvider _packageSourceProvider;
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,
@@ -47,7 +46,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             : base(packageSourceProvider, packageRepositoryFactory, svcServiceProvider, packageManagerFactory, solutionManager, clientEvents)
         {
             _actionType = actionType;
-            _packageSourceProvider = packageSourceProvider;
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -264,7 +262,21 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
                     if (UriHelper.IsHttpSource(Id))
                     {
-                        Source = Id;
+                        //InMemoryPackageRepository inMemoRepo = new InMemoryPackageRepository();
+                        //PackageDownloader downloader = new PackageDownloader();
+                        //ZipPackage package;
+                        //using (var targetStream = new MemoryStream())
+                        //{
+                        //    downloader.DownloadPackage(
+                        //        new HttpClient(new Uri(Id)),
+                        //        packageName,
+                        //        targetStream);
+
+                        //    targetStream.Seek(0, SeekOrigin.Begin);
+                        //    package = new ZipPackage(targetStream);
+                        //}
+                        //inMemoRepo.AddPackage(package);
+                        //ActiveSourceRepository = inMemoRepo;
                     }
                     else
                     {
