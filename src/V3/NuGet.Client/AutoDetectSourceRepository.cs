@@ -53,7 +53,7 @@ namespace NuGet.Client
                 bool r = await IsV3Async(_source);
                 if (r)
                 {
-                    _repo = new V3SourceRepository(_source, _host);
+                    _repo = new V3SourceRepository2(_source, _host);
                     return;
                 }
 
