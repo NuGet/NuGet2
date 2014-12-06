@@ -60,6 +60,7 @@
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Common\CommandLineConstants.cs" />
     <Compile Include="Common\CommandLineException.cs" />
+    <Compile Include="Common\CommandLineMachineWideSettings.cs" />
     <Compile Include="Common\CommandManager.cs" />
     <Compile Include="Common\Console.cs" />
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
