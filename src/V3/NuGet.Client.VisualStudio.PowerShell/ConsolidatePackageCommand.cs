@@ -34,7 +34,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  PackageActionType.Install)
         {
-            this.IterateProjects = true;
+            this.IncludeAllProjects = true;
             this.IsConsolidating = true;
         }
 

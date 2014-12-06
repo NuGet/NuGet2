@@ -6,6 +6,7 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private PackageActionType _actionType;
         private IEnumerable<PackageIdentity> _identities;
         private SourceRepository _activeSourceRepository;
-        internal const string PackagesConfigName = "packages.config";
+        private IVsPackageSourceProvider _packageSourceProvider;
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,
@@ -46,13 +47,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
             : base(packageSourceProvider, packageRepositoryFactory, svcServiceProvider, packageManagerFactory, solutionManager, clientEvents)
         {
             _actionType = actionType;
+            _packageSourceProvider = packageSourceProvider;
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public virtual string Id { get; set; }
 
         [Parameter(Position = 2)]
-        public virtual string Version { get; set; }
+        public string Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
@@ -95,9 +97,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public bool IterateProjects { get; set; }
+        public bool IncludeAllProjects { get; set; }
 
-        public bool IteratePackages { get; set; }
+        public bool ReadFromPackagesConfig { get; set; }
+
+        public bool ReadFromDirectPackagePath { get; set; }
 
         public bool IsConsolidating { get; set; }
 
@@ -108,7 +112,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             get
             {
                 IEnumerable<VsProject> projects;
-                if (IterateProjects)
+                if (IncludeAllProjects)
                 {
                     IEnumerable<string> projectNames = GetAllValidProjectNames();
                     projects = GetProjectsByName(projectNames).ToList();
@@ -143,15 +147,45 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected virtual IEnumerable<PackageIdentity> GetIdentitiesForResolver()
         {
             IEnumerable<PackageIdentity> identityList = null;
-            identityList = GetPackageIdentityForResolver();
+            if (!ReadFromPackagesConfig)
+            {
+                identityList = GetPackageIdentityForResolver();
+            }
+            else
+            {
+                identityList = CreatePackageIdentitiesFromPackagesConfig();
+            }
             return identityList;
+        }
+
+        /// <summary>
+        /// Return list of package identities parsed from packages.config
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<PackageIdentity> CreatePackageIdentitiesFromPackagesConfig()
+        {
+            List<PackageIdentity> identities = new List<PackageIdentity>();
+            IEnumerable<PackageIdentity> parsedIdentities;
+            using (FileStream stream = new FileStream(Id, FileMode.Open))
+            {
+                PackagesConfigReader reader = new PackagesConfigReader(stream);
+                parsedIdentities = reader.GetPackages();
+                stream.Close();
+            }
+
+            foreach (PackageIdentity identity in parsedIdentities.ToList())
+            {
+                PackageIdentity resolvedIdentity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
+                identities.Add(resolvedIdentity);
+            }
+            return identities;
         }
 
         /// <summary>
         /// Returns single package identity for resolver when Id is specified
         /// </summary>
         /// <returns></returns>
-        protected List<PackageIdentity> GetPackageIdentityForResolver()
+        private List<PackageIdentity> GetPackageIdentityForResolver()
         {
             PackageIdentity identity = null;
 
@@ -166,7 +200,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 else
                 {
-                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
+                    if (!ReadFromDirectPackagePath)
+                    {
+                        identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
+                    }
                 }
             }
             else
@@ -191,51 +228,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         /// <summary>
-        /// Returns the list of package identities installed to a project
-        /// </summary>
-        /// <param name="proj"></param>
-        /// <returns></returns>
-        private List<PackageIdentity> GetInstalledPackageIdentitiesForProject(VsProject proj)
-        {
-            List<PackageIdentity> identities = new List<PackageIdentity>();
-            IEnumerable<InstalledPackageReference> refs = GetInstalledReferences(proj);
-            foreach (InstalledPackageReference packageRef in refs)
-            {
-                identities.Add(packageRef.Identity);
-            }
-            return identities;
-        }
-
-        /// <summary>
-        /// Get Installed Package References for all targeted projects.
-        /// </summary>
-        /// <returns></returns>
-        private List<InstalledPackageReference> GetInstalledReferencesForAllProjects()
-        {
-            List<InstalledPackageReference> packageRefs = new List<InstalledPackageReference>();
-            foreach (VsProject proj in Projects)
-            {
-                packageRefs.AddRange(GetInstalledReferences(proj));
-            }
-            return packageRefs;
-        }
-
-        /// <summary>
-        /// Get Installed Package References for a single project
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
-        {
-            IEnumerable<InstalledPackageReference> refs = null;
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                refs = installedList.GetInstalledPackages();
-            }
-            return refs;
-        }
-
-        /// <summary>
         /// Get Installed Package References a single project with specified packageId
         /// </summary>
         /// <returns></returns>
@@ -250,11 +242,49 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return packageRef;
         }
 
-        protected void CheckForSolutionOpen()
+        private void CheckForSolutionOpen()
         {
             if (!SolutionManager.IsSolutionOpen)
             {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+        }
+
+        private void ParseUserInputForId()
+        {
+            if (!String.IsNullOrEmpty(Id))
+            {
+                if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageReferenceFile))
+                {
+                    ReadFromPackagesConfig = true;
+                }
+                else if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageExtension))
+                {
+                    ReadFromDirectPackagePath = true;
+
+                    if (UriHelper.IsHttpSource(Id))
+                    {
+                        Source = Id;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            string fullPath = Path.GetFullPath(Id);
+                            Source = Path.GetDirectoryName(fullPath);
+                            var package = new OptimizedZipPackage(fullPath);
+                            if (package != null)
+                            {
+                                Id = package.Id;
+                                Version = package.Version.ToString();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                    }
+                }
             }
         }
 
@@ -264,6 +294,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 CheckForSolutionOpen();
+                ParseUserInputForId();
                 ExecutePackageAction();
             }
             catch (Exception ex)
@@ -357,7 +388,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public void LogPreviewResult(PreviewResult result, VsProject proj)
+        private void LogPreviewResult(PreviewResult result, VsProject proj)
         {
             IEnumerable<PowerShellPreviewResult> psResults = ConvertToPowerShellPreviewResult(result, proj);
             WriteObject(psResults);
