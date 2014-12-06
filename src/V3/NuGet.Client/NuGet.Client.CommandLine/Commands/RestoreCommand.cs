@@ -37,13 +37,13 @@ namespace NuGet.Commands
         // lock used to access _outputOptOutMessage.
         private readonly object _outputOptOutMessageLock = new object();
 
-        //[Option(typeof(NuGetCommand), "RestoreCommandRequireConsent")]
+        [Option("RestoreCommandRequireConsent")]
         public bool RequireConsent { get; set; }
 
-        //[Option(typeof(NuGetCommand), "RestoreCommandPackagesDirectory", AltName = "OutputDirectory")]
+        [Option("RestoreCommandPackagesDirectory", AltName = "OutputDirectory")]
         public string PackagesDirectory { get; set; }
 
-        //[Option(typeof(NuGetCommand), "RestoreCommandSolutionDirectory")]
+        [Option("RestoreCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
         /// <remarks>

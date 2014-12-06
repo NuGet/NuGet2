@@ -41,7 +41,7 @@ namespace NuGet.Client.Installation
             {
                 // Get required features from the target
                 var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
-                var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
+                var packageCache = action.Target.TryGetFeature<IPackageCacheRepository>();
 
                 // Load the package
                 IPackage package;

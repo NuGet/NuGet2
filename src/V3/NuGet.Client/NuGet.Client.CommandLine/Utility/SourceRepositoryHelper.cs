@@ -10,8 +10,8 @@ namespace NuGet
     internal static class SourceRepositoryHelper
     {
         private static readonly PackageSource NuGetV3PreviewSource = new PackageSource(
-            "preview.nuget.org",
-            "https://az320820.vo.msecnd.net/ver3-preview/index.json");
+            "https://az320820.vo.msecnd.net/ver3-preview/index.json",
+            "preview.nuget.org");
 
         internal static SourceRepository CreateSourceRepository(IPackageSourceProvider packageSourceProvider, IEnumerable<string> sources)
         {

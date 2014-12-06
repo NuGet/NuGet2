@@ -20,19 +20,19 @@ namespace NuGet.Commands
             _cacheRepository = cacheRepository;
         }
 
-        //[Option(typeof(NuGetCommand), "CommandSourceDescription")]
+        [Option("CommandSourceDescription")]
         public ICollection<string> Source
         {
             get { return _sources; }
         }
 
-        //[Option(typeof(NuGetCommand), "CommandNoCache")]
+        [Option("CommandNoCache")]
         public bool NoCache { get; set; }
 
-        //[Option(typeof(NuGetCommand), "CommandDisableParallelProcessing")]
+        [Option("CommandDisableParallelProcessing")]
         public bool DisableParallelProcessing { get; set; }
 
-        //[Option(typeof(NuGetCommand), "CommandPackageSaveMode")]
+        [Option("CommandPackageSaveMode")]
         public string PackageSaveMode { get; set; }
         
         protected void CalculateEffectivePackageSaveMode()
