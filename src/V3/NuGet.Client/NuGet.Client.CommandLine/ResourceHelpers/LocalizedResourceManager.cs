@@ -6,7 +6,7 @@ namespace NuGet
 {
     internal static class LocalizedResourceManager
     {
-        private static readonly ResourceManager _resourceManager = new ResourceManager("NuGet.NuGetResources", typeof(LocalizedResourceManager).Assembly);
+        private static readonly ResourceManager _resourceManager = new ResourceManager("NuGet.Client.CommandLine.NuGetResources", typeof(LocalizedResourceManager).Assembly);
 
         public static string GetString(string resourceName)
         {
