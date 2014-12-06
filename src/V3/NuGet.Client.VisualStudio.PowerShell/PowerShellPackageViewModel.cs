@@ -66,6 +66,25 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         /// <summary>
+        /// Get latest update for package identity
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="packageId"></param>
+        /// <param name="allowPrerelease"></param>
+        /// <returns></returns>
+        public static PackageIdentity GetLastestUpdateForPackage(SourceRepository repo, PackageIdentity identity, bool allowPrerelease)
+        {
+            string id = identity.Id;
+            string version = GetLastestVersionForPackage(repo, id, allowPrerelease);
+            PackageIdentity latestIdentity = null;
+            if (version != null)
+            {
+                latestIdentity = new PackageIdentity(id, NuGetVersion.Parse(version));
+            }
+            return latestIdentity;
+        }
+
+        /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
         public static IVersionSpec GetSafeRange(SemanticVersion version)

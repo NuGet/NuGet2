@@ -240,6 +240,52 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return packageRef;
         }
 
+        /// <summary>
+        /// Returns the list of package identities installed to a project
+        /// </summary>
+        /// <param name="proj"></param>
+        /// <returns></returns>
+        private List<PackageIdentity> GetInstalledPackageIdentitiesForProject(VsProject proj)
+        {
+            List<PackageIdentity> identities = new List<PackageIdentity>();
+            IEnumerable<InstalledPackageReference> refs = GetInstalledReferences(proj);
+            foreach (InstalledPackageReference packageRef in refs)
+            {
+                identities.Add(packageRef.Identity);
+            }
+            return identities;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for all targeted projects.
+        /// </summary>
+        /// <returns></returns>
+        protected Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
+        {
+            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
+            foreach (VsProject proj in Projects)
+            {
+                List<PackageIdentity> list = GetInstalledPackageIdentitiesForProject(proj);
+                dic.Add(proj, list);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for a single project
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
+        {
+            IEnumerable<InstalledPackageReference> refs = null;
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                refs = installedList.GetInstalledPackages();
+            }
+            return refs;
+        }
+
         private void CheckForSolutionOpen()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -326,7 +372,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
             foreach (PackageIdentity identity in Identities)
             {
-                ExecuteSinglePackageAction(identity);
+                ExecuteSinglePackageAction(identity, Projects);
             }
         }
 
@@ -334,12 +380,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Resolve and execute actions for a single package
         /// </summary>
         /// <param name="identity"></param>
-        private void ExecuteSinglePackageAction(PackageIdentity identity)
+        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projs)
         {
             try
             {
                 // Resolve Actions
-                List<VsProject> targetProjects = Projects.ToList();
+                List<VsProject> targetProjects = projs.ToList();
                 Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction =
                     PackageActionResolver.ResolveActionsAsync(identity, _actionType, targetProjects, Solution);
 

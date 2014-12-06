@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
 using System.Management.Automation;
 
 
@@ -95,19 +96,41 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void ExecutePackageAction()
         {
+            SubscribeToProgressEvents();
+
             // UpdateAll
-            if (!_idSpecified && !_projectSpecified)
+            if (!_idSpecified)
             {
-                //TODO: UpdateAll logic using NuGet.Client after UI UpdateAll is implemented.
+                if (!_projectSpecified)
+                {
+                    IncludeAllProjects = true;
+                }
+                Dictionary<VsProject, List<PackageIdentity>> dictionary = GetInstalledPackagesForAllProjects();
+                foreach (KeyValuePair<VsProject, List<PackageIdentity>> entry in dictionary)
+                {
+                    IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
+                    List<PackageIdentity> identities = entry.Value;
+                    // Execute update for each of the project inside the solution
+                    foreach (PackageIdentity identity in identities)
+                    {
+                        // Find packages update
+                        PackageIdentity update = PowerShellPackageViewModel.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent);
+                        ExecuteSinglePackageAction(update, Projects);
+                    }
+                }
             }
-            else if (_idSpecified && !_projectSpecified)
+            else 
             {
-                //TODO: Update Id for every project
-            }
-            else if (_idSpecified && _projectSpecified)
-            {
-                //TODO: Update Id for specified project
-                base.ExecutePackageAction();
+                if (!_projectSpecified)
+                {
+                    IncludeAllProjects = true;
+                }
+                foreach (PackageIdentity identity in Identities)
+                {
+                    // Find packages update
+                    PackageIdentity update = PowerShellPackageViewModel.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent);
+                    ExecuteSinglePackageAction(update, Projects);
+                }
             }
         }
 
