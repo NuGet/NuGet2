@@ -14,19 +14,17 @@ namespace NuGet.Common
     internal class FilesystemInstallationTarget : InstallationTarget
     {
         private static readonly IEnumerable<FrameworkName> EmtpyFrameworks = new List<FrameworkName>() { VersionUtility.EmptyFramework };
-
-        private string _name;
-        private InstalledPackagesList _installedPackagesList;
+        private const string FilesystemInstallationTargetName = "FilesystemInstallationTarget";
 
         public FilesystemInstallationTarget(IPackageManager packageManager)
         {
             AddFeature<IPackageManager>(() => packageManager);
-            //AddFeature<IPackageCacheRepository>(() => MachineCache.Default);
+            AddFeature<IPackageCacheRepository>(() => MachineCache.Default);
         }
         
         public override string Name
         {
-            get { return _name; }
+            get { return FilesystemInstallationTargetName; }
         }
 
         public override bool IsAvailable
