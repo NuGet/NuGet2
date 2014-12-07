@@ -20,7 +20,7 @@ namespace NuGet.Test.Server.Infrastructure
         public void ServerPackageRepositoryRemovePackage()
         {
             // Arrange
-            var mockProjectSystem = new Mock<MockProjectSystem>() {CallBase = true};
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
 
             AddPackage(mockProjectSystem, "test", "1.11");
             AddPackage(mockProjectSystem, "test", "1.9");
@@ -69,6 +69,69 @@ namespace NuGet.Test.Server.Infrastructure
             Assert.Equal("test3", valid.First().Id);
             Assert.Equal(0, invalid.Count());
         }
+
+        [Fact]
+        public void ServerPackageRepositorySearchUnlisted()
+        {   
+            var tempPath = Path.GetTempPath();
+            var workingDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+
+            try
+            {
+                // Arrange
+                // create the server repo, from a directory containing a package.
+                Func<string, bool, bool> settingsFunc = (key, defaultValue) =>
+                {
+                    if (key == "enableDelisting")
+                    {
+                        return true;
+                    }
+                    return defaultValue;
+                };
+
+                CreateDirectory(workingDirectory);
+                var packageFile = CreatePackage("test1", "1.0", workingDirectory);
+
+                var fileSystem = new PhysicalFileSystem(workingDirectory);
+                var serverRepository = new ServerPackageRepository(
+                    new DefaultPackagePathResolver(fileSystem),
+                    fileSystem,
+                    settingsFunc)
+                {
+                    HashProvider = GetHashProvider().Object
+                };
+
+                var packages = serverRepository.Search("test1", true).ToList();
+                Assert.Equal(1, packages.Count);
+                Assert.Equal("test1", packages[0].Id);
+                Assert.Equal("1.0", packages[0].Version.ToString());
+
+                // delist the package
+                serverRepository.RemovePackage("test1", new SemanticVersion("1.0"));
+
+                // verify that the package is not returned by search
+                packages = serverRepository.Search("test1", true).ToList();
+                Assert.Equal(0, packages.Count);
+
+                // Act: search with includeDelisted=true
+                packages = serverRepository.Search(
+                    "test1", 
+                    targetFrameworks: Enumerable.Empty<string>(),
+                    allowPrereleaseVersions: true,
+                    includeDelisted: true).ToList();
+
+                // Verify
+                Assert.Equal(1, packages.Count);
+                Assert.Equal("test1", packages[0].Id);
+                Assert.Equal("1.0", packages[0].Version.ToString());
+            }
+            finally
+            {
+                // Cleanup
+                DeleteDirectory(workingDirectory);
+            }
+        }
+
 
         [Fact]
         public void ServerPackageRepositoryFindPackageById()
@@ -141,7 +204,7 @@ namespace NuGet.Test.Server.Infrastructure
 
             // Verify that hashes are always (re)computed when enablePersistNupkgHash is turned off, and at most once per package otherwise.
             // also verify that Streams are used instead of byte arrays (prone to OOM) to compute hashes.
-            var expectedHashProviderCallCount = enablePersistNupkgHash ? NbPackages : NbPackages*(NbInvalidate + 1);
+            var expectedHashProviderCallCount = enablePersistNupkgHash ? NbPackages : NbPackages * (NbInvalidate + 1);
             hashProvider.Verify(h => h.CalculateHash(It.IsAny<Stream>()), Times.Exactly(expectedHashProviderCallCount));
             hashProvider.Verify(h => h.CalculateHash(It.IsAny<byte[]>()), Times.Never);
         }
@@ -370,6 +433,68 @@ namespace NuGet.Test.Server.Infrastructure
         private static byte Invert(byte value)
         {
             return (byte)~value;
+        }
+
+        public static string CreatePackage(string id, string version, string outputDirectory,
+            Action<PackageBuilder> additionalAction = null)
+        {
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = id,
+                Version = new SemanticVersion(version),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("test");
+            builder.Files.Add(CreatePackageFile(@"content\test1.txt"));
+            if (additionalAction != null)
+            {
+                additionalAction(builder);
+            }
+
+            var packageFileName = Path.Combine(outputDirectory, id + "." + version + ".nupkg");
+            using (var stream = new FileStream(packageFileName, FileMode.CreateNew))
+            {
+                builder.Save(stream);
+            }
+
+            return packageFileName;
+        }
+
+        private static IPackageFile CreatePackageFile(string name)
+        {
+            var file = new Mock<IPackageFile>();
+            file.SetupGet(f => f.Path).Returns(name);
+            file.Setup(f => f.GetStream()).Returns(new MemoryStream());
+
+            string effectivePath;
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
+            file.SetupGet(f => f.TargetFramework).Returns(fx);
+
+            return file.Object;
+        }
+
+        /// <summary>
+        /// Creates the specified directory. If it exists, it's first deleted before 
+        /// it's created. Thus, the directory is guaranteed to be empty.
+        /// </summary>
+        /// <param name="directory">The directory to be created.</param>
+        private static void CreateDirectory(string directory)
+        {
+            DeleteDirectory(directory);
+            Directory.CreateDirectory(directory);
+        }
+
+        /// <summary>
+        /// Deletes the specified directory.
+        /// </summary>
+        /// <param name="packageDirectory">The directory to be deleted.</param>
+        private static void DeleteDirectory(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, true);
+            }
         }
     }
 }

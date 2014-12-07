@@ -110,11 +110,11 @@ namespace NuGet.Server.DataServices
         }
 
         [WebGet]
-        public IQueryable<Package> Search(string searchTerm, string targetFramework, bool includePrerelease)
+        public IQueryable<Package> Search(string searchTerm, string targetFramework, bool includePrerelease, bool? includeDelisted)
         {
             IEnumerable<string> targetFrameworks = String.IsNullOrEmpty(targetFramework) ? Enumerable.Empty<string>() : targetFramework.Split('|');
 
-            return Repository.Search(searchTerm, targetFrameworks, includePrerelease)
+            return Repository.Search(searchTerm, targetFrameworks, includePrerelease, includeDelisted == true)
                 .Select(Repository.GetMetadataPackage)
                 .Where(p => p != null)
                 .AsQueryable();

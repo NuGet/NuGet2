@@ -5326,4 +5326,7 @@ nuget update -Self</value>
   <data name="PackageCommandDisableRules" xml:space="preserve">
     <value>';' delimited list of package analysis rules to disable. Specify '-Verbosity Detailed' to view the list of currently enabled rules.</value>
   </data>
+  <data name="ListCommandIncludeDelisted" xml:space="preserve">
+    <value>Include delisted packages.</value>
+  </data>
 </root>

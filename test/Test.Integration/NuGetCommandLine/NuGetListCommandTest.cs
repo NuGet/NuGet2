@@ -231,6 +231,79 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Assert.Contains("$filter=IsLatestVersion", searchRequest);
                 Assert.Contains("searchTerm='test", searchRequest);
                 Assert.Contains("includePrerelease=false", searchRequest);
+
+                // verify that nuget doesn't include "includeDelisted" in its request
+                Assert.DoesNotContain("includeDelisted", searchRequest);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(packageDirectory);
+            }
+        }
+
+        // Tests that list command show delisted packages 
+        // when IncludeDelisted is specified.
+        [Fact]
+        public void ListCommand_IncludeDelisted()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var tempPath = Path.GetTempPath();
+            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var mockServerEndPoint = "http://localhost:1234/";
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(packageDirectory);
+                var packageFileName1 = Util.CreateTestPackage("testPackage1", "1.1.0", packageDirectory);
+                var packageFileName2 = Util.CreateTestPackage("testPackage2", "2.1", packageDirectory);
+                var package1 = new ZipPackage(packageFileName1);
+                var package2 = new ZipPackage(packageFileName2);
+                package1.Listed = false;
+
+                var server = new MockServer(mockServerEndPoint);
+                string searchRequest = string.Empty;
+
+                server.Get.Add("/nuget/$metadata", r =>
+                    MockServerResource.NuGetV2APIMetadata);
+                server.Get.Add("/nuget/Search()", r =>
+                    new Action<HttpListenerResponse>(response =>
+                    {
+                        searchRequest = r.Url.ToString();
+                        response.ContentType = "application/atom+xml;type=feed;charset=utf-8";
+                        string feed = server.ToODataFeed(new[] { package1, package2 }, "Search");
+                        MockServer.SetResponseContent(response, feed);
+                    }));
+                server.Get.Add("/nuget", r => "OK");
+
+                server.Start();
+
+                // Act
+                var args = "list test -IncludeDelisted -Source " + mockServerEndPoint + "nuget";
+                var r1 = CommandRunner.Run(
+                    nugetexe,
+                    tempPath,
+                    args,
+                    waitForExit: true);
+                server.Stop();
+
+                // Assert
+                Assert.Equal(0, r1.Item1);
+
+                // verify that both testPackage1 and testPackage2 are listed.
+                var expectedOutput = 
+                    "testPackage1 1.1.0" + Environment.NewLine +
+                    "testPackage2 2.1" + Environment.NewLine;
+                Assert.Equal(expectedOutput, r1.Item2);
+
+                Assert.Contains("$filter=IsLatestVersion", searchRequest);
+                Assert.Contains("searchTerm='test", searchRequest);
+                Assert.Contains("includePrerelease=false", searchRequest);
+
+                // verify that "includeDelisted=true" is included in the request
+                Assert.Contains("includeDelisted=true", searchRequest);
             }
             finally
             {

@@ -94,7 +94,7 @@ namespace NuGet.VisualStudio
             activeRepository.RemovePackage(package);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions, bool includeDelisted)
         {
             var activeRepository = GetActiveRepository();
             if (activeRepository == null)
@@ -102,7 +102,7 @@ namespace NuGet.VisualStudio
                 return Enumerable.Empty<IPackage>().AsQueryable();
             }
             
-            return activeRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
+            return activeRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions, includeDelisted);
         }
 
         public IPackageRepository Clone()
