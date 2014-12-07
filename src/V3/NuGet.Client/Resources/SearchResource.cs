@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace NuGet.Client.Resources
         public abstract string Url { get; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public abstract Task<IEnumerable<VisualStudioUISearchResult>> GetSearchResultsForVisualStudioUI(
+        public abstract Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(
             string searchTerm,           
             SearchFilter filters,
             int skip,

@@ -14,6 +14,7 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.Client.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -488,23 +489,47 @@ namespace NuGet.Client.VisualStudio.UI
                 }
                 else
                 {
-                    var loader = new PackageLoader(
-                        (startIndex, ct) =>
-                            sourceRepository.Search(
-                            searchText,
-                            new SearchFilter()
-                            {
-                                SupportedFrameworks = supportedFrameworks,
-                                IncludePrerelease = option.IncludePrerelease
-                            },
-                            startIndex,
-                            PageSize,
-                            ct),
-                        sourceRepository,
-                        Target,
-                        option,
-                        searchText);
-                    _packageList.Loader = loader;
+                    SearchResource searchResource = sourceRepository.TryGetResource<SearchResource>();
+                    if (searchResource != null)
+                    {
+                        var loader = new PackageLoader(
+                         (startIndex, ct) =>
+                             searchResource.GetSearchResultsForVisualStudioUI(
+                             searchText,
+                             new SearchFilter()
+                             {
+                                 SupportedFrameworks = supportedFrameworks,
+                                 IncludePrerelease = option.IncludePrerelease
+                             },
+                             startIndex,
+                             PageSize,
+                             ct),
+                         sourceRepository,
+                         Target,
+                         option,
+                         searchText);
+                        _packageList.Loader = loader;
+                    }
+                    else
+                    {
+                        var loader = new PackageLoader(
+                            (startIndex, ct) =>
+                                sourceRepository.Search(
+                                searchText,
+                                new SearchFilter()
+                                {
+                                    SupportedFrameworks = supportedFrameworks,
+                                    IncludePrerelease = option.IncludePrerelease
+                                },
+                                startIndex,
+                                PageSize,
+                                ct),
+                            sourceRepository,
+                            Target,
+                            option,
+                            searchText);
+                        _packageList.Loader = loader;
+                    }                 
                 }
             }
         }

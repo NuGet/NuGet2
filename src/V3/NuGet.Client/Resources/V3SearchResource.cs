@@ -11,6 +11,7 @@ using NuGet.Versioning;
 namespace NuGet.Client.Resources
 {
     //TODO : Pass host name;
+    //TODO : GetUri to common utility
     public class V3SearchResource : SearchResource
     {
         private string _url;
@@ -27,17 +28,18 @@ namespace NuGet.Client.Resources
             
         }
 
-        public async override Task<IEnumerable<VisualStudioUISearchResult>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public async override Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
 
             List<string> frameworkNames = new List<string>();
             foreach (FrameworkName fx in filters.SupportedFrameworks)
                 frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
-            IEnumerable<JObject> searchResultJsonObjects =    await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-            List<VisualStudioUISearchResult> visualStudioUISearchResults = new List<VisualStudioUISearchResult>();
-            foreach (JObject searchResultJson in searchResultJsonObjects)
-                visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson));
-            return visualStudioUISearchResults;
+            return await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+           // IEnumerable<JObject> searchResultJsonObjects =    await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            //List<VisualStudioUISearchResult> visualStudioUISearchResults = new List<VisualStudioUISearchResult>();
+            //foreach (JObject searchResultJson in searchResultJsonObjects)
+            //    visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson));
+            //return visualStudioUISearchResults;
         }
 
         public override Task<IEnumerable<CommandLineSearchResult>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
