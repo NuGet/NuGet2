@@ -305,7 +305,7 @@ namespace NuGet
             return Search(repository, searchTerm, targetFrameworks: Enumerable.Empty<string>(), allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
+        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions, bool includeDelisted = false)
         {
             if (targetFrameworks == null)
             {
@@ -315,16 +315,19 @@ namespace NuGet
             var serviceBasedRepository = repository as IServiceBasedRepository;
             if (serviceBasedRepository != null)
             {
-                return serviceBasedRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
+                return serviceBasedRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions, includeDelisted);
             }
 
             // Ignore the target framework if the repository doesn't support searching
             var result = repository
                 .GetPackages()
                 .Find(searchTerm)
-                .FilterByPrerelease(allowPrereleaseVersions)
-                .AsQueryable();
-            return result;
+                .FilterByPrerelease(allowPrereleaseVersions);
+            if (includeDelisted == false)
+            {
+                result = result.Where(p => p.IsListed());
+            }
+            return result.AsQueryable();
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions, bool preferListedPackages)

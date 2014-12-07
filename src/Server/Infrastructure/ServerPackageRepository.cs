@@ -104,14 +104,17 @@ namespace NuGet.Server.Infrastructure
             return metadata;
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions, bool includeDelisted)
         {
             var cache = PackageCache;
 
-            var packages = cache.Keys.AsQueryable().Find(searchTerm)
-                                        .FilterByPrerelease(allowPrereleaseVersions)
-                                        .Where(p => p.Listed)
-                                        .AsQueryable();
+            var packages = cache.Keys.AsQueryable()
+                .Find(searchTerm)
+                .FilterByPrerelease(allowPrereleaseVersions);
+            if (includeDelisted == false)
+            {
+                packages = packages.Where(p => p.Listed);
+            }
 
             if (EnableFrameworkFiltering && targetFrameworks.Any())
             {
@@ -121,7 +124,7 @@ namespace NuGet.Server.Infrastructure
                 packages = packages.Where(package => frameworkNames.Any(frameworkName => VersionUtility.IsCompatible(frameworkName, cache[package].SupportedFrameworks)));
             }
 
-            return packages;
+            return packages.AsQueryable();
         }
 
         public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackageName> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks, IEnumerable<IVersionSpec> versionConstraints)

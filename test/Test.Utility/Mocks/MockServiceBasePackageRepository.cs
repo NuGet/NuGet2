@@ -6,7 +6,7 @@ namespace NuGet.Test.Mocks
 {
     public class MockServiceBasePackageRepository : MockPackageRepository, IServiceBasedRepository
     {
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions, bool includeDelisted)
         {
             throw new NotImplementedException();
         }

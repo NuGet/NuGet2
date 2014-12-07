@@ -236,14 +236,22 @@ namespace NuGet
             return new SmartDataServiceQuery<DataServicePackage>(Context, PackageServiceEntitySetName);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions, bool includeDelisted)
         {
             if (!Context.SupportsServiceMethod(SearchSvcMethod))
             {
                 // If there's no search method then we can't filter by target framework
-                return GetPackages().Find(searchTerm)
-                                    .FilterByPrerelease(allowPrereleaseVersions)
-                                    .AsQueryable();
+                var q = GetPackages()
+                    .Find(searchTerm)
+                    .FilterByPrerelease(allowPrereleaseVersions);
+
+                // filter out delisted packages if includeDelisted is false.
+                if (includeDelisted == false)
+                {
+                    q = q.Where(p => p.IsListed());
+                }
+
+                return q.AsQueryable();
             }
 
             // Convert the list of framework names into short names
@@ -261,6 +269,11 @@ namespace NuGet
             if (SupportsPrereleasePackages)
             {
                 searchParameters.Add("includePrerelease", ToLowerCaseString(allowPrereleaseVersions));
+            }
+
+            if (includeDelisted)
+            {
+                searchParameters.Add("includeDelisted", "true");
             }
 
             // Create a query for the search service method

@@ -206,7 +206,7 @@ namespace NuGet.Test
             // Arrange
             var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
             repo.Setup(m => m.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
-            repo.As<IServiceBasedRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), false))
+            repo.As<IServiceBasedRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), false, false))
                                             .Returns(new[] { PackageUtility.CreatePackage("A") }.AsQueryable());
 
             // Act

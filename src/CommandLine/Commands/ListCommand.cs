@@ -30,14 +30,20 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "ListCommandPrerelease")]
         public bool Prerelease { get; set; }
 
+        [Option(typeof(NuGetCommand), "ListCommandIncludeDelisted")]
+        public bool IncludeDelisted { get; set; }
+
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call is expensive")]
         public IEnumerable<IPackage> GetPackages()
         {
             IPackageRepository packageRepository = GetRepository();
             string searchTerm = Arguments != null ? Arguments.FirstOrDefault() : null;
 
-            IQueryable<IPackage> packages = packageRepository.Search(searchTerm, Prerelease);
-
+            IQueryable<IPackage> packages = packageRepository.Search(
+                searchTerm,
+                targetFrameworks: Enumerable.Empty<string>(),
+                allowPrereleaseVersions: Prerelease,
+                includeDelisted: IncludeDelisted);
             if (AllVersions)
             {
                 return packages.OrderBy(p => p.Id);
@@ -54,11 +60,16 @@ namespace NuGet.Commands
                 }
             }
 
-            return packages.OrderBy(p => p.Id)
-                           .AsEnumerable()
-                           .Where(PackageExtensions.IsListed)
-                           .Where(p => Prerelease || p.IsReleaseVersion())
-                           .AsCollapsed();
+            var result = packages.OrderBy(p => p.Id)
+                .AsEnumerable();
+
+            // we still need to do client side filtering of delisted & prerelease packages.
+            if (IncludeDelisted == false)
+            {
+                result = result.Where(PackageExtensions.IsListed);
+            }
+            return result.Where(p => Prerelease || p.IsReleaseVersion())
+                       .AsCollapsed();
         }
 
         private IPackageRepository GetRepository()
