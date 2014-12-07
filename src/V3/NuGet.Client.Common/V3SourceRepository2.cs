@@ -17,9 +17,8 @@ using NuGet.Client.Installation;
 using System.Threading;
 using NuGet.Client.V3;
 using System.Runtime.Versioning;
-using NuGet.Client.Resources;
 
-namespace NuGet.Client
+namespace NuGet.Client.Common
 {
     public class V3SourceRepository2 : SourceRepository
     {       
@@ -36,7 +35,6 @@ namespace NuGet.Client
         {
             _source = source;          
             _client = new NuGetV3Client(source.Url, host);
-            AddResource<SearchResource>(() => new V3SearchResource(source.Url));
          
         }
       

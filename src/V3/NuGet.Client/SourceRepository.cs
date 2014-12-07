@@ -8,6 +8,8 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Versioning;
+using System.Diagnostics;
+using NuGet.Client.Diagnostics;
 
 namespace NuGet.Client
 {
@@ -15,9 +17,19 @@ namespace NuGet.Client
     /// Represents a place where packages can be retrieved.
     /// </summary>
     // TODO: it needs to implement IDisposable.
+    // TODO: Define RequiredResourceNotFound exception instead of general exception.
+    // TODO: Add SourceRepository to NugGetTraceSource and add traces.
     public abstract class SourceRepository
     {
         public abstract PackageSource Source { get; }
+        private readonly Dictionary<Type, Func<object>> _resourceFactories = new Dictionary<Type, Func<object>>();
+#if DEBUG
+        // Helper list for debug builds only.
+        private static readonly HashSet<Type> KnownResources = new HashSet<Type>()
+        {
+          
+        };
+#endif
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public abstract Task<IEnumerable<JObject>> Search(
@@ -31,5 +43,79 @@ namespace NuGet.Client
         public abstract Task<JObject> GetPackageMetadata(string id, NuGetVersion version);
         public abstract Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId);
         public abstract void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target);
+
+        /// <summary>
+        /// Retrieves an instance of the requested resource, throwing a <see cref="RequiredResourceNotSupportedException"/>
+        /// if the resource is not supported by this host.
+        /// </summary>
+        /// <typeparam name="T">The type defining the resource to retrieve</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>.</returns>
+        /// <exception cref="RequiredResourceNotSupportedException">The target does not support this resource.</exception>
+        public virtual T GetRequiredResource<T>()
+        {
+            var resource = TryGetResource<T>();
+            if (resource == null)
+            {
+                throw new Exception(String.Format("Resource {0} in the current Source {1}",typeof(T).FullName, Source.Name));
+            }
+            return resource;
+        }
+
+        /// <summary>
+        /// Retrieves an instance of the requested resource, throwing a <see cref="RequiredResourceNotSupportedException"/>
+        /// if the resource is not supported by this host.
+        /// </summary>
+        /// <param name="resourceType">The type defining the resource to retrieve</param>
+        /// <returns>An instance of <paramref name="resourceType"/>.</returns>
+        /// <exception cref="RequiredResourceNotSupportedException">The host does not support this resource.</exception>
+        public virtual object GetRequiredResource(Type resourceType)
+        {
+            var resource = TryGetResource(resourceType);
+            NuGetTraceSources.SourceRepository.Error(
+                "missingresource",
+                "[{0}] Required resource '{1}' was requested but is not provided",
+                Source.Name,
+                resourceType.FullName);
+            Debug.Assert(resource != null, "Required resource '" + resourceType.FullName + "' not found for this source " + Source.Name);
+            if (resource == null)
+            {
+                throw new Exception(String.Format("Resource {0} in the current Source {1}", resourceType.FullName, Source.Name));
+            }
+            return resource;
+        }
+
+        /// <summary>
+        /// Retrieves an instance of the requested resource, if one exists in this host.
+        /// </summary>
+        /// <typeparam name="T">The type defining the resource to retrieve</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>, or null if no such resource exists.</returns>
+        public virtual T TryGetResource<T>() { return (T)TryGetResource(typeof(T)); }
+
+        /// <summary>
+        /// Retrieves an instance of the requested resource, if one exists in this host.
+        /// </summary>
+        /// <param name="resourceType">The type defining the resource to retrieve</param>
+        /// <returns>An instance of <paramref name="resourceType"/>, or null if no such resource exists.</returns>
+        public virtual object TryGetResource(Type resourceType)
+        {
+            Func<object> factory;
+            if (!_resourceFactories.TryGetValue(resourceType, out factory))
+            {
+                return null;
+            }
+            return factory();
+        }
+
+        protected void AddResource<T>(Func<T> factory) where T : class
+        {
+#if DEBUG
+            // During development, there should NEVER be a resource type added that we don't know about :).
+            Debug.Assert(
+                KnownResources.Contains(typeof(T)),
+                "You tried to register a resource ('" + typeof(T).FullName + "') I'm not familiar with. This isn't generally a good thing...");
+#endif
+
+            _resourceFactories.Add(typeof(T), factory);
+        }
     }
 }

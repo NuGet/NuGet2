@@ -26,11 +26,7 @@ namespace NuGet.Client.Diagnostics
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
         public static readonly TraceSource InstallationTarget = new TraceSource(typeof(InstallationTarget).FullName);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource V3SourceRepository2 = new TraceSource(typeof(V3SourceRepository2).FullName);
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource V3SourceRepository = new TraceSource(typeof(V3SourceRepository).FullName);        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "The type is immutable enough :).")]
-        public static readonly TraceSource SourceRepository = new TraceSource(typeof(SourceRepository).FullName);
+        public static readonly TraceSource V3SourceRepository = new TraceSource(typeof(V3SourceRepository2).FullName);
 
         /// <summary>
         /// Retrieves a list of all sources defined in this class. Uses reflection, store the result!

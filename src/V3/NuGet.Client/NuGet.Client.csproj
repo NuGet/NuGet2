@@ -115,6 +115,11 @@
     <Compile Include="Installation\PurgeActionHandler.cs" />
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
+    <Compile Include="Resources\CommandLineSearchResult.cs" />
+    <Compile Include="Resources\PowershellSearchResult.cs" />
+    <Compile Include="Resources\SearchResource.cs" />
+    <Compile Include="Resources\V3SearchResource.cs" />
+    <Compile Include="Resources\VisualStudioUISearchResult.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />
