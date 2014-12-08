@@ -313,6 +313,15 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package with the Id &apos;{0}&apos; is not installed to the current project..
+        /// </summary>
+        internal static string Cmdlet_PackageNotInstalled {
+            get {
+                return ResourceManager.GetString("Cmdlet_PackageNotInstalled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} {1}.
         /// </summary>
         internal static string Cmdlet_PackageOperation {

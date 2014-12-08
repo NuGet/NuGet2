@@ -231,4 +231,7 @@
   <data name="Cmdlet_ProjectSet" xml:space="preserve">
     <value>The 'Default project' has been successfully set as '{0}'.</value>
   </data>
+  <data name="Cmdlet_PackageNotInstalled" xml:space="preserve">
+    <value>Package with the Id '{0}' is not installed to the current project.</value>
+  </data>
 </root>

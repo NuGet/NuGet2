@@ -75,7 +75,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context = new ResolutionContext();
                 _context.DependencyBehavior = GetDependencyBehavior();
                 // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (PowerShellPackageViewModel.IsPrereleaseVersion(this.Version))
+                if (IsVersionSpecified && PowerShellPackageViewModel.IsPrereleaseVersion(this.Version))
                 {
                     _context.AllowPrerelease = true;
                 }

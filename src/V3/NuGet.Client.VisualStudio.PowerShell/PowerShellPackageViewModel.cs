@@ -39,7 +39,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         // 1. The unlisted packages are not filtered out. The plan is that Server will return unlisted packages.
         // Test EntityFramework 7.0.0-beta1 is not installed when specify -pre.
         // 2. GetLastestVersionForPackage supports local repository such as UNC share.
-        public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, bool allowPrerelease)
+        public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, bool allowPrerelease, NuGetVersion nugetVersion = null, bool isSafe = false)
         {
             string version = String.Empty;
             try
@@ -51,6 +51,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     allVersions = allVersions.Where(p => !p.IsPrerelease);
                 }
+                if (isSafe && nugetVersion != null)
+                {
+                    IVersionSpec spec = GetSafeRange(nugetVersion);
+                    allVersions = allVersions.Where(p =>
+                    {
+                        var sv = new SemanticVersion(p.ToNormalizedString());
+                        return sv < spec.MaxVersion && sv >= spec.MinVersion;
+                    });       
+                }                
                 version = allVersions.OrderByDescending(v => v).FirstOrDefault().ToNormalizedString();
             }
             catch (Exception)
@@ -72,14 +81,13 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <param name="identity"></param>
         /// <param name="allowPrerelease"></param>
         /// <returns></returns>
-        public static PackageIdentity GetLastestUpdateForPackage(SourceRepository repo, PackageIdentity identity, bool allowPrerelease)
+        public static PackageIdentity GetLastestUpdateForPackage(SourceRepository repo, PackageIdentity identity, bool allowPrerelease, bool isSafe)
         {
-            string id = identity.Id;
-            string version = GetLastestVersionForPackage(repo, id, allowPrerelease);
+            string latestVersion = GetLastestVersionForPackage(repo, identity.Id, allowPrerelease, identity.Version, isSafe);
             PackageIdentity latestIdentity = null;
-            if (version != null)
+            if (latestVersion != null)
             {
-                latestIdentity = new PackageIdentity(id, NuGetVersion.Parse(version));
+                latestIdentity = new PackageIdentity(identity.Id, NuGetVersion.Parse(latestVersion));
             }
             return latestIdentity;
         }
@@ -87,12 +95,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
-        public static IVersionSpec GetSafeRange(SemanticVersion version)
+        public static IVersionSpec GetSafeRange(NuGetVersion version)
         {
             return new VersionSpec
             {
                 IsMinInclusive = true,
-                MinVersion = version,
+                MinVersion = new SemanticVersion(version.ToNormalizedString()),
                 MaxVersion = new SemanticVersion(new Version(version.Version.Major, version.Version.Minor + 1))
             };
         }

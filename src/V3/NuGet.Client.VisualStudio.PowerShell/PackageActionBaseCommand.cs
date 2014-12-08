@@ -211,8 +211,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     VsProject target = this.GetProject(true);
                     InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
-                    identity = installedPackage.Identity;
-                    Version = identity.Version.ToNormalizedString();
+                    if (installedPackage == null)
+                    {
+                        Log(MessageLevel.Error, Resources.Cmdlet_PackageNotInstalled, Id);
+                    }
+                    else
+                    {
+                        identity = installedPackage.Identity;
+                        Version = identity.Version.ToNormalizedString();
+                    }
                 }
                 else
                 {
@@ -382,6 +389,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <param name="identity"></param>
         protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projs)
         {
+            if (identity == null)
+            {
+                return;
+            }
+
             try
             {
                 // Resolve Actions
