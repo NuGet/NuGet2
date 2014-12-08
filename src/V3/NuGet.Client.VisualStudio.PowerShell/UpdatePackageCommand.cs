@@ -127,9 +127,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 foreach (PackageIdentity identity in Identities)
                 {
-                    // Find packages update
-                    PackageIdentity update = PowerShellPackageViewModel.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent);
-                    ExecuteSinglePackageAction(update, Projects);
+                    ExecuteSinglePackageAction(identity, Projects);
                 }
             }
         }

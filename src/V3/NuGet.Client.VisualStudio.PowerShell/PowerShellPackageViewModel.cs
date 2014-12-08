@@ -69,7 +69,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Get latest update for package identity
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="packageId"></param>
+        /// <param name="identity"></param>
         /// <param name="allowPrerelease"></param>
         /// <returns></returns>
         public static PackageIdentity GetLastestUpdateForPackage(SourceRepository repo, PackageIdentity identity, bool allowPrerelease)
