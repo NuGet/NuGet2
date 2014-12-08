@@ -214,8 +214,10 @@ namespace NuGet.Client.V3
             searchResult["id"] = result["id"];
             searchResult[Properties.LatestVersion] = result[Properties.Version];
             searchResult[Properties.Versions] = result[Properties.Versions];
-            searchResult[Properties.Summary] = "Please add summary !!!";
-            // +++ summary, iconUrl, description            
+            searchResult[Properties.Summary] = result[Properties.Summary];
+            searchResult[Properties.Description] = result[Properties.Description];
+            searchResult[Properties.IconUrl] = result[Properties.IconUrl];
+
 
             return searchResult;
         }

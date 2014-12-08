@@ -10,8 +10,7 @@ namespace NuGet.Client.Resources
 {
     public abstract class SearchResource
     {
-        public abstract string Url { get; }
-
+       
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public abstract Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(
             string searchTerm,           

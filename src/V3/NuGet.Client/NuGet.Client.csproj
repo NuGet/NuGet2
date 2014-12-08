@@ -118,6 +118,9 @@
     <Compile Include="Resources\CommandLineSearchResult.cs" />
     <Compile Include="Resources\PowershellSearchResult.cs" />
     <Compile Include="Resources\SearchResource.cs" />
+    <Compile Include="Resources\SourceRepositoryFactory.cs" />
+    <Compile Include="Resources\V2SearchResource.cs" />
+    <Compile Include="Resources\V2SourceRepository2.cs" />
     <Compile Include="Resources\V3SearchResource.cs" />
     <Compile Include="Resources\VisualStudioUISearchResult.cs" />
     <Compile Include="SetUserAgentHandler.cs" />

@@ -36,7 +36,7 @@ namespace NuGet.Client
         {
             _source = source;          
             _client = new NuGetV3Client(source.Url, host);
-            AddResource<SearchResource>(() => new V3SearchResource(source.Url));
+            AddResource<SearchResource>(() => new V3SearchResource(source.Url,host));
          
         }
       

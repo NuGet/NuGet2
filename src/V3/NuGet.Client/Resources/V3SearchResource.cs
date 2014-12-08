@@ -16,16 +16,11 @@ namespace NuGet.Client.Resources
     {
         private string _url;
         private NuGetV3Client _client;
-        public override string Url
-        {
-            get { return _url; }
-        }
-
-        public V3SearchResource(string sourceUrl)
+      
+        public V3SearchResource(string sourceUrl,string host)
         {
             _url = sourceUrl;
-            _client = new NuGetV3Client(sourceUrl, "xxx");
-            
+            _client = new NuGetV3Client(sourceUrl, host);            
         }
 
         public async override Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
