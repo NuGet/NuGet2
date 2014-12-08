@@ -61,12 +61,7 @@ namespace NuGet.Client
         /// <exception cref="RequiredResourceNotSupportedException">The host does not support this resource.</exception>
         public virtual object GetRequiredResource(Type resourceType)
         {
-            var resource = TryGetResource(resourceType);
-            NuGetTraceSources.SourceRepository.Error(
-                "missingresource",
-                "[{0}] Required resource '{1}' was requested but is not provided",
-                Source.Name,
-                resourceType.FullName);
+            var resource = TryGetResource(resourceType);            
             Debug.Assert(resource != null, "Required resource '" + resourceType.FullName + "' not found for this source " + Source.Name);
             if (resource == null)
             {
