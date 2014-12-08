@@ -16,8 +16,8 @@ namespace NuGet.Client.CommandLine
         private const string NuGetExtensionsKey = "NUGET_EXTENSIONS_PATH";
         private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "Commands");
 
-        //[Import]
-        //public HelpCommand HelpCommand { get; set; }
+        [Import]
+        public HelpCommand HelpCommand { get; set; }
 
         [ImportMany]
         public IEnumerable<ICommand> Commands { get; set; }
@@ -68,13 +68,18 @@ namespace NuGet.Client.CommandLine
                 CommandLineParser parser = new CommandLineParser(p.Manager);
 
                 // Parse the command
-                ICommand command = parser.ParseCommandLine(args);
+                ICommand command = parser.ParseCommandLine(args) ?? p.HelpCommand;
 
                 // Fallback on the help command if we failed to parse a valid command
                 if (command == null || !ArgumentCountValid(command))
                 {
-                    console.WriteLine("Help command is not implemented. Exiting...");
-                    return 0;
+                    // Get the command name and add it to the argument list of the help command
+                    string commandName = command.CommandAttribute.CommandName;
+
+                    // Print invalid command then show help
+                    console.WriteLine(LocalizedResourceManager.GetString("InvalidArguments"), commandName);
+
+                    p.HelpCommand.ViewHelpForCommand(commandName);
                 }
                 else
                 {

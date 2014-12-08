@@ -56,6 +56,12 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\DownloadCommandBase.cs" />
+    <Compile Include="Commands\HelpCommand.cs" />
+    <Compile Include="Commands\HelpCommandMarkdownTemplate.cs">
+      <DependentUpon>HelpCommandMarkdownTemplate.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Common\CommandLineConstants.cs" />
@@ -68,6 +74,7 @@
     <Compile Include="Common\ICommandManager.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\Verbosity.cs" />
+    <Compile Include="NuGetCommand.cs" />
     <Compile Include="NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -90,12 +97,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Commands\HelpCommandMarkdownTemplate.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>HelpCommandMarkdownTemplate.cs</LastGenOutput>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\..\Common\CommonResources.resx">
       <Link>ResourceHelpers\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NuGetCommand.resx">
+      <DependentUpon>NuGetCommand.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

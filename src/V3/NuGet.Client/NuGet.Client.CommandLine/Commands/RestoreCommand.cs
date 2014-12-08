@@ -18,7 +18,7 @@ using System.Threading;
 
 namespace NuGet.Commands
 {
-    [Command("restore", "RestoreCommandDescription",
+    [Command(typeof(NuGetCommand), "restore", "RestoreCommandDescription",
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "RestoreCommandUsageSummary",
         UsageDescriptionResourceName = "RestoreCommandUsageDescription",
         UsageExampleResourceName = "RestoreCommandUsageExamples")]
@@ -37,13 +37,13 @@ namespace NuGet.Commands
         // lock used to access _outputOptOutMessage.
         private readonly object _outputOptOutMessageLock = new object();
 
-        [Option("RestoreCommandRequireConsent")]
+        [Option(typeof(NuGetCommand), "RestoreCommandRequireConsent")]
         public bool RequireConsent { get; set; }
 
-        [Option("RestoreCommandPackagesDirectory", AltName = "OutputDirectory")]
+        [Option(typeof(NuGetCommand), "RestoreCommandPackagesDirectory", AltName = "OutputDirectory")]
         public string PackagesDirectory { get; set; }
 
-        [Option("RestoreCommandSolutionDirectory")]
+        [Option(typeof(NuGetCommand), "RestoreCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
         /// <remarks>
