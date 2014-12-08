@@ -60,7 +60,6 @@
     <Compile Include="ConsolidatePackageCommand.cs" />
     <Compile Include="GetPackageCommand.cs" />
     <Compile Include="GetProjectCommand.cs" />
-    <Compile Include="InMemoryPackageRepository.cs" />
     <Compile Include="InstallPackageCommand.cs" />
     <Compile Include="NuGetPowerShellBaseCommand.cs" />
     <Compile Include="OpenPackagePageCommand.cs" />
