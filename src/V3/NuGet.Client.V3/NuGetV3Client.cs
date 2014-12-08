@@ -16,10 +16,14 @@ using System.Globalization;
 namespace NuGet.Client.V3
 {
     /// <summary>
+    /// Class used by all the APi v3 clients (like VisualStudio UI, Powershell and commandline to talk to Api v3 endpoints).
+    /// *TODOS:
+    /// Integrate ServiceDiscovery.
     /// Setting user agent
     /// Writing traces disabled.
-    /// No "SearchFilteR". Instead pass list of Framework names and prerelease.
-    /// Recording metric.
+    /// No "SearchFilter". Instead pass list of Framework names and prerelease.
+    /// Recording metric is disabled as of now.
+    /// Update the csproj to match with the rest of the solution.
     /// </summary>
     public class NuGetV3Client : IDisposable
     {
@@ -57,10 +61,6 @@ namespace NuGet.Client.V3
             new Uri("http://schema.nuget.org/schema#version"),
         };
 
-        //public override PackageSource Source
-        //{
-        //    get { return _source; }
-        //}
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The HttpClient can be left open until VS shuts down.")]
         public NuGetV3Client(string rootUrl, string host)
@@ -79,24 +79,16 @@ namespace NuGet.Client.V3
                 cache = new NullFileCache();
             }
 
-            cache = new NullFileCache(); // +++
+            cache = new NullFileCache(); 
 
             _client = new DataClient(
                 _http,
                 cache);
         }
 
-        public DataClient DataClient
-        {
-            get
-            {
-                return _client;
-            }
-        }
-
         public async Task<IEnumerable<JObject>> Search(string searchTerm, IEnumerable<string> supportedFrameworkNames,bool includePrerelease, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
-            // Get the search service URL from the service
+            //*TODOS: Get the search service URL from the service. Once it is integrated with ServiceDiscovery GetServiceUri would go away.
             cancellationToken.ThrowIfCancellationRequested();
             var searchService = await GetServiceUri(ServiceUris.SearchQueryService);
             if (String.IsNullOrEmpty(searchService))
@@ -123,37 +115,19 @@ namespace NuGet.Client.V3
             }
             queryUrl.Query = queryString;
 
-            // Execute the query! Bypass the cache for now
-            //NuGetTraceSources.V3SourceRepository.Info(
-            //    "searching",
-            //    "Executing Query: {0}",
-            //    queryUrl.ToString());
+           
             var queryUri = queryUrl.Uri;
             var results = await _client.GetFile(queryUri);
             cancellationToken.ThrowIfCancellationRequested();
             if (results == null)
-            {
-                //NuGetTraceSources.V3SourceRepository.Warning(
-                //    "results_invalid",
-                //    "Recieved unexpected results from {0}!",
-                //    queryUrl.ToString());
+            {              
                 return Enumerable.Empty<JObject>();
             }
             var data = results.Value<JArray>("data");
             if (data == null)
-            {
-                //NuGetTraceSources.V3SourceRepository.Warning(
-                //    "results_invalid",
-                //    "Recieved invalid results from {0}!",
-                //    queryUrl.ToString());
+            {               
                 return Enumerable.Empty<JObject>();
             }
-
-            //NuGetTraceSources.V3SourceRepository.Verbose(
-            //    "results_received",
-            //    "Received {1} hits from {0}",
-            //    queryUrl.ToString(),
-            //    data.Count);
 
             // Resolve all the objects
             List<JObject> outputs = new List<JObject>(take);
@@ -167,61 +141,9 @@ namespace NuGet.Client.V3
             }
 
             return outputs;
-        }
-
-        // Async void because we don't want metric recording to block anything at all
-        //public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
-        //{
-        //    var metricsUrl = await GetServiceUri(ServiceUris.MetricsService);
-
-        //    if (metricsUrl == null)
-        //    {
-        //        // Nothing to do!
-        //        return;
-        //    }
-
-        //    // Create the JSON payload
-        //    var payload = new JObject();
-        //    payload.Add("id", packageIdentity.Id);
-        //    payload.Add("version", packageIdentity.Version.ToNormalizedString());
-        //    payload.Add("operation", isUpdate ? "Update" : "Install");
-        //    payload.Add("userAgent", _userAgent);
-        //    payload.Add("targetFrameworks", new JArray(target.GetSupportedFrameworks().Select(fx => VersionUtility.GetShortFrameworkName(fx))));
-        //    if (dependentPackage != null)
-        //    {
-        //        payload.Add("dependentPackage", dependentPackage.Id);
-        //        payload.Add("dependentPackageVersion", dependentPackage.Version.ToNormalizedString());
-        //    }
-        //    target.AddMetricsMetadata(payload);
-
-        //    // Post the message
-        //    await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));
-        //}
-
-        // +++ this would not be needed once the result matches searchResult.
-        private async Task<JObject> ProcessSearchResult(System.Threading.CancellationToken cancellationToken, JObject result)
-        {
-            //NuGetTraceSources.V3SourceRepository.Verbose(
-            //                    "resolving_package",
-            //                    "Resolving Package: {0}",
-            //                    result[Properties.SubjectId]);
-            //cancellationToken.ThrowIfCancellationRequested();
-
-            // Get the registration
-            result = (JObject)(await _client.Ensure(result, ResultItemRequiredProperties));
-
-            var searchResult = new JObject();
-            searchResult["id"] = result["id"];
-            searchResult[Properties.LatestVersion] = result[Properties.Version];
-            searchResult[Properties.Versions] = result[Properties.Versions];
-            searchResult[Properties.Summary] = result[Properties.Summary];
-            searchResult[Properties.Description] = result[Properties.Description];
-            searchResult[Properties.IconUrl] = result[Properties.IconUrl];
-
-
-            return searchResult;
-        }
-
+        }      
+        
+      
         public async Task<JObject> GetPackageMetadata(string id, NuGetVersion version)
         {
             return (await GetPackageMetadataById(id))
@@ -258,6 +180,8 @@ namespace NuGet.Client.V3
                 return result;
             });
         }
+
+        #region PrivateHelpers
 
         private async Task<IEnumerable<JObject>> Descend(JArray json)
         {
@@ -309,34 +233,36 @@ namespace NuGet.Client.V3
                               where resourceType != null && Equals(resourceType, type.ToString())
                               select resource)
                              .ToList();
-            //NuGetTraceSources.V3SourceRepository.Verbose(
-            //    "service_candidates",
-            //    "Found {0} candidates for {1} service: [{2}]",
-            //    candidates.Count,
-            //    type,
-            //    String.Join(", ", candidates.Select(c => c.Value<string>("@id"))));
+       
 
             var selected = candidates.FirstOrDefault();
 
             if (selected != null)
-            {
-                //NuGetTraceSources.V3SourceRepository.Info(
-                    //"getserviceuri",
-                    //"Found {0} service at {1}",
-                    //selected["@type"][0],
-                    //selected["@id"]);
+            {            
                 return selected.Value<string>("@id");
             }
             else
-            {
-                //NuGetTraceSources.V3SourceRepository.Error(
-                //    "getserviceuri_failed",
-                //    "Unable to find compatible {0} service on {1}",
-                //    type,
-                //    _root);
+            {             
                 return null;
             }
         }
+
+        private async Task<JObject> ProcessSearchResult(System.Threading.CancellationToken cancellationToken, JObject result)
+        {
+            // Get the registration
+            result = (JObject)(await _client.Ensure(result, ResultItemRequiredProperties));
+
+            var searchResult = new JObject();
+            searchResult["id"] = result["id"];
+            searchResult[Properties.LatestVersion] = result[Properties.Version];
+            searchResult[Properties.Versions] = result[Properties.Versions];
+            searchResult[Properties.Summary] = result[Properties.Summary];
+            searchResult[Properties.Description] = result[Properties.Description];
+            searchResult[Properties.IconUrl] = result[Properties.IconUrl];
+            return searchResult;
+        }
+
+        #endregion PrivateHelpers
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

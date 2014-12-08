@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.Resources
 {
+    /// <summary>
+    /// Model for Search results displayed by Visual Studio Package Manager dialog UI.
+    /// </summary>
     public class VisualStudioUISearchMetaData
     {
         public string Id { get; set; }

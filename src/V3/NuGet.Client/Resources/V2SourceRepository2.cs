@@ -11,6 +11,10 @@ using NuGet.Client.Interop;
 
 namespace NuGet.Client.Resources
 {
+    /// <summary>
+    /// V2SourceRepository which exposes various resources like SearchResource, MetricsResource and so on...
+    /// *TODOS: Remove individual methods like Search, GetPackageMetaData from the repository.
+    /// </summary>
     public class V2SourceRepository2 : SourceRepository
     {
         private readonly IPackageRepository _repository;

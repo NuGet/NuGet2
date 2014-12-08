@@ -13,8 +13,10 @@ using NuGet.Client.Interop;
 
 namespace NuGet.Client.Resources
 {
-    //TODO : Pass host name;
-    //TODO : GetUri to common utility
+    
+  /// <summary>
+  /// *TODOS: Pass host name. Do tracing.
+  /// </summary>
     public class V2SearchResource : SearchResource
     {
         
@@ -69,19 +71,18 @@ namespace NuGet.Client.Resources
             }, cancellationToken);
         }
 
-        public override Task<IEnumerable<CommandLineSearchResult>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<CommandLineSearchMetadata>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<IEnumerable<PowershellSearchResult>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<PowershellSearchMetadata>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
         private VisualStudioUISearchMetaData CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
+            cancellationToken.ThrowIfCancellationRequested();         
             var versions = _repository.FindPackagesById(package.Id);
             if (!versions.Any())
             {

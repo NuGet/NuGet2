@@ -21,6 +21,11 @@ using NuGet.Client.Resources;
 
 namespace NuGet.Client
 {
+    /// <summary>
+    /// Respository which exposes various resources like Search resource, metrics resource for the APi v3 endpoint.
+    /// Uses the NuGetV3Client to talk to the endpoint.
+    /// *TODOS: Remove the direct methods like Search, GetPackageMetadata ....
+    /// </summary>
     public class V3SourceRepository2 : SourceRepository
     {       
         private PackageSource _source;      
@@ -36,8 +41,7 @@ namespace NuGet.Client
         {
             _source = source;          
             _client = new NuGetV3Client(source.Url, host);
-            AddResource<SearchResource>(() => new V3SearchResource(source.Url,host));
-         
+            AddResource<SearchResource>(() => new V3SearchResource(source.Url,host));         
         }
       
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
@@ -66,9 +70,6 @@ namespace NuGet.Client
             return await _client.GetPackageMetadataById(packageId);
          
         }
-
-    
-
 
     }
 }

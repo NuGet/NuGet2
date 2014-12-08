@@ -14,23 +14,14 @@ using NuGet.Client.Diagnostics;
 namespace NuGet.Client
 {
     /// <summary>
-    /// Represents a place where packages can be retrieved.
+    /// Represents a Server endpoint. Exposes the list of resources/services provided by the endpoint like : Search service, Metrics service and so on.
     /// </summary>
     // TODO: it needs to implement IDisposable.
-    // TODO: Define RequiredResourceNotFound exception instead of general exception.
-    // TODO: Add SourceRepository to NugGetTraceSource and add traces.
+    // TODO: Define RequiredResourceNotFound exception instead of general exception.    
     public abstract class SourceRepository
     {
         public abstract PackageSource Source { get; }
         private readonly Dictionary<Type, Func<object>> _resourceFactories = new Dictionary<Type, Func<object>>();
-#if DEBUG
-        // Helper list for debug builds only.
-        private static readonly HashSet<Type> KnownResources = new HashSet<Type>()
-        {
-          
-        };
-#endif
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public abstract Task<IEnumerable<JObject>> Search(
             string searchTerm,

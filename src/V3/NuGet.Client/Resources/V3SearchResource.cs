@@ -10,8 +10,15 @@ using NuGet.Versioning;
 
 namespace NuGet.Client.Resources
 {
-    //TODO : Pass host name;
-    //TODO : GetUri to common utility
+    
+
+    /// <summary>
+    /// Search resource implementation for api v3 endpoint. Uses the NuGetV3Client to talk to the endpoint and get the data.
+    /// *TODOS:
+    /// Host name not being used.
+    /// GetUri to be moved to a utility.
+    /// Tracing not done yet.
+    /// </summary>
     public class V3SearchResource : SearchResource
     {
         private string _url;
@@ -36,24 +43,24 @@ namespace NuGet.Client.Resources
             return visualStudioUISearchResults;
         }
 
-        public override Task<IEnumerable<CommandLineSearchResult>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<CommandLineSearchMetadata>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<IEnumerable<PowershellSearchResult>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<PowershellSearchMetadata>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
         private VisualStudioUISearchMetaData GetVisualStudioUISearchResult(JObject package,bool includePrerelease)
         {
-             VisualStudioUISearchMetaData searchResult = new VisualStudioUISearchMetaData();
-              searchResult.Id = package.Value<string>(Properties.PackageId);
-              searchResult.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
-              searchResult.IconUrl = GetUri(package, Properties.IconUrl);
+                VisualStudioUISearchMetaData searchResult = new VisualStudioUISearchMetaData();
+                searchResult.Id = package.Value<string>(Properties.PackageId);
+                searchResult.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
+                searchResult.IconUrl = GetUri(package, Properties.IconUrl);
 
-                  // get other versions
+                // get other versions
                 var versionList = new List<NuGetVersion>();
                 var versions = package.Value<JArray>(Properties.Versions);
                 if (versions != null)
@@ -83,14 +90,14 @@ namespace NuGet.Client.Resources
                     versionList.Add(searchResult.Version);
                 }
 
-              //searchResultPackage.Versions = versionList;
-                    searchResult.Summary = package.Value<string>(Properties.Summary);
-                    if (string.IsNullOrWhiteSpace(searchResult.Summary))
-                    {
-                        // summary is empty. Use its description instead.
-                        searchResult.Summary = package.Value<string>(Properties.Description);
-                    }
-                    return searchResult;
+                searchResult.Versions = versionList;
+                searchResult.Summary = package.Value<string>(Properties.Summary);
+                if (string.IsNullOrWhiteSpace(searchResult.Summary))
+                {
+                    // summary is empty. Use its description instead.
+                    searchResult.Summary = package.Value<string>(Properties.Description);
+                }
+                return searchResult;
 
         }
         private Uri GetUri(JObject json, string property)

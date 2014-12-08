@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.Resources
 {
+    /// <summary>
+    /// Exposes Search functionality required by various clients.
+    /// </summary>
     public abstract class SearchResource
     {
        
@@ -20,13 +23,13 @@ namespace NuGet.Client.Resources
             CancellationToken cancellationToken);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public abstract Task<IEnumerable<CommandLineSearchResult>> GetSearchResultsForCommandLine(
+        public abstract Task<IEnumerable<CommandLineSearchMetadata>> GetSearchResultsForCommandLine(
             string searchTerm,
             bool includePrerelease,
             CancellationToken cancellationToken);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public abstract Task<IEnumerable<PowershellSearchResult>> GetSearchResultsForPowershellConsole(
+        public abstract Task<IEnumerable<PowershellSearchMetadata>> GetSearchResultsForPowershellConsole(
             string searchTerm,
             SearchFilter filters,
             int skip,
