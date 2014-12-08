@@ -229,14 +229,14 @@ namespace NuGet.Commands
 
         // BUGBUG: NEED to use NuGet.Versioning.NuGetVersion and not the old SemanticVersion
         // Do a very quick check of whether a package in installed by checking whether the nupkg file exists
-        private static bool IsPackageInstalled(IPackageRepository repository, IFileSystem packagesFolderFileSystem, string packageId, SemanticVersion version)
+        private static bool IsPackageInstalled(IPackageRepository repository, IFileSystem packagesFolderFileSystem, PackageIdentity packageIdentity)
         {
-            if (version != null)
+            if (packageIdentity.Version != null)
             {
                 // If we know exactly what package to lookup, check if it's already installed locally. 
                 // We'll do this by checking if the package directory exists on disk.
                 var localRepository = (LocalPackageRepository)repository;
-                var packagePaths = localRepository.GetPackageLookupPaths(packageId, version);
+                var packagePaths = localRepository.GetPackageLookupPaths(packageIdentity.Id, new SemanticVersion(packageIdentity.Version.ToString()));
                 return packagePaths.Any(packagesFolderFileSystem.FileExists);
             }
             return false;
@@ -256,14 +256,13 @@ namespace NuGet.Commands
 
         private bool RestorePackage(
             IFileSystem packagesFolderFileSystem,
-            string packageId,
-            SemanticVersion version,
+            PackageIdentity packageIdentity,
             bool packageRestoreConsent,
             ConcurrentQueue<IPackage> satellitePackages)
         {
             // BUGBUG: Looks like we are creating PackageManager for every single restore. This is likely done to support execution in parallel
             var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
-            if (IsPackageInstalled(packageManager.LocalRepository, packagesFolderFileSystem, packageId, version))
+            if (IsPackageInstalled(packageManager.LocalRepository, packagesFolderFileSystem, packageIdentity))
             {
                 return false;
             }
@@ -290,21 +289,21 @@ namespace NuGet.Commands
             // BUGBUG: TO BE REMOVED AFTER INVESTIGATION
             using (packageManager.SourceRepository.StartOperation(
                 RepositoryOperationNames.Restore,
-                packageId,
-                version == null ? null : version.ToString()))
+                packageIdentity.Id,
+                packageIdentity.Version == null ? null : packageIdentity.Version.ToString()))
             {
                 // BUGBUG: Satellite packages should only be restored at the end. Find out Why first??
                 //         And, then, handle it here
 
-                NuGetVersion packageVersion = new NuGetVersion(version.ToString());
+
                 var filesystemInstallationTarget = new FilesystemInstallationTarget(packageManager);
 
                 // BUGBUG: Should consider using async method and await
-                var task = SourceRepository.GetPackageMetadata(packageId, packageVersion);
+                var task = SourceRepository.GetPackageMetadata(packageIdentity.Id, packageIdentity.Version);
                 task.Wait();
                 var packageJSON = task.Result;
                 var packageAction = new NewPackageAction(Client.Resolution.PackageActionType.Download,
-                    new PackageIdentity(packageId, packageVersion), packageJSON, filesystemInstallationTarget, SourceRepository, null);
+                    packageIdentity, packageJSON, filesystemInstallationTarget, SourceRepository, null);
 
                 // BUGBUG: See PackageExtractor.cs for locking mechanism used to handle concurrency
                 NuGet.Client.Installation.ActionExecutor actionExecutor = new Client.Installation.ActionExecutor();
@@ -317,13 +316,13 @@ namespace NuGet.Commands
         }
 
         /// <returns>True if one or more packages are installed.</returns>
-        private bool ExecuteInParallel(IFileSystem fileSystem, ICollection<PackageReference> packageReferences)
+        private bool ExecuteInParallel(IFileSystem fileSystem, ICollection<InstalledPackageReference> installedPackageReferences)
         {
             bool packageRestoreConsent = new PackageRestoreConsent(Settings).IsGranted;
             int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;
-            if (packageReferences.Count > defaultConnectionLimit)
+            if (installedPackageReferences.Count > defaultConnectionLimit)
             {
-                ServicePointManager.DefaultConnectionLimit = Math.Min(10, packageReferences.Count);
+                ServicePointManager.DefaultConnectionLimit = Math.Min(10, installedPackageReferences.Count);
             }
 
             // The PackageSourceProvider reads from the underlying ISettings multiple times. One of the fields it reads is the password which is consequently decrypted
@@ -334,9 +333,9 @@ namespace NuGet.Commands
             var satellitePackages = new ConcurrentQueue<IPackage>();
             if (DisableParallelProcessing)
             {
-                foreach (var package in packageReferences)
+                foreach (var package in installedPackageReferences)
                 {
-                    RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages);
+                    RestorePackage(fileSystem, package.Identity, packageRestoreConsent, satellitePackages);
                 }
 
                 // InstallSatellitePackages(fileSystem, satellitePackages);
@@ -344,8 +343,8 @@ namespace NuGet.Commands
                 return true;
             }
 
-            var tasks = packageReferences.Select(package =>
-                            Task.Factory.StartNew(() => RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages))).ToArray();
+            var tasks = installedPackageReferences.Select(installedPackageReference =>
+                            Task.Factory.StartNew(() => RestorePackage(fileSystem, installedPackageReference.Identity, packageRestoreConsent, satellitePackages))).ToArray();
 
             Task.WaitAll(tasks);
             // Return true if we installed any satellite packages or if any of our install tasks succeeded.
@@ -353,10 +352,10 @@ namespace NuGet.Commands
             return true;
         }
 
-        private void InstallPackages(IFileSystem packagesFolderFileSystem, ICollection<PackageReference> packageReferences)
+        private void InstallPackages(IFileSystem packagesFolderFileSystem, ICollection<InstalledPackageReference> installedPackageReferences)
         {
-            bool installedAny = ExecuteInParallel(packagesFolderFileSystem, packageReferences);
-            if (!installedAny && packageReferences.Count > 0)
+            bool installedAny = ExecuteInParallel(packagesFolderFileSystem, installedPackageReferences);
+            if (!installedAny && installedPackageReferences.Count > 0)
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("InstallCommandNothingToInstall"), Constants.PackageReferenceFile);
             }
@@ -371,7 +370,7 @@ namespace NuGet.Commands
                     Console.WriteLine(LocalizedResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile"), packageReferenceFilePath);
                 }
 
-                InstallPackages(packagesFolderFileSystem, GetPackageReferences(packageReferenceFilePath, projectName: null));
+                InstallPackages(packagesFolderFileSystem, GetInstalledPackageReferences(packageReferenceFilePath, projectName: null));
             }
         }
 
@@ -387,11 +386,11 @@ namespace NuGet.Commands
             RestorePackagesFromConfigFile(solutionConfigFilePath, packagesFolderFileSystem);
 
             // restore packages for projects
-            var packageReferences = GetPackageReferencesFromSolutionFile(solutionFileFullPath);
-            InstallPackages(packagesFolderFileSystem, packageReferences);
+            var installedPackageReferences = GetInstalledPackageReferencesFromSolutionFile(solutionFileFullPath);
+            InstallPackages(packagesFolderFileSystem, installedPackageReferences);
         }
 
-        private ICollection<PackageReference> GetPackageReferencesFromSolutionFile(string solutionFileFullPath)
+        private ICollection<InstalledPackageReference> GetInstalledPackageReferencesFromSolutionFile(string solutionFileFullPath)
         {
             ISolutionParser solutionParser;
             if (EnvironmentUtility.IsMonoRuntime)
@@ -402,8 +401,8 @@ namespace NuGet.Commands
             {
                 solutionParser = new MSBuildSolutionParser();
             }
-            
-            var packageReferences = new HashSet<PackageReference>();
+
+            var installedPackageReferences = new HashSet<InstalledPackageReference>();
             IEnumerable<string> projectFiles = Enumerable.Empty<string>();
             try
             {
@@ -433,15 +432,15 @@ namespace NuGet.Commands
 
                 string projectName = Path.GetFileNameWithoutExtension(projectFile);
 
-                packageReferences.AddRange(GetPackageReferences(projectConfigFilePath, projectName));
+                installedPackageReferences.AddRange(GetInstalledPackageReferences(projectConfigFilePath, projectName));
             }
 
-            return packageReferences;
+            return installedPackageReferences;
         }
 
-        private static ICollection<PackageReference> GetPackageReferencesInDirectory(string directory)
+        private static ICollection<InstalledPackageReference> GetInstalledPackageReferencesInDirectory(string directory)
         {
-            var packageReferences = new HashSet<PackageReference>();
+            var installedPackageReferences = new HashSet<InstalledPackageReference>();
             var configFiles = Directory.GetFiles(directory, "packages*.config", SearchOption.AllDirectories)
                 .Where(f => Path.GetFileName(f).StartsWith("packages.", StringComparison.OrdinalIgnoreCase));
             foreach (var configFile in configFiles)
@@ -449,7 +448,7 @@ namespace NuGet.Commands
                 PackageReferenceFile file = new PackageReferenceFile(configFile);
                 try
                 {
-                    packageReferences.AddRange(CommandLineUtility.GetPackageReferences(file, requireVersion: true));
+                    installedPackageReferences.AddRange(CommandLineUtility.GetInstalledPackageReferences(file, requireVersion: true));
                 }
                 catch (InvalidOperationException)
                 {
@@ -457,16 +456,16 @@ namespace NuGet.Commands
                 }
             }
 
-            return packageReferences;
+            return installedPackageReferences;
         }
 
-        private static ICollection<PackageReference> GetPackageReferences(string fullConfigFilePath, string projectName)
+        private static ICollection<InstalledPackageReference> GetInstalledPackageReferences(string fullConfigFilePath, string projectName)
         {
             var projectFileSystem = new PhysicalFileSystem(Path.GetDirectoryName(fullConfigFilePath));
             string configFileName = Path.GetFileName(fullConfigFilePath);
 
-            PackageReferenceFile file = new PackageReferenceFile(projectFileSystem, configFileName, projectName);
-            return CommandLineUtility.GetPackageReferences(file, requireVersion: true);
+            PackageReferenceFile packageReferenceFile = new PackageReferenceFile(projectFileSystem, configFileName, projectName);
+            return CommandLineUtility.GetInstalledPackageReferences(packageReferenceFile, requireVersion: true);
         }
 
         public override void ExecuteCommand()
@@ -497,7 +496,7 @@ namespace NuGet.Commands
                     throw new InvalidOperationException(message);
                 }
 
-                InstallPackages(packagesFolderFileSystem, GetPackageReferences(_packagesConfigFileFullPath, projectName: null));
+                InstallPackages(packagesFolderFileSystem, GetInstalledPackageReferences(_packagesConfigFileFullPath, projectName: null));
             }
         }
     }

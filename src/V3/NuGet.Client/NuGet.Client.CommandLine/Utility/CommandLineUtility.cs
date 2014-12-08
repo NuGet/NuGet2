@@ -1,3 +1,4 @@
+using NuGet.Client;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -38,14 +39,14 @@ namespace NuGet
             return "'" + source + "'";
         }
 
-        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile configFile, bool requireVersion)
+        public static ICollection<InstalledPackageReference> GetInstalledPackageReferences(PackageReferenceFile configFile, bool requireVersion)
         {
             if (configFile == null)
             {
                 throw new ArgumentNullException("configFile");
             }
 
-            var packageReferences = configFile.GetPackageReferences(requireVersion).ToList();
+            var packageReferences = configFile.GetPackageReferences(requireVersion);
             foreach (var package in packageReferences)
             {
                 // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
@@ -62,7 +63,7 @@ namespace NuGet
                 }
             }
 
-            return packageReferences;
+            return packageReferences.Select(pr => CoreConverters.SafeToInstalledPackageReference(pr)).ToList();
         }
     }
 }
