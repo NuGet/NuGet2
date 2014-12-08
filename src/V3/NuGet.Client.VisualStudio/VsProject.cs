@@ -8,6 +8,7 @@ using NuGet.Client.ProjectSystem;
 using DteProject = EnvDTE.Project;
 using System;
 using System.Runtime.Versioning;
+using NuGet.Client.Resources;
 
 #if VS14
 
@@ -133,7 +134,7 @@ namespace NuGet.Client.VisualStudio
             return new FrameworkName[] { DteProject.GetTargetFrameworkName() };
         }
 
-        public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
+        public override Task<IEnumerable<VisualStudioUISearchMetaData>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
             return InstalledPackages.Search(source, searchText, skip, take, cancelToken);
         }

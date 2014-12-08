@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
+using NuGet.Client.Resources;
 
 namespace NuGet.Client
 {
@@ -20,7 +21,7 @@ namespace NuGet.Client
         /// <param name="searchTerm"></param>
         /// <param name="cancelToken"></param>
         /// <returns>Returns a list of JSON objects suitable for rendering by the Package Manager Dialog</returns>
-        public abstract Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken);
+        public abstract Task<IEnumerable<VisualStudioUISearchMetaData>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken);
 
         /// <summary>
         /// Retrieves a list of installed packages

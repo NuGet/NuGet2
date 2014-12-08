@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
+using NuGet.Client.Resources;
 
 namespace NuGet.Client
 {
@@ -47,7 +48,7 @@ namespace NuGet.Client
             return _localRepository.Exists(packageId);
         }
 
-        public override async Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
+        public override async Task<IEnumerable<VisualStudioUISearchMetaData>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
             var installedPackages = await Task.Factory.StartNew(() =>
@@ -55,7 +56,7 @@ namespace NuGet.Client
                     .Skip(skip).Take(take).ToList());
 
             // start CreatePackageSearchResult() for all packages in parallel
-            var createPackageSearchResultTasks = new List<Task<JObject>>();
+            var createPackageSearchResultTasks = new List<Task<VisualStudioUISearchMetaData>>();
             foreach (var p in installedPackages)
             {
                 var task = CreatePackageSearchResult(source, p);
@@ -63,7 +64,7 @@ namespace NuGet.Client
             }
 
             // collect results
-            var result = new List<JObject>();
+            var result = new List<VisualStudioUISearchMetaData>();
             foreach (var task in createPackageSearchResultTasks)
             {
                 var searchResult = await task;
@@ -72,7 +73,7 @@ namespace NuGet.Client
             return result;
         }
 
-        private static async Task<JObject> CreatePackageSearchResult(SourceRepository source, IPackage package)
+        private static async Task<VisualStudioUISearchMetaData> CreatePackageSearchResult(SourceRepository source, IPackage package)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
 
@@ -83,9 +84,16 @@ namespace NuGet.Client
                 var v = SemanticVersion.Parse(p.Value<string>(Properties.Version));
                 versions.Add(v);
             }
-            
-            var result = PackageJsonLd.CreatePackageSearchResult(package, versions);
-            return result;
+            VisualStudioUISearchMetaData searchMetaData = new VisualStudioUISearchMetaData();
+            searchMetaData.Version = CoreConverters.SafeToNuGetVer(package.Version);
+            searchMetaData.Summary = package.Summary;
+            searchMetaData.Versions = versions.Select(p => CoreConverters.SafeToNuGetVer(p));
+            if (string.IsNullOrWhiteSpace(package.Summary))
+                searchMetaData.Summary = package.Summary;
+            else
+                searchMetaData.Summary = package.Description;
+            searchMetaData.IconUrl = package.IconUrl;
+            return searchMetaData;
         }
 
         public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()

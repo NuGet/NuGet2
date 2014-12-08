@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.Resources
 {
-    public class VisualStudioUISearchResult
+    public class VisualStudioUISearchMetaData
     {
         public string Id { get; set; }
 

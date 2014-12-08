@@ -122,7 +122,7 @@
     <Compile Include="Resources\V2SearchResource.cs" />
     <Compile Include="Resources\V2SourceRepository2.cs" />
     <Compile Include="Resources\V3SearchResource.cs" />
-    <Compile Include="Resources\VisualStudioUISearchResult.cs" />
+    <Compile Include="Resources\VisualStudioUISearchMetadata.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />

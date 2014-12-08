@@ -23,18 +23,17 @@ namespace NuGet.Client.Resources
             _client = new NuGetV3Client(sourceUrl, host);            
         }
 
-        public async override Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public async override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
-
             List<string> frameworkNames = new List<string>();
             foreach (FrameworkName fx in filters.SupportedFrameworks)
                 frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
-            return await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-           // IEnumerable<JObject> searchResultJsonObjects =    await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-            //List<VisualStudioUISearchResult> visualStudioUISearchResults = new List<VisualStudioUISearchResult>();
-            //foreach (JObject searchResultJson in searchResultJsonObjects)
-            //    visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson));
-            //return visualStudioUISearchResults;
+            await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            IEnumerable<JObject> searchResultJsonObjects = await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            List<VisualStudioUISearchMetaData> visualStudioUISearchResults = new List<VisualStudioUISearchMetaData>();
+            foreach (JObject searchResultJson in searchResultJsonObjects)
+                visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson, filters.IncludePrerelease));
+            return visualStudioUISearchResults;
         }
 
         public override Task<IEnumerable<CommandLineSearchResult>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
@@ -47,32 +46,44 @@ namespace NuGet.Client.Resources
             throw new NotImplementedException();
         }
 
-        private VisualStudioUISearchResult GetVisualStudioUISearchResult(JObject package)
+        private VisualStudioUISearchMetaData GetVisualStudioUISearchResult(JObject package,bool includePrerelease)
         {
-             VisualStudioUISearchResult searchResult = new VisualStudioUISearchResult();
+             VisualStudioUISearchMetaData searchResult = new VisualStudioUISearchMetaData();
               searchResult.Id = package.Value<string>(Properties.PackageId);
               searchResult.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
               searchResult.IconUrl = GetUri(package, Properties.IconUrl);
 
-                    // get other versions
-                    var versionList = new List<NuGetVersion>();
-                    var versions = package.Value<JArray>(Properties.Versions);
-                    if (versions != null)
+                  // get other versions
+                var versionList = new List<NuGetVersion>();
+                var versions = package.Value<JArray>(Properties.Versions);
+                if (versions != null)
+                {
+                    if (versions[0].Type == JTokenType.String)
                     {
-                        if (versions[0].Type == JTokenType.String)
-                        {
-                            // TODO: this part should be removed once the new end point is up and running.
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                                .ToList();
-                        }
-                        else
-                        {
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
-                                .ToList();
-                        }
+                        // TODO: this part should be removed once the new end point is up and running.
+                        versionList = versions
+                            .Select(v => NuGetVersion.Parse(v.Value<string>()))
+                            .ToList();
                     }
+                    else
+                    {
+                        versionList = versions
+                            .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
+                            .ToList();
+                    }
+
+                    if (!includePrerelease)
+                    {
+                        // remove prerelease version if includePrelease is false
+                        versionList.RemoveAll(v => v.IsPrerelease);
+                    }
+                }
+                if (!versionList.Contains(searchResult.Version))
+                {
+                    versionList.Add(searchResult.Version);
+                }
+
+              //searchResultPackage.Versions = versionList;
                     searchResult.Summary = package.Value<string>(Properties.Summary);
                     if (string.IsNullOrWhiteSpace(searchResult.Summary))
                     {

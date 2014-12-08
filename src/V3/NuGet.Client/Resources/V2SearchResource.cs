@@ -27,7 +27,7 @@ namespace NuGet.Client.Resources
             _host = host;
         }
 
-        public override Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
   
             return Task.Factory.StartNew(() =>
@@ -58,7 +58,7 @@ namespace NuGet.Client.Resources
                 }
 
                 // Now apply skip and take and the rest of the party
-                return (IEnumerable<JObject>)query
+                return (IEnumerable<VisualStudioUISearchMetaData>)query
                     .Skip(skip)
                     .Take(take)
                     .ToList()
@@ -78,7 +78,7 @@ namespace NuGet.Client.Resources
         {
             throw new NotImplementedException();
         }
-        private JObject CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
+        private VisualStudioUISearchMetaData CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             NuGetTraceSources.V2SourceRepository.Verbose("getallvers", "Retrieving all versions for {0}", package.Id);
@@ -88,7 +88,17 @@ namespace NuGet.Client.Resources
                 versions = new[] { package };
             }
 
-            return PackageJsonLd.CreatePackageSearchResult(package, versions.Select(p => p.Version));
+            VisualStudioUISearchMetaData searchMetaData = new VisualStudioUISearchMetaData();
+            searchMetaData.Id = package.Id;
+            searchMetaData.Version = CoreConverters.SafeToNuGetVer(package.Version);
+            searchMetaData.Summary = package.Summary;
+            searchMetaData.Versions = versions.Select(p => CoreConverters.SafeToNuGetVer(p.Version));
+            if (string.IsNullOrWhiteSpace(package.Summary))
+                searchMetaData.Summary = package.Summary;
+            else
+                searchMetaData.Summary = package.Description;
+            searchMetaData.IconUrl = package.IconUrl;
+            return searchMetaData;
         }
     }
 }

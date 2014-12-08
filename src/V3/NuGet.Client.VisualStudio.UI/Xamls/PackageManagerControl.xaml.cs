@@ -228,7 +228,7 @@ namespace NuGet.Client.VisualStudio.UI
         private class PackageLoader : ILoader
         {
             // where to get the package list
-            private Func<int, CancellationToken, Task<IEnumerable<JObject>>> _loader;
+            private Func<int, CancellationToken, Task<IEnumerable<VisualStudioUISearchMetaData>>> _loader;
 
             private InstallationTarget _target;
 
@@ -237,7 +237,7 @@ namespace NuGet.Client.VisualStudio.UI
             private SourceRepository _source;
 
             public PackageLoader(
-                Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
+                Func<int, CancellationToken, Task<IEnumerable<VisualStudioUISearchMetaData>>> loader,
                 SourceRepository source,
                 InstallationTarget target,
                 PackageLoaderOption option,
@@ -266,57 +266,57 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var results = await _loader(startIndex, ct);
 
-                List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
+                List<UiSearchResultPackage2> packages = new List<UiSearchResultPackage2>();
                 int resultCount = 0;
                 foreach (var package in results)
                 {
                     ct.ThrowIfCancellationRequested();
                     ++resultCount;
 
-                    var searchResultPackage = new UiSearchResultPackage(_source);
-                    searchResultPackage.Id = package.Value<string>(Properties.PackageId);
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
+                    var searchResultPackage = new UiSearchResultPackage2(_source);
+                    searchResultPackage.searchMetaData = package;
+                    //searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
 
-                    searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
+                    //searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
 
-                    // get other versions
-                    var versionList = new List<NuGetVersion>();
-                    var versions = package.Value<JArray>(Properties.Versions);
-                    if (versions != null)
-                    {   
-                        if (versions[0].Type == JTokenType.String)
-                        {
-                            // TODO: this part should be removed once the new end point is up and running.
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                                .ToList();
-                        }
-                        else
-                        {
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
-                                .ToList();
-                        }
+                    //// get other versions
+                    //var versionList = new List<NuGetVersion>();
+                    //var versions = package.Value<JArray>(Properties.Versions);
+                    //if (versions != null)
+                    //{   
+                    //    if (versions[0].Type == JTokenType.String)
+                    //    {
+                    //        // TODO: this part should be removed once the new end point is up and running.
+                    //        versionList = versions
+                    //            .Select(v => NuGetVersion.Parse(v.Value<string>()))
+                    //            .ToList();
+                    //    }
+                    //    else
+                    //    {
+                    //        versionList = versions
+                    //            .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
+                    //            .ToList();
+                    //    }
 
-                        if (!_option.IncludePrerelease)
-                        {
-                            // remove prerelease version if includePrelease is false
-                            versionList.RemoveAll(v => v.IsPrerelease);
-                        }
-                    }
-                    if (!versionList.Contains(searchResultPackage.Version))
-                    {
-                        versionList.Add(searchResultPackage.Version);
-                    }
+                    //    if (!_option.IncludePrerelease)
+                    //    {
+                    //        // remove prerelease version if includePrelease is false
+                    //        versionList.RemoveAll(v => v.IsPrerelease);
+                    //    }
+                    //}
+                    //if (!versionList.Contains(searchResultPackage.Version))
+                    //{
+                    //    versionList.Add(searchResultPackage.Version);
+                    //}
 
-                    searchResultPackage.Versions = versionList;
+                    //searchResultPackage.Versions = versionList;
                     searchResultPackage.Status = PackageManagerControl.GetPackageStatus(
-                        searchResultPackage.Id,
+                        searchResultPackage.searchMetaData.Id,
                         _target,
-                        searchResultPackage.Versions);
+                        searchResultPackage.searchMetaData.Versions);
 
                     // filter out prerelease version when needed.
-                    if (searchResultPackage.Version.IsPrerelease &&
+                    if (searchResultPackage.searchMetaData.Version.IsPrerelease &&
                        !_option.IncludePrerelease &&
                         searchResultPackage.Status == PackageStatus.NotInstalled)
                     {
@@ -329,12 +329,12 @@ namespace NuGet.Client.VisualStudio.UI
                         continue;
                     }
 
-                    searchResultPackage.Summary = package.Value<string>(Properties.Summary);
-                    if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
-                    {
-                        // summary is empty. Use its description instead.
-                        searchResultPackage.Summary = package.Value<string>(Properties.Description);
-                    }
+                    //searchResultPackage.Summary = package.Value<string>(Properties.Summary);
+                    //if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
+                    //{
+                    //    // summary is empty. Use its description instead.
+                    //    searchResultPackage.Summary = package.Value<string>(Properties.Description);
+                    //}
 
                     packages.Add(searchResultPackage);
                 }
@@ -478,7 +478,7 @@ namespace NuGet.Client.VisualStudio.UI
                         {
                             return Task.Factory.StartNew(() =>
                             {
-                                return Enumerable.Empty<JObject>();
+                                return Enumerable.Empty<VisualStudioUISearchMetaData>();
                             });
                         },
                         sourceRepository,
@@ -513,21 +513,17 @@ namespace NuGet.Client.VisualStudio.UI
                     else
                     {
                         var loader = new PackageLoader(
-                            (startIndex, ct) =>
-                                sourceRepository.Search(
-                                searchText,
-                                new SearchFilter()
-                                {
-                                    SupportedFrameworks = supportedFrameworks,
-                                    IncludePrerelease = option.IncludePrerelease
-                                },
-                                startIndex,
-                                PageSize,
-                                ct),
-                            sourceRepository,
-                            Target,
-                            option,
-                            searchText);
+                        (startIndex, ct) =>
+                        {
+                            return Task.Factory.StartNew(() =>
+                            {
+                                return Enumerable.Empty<VisualStudioUISearchMetaData>();
+                            });
+                        },
+                        sourceRepository,
+                        Target,
+                        option,
+                        searchText);
                         _packageList.Loader = loader;
                     }                 
                 }

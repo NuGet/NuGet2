@@ -12,7 +12,7 @@ namespace NuGet.Client.Resources
     {
        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public abstract Task<IEnumerable<JObject>> GetSearchResultsForVisualStudioUI(
+        public abstract Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(
             string searchTerm,           
             SearchFilter filters,
             int skip,

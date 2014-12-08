@@ -91,6 +91,7 @@
     <Compile Include="Models\PackageLicenseInfo.cs" />
     <Compile Include="Models\UiDetailedPackage.cs" />
     <Compile Include="Models\UiPackageDependency.cs" />
+    <Compile Include="Models\UiSearchResultPackage2.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
