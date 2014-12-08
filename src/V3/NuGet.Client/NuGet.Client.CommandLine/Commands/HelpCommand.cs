@@ -9,7 +9,7 @@ using NuGet.Common;
 namespace NuGet.Commands
 {
     [Export(typeof(HelpCommand))]
-    [Command(typeof(NuGetCommand), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
+    [Command(typeof(NuGetCommandResourceType), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageSummary", UsageDescriptionResourceName = "HelpCommandUsageDescription",
         UsageExampleResourceName = "HelpCommandUsageExamples")]
     public class HelpCommand : Command
@@ -31,10 +31,10 @@ namespace NuGet.Commands
             }
         }
 
-        [Option(typeof(NuGetCommand), "HelpCommandAll")]
+        [Option(typeof(NuGetCommandResourceType), "HelpCommandAll")]
         public bool All { get; set; }
 
-        [Option(typeof(NuGetCommand), "HelpCommandMarkdown")]
+        [Option(typeof(NuGetCommandResourceType), "HelpCommandMarkdown")]
         public bool Markdown { get; set; }
 
         [ImportingConstructor]

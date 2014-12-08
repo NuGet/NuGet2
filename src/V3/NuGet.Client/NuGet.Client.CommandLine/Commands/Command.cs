@@ -38,13 +38,13 @@ namespace NuGet.Commands
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
-        //[Option(typeof(NuGetCommand), "Option_Verbosity")]
+        [Option(typeof(NuGetCommandResourceType), "Option_Verbosity")]
         public Verbosity Verbosity { get; set; }
 
-        //[Option(typeof(NuGetCommand), "Option_NonInteractive")]
+        [Option(typeof(NuGetCommandResourceType), "Option_NonInteractive")]
         public bool NonInteractive { get; set; }
 
-        //[Option(typeof(NuGetCommand), "Option_ConfigFile")]
+        [Option(typeof(NuGetCommandResourceType), "Option_ConfigFile")]
         public string ConfigFile { get; set; }
 
         protected internal ISettings Settings { get; set; }
