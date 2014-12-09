@@ -44,8 +44,10 @@ namespace NuGet.Commands
             CalculateEffectivePackageSaveMode();
             string installPath = ResolveInstallPath();
             IFileSystem installPathFilesystem = CreateFileSystem(installPath);
+            // BUGBUG: Check that the argument is always passed
             string packageId = Arguments[0];
             NuGetVersion version = Version != null ? new NuGetVersion(Version) : null;
+            InitializeSourceRepository();
             InstallPackage(installPathFilesystem, packageId, version).Wait();
         }
 
@@ -92,6 +94,7 @@ namespace NuGet.Commands
             if (version == null)
             {
                 packageMetadata = await SourceRepositoryHelper.GetLatestVersionMetadata(SourceRepository, packageId, prerelease: Prerelease);
+                version = NuGetVersion.Parse(packageMetadata["version"].ToString());
             }
             else
             {

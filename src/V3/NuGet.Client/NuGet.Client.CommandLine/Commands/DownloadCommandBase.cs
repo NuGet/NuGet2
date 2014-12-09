@@ -35,6 +35,11 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommandResourceType), "CommandPackageSaveMode")]
         public string PackageSaveMode { get; set; }
         
+        protected void InitializeSourceRepository()
+        {
+            SourceRepository = SourceRepositoryHelper.CreateSourceRepository(SourceProvider, Source);
+        }
+
         protected void CalculateEffectivePackageSaveMode()
         {
             string packageSaveModeValue = PackageSaveMode;
