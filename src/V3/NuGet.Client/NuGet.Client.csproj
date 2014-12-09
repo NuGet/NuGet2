@@ -115,6 +115,7 @@
     <Compile Include="Installation\PurgeActionHandler.cs" />
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
+    <Compile Include="ServiceDiscovery.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />
