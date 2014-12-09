@@ -48,6 +48,11 @@ namespace NuGet.Resolution
         {
             //TODO: Support multiple projects/operations. For now, only support a single project/operation/target.
             //TODO: Support proper merging/diffing to a target that already contains installed packages
+            if (operation != PackageActionType.Install)
+            {
+                throw new NotSupportedException();
+            }
+
             var packageMetadata = await source.GetPackageMetadata(package.Id, package.Version);
 
             IDictionary<string, ISet<JObject>> dependenciesById = new Dictionary<string, ISet<JObject>>(StringComparer.OrdinalIgnoreCase);
@@ -162,15 +167,37 @@ namespace NuGet.Resolution
 
             var nonAbsentCandidates = solution.Where(c => !IsAbsentPackage(c));
 
-            return TopologicalSort(nonAbsentCandidates)
-                       .Where(c => this.project == null || !this.project.InstalledPackages.IsInstalled(c.GetId(), c.GetVersion()))
-                       .Select(c => new NewPackageAction(PackageActionType.Install, c.AsPackageIdentity(), c, null, source, null));
+            var sortedSolution = TopologicalSort(nonAbsentCandidates);
+
+            var uninstallActionsForUpgrade = GetUninstallActions(sortedSolution, this.project).Reverse();
+            var installActions = GetInstallActions(sortedSolution, this.project);
+
+            return uninstallActionsForUpgrade.Concat(installActions);
+        }
+
+        private IEnumerable<NewPackageAction> GetUninstallActions(IEnumerable<JObject> solution, Project project)
+        {
+            if (this.project != null)
+            {
+                var installedPackages = this.project.InstalledPackages.GetAllInstalledPackagesAndMetadata().GetAwaiter().GetResult();
+
+                return solution.SelectMany(node => installedPackages.Where(p => p.GetId() == node.GetId() && p.GetVersion().CompareTo(node.GetVersion()) != 0)
+                                                                    .Select(p => new NewPackageAction(PackageActionType.Uninstall, p.AsPackageIdentity(), p, null, source, null)));
+            }
+
+            return Enumerable.Empty<NewPackageAction>();
+        }
+
+        private IEnumerable<NewPackageAction> GetInstallActions(IEnumerable<JObject> solution, Project project)
+        {
+            return solution.Where(node => this.project == null || !this.project.InstalledPackages.IsInstalled(node.GetId(), node.GetVersion()))
+                           .Select(node => new NewPackageAction(PackageActionType.Install, node.AsPackageIdentity(), node, null, source, null));
         }
 
         private IEnumerable<JObject> TopologicalSort(IEnumerable<JObject> nodes)
         {
             List<JObject> result = new List<JObject>();
-            
+
             var dependsOn = new Func<JObject, JObject, bool>((x, y) =>
             {
                 return x.FindDependencyRange(y.GetId()) != null;
@@ -184,7 +211,7 @@ namespace NuGet.Resolution
             });
 
             var satisfiedNodes = new HashSet<JObject>(nodes.Where(n => dependenciesAreSatisfied(n)));
-            while(!satisfiedNodes.IsEmpty())
+            while (!satisfiedNodes.IsEmpty())
             {
                 //Pick any element from the set. Remove it, and add it to the result list.
                 var node = satisfiedNodes.First();

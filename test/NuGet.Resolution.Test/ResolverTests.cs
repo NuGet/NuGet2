@@ -19,7 +19,6 @@ namespace NuGet.Resolution.Test
         public void ResolveDependenciesForInstallDiamondDependencyGraph()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
             // A -> [B, C]
             // B -> [D]
             // C -> [D]
@@ -29,15 +28,12 @@ namespace NuGet.Resolution.Test
             //   \ /
             //    D 
 
-            var packageA = CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", null }, { "C", null } });
-            var packageB = CreatePackage("B", "1.0", new Dictionary<string, string>() { { "D", null } });
-            var packageC = CreatePackage("C", "1.0", new Dictionary<string, string>() { { "D", null } });
-            var packageD = CreatePackage("D", "1.0");
-
-            sourceRepository.AddPackage(packageA);
-            sourceRepository.AddPackage(packageB);
-            sourceRepository.AddPackage(packageC);
-            sourceRepository.AddPackage(packageD);
+            var sourceRepository = new MockSourceRepository() { 
+                CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", null }, { "C", null } }),
+                CreatePackage("B", "1.0", new Dictionary<string, string>() { { "D", null } }),
+                CreatePackage("C", "1.0", new Dictionary<string, string>() { { "D", null } }),
+                CreatePackage("D", "1.0"),
+            };
 
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
             resolver.AddOperationTarget(null);
@@ -50,7 +46,6 @@ namespace NuGet.Resolution.Test
             Assert.NotNull(actions["C"]);
             Assert.NotNull(actions["D"]);
         }
-
 
         [Fact]
         public void ResolveDependenciesForInstallDiamondDependencyGraphWithDifferentVersionsOfSamePackage()
@@ -121,22 +116,21 @@ namespace NuGet.Resolution.Test
             // C 2.0
 
             // Expect: Install A 1.0 (no change to B or C)
-            var sourceRepository = new MockSourceRepository();
-            new[] {
+            var sourceRepository = new MockSourceRepository() {
                 CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" }, { "C", "1.0" } }),
                 CreatePackage("B", "1.0"),
                 CreatePackage("B", "1.1"),
                 CreatePackage("C", "1.0"),
                 CreatePackage("C", "2.0"),
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.HighestMinor };
             var project = new MockProject();
-            ((MockInstalledPackagesList)project.InstalledPackages).IsInstalledImpl = new Func<string, NuGetVersion, bool>((id, version) =>
-            {
-                return (id == "B" && version.ToNormalizedString() == "1.0.0") || 
-                       (id == "C" && version.ToNormalizedString() == "1.0.0");
+
+            ((MockInstalledPackagesList)project.InstalledPackages).AddPackages(new[] {
+                CreatePackage("B", "1.0"),
+                CreatePackage("C", "1.0"),
             });
             resolver.AddOperationTarget(project);
             var packages = resolver.ResolveActionsAsync().GetAwaiter().GetResult().ToDictionary(p => p.PackageIdentity.Id);
@@ -146,47 +140,38 @@ namespace NuGet.Resolution.Test
             Assert.Equal("1.0.0", packages["A"].PackageIdentity.Version.ToNormalizedString());
         }
 
+
+
         //[Fact]
-        //public void UninstallWalkerIgnoresMissingDependencies()
+        //public void UninstallIgnoresMissingDependencies()
         //{
         //    // Arrange
-        //    var localRepository = new MockPackageRepository();
         //    // A -> [B, C]
         //    // B -> [D]
         //    // C -> [D]
 
-        //    IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-        //                                                    dependencies: new List<PackageDependency> {
-        //                                                            new PackageDependency("B"),
-        //                                                            new PackageDependency("C")
-        //                                                        });
-
-        //    IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
-        //                                                    dependencies: new List<PackageDependency> {
-        //                                                            new PackageDependency("D")
-        //                                                        });
-
-        //    IPackage packageD = PackageUtility.CreatePackage("D", "1.0");
-
-        //    localRepository.AddPackage(packageA);
-        //    localRepository.AddPackage(packageC);
-        //    localRepository.AddPackage(packageD);
-
-        //    IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-        //                                                       new DependentsWalker(localRepository),
-        //                                                       NullLogger.Instance,
-        //                                                       removeDependencies: true,
-        //                                                       forceRemove: false);
+        //    var project = new MockProject();
+        //    ((MockInstalledPackagesList)project.InstalledPackages).IsInstalledImpl = new Func<string, NuGetVersion, bool>((id, version) =>
+        //    {
+        //        return (id == "A" && version.ToNormalizedString() == "1.0.0") ||
+        //               (id == "C" && version.ToNormalizedString() == "1.0.0") ||
+        //               (id == "D" && version.ToNormalizedString() == "1.0.0");
+        //    });
 
         //    // Act
-        //    var packages = resolver.ResolveOperations(packageA)
-        //                           .ToDictionary(p => p.Package.Id);
+        //    var resolver = new Resolver(PackageActionType.Uninstall, new PackageIdentity("A", new NuGetVersion("1.0")), null)
+        //    {
+        //        DependencyVersion = DependencyBehavior.HighestMinor,
+        //        IgnoreDependencies = false,
+        //    };
+        //    resolver.AddOperationTarget(project);
+        //    var actions = resolver.ResolveActionsAsync().GetAwaiter().GetResult().ToDictionary(p => p.PackageIdentity.Id);
 
         //    // Assert
-        //    Assert.Equal(3, packages.Count);
-        //    Assert.NotNull(packages["A"]);
-        //    Assert.NotNull(packages["C"]);
-        //    Assert.NotNull(packages["D"]);
+        //    Assert.Equal(3, actions.Count);
+        //    Assert.NotNull(actions["A"]);
+        //    Assert.NotNull(actions["C"]);
+        //    Assert.NotNull(actions["D"]);
         //}
 
         //[Fact]
@@ -251,11 +236,11 @@ namespace NuGet.Resolution.Test
         public void ResolveActionsForInstallCircularReferenceThrows()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
-            new[] { 
+            var sourceRepository = new MockSourceRepository()
+            {
                 CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", null } } ),
                 CreatePackage("B", "1.0", new Dictionary<string, string> { { "A", null } } ),
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act & Assert
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -268,12 +253,12 @@ namespace NuGet.Resolution.Test
         public void ResolveActionsForInstallCircularReferenceWithDifferentVersionOfPackageReferenceThrows()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
-            new[] { 
+            var sourceRepository = new MockSourceRepository() 
+            {
                 CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", null } } ),
                 CreatePackage("A", "1.5", new Dictionary<string, string> { { "B", null } } ),
                 CreatePackage("B", "1.0", new Dictionary<string, string> { { "A", "[1.5]" } } ),
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act & Assert
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -281,54 +266,125 @@ namespace NuGet.Resolution.Test
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveActionsAsync().GetAwaiter().GetResult(), "Circular dependency detected 'A 1.0 => B 1.0 => A [1.5]'.");
         }
 
-        //[Fact]
-        //public void ResolvingDependencyForUpdateWithConflictingDependents()
-        //{
-        //    // Arrange
-        //    var localRepository = new MockPackageRepository();
-        //    var sourceRepository = new MockPackageRepository();
+        [Fact]
+        public void ResolveActionsForSimpleUpdate()
+        {
+            // Arrange
+            // Installed: A, B
+            // A 1.0 -> B [1.0]
+            var project = new MockProject()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", "1.0" } } ),
+                CreatePackage("B", "1.0"),
+            };
 
-        //    // A 1.0 -> B [1.0]
-        //    IPackage A10 = PackageUtility.CreatePackage("A", "1.0",
-        //                                                    dependencies: new List<PackageDependency> {
-        //                                                            PackageDependency.CreateDependency("B", "[1.0]")
-        //                                                        }, content: new[] { "a1" });
+            var sourceRepository = new MockSourceRepository()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", "1.0" } } ),
+                CreatePackage("A", "2.0", new Dictionary<string, string> { { "B", "1.0" } } ),
+                CreatePackage("B", "1.0"),
+            };
 
-        //    // A 2.0 -> B (any version)
-        //    IPackage A20 = PackageUtility.CreatePackage("A", "2.0",
-        //                                                    dependencies: new List<PackageDependency> {
-        //                                                            new PackageDependency("B")
-        //                                                        }, content: new[] { "a2" });
+            // Act
+            var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("2.0")), sourceRepository);
+            resolver.DependencyVersion = DependencyBehavior.HighestPatch;
+            resolver.AddOperationTarget(project);
+            var actions = resolver.ResolveActionsAsync().GetAwaiter().GetResult().ToList();
 
-        //    IPackage B10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b1" });
-        //    IPackage B101 = PackageUtility.CreatePackage("B", "1.0.1", content: new[] { "b101" });
-        //    IPackage B20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "a2" });
-        //    localRepository.Add(A10);
-        //    localRepository.Add(B10);
-        //    sourceRepository.AddPackage(A10);
-        //    sourceRepository.AddPackage(A20);
-        //    sourceRepository.AddPackage(B10);
-        //    sourceRepository.AddPackage(B101);
-        //    sourceRepository.AddPackage(B20);
+            // Assert
+            Assert.Equal(2, actions.Count);
+            AssertOperation("A", "1.0.0", PackageActionType.Uninstall, actions[0]);
+            AssertOperation("A", "2.0.0", PackageActionType.Install, actions[1]);
 
-        //    IPackageOperationResolver resolver = new UpdateWalker(localRepository,
-        //                                                          sourceRepository,
-        //                                                          new DependentsWalker(localRepository),
-        //                                                          NullConstraintProvider.Instance,
-        //                                                          NullLogger.Instance,
-        //                                                          updateDependencies: true,
-        //                                                          allowPrereleaseVersions: false) { AcceptedTargets = PackageTargets.Project };
+        }
 
-        //    // Act
-        //    var packages = resolver.ResolveOperations(B101).ToList();
+        //// A 1.0 -> B [1.0]
+        //IPackage A10 = PackageUtility.CreatePackage("A", "1.0",
+        //                                                dependencies: new List<PackageDependency> {
+        //                                                        PackageDependency.CreateDependency("B", "[1.0]")
+        //                                                    }, content: new[] { "a1" });
 
-        //    // Assert
-        //    Assert.Equal(4, packages.Count);
-        //    AssertOperation("A", "1.0", PackageAction.Uninstall, packages[0]);
-        //    AssertOperation("B", "1.0", PackageAction.Uninstall, packages[1]);
-        //    AssertOperation("A", "2.0", PackageAction.Install, packages[2]);
-        //    AssertOperation("B", "1.0.1", PackageAction.Install, packages[3]);
-        //}
+        //// A 2.0 -> B (any version)
+        //IPackage A20 = PackageUtility.CreatePackage("A", "2.0",
+        //                                                dependencies: new List<PackageDependency> {
+        //                                                        new PackageDependency("B")
+        //                                                    }, content: new[] { "a2" });
+
+        //IPackage B10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b1" });
+        //IPackage B101 = PackageUtility.CreatePackage("B", "1.0.1", content: new[] { "b101" });
+        //IPackage B20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "a2" });
+        //localRepository.Add(A10);
+        //localRepository.Add(B10);
+        //sourceRepository.AddPackage(A10);
+        //sourceRepository.AddPackage(A20);
+        //sourceRepository.AddPackage(B10);
+        //sourceRepository.AddPackage(B101);
+        //sourceRepository.AddPackage(B20);
+
+        //IPackageOperationResolver resolver = new UpdateWalker(localRepository,
+        //                                                      sourceRepository,
+        //                                                      new DependentsWalker(localRepository),
+        //                                                      NullConstraintProvider.Instance,
+        //                                                      NullLogger.Instance,
+        //                                                      updateDependencies: true,
+        //                                                      allowPrereleaseVersions: false) { AcceptedTargets = PackageTargets.Project };
+
+        //// Act
+        //var packages = resolver.ResolveOperations(B101).ToList();
+
+        //// Assert
+        //Assert.Equal(2, packages.Count);
+
+        [Fact(Skip="Scenario not coded yet. Next up to get working...")]
+        public void ResolveActionsForUpdateWherePeerConsumersRequireUpdate()
+        {
+            // Arrange
+            // Installed: A 1.0, B 1.0, C 1.0
+            // A 1.0 -> B [1.0]
+            // C 1.0 -> B [1.0]
+            //
+            // Install A 2.0 -> B [2.0]
+            //
+            // Expected A 2.0, B 2.0, C 2.0
+            var project = new MockProject()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", "[1.0]" } } ),
+                CreatePackage("B", "1.0"),
+                CreatePackage("C", "1.0", new Dictionary<string, string> { { "B", "[1.0]" } } ),
+            };
+
+            var sourceRepository = new MockSourceRepository()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string> { { "B", "[1.0]" } } ),
+                CreatePackage("A", "2.0", new Dictionary<string, string> { { "B", "[2.0]" } } ),
+                CreatePackage("B", "1.0"),
+                CreatePackage("B", "2.0"),
+                CreatePackage("C", "1.0", new Dictionary<string, string> { { "B", "[1.0]" } } ),
+                CreatePackage("C", "2.0", new Dictionary<string, string> { { "B", "[2.0]" } } ),
+            };
+
+            // Act
+            var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("2.0")), sourceRepository);
+            resolver.DependencyVersion = DependencyBehavior.HighestPatch;
+            resolver.AddOperationTarget(project);
+            var actions = resolver.ResolveActionsAsync().GetAwaiter().GetResult().ToList();
+
+            // Assert
+            Assert.Equal(6, actions.Count);
+            AssertOperation("A", "1.0.0", PackageActionType.Uninstall, actions[0]);
+            AssertOperation("C", "1.0.0", PackageActionType.Uninstall, actions[1]);
+            AssertOperation("B", "1.0.0", PackageActionType.Uninstall, actions[2]);
+            AssertOperation("B", "2.0.0", PackageActionType.Install, actions[3]);
+            AssertOperation("A", "2.0.0", PackageActionType.Install, actions[4]);
+            AssertOperation("C", "2.0.0", PackageActionType.Install, actions[5]);
+        }
+
+        private void AssertOperation(string expectedId, string expectedVersion, PackageActionType expectedPackageAction, Client.Resolution.PackageAction actualAction)
+        {
+            Assert.Equal(expectedId, actualAction.PackageIdentity.Id);
+            Assert.Equal(expectedVersion, actualAction.PackageIdentity.Version.ToNormalizedString());
+            Assert.Equal(expectedPackageAction, actualAction.ActionType);
+        }
 
         //[Fact]
         //public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint()
@@ -375,11 +431,11 @@ namespace NuGet.Resolution.Test
         public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetMinimumVersionThrows()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
-            var packageA = CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.5" } });
-            var packageB = CreatePackage("B", "1.4");
-            sourceRepository.AddPackage(packageA);
-            sourceRepository.AddPackage(packageB);
+            var sourceRepository = new MockSourceRepository()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.5" } }),
+                CreatePackage("B", "1.4")
+            };
 
             // Act & Assert
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -391,11 +447,11 @@ namespace NuGet.Resolution.Test
         public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetExactVersionThrows()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
-            var packageA = CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "[1.3]" } });
-            var packageB = CreatePackage("B", "1.4");
-            sourceRepository.AddPackage(packageA);
-            sourceRepository.AddPackage(packageB);
+            var sourceRepository = new MockSourceRepository()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "[1.3]" } }),
+                CreatePackage("B", "1.4"),
+            };
 
             // Act & Assert
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -407,20 +463,13 @@ namespace NuGet.Resolution.Test
         public void ResolveOperationsForInstallSameDependencyAtDifferentLevelsInGraph()
         {
             // Arrange
-            var sourceRepository = new MockSourceRepository();
-            //A1 -> B1, C1
-            var packageA = CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" }, { "C", "1.0" } });
-            // B1
-            var packageB = CreatePackage("B", "1.0");
-            // C1 -> B1, D1
-            var packageC = CreatePackage("C", "1.0", new Dictionary<string, string>() { { "B", "1.0" }, { "D", "1.0" } });
-            // D1 -> B1
-            var packageD = CreatePackage("D", "1.0", new Dictionary<string, string>() { { "B", "1.0" } });
-
-            sourceRepository.AddPackage(packageA);
-            sourceRepository.AddPackage(packageB);
-            sourceRepository.AddPackage(packageC);
-            sourceRepository.AddPackage(packageD);
+            var sourceRepository = new MockSourceRepository()
+            {
+                CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" }, { "C", "1.0" } }),
+                CreatePackage("B", "1.0"),
+                CreatePackage("C", "1.0", new Dictionary<string, string>() { { "B", "1.0" }, { "D", "1.0" } }),
+                CreatePackage("D", "1.0", new Dictionary<string, string>() { { "B", "1.0" } })
+            };
 
             // Act
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -909,8 +958,7 @@ namespace NuGet.Resolution.Test
             // B 1.0 -> C 1.1
             // C 1.1 -> D 1.0
 
-            var sourceRepository = new MockSourceRepository();
-            new[] {
+            var sourceRepository = new MockSourceRepository() {
                 CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" } }),
                 CreatePackage("B", "2.0", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.0", new Dictionary<string, string>() { { "C", "1.1" } }),
@@ -921,8 +969,7 @@ namespace NuGet.Resolution.Test
                 CreatePackage("C", "1.5.1", new Dictionary<string, string>() { { "D", "1.0" } }),
                 CreatePackage("B", "1.0.9", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.1", new Dictionary<string, string>() { { "C", "1.1" } })
-
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.HighestMinor };
@@ -949,8 +996,7 @@ namespace NuGet.Resolution.Test
             // B 1.0 -> C 1.1
             // C 1.1 -> D 1.0
 
-            var sourceRepository = new MockSourceRepository();
-            new[] {
+            var sourceRepository = new MockSourceRepository() {
                 CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" } }),
                 CreatePackage("B", "2.0", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.0.1"),
@@ -960,8 +1006,7 @@ namespace NuGet.Resolution.Test
                 CreatePackage("C", "1.5.1", new Dictionary<string, string>() { { "D", "1.0" } }),
                 CreatePackage("B", "1.0.9", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.1", new Dictionary<string, string>() { { "C", "1.1" } })
-
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.Lowest };
@@ -984,9 +1029,8 @@ namespace NuGet.Resolution.Test
             // A 1.0 -> B 1.0
             // B 1.0 -> C 1.1
             // C 1.1 -> D 1.0
-
-            var sourceRepository = new MockSourceRepository();
-            new[] {
+            var sourceRepository = new MockSourceRepository()
+            {
                 CreatePackage("A", "1.0", new Dictionary<string, string>() { { "B", "1.0" } }),
                 CreatePackage("B", "2.0", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.0", new Dictionary<string, string>() { { "C", "1.1" } }),
@@ -997,14 +1041,13 @@ namespace NuGet.Resolution.Test
                 CreatePackage("C", "1.5.1", new Dictionary<string, string>() { { "D", "1.0" } }),
                 CreatePackage("B", "1.0.9", new Dictionary<string, string>() { { "C", "1.1" } }),
                 CreatePackage("B", "1.1", new Dictionary<string, string>() { { "C", "1.1" } })
-
-            }.ToList().ForEach(p => sourceRepository.AddPackage(p));
+            };
 
             // Act
             var resolver = new Resolver(PackageActionType.Install, new PackageIdentity("A", new NuGetVersion("1.0")), sourceRepository) { DependencyVersion = DependencyBehavior.HighestPatch };
             resolver.AddOperationTarget(null);
             var packages = resolver.ResolveActionsAsync().GetAwaiter().GetResult().ToDictionary(p => p.PackageIdentity.Id);
-            
+
             // Assert
             Assert.Equal(4, packages.Count);
             Assert.Equal("2.0.0", packages["D"].PackageIdentity.Version.ToNormalizedString());
@@ -1100,7 +1143,7 @@ namespace NuGet.Resolution.Test
             return package;
         }
 
-        private class MockSourceRepository : SourceRepository
+        private class MockSourceRepository : SourceRepository, ICollection<JObject>
         {
             private IList<JObject> packages = new List<JObject>();
 
@@ -1134,14 +1177,65 @@ namespace NuGet.Resolution.Test
             {
                 packages.Add(package);
             }
+
+            public void Add(JObject item)
+            {
+                AddPackage(item);
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(JObject item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CopyTo(JObject[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Count
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsReadOnly
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool Remove(JObject item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<JObject> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class MockInstalledPackagesList : InstalledPackagesList
         {
+            private Dictionary<string, JObject> packagesById;
+
+            public MockInstalledPackagesList()
+            {
+                this.packagesById = new Dictionary<string, JObject>();
+            }
 
             public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()
             {
-                throw new NotImplementedException();
+                return Task.FromResult(packagesById.Values.AsEnumerable());
             }
 
             public override Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
@@ -1159,24 +1253,31 @@ namespace NuGet.Resolution.Test
                 throw new NotImplementedException();
             }
 
-            public Func<string, NuGetVersion, bool> IsInstalledImpl
-            {
-                get;
-                set;
-            }
-
             public override bool IsInstalled(string packageId, NuGetVersion packageVersion)
             {
-                return IsInstalledImpl(packageId, packageVersion);
+                return IsInstalled(packageId) && packagesById[packageId].GetVersion().Equals(packageVersion);
             }
 
             public override bool IsInstalled(string packageId)
             {
-                throw new NotImplementedException();
+                return packagesById.ContainsKey(packageId);
+            }
+
+            internal void AddPackage(JObject package)
+            {
+                packagesById.Add(package.GetId(), package);
+            }
+
+            internal void AddPackages(IEnumerable<JObject> packages)
+            {
+                foreach (var package in packages)
+                {
+                    AddPackage(package);
+                }
             }
         }
 
-        private class MockProject : Project
+        private class MockProject : Project, ICollection<JObject>
         {
             private InstalledPackagesList installedPackages;
 
@@ -1216,6 +1317,51 @@ namespace NuGet.Resolution.Test
             }
 
             public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Add(JObject item)
+            {
+                ((MockInstalledPackagesList)this.InstalledPackages).AddPackage(item);
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(JObject item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CopyTo(JObject[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Count
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsReadOnly
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool Remove(JObject item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<JObject> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
                 throw new NotImplementedException();
             }
