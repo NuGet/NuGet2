@@ -1,12 +1,16 @@
-﻿using NuGet.Client;
+﻿using Newtonsoft.Json.Linq;
+using NuGet.Client;
 using NuGet.Client.Interop;
 using NuGet.Common;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NuGet
 {
+    // BUGBUG: Need to create a new class called CommandLineSourceRepositoryManager similar to the factory class used by VS
     internal static class SourceRepositoryHelper
     {
         private static readonly PackageSource NuGetV3PreviewSource = new PackageSource(
@@ -44,6 +48,29 @@ namespace NuGet
 
             return null;
             //return new V2SourceRepository(source, _repoFactory.CreateRepository(source.Url), HostName);
+        }
+
+        // BUGBUG: Beware! Do not start piling up on this class to add more extension like methods
+        // This is temporary until we get a dedicated endpoint to get the latest version
+        internal static async Task<JObject> GetLatestVersionMetadata(SourceRepository sourceRepository, string packageId, bool prerelease)
+        {
+            var packages = await sourceRepository.GetPackageMetadataById(packageId);
+            JObject latestPackage = null;
+            NuGetVersion latestPackageVersion = null;
+            foreach(var package in packages)
+            {
+                var packageVersion = NuGetVersion.Parse(package["version"].ToString());
+                if (!prerelease && packageVersion.IsPrerelease)
+                    continue;
+
+                if(latestPackageVersion == null || latestPackageVersion < packageVersion)
+                {
+                    latestPackageVersion = packageVersion;
+                    latestPackage = package;
+                }
+            }
+
+            return latestPackage;
         }
     }
 }
