@@ -10,31 +10,44 @@ using System.Diagnostics;
 
 namespace NuGet.ServiceDiscovery
 {
+    // Let's not use NuGet's HttpClient for this.
+    using HttpClient = System.Net.Http.HttpClient;
+
     public class ServiceDiscovery
     {
-        TimeSpan _serviceIndexDocumentExpiration = TimeSpan.FromSeconds(1);
+        class ServiceIndexDocument
+        {
+            public JObject Doc { get; private set; }
+            public DateTime UpdateTime { get; private set; }
+
+            public ServiceIndexDocument(JObject doc, DateTime updateTime)
+            {
+                Doc = doc;
+                UpdateTime = updateTime;
+            }
+        }
+
+        TimeSpan _serviceIndexDocumentExpiration = TimeSpan.FromMinutes(5);
 
         Uri _serviceIndexUri;
-        JObject _serviceIndexDocument;
+        ServiceIndexDocument _serviceIndexDocument;
         object _serviceIndexDocumentLock;
         IDictionary<string, IList<Uri>> _serviceEndpointsMap;
-        System.Net.Http.HttpClient _httpClient = new System.Net.Http.HttpClient();
+        HttpClient _httpClient = new HttpClient();
 
-        DateTime _serviceIndexDocumentUpdateTime;
         bool _serviceIndexDocumentUpdating;
 
         private ServiceDiscovery(Uri serviceIndexUri, JObject serviceIndexDocument)
         {
             _serviceIndexUri = serviceIndexUri;
-            _serviceIndexDocument = serviceIndexDocument;
-            _serviceIndexDocumentUpdateTime = DateTime.UtcNow;
+            _serviceIndexDocument = new ServiceIndexDocument(serviceIndexDocument, DateTime.UtcNow);
             _serviceIndexDocumentUpdating = false;
             _serviceIndexDocumentLock = new object();
         }
 
         public static async Task<ServiceDiscovery> Connect(Uri serviceIndexUri)
         {
-            System.Net.Http.HttpClient hc = new System.Net.Http.HttpClient();
+            HttpClient hc = new HttpClient();
             string serviceIndexDocString = await hc.GetStringAsync(serviceIndexUri);
             JObject serviceIndexDoc = JObject.Parse(serviceIndexDocString);
 
@@ -46,24 +59,17 @@ namespace NuGet.ServiceDiscovery
             get
             {
                 BeginUpdateServiceIndexDocument();
-
-                JObject serviceIndexDocument;
-                lock (_serviceIndexDocument)
-                {
-                    serviceIndexDocument = _serviceIndexDocument;
-                }
-                return serviceIndexDocument["resources"].Where(j => ((string)j["@type"]) == type).Select(o => o["@id"].ToObject<Uri>()).ToList();
+                return _serviceIndexDocument.Doc["resources"].Where(j => ((string)j["@type"]) == type).Select(o => o["@id"].ToObject<Uri>()).ToList();
             }
         }
 
         public async Task<string> GetStringAsync(string serviceType, string queryString)
         {
-            BeginUpdateServiceIndexDocument();
-
             IList<Uri> uris = this[serviceType];
 
             List<Exception> exceptions = new List<Exception>();
 
+            // Try the whole list of endpoints twice each.
             for (int i = 0; i < 2; ++i)
             {
                 foreach (Uri uri in uris)
@@ -75,6 +81,8 @@ namespace NuGet.ServiceDiscovery
                     }
                     catch (Exception ex)
                     {
+                        // Accumulate a list of exceptions from failed requests. They'll only
+                        // be thrown if no request succeeds against any endpoint.
                         exceptions.Add(ex);
                     }
                 }
@@ -85,26 +93,31 @@ namespace NuGet.ServiceDiscovery
 
         void BeginUpdateServiceIndexDocument()
         {
+            // Get out quick if we don't have anything to do.
+            if (_serviceIndexDocumentUpdating || DateTime.UtcNow <= _serviceIndexDocument.UpdateTime + _serviceIndexDocumentExpiration)
+                return;
+
+            // Lock to make sure that we can only attempt one update at a time.
             lock (_serviceIndexDocumentLock)
             {
                 if (_serviceIndexDocumentUpdating)
                     return;
 
-                if (DateTime.UtcNow > _serviceIndexDocumentUpdateTime + _serviceIndexDocumentExpiration)
-                {
-                    _serviceIndexDocumentUpdating = true;
-                    _httpClient.GetStringAsync(_serviceIndexUri).ContinueWith((t) =>
-                    {
-                        _serviceIndexDocumentUpdating = false;
-                        JObject serviceIndexDocument = JObject.Parse(t.Result);
-                        lock (_serviceIndexDocument)
-                        {
-                            _serviceIndexDocument = serviceIndexDocument;
-                            _serviceIndexDocumentUpdateTime = DateTime.UtcNow;
-                        }
-                    });
-                }
+                _serviceIndexDocumentUpdating = true;
             }
+
+            _httpClient.GetStringAsync(_serviceIndexUri).ContinueWith((t) =>
+            {
+                try
+                {
+                    JObject serviceIndexDocument = JObject.Parse(t.Result);
+                    _serviceIndexDocument = new ServiceIndexDocument(serviceIndexDocument, DateTime.UtcNow);
+                }
+                finally
+                {
+                    _serviceIndexDocumentUpdating = false;
+                }
+            });
         }
     }
 }
