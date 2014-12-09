@@ -2,31 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using NuGet.Client.V3;
-using System.Runtime.Versioning;
-using Newtonsoft.Json.Linq;
-using NuGet.Versioning;
-using NuGet.Client.Diagnostics;
 using System.Threading;
-using NuGet.Client.Interop;
+using System.Threading.Tasks;
+using NuGet.Client.Resources;
 
-namespace NuGet.Client.Resources
+namespace NuGet.Client.VisualStudio.Repository
 {
-    
-  /// <summary>
-  /// *TODOS: Pass host name. Do tracing.
-  /// </summary>
-    public class V2SearchResource : SearchResource
+    public class VsV2SearchResource : VsSearchResource,V2Resource
     {
-        
-        private IPackageRepository _repository;
+        private IPackageRepository _v2Client;
         private string _host;
-       
-        public V2SearchResource(IPackageRepository repo,string host)
-        {  
-            _repository = repo;
-            _host = host;
+                     
+        public VsV2SearchResource(IPackageRepository repo,string host)
+        {
+            _v2Client = repo;
+            _host = host;            
         }
 
         public override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
@@ -34,7 +24,7 @@ namespace NuGet.Client.Resources
   
             return Task.Factory.StartNew(() =>
             {
-                var query = _repository.Search(
+                var query = V2Client.Search(
                     searchTerm,
                     filters.SupportedFrameworks.Select(fx => fx.FullName),
                     filters.IncludePrerelease);
@@ -49,7 +39,7 @@ namespace NuGet.Client.Resources
                     query = query.Where(p => p.IsLatestVersion);
                 }
 
-                if (_repository is LocalPackageRepository)
+                if (V2Client is LocalPackageRepository)
                 {
                     // if the repository is a local repo, then query contains all versions of packages.
                     // we need to explicitly select the latest version.
@@ -69,21 +59,11 @@ namespace NuGet.Client.Resources
                     .Select(p => CreatePackageSearchResult(p, cancellationToken))
                     .ToList();
             }, cancellationToken);
-        }
-
-        public override Task<IEnumerable<CommandLineSearchMetadata>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<IEnumerable<PowershellSearchMetadata>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        }     
         private VisualStudioUISearchMetaData CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();         
-            var versions = _repository.FindPackagesById(package.Id);
+            var versions = V2Client.FindPackagesById(package.Id);
             if (!versions.Any())
             {
                 versions = new[] { package };
@@ -100,6 +80,32 @@ namespace NuGet.Client.Resources
                 searchMetaData.Summary = package.Description;
             searchMetaData.IconUrl = package.IconUrl;
             return searchMetaData;
+        }
+
+            
+
+        IPackageRepository V2Client
+        {
+            get
+            {
+                return _v2Client;
+            }
+            set
+            {
+                _v2Client = value;
+            }
+        }
+
+        string Host
+        {
+            get
+            {
+                return _host;
+            }
+            set
+            {
+                _host = value;
+            }
         }
     }
 }

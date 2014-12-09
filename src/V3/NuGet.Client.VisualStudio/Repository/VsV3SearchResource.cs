@@ -1,33 +1,25 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using NuGet.Client.V3;
+using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.Resources;
 using NuGet.Client.V3;
-using System.Runtime.Versioning;
-using Newtonsoft.Json.Linq;
-using NuGet.Versioning;
 
-namespace NuGet.Client.Resources
+namespace NuGet.Client.VisualStudio.Repository
 {
-    
-
-    /// <summary>
-    /// Search resource implementation for api v3 endpoint. Uses the NuGetV3Client to talk to the endpoint and get the data.
-    /// *TODOS:
-    /// Host name not being used.
-    /// GetUri to be moved to a utility.
-    /// Tracing not done yet.
-    /// </summary>
-    public class V3SearchResource : SearchResource
+    public class VsV3SearchResource : VsSearchResource,IV3Resource
     {
-        private string _url;
-        private NuGetV3Client _client;
-      
-        public V3SearchResource(string sourceUrl,string host)
+        private NuGetV3Client _v3Client;
+        private string _host;
+        public VsV3SearchResource(string sourceUrl,string host) 
         {
-            _url = sourceUrl;
-            _client = new NuGetV3Client(sourceUrl, host);            
+            _v3Client = new NuGetV3Client(sourceUrl, host);
+            _host = host;
         }
 
         public async override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
@@ -35,24 +27,13 @@ namespace NuGet.Client.Resources
             List<string> frameworkNames = new List<string>();
             foreach (FrameworkName fx in filters.SupportedFrameworks)
                 frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
-            await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-            IEnumerable<JObject> searchResultJsonObjects = await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            await V3Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            IEnumerable<JObject> searchResultJsonObjects = await Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
             List<VisualStudioUISearchMetaData> visualStudioUISearchResults = new List<VisualStudioUISearchMetaData>();
             foreach (JObject searchResultJson in searchResultJsonObjects)
                 visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson, filters.IncludePrerelease));
             return visualStudioUISearchResults;
         }
-
-        public override Task<IEnumerable<CommandLineSearchMetadata>> GetSearchResultsForCommandLine(string searchTerm, bool includePrerelease, System.Threading.CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<IEnumerable<PowershellSearchMetadata>> GetSearchResultsForPowershellConsole(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         private VisualStudioUISearchMetaData GetVisualStudioUISearchResult(JObject package,bool includePrerelease)
         {
                 VisualStudioUISearchMetaData searchResult = new VisualStudioUISearchMetaData();
@@ -112,6 +93,32 @@ namespace NuGet.Client.Resources
                 return null;
             }
             return new Uri(str);
+        }
+
+
+
+        public NuGetV3Client V3Client
+        {
+            get
+            {
+                return _v3Client;
+            }
+            set
+            {
+                _v3Client = value;
+            }
+        }
+
+        public string Host
+        {
+            get
+            {
+                return _host;
+            }
+            set
+            {
+                _host = value;
+            }
         }
     }
 }
