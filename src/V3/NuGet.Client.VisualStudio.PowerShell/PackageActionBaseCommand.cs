@@ -11,6 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 
@@ -163,20 +165,81 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private IEnumerable<PackageIdentity> CreatePackageIdentitiesFromPackagesConfig()
         {
             List<PackageIdentity> identities = new List<PackageIdentity>();
-            IEnumerable<PackageIdentity> parsedIdentities;
-            using (FileStream stream = new FileStream(Id, FileMode.Open))
+            IEnumerable<PackageIdentity> parsedIdentities = null;
+
+            try
             {
-                PackagesConfigReader reader = new PackagesConfigReader(stream);
-                parsedIdentities = reader.GetPackages();
-                stream.Close();
+                // Example: install-package2 https://raw.githubusercontent.com/NuGet/json-ld.net/master/src/JsonLD/packages.config
+                if (Id.ToLowerInvariant().StartsWith("http"))
+                {
+                    string text = ReadPackagesConfigFileContentOnline(Id).Replace("???", "");
+                    PackagesConfigReader reader = new PackagesConfigReader();
+                    parsedIdentities = reader.GetPackages(text);
+                }
+                else
+                {
+                    using (FileStream stream = new FileStream(Id, FileMode.Open))
+                    {
+                        PackagesConfigReader reader = new PackagesConfigReader(stream);
+                        parsedIdentities = reader.GetPackages();
+                        if (stream != null)
+                        {
+                            stream.Close();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParsePackages, Id, ex.Message);
             }
 
-            foreach (PackageIdentity identity in parsedIdentities.ToList())
+            foreach (PackageIdentity identity in parsedIdentities)
             {
                 PackageIdentity resolvedIdentity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
                 identities.Add(resolvedIdentity);
             }
             return identities;
+        }
+
+        /// <summary>
+        /// Read the content of the file via HttpWebRequest
+        /// </summary>
+        /// <param name="url"></param>
+        private string ReadPackagesConfigFileContentOnline(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            // Read data via the response stream
+            Stream resStream = response.GetResponseStream();
+            string tempString = null;
+            StringBuilder stringBuilder = new StringBuilder();
+
+            int bytesToRead = 10000;
+            byte[] buffer = new Byte[bytesToRead];
+            int count = 0;
+
+            do
+            {
+                // Fill the buffer with data
+                count = resStream.Read(buffer, 0, buffer.Length);
+
+                // Make sure we read some data
+                if (count != 0)
+                {
+                    // Translate from bytes to ASCII text
+                    tempString = Encoding.ASCII.GetString(buffer, 0, count);
+
+                    // Continue building the string
+                    stringBuilder.Append(tempString);
+                }
+            }
+            while (count > 0); // Any more data to read?
+            resStream.Close();
+
+            // Return content
+            return stringBuilder.ToString();
         }
 
         /// <summary>

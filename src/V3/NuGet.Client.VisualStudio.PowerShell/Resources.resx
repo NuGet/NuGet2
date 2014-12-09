@@ -234,4 +234,7 @@
   <data name="Cmdlet_PackageNotInstalled" xml:space="preserve">
     <value>Package with the Id '{0}' is not installed to the current project.</value>
   </data>
+  <data name="Cmdlet_FailToParsePackages" xml:space="preserve">
+    <value>Fail to parse package identities from file {0} with exception: {1}</value>
+  </data>
 </root>

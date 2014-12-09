@@ -14,6 +14,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
     {
         private readonly Stream _stream;
 
+        public PackagesConfigReader()
+        {
+        }
+
         public PackagesConfigReader(Stream stream)
         {
             if (stream == null)
@@ -27,6 +31,26 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public IEnumerable<PackageIdentity> GetPackages()
         {
             XDocument doc = XDocument.Load(_stream);
+
+            List<PackageIdentity> packages = new List<PackageIdentity>();
+
+            foreach (var package in doc.Root.Elements(XName.Get("package")))
+            {
+                string id = package.Attributes(XName.Get("id")).Single().Value;
+                string version = package.Attributes(XName.Get("version")).Single().Value;
+
+                // todo: handle validation
+                NuGetVersion semver = NuGetVersion.Parse(version);
+
+                packages.Add(new PackageIdentity(id, semver));
+            }
+
+            return packages;
+        }
+
+        public IEnumerable<PackageIdentity> GetPackages(string text)
+        {
+            XDocument doc = XDocument.Parse(text);
 
             List<PackageIdentity> packages = new List<PackageIdentity>();
 

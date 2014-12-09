@@ -79,6 +79,15 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fail to parse package identities from file {0} with exception: {1}.
+        /// </summary>
+        internal static string Cmdlet_FailToParsePackages {
+            get {
+                return ResourceManager.GetString("Cmdlet_FailToParsePackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to set {0} as the Default Project for PowerShell Console. .
         /// </summary>
         internal static string Cmdlet_FailToSetProject {
