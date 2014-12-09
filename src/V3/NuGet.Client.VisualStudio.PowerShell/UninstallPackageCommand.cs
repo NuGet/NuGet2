@@ -37,10 +37,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
             VsProject proj = GetProject(true);
             SourceRepository localRepo = proj.TryGetFeature<SourceRepository>();
             this.ActiveSourceRepository = localRepo;
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResContext);
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        public ResolutionContext ResContext
+        public ResolutionContext ResolutionContext
         {
             get
             {

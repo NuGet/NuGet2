@@ -36,7 +36,7 @@ namespace NuGet.Client
             if (version != null)
             {
                 SemanticVersion sVersion = new SemanticVersion(version);
-                IPackage package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: true);
+                IPackage package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: false);
                 if (package != null)
                 {
                     resolvedIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(package.Version.ToString()));
@@ -45,7 +45,13 @@ namespace NuGet.Client
 
             if (resolvedIdentity == null)
             {
-                try
+                if (nVersion == null)
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.UnknownPackageSpecificVersion, packageId, version));
+                }
+                else
                 {
                     Task<JObject> task = sourceRepository.GetPackageMetadata(packageId, nVersion);
                     JObject package = task.Result;
@@ -65,10 +71,6 @@ namespace NuGet.Client
                     {
                         resolvedIdentity = new PackageIdentity(packageId, nVersion);
                     }
-                }
-                catch (Exception e)
-                {
-                    throw e;
                 }
             }
 
@@ -100,7 +102,7 @@ namespace NuGet.Client
             if (version != null)
             {
                 SemanticVersion sVersion = new SemanticVersion(version);
-                IPackage package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: true);
+                IPackage package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: false);
                 if (package != null)
                 {
                     resolvedIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(package.Version.ToString()));

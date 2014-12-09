@@ -91,7 +91,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected override void BeginProcessing()
         {
             base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResContext);
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
         protected override void ExecutePackageAction()
@@ -114,7 +114,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     foreach (PackageIdentity identity in identities)
                     {
                         // Find packages update
-                        PackageIdentity update = PowerShellPackageViewModel.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
                         ExecuteSinglePackageAction(update, Projects);
                     }
                 }
@@ -163,7 +163,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public ResolutionContext ResContext
+        public ResolutionContext ResolutionContext
         {
             get
             {
@@ -171,7 +171,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context.DependencyBehavior = GetDependencyBehavior();
                 _context.AllowPrerelease = IncludePrerelease.IsPresent;
                 // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (IsVersionSpecified && PowerShellPackageViewModel.IsPrereleaseVersion(this.Version))
+                if (IsVersionSpecified && PowerShellPackage.IsPrereleaseVersion(this.Version))
                 {
                     _context.AllowPrerelease = true;
                 }

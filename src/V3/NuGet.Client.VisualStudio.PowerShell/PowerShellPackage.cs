@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
-    public class PowerShellPackageViewModel
+    public class PowerShellPackage
     {
         public string Id { get; set; }
 
@@ -17,20 +17,20 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public string Description { get; set; }
 
-        public static List<PowerShellPackageViewModel> GetPowerShellPackageView(IEnumerable<JObject> metadata)
+        public static List<PowerShellPackage> GetPowerShellPackageView(IEnumerable<JObject> metadata)
         {
-            List<PowerShellPackageViewModel> view = new List<PowerShellPackageViewModel>();
+            List<PowerShellPackage> view = new List<PowerShellPackage>();
             foreach (JObject json in metadata)
             {
-                PowerShellPackageViewModel model = new PowerShellPackageViewModel();
-                model.Id = json.Value<string>(Properties.PackageId);
-                model.Version = NuGetVersion.Parse(json.Value<string>(Properties.Version));
-                model.Description = json.Value<string>(Properties.Description);
-                if (string.IsNullOrEmpty(model.Description))
+                PowerShellPackage package = new PowerShellPackage();
+                package.Id = json.Value<string>(Properties.PackageId);
+                package.Version = NuGetVersion.Parse(json.Value<string>(Properties.Version));
+                package.Description = json.Value<string>(Properties.Description);
+                if (string.IsNullOrEmpty(package.Description))
                 {
-                    model.Description = json.Value<string>(Properties.Summary);
+                    package.Description = json.Value<string>(Properties.Summary);
                 }
-                view.Add(model);
+                view.Add(package);
             }
             return view;
         }
@@ -53,11 +53,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 if (isSafe && nugetVersion != null)
                 {
-                    IVersionSpec spec = GetSafeRange(nugetVersion);
+                    VersionRange spec = GetSafeRange(nugetVersion, allowPrerelease);
                     allVersions = allVersions.Where(p =>
                     {
-                        var sv = new SemanticVersion(p.ToNormalizedString());
-                        return sv < spec.MaxVersion && sv >= spec.MinVersion;
+                        return p < spec.MaxVersion && p >= spec.MinVersion;
                     });       
                 }                
                 version = allVersions.OrderByDescending(v => v).FirstOrDefault().ToNormalizedString();
@@ -95,14 +94,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
-        public static IVersionSpec GetSafeRange(NuGetVersion version)
+        public static VersionRange GetSafeRange(NuGetVersion version, bool includePrerlease)
         {
-            return new VersionSpec
-            {
-                IsMinInclusive = true,
-                MinVersion = new SemanticVersion(version.ToNormalizedString()),
-                MaxVersion = new SemanticVersion(new Version(version.Version.Major, version.Version.Minor + 1))
-            };
+            SemanticVersion max = new SemanticVersion(new Version(version.Major, version.Minor + 1));
+            NuGetVersion maxVersion = NuGetVersion.Parse(max.ToString());
+            return new VersionRange(version, true, maxVersion, false, includePrerlease);
         }
 
         public static bool IsPrereleaseVersion(string version)

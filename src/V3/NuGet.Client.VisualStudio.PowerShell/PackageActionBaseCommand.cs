@@ -287,7 +287,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 else
                 {
                     // For Install-Package and Update-Package
-                    Version = PowerShellPackageViewModel.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
+                    Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
                     identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
                 }
             }
@@ -311,22 +311,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         /// <summary>
-        /// Returns the list of package identities installed to a project
-        /// </summary>
-        /// <param name="proj"></param>
-        /// <returns></returns>
-        private List<PackageIdentity> GetInstalledPackageIdentitiesForProject(VsProject proj)
-        {
-            List<PackageIdentity> identities = new List<PackageIdentity>();
-            IEnumerable<InstalledPackageReference> refs = GetInstalledReferences(proj);
-            foreach (InstalledPackageReference packageRef in refs)
-            {
-                identities.Add(packageRef.Identity);
-            }
-            return identities;
-        }
-
-        /// <summary>
         /// Get Installed Package References for all targeted projects.
         /// </summary>
         /// <returns></returns>
@@ -335,7 +319,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
             foreach (VsProject proj in Projects)
             {
-                List<PackageIdentity> list = GetInstalledPackageIdentitiesForProject(proj);
+                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
                 dic.Add(proj, list);
             }
             return dic;
@@ -347,7 +331,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <returns></returns>
         private IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
         {
-            IEnumerable<InstalledPackageReference> refs = null;
+            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
             InstalledPackagesList installedList = proj.InstalledPackages;
             if (installedList != null)
             {
@@ -378,6 +362,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
                     if (UriHelper.IsHttpSource(Id))
                     {
+                        throw new NotImplementedException();
                         //InMemoryPackageRepository inMemoRepo = new InMemoryPackageRepository();
                         //PackageDownloader downloader = new PackageDownloader();
                         //ZipPackage package;
@@ -504,6 +489,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     }
                 }
             }
+            // TODO: Consider adding the rollback behavior if exception is thrown.
             catch (Exception ex)
             {
                 if (ex.InnerException != null)

@@ -51,7 +51,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected override void BeginProcessing()
         {
             base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResContext);
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
         public override FileConflictAction ResolveFileConflict(string message)
@@ -69,7 +69,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return base.ResolveFileConflict(message);
         }
 
-        public ResolutionContext ResContext
+        public ResolutionContext ResolutionContext
         {
             get
             {
@@ -77,7 +77,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context.DependencyBehavior = GetDependencyBehavior();
                 _context.AllowPrerelease = IncludePrerelease.IsPresent;
                 // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (IsVersionSpecified && PowerShellPackageViewModel.IsPrereleaseVersion(this.Version))
+                if (IsVersionSpecified && PowerShellPackage.IsPrereleaseVersion(this.Version))
                 {
                     _context.AllowPrerelease = true;
                 }

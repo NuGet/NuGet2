@@ -124,7 +124,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             // Get the PowerShellPackageView
-            var view = PowerShellPackageViewModel.GetPowerShellPackageView(installedPackages);
+            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
             WriteObject(view, enumerateCollection: true);
         }
     }
