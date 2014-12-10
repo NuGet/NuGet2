@@ -62,6 +62,7 @@
     <Compile Include="NuGetAwareProjectPackageRepository.cs" Condition="$(VisualStudioVersion)=='14.0'" />
     <Compile Include="ProjectSystems\CpsProjectSystem.cs" />
     <Compile Include="ProjectSystems\NuGetAwareProjectSystem.cs" Condition="$(VisualStudioVersion)=='14.0'" />
+    <Compile Include="ProjectSystems\VcxProject.cs" />
     <Compile Include="QuickSearch\NugetSearchProvider.cs" />
     <Compile Include="QuickSearch\NugetSearchTask.cs" />
     <Compile Include="QuickSearch\NuGetStaticSearchResult.cs" />
