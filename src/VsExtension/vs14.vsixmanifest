@@ -12,6 +12,7 @@
     <SupportedProducts>
       <VisualStudio Version="14.0">
         <Edition>Pro</Edition>
+		<Edition>Community</Edition>
         <Edition>IntegratedShell</Edition>
       </VisualStudio>
     </SupportedProducts>
