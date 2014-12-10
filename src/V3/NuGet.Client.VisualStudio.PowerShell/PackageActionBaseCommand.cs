@@ -2,17 +2,12 @@
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Resources;
-using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 
