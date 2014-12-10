@@ -310,8 +310,17 @@ namespace NuGet.VisualStudio
         /// </summary>
         public static bool IsClr(this Project project)
         {
-            var vcx = new VcxProject(project.FullName);
-            return vcx.HasClrSupport(project.ConfigurationManager.ActiveConfiguration);
+            bool isClr = false;
+
+            // Null properties on the DTE project item are a common source of bugs, make sure everything is non-null before attempting this check.
+            // We will default to false since CLR projects should have all of these properties set.
+            if (project != null && project.FullName != null && project.ConfigurationManager != null && project.ConfigurationManager.ActiveConfiguration != null)
+            {
+                var vcx = new VcxProject(project.FullName);
+                isClr = vcx.HasClrSupport(project.ConfigurationManager.ActiveConfiguration);
+            }
+
+            return isClr;
         }
 
         // TODO: Return null for library projects
