@@ -32,7 +32,6 @@ namespace NuGet.ServiceDiscovery
         Uri _serviceIndexUri;
         ServiceIndexDocument _serviceIndexDocument;
         object _serviceIndexDocumentLock;
-        IDictionary<string, IList<Uri>> _serviceEndpointsMap;
         HttpClient _httpClient = new HttpClient();
 
         bool _serviceIndexDocumentUpdating;
