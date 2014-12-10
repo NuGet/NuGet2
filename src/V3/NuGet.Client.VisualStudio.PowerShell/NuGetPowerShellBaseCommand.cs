@@ -67,22 +67,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _httpClientEvents = clientEvents;
         }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1), Alias("Project")]
-        public virtual string ProjectName
-        {
-            get
-            {
-                if (String.IsNullOrEmpty(_projectName))
-                {
-                    _projectName = _solutionManager.DefaultProjectName;
-                }
-                return _projectName;
-            }
-            set
-            {
-                _projectName = value;
-            }
-        }
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
+        [ValidateNotNullOrEmpty]
+        public virtual string ProjectName { get; set; }
 
         internal VsSolution Solution 
         {
@@ -440,22 +427,24 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             VsProject project = null;
 
-            // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(ProjectName))
+            // If the user does not specify a project then use the Default project
+            if (String.IsNullOrEmpty(ProjectName))
             {
-                EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                    .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
-                                         String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
-                if (dteProject != null)
-                {
-                    project = Solution.GetProject(dteProject);
-                }
+                ProjectName = _solutionManager.DefaultProjectName;
+            }
 
-                // If that project was invalid then throw
-                if (project == null && throwIfNotExists)
-                {
-                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-                }
+            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
+                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
+            if (dteProject != null)
+            {
+                project = Solution.GetProject(dteProject);
+            }
+
+            // If that project was invalid then throw
+            if (project == null && throwIfNotExists)
+            {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
             }
 
             return project;

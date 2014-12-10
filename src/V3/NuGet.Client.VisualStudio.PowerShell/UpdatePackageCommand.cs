@@ -2,10 +2,8 @@
 using NuGet.Client.Resolution;
 using NuGet.VisualStudio;
 using System.Collections.Generic;
-using System.Management.Automation;
 using System.Linq;
-using System;
-
+using System.Management.Automation;
 
 
 #if VS14
@@ -85,14 +83,21 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        protected override void ExecutePackageActions()
+        protected override void PreprocessProjectAndIdentities()
         {
-            SubscribeToProgressEvents();
-
             if (!_projectSpecified)
             {
                 this.Projects = GetAllProjectsInSolution();
             }
+            else
+            {
+                base.PreprocessProjectAndIdentities();
+            }
+        }
+
+        protected override void ExecutePackageActions()
+        {
+            SubscribeToProgressEvents();
 
             // UpdateAll
             if (!_idSpecified)

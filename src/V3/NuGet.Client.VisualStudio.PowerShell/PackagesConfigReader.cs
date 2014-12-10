@@ -13,9 +13,16 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public class PackagesConfigReader
     {
         private readonly Stream _stream;
+        private readonly string _text;
 
-        public PackagesConfigReader()
+        public PackagesConfigReader(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentNullException("text");
+            }
+
+            _text = text;
         }
 
         public PackagesConfigReader(Stream stream)
@@ -30,27 +37,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public IEnumerable<PackageIdentity> GetPackages()
         {
-            XDocument doc = XDocument.Load(_stream);
-
-            List<PackageIdentity> packages = new List<PackageIdentity>();
-
-            foreach (var package in doc.Root.Elements(XName.Get("package")))
+            XDocument doc = new XDocument();
+            if (!string.IsNullOrEmpty(_text))
             {
-                string id = package.Attributes(XName.Get("id")).Single().Value;
-                string version = package.Attributes(XName.Get("version")).Single().Value;
-
-                // todo: handle validation
-                NuGetVersion semver = NuGetVersion.Parse(version);
-
-                packages.Add(new PackageIdentity(id, semver));
+                doc = XDocument.Parse(_text);
             }
-
-            return packages;
-        }
-
-        public IEnumerable<PackageIdentity> GetPackages(string text)
-        {
-            XDocument doc = XDocument.Parse(text);
+            else if (_stream != null)
+            {
+                doc = XDocument.Load(_stream);
+            }
 
             List<PackageIdentity> packages = new List<PackageIdentity>();
 

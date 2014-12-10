@@ -48,6 +48,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public virtual string Id { get; set; }
 
         [Parameter(Position = 2)]
+        [ValidateNotNullOrEmpty]
         public string Version { get; set; }
 
         [Parameter(Position = 3)]
@@ -88,19 +89,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public IEnumerable<VsProject> Projects
-        {
-            get
-            {
-                VsProject vsProject = GetProject(true);
-                _projects = new List<VsProject> { vsProject };
-                return _projects;
-            }
-            set
-            {
-                _projects = value;
-            }
-        }
+        public IEnumerable<VsProject> Projects { get; set; }
 
         public IEnumerable<PackageIdentity> Identities { get; set; }
 
@@ -162,7 +151,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected abstract void PreprocessProjectAndIdentities();
+        protected virtual void PreprocessProjectAndIdentities()
+        {
+            VsProject vsProject = GetProject(true);
+            this.Projects = new List<VsProject> { vsProject };
+        }
 
         protected virtual void ExecutePackageActions()
         {
@@ -178,7 +171,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Resolve and execute actions for a single package
         /// </summary>
         /// <param name="identity"></param>
-        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projs)
+        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects)
         {
             if (identity == null)
             {
@@ -188,7 +181,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 // Resolve Actions
-                List<VsProject> targetProjects = projs.ToList();
+                List<VsProject> targetProjects = projects.ToList();
                 Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction =
                     PackageActionResolver.ResolveActionsAsync(identity, _actionType, targetProjects, Solution);
 
