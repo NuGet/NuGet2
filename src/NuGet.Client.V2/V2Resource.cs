@@ -18,11 +18,10 @@ namespace NuGet.Client.V2
         private string _host;
         private string _description;
                      
-        public V2Resource(IPackageRepository repo,string host,string description):base(host,description)
+        public V2Resource(IPackageRepository repo,string host):base(host)
         {
             _v2Client = repo;
-            _host = host;
-            _description = description;
+            _host = host;           
         }
          public IPackageRepository V2Client
         {

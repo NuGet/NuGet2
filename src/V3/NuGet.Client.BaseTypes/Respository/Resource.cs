@@ -15,10 +15,9 @@ namespace NuGet.Client
         private string _host;
         private string _description;
                      
-        public Resource(string host,string description)
+        public Resource(string host)
         {         
-            _host = host;
-            _description = description;
+            _host = host;            
         }
         
         public string Host

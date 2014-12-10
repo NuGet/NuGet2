@@ -9,7 +9,7 @@ using NuGet.Versioning;
 
 namespace NuGet.Client
 {
-    internal static class UserAgentUtil
+    public static class UserAgentUtil
     {
         private static readonly Lazy<NuGetVersion> NuGetClientVersion = new Lazy<NuGetVersion>(GetNuGetVersion);
 

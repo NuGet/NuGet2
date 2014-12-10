@@ -10,7 +10,12 @@ namespace NuGet.Client.V2
 {
     public class V2DownloadResource : V2Resource,IDownloadResource
     {
-        private string _description = "Resource that helps in downloading a package from the V2 server endpoint."
+        private string _description = "Resource that helps in downloading a package from the V2 server endpoint.";
+        public V2DownloadResource(IPackageRepository repo,string host):base(repo,host)
+        {
+
+        }
+
         public override string Description
         {
             get { return _description;}

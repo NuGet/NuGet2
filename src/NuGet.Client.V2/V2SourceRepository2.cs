@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client;
 
-namespace NuGet.Client.Resources
+namespace NuGet.Client
 {
     /// <summary>
     /// V2SourceRepository which exposes various resources like SearchResource, MetricsResource and so on...
