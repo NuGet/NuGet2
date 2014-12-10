@@ -163,6 +163,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V3", "src\V3\N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.BaseTypes", "src\V3\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj", "{05B640AD-133D-4B36-8DF0-036323D7873E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2", "src\NuGet.Client.V2\NuGet.Client.V2.csproj", "{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
@@ -1100,6 +1102,26 @@ Global
 		{05B640AD-133D-4B36-8DF0-036323D7873E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05B640AD-133D-4B36-8DF0-036323D7873E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{05B640AD-133D-4B36-8DF0-036323D7873E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Mono Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -21,7 +21,7 @@ namespace NuGet.Client
         /// <param name="searchTerm"></param>
         /// <param name="cancelToken"></param>
         /// <returns>Returns a list of JSON objects suitable for rendering by the Package Manager Dialog</returns>
-        public abstract Task<IEnumerable<SearchResult>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken);
+        public abstract Task<IEnumerable<SearchResult>> Search(SourceRepository2 source, string searchTerm, int skip, int take, CancellationToken cancelToken);
 
         /// <summary>
         /// Retrieves a list of installed packages

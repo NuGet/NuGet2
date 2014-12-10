@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.Client.BaseTypes
+namespace NuGet.Client
 {
     /// <summary>
     /// Represents a resource provided by a server endpoint (V2 or V3).

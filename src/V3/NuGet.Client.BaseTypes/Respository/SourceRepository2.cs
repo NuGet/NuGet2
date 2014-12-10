@@ -12,7 +12,7 @@ namespace NuGet.Client
     /// </summary>
     // TODO: it needs to implement IDisposable.
     // TODO: Define RequiredResourceNotFound exception instead of general exception.    
-    public abstract class SourceRepository
+    public abstract class SourceRepository2
     {
         public abstract PackageSource Source { get; }
         private readonly Dictionary<Type, Func<object>> _resourceFactories = new Dictionary<Type, Func<object>>();
