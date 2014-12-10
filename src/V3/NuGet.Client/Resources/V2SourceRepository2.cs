@@ -155,7 +155,7 @@ namespace NuGet.Client.Resources
             });
         }
 
-        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
         {
             // No-op, V2 doesn't support this.
         }

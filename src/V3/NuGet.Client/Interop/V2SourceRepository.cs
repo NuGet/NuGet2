@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
+using NuGet.Client;
 
 namespace NuGet.Client.Interop
 {
@@ -149,7 +150,7 @@ namespace NuGet.Client.Interop
             });
         }
 
-        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
         {
             // No-op, V2 doesn't support this.
         }

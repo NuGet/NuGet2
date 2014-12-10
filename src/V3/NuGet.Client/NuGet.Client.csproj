@@ -116,12 +116,9 @@
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
     <Compile Include="Resources\CommandLineSearchMetadata.cs" />
-    <Compile Include="Resources\DownloadResource.cs" />
-    <Compile Include="Resources\IV3Resource.cs" />
-    <Compile Include="Resources\MetadataResource.cs" />
+    <Compile Include="Resources\V3Resource.cs" />
     <Compile Include="Resources\PowerShellAutoCompleteResource.cs" />
     <Compile Include="Resources\PowershellSearchMetadata.cs" />
-    <Compile Include="Resources\ResolutionResource.cs" />
     <Compile Include="Resources\SourceRepositoryFactory.cs" />
     <Compile Include="Resources\V2Resource.cs" />
     <Compile Include="Resources\V2SourceRepository2.cs" />
@@ -157,6 +154,10 @@
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj">
+      <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
+      <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
       <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>

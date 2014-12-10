@@ -173,7 +173,7 @@ namespace NuGet.Client
         }
 
         // Async void because we don't want metric recording to block anything at all
-        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
+        public override async void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
         {
             var metricsUrl = await GetServiceUri(ServiceUris.MetricsService);
 
@@ -195,7 +195,7 @@ namespace NuGet.Client
                 payload.Add("dependentPackage", dependentPackage.Id);
                 payload.Add("dependentPackageVersion", dependentPackage.Version.ToNormalizedString());
             }
-            target.AddMetricsMetadata(payload);
+           // target.AddMetricsMetadata(payload);
 
             // Post the message
             await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));

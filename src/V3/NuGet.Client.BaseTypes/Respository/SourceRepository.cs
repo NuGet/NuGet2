@@ -1,9 +1,14 @@
-﻿using System;
+﻿using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Threading;
+using Newtonsoft.Json.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet.Client
 {
@@ -11,8 +16,9 @@ namespace NuGet.Client
     /// Represents a Server endpoint. Exposes the list of resources/services provided by the endpoint like : Search service, Metrics service and so on.
     /// </summary>
     // TODO: it needs to implement IDisposable.
-    // TODO: Define RequiredResourceNotFound exception instead of general exception.    
-    public abstract class SourceRepository2
+    // *TODOs: Define RequiredResourceNotFound exception instead of general exception.   
+    // *TODOs: Uninstall newtonsoft.json
+    public abstract class SourceRepository
     {
         public abstract PackageSource Source { get; }
         private readonly Dictionary<Type, Func<object>> _resourceFactories = new Dictionary<Type, Func<object>>();
@@ -77,5 +83,31 @@ namespace NuGet.Client
         {
             _resourceFactories.Add(typeof(T), factory);
         }
+
+        #region TempStuffThatWouldGoAway
+
+          [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public abstract Task<IEnumerable<JObject>> Search(
+            string searchTerm,
+            // REVIEW: Do we use parameters instead of this object? What about adding filter criteria?
+            SearchFilter filters,
+            int skip,
+            int take,
+            CancellationToken cancellationToken);
+
+          public abstract Task<JObject> GetPackageMetadata(string id, NuGetVersion version);
+          public abstract Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId);
+          public abstract void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target);
+
+
+            public class SearchFilter
+            {
+                public IEnumerable<FrameworkName> SupportedFrameworks { get; set; }
+                public bool IncludePrerelease { get; set; }
+            }
+
+
+
+        #endregion 
     }
 }

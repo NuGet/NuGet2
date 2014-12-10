@@ -53,7 +53,7 @@ namespace NuGet.Client
         }
 
         // Async void because we don't want metric recording to block anything at all
-        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, InstallationTarget target)
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
         {
            //No op
         }
