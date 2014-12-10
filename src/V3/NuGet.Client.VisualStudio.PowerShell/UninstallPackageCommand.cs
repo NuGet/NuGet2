@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace NuGet.Client.VisualStudio.PowerShell
@@ -29,7 +31,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter]
         public SwitchParameter RemoveDependencies { get; set; }
-
+        
         protected override void BeginProcessing()
         {
             base.BeginProcessing();
@@ -38,6 +40,43 @@ namespace NuGet.Client.VisualStudio.PowerShell
             SourceRepository localRepo = proj.TryGetFeature<SourceRepository>();
             this.ActiveSourceRepository = localRepo;
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
+        }
+
+        protected override void PreprocessProjectAndIdentities()
+        {
+            this.Identities = GetPackageIdentityForResolver();
+        }
+
+        /// <summary>
+        /// Returns single package identity for resolver when Id is specified
+        /// </summary>
+        /// <returns></returns>
+        private List<PackageIdentity> GetPackageIdentityForResolver()
+        {
+            PackageIdentity identity = null;
+
+            // If Version is specified by commandline parameter
+            if (!string.IsNullOrEmpty(Version))
+            {
+                identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, true);
+            }
+            else
+            {
+                VsProject target = this.GetProject(true);
+                InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
+                if (installedPackage == null)
+                {
+                    Log(MessageLevel.Error, Resources.Cmdlet_PackageNotInstalled, Id);
+                }
+                else
+                {
+                    identity = installedPackage.Identity;
+                    Version = identity.Version.ToNormalizedString();
+                }
+            }
+
+            return new List<PackageIdentity>() { identity };
         }
 
         public ResolutionContext ResolutionContext

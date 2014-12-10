@@ -430,7 +430,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #endregion Logging
 
         #region Project APIs
-
+        /// <summary>
+        /// Get the VsProject by name. 
+        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// </summary>
+        /// <param name="throwIfNotExists"></param>
+        /// <returns></returns>
         public VsProject GetProject(bool throwIfNotExists)
         {
             VsProject project = null;
@@ -454,6 +459,16 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return project;
+        }
+
+        /// <summary>
+        /// Return all projects in current solution.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<VsProject> GetAllProjectsInSolution()
+        {
+            IEnumerable<string> projectNames = GetAllValidProjectNames();
+            return GetProjectsByName(projectNames);
         }
 
         /// <summary>

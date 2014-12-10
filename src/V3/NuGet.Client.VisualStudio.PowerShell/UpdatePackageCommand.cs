@@ -3,6 +3,8 @@ using NuGet.Client.Resolution;
 using NuGet.VisualStudio;
 using System.Collections.Generic;
 using System.Management.Automation;
+using System.Linq;
+using System;
 
 
 
@@ -23,9 +25,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 2. Figure out the Utility to get list of packages installed to a project - CoreInteropInstalledPackagesList?
     /// 3. Figure out the right API to use to get latest version, safe version etc. 
     [Cmdlet(VerbsData.Update, "Package2", DefaultParameterSetName = "All")]
-    public class UpdatePackageCommand : PackageActionBaseCommand
+    public class UpdatePackageCommand : PackageInstallBaseCommand
     {
-        private ResolutionContext _context;
         private IProductUpdateService _productUpdateService;
         private bool _hasConnectedToHttpSource;
         private bool _idSpecified;
@@ -37,8 +38,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IHttpClientEvents>(),
-                 PackageActionType.Install)
+                 ServiceLocator.GetInstance<IHttpClientEvents>())
         {
             _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
@@ -77,16 +77,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         [Parameter]
-        public SwitchParameter IgnoreDependencies { get; set; }
-
-        [Parameter]
         public SwitchParameter Safe { get; set; }
-
-        [Parameter]
-        public FileConflictAction FileConflictAction { get; set; }
-
-        [Parameter]
-        public DependencyBehavior? DependencyVersion { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -94,17 +85,18 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        protected override void ExecutePackageAction()
+        protected override void ExecutePackageActions()
         {
             SubscribeToProgressEvents();
+
+            if (!_projectSpecified)
+            {
+                this.Projects = GetAllProjectsInSolution();
+            }
 
             // UpdateAll
             if (!_idSpecified)
             {
-                if (!_projectSpecified)
-                {
-                    IncludeAllProjects = true;
-                }
                 Dictionary<VsProject, List<PackageIdentity>> dictionary = GetInstalledPackagesForAllProjects();
                 foreach (KeyValuePair<VsProject, List<PackageIdentity>> entry in dictionary)
                 {
@@ -115,36 +107,57 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     {
                         // Find packages update
                         PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
-                        ExecuteSinglePackageAction(update, Projects);
+                        ExecuteSinglePackageAction(update, targetedProjects);
                     }
                 }
             }
             else 
             {
-                if (!_projectSpecified)
+                Dictionary<VsProject, PackageIdentity> dictionary = GetInstalledPackageWithId(Id);
+                foreach (KeyValuePair<VsProject, PackageIdentity> entry in dictionary)
                 {
-                    IncludeAllProjects = true;
-                }
-                foreach (PackageIdentity identity in Identities)
-                {
-                    ExecuteSinglePackageAction(identity, Projects);
+                    IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
+                    PackageIdentity identity = entry.Value;
+                    // Find package update
+                    PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                    ExecuteSinglePackageAction(update, targetedProjects);
                 }
             }
         }
 
-        public override FileConflictAction ResolveFileConflict(string message)
+        /// <summary>
+        /// Get Installed Package References for all projects.
+        /// </summary>
+        /// <returns></returns>
+        private Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
         {
-            if (FileConflictAction == FileConflictAction.Overwrite)
+            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
+            foreach (VsProject proj in Projects)
             {
-                return Client.FileConflictAction.Overwrite;
+                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
+                dic.Add(proj, list);
             }
+            return dic;
+        }
 
-            if (FileConflictAction == FileConflictAction.Ignore)
+        /// <summary>
+        /// Get installed package identity for specific package Id in all projects.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        private Dictionary<VsProject, PackageIdentity> GetInstalledPackageWithId(string packageId)
+        {
+            Dictionary<VsProject, PackageIdentity> dic = new Dictionary<VsProject, PackageIdentity>();
+            foreach (VsProject proj in Projects)
             {
-                return Client.FileConflictAction.Ignore;
+                InstalledPackageReference reference = GetInstalledReference(proj, packageId);
+                if (reference != null)
+                {
+                    PackageIdentity identity = reference.Identity;
+                    dic.Add(proj, identity);
+                }
             }
-
-            return base.ResolveFileConflict(message);
+            return dic;
         }
 
         protected override void EndProcessing()
@@ -160,38 +173,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             if (_productUpdateService != null && _hasConnectedToHttpSource)
             {
                 _productUpdateService.CheckForAvailableUpdateAsync();
-            }
-        }
-
-        public ResolutionContext ResolutionContext
-        {
-            get
-            {
-                _context = new ResolutionContext();
-                _context.DependencyBehavior = GetDependencyBehavior();
-                _context.AllowPrerelease = IncludePrerelease.IsPresent;
-                // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (IsVersionSpecified && PowerShellPackage.IsPrereleaseVersion(this.Version))
-                {
-                    _context.AllowPrerelease = true;
-                }
-                return _context;
-            }
-        }
-
-        private DependencyBehavior GetDependencyBehavior()
-        {
-            if (IgnoreDependencies.IsPresent)
-            {
-                return DependencyBehavior.Ignore;
-            }
-            else if (DependencyVersion.HasValue)
-            {
-                return DependencyVersion.Value;
-            }
-            else
-            {
-                return DependencyBehavior.Lowest;
             }
         }
     }

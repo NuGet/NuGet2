@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
 using System.Management.Automation;
 
 
@@ -21,31 +23,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 2. Implement the spec
     /// </summary>
     [Cmdlet("Consolidate", "Package")]
-    public class ConsolidatePackageCommand : PackageActionBaseCommand
+    public class ConsolidatePackageCommand : PackageInstallBaseCommand
     {
-        private ResolutionContext _context;
-
         public ConsolidatePackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IHttpClientEvents>(),
-                 PackageActionType.Install)
+                 ServiceLocator.GetInstance<IHttpClientEvents>())
         {
-            this.IncludeAllProjects = true;
-            this.IsConsolidating = true;
         }
-
-        [Parameter]
-        public SwitchParameter IgnoreDependencies { get; set; }
-
-        [Parameter]
-        public Client.FileConflictAction FileConflictAction { get; set; }
-
-        [Parameter]
-        public DependencyBehavior? DependencyVersion { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -53,50 +41,38 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        public override FileConflictAction ResolveFileConflict(string message)
+        protected override void PreprocessProjectAndIdentities()
         {
-            if (FileConflictAction == FileConflictAction.Overwrite)
-            {
-                return Client.FileConflictAction.Overwrite;
-            }
-
-            if (FileConflictAction == FileConflictAction.Ignore)
-            {
-                return Client.FileConflictAction.Ignore;
-            }
-
-            return base.ResolveFileConflict(message);
+            this.Projects = GetAllProjectsInSolution();
+            this.Identities = GetConsolidatedPackageIdentityForResolver();
         }
 
-        public ResolutionContext ResolutionContext
+        private IEnumerable<PackageIdentity> GetConsolidatedPackageIdentityForResolver()
         {
-            get
-            {
-                _context = new ResolutionContext();
-                _context.DependencyBehavior = GetDependencyBehavior();
-                // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (IsVersionSpecified && PowerShellPackage.IsPrereleaseVersion(this.Version))
-                {
-                    _context.AllowPrerelease = true;
-                }
-                return _context;
-            }
-        }
+            PackageIdentity identity = null;
 
-        private DependencyBehavior GetDependencyBehavior()
-        {
-            if (IgnoreDependencies.IsPresent)
+            // If Version is specified by commandline parameter
+            if (!string.IsNullOrEmpty(Version))
             {
-                return DependencyBehavior.Ignore;
-            }
-            else if (DependencyVersion.HasValue)
-            {
-                return DependencyVersion.Value;
+                identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, true);
             }
             else
             {
-                return DependencyBehavior.Lowest;
+                VsProject target = this.GetProject(true);
+                InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
+                if (installedPackage == null)
+                {
+                    Log(MessageLevel.Error, Resources.Cmdlet_PackageNotInstalled, Id);
+                }
+                else
+                {
+                    identity = installedPackage.Identity;
+                    Version = identity.Version.ToNormalizedString();
+                }
             }
+
+            return new List<PackageIdentity>() { identity };
         }
     }
 }

@@ -24,81 +24,16 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 4. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
     /// 5. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
-    public class InstallPackageCommand : PackageActionBaseCommand
+    public class InstallPackageCommand : PackageInstallBaseCommand
     {
-        private ResolutionContext _context;
-
         public InstallPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IHttpClientEvents>(),
-                 PackageActionType.Install)
+                 ServiceLocator.GetInstance<IHttpClientEvents>())
         {
-        }
-
-        [Parameter]
-        public SwitchParameter IgnoreDependencies { get; set; }
-
-        [Parameter]
-        public Client.FileConflictAction FileConflictAction { get; set; }
-
-        [Parameter]
-        public DependencyBehavior? DependencyVersion { get; set; }
-
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
-
-        public override FileConflictAction ResolveFileConflict(string message)
-        {
-            if (FileConflictAction == FileConflictAction.Overwrite)
-            {
-                return Client.FileConflictAction.Overwrite;
-            }
-
-            if (FileConflictAction == FileConflictAction.Ignore)
-            {
-                return Client.FileConflictAction.Ignore;
-            }
-
-            return base.ResolveFileConflict(message);
-        }
-
-        public ResolutionContext ResolutionContext
-        {
-            get
-            {
-                _context = new ResolutionContext();
-                _context.DependencyBehavior = GetDependencyBehavior();
-                _context.AllowPrerelease = IncludePrerelease.IsPresent;
-                // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (IsVersionSpecified && PowerShellPackage.IsPrereleaseVersion(this.Version))
-                {
-                    _context.AllowPrerelease = true;
-                }
-                return _context;
-            }
-        }
-
-        private DependencyBehavior GetDependencyBehavior()
-        {
-            if (IgnoreDependencies.IsPresent)
-            {
-                return DependencyBehavior.Ignore;
-            }
-            else if (DependencyVersion.HasValue)
-            {
-                return DependencyVersion.Value;
-            }
-            else
-            {
-                return DependencyBehavior.Lowest;
-            }
         }
     }
 }
