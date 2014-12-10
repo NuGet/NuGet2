@@ -11,7 +11,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Project2", DefaultParameterSetName = ParameterSetByName)]
+    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterSetByName)]
     [OutputType(typeof(Project))]
     public class GetProjectCommand : NuGetPowerShellBaseCommand
     {
