@@ -2538,18 +2538,17 @@ function Test-InstallPackageWithLeadingZeroInVersion
 function Test-InstallPackagePreservesProjectConfigFile
 {
     param($context)
-
+	
     # Arrange
     $p = New-ClassLibrary "CoolProject"
-
-    $projectPath = $p.Properties.Item("FullPath").Value
+    $projectPath = $p.Properties.Item("FullPath").Value	
     $packagesConfigPath = Join-Path $projectPath 'packages.CoolProject.config'
-    
+
     # create file and add to project
     $newFile = New-Item $packagesConfigPath -ItemType File
     '<packages></packages>' > $newFile
-    $p.ProjectItems.AddFromFile($packagesConfigPath)
 
+    $p.ProjectItems.AddFromFile($packagesConfigPath)
     # Act
     $p | Install-Package PackageWithFolder -source $context.RepositoryRoot
 
