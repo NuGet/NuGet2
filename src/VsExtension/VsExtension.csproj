@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
@@ -202,10 +202,6 @@
     <ProjectReference Include="..\V3\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
       <Name>NuGet.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Versioning\Versioning.csproj">
-      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
-      <Name>Versioning</Name>
     </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
