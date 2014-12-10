@@ -35,12 +35,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
         }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
-
         protected override void PreprocessProjectAndIdentities()
         {
             this.Projects = GetAllProjectsInSolution();
