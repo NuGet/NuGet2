@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -111,12 +112,33 @@ namespace NuGet.Commands
             var actionResolver = new ActionResolver(SourceRepository,
                 new ResolutionContext()
                 {
-                    AllowPrerelease = Prerelease
+                    AllowPrerelease = Prerelease,
+                    DependencyBehavior = DependencyBehavior.Lowest,
                 });
 
             var actions = await actionResolver.ResolveActionsAsync(new PackageIdentity(packageId, version),
                 PackageActionType.Install,
                 new FilesystemInstallationTarget(packageManager));
+
+            if (Verbosity == NuGet.Verbosity.Detailed)
+            {
+                Console.WriteLine("Actions returned by resolver");
+                foreach (var action in actions)
+                {
+                    Console.WriteLine(action.ActionType.ToString() + "-" + action.PackageIdentity.ToString());
+                }
+            }
+
+            actions = actions.Where(a => a.ActionType == PackageActionType.Download || a.ActionType == PackageActionType.Purge);
+
+            if (Verbosity == NuGet.Verbosity.Detailed)
+            {
+                Console.WriteLine("After reducing actions to just Download and Purge");
+                foreach (var action in actions)
+                {
+                    Console.WriteLine(action.ActionType.ToString() + "-" + action.PackageIdentity.ToString());
+                }
+            }
 
             var actionExecutor = new ActionExecutor();
             await actionExecutor.ExecuteActionsAsync(actions, CancellationToken.None);

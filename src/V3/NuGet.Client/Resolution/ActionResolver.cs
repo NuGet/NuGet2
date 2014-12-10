@@ -38,11 +38,7 @@ namespace NuGet.Client.Resolution
             ApplyContext(oldResolver);
 
             var packageManager = target.GetRequiredFeature<IPackageManager>();
-            var nullProjectManager = new NullProjectManager(packageManager);
-            foreach (var package in packageManager.LocalRepository.GetPackages())
-            {
-                nullProjectManager.LocalRepository.AddPackage(package);
-            }
+            var nullProjectManager = new NullProjectManager(new CoreInteropPackageManager(packageManager.LocalRepository, new CoreInteropSourceRepository(_source)));
 
             oldResolver.AddOperation(
                 MapNewToOldActionType(operation),
