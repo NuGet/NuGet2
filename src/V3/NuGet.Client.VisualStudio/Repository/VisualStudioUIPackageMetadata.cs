@@ -8,20 +8,20 @@ namespace NuGet.Client.VisualStudio.Repository
 {
     public class VisualStudioUIPackageMetadata
     {
-        string Title { get; }
-        IEnumerable<string> Authors { get; }
-        IEnumerable<string> Owners { get; }
-        Uri IconUrl { get; }
-        Uri LicenseUrl { get; }
-        Uri ProjectUrl { get; }
-        bool RequireLicenseAcceptance { get; }
-        string Description { get; }
-        string Summary { get; }
-        string ReleaseNotes { get; }
-        string Language { get; }
-        string Tags { get; }
-        string Copyright { get; }
-        IEnumerable<PackageDependencySet> DependencySets { get; }
-        Version MinClientVersion { get; }
+        string Title { get; set;}
+        IEnumerable<string> Authors { get; set;}
+        IEnumerable<string> Owners { get; set;}
+        Uri IconUrl { get; set;}
+        Uri LicenseUrl { get; set;}
+        Uri ProjectUrl { get; set;}
+        bool RequireLicenseAcceptance { get; set;}
+        string Description { get; set;}
+        string Summary { get; set;}
+        string ReleaseNotes { get; set;}
+        string Language { get; set;}
+        string Tags { get; set;}
+        string Copyright { get; set;}
+        IEnumerable<PackageDependencySet> DependencySets { get; set;}
+        Version MinClientVersion { get; set;}
     }
 }

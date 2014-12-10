@@ -37,12 +37,12 @@ namespace NuGet.Client.Resources
                 return _host;
             }         
         }
-        public abstract string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
+        //public abstract string Description
+        //{
+        //    get
+        //    {
+        //        return _description;
+        //    }
+        //}
     }
 }

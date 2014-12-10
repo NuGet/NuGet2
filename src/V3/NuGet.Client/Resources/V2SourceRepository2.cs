@@ -47,7 +47,7 @@ namespace NuGet.Client.Resources
             }
 
             _lprepo = _repository as LocalPackageRepository;
-            AddResource<SearchResource>(() => new V2SearchResource(repository,host));
+//            AddResource<SearchResource>(() => new V2SearchResource(repository,host));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]

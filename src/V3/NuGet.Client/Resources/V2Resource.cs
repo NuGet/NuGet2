@@ -10,7 +10,7 @@ namespace NuGet.Client.Resources
     /// Represents a resource provided by a V2 server. [ Like search resource, metadata resource]
     /// *TODOS: Add a trace source , Resource description ?
     /// </summary>
-    public interface V2Resource
+    public abstract class V2Resource
     {
         private IPackageRepository _v2Client;
         private string _host;
@@ -38,13 +38,13 @@ namespace NuGet.Client.Resources
             }
            
         }
-        public abstract string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
+        //public abstract string Description
+        //{
+        //    get
+        //    {
+        //        return _description;
+        //    }
+        //}
         
 
        

@@ -8,27 +8,25 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client.Resources;
-using NuGet.Client.V3;
+
 
 namespace NuGet.Client.VisualStudio.Repository
 {
-    public class VsV3SearchResource : VsSearchResource,IV3Resource
+    public class VsV3SearchResource : V3Resource, VsSearchResource
     {
-        private NuGetV3Client _v3Client;
-        private string _host;
-        public VsV3SearchResource(string sourceUrl,string host) 
+       
+        public VsV3SearchResource(string sourceUrl,string host) :base(sourceUrl,host,"xx")
         {
-            _v3Client = new NuGetV3Client(sourceUrl, host);
-            _host = host;
+           
         }
 
-        public async override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public async Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             List<string> frameworkNames = new List<string>();
             foreach (FrameworkName fx in filters.SupportedFrameworks)
                 frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
             await V3Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-            IEnumerable<JObject> searchResultJsonObjects = await Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
+            IEnumerable<JObject> searchResultJsonObjects = await V3Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
             List<VisualStudioUISearchMetaData> visualStudioUISearchResults = new List<VisualStudioUISearchMetaData>();
             foreach (JObject searchResultJson in searchResultJsonObjects)
                 visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson, filters.IncludePrerelease));
@@ -97,28 +95,6 @@ namespace NuGet.Client.VisualStudio.Repository
 
 
 
-        public NuGetV3Client V3Client
-        {
-            get
-            {
-                return _v3Client;
-            }
-            set
-            {
-                _v3Client = value;
-            }
-        }
-
-        public string Host
-        {
-            get
-            {
-                return _host;
-            }
-            set
-            {
-                _host = value;
-            }
-        }
+      
     }
 }

@@ -9,8 +9,8 @@ namespace NuGet.Client.Resources
     public abstract class ResolutionResource
     {
         public abstract PackageIdentity ResolvePackage(string id, string version);
-        public abstract PackageIdentity ResolveDependency( ??)
+       // public abstract PackageIdentity ResolveDependency( ??)
 
-)
+
     }
 }

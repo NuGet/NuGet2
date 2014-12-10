@@ -41,7 +41,7 @@ namespace NuGet.Client
         {
             _source = source;          
             _client = new NuGetV3Client(source.Url, host);
-            AddResource<SearchResource>(() => new V3SearchResource(source.Url,host));         
+           // AddResource<SearchResource>(() => new V3SearchResource(source.Url,host));         
         }
       
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)

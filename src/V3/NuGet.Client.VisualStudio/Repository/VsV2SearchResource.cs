@@ -8,18 +8,16 @@ using NuGet.Client.Resources;
 
 namespace NuGet.Client.VisualStudio.Repository
 {
-    public class VsV2SearchResource : VsSearchResource,V2Resource
+    public class VsV2SearchResource : V2Resource, VsSearchResource
     {
-        private IPackageRepository _v2Client;
-        private string _host;
+      
                      
-        public VsV2SearchResource(IPackageRepository repo,string host)
+        public VsV2SearchResource(IPackageRepository repo,string host):base(repo,host,"V2 Search")
         {
-            _v2Client = repo;
-            _host = host;            
+                    
         }
 
-        public override Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
   
             return Task.Factory.StartNew(() =>
@@ -84,28 +82,6 @@ namespace NuGet.Client.VisualStudio.Repository
 
             
 
-        IPackageRepository V2Client
-        {
-            get
-            {
-                return _v2Client;
-            }
-            set
-            {
-                _v2Client = value;
-            }
-        }
-
-        string Host
-        {
-            get
-            {
-                return _host;
-            }
-            set
-            {
-                _host = value;
-            }
-        }
+      
     }
 }

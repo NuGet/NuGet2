@@ -10,6 +10,6 @@ namespace NuGet.Client.Resources
     public abstract class MetadataResource
     {
         public abstract NuGetVersion GetLatestVersionForPowershellAndCommandLine(string packageId);
-        public abstract VisualStudioUIPackageMetaData GetPackageMetadataForVisualStudioUI(string packageId);
+       // public abstract VisualStudioUIPackageMetaData GetPackageMetadataForVisualStudioUI(string packageId);
     }
 }

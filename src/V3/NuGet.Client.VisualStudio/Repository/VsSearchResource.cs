@@ -8,10 +8,10 @@ using NuGet.Client.Resources;
 
 namespace NuGet.Client.VisualStudio.Repository
 {
-    public abstract class VsSearchResource
+    public interface VsSearchResource
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public abstract Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(
+         Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(
             string searchTerm,
             SearchFilter filters,
             int skip,
