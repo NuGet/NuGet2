@@ -216,10 +216,7 @@ namespace NuGet.VisualStudio
                 }
 
                 if (reference != null)
-                {
-                    TrySetCopyLocal(reference);
-                    TrySetSpecificVersion(reference);
-
+                {   
                     // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
                     // Most commonly, it happens if this assembly is in the GAC or in the output path.
                     if (reference.Path != null && !reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase))
@@ -242,10 +239,18 @@ namespace NuGet.VisualStudio
                                 // Add the <HintPath> metadata item as a relative path
                                 item.SetMetadataValue("HintPath", referencePath);
 
+                                // Set <Private> to true
+                                item.SetMetadataValue("Private", "True");
+
                                 // Save the project after we've modified it.
                                 Project.Save(this);
                             }
                         }
+                    }
+                    else
+                    {
+                        TrySetSpecificVersion(reference);
+                        TrySetCopyLocal(reference);
                     }
                 }
 
