@@ -10,16 +10,14 @@ namespace NuGet.Client.Resources
     /// <summary>
     /// Represents a resource provided by a V3 server. [ Like search resource, metadata resource]
     /// </summary>
-    public abstract class V3Resource
+    public abstract class V3Resource : Resource
     {
         private NuGetV3Client _v3Client;
-        private string _host;
-        private string _description;
-        public V3Resource(string sourceUrl, string host,string description) 
+       
+        public V3Resource(string sourceUrl, string host) :base(host)
         {
             _v3Client = new NuGetV3Client(sourceUrl, host);
-            _host = host;
-            _description = description;
+            
         }
 
         public NuGetV3Client V3Client
@@ -30,19 +28,7 @@ namespace NuGet.Client.Resources
             }           
         }
 
-        public string Host
-        {
-            get
-            {
-                return _host;
-            }         
-        }
-        //public abstract string Description
-        //{
-        //    get
-        //    {
-        //        return _description;
-        //    }
-        //}
+      
+               
     }
 }

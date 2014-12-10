@@ -12,7 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
-using NuGet.Client.Resources;
+using NuGet.Client;
+using NuGet.Client.VisualStudio.Models;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -106,10 +107,10 @@ namespace NuGet.Client.VisualStudio
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
         }
         
-        public override Task<IEnumerable<VisualStudioUISearchMetaData>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
+        public override Task<IEnumerable<SearchResult>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
             return Task.Run(async () => {
-                Dictionary<string, VisualStudioUISearchMetaData> result = new Dictionary<string, VisualStudioUISearchMetaData>(
+                Dictionary<string, SearchResult> result = new Dictionary<string, SearchResult>(
                     StringComparer.OrdinalIgnoreCase);
                 foreach (var proj in Projects)
                 {
@@ -130,9 +131,9 @@ namespace NuGet.Client.VisualStudio
             });
         }
 
-        private static void AddToResult(Dictionary<string, VisualStudioUISearchMetaData> result, VisualStudioUISearchMetaData package)
+        private static void AddToResult(Dictionary<string, SearchResult> result, SearchResult package)
         {
-            VisualStudioUISearchMetaData existingValue;
+            SearchResult existingValue;
             if (result.TryGetValue(package.Id, out existingValue))
             {
                 // if package has higher version, replace the old value with 

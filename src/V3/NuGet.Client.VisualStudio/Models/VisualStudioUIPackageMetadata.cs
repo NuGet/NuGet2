@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.Client.VisualStudio.Repository
+namespace NuGet.Client.VisualStudio.Models
 {
-    public class VisualStudioUIPackageMetadata
+    public class VisualStudioUIPackageMetadata 
     {
         string Title { get; set;}
         IEnumerable<string> Authors { get; set;}

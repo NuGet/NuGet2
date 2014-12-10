@@ -116,11 +116,11 @@
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
     <Compile Include="Resources\CommandLineSearchMetadata.cs" />
+    <Compile Include="Resources\V3DownloadResource.cs" />
     <Compile Include="Resources\V3Resource.cs" />
     <Compile Include="Resources\PowerShellAutoCompleteResource.cs" />
     <Compile Include="Resources\PowershellSearchMetadata.cs" />
     <Compile Include="Resources\SourceRepositoryFactory.cs" />
-    <Compile Include="Resources\V2Resource.cs" />
     <Compile Include="Resources\V2SourceRepository2.cs" />
     <Compile Include="Resources\VisualStudioUISearchMetaData.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
@@ -139,7 +139,7 @@
     <Compile Include="UpdatePreviewResult.cs" />
     <Compile Include="UserAgentUtil.cs" />
     <Compile Include="V3SourceRepository.cs" />
-    <Compile Include="V3SourceRepository2.cs" />
+    <Compile Include="Resources\V3SourceRepository2.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client.Resources;
+using NuGet.Client.VisualStudio.Models;
+using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.Repository
 {
