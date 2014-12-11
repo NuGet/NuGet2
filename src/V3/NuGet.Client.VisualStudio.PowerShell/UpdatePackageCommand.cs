@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System.Collections.Generic;
 using System.Linq;
@@ -123,8 +124,27 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
                     PackageIdentity identity = entry.Value;
+                    PackageIdentity update = null;
                     // Find package update
-                    PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                    if (!string.IsNullOrEmpty(Version))
+                    {
+                        NuGetVersion nVersion;
+                        bool success = NuGetVersion.TryParse(Version, out nVersion);
+                        if (success)
+                        {
+                            update = new PackageIdentity(Id, nVersion);
+                            identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, update, IncludePrerelease.IsPresent);
+                        }
+                        else
+                        {
+                            Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
+                        }
+                    }
+                    else
+                    {
+                        update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                    }
+
                     ExecuteSinglePackageAction(update, targetedProjects);
                 }
             }
