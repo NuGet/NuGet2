@@ -161,7 +161,8 @@ function New-Project {
         $project = Get-Project "$destPath\"
     }
     
-    $project
+    $project = $project.DteProject
+	$project
 }
 
 function Get-SolutionFolderPathRecursive([parameter(mandatory=$true)]$solutionFolder) {

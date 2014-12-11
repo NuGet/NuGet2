@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.ProjectSystem.Interop;
 
 namespace NuGet.Client.VisualStudio
 {
-    public class VsProject : Project, EnvDTE.Project
+    public class VsProject : Project
     {
         private readonly InstalledPackagesList _installed;
         private readonly VsSolution _solution;
@@ -32,29 +32,6 @@ namespace NuGet.Client.VisualStudio
         public override bool IsAvailable
         {
             get { return !DteProject.IsUnloaded(); }
-        }
-
-        public string FullPath
-        {
-            get { return DteProject.FullName; }
-        }
-
-        public EnvDTE.ProjectItems ProjectItems
-        {
-            get { return DteProject.GetReferences(); }
-        }
-
-        public VSLangProj References
-        {
-
-        }
-
-        public EnvDTE.Properties Properties
-        {
-            get
-            {
-                return DteProject.Properties;
-            }
         }
 
         public override InstalledPackagesList InstalledPackages
