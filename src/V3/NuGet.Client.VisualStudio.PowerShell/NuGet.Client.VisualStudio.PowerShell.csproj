@@ -11,11 +11,9 @@
     <RootNamespace>NuGet.Client.VisualStudio.PowerShell</RootNamespace>
     <AssemblyName>NuGet.Client.VisualStudio.PowerShell</AssemblyName>
     <CodeAnalysisRuleSet>..\..\..\NuGet.ruleset</CodeAnalysisRuleSet>
-	
-	<!-- TODO: enable code analysis later 
+    <!-- TODO: enable code analysis later 
 	<RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis> -->
     <RunCodeAnalysis>false</RunCodeAnalysis>
-	
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -113,6 +111,10 @@
     <ProjectReference Include="..\..\VsConsole\PowerShellHost\PowerShellHost.csproj">
       <Project>{5a79eef3-51c0-4a14-8d37-50ef38ad835d}</Project>
       <Name>PowerShellHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj">
+      <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
+      <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
       <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
