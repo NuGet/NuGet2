@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NuGet.Client.V2.VisualStudio")]
+[assembly: AssemblyTitle("TempTestApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("NuGet.Client.V2.VisualStudio")]
+[assembly: AssemblyProduct("TempTestApp")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c02ce57f-df3e-43fe-a548-2740f941c763")]
+[assembly: Guid("ac482121-764c-4de2-a284-b3c082c50208")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -121,7 +121,7 @@ namespace NuGet.Client.VisualStudio
         private SourceRepository CreateRepo(PackageSource source)
         {
             return new AutoDetectSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
-           // return SourceRepositoryFactory.CreateSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
+            // return SourceRepositoryFactory.CreateSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
         }
     }
 }

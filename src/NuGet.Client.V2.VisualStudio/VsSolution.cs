@@ -23,7 +23,7 @@ namespace NuGet.Client.VisualStudio
         private readonly string _name;
         private readonly InstalledPackagesList _installedSolutionLevelPackages;
         private readonly IVsPackageManager _packageManager;
-        
+
         public override bool IsAvailable
         {
             get
@@ -106,10 +106,11 @@ namespace NuGet.Client.VisualStudio
             return Projects.Cast<VsProject>().FirstOrDefault(
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
         }
-        
+
         public override Task<IEnumerable<SearchResult>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
-            return Task.Run(async () => {
+            return Task.Run(async () =>
+            {
                 Dictionary<string, SearchResult> result = new Dictionary<string, SearchResult>(
                     StringComparer.OrdinalIgnoreCase);
                 foreach (var proj in Projects)
