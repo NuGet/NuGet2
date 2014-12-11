@@ -133,7 +133,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                         if (success)
                         {
                             update = new PackageIdentity(Id, nVersion);
-                            identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, update, IncludePrerelease.IsPresent);
+                            update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, update, IncludePrerelease.IsPresent);
                         }
                         else
                         {
