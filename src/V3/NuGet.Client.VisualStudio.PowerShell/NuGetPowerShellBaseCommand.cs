@@ -66,10 +66,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _httpClientEvents = clientEvents;
         }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
-        [ValidateNotNullOrEmpty]
-        public virtual string ProjectName { get; set; }
-
         internal VsSolution Solution 
         {
             get
@@ -417,36 +413,46 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         #region Project APIs
         /// <summary>
-        /// Get the VsProject by name. 
-        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// This method will automatically generate error records for non-wildcarded project names that
+        /// are not found.
         /// </summary>
-        /// <param name="throwIfNotExists"></param>
-        /// <returns></returns>
-        public VsProject GetProject(bool throwIfNotExists)
+        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<EnvDTE.Project> GetProjectsByName(string[] projectNames)
         {
-            VsProject project = null;
+            var allValidProjectNames = GetAllValidProjectNames().ToList();
 
-            // If the user does not specify a project then use the Default project
-            if (String.IsNullOrEmpty(ProjectName))
+            foreach (string projectName in projectNames)
             {
-                ProjectName = _solutionManager.DefaultProjectName;
-            }
+                // if ctrl+c hit, leave immediately
+                if (Stopping)
+                {
+                    break;
+                }
 
-            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
-                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
-            if (dteProject != null)
-            {
-                project = Solution.GetProject(dteProject);
-            }
+                // Treat every name as a wildcard; results in simpler code
+                var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
 
-            // If that project was invalid then throw
-            if (project == null && throwIfNotExists)
-            {
-                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-            }
+                var matches = from s in allValidProjectNames
+                              where pattern.IsMatch(s)
+                              select _solutionManager.GetProject(s);
 
-            return project;
+                int count = 0;
+                foreach (var project in matches)
+                {
+                    count++;
+                    yield return project;
+                }
+
+                // We only emit non-terminating error record if a non-wildcarded name was not found.
+                // This is consistent with built-in cmdlets that support wildcarded search.
+                // A search with a wildcard that returns nothing should not be considered an error.
+                if ((count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName))
+                {
+                    ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
+                }
+            }
         }
 
         /// <summary>

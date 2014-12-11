@@ -47,6 +47,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public virtual string Id { get; set; }
 
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
+        [ValidateNotNullOrEmpty]
+        public virtual string ProjectName { get; set; }
+
         [Parameter(Position = 2)]
         [ValidateNotNullOrEmpty]
         public string Version { get; set; }
@@ -317,6 +321,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Get the VsProject by ProjectName. 
+        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// </summary>
+        /// <param name="throwIfNotExists"></param>
+        /// <returns></returns>
+        public VsProject GetProject(bool throwIfNotExists)
+        {
+            VsProject project = null;
+
+            // If the user does not specify a project then use the Default project
+            if (String.IsNullOrEmpty(ProjectName))
+            {
+                ProjectName = SolutionManager.DefaultProjectName;
+            }
+
+            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
+                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
+            if (dteProject != null)
+            {
+                project = Solution.GetProject(dteProject);
+            }
+
+            // If that project was invalid then throw
+            if (project == null && throwIfNotExists)
+            {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+            }
+
+            return project;
         }
     }
 }

@@ -27,6 +27,9 @@
     <Reference Include="Microsoft.VisualStudio.Shell.12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" Condition="'$(VisualStudioVersion)'=='12.0'" />
     <Reference Include="Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" Condition="'$(VisualStudioVersion)'=='14.0'" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,7 +60,9 @@
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\ProgressActivityIds.cs">
       <Link>ProgressActivityIds.cs</Link>
     </Compile>
+    <Compile Include="AddBindingRedirectCommand.cs" />
     <Compile Include="ConsolidatePackageCommand.cs" />
+    <Compile Include="FindPackageCommand.cs" />
     <Compile Include="GetPackageCommand.cs" />
     <Compile Include="GetProjectCommand.cs" />
     <Compile Include="InstallPackageCommand.cs" />
