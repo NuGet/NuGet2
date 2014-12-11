@@ -128,17 +128,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     // Find package update
                     if (!string.IsNullOrEmpty(Version))
                     {
-                        NuGetVersion nVersion;
-                        bool success = NuGetVersion.TryParse(Version, out nVersion);
-                        if (success)
-                        {
-                            update = new PackageIdentity(Id, nVersion);
-                            update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, update, IncludePrerelease.IsPresent);
-                        }
-                        else
-                        {
-                            Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
-                        }
+                        NuGetVersion nVersion = ParseUserInputForVersion(Version);
+                        PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
+                        update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
                     }
                     else
                     {

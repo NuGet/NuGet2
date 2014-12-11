@@ -86,25 +86,16 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                NuGetVersion nVersion;
-                bool success = NuGetVersion.TryParse(Version, out nVersion);
-                if (success)
-                {
-                    identity = new PackageIdentity(Id, nVersion);
-                }
-                else
-                {
-                    Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
-                }
-
+                NuGetVersion nVersion = ParseUserInputForVersion(Version);
+                PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
                 if (!_readFromDirectPackagePath)
                 {
-                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
+                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
                 }
             }
             else
             {
-                // For Install-Package and Update-Package
+                // Get the latest Version from package repository.
                 Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
                 identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
             }

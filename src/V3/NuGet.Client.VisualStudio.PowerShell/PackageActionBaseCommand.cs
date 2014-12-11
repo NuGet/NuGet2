@@ -2,6 +2,7 @@
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Resources;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
@@ -154,6 +155,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             VsProject vsProject = GetProject(true);
             this.Projects = new List<VsProject> { vsProject };
+        }
+
+        protected NuGetVersion ParseUserInputForVersion(string version)
+        {
+            NuGetVersion nVersion;
+            bool success = NuGetVersion.TryParse(Version, out nVersion);
+            if (!success)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
+            }
+            return nVersion;
         }
 
         protected virtual void ExecutePackageActions()

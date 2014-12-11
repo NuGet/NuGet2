@@ -567,7 +567,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 PackageSource packageSource = new PackageSource(source, url);
-                V3SourceRepository sourceRepo = new V3SourceRepository(packageSource, PSCommandsUserAgentClient);
+                var sourceRepo = new AutoDetectSourceRepository(packageSource, PSCommandsUserAgentClient, _repositoryFactory);
                 return sourceRepo;
             }
             catch (UriFormatException ex)
