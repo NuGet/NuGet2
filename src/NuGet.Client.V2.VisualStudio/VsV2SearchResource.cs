@@ -9,10 +9,12 @@ using NuGet.Client.VisualStudio.Models;
 using NuGet.Client.V2;
 using NuGet.Client.BaseTypes;
 using NuGet.Versioning;
+using System.ComponentModel.Composition;
 
 
-namespace NuGet.Client.VisualStudio.Repository
+namespace NuGet.Client.VisualStudio
 {
+    [Export(typeof(V2Resource))]
     public class VsV2SearchResource : V2Resource, VsSearchResource
     {
       

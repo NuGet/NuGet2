@@ -31,6 +31,7 @@ namespace NuGet.Client
         public abstract string Description
         {
             get;            
-        }        
+        } 
+            
     }
 }

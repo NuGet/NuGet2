@@ -4,6 +4,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client;
+using NuGet.Client.V2;
+using System.ComponentModel.Composition;
 
 namespace NuGet.Client
 {
@@ -18,6 +20,8 @@ namespace NuGet.Client
         private readonly PackageSource _source;
         private readonly string _userAgent;
 
+        [ImportMany(typeof(V2Resource))]
+        private IEnumerable<V2Resource> v2Resource;
         public override PackageSource Source { get { return _source; } }
 
         public V2SourceRepository2(PackageSource source, IPackageRepository repository, string host)
