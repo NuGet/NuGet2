@@ -13,5 +13,8 @@ namespace NuGet.Client
         public NuGetVersion Version;
         public string Description;
         public string Summary;
+        public Uri IconUrl { get; set; }
+        public IEnumerable<NuGetVersion> Versions { get; set; }
+       // public PackageMetadata latestPackageMetadata { get; set; }
     }
 }

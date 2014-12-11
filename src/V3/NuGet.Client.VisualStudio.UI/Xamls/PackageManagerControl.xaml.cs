@@ -15,6 +15,7 @@ using NuGet.VisualStudio;
 using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.Client.Resources;
+using NuGet.Client.VisualStudio.Models;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -418,19 +419,19 @@ namespace NuGet.Client.VisualStudio.UI
             if (ShowInstalled || ShowUpdatesAvailable)
             {
                 // search installed packages
-                var loader = new PackageLoader(
-                    (startIndex, ct) =>
-                        Target.SearchInstalled(
-                            sourceRepository,
-                            searchText,
-                            startIndex,
-                            PageSize,
-                            ct),
-                    sourceRepository,
-                    Target,
-                    option,
-                    searchText);
-                _packageList.Loader = loader;
+                //var loader = new PackageLoader(
+                //    (startIndex, ct) =>
+                //        Target.SearchInstalled(
+                //            sourceRepository,
+                //            searchText,
+                //            startIndex,
+                //            PageSize,
+                //            ct),
+                //    sourceRepository,
+                //    Target,
+                //    option,
+                //    searchText);
+                //_packageList.Loader = loader;
             }
             else
             {
@@ -453,7 +454,7 @@ namespace NuGet.Client.VisualStudio.UI
                 }
                 else
                 {
-                    SearchResource searchResource = sourceRepository.TryGetResource<SearchResource>();
+                     VsSearchResource searchResource = sourceRepository.TryGetResource<VsSearchResource>();
                     if (searchResource != null)
                     {
                         var loader = new PackageLoader(

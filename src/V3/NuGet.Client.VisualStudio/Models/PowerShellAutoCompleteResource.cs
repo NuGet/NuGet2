@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.Client.Resources
+namespace NuGet.Client.VisualStudio.Models
 {
     public abstract class PowerShellAutoCompleteResource
     {
@@ -13,3 +13,4 @@ namespace NuGet.Client.Resources
         public abstract IEnumerable<NuGetVersion> GetPackageVersionsStartingWith(string versionPrefix);
     }
 }
+

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using NuGet.Client.VisualStudio.Models;
 using NuGet.Client;
 
-namespace NuGet.Client.VisualStudio.Repository
+namespace NuGet.Client.VisualStudio.Models
 {
     public interface VsSearchResource
     {

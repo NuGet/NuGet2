@@ -16,8 +16,8 @@ namespace NuGet.Client.VisualStudio.Models
         //public string Id { get; set; }
         //public NuGetVersion Version { get; set; }
         //public string Summary { get; set; }
-        public Uri IconUrl { get; set; }
-        public IEnumerable<NuGetVersion> Versions { get; set; }
+        //public Uri IconUrl { get; set; }
+        //public IEnumerable<NuGetVersion> Versions { get; set; }
         public VisualStudioUIPackageMetadata latestPackageMetadata { get; set; }
 
     }

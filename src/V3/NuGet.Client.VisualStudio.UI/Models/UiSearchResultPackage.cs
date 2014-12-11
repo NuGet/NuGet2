@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
+using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.UI
 {
