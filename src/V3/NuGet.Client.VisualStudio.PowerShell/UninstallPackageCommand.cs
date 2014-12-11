@@ -59,8 +59,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, true);
+                NuGetVersion nVersion;
+                bool success = NuGetVersion.TryParse(Version, out nVersion);
+                if (success)
+                {
+                    identity = new PackageIdentity(Id, nVersion);
+                    identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, true);
+                }
+                else
+                {
+                    Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
+                }
             }
             else
             {

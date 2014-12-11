@@ -46,7 +46,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private ProgressRecordCollection _progressRecordCache;
-        private string _projectName;
         private bool _overwriteAll, _ignoreAll;
 
         public NuGetPowerShellBaseCommand(

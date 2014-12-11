@@ -29,7 +29,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
     {
         private PackageActionType _actionType;
         private SourceRepository _activeSourceRepository;
-        private IEnumerable<VsProject> _projects;
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,

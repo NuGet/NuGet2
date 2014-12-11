@@ -57,7 +57,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// or multiple identities for Install/Update-Package.
         /// </summary>
         /// <returns></returns>
-        protected IEnumerable<PackageIdentity> GetIdentitiesForResolver(bool isSafe = false)
+        protected IEnumerable<PackageIdentity> GetIdentitiesForResolver()
         {
             IEnumerable<PackageIdentity> identityList = Enumerable.Empty<PackageIdentity>();
             if (_readFromPackagesConfig)
@@ -70,7 +70,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
             else
             {
-                identityList = GetPackageIdentityForResolver(isSafe);
+                identityList = GetPackageIdentityForResolver();
             }
             return identityList;
         }
@@ -79,14 +79,24 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Returns single package identity for resolver when Id is specified
         /// </summary>
         /// <returns></returns>
-        private List<PackageIdentity> GetPackageIdentityForResolver(bool requireSafe)
+        private List<PackageIdentity> GetPackageIdentityForResolver()
         {
             PackageIdentity identity = null;
 
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                NuGetVersion nVersion;
+                bool success = NuGetVersion.TryParse(Version, out nVersion);
+                if (success)
+                {
+                    identity = new PackageIdentity(Id, nVersion);
+                }
+                else
+                {
+                    Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
+                }
+
                 if (!_readFromDirectPackagePath)
                 {
                     identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, identity, IncludePrerelease.IsPresent);
@@ -95,7 +105,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             else
             {
                 // For Install-Package and Update-Package
-                Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent, null, requireSafe);
+                Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
                 identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
             }
 

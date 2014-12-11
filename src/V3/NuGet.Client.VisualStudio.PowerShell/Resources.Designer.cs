@@ -88,6 +88,15 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fail to parse the input of Version parameter: {0} to a valid Semantic version. .
+        /// </summary>
+        internal static string Cmdlet_FailToParseVersion {
+            get {
+                return ResourceManager.GetString("Cmdlet_FailToParseVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to set {0} as the Default Project for PowerShell Console. .
         /// </summary>
         internal static string Cmdlet_FailToSetProject {
