@@ -15,6 +15,8 @@ using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 using NuGet.Client;
 using NuGet.Client.Installation;
 using System.Threading;
+using Newtonsoft.Json.Linq;
+using NuGet.Client.Interop;
 
 namespace NuGet.Commands
 {
@@ -258,7 +260,7 @@ namespace NuGet.Commands
             IFileSystem packagesFolderFileSystem,
             PackageIdentity packageIdentity,
             bool packageRestoreConsent,
-            ConcurrentQueue<IPackage> satellitePackages)
+            ConcurrentQueue<JObject> satellitePackages)
         {
             // BUGBUG: Looks like we are creating PackageManager for every single restore. This is likely done to support execution in parallel
             var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
@@ -302,6 +304,15 @@ namespace NuGet.Commands
                 var task = SourceRepository.GetPackageMetadata(packageIdentity.Id, packageIdentity.Version);
                 task.Wait();
                 var packageJSON = task.Result;
+
+                if (IsSatellitePackage(packageJSON))
+                {
+                    // Satellite packages would necessarily have to be installed later than the corresponding package. 
+                    // We'll collect them in a list to keep track and then install them later.
+                    satellitePackages.Enqueue(packageJSON);
+                    return true;
+                }
+
                 var packageAction = new NewPackageAction(Client.Resolution.PackageActionType.Download,
                     packageIdentity, packageJSON, filesystemInstallationTarget, SourceRepository, null);
 
@@ -313,6 +324,32 @@ namespace NuGet.Commands
                 actionExecutor.ExecuteActionsAsync(packageActions, CancellationToken.None).Wait();
                 return true;
             }
+        }
+
+        private bool IsSatellitePackage(JObject packageJSON)
+        {
+            if (!String.IsNullOrEmpty(packageJSON[Properties.PackageId].ToString()) &&
+                    packageJSON[Properties.PackageId].ToString().EndsWith('.' + packageJSON[Properties.Language].ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                // The satellite pack's Id is of the format <Core-Package-Id>.<Language>. Extract the core package id using this.
+                // Additionally satellite packages have a strict dependency on the core package
+                IEnumerable <PackageDependencySet> depEnum;
+                var deps = packageJSON.Value<JArray>(Properties.DependencyGroups);
+                if (deps == null)
+                {
+                    depEnum = Enumerable.Empty<PackageDependencySet>();
+                }
+                else
+                {
+                    depEnum = deps.Select(t => PackageJsonLd.DependencySetFromJson((JObject)t));
+                }
+                string corePackageId = packageJSON[Properties.PackageId].ToString().Substring(0, packageJSON[Properties.PackageId].ToString().Length - packageJSON[Properties.Language].ToString().Length - 1);
+                return depEnum.SelectMany(s => s.Dependencies).Any(
+                       d => d.Id.Equals(corePackageId, StringComparison.OrdinalIgnoreCase) &&
+                       d.VersionSpec != null &&
+                       d.VersionSpec.MaxVersion == d.VersionSpec.MinVersion && d.VersionSpec.IsMaxInclusive && d.VersionSpec.IsMinInclusive);
+            }
+            return false;
         }
 
         /// <returns>True if one or more packages are installed.</returns>
@@ -330,7 +367,7 @@ namespace NuGet.Commands
             // code. Instead, we'll use a cached set of sources. This should solve the issue and also give us some perf boost.
             SourceProvider = new CachedPackageSourceProvider(SourceProvider);
 
-            var satellitePackages = new ConcurrentQueue<IPackage>();
+            var satellitePackages = new ConcurrentQueue<JObject>();
             if (DisableParallelProcessing)
             {
                 foreach (var package in installedPackageReferences)
@@ -338,7 +375,7 @@ namespace NuGet.Commands
                     RestorePackage(fileSystem, package.Identity, packageRestoreConsent, satellitePackages);
                 }
 
-                // InstallSatellitePackages(fileSystem, satellitePackages);
+                InstallSatellitePackages(fileSystem, satellitePackages);
 
                 return true;
             }
@@ -349,6 +386,27 @@ namespace NuGet.Commands
             Task.WaitAll(tasks);
             // Return true if we installed any satellite packages or if any of our install tasks succeeded.
             // TODO: Satellite packages
+            InstallSatellitePackages(fileSystem, satellitePackages);
+
+            return true;
+        }
+
+        private bool InstallSatellitePackages(IFileSystem packagesFolderFileSystem, ConcurrentQueue<JObject> satellitePackages)
+        {
+            if (satellitePackages.Count == 0)
+            {
+                return false;
+            }
+
+            var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
+            var filesystemInstallationTarget = new FilesystemInstallationTarget(packageManager);
+            var packageAction = satellitePackages.Select(packageJSON => new NewPackageAction(Client.Resolution.PackageActionType.Download,
+                    new PackageIdentity(packageJSON[Properties.PackageId].ToString(), new NuGetVersion (packageJSON[Properties.Version].ToString())), packageJSON, filesystemInstallationTarget, SourceRepository, null));
+
+            // BUGBUG: See PackageExtractor.cs for locking mechanism used to handle concurrency
+            NuGet.Client.Installation.ActionExecutor actionExecutor = new Client.Installation.ActionExecutor();
+            actionExecutor.ExecuteActionsAsync(packageAction, CancellationToken.None).Wait();
+
             return true;
         }
 
