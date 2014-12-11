@@ -115,14 +115,8 @@
     <Compile Include="Installation\PurgeActionHandler.cs" />
     <Compile Include="Resolution\ResolutionContext.cs" />
     <Compile Include="Installation\UninstallActionHandler.cs" />
-    <Compile Include="Resources\CommandLineSearchMetadata.cs" />
-    <Compile Include="Resources\V3DownloadResource.cs" />
     <Compile Include="Resources\V3Resource.cs" />
-    <Compile Include="Resources\PowerShellAutoCompleteResource.cs" />
-    <Compile Include="Resources\PowershellSearchMetadata.cs" />
     <Compile Include="Resources\SourceRepositoryFactory.cs" />
-    <Compile Include="Resources\V2SourceRepository2.cs" />
-    <Compile Include="Resources\VisualStudioUISearchMetaData.cs" />
     <Compile Include="SetUserAgentHandler.cs" />
     <Compile Include="SourceRepository.cs" />
     <Compile Include="SourceRepositoryManager.cs" />

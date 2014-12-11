@@ -74,6 +74,8 @@
     <Compile Include="ActivityLogTraceListener.cs" />
     <Compile Include="DebugConsoleTraceListener.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\PowerShellAutoCompleteResource.cs" />
+    <Compile Include="Models\PowershellSearchMetadata.cs" />
     <Compile Include="Models\VsMetadataResource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\VisualStudioUIPackageMetadata.cs" />
