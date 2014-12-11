@@ -17,6 +17,7 @@ using NuGet.Client.Installation;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Interop;
+using System.Diagnostics;
 
 namespace NuGet.Commands
 {
@@ -269,6 +270,7 @@ namespace NuGet.Commands
                 return false;
             }
 
+            // BUGBUG: Investigate if the following lock is needed
             EnsurePackageRestoreConsent(packageRestoreConsent);
             if (RequireConsent && _outputOptOutMessage)
             {
@@ -321,7 +323,7 @@ namespace NuGet.Commands
 
                 // BUGBUG: This is likely inefficient. Consider collecting all actions first and executing them in 1 shot
                 var packageActions = new List<NewPackageAction>() { packageAction };
-                actionExecutor.ExecuteActionsAsync(packageActions, CancellationToken.None).Wait();
+                actionExecutor.ExecuteActionsAsync(packageActions, Console, CancellationToken.None).Wait();
                 return true;
             }
         }
@@ -554,7 +556,16 @@ namespace NuGet.Commands
                     throw new InvalidOperationException(message);
                 }
 
-                InstallPackages(packagesFolderFileSystem, GetInstalledPackageReferences(_packagesConfigFileFullPath, projectName: null));
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
+                var installedPackageReferences = GetInstalledPackageReferences(_packagesConfigFileFullPath, projectName: null);
+                watch.Stop();
+                DisplayExecutedTime(watch.Elapsed, "GetInstalledPackageReferences");
+
+                watch.Restart();
+                InstallPackages(packagesFolderFileSystem, installedPackageReferences);
+                watch.Stop();
+                DisplayExecutedTime(watch.Elapsed, "RestoringPackages");
             }
         }
     }

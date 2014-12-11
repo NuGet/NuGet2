@@ -141,7 +141,7 @@ namespace NuGet.Commands
             }
 
             var actionExecutor = new ActionExecutor();
-            await actionExecutor.ExecuteActionsAsync(actions, CancellationToken.None);
+            await actionExecutor.ExecuteActionsAsync(actions, Console, CancellationToken.None);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
+using System.Diagnostics;
 
 namespace NuGet.Commands
 {
@@ -26,8 +27,8 @@ namespace NuGet.Commands
         [Import]
         public IConsole Console { get; set; }
 
-        //[Import]
-        //public HelpCommand HelpCommand { get; set; }
+        [Import]
+        public HelpCommand HelpCommand { get; set; }
 
         [Import]
         public ICommandManager Manager { get; set; }
@@ -72,10 +73,12 @@ namespace NuGet.Commands
         {
             if (Help)
             {
-                //HelpCommand.ViewHelpForCommand(CommandAttribute.CommandName);
+                HelpCommand.ViewHelpForCommand(CommandAttribute.CommandName);
             }
             else
             {
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
                 if (String.IsNullOrEmpty(ConfigFile))
                 {
                     Settings = NuGet.Settings.LoadDefaultSettings(
@@ -113,10 +116,20 @@ namespace NuGet.Commands
                 HttpClient.DefaultCredentialProvider = credentialProvider;
 
                 ExecuteCommand();
+                watch.Stop();
+                DisplayExecutedTime(watch.Elapsed, CommandAttribute.CommandName);
             }
         }
 
         public abstract void ExecuteCommand();
+
+        protected void DisplayExecutedTime(TimeSpan elapsed, string executionName)
+        {
+            if (Verbosity == NuGet.Verbosity.Detailed)
+            {
+                Console.WriteLine("Executed '{0}' in {1} seconds", executionName, elapsed.TotalSeconds);
+            }
+        }
 
         /// <summary>
         /// Indicates if the config file should be created if it does not exist.

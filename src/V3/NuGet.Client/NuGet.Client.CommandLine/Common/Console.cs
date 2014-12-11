@@ -4,14 +4,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
-using NuGet;
+using NuGet.Client;
 
 namespace NuGet.Common
 {
     public class Console : IConsole
     {
+        private readonly ILogger _V2Logger;
         public Console()
         {
+            _V2Logger = new ShimLogger(this);
             // setup CancelKeyPress handler so that the console colors are
             // restored to their original values when nuget.exe is interrupted
             // by Ctrl-C.
@@ -324,23 +326,33 @@ namespace NuGet.Common
             }
         }
 
-        public void Log(MessageLevel level, string message, params object[] args)
+        public void Log(NuGet.MessageLevel level, string message, params object[] args)
+        {
+            _V2Logger.Log(level, message, args);
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            return _V2Logger.ResolveFileConflict(message);
+        }
+
+        public void Log(Client.MessageLevel level, string message, params object[] args)
         {
             switch (level)
             {
-                case MessageLevel.Info:
+                case Client.MessageLevel.Info:
                     WriteLine(message, args);
                     break;
-                case MessageLevel.Warning:
+                case Client.MessageLevel.Warning:
                     WriteWarning(message, args);
                     break;
-                case MessageLevel.Debug:
+                case Client.MessageLevel.Debug:
                     WriteColor(Out, ConsoleColor.Gray, message, args);
                     break;
             }
         }
 
-        public FileConflictResolution ResolveFileConflict(string message)
+        FileConflictAction IExecutionLogger.ResolveFileConflict(string message)
         {
             // make the question stand out from previous text
             WriteLine();
@@ -352,17 +364,17 @@ namespace NuGet.Common
             var acceptedAnswers = new List<string> { "Y", "A", "N", "L" };
             var choices = new[]
             {
-                FileConflictResolution.Overwrite,
-                FileConflictResolution.OverwriteAll,
-                FileConflictResolution.Ignore,
-                FileConflictResolution.IgnoreAll
+                FileConflictAction.Overwrite,
+                FileConflictAction.OverwriteAll,
+                FileConflictAction.Ignore,
+                FileConflictAction.IgnoreAll
             };
 
             while (true)
             {
                 Write(LocalizedResourceManager.GetString("FileConflictChoiceText"));
-                string answer = ReadLine();                
-                if (!String.IsNullOrEmpty(answer)) 
+                string answer = ReadLine();
+                if (!String.IsNullOrEmpty(answer))
                 {
                     int index = acceptedAnswers.FindIndex(a => a.Equals(answer, StringComparison.OrdinalIgnoreCase));
                     if (index > -1)
