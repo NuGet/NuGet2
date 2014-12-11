@@ -97,16 +97,7 @@ namespace NuGet.Client
 
           public abstract Task<JObject> GetPackageMetadata(string id, NuGetVersion version);
           public abstract Task<IEnumerable<JObject>> GetPackageMetadataById(string packageId);
-          public abstract void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target);
-
-
-            public class SearchFilter
-            {
-                public IEnumerable<FrameworkName> SupportedFrameworks { get; set; }
-                public bool IncludePrerelease { get; set; }
-            }
-
-
+          public abstract void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target);        
 
         #endregion 
     }

@@ -5,7 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client;
-using NuGet.Client.VisualStudio;
+using NuGet.Client.VisualStudio.Models;
+using NuGet.Client.V2;
+using NuGet.Client.BaseTypes;
+using NuGet.Versioning;
+
 
 namespace NuGet.Client.VisualStudio.Repository
 {
@@ -13,7 +17,7 @@ namespace NuGet.Client.VisualStudio.Repository
     {
       
                      
-        public VsV2SearchResource(IPackageRepository repo,string host):base(repo,host,"V2 Search")
+        public VsV2SearchResource(IPackageRepository repo,string host):base(repo,host)
         {
                     
         }
@@ -70,9 +74,9 @@ namespace NuGet.Client.VisualStudio.Repository
 
             VisualStudioUISearchMetaData searchMetaData = new VisualStudioUISearchMetaData();
             searchMetaData.Id = package.Id;
-            searchMetaData.Version = CoreConverters.SafeToNuGetVer(package.Version);
+            searchMetaData.Version = SafeToNuGetVer(package.Version);
             searchMetaData.Summary = package.Summary;
-            searchMetaData.Versions = versions.Select(p => CoreConverters.SafeToNuGetVer(p.Version));
+            searchMetaData.Versions = versions.Select(p => SafeToNuGetVer(p.Version));
             if (string.IsNullOrWhiteSpace(package.Summary))
                 searchMetaData.Summary = package.Summary;
             else
@@ -80,9 +84,21 @@ namespace NuGet.Client.VisualStudio.Repository
             searchMetaData.IconUrl = package.IconUrl;
             return searchMetaData;
         }
-
-            
-
+        
+        public override string Description
+        {
+            get { throw new NotImplementedException(); }
+        }
+        private NuGetVersion SafeToNuGetVer(SemanticVersion semanticVersion)
+        {
+            if (semanticVersion == null)
+            {
+                return null;
+            }
+            return new NuGetVersion(
+                semanticVersion.Version,
+                semanticVersion.SpecialVersion);
+        }
       
     }
 }

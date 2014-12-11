@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NuGet.Versioning">
+      <HintPath>..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,12 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VsV2MetadataResource.cs" />
     <Compile Include="VsV2SearchResource.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.V2\NuGet.Client.V2.csproj">
       <Project>{07536c1c-85c7-4150-ada3-5705e7a9e3ca}</Project>
       <Name>NuGet.Client.V2</Name>

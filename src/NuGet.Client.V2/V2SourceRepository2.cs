@@ -11,7 +11,7 @@ namespace NuGet.Client
     /// V2SourceRepository which exposes various resources like SearchResource, MetricsResource and so on...
     /// *TODOS: Add tracing
     /// </summary>
-    public class V2SourceRepository2 : SourceRepository2
+    public class V2SourceRepository2 : SourceRepository
     {
         private readonly IPackageRepository _repository;
         private readonly LocalPackageRepository _lprepo;
@@ -45,6 +45,26 @@ namespace NuGet.Client
 //            AddResource<SearchResource>(() => new V2SearchResource(repository,host));
         }
 
-       
+
+
+        public override Task<IEnumerable<Newtonsoft.Json.Linq.JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task<Newtonsoft.Json.Linq.JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task<IEnumerable<Newtonsoft.Json.Linq.JObject>> GetPackageMetadataById(string packageId)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

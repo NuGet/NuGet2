@@ -59,6 +59,7 @@
     <Compile Include="Respository\Resource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Respository\SourceRepository.cs" />
+    <Compile Include="SearchFilter.cs" />
     <Compile Include="SearchResult.cs" />
     <Compile Include="UserAgentUtil.cs" />
   </ItemGroup>
