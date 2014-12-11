@@ -30,13 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-      <HintPath>..\..\..\..\Program Files (x86)\Common Files\Microsoft Shared\MSEnv\PublicAssemblies\envdte.dll</HintPath>
-    </Reference>
     <Reference Include="NuGet.Versioning">
-      <HintPath>..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
+      <HintPath>..\..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -48,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\NuGetVersion.cs" />
     <Compile Include="Models\PowerShellAutoCompleteResource.cs" />
     <Compile Include="Models\PowershellSearchMetadata.cs" />
     <Compile Include="Models\VisualStudioUIPackageMetadata.cs" />
@@ -57,11 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj">
+    <ProjectReference Include="..\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj">
       <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
       <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>

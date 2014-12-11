@@ -53,10 +53,6 @@
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.V2.VisualStudio\NuGet.Client.VisualStudio.csproj">
-      <Project>{2de18bab-dda1-4f71-9000-641198758399}</Project>
-      <Name>NuGet.Client.VisualStudio</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.V2\NuGet.Client.V2.csproj">
       <Project>{07536c1c-85c7-4150-ada3-5705e7a9e3ca}</Project>
       <Name>NuGet.Client.V2</Name>

@@ -198,10 +198,6 @@
       <Project>{a8efbe54-4136-4d15-8db7-3ffecee50682}</Project>
       <Name>NuGet.Client.VisualStudio.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.VisualStudio\NuGet.Client.V2.VisualStudio.csproj">
-      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
-      <Name>NuGet.Client.V2.VisualStudio</Name>
-    </ProjectReference>
     <ProjectReference Include="..\V3\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
       <Name>NuGet.Client</Name>
