@@ -156,7 +156,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V3Interop", "src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj", "{9FE9B712-F684-43EC-8F20-F452C60437CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.CommandLine", "src\V3\NuGet.Client\NuGet.Client.CommandLine\NuGet.Client.CommandLine.csproj", "{253F3206-BEF0-4F7E-8D04-570E7E339643}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.CommandLine", "src\V3\NuGet.Client.CommandLine\NuGet.Client.CommandLine.csproj", "{253F3206-BEF0-4F7E-8D04-570E7E339643}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

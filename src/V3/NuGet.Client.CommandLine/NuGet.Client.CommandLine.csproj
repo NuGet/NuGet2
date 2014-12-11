@@ -36,7 +36,7 @@
     <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -46,10 +46,10 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\Common\CommonResources.cs">
+    <Compile Include="..\..\..\Common\CommonResources.cs">
       <Link>ResourceHelpers\CommonResources.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Common\NuGetConstants.cs">
+    <Compile Include="..\..\..\Common\NuGetConstants.cs">
       <Link>Common\NuGetConstants.cs</Link>
     </Compile>
     <Compile Include="Attributes\CommandAttribute.cs" />
@@ -105,7 +105,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\Common\CommonResources.resx">
+    <EmbeddedResource Include="..\..\..\Common\CommonResources.resx">
       <Link>ResourceHelpers\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
@@ -119,15 +119,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Core\Core.csproj">
+    <ProjectReference Include="..\..\Core\Core.csproj">
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Versioning\Versioning.csproj">
+    <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.csproj">
+    <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
       <Name>NuGet.Client</Name>
     </ProjectReference>
