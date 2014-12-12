@@ -82,13 +82,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter]
         [ValidateRange(0, Int32.MaxValue)]
-        public int Skip { get; set; }
+        public int Skip { get; set; }   
 
         protected override void ProcessRecordCore()
         {
-            List<InstallationTarget> targets = new List<InstallationTarget>();
-            List<JObject> solutionInstalledPackages = new List<JObject>();
+            IEnumerable<InstallationTarget> targets = PreprocessProjects();
+            List<JObject> installedJObjects = GetInstalledJObjectInSolution(targets);
+            IEnumerable<JObject> installedPackages = Enumerable.Empty<JObject>();
 
+            // Filter the results by string
+            if (!string.IsNullOrEmpty(Filter))
+            {
+                installedPackages = installedJObjects.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                installedPackages = installedJObjects;
+            }
+
+            // Skip and then take
+            installedPackages = installedPackages.Skip(Skip).ToList();
+            if (_firstValueSpecified)
+            {
+                installedPackages = installedPackages.Take(First).ToList();
+            }
+
+            // Get the PowerShellPackageView
+            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
+            WriteObject(view, enumerateCollection: true);
+        }
+
+        protected IEnumerable<InstallationTarget> PreprocessProjects()
+        {
+            List<InstallationTarget> targets = new List<InstallationTarget>();
             if (!string.IsNullOrEmpty(ProjectName))
             {
                 // Get current project
@@ -100,40 +126,23 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 targets = Solution.GetAllTargetsRecursively().ToList();
             }
+            return targets;
+        }
 
+        protected List<JObject> GetInstalledJObjectInSolution(IEnumerable<InstallationTarget> targets)
+        {
+            List<JObject> list = new List<JObject>();
             foreach (InstallationTarget target in targets)
             {
                 InstalledPackagesList projectlist = target.InstalledPackages;
-
                 // Get all installed packages and metadata for project
                 Task<IEnumerable<JObject>> task = projectlist.GetAllInstalledPackagesAndMetadata();
                 IEnumerable<JObject> installedObjects = task.Result.ToList();
 
                 // Add to the solution's installed packages list
-                solutionInstalledPackages.AddRange(installedObjects);
+                list.AddRange(installedObjects);
             }
-
-            IEnumerable<JObject> installedPackages = null;
-
-            // Filter the results by string, then skip and take
-            if (!string.IsNullOrEmpty(Filter))
-            {
-                installedPackages = solutionInstalledPackages.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                installedPackages = solutionInstalledPackages;
-            }
-
-            installedPackages = installedPackages.Skip(Skip).ToList();
-            if (_firstValueSpecified)
-            {
-                installedPackages = installedPackages.Take(First).ToList();
-            }
-
-            // Get the PowerShellPackageView
-            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
-            WriteObject(view, enumerateCollection: true);
+            return list;
         }
     }
 }
