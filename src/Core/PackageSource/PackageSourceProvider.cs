@@ -41,14 +41,13 @@ namespace NuGet
             IDictionary<PackageSource, PackageSource> migratePackageSources)
             : this(settingsManager, providerDefaultSources, migratePackageSources, ConfigurationDefaults.Instance.DefaultPackageSources, new EnvironmentVariableWrapper())
         {
-
         }
 
         internal PackageSourceProvider(
             ISettings settingsManager,
             IEnumerable<PackageSource> providerDefaultSources,
             IDictionary<PackageSource, PackageSource> migratePackageSources,
-            IEnumerable<PackageSource> configurationDefaultSources, 
+            IEnumerable<PackageSource> configurationDefaultSources,
             IEnvironmentVariableReader environment)
         {
             if (settingsManager == null)
@@ -69,10 +68,10 @@ namespace NuGet
         public IEnumerable<PackageSource> LoadPackageSources()
         {
             var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var settingsValue = new List<SettingValue>();            
+            var settingsValue = new List<SettingValue>();
             IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);
             var machineWideSourcesCount = 0;
-            
+
             if (!values.IsEmpty())
             {
                 var machineWideSources = new List<SettingValue>();
@@ -90,7 +89,7 @@ namespace NuGet
                         }
                         else
                         {
-                            settingsValue.Add(settingValue); 
+                            settingsValue.Add(settingValue);
                         }
 
                         sources.Add(settingValue.Key);
@@ -108,27 +107,32 @@ namespace NuGet
             var loadedPackageSources = new List<PackageSource>();
             if (!settingsValue.IsEmpty())
             {
-                // put disabled package source names into the hash set
-
-                IEnumerable<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName) ??
-                                                                                  Enumerable.Empty<KeyValuePair<string, string>>();
-                var disabledSources = new HashSet<string>(disabledSourcesValues.Select(s => s.Key), StringComparer.CurrentCultureIgnoreCase);
+                // get list of disabled packages
+                var disabledSources = (_settingsManager.GetSettingValues(DisabledPackageSourcesSectionName, isPath: false) ?? Enumerable.Empty<SettingValue>())
+                    .ToDictionary(s => s.Key, StringComparer.CurrentCultureIgnoreCase);
                 loadedPackageSources = settingsValue.
-                                           Select(p =>
-                                           {
-                                               string name = p.Key;
-                                               string src = p.Value;
-                                               PackageSourceCredential creds = ReadCredential(name);
+                    Select(p =>
+                    {
+                        string name = p.Key;
+                        string src = p.Value;
+                        PackageSourceCredential creds = ReadCredential(name);
 
-                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name))
-                                               {
-                                                   UserName = creds != null ? creds.Username : null,
-                                                   Password = creds != null ? creds.Password : null,
-                                                   IsPasswordClearText = creds != null && creds.IsPasswordClearText,
-                                                   IsMachineWide = p.IsMachineWide
-                                               };
+                        bool isEnabled = true;
+                        SettingValue disabledSource;
+                        if (disabledSources.TryGetValue(name, out disabledSource) &&
+                            disabledSource.Priority >= p.Priority)
+                        {
+                            isEnabled = false;
+                        }
 
-                                           }).ToList();
+                        return new PackageSource(src, name, isEnabled)
+                        {
+                            UserName = creds != null ? creds.Username : null,
+                            Password = creds != null ? creds.Password : null,
+                            IsPasswordClearText = creds != null && creds.IsPasswordClearText,
+                            IsMachineWide = p.IsMachineWide
+                        };
+                    }).ToList();
 
                 if (_migratePackageSources != null)
                 {
@@ -298,7 +302,7 @@ namespace NuGet
             // and write the new ones
             _settingsManager.SetValues(
                 PackageSourcesSectionName,
-                sources.Where(p => !p.IsMachineWide)
+                sources.Where(p => !p.IsMachineWide && p.IsPersistable)
                     .Select(p => new KeyValuePair<string, string>(p.Name, p.Source))
                     .ToList());
 
@@ -362,7 +366,9 @@ namespace NuGet
         private class PackageSourceCredential
         {
             public string Username { get; private set; }
+
             public string Password { get; private set; }
+
             public bool IsPasswordClearText { get; private set; }
 
             public PackageSourceCredential(string username, string password, bool isPasswordClearText)

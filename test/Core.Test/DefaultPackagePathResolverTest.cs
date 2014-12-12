@@ -1,4 +1,5 @@
-﻿using NuGet.Test.Mocks;
+﻿using System.IO;
+using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.Test
@@ -18,7 +19,7 @@ namespace NuGet.Test
             string installPath = resolver.GetInstallPath(testPackage);
 
             // Assert
-            Assert.Equal(fs.Root + "Test.1.0", installPath);
+            Assert.Equal(Path.Combine(fs.Root, "Test.1.0"), installPath);
         }
 
         [Fact]

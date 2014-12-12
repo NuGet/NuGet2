@@ -26,10 +26,9 @@ namespace NuGet.Client.VisualStudio
 
         private static PackageSource CreateV3PreviewSource()
         {
-            var url = "https://az320820.vo.msecnd.net/ver3-preview/index.json";
             var source = new PackageSource(
                 Strings.VsSourceRepositoryManager_V3SourceName,
-                url);
+                NuGetConstants.V3FeedUrl);
             return source;
         }
 
@@ -59,8 +58,6 @@ namespace NuGet.Client.VisualStudio
         {
             get
             {
-                yield return NuGetV3PreviewSource;
-
                 var coreSources = _sourceProvider
                     .GetEnabledPackageSources()
                     .Select(s => new PackageSource(s.Name, s.Source));

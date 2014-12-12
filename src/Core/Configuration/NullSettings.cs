@@ -29,11 +29,6 @@ namespace NuGet
             return new List<KeyValuePair<string, string>>().AsReadOnly();
         }
 
-        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
-        {
-            return new List<KeyValuePair<string, string>>().AsReadOnly();
-        }
-
         public IList<SettingValue> GetSettingValues(string section, bool isPath)
         {
             return new List<SettingValue>().AsReadOnly();

@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Moq;
 using NuGet.Test;
+using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test
 {
     public class VsPackageSourceProviderTest
     {
-        private const string NuGetOfficialFeedUrlV3 = "https://az320820.vo.msecnd.net/ver3-preview/index.json";
-        private const string NuGetOfficialFeedNameV3 = "preview.nuget.org";
-
         private const string NuGetOfficialFeedUrl = "https://www.nuget.org/api/v2/";
         private const string NuGetOfficialFeedName = "nuget.org";
         private const string NuGetLegacyOfficialFeedName = "NuGet official package source";
@@ -179,8 +177,8 @@ namespace NuGet.VisualStudio.Test
             AssertPackageSource(sources[1], NuGetOfficialFeedName, NuGetOfficialFeedUrl);
             Assert.False(sources[1].IsEnabled);
             Assert.True(sources[1].IsOfficial);
-        }
-              
+        }     
+
         [Fact]
         public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
         {
@@ -190,8 +188,8 @@ namespace NuGet.VisualStudio.Test
                         .Returns(new[] { new SettingValue(NuGetLegacyOfficialFeedName, "https://go.microsoft.com/fwlink/?LinkID=206669", false) });
 
             // disable the official source
-            userSettings.Setup(s => s.GetValues("disabledPackageSources"))
-                        .Returns(new[] { new KeyValuePair<string, string>(NuGetLegacyOfficialFeedName, "true") });
+            userSettings.Setup(s => s.GetSettingValues("disabledPackageSources", false))
+                        .Returns(new[] { new  SettingValue(NuGetLegacyOfficialFeedName, "true", false) });
 
             var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
@@ -399,25 +397,40 @@ namespace NuGet.VisualStudio.Test
         public void TheDisabledStateOfWindows8FeedIsPersistedWhenRunningOnWindows8Express()
         {
             // Arrange
-            var userSettings = new Mock<ISettings>();
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
-
+            var mockFileSystem = new MockFileSystem();
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                configFileName: null,
+                machineWideSettings: null);
+            var packageSourceProvider = new PackageSourceProvider(settings);
             var vsShellInfo = new Mock<IVsShellInfo>();
             vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
-            packageSourceProvider.Setup(p => p.DisablePackageSource(It.IsAny<PackageSource>())).Callback<PackageSource>(
-                ps => AssertPackageSource(ps, "Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl));
+            var provider = new VsPackageSourceProvider(settings, packageSourceProvider, vsShellInfo.Object);
+            var packageSources = provider.LoadPackageSources().ToList();
+
+            Assert.Equal(1, packageSources.Count);
+            Assert.Equal(NuGetConstants.VSExpressForWindows8FeedUrl, packageSources[0].Source);
+            Assert.True(packageSources[0].IsEnabled);
 
             // Act
-            var packageSources = new PackageSource[]
-            {
-                new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl, "Windows 8 packages", isEnabled: false, isOfficial: true),
-                new PackageSource("theFirstSource", "theFirstFeed", isEnabled: true)
-            };
+            packageSources[0].IsEnabled = false;
             provider.SavePackageSources(packageSources);
 
             // Assert
-            packageSourceProvider.Verify(p => p.DisablePackageSource(It.IsAny<PackageSource>()), Times.Once());
+            // the Win8ExpressFeed is not saved in <disabledPackageSources>.
+            Assert.Equal(1, mockFileSystem.Paths.Count);
+            var configFile = mockFileSystem.Paths.First().Key;
+            var configFileContent = mockFileSystem.ReadAllText(configFile);
+
+            Assert.Equal(
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageSources />
+  <disabledPackageSources>
+    <add key=""Windows 8 Packages"" value=""true"" />
+  </disabledPackageSources>
+</configuration>",
+                  configFileContent);
         }
 
         [Fact]
@@ -470,7 +483,6 @@ namespace NuGet.VisualStudio.Test
             Assert.False(packageSources[0].IsEnabled);
         }
 
-        /* !!!
         [Fact]
         public void SetActivePackageSourceToWindows8FeedWillThrowWhenNotRunningWindows8Express()
         {
@@ -492,120 +504,153 @@ namespace NuGet.VisualStudio.Test
                 () => provider.ActivePackageSource = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl, "Windows 8 packages"),
                 "value",
                 "The package source does not belong to the collection of available sources.");
-        } */
+        }
+
+
+        [Fact]
+        public void PackageSourcesNotChanged()
+        {
+            bool r = VsPackageSourceProvider.PackageSourcesEqual(
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                },
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                });
+            Assert.True(r);
+        }
+
+        [Fact]
+        public void PackageSourcesChanged()
+        {
+            // Assert: names differ
+            bool r = VsPackageSourceProvider.PackageSourcesEqual(
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                },
+                new List<PackageSource>() {
+                    new PackageSource("a1", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                });
+            Assert.False(r);
+
+            // Assert: sources differ
+            r = VsPackageSourceProvider.PackageSourcesEqual(
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                },
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a1", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                });
+            Assert.False(r);
+
+            // Assert: isEnabled differ
+            r = VsPackageSourceProvider.PackageSourcesEqual(
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: true),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                },
+                new List<PackageSource>() {
+                    new PackageSource("a", "http://a", isEnabled: false),
+                    new PackageSource("b", "http://b", isEnabled: false)
+                });
+            Assert.False(r);
+        }
 
         [Fact]
         public void LoadPackageSourcesWillAddTheWindows8SourceAtTheFrontWhenRunningWindows8Express()
         {
             // Arrange
-            var userSettings = new Mock<ISettings>();
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
-            {
-                new PackageSource("theFirstSource", "theFirstFeed"),
-                new PackageSource(NuGetOfficialFeedUrl, NuGetOfficialFeedName),
-                new PackageSource("theThirdSource", "theThirdFeed"),
-            });
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("nuget.config",
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageSources>
+    <add key=""a"" value=""http://a"" />
+  </packageSources>
+</configuration>");
+
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                configFileName: null,
+                machineWideSettings: null);
+            var packageSourceProvider = new PackageSourceProvider(settings);
             var vsShellInfo = new Mock<IVsShellInfo>();
             vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+            var provider = new VsPackageSourceProvider(settings, packageSourceProvider, vsShellInfo.Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(4, sources.Count);
+            Assert.Equal(2, sources.Count);
             AssertPackageSource(sources[0], "Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl);
-            AssertPackageSource(sources[1], "theFirstFeed", "theFirstSource");
-            AssertPackageSource(sources[2], NuGetOfficialFeedName, NuGetOfficialFeedUrl);
-            AssertPackageSource(sources[3], "theThirdFeed", "theThirdSource");
+            AssertPackageSource(sources[1], "a", "http://a");
         }
 
         [Fact]
         public void LoadPackageSourcesWillNotAddTheWindows8SourceWhenNotRunningWindows8Express()
         {
             // Arrange
-            var userSettings = new Mock<ISettings>();
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
-            {
-                new PackageSource("theFirstSource", "theFirstFeed"),
-                new PackageSource(NuGetOfficialFeedUrl, NuGetOfficialFeedName),
-                new PackageSource("theThirdSource", "theThirdFeed"),
-            });
+            var mockFileSystem = new MockFileSystem();
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                configFileName: null,
+                machineWideSettings: null);
+            var packageSourceProvider = new PackageSourceProvider(settings);
             var vsShellInfo = new Mock<IVsShellInfo>();
             vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+            var provider = new VsPackageSourceProvider(settings, packageSourceProvider, vsShellInfo.Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(3, sources.Count);
-            AssertPackageSource(sources[0], "theFirstFeed", "theFirstSource");
-            AssertPackageSource(sources[1], NuGetOfficialFeedName, NuGetOfficialFeedUrl);
-            AssertPackageSource(sources[2], "theThirdFeed", "theThirdSource");
+            Assert.Equal(0, sources.Count);
         }
 
         [Fact]
         public void SavePackageSourcesWillNotSaveTheWindows8ExpressFeedWhenRunningWindows8Express()
         {
             // Arrange
-            var userSettings = new Mock<ISettings>();
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var mockFileSystem = new MockFileSystem();            
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                configFileName: null,
+                machineWideSettings: null);
+            var packageSourceProvider = new PackageSourceProvider(settings);
             var vsShellInfo = new Mock<IVsShellInfo>();
             vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+            var provider = new VsPackageSourceProvider(settings, packageSourceProvider, vsShellInfo.Object);
+            var packageSources = provider.LoadPackageSources().ToList();
 
-            IList<PackageSource> savedSources = null;
-            packageSourceProvider.Setup(_ => _.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
-                                 .Callback((IEnumerable<PackageSource> _) => savedSources = _.ToList())
-                                 .Verifiable();
-
-            // Act
-            provider.SavePackageSources(new[]
-                {
-                    new PackageSource("theFirstSource", "theFirstFeed"),
-                    new PackageSource(NuGetOfficialFeedUrl + "curated-feeds/windows8-packages/", "Windows 8 Packages"){ IsOfficial = true },
-                    new PackageSource("theThirdSource", "theThirdFeed"),
-                });
-
-            // Assert
-            Assert.NotNull(savedSources);
-            Assert.Equal(2, savedSources.Count);
-            AssertPackageSource(savedSources[0], "theFirstFeed", "theFirstSource");
-            AssertPackageSource(savedSources[1], "theThirdFeed", "theThirdSource");
-        }
-
-        [Fact]
-        public void SavePackageSourcesWillSaveTheWindows8ExpressFeedWhenNotRunningWindows8Express()
-        {
-            // Arrange
-            var userSettings = new Mock<ISettings>();
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            var vsShellInfo = new Mock<IVsShellInfo>();
-            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
-
-            IList<PackageSource> savedSources = null;
-            packageSourceProvider.Setup(_ => _.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
-                                 .Callback((IEnumerable<PackageSource> _) => savedSources = _.ToList())
-                                 .Verifiable();
+            Assert.Equal(1, packageSources.Count);
+            Assert.Equal(NuGetConstants.VSExpressForWindows8FeedUrl, packageSources[0].Source);
+            Assert.True(packageSources[0].IsEnabled);
 
             // Act
-            provider.SavePackageSources(new[]
-                {
-                    new PackageSource("theFirstSource", "theFirstFeed"),
-                    new PackageSource(NuGetOfficialFeedUrl + "curated-feeds/windows8-packages/", "Windows 8 Packages"){ IsOfficial = true },
-                    new PackageSource("theThirdSource", "theThirdFeed"),
-                });
+            provider.SavePackageSources(packageSources);
 
             // Assert
-            Assert.NotNull(savedSources);
-            Assert.Equal(3, savedSources.Count);
-            AssertPackageSource(savedSources[0], "theFirstFeed", "theFirstSource");
-            AssertPackageSource(savedSources[1], "Windows 8 Packages", NuGetOfficialFeedUrl + "curated-feeds/windows8-packages/");
-            AssertPackageSource(savedSources[2], "theThirdFeed", "theThirdSource");
+            // the Win8ExpressFeed is saved as active source, but not saved
+            // in <packageSources>.
+            Assert.Equal(1, mockFileSystem.Paths.Count);
+            var configFile = mockFileSystem.Paths.First().Key;
+            var configFileContent = mockFileSystem.ReadAllText(configFile);
+
+            Assert.Equal(
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <activePackageSource>
+    <add key=""Windows 8 Packages"" value=""https://www.nuget.org/api/v2/curated-feeds/windows8-packages/"" />
+  </activePackageSource>
+</configuration>",
+                  configFileContent);
         }
 
         private static void AssertPackageSource(PackageSource ps, string name, string source)

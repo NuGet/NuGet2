@@ -15,10 +15,14 @@ namespace NuGet
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
         private readonly string _fileName;
+
         // next config file to read if any
         private Settings _next;
 
         private readonly bool _isMachineWideSettings;
+
+        // The priority of this setting file
+        private int _priority;
 
         public Settings(IFileSystem fileSystem)
             : this(fileSystem, Constants.SettingsFileName, false)
@@ -62,7 +66,8 @@ namespace NuGet
             get
             {
                 return Path.IsPathRooted(_fileName) ?
-                            _fileName : Path.GetFullPath(Path.Combine(_fileSystem.Root, _fileName));
+                    _fileName :
+                    Path.GetFullPath(Path.Combine(_fileSystem.Root, _fileName));
             }
         }
 
@@ -77,7 +82,7 @@ namespace NuGet
         /// After that, the machine wide settings files are added.
         /// </summary>
         /// <remarks>
-        /// For example, if <paramref name="fileSystem"/> is c:\dir1\dir2, <paramref name="configFileName"/> 
+        /// For example, if <paramref name="fileSystem"/> is c:\dir1\dir2, <paramref name="configFileName"/>
         /// is "userConfig.file", the files loaded are (in the order that they are loaded):
         ///     c:\dir1\dir2\nuget.config
         ///     c:\dir1\nuget.config
@@ -85,11 +90,12 @@ namespace NuGet
         ///     c:\dir1\dir2\userConfig.file
         ///     machine wide settings (e.g. c:\programdata\NuGet\Config\*.config)
         /// </remarks>
-        /// <param name="fileSystem">The file system to walk to find configuration files.</param>
+        /// <param name="fileSystem">The file system to walk to find configuration files.
+        /// Can be null.</param>
         /// <param name="configFileName">The user specified configuration file.</param>
         /// <param name="machineWideSettings">The machine wide settings. If it's not null, the
-        /// settings files in the machine wide settings are added after the user sepcific 
-        /// config file.</param>        
+        /// settings files in the machine wide settings are added after the user sepcific
+        /// config file.</param>
         /// <returns>The settings object loaded.</returns>
         public static ISettings LoadDefaultSettings(
             IFileSystem fileSystem,
@@ -118,20 +124,23 @@ namespace NuGet
             if (validSettingFiles.IsEmpty())
             {
                 // This means we've failed to load all config files and also failed to load or create the one in %AppData%
-                // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS.
                 // Returning a null instance prevents us from silently failing and also from picking up the wrong config
                 return NullSettings.Instance;
             }
+
+            validSettingFiles[0]._priority = validSettingFiles.Count;
 
             // if multiple setting files were loaded, chain them in a linked list
             for (int i = 1; i < validSettingFiles.Count; ++i)
             {
                 validSettingFiles[i]._next = validSettingFiles[i - 1];
+                validSettingFiles[i]._priority = validSettingFiles[i - 1]._priority - 1;
             }
 
             // return the linked list head. Typicall, it's either the config file in %ProgramData%\NuGet\Config,
             // or the user specific config (%APPDATA%\NuGet\nuget.config) if there are no machine
-            // wide config files. The head file is the one we want to read first, while the user specific config 
+            // wide config files. The head file is the one we want to read first, while the user specific config
             // is the one that we want to write to.
             // TODO: add UI to allow specifying which one to write to
             return validSettingFiles.Last();
@@ -151,9 +160,14 @@ namespace NuGet
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 if (!String.IsNullOrEmpty(appDataPath))
                 {
-                    var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                    appDataSettings = ReadSettings(new PhysicalFileSystem(defaultSettingsPath),
-                        Constants.SettingsFileName);
+                    var defaultSettingsFilePath = Path.Combine(
+                        appDataPath, "NuGet", Constants.SettingsFileName);
+
+                    // Since defaultSettingsFilePath is a full path, so it doesn't matter what value is
+                    // used as root for the PhysicalFileSystem.
+                    appDataSettings = ReadSettings(
+                        fileSystem ?? new PhysicalFileSystem(@"c:\"),
+                        defaultSettingsFilePath);
                 }
             }
             else
@@ -198,7 +212,7 @@ namespace NuGet
             string combinedPath = Path.Combine(paths);
 
             while (true)
-            {   
+            {
                 string directory = Path.Combine(basePath, combinedPath);
 
                 // load setting files in directory
@@ -316,7 +330,7 @@ namespace NuGet
             return GetValues(section, isPath: false);
         }
 
-        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
+        private IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
         {
             var values = GetSettingValues(section, isPath);
             return values.Select(v => new KeyValuePair<string, string>(v.Key, v.Value)).ToList().AsReadOnly();
@@ -336,7 +350,7 @@ namespace NuGet
                 curr.PopulateValues(section, settingValues, isPath);
                 curr = curr._next;
             }
-   
+
             return settingValues.AsReadOnly();
         }
 
@@ -549,7 +563,7 @@ namespace NuGet
 
                 return _next.DeleteSection(section);
             }
-            
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -576,7 +590,7 @@ namespace NuGet
                 if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase))
                 {
                     var v = ReadValue(element, isPath);
-                    values.Add(new SettingValue(v.Key, v.Value, _isMachineWideSettings));
+                    values.Add(new SettingValue(v.Key, v.Value, _isMachineWideSettings, _priority));
                 }
                 else if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
                 {
@@ -650,7 +664,7 @@ namespace NuGet
             }
             return result;
         }
-        
+
         /// <remarks>
         /// Order is most significant (e.g. applied last) to least significant (applied first)
         /// ex:
@@ -664,22 +678,6 @@ namespace NuGet
             foreach (var dir in GetSettingsFilePaths(fileSystem))
             {
                 string fileName = Path.Combine(dir, Constants.SettingsFileName);
-
-                // This is to workaround limitations in the filesystem mock implementations that assume relative paths.
-                // For example MockFileSystem.Paths is holding relative paths, which whould be responsible for hundreds
-                // of failures should this code could go away
-                if (fileName.StartsWith(fileSystem.Root, StringComparison.OrdinalIgnoreCase))
-                {
-                    int count = fileSystem.Root.Length;
-                    // if fileSystem.Root ends with \ (ex: c:\foo\) then we've removed all we needed
-                    // otherwise, remove one more char
-                    if (!(fileSystem.Root.EndsWith("\\") || fileSystem.Root.EndsWith("/")))
-                    {
-                        count++;
-                    }
-                    fileName = fileName.Substring(count);
-                }
-
                 if (fileSystem.FileExists(fileName))
                 {
                     yield return fileName;
@@ -721,7 +719,7 @@ namespace NuGet
         {
             var fileName = _fileSystem.GetFullPath(_fileName);
 
-            // Global: ensure mutex is honored across TS sessions 
+            // Global: ensure mutex is honored across TS sessions
             using (var mutex = new Mutex(false, "Global\\" + EncryptionUtility.GenerateUniqueToken(fileName)))
             {
                 var owner = false;
@@ -743,7 +741,6 @@ namespace NuGet
                     }
                 }
             }
-            
         }
     }
 }

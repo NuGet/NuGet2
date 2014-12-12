@@ -34,6 +34,16 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)'=='14.0'">
+	  <ItemGroup>
+	    <Reference Include="Microsoft.VisualStudio.ProjectSystem.Interop">
+          <HintPath>..\..\lib\Microsoft.VisualStudio.ProjectSystem.Interop.dll</HintPath>
+          <EmbedInteropTypes>True</EmbedInteropTypes>
+        </Reference>
+	  </ItemGroup>
+	</When>
+  </Choose>
   <ItemGroup>
     <Compile Include="..\..\Common\CommonResources.cs">
       <Link>Common\CommonResources.cs</Link>
@@ -240,19 +250,15 @@
     <Compile Include="V3Interop\IV3InteropRepository.cs" />
     <Compile Include="V3Interop\IV3PackageMetadata.cs" />
     <Reference Include="Microsoft.Data.Edm, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.Edm.5.6.1\lib\net40\Microsoft.Data.Edm.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.ProjectSystem.Interop" Condition="'$(VisualStudioVersion)'=='14.0'">
-      <HintPath>..\..\lib\Microsoft.VisualStudio.ProjectSystem.Interop.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="Microsoft.Data.OData, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.OData.5.6.1\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Services.Client, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.Services.Client.5.6.1\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.XmlTransform">
@@ -265,7 +271,7 @@
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Spatial, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
       <HintPath>..\..\packages\System.Spatial.5.6.1\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />

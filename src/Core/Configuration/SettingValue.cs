@@ -8,11 +8,12 @@ namespace NuGet
 {
     public class SettingValue
     {
-        public SettingValue(string key, string value, bool isMachineWide)
+        public SettingValue(string key, string value, bool isMachineWide, int priority = 0)
         {
             Key = key;
             Value = value;
             IsMachineWide = isMachineWide;
+            Priority = priority;
         }
 
         public string Key { get; private set; }
@@ -20,6 +21,9 @@ namespace NuGet
         public string Value { get; private set; }
 
         public bool IsMachineWide { get; private set; }
+
+        // The priority of this setting in the nuget.config hierarchy. Bigger number means higher priority.
+        public int Priority { get; private set; }
 
         public override bool Equals(object obj)
         {

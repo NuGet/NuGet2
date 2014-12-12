@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 
 namespace NuGet.VisualStudio
 {
@@ -20,9 +21,9 @@ namespace NuGet.VisualStudio
         public VsSettings(ISolutionManager solutionManager, IMachineWideSettings machineWideSettings)
             : this(solutionManager,
                 Settings.LoadDefaultSettings(
-                    GetSolutionSettingsFileSystem(solutionManager), 
+                    GetSolutionSettingsFileSystem(solutionManager),
                     null,
-                    machineWideSettings), 
+                    machineWideSettings),
                 new PhysicalFileSystemProvider(),
                 machineWideSettings)
         {
@@ -57,7 +58,7 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _defaultSettings = defaultSettings;
             _machineWideSettings = machineWideSettings;
-            _fileSystemProvider = fileSystemProvider;            
+            _fileSystemProvider = fileSystemProvider;
 
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -105,20 +106,12 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValue(section, key, isPath);
             }
             return _defaultSettings.GetValue(section, key, isPath);
-        }        
+        }
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
-            return GetValues(section, isPath: false);
-        }
-
-        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
-        {
-            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
-            {
-                return SolutionSettings.GetValues(section, isPath);
-            }
-            return _defaultSettings.GetValues(section, isPath);
+            return GetSettingValues(section, isPath: false)
+                .Select(v => new KeyValuePair<string, string>(v.Key, v.Value)).ToList();
         }
 
         public IList<SettingValue> GetSettingValues(string section, bool isPath)

@@ -7,10 +7,26 @@ namespace NuGet
     public interface IFileSystem
     {
         ILogger Logger { get; set; }
+
+        // The root directory of the file system. 
+        // Examples:
+        //   c:\
+        //   c:\a   (Note there is no trailing \)
+        //   c:\a\b\c
         string Root { get; }
+
         void DeleteDirectory(string path, bool recursive);
+
+        // The returned file names are relative paths.
         IEnumerable<string> GetFiles(string path, string filter, bool recursive);
+
+        /// <summary>
+        /// Returns the directories under the directory <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The directory under which to search for subdirectories.</param>
+        /// <returns>The list of subdirectories in relative path.</returns>
         IEnumerable<string> GetDirectories(string path);
+
         string GetFullPath(string path);
         void DeleteFile(string path);
         void DeleteFiles(IEnumerable<IPackageFile> files, string rootDir);

@@ -17,12 +17,19 @@ namespace NuGet.VisualStudio
         private static readonly string NuGetLegacyOfficialFeedName = VsResources.NuGetLegacyOfficialSourceName;
         private static readonly string NuGetOfficialFeedName = VsResources.NuGetOfficialSourceName;
         private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetOfficialFeedName);
-        private static readonly PackageSource NuGetV3Source = new PackageSource(NuGetConstants.V3FeedUrl, NuGetOfficialFeedNameV3);
+        private static readonly PackageSource NuGetV3Source = new PackageSource(
+            NuGetConstants.V3FeedUrl, 
+            NuGetOfficialFeedNameV3,
+            isEnabled: true,
+            isOfficial: true,
+            isPersistable: false);
         
-        private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
-                                                                                 VsResources.VisualStudioExpressForWindows8SourceName,
-                                                                                 isEnabled: true,
-                                                                                 isOfficial: true);
+        private static readonly PackageSource Windows8Source = new PackageSource(
+            NuGetConstants.VSExpressForWindows8FeedUrl,
+            VsResources.VisualStudioExpressForWindows8SourceName,
+            isEnabled: true,
+            isOfficial: true,
+            isPersistable: false);
 
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
@@ -113,8 +120,7 @@ namespace NuGet.VisualStudio
                     !_packageSources.Contains(value) &&
                     !value.Name.Equals(NuGetOfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    _activePackageSource = _packageSources.FirstOrDefault();
-                    //throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
+                    throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
 
                 _activePackageSource = value;
@@ -148,12 +154,20 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("sources");
             }
 
+            // reload the sources
+            _initialized = false;
             EnsureInitialized();
-            Debug.Assert(!sources.Any(IsAggregateSource));
+            var newSources = sources.ToList();
+            Debug.Assert(!newSources.Any(IsAggregateSource));
 
+            if (PackageSourcesEqual(_packageSources, newSources))
+            {
+                return;
+            }
+            
             ActivePackageSource = null;
             _packageSources.Clear();
-            _packageSources.AddRange(sources);
+            _packageSources.AddRange(newSources);
 
             PersistPackageSources(_packageSourceProvider, _vsShellInfo, _packageSources);
 
@@ -161,6 +175,38 @@ namespace NuGet.VisualStudio
             {
                 PackageSourcesSaved(this, EventArgs.Empty);
             }
+        }
+
+        // We only need to check properties that can be changed by user through UI.
+        internal static bool PackageSourcesEqual(List<PackageSource> a, List<PackageSource> b)
+        {
+            if (a.Count != b.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < a.Count; ++i)
+            {
+                var s1 = a[i];
+                var s2 = b[i];
+
+                if (!StringComparer.CurrentCultureIgnoreCase.Equals(s1.Name, s2.Name))
+                {
+                    return false;
+                }
+
+                if (!StringComparer.OrdinalIgnoreCase.Equals(s1.Source, s2.Source))
+                {
+                    return false;
+                }
+
+                if (s1.IsEnabled != s2.IsEnabled)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void DisablePackageSource(PackageSource source)
@@ -192,15 +238,6 @@ namespace NuGet.VisualStudio
                 }
 
                 _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
-
-                var previewFeed = _packageSources.FirstOrDefault(ps => NuGetV3Source.Equals(ps));
-                if (previewFeed != null)
-                {
-                    PersistPackageSources(
-                            _packageSourceProvider,
-                            _vsShellInfo,
-                            _packageSources);
-                }
 
                 // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
                 if (_vsShellInfo.IsVisualStudioExpressForWindows8)
@@ -313,31 +350,11 @@ namespace NuGet.VisualStudio
 
         private static void PersistPackageSources(IPackageSourceProvider packageSourceProvider, IVsShellInfo vsShellInfo, List<PackageSource> packageSources)
         {
-            bool windows8SourceIsDisabled = false;
-
-            // When running Visual Studio Express For Windows 8, we will have previously added a curated package source.
-            // But we don't want to persist it, so remove it from the list.
-            if (vsShellInfo.IsVisualStudioExpressForWindows8)
-            {
-                PackageSource windows8SourceInUse = packageSources.Find(p => p.Equals(Windows8Source));
-                Debug.Assert(windows8SourceInUse != null);
-                if (windows8SourceInUse != null)
-                {
-                    packageSources = packageSources.Where(ps => !ps.Equals(Windows8Source)).ToList();
-                    windows8SourceIsDisabled = !windows8SourceInUse.IsEnabled;
-                }
-            }
-
             // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
             // assert that we are not saving aggregate source
             Debug.Assert(!packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
             
             packageSourceProvider.SavePackageSources(packageSources);
-
-            if (windows8SourceIsDisabled)
-            {
-                packageSourceProvider.DisablePackageSource(Windows8Source);
-            }
         }
 
         private static bool IsAggregateSource(string name, string source)

@@ -19,7 +19,12 @@ namespace NuGet.Test.Mocks
 
         public MockFileSystem(string root)
         {
-            Root = root;
+            Root = root.TrimEnd(Path.DirectorySeparatorChar);
+            if (Root.EndsWith(":"))
+            {
+                Root += Path.DirectorySeparatorChar;
+            }
+
             Paths = new Dictionary<string, Func<Stream>>(StringComparer.OrdinalIgnoreCase);
             Deleted = new HashSet<string>();
             _createdTime = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
@@ -36,6 +41,8 @@ namespace NuGet.Test.Mocks
                 _logger = value;
             }
         }
+
+        
 
         public virtual string Root
         {
@@ -57,11 +64,13 @@ namespace NuGet.Test.Mocks
 
         public virtual void CreateDirectory(string path)
         {
+            path = NormalizePath(path);
             Paths.Add(path, null);
         }
 
         public virtual void DeleteDirectory(string path, bool recursive = false)
         {
+            path = NormalizePath(path);
             foreach (var file in Paths.Keys.ToList())
             {
                 if (file.StartsWith(path))
@@ -79,18 +88,28 @@ namespace NuGet.Test.Mocks
 
         public virtual IEnumerable<string> GetFiles(string path, bool recursive)
         {
+            path = PathUtility.EnsureTrailingSlash(NormalizePath(path));
             var files = Paths.Select(f => f.Key);
             if (recursive)
             {
-                path = PathUtility.EnsureTrailingSlash(path);
                 files = files.Where(f => f.StartsWith(path, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
-                files = files.Where(f => Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase));
+                files = files.Where(f =>
+                {
+                    var d = PathUtility.EnsureTrailingSlash(Path.GetDirectoryName(f));
+                    return StringComparer.OrdinalIgnoreCase.Equals(d, path);
+                });
             }
 
-            return files;
+            var retValue = files.Select(MakeRelativePath).ToList();
+            return retValue;
+        }
+
+        protected string MakeRelativePath(string fullPath)
+        {
+            return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);
         }
 
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
@@ -100,7 +119,6 @@ namespace NuGet.Test.Mocks
                 filter = "*";
             }
 
-            // TODO: This is just flaky. We need to make it closer to the implementation that Directory.Enumerate supports perhaps by using PathResolver.
             var files = GetFiles(path, recursive);
             if (!filter.Contains("*"))
             {
@@ -108,7 +126,8 @@ namespace NuGet.Test.Mocks
             }
 
             Regex matcher = GetFilterRegex(filter);
-            return files.Where(f => matcher.IsMatch(f));
+            var retValue = files.Where(f => matcher.IsMatch(f)).ToList();
+            return retValue;
         }
 
         private static Regex GetFilterRegex(string wildcard)
@@ -122,8 +141,14 @@ namespace NuGet.Test.Mocks
             return token.Replace("*", "(.*)");
         }
 
+        private string NormalizePath(string path)
+        {
+            return Path.GetFullPath(Path.Combine(Root, path));
+        }
+
         public virtual void DeleteFile(string path)
         {
+            path = NormalizePath(path);
             Paths.Remove(path);
             Deleted.Add(path);
         }
@@ -135,11 +160,14 @@ namespace NuGet.Test.Mocks
 
         public virtual bool FileExists(string path)
         {
+            path = NormalizePath(path);
             return Paths.ContainsKey(path);
         }
 
         public virtual Stream OpenFile(string path)
         {
+            path = NormalizePath(path);
+
             Func<Stream> factory;
             if (!Paths.TryGetValue(path, out factory))
             {
@@ -150,6 +178,7 @@ namespace NuGet.Test.Mocks
 
         public virtual Stream CreateFile(string path)
         {
+            path = NormalizePath(path);
             Paths[path] = () => Stream.Null;
             
             Action<Stream> streamClose = (stream) => {
@@ -167,6 +196,7 @@ namespace NuGet.Test.Mocks
 
         public virtual bool DirectoryExists(string path)
         {
+            path = NormalizePath(path);
             string pathPrefix = PathUtility.EnsureTrailingSlash(path);
             return Paths.Keys
                         .Any(file => file.Equals(path, StringComparison.OrdinalIgnoreCase) ||
@@ -175,11 +205,24 @@ namespace NuGet.Test.Mocks
 
         public virtual IEnumerable<string> GetDirectories(string path)
         {
-            return Paths.GroupBy(f => Path.GetDirectoryName(f.Key))
-                        .SelectMany(g => FileSystemExtensions.GetDirectories(g.Key))
-                        .Where(f => !String.IsNullOrEmpty(f) &&
-                               path.Equals(Path.GetDirectoryName(f), StringComparison.OrdinalIgnoreCase))
-                        .Distinct();
+            path = NormalizePath(path).TrimEnd(Path.DirectorySeparatorChar);
+            var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            directories.AddRange(Paths.Select(f => Path.GetDirectoryName(f.Key)));
+            var subDirectories = directories
+                .Where(d =>
+                {   
+                    if (d.StartsWith(path, StringComparison.OrdinalIgnoreCase)
+                        && !StringComparer.OrdinalIgnoreCase.Equals(d, path))
+                    {
+                        // d is a subdirectory of path. Now checks if it is one level deep.
+                        var s = d.Substring(path.Length).TrimStart(Path.DirectorySeparatorChar);
+                        return !s.Contains(Path.DirectorySeparatorChar);
+                    }
+
+                    return false;
+                })
+                .Select(MakeRelativePath);
+            return subDirectories;
         }
 
         public virtual void AddFile(string path)
@@ -194,6 +237,7 @@ namespace NuGet.Test.Mocks
 
         public virtual void AddFile(string path, Stream stream, bool overrideIfExists)
         {
+            path = NormalizePath(path);
             var ms = new MemoryStream((int)stream.Length);
             stream.CopyTo(ms);
             byte[] buffer = ms.ToArray();
@@ -208,6 +252,7 @@ namespace NuGet.Test.Mocks
 
         public virtual void AddFile(string path, Action<Stream> writeToStream)
         {
+            path = NormalizePath(path);
             var ms = new MemoryStream();
             writeToStream(ms);
             byte[] buffer = ms.ToArray();
@@ -222,11 +267,13 @@ namespace NuGet.Test.Mocks
 
         public virtual void AddFile(string path, Func<Stream> getStream)
         {
+            path = NormalizePath(path);
             Paths[path] = getStream;
         }
 
         public virtual DateTimeOffset GetLastModified(string path)
         {
+            path = NormalizePath(path);
             DateTime time;
             if (_createdTime.TryGetValue(path, out time))
             {
@@ -240,6 +287,7 @@ namespace NuGet.Test.Mocks
 
         public virtual DateTimeOffset GetCreated(string path)
         {
+            path = NormalizePath(path);
             DateTime time;
             if (_createdTime.TryGetValue(path, out time))
             {
@@ -253,6 +301,7 @@ namespace NuGet.Test.Mocks
 
         public virtual DateTimeOffset GetLastAccessed(string path)
         {
+            path = NormalizePath(path);
             DateTime time;
             if (_createdTime.TryGetValue(path, out time))
             {
@@ -272,6 +321,9 @@ namespace NuGet.Test.Mocks
 
         public virtual void MoveFile(string src, string destination)
         {
+            src = NormalizePath(src);
+            destination = NormalizePath(destination);
+
             Paths.Add(destination, Paths[src]);
             Paths.Remove(src);
         }

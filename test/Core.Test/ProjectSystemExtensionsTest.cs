@@ -213,7 +213,7 @@ namespace NuGet.Test
             var logger = new Mock<ILogger>();
 
             // Arrange
-            var project = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"), "x:\\root");
+            var project = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"), @"x:\root");
             project.AddFile("a.txt", "this is a");
             project.AddFile("c.txt", "this is c");
             project.Logger = logger.Object;
@@ -224,7 +224,7 @@ namespace NuGet.Test
             project.AddFiles(files, new Dictionary<FileTransformExtensions, IPackageFileTransformer>());
 
             // Assert
-            logger.Verify(l => l.ResolveFileConflict("File 'a.txt' already exists in project 'x:\\root'. Do you want to overwrite it?"), Times.Once());
+            logger.Verify(l => l.ResolveFileConflict(@"File 'a.txt' already exists in project 'x:\root'. Do you want to overwrite it?"), Times.Once());
         }
 
         [Fact]
