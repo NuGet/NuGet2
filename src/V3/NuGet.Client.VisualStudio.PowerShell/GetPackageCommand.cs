@@ -86,6 +86,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void ProcessRecordCore()
         {
+            if (!SolutionManager.IsSolutionOpen)
+            {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+
             List<InstallationTarget> targets = new List<InstallationTarget>();
             List<JObject> solutionInstalledPackages = new List<JObject>();
 
