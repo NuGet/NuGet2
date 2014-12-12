@@ -1,19 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
-using NuGet.Client.Diagnostics;
-using NuGet.Data;
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JsonLD.Core;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using NuGet.Client.Resolution;
-using System.Net.Http;
 using System.Globalization;
-using NuGet.Client.Installation;
 using System.Threading;
 using NuGet.Client.V3;
 using System.Runtime.Versioning;
@@ -25,6 +19,7 @@ namespace NuGet.Client
     /// Respository which exposes various resources like Search resource, metrics resource for the APi v3 endpoint.
     /// Uses the NuGetV3Client to talk to the endpoint.
     /// *TODOS: Remove the direct methods like Search, GetPackageMetadata ....
+    /// *TODOs: Version Utility.
     /// </summary>
     public class V3SourceRepository2 : SourceRepository
     {       
@@ -47,8 +42,9 @@ namespace NuGet.Client
         public async override Task<IEnumerable<JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
         {
             List<string> frameworkNames = new List<string>();
-            foreach(FrameworkName fx in filters.SupportedFrameworks)
-                frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
+            foreach (FrameworkName fx in filters.SupportedFrameworks)
+                // frameworkNames.Add(VersionUtility.GetShortFrameworkName(fx));
+                frameworkNames.Add(fx.FullName);
             return await _client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
         }
 

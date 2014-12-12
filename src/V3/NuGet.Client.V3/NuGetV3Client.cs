@@ -86,6 +86,10 @@ namespace NuGet.Client.V3
                 cache);
         }
 
+        public async Task<JObject> GetFile(Uri uri)
+        {
+            return await _client.GetFile(uri);
+        }
         public async Task<IEnumerable<JObject>> Search(string searchTerm, IEnumerable<string> supportedFrameworkNames,bool includePrerelease, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             //*TODOS: Get the search service URL from the service. Once it is integrated with ServiceDiscovery GetServiceUri would go away.
