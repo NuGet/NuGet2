@@ -30,6 +30,12 @@ namespace NuGet
 
         public bool IsPasswordClearText { get; set; }
 
+        public bool IsPersistable
+        {
+            get;
+            private set;
+        }
+
         public PackageSource(string source) :
             this(source, source, isEnabled: true)
         {
@@ -45,7 +51,12 @@ namespace NuGet
         {
         }
 
-        public PackageSource(string source, string name, bool isEnabled, bool isOfficial)
+        public PackageSource(
+            string source, 
+            string name, 
+            bool isEnabled, 
+            bool isOfficial,
+            bool isPersistable = true)
         {
             if (source == null)
             {
@@ -61,6 +72,7 @@ namespace NuGet
             Source = source;
             IsEnabled = isEnabled;
             IsOfficial = isOfficial;
+            IsPersistable = isPersistable;
             _hashCode = Name.ToUpperInvariant().GetHashCode() * 3137 + Source.ToUpperInvariant().GetHashCode();
         }
 
@@ -97,7 +109,7 @@ namespace NuGet
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText, IsMachineWide = IsMachineWide };
+            return new PackageSource(Source, Name, IsEnabled, IsOfficial, IsPersistable) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText, IsMachineWide = IsMachineWide };
         }
     }
 }

@@ -141,9 +141,15 @@ namespace NuGet.VisualStudio
 
         private IEnumerable<string> SearchFilesWithinOneSubFolders(IFileSystem fileSystem, string folder, string extension)
         {
-            // get files directly under 'folder' or files under subfolders of 'folder'
-            return fileSystem.GetFiles(folder, extension)
-                             .Concat(fileSystem.GetDirectories(folder).SelectMany(subFolder => fileSystem.GetFiles(subFolder, extension)));
+            // get files directly under 'folder'
+            var filesUnderFolder = fileSystem
+                .GetFiles(folder, extension);
+
+            // get files under subfolders of 'folder'
+            var fileUnderSubFolder = fileSystem.GetDirectories(folder)
+                .SelectMany(subFolder => fileSystem.GetFiles(subFolder, extension));
+
+            return filesUnderFolder.Concat(fileUnderSubFolder);
         }
 
         private void CopyNativeBinaries(IProjectSystem projectSystem, IFileSystem packagesFileSystem, PackageName packageName)

@@ -113,7 +113,7 @@ namespace NuGet.Test
             processor.RevertFile(mockFile.Object, "foo.bar", Enumerable.Empty<IPackageFile>(), mockProjectSystem.Object);
 
             // Assert            
-            Assert.True(mockProjectSystem.Object.Deleted.Contains("foo.bar"));
+            Assert.True(mockProjectSystem.Object.Deleted.Contains(Path.Combine(mockProjectSystem.Object.Root, "foo.bar")));
         }
 
         private Stream GetStream(string content)

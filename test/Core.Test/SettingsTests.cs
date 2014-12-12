@@ -1045,7 +1045,9 @@ namespace NuGet.Test
             Settings settings = new Settings(mockFileSystem);
 
             // Act
-            var result = settings.GetValues("SectionName", isPath: true);
+            var result = settings.GetSettingValues("SectionName", isPath: true)
+                .Select(v => new KeyValuePair<string, string>(v.Key, v.Value))
+                .ToList();
 
             // Assert
             AssertEqualCollections(
@@ -1157,8 +1159,8 @@ namespace NuGet.Test
             // Assert
             Assert.Equal<SettingValue>(
                 new [] {
-                    new SettingValue("key3", "value3", isMachineWide: false),
-                    new SettingValue("key4", "value4", isMachineWide: false)
+                    new SettingValue("key3", "value3", isMachineWide: false, priority: 0),
+                    new SettingValue("key4", "value4", isMachineWide: false, priority: 0)
                 },
                 result);
         }

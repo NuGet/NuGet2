@@ -216,9 +216,9 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(3, mockFileSystem.Deleted.Count);
-            Assert.True(mockFileSystem.Deleted.Contains(""));
-            Assert.True(mockFileSystem.Deleted.Contains("A.1.0"));
-            Assert.True(mockFileSystem.Deleted.Contains(PathFixUtility.FixPath(@"A.1.0\A.1.0.nupkg")));
+            Assert.True(mockFileSystem.Deleted.Contains(mockFileSystem.Root));
+            Assert.True(mockFileSystem.Deleted.Contains(Path.Combine(mockFileSystem.Root, "A.1.0")));
+            Assert.True(mockFileSystem.Deleted.Contains(Path.Combine(mockFileSystem.Root, PathFixUtility.FixPath(@"A.1.0\A.1.0.nupkg"))));
         }
 
         [Fact]
@@ -237,8 +237,8 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(2, mockFileSystem.Deleted.Count);
-            Assert.True(mockFileSystem.Deleted.Contains("A.1.0"));
-            Assert.True(mockFileSystem.Deleted.Contains(PathFixUtility.FixPath(@"A.1.0\A.1.0.nupkg")));
+            Assert.True(mockFileSystem.Deleted.Contains(Path.Combine(mockFileSystem.Root, @"A.1.0")));
+            Assert.True(mockFileSystem.Deleted.Contains(Path.Combine(mockFileSystem.Root, PathFixUtility.FixPath(@"A.1.0\A.1.0.nupkg"))));
         }
 
         [Fact]

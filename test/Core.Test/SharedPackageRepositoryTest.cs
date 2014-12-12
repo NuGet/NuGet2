@@ -521,7 +521,7 @@ namespace NuGet.Test
             repository.RemovePackage(solutionPackage);
 
             // Assert
-            Assert.True(configFileSystem.Deleted.Contains("packages.config"));
+            Assert.True(configFileSystem.Deleted.Contains(Path.Combine(configFileSystem.Root, "packages.config")));
         }
 
         [Fact]
@@ -591,14 +591,13 @@ namespace NuGet.Test
         public void RegisterRepositoryDoesNotAddRelativePathToRepositoriesConfigIfExists()
         {
             // Arrange
-            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            var fileSystem = new MockFileSystem(@"x:\foo");
+            fileSystem.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
 </repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, new MockFileSystem());
             var packageReferenceFile = new PackageReferenceFile(new MockFileSystem(), @"x:\foo\A\packages.config");
 
             // Act
@@ -609,18 +608,18 @@ namespace NuGet.Test
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
-</repositories>", fileSystem.Object.ReadAllText("repositories.config"));
+</repositories>", fileSystem.ReadAllText("repositories.config"));
         }
 
         [Fact]
         public void GetRepositoryPathsRemovesInvalidOrNonExistantPathsAndReturnsRelativePaths()
         {
             // Arrange
-            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.FileExists(@"A\packages.config")).Returns(true);
-            fileSystem.Setup(m => m.FileExists(@"x:\foo\packages.config")).Returns(true);
-            fileSystem.Setup(m => m.FileExists(@"..\..\packages.config")).Returns(true);
-            fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            var fileSystem = new MockFileSystem(@"x:\foo\bar\baz");
+            fileSystem.AddFile(@"A\packages.config", "");
+            fileSystem.AddFile(@"x:\foo\packages.config", "");
+            fileSystem.AddFile(@"..\..\packages.config", "");
+            fileSystem.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
@@ -629,8 +628,7 @@ namespace NuGet.Test
   <repository path="""" />
   <repository />
 </repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\bar\baz\");
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, new MockFileSystem());
 
             // Act
             var paths = repository.GetRepositoryPaths().ToList();
@@ -643,7 +641,7 @@ namespace NuGet.Test
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""x:\foo\packages.config"" />
-</repositories>", fileSystem.Object.ReadAllText("repositories.config"));
+</repositories>", fileSystem.ReadAllText("repositories.config"));
         }
 
         [Fact]
@@ -675,18 +673,17 @@ namespace NuGet.Test
         public void IsReferencedReturnsTrueIfAnyOtherRepositoryReferencesAPackage()
         {
             // Arrange
-            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.FileExists(@"A\packages.config")).Returns(true);
-            fileSystem.Setup(m => m.FileExists(@"..\..\packages.config")).Returns(true);
-            fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            var fileSystem = new MockFileSystem(@"x:\foo\bar\baz");
+            fileSystem.AddFile(@"A\packages.config", "");
+            fileSystem.AddFile(@"..\..\packages.config", "");
+            fileSystem.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""..\..\packages.config"" />
   <repository />
 </repositories>");
 
-            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\bar\baz");
-            var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
+            var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem), fileSystem) { CallBase = true };
             var r1 = new MockPackageRepository {
                 PackageUtility.CreatePackage("A")
             };
