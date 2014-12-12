@@ -69,7 +69,8 @@ CmdletsToExport = @(
     'Get-Project',
     'Set-Project', 
     'Open-PackagePage', 
-    'Consolidate-Package')
+    'Consolidate-Package',
+	'Add-BindingRedirect')
 
 # Variables to export from this module
 VariablesToExport = ''

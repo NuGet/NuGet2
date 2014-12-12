@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
-    [Cmdlet(VerbsCommon.Add, "BindingRedirect2")]
+    [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
     [OutputType(typeof(AssemblyBinding))]
     public class AddBindingRedirectCommand : NuGetPowerShellBaseCommand
     {
