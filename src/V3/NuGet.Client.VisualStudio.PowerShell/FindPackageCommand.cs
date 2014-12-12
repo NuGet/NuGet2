@@ -8,7 +8,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// TODO List:
     /// 1. Reimplement this command after spec regarding to Get-Package is done.
     /// 2. Consider replacing Get-Package -ListAvailable with Find-Package.
-    [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
+    [Cmdlet(VerbsCommon.Find, "Package2", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
     public class FindPackageCommand : GetPackageCommand
     {

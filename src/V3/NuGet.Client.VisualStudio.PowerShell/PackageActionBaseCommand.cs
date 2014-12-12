@@ -72,7 +72,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     _activeSourceRepository = CreateRepositoryFromSource(Source);
                 }
-                else
+                else if (_activeSourceRepository == null)
                 {
                     _activeSourceRepository = RepositoryManager.ActiveRepository;
                 }
