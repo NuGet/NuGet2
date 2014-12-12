@@ -17,6 +17,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
         }
 
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
+        public string Id { get; set; }
+
+        [Parameter(Position = 1)]
+        [ValidateNotNull]
+        public SemanticVersion Version { get; set; }
+
+        [Parameter(Position = 2)]
+        [ValidateNotNullOrEmpty]
+        public string Source { get; set; }
+
         [Parameter(Mandatory = true, ParameterSetName = "License")]
         public SwitchParameter License { get; set; }
 
