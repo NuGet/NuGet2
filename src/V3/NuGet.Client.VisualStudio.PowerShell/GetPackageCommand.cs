@@ -17,7 +17,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// TODO List
     /// 1. Figure out the new behavior/Command that is similar to -ListAvailable
     /// 2. For parameters that are cut/modified, emit useful message for directing users to the new useage pattern.
-    [Cmdlet(VerbsCommon.Get, "Package2", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetPowerShellBaseCommand
     {

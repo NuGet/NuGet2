@@ -161,7 +161,7 @@ function New-Project {
         $project = Get-Project "$destPath\"
     }
     
-    $project = $project.DteProject
+    $project = $project
 	$project
 }
 
