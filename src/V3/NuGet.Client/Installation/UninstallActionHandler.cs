@@ -30,7 +30,7 @@ namespace NuGet.Client.Installation
             // Get the package out of the project manager
             var package = projectManager.LocalRepository.FindPackage(
                 action.PackageIdentity.Id,
-                CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+                CoreConverters.SafeToSemanticVersion(action.PackageIdentity.Version));
             Debug.Assert(package != null);
 
             // Add the package to the project

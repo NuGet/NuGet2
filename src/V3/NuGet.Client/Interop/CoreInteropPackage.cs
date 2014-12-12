@@ -30,7 +30,7 @@ namespace NuGet.Client.Interop
         {
             Id = json.Value<string>("id");
             Version = NuGetVersion.Parse(json.Value<string>("version"));
-            _oldVer = CoreConverters.SafeToSemVer(Version);
+            _oldVer = CoreConverters.SafeToSemanticVersion(Version);
         
             Json = json;
         }

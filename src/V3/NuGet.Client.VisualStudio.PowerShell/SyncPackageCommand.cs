@@ -22,10 +22,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 1. Have a spec to define the behaviors of this command in details.
     /// 2. Implement the spec
     /// </summary>
-    [Cmdlet("Consolidate", "Package")]
-    public class ConsolidatePackageCommand : PackageInstallBaseCommand
+    [Cmdlet(VerbsData.Sync, "Package")]
+    public class SyncPackageCommand : PackageInstallBaseCommand
     {
-        public ConsolidatePackageCommand() :
+        public SyncPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
@@ -35,8 +35,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
+            base.Preprocess();
             this.Projects = GetAllProjectsInSolution();
             this.Identities = GetConsolidatedPackageIdentityForResolver();
         }
@@ -48,7 +49,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                NuGetVersion nVersion = ParseUserInputForVersion(Version);
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
                 PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
                 identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, pIdentity, true);
             }

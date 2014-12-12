@@ -195,6 +195,10 @@
       <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
       <Name>NuGet.Client.V3Interop</Name>
     </ProjectReference>
+    <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.PowerShell\NuGet.Client.VisualStudio.PowerShell.csproj">
+      <Project>{37465016-5f91-478b-b4e3-dc78b025797a}</Project>
+      <Name>NuGet.Client.VisualStudio.PowerShell</Name>
+    </ProjectReference>
     <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj">
       <Project>{a8efbe54-4136-4d15-8db7-3ffecee50682}</Project>
       <Name>NuGet.Client.VisualStudio.UI</Name>

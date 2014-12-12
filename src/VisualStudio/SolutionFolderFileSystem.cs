@@ -5,7 +5,7 @@ using System.IO;
 namespace NuGet.VisualStudio
 {
     // TODO: Redo this to share code with VsProjectSystem.
-    internal class SolutionFolderFileSystem : PhysicalFileSystem
+    public class SolutionFolderFileSystem : PhysicalFileSystem
     {
         private readonly Solution _solution;
         private readonly string _solutionFolderPath;

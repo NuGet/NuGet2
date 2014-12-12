@@ -113,7 +113,7 @@ function Test-OpenPackagePageAcceptSourceName {
     $p = Open-PackagePage 'elmah' -Source $source -WhatIf -PassThru
 
     # Assert
-    Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
+    Assert-AreEqual 'http://elmah.googlecode.com' $p.OriginalString
 
     # Act
     $p = Open-PackagePage 'elmah' -License -Source $source -WhatIf -PassThru
@@ -122,7 +122,7 @@ function Test-OpenPackagePageAcceptSourceName {
     Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString
 }
 
-function Test-OpenPackagePageAcceptAllAsSourceName {
+function OpenPackagePageAcceptAllAsSourceName {
     # Act
     $p = Open-PackagePage 'elmah' -version 1.1 -Source 'All' -WhatIf -PassThru
 

@@ -88,25 +88,34 @@ namespace NuGet.Client
         public static PackageIdentity ResolvePackage(IPackageRepository localRepository, PackageIdentity identity, bool allowPrereleaseVersions)
         {
             string packageId = identity.Id;
-            NuGetVersion nVersion = identity.Version;
-            string version = identity.Version.ToNormalizedString();
+            string version = null;
+            if (identity.Version != null)
+            {
+                version = identity.Version.ToNormalizedString();
+            }
 
             if (String.IsNullOrEmpty(identity.Id))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
+            IPackage package = null;
             PackageIdentity resolvedIdentity = null;
 
             // If we're looking for an exact version of a package then try local first
-            if (version != null)
+            if (!string.IsNullOrEmpty(version))
             {
                 SemanticVersion sVersion = new SemanticVersion(version);
-                IPackage package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: false);
-                if (package != null)
-                {
-                    resolvedIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(package.Version.ToString()));
-                }
+                package = localRepository.FindPackage(packageId, sVersion, allowPrereleaseVersions, allowUnlisted: false);
+            }
+            else
+            {
+                package = localRepository.FindPackage(packageId);
+            }
+
+            if (package != null)
+            {
+                resolvedIdentity = new PackageIdentity(packageId, NuGetVersion.Parse(package.Version.ToString()));
             }
 
             if (resolvedIdentity == null)

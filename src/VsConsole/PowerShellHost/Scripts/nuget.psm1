@@ -64,7 +64,7 @@ Register-TabExpansion 'Install-Package' @{
 		GetEnumNames 'NuGet.DependencyVersion'
 	}
 	'FileConflictAction' = {
-		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
+		GetEnumNames 'NuGet.Client.FileConflictAction'
 	}
 }
 
@@ -101,10 +101,7 @@ Register-TabExpansion 'Update-Package' @{
             if($packages.Count) {
                 $package = @($packages | Sort-Object Version)[0]
 
-                $versions = GetRemotePackageVersions $context
-
-                # Only show versions that are higher than the lowest installed version
-                $versions = $versions | ?{ $_ -gt $package.Version }
+                $versions = GetRemotePackageUpdateVersions $context
             }
 
             $versions
@@ -114,7 +111,7 @@ Register-TabExpansion 'Update-Package' @{
         GetPackageSources
     }
 	'FileConflictAction' = {
-		GetEnumNames 'NuGet.PowerShell.Commands.FileConflictAction'
+		GetEnumNames 'NuGet.Client.FileConflictAction'
 	}
 }
 
@@ -147,13 +144,13 @@ function IsPrereleaseSet($context) {
 function GetPackages($context) {
     $parameters = @{}
 
-    if ($context.Id) { $parameters.filter = $context.Id }
+    if ($context.Id) { $parameters.Id = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
     if (IsPrereleaseSet $context) {
         $parameters.IncludePreRelease = $true 
     }
 
-    return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
+    return Find-Package @parameters -ListAll -ErrorAction SilentlyContinue
 }
 
 function GetProjectNames {
@@ -170,7 +167,7 @@ function GetInstalledPackageIds($context) {
     
     if ($context.Id) { $parameters.filter = $context.id }
 
-    Find-Package @parameters -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id -Unique
+    Get-Package @parameters -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id -Unique
 }
 
 function GetRemotePackageIds($context) {
@@ -203,8 +200,8 @@ function GetEnumNames($typeName) {
 
 function GetInstalledPackageVersions($context) {
     $parameters = @{}
-    if ($context.id) { $parameters.filter = $context.id }
-    GetAndSortVersions (Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
+    if ($context.id) { $parameters.Filter = $context.id }
+    GetAndSortVersions (Get-Package @parameters -ErrorAction SilentlyContinue)
 }
 
 function GetRemotePackageVersions($context) {
@@ -226,14 +223,42 @@ function GetRemotePackageVersions($context) {
     catch {
 	    # If the server doesn't have the JSON API endpoints, get the remote package versions the old way.
         $parameters = @{}
-        if ($context.Id) { $parameters.filter = $context.Id }
+        if ($context.Id) { $parameters.Id = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
         if (IsPrereleaseSet $context) {
             $parameters.IncludePreRelease = $true 
         }
-        $parameters.Remote = $true
-        $parameters.AllVersions = $true
+        $parameters.ListAll = $true
         GetAndSortVersions(Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
+    }
+}
+
+function GetRemotePackageUpdateVersions($context) {
+    $parameters = @{}
+
+    if ($context.Id -eq $null) {
+        return @()
+    }
+
+    if ($context.Id) { $parameters.id = $context.Id }
+    if ($context.Source) { $parameters.source = $context.Source }
+    if (IsPrereleaseSet $context) {
+        $parameters.IncludePreRelease = $true 
+    }
+
+    try {
+	    return Get-RemotePackageVersion @parameters | %{ [NuGet.SemanticVersion]::Parse($_) } | Sort-Object -Descending
+    }
+    catch {
+	    # If the server doesn't have the JSON API endpoints, get the remote package versions the old way.
+        $parameters = @{}
+        if ($context.Id) { $parameters.Filter = $context.Id }
+        if ($context.Source) { $parameters.source = $context.Source }
+        if (IsPrereleaseSet $context) {
+            $parameters.IncludePreRelease = $true 
+        }
+        $parameters.Updates = $true
+        GetAndSortVersions(Get-Package @parameters -AllVersions -ErrorAction SilentlyContinue)
     }
 }
 

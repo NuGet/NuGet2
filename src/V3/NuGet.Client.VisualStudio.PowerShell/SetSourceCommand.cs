@@ -1,20 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Management.Automation;
-
-using EnvDTE;
+﻿using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio;
-using Microsoft.VisualStudio.Shell;
+using System.Diagnostics.CodeAnalysis;
+using System.Management.Automation;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
     /// <summary>
     /// This cmdlet set the Default project of PowerShell tool window
     /// </summary>
-    [Cmdlet(VerbsCommon.Set, "Project")]
-    [OutputType(typeof(Project))]
-    public class SetProjectCommand : NuGetPowerShellBaseCommand
+    [Cmdlet(VerbsCommon.Set, "Source")]
+    [OutputType(typeof(string))]
+    public class SetSourceCommand : NuGetPowerShellBaseCommand
     {
-        public SetProjectCommand() :
+        public SetSourceCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<SVsServiceProvider>(),
@@ -31,15 +29,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void ProcessRecordCore()
         {
-            if (!SolutionManager.IsSolutionOpen)
-            {
-                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
-            }
-
             if (!string.IsNullOrEmpty(Name))
             {
-                bool success = SetProjectsByName(Name);
-            }         
+                bool success = SetPackageSourceByName(Name);
+            }
         }
     }
 }

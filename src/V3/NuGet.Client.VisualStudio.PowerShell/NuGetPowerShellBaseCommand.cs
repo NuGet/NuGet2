@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Shell;
+using NuGet.Client.ProjectSystem;
+using NuGet.PowerShell.Commands;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
+using NuGetConsole.Host.PowerShell.Implementation;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -10,12 +16,6 @@ using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
-using Microsoft.VisualStudio.Shell;
-using NuGet.Client.ProjectSystem;
-using NuGet.PowerShell.Commands;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
-using NuGetConsole.Host.PowerShell.Implementation;
 
 #if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;
@@ -74,17 +74,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        internal VsSourceRepositoryManager RepositoryManager
-        {
-            get
-            {
-                return _repoManager;
-            }
-            set
-            {
-                _repoManager = value;
-            }
-        }
+        internal IEnumerable<VsProject> Projects { get; set; }
 
         internal IVsPackageManagerFactory PackageManagerFactory
         {
@@ -105,6 +95,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 return _solutionManager;
             }
         }
+
+        public SourceRepository ActiveSourceRepository { get; set; }
 
         internal bool IsSyncMode
         {
@@ -151,6 +143,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// </summary>
         protected abstract void ProcessRecordCore();
 
+        protected void CheckForSolutionOpen()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+        }
+
         protected override void BeginProcessing()
         {
             if (_httpClientEvents != null)
@@ -188,7 +188,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         #region Logging
 
-        public void Log(Client.MessageLevel level, string message, params object[] args)
+        public void Log(MessageLevel level, string message, params object[] args)
         {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
             LogCore(level, formattedMessage);
@@ -325,23 +325,23 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected virtual void LogCore(Client.MessageLevel level, string formattedMessage)
+        protected virtual void LogCore(MessageLevel level, string formattedMessage)
         {
             switch (level)
             {
-                case Client.MessageLevel.Debug:
+                case MessageLevel.Debug:
                     WriteVerbose(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Warning:
+                case MessageLevel.Warning:
                     WriteWarning(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Info:
+                case MessageLevel.Info:
                     WriteLine(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Error:
+                case MessageLevel.Error:
                     WriteError(formattedMessage);
                     break;
             }
@@ -412,6 +412,37 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #endregion Logging
 
         #region Project APIs
+
+        /// <summary>
+        /// Get the VsProject by ProjectName. 
+        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// </summary>
+        /// <param name="throwIfNotExists"></param>
+        /// <returns></returns>
+        public VsProject GetProject(string projectName, bool throwIfNotExists)
+        {
+            VsProject project = null;
+
+            // If the user does not specify a project then use the Default project
+            if (String.IsNullOrEmpty(projectName))
+            {
+                projectName = SolutionManager.DefaultProjectName;
+            }
+
+            EnvDTE.Project dteProject = SolutionManager.GetProject(projectName);
+            if (dteProject != null)
+            {
+                project = Solution.GetProject(dteProject);
+            }
+
+            // If that project was invalid then throw
+            if (project == null && throwIfNotExists)
+            {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+            }
+
+            return project;
+        }
 
         /// <summary>
         /// Return all projects in the solution matching the provided names. Wildcards are supported.
@@ -545,7 +576,40 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     matchIndex = allValidProjectNames.IndexOf(match);
                     host.SetDefaultProjectIndex(matchIndex);
                     _solutionManager.DefaultProjectName = match;
-                    Log(Client.MessageLevel.Info, Resources.Cmdlet_ProjectSet, match);
+                    Log(MessageLevel.Info, Resources.Cmdlet_ProjectSet, match);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteError(ex);
+                    return false;
+                }
+            }
+        }
+        #endregion Project APIs
+
+        /// <summary>
+        /// This method will set the active package source of PowerShell Console by source name.
+        /// </summary>
+        /// <param name="projectNames">The project name to be set to.</param>
+        /// <returns>Boolean indicating success or failure.</returns>
+        protected bool SetPackageSourceByName(string sourceName)
+        {
+            var host = PowerShellHostService.CreateHost(PowerConsoleHostName, false);
+            var allSourceNames = host.GetPackageSources().ToList();
+            string match = allSourceNames.Where(p => string.Equals(p, sourceName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            if (string.IsNullOrEmpty(match))
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_PackageSourceNotFound, sourceName);
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    host.ActivePackageSource = match;
+                    this.ActiveSourceRepository = GetActiveRepository(match);
+                    Log(MessageLevel.Info, Resources.Cmdlet_PackageSourceSet, match);
                     return true;
                 }
                 catch (Exception ex)
@@ -556,7 +620,24 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        #endregion Project APIs
+        /// <summary>
+        /// Get the active SourceRepository for current solution.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        protected SourceRepository GetActiveRepository(string source)
+        {
+            SourceRepository activeSourceRepository = null;
+            if (!string.IsNullOrEmpty(source))
+            {
+                activeSourceRepository = CreateRepositoryFromSource(source);
+            }
+            else if (activeSourceRepository == null)
+            {
+                activeSourceRepository = _repoManager.ActiveRepository;
+            }
+            return activeSourceRepository;
+        }
 
         /// <summary>
         /// Create a package repository from the source by trying to resolve relative paths.
@@ -573,9 +654,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
             try
             {
-                PackageSource packageSource = new PackageSource(source, url);
-                var sourceRepo = new AutoDetectSourceRepository(packageSource, PSCommandsUserAgentClient, _repositoryFactory);
-                return sourceRepo;
+                IPackageRepository repository = _repositoryFactory.CreateRepository(url);
             }
             catch (UriFormatException ex)
             {
@@ -583,7 +662,61 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 uriException = ex;
             }
 
-            return null;
+            Uri uri;
+            if (uriException != null)
+            {
+                // if it's not an absolute path, treat it as relative path
+                if (Uri.TryCreate(source, UriKind.Relative, out uri))
+                {
+                    string outputPath;
+                    bool? exists;
+                    string errorMessage;
+                    // translate relative path to absolute path
+                    if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage) && exists == true)
+                    {
+                        source = outputPath;
+                        url = _packageSourceProvider.ResolveSource(outputPath);
+                    }
+                }
+            }
+
+            try
+            {
+                IPackageRepository repository = _repositoryFactory.CreateRepository(url);
+                PackageSource packageSource = new PackageSource(source, url);
+                var sourceRepo = new AutoDetectSourceRepository(packageSource, PSCommandsUserAgentClient, _repositoryFactory);
+                return sourceRepo;
+            }
+            catch (Exception ex)
+            {
+                // if this is not a valid relative path either, 
+                // we rethrow the UriFormatException that we caught earlier.
+                if (uriException != null)
+                {
+                    throw uriException;
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Translate a PSPath into a System.IO.* friendly Win32 path.
+        /// Does not resolve/glob wildcards.
+        /// </summary>                
+        /// <param name="psPath">The PowerShell PSPath to translate which may reference PSDrives or have provider-qualified paths which are syntactically invalid for .NET APIs.</param>
+        /// <param name="path">The translated PSPath in a format understandable to .NET APIs.</param>
+        /// <param name="exists">Returns null if not tested, or a bool representing path existence.</param>
+        /// <param name="errorMessage">If translation failed, contains the reason.</param>
+        /// <returns>True if successfully translated, false if not.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Following TryParse pattern in BCL", Target = "path")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following TryParse pattern in BCL", Target = "exists")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
+        protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage)
+        {
+            return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
         }
 
         public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object packageObject, Installation.InstallationTarget target)

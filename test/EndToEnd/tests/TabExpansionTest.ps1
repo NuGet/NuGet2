@@ -174,7 +174,7 @@ function Test-TabExpansionForUpdatePackageWithVersionOnlyShowsVersionsHigherThan
     $versions = $suggestions | %{ [NuGet.SemanticVersion]$_ }
 
     # Assert
-    $versions | %{ Assert-True ($_ -gt $installedVersion) }
+    $versions[0] | %{ Assert-True ($_ -gt $installedVersion) }
 }
 
 function Test-TabExpansionForUpdatePackageShowSuggestionsForProjectNames {
@@ -403,8 +403,8 @@ function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions 
     # Assert
     Assert-AreEqual 2 $suggestions.Count
 
-    Assert-AreEqual '1.0.1-a' $suggestions[0]
-    Assert-AreEqual '1.0.0' $suggestions[1]
+    Assert-AreEqual '1.0.1-a' $suggestions[0][0]
+    Assert-AreEqual '1.0.0' $suggestions[1][0]
 }
 
 function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesIfPreReleaseFlagIsSet {

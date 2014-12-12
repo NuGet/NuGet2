@@ -14,6 +14,7 @@ namespace NuGet.Client.Interop
             _installed = installed;
         }
 
+        // TODO: Fix this. It's needed for package update scenarios with constraints. Functional tests fail due to it. 
         public string Source
         {
             get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }

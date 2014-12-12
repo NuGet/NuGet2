@@ -51,14 +51,14 @@ namespace NuGet.Client
                     packageRef.RequireReinstallation);
         }
 
-        internal static NuGet.SemanticVersion SafeToSemVer(SimpleVersion ver)
+        public static NuGet.SemanticVersion SafeToSemanticVersion(SimpleVersion simpleVersion)
         {
-            if (ver == null)
+            if (simpleVersion == null)
             {
                 return null;
             }            
                     
-            return new NuGet.SemanticVersion(ver.ToNormalizedString());
+            return new NuGet.SemanticVersion(simpleVersion.ToNormalizedString());
         }
 
         internal static IVersionSpec SafeToVerSpec(VersionRange versionRange)
@@ -72,12 +72,12 @@ namespace NuGet.Client
             {
                 IsMaxInclusive = versionRange.IsMaxInclusive,
                 IsMinInclusive = versionRange.IsMinInclusive,
-                MaxVersion = SafeToSemVer(versionRange.MaxVersion),
-                MinVersion = SafeToSemVer(versionRange.MinVersion)
+                MaxVersion = SafeToSemanticVersion(versionRange.MaxVersion),
+                MinVersion = SafeToSemanticVersion(versionRange.MinVersion)
             };
         }
 
-        internal static IPackageName SafeToPackageName(PackageIdentity packageIdentity)
+        public static IPackageName SafeToPackageName(PackageIdentity packageIdentity)
         {
             if (packageIdentity == null)
             {
@@ -86,7 +86,7 @@ namespace NuGet.Client
 
             return new PackageName(
                 packageIdentity.Id,
-                SafeToSemVer(packageIdentity.Version));
+                SafeToSemanticVersion(packageIdentity.Version));
         }
     }
 }

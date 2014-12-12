@@ -1,53 +1,42 @@
-﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
-using Newtonsoft.Json.Linq;
-using NuGet.Client.Installation;
-using NuGet.VisualStudio;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
-using System.Threading.Tasks;
+using System.Management.Automation.Host;
+using System.Runtime.Versioning;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    /// TODO List
-    /// 1. Figure out the new behavior/Command that is similar to -ListAvailable
-    /// 2. For parameters that are cut/modified, emit useful message for directing users to the new useage pattern.
-    [Cmdlet(VerbsCommon.Get, "Package2", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
-    public class GetPackageCommand : NuGetPowerShellBaseCommand
+    public class GetPackageCommand : PackageListBaseCommand
     {
-        private readonly IProductUpdateService _productUpdateService;
-        private int _firstValue;
-        private bool _firstValueSpecified;
+        private const int DefaultFirstValue = 50;
+        private bool _enablePaging;
 
         public GetPackageCommand() :
-            base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
-                 ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-                 ServiceLocator.GetInstance<SVsServiceProvider>(),
-                 ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                 ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IHttpClientEvents>())
+            base()
         {
-            _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
 
         [Parameter(Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
-        [ValidateNotNullOrEmpty]
-        public string Source { get; set; }
-
         [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
         [ValidateNotNullOrEmpty]
         public string ProjectName { get; set; }
+
+        [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Updates")]
+        [ValidateNotNullOrEmpty]
+        public string Source { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
@@ -61,79 +50,148 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public SwitchParameter AllVersions { get; set; }
 
         [Parameter(ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName = "Updates")]
-        [Alias("Prerelease")]
-        public SwitchParameter IncludePrerelease { get; set; }
+        public int PageSize { get; set; }
 
-        [Parameter]
-        [ValidateRange(0, Int32.MaxValue)]
-        public int First
+        protected override void Preprocess()
         {
-            get
+            base.TargetProjectName = this.ProjectName;
+            UseRemoteSourceOnly = ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+            UseRemoteSource = ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
+            CollapseVersions = !AllVersions.IsPresent && ListAvailable;
+            if (UseRemoteSource || UseRemoteSourceOnly)
             {
-                return _firstValue;
-            }
-            set
-            {
-                _firstValue = value;
-                _firstValueSpecified = true;
+                this.ActiveSourceRepository = GetActiveRepository(Source);
             }
         }
 
-        [Parameter]
-        [ValidateRange(0, Int32.MaxValue)]
-        public int Skip { get; set; }
-
         protected override void ProcessRecordCore()
         {
-            List<InstallationTarget> targets = new List<InstallationTarget>();
-            List<JObject> solutionInstalledPackages = new List<JObject>();
+            Preprocess();
 
-            if (!string.IsNullOrEmpty(ProjectName))
+            // If Remote & Updates set of parameters are not specified
+            if (!UseRemoteSource)
             {
-                // Get current project
-                Project project = SolutionManager.GetProject(ProjectName);
-                VsProject target = Solution.GetProject(project);
-                targets.Add(target);
+                CheckForSolutionOpen();
+                Dictionary<VsProject, IEnumerable<JObject>> packagesToDisplay = new Dictionary<VsProject, IEnumerable<JObject>>();
+                packagesToDisplay = GetInstalledPackages(Filter, Skip, First);
+                WritePackages(packagesToDisplay, VersionType.single);
             }
             else
             {
-                targets = Solution.GetAllTargetsRecursively().ToList();
+                if (PageSize != 0)
+                {
+                    _enablePaging = true;
+                    First = PageSize;
+                }
+                else if (First == 0)
+                {
+                    First = DefaultFirstValue;
+                }
+
+                // Find avaiable packages from the online sources and not taking targetframeworks into account. 
+                if (UseRemoteSourceOnly)
+                {
+                    IEnumerable<JObject> packagesToDisplay = Enumerable.Empty<JObject>();
+                    // Display the First number of packages
+                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
+                    WritePackagesFromRemoteSources(packagesToDisplay, true);
+                    if (_enablePaging)
+                    {
+                        WriteMoreRemotePackagesWithPaging(packagesToDisplay);
+                    }
+                }
+                else
+                {
+                    // Get package updates from the remote source and take targetframeworks into account.
+                    CheckForSolutionOpen();
+                    Dictionary<VsProject, IEnumerable<JObject>> packagesToDisplay = new Dictionary<VsProject, IEnumerable<JObject>>();
+                    packagesToDisplay = GetPackageUpdatesFromRemoteSource(Filter, IncludePrerelease.IsPresent, Skip, First, AllVersions.IsPresent);
+                    WriteUpdatePackagesFromRemoteSource(packagesToDisplay);
+                }
             }
+        }
 
-            foreach (InstallationTarget target in targets)
+        private void WriteUpdatePackagesFromRemoteSource(Dictionary<VsProject, IEnumerable<JObject>> packagesToDisplay)
+        {
+            VersionType versionType;
+            if (!CollapseVersions)
             {
-                InstalledPackagesList projectlist = target.InstalledPackages;
-
-                // Get all installed packages and metadata for project
-                Task<IEnumerable<JObject>> task = projectlist.GetAllInstalledPackagesAndMetadata();
-                IEnumerable<JObject> installedObjects = task.Result.ToList();
-
-                // Add to the solution's installed packages list
-                solutionInstalledPackages.AddRange(installedObjects);
-            }
-
-            IEnumerable<JObject> installedPackages = null;
-
-            // Filter the results by string, then skip and take
-            if (!string.IsNullOrEmpty(Filter))
-            {
-                installedPackages = solutionInstalledPackages.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
+                versionType = VersionType.all;
             }
             else
             {
-                installedPackages = solutionInstalledPackages;
+                versionType = VersionType.single;
             }
+            WritePackages(packagesToDisplay, versionType);
+        }
 
-            installedPackages = installedPackages.Skip(Skip).ToList();
-            if (_firstValueSpecified)
+        private void WritePackagesFromRemoteSources(IEnumerable<JObject> packagesToDisplay, bool outputWarning = false)
+        {
+            // Write warning message for Get-Package -ListAvaialble -Filter being obsolete
+            // and will be replaced by Find-Package [-Id] 
+            VersionType versionType;
+            string message;
+            if (!CollapseVersions)
             {
-                installedPackages = installedPackages.Take(First).ToList();
+                versionType = VersionType.all;
+                message = "Find-Package [-Id] -ListAll";
+            }
+            else
+            {
+                versionType = VersionType.latest;
+                message = "Find-Package [-Id]";
             }
 
-            // Get the PowerShellPackageView
-            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
-            WriteObject(view, enumerateCollection: true);
+            // Output list of PowerShellPackages
+            if (outputWarning && !string.IsNullOrEmpty(Filter))
+            {
+                Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, message);
+            }
+
+            WritePackages(packagesToDisplay, versionType);
+        }
+
+        private void WriteMoreRemotePackagesWithPaging(IEnumerable<JObject> packagesToDisplay)
+        {
+            // Display more packages with paging
+            int pageNumber = 1;
+            while (true)
+            {
+                packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, pageNumber * PageSize, PageSize);
+                if (packagesToDisplay.Count() != 0)
+                {
+                    // Prompt to user and if want to continue displaying more packages
+                    int command = AskToContinueDisplayPackages();
+                    if (command == 0)
+                    {
+                        // If yes, display the next page of (PageSize) packages
+                        WritePackagesFromRemoteSources(packagesToDisplay);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                pageNumber++;
+            }
+        }
+
+        private int AskToContinueDisplayPackages()
+        {
+            // Add a line before message prompt
+            WriteLine();
+            var choices = new Collection<ChoiceDescription>
+            {
+                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_DisplayMorePackagesYesHelp),
+                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_DisplayMorePackagesNoHelp),
+            };
+
+            int choice = Host.UI.PromptForChoice(string.Empty, Resources.Cmdlet_PrompToDisplayMorePackages, choices, defaultChoice: 1);
+
+            Debug.Assert(choice >= 0 && choice < 2);
+            // Add a line after
+            WriteLine();
+            return choice;
         }
     }
 }

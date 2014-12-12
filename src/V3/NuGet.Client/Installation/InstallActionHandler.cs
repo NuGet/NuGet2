@@ -55,7 +55,7 @@ namespace NuGet.Client.Installation
 
                 // Get the package from the shared repository
                 var package = packageManager.LocalRepository.FindPackage(
-                    action.PackageIdentity.Id, CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+                    action.PackageIdentity.Id, CoreConverters.SafeToSemanticVersion(action.PackageIdentity.Version));
                 Debug.Assert(package != null); // The package had better be in the local repository!!
 
                 // Ping the metrics service

@@ -1147,7 +1147,7 @@ function Test-PackageInstallAcceptsSourceName {
     Assert-SolutionPackage Castle.Core
 }
 
-function Test-PackageInstallAcceptsAllAsSourceName {
+function PackageInstallAcceptsAllAsSourceName {
     # Arrange
     $project = New-ConsoleApplication
     

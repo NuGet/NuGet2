@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NuGet.Client.Diagnostics;
+using NuGet.Resources;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.Installation
@@ -14,9 +13,10 @@ namespace NuGet.Client.Installation
     /// <summary>
     /// Handles the Download package Action by downloading the specified package into the shared repository
     /// (packages folder) for the solution.
-    /// </summary>
+    /// </summary>    
     public class DownloadActionHandler : IActionHandler
     {
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public void Execute(NewPackageAction action, IExecutionContext context, CancellationToken cancelToken)
         {
             string downloadUriStr = action.Package[Properties.PackageContent].ToString();
@@ -42,10 +42,33 @@ namespace NuGet.Client.Installation
             var packageCache = action.Target.TryGetFeature<IPackageCacheRepository>();
 
             // Load the package
-            IPackage package;
+            IPackage package = null;
             if (downloadUri.IsFile)
             {
-                package = new OptimizedZipPackage(downloadUri.LocalPath);
+                // To keep feature backward-compatbility. The .nupkg file on disk may have a shorter name than semantic version.
+                // For example: TestPackage 2.0.0.0 may be saved as TestPackage.2.0.nupkg on disk.
+                SemanticVersion originalVersion = new SemanticVersion(action.PackageIdentity.Version.ToString());
+                IEnumerable<SemanticVersion> possibleVersions = VersionUtility.GetPossibleVersions(originalVersion);
+                foreach (SemanticVersion version in possibleVersions)
+                {
+                    // Get other alternative download path
+                    string downloadPath = downloadUri.LocalPath.Replace(originalVersion.ToString(), version.ToString());
+                    try
+                    {
+                        package = new OptimizedZipPackage(downloadPath);
+                        break;
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                }
+
+                // Verify the version of OptimizedZipPackage is expected.
+                if (package == null || package.Version != originalVersion)
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.FileDoesNotExit, downloadUri.LocalPath));
+                }
             }
             else
             {
@@ -81,7 +104,7 @@ namespace NuGet.Client.Installation
 
         internal static IPackage GetPackage(IPackageCacheRepository packageCache, PackageIdentity packageIdentity, Uri downloadUri)
         {
-            var packageSemVer = CoreConverters.SafeToSemVer(packageIdentity.Version);
+            var packageSemVer = CoreConverters.SafeToSemanticVersion(packageIdentity.Version);
             var packageName = CoreConverters.SafeToPackageName(packageIdentity);
             var downloader = new PackageDownloader();
 
@@ -129,8 +152,8 @@ namespace NuGet.Client.Installation
             }
 
             // Either:
-            //  1. We failed to load the package into the cache, which can happen when 
-            //       access to the %LocalAppData% directory is blocked, 
+            //  1. We failed to load the package into the cache, which can happen when
+            //       access to the %LocalAppData% directory is blocked,
             //       e.g. on Windows Azure Web Site build OR
             //  B. It was purged from the cache before it could be retrieved again.
             // Regardless, the cache isn't working for us, so download it in to memory.

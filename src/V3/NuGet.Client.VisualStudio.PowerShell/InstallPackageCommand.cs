@@ -3,11 +3,13 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.Versioning;
 using System.Text;
 
 
@@ -24,16 +26,20 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This command installs the specified package into the specified project.
     /// </summary>
     /// TODO List
-    /// 1. Filter unlisted packages from latest version, if version is not specified by user
-    /// 2. Add back fall back to cache featuree
-    /// 3. Add new path/package recognition feature
-    /// 4. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
-    /// 5. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
-    [Cmdlet(VerbsLifecycle.Install, "Package2")]
+    /// 1. Be able to resolve dependency packages from other enabled package sources, if active repo does not contain them.
+    /// 2. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
+    /// 3. Implement Add-BindingRedirect for V3
+    [Cmdlet(VerbsLifecycle.Install, "Package")]
     public class InstallPackageCommand : PackageInstallBaseCommand
     {
         private bool _readFromPackagesConfig;
         private bool _readFromDirectPackagePath;
+        private bool _isHttp;
+        private bool _isNetworkAvailable;
+        private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
+        private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
+        private string _cacheStatusMessage = String.Empty;
+        private object _currentSource = String.Empty;
 
         public InstallPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -43,13 +49,68 @@ namespace NuGet.Client.VisualStudio.PowerShell
                  ServiceLocator.GetInstance<ISolutionManager>(),
                  ServiceLocator.GetInstance<IHttpClientEvents>())
         {
+            _isNetworkAvailable = isNetworkAvailable();
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        [Parameter]
+        public SwitchParameter Force { get; set; }
+
+        private static bool isNetworkAvailable()
         {
+            return NetworkInterface.GetIsNetworkAvailable();
+        }
+
+        protected override void Preprocess()
+        {
+            ForceInstall = Force.IsPresent;
+            FallbackToCacheIfNeccessary();
             ParseUserInputForId();
+            // Process active repository and projects
+            base.Preprocess();
             this.Identities = GetIdentitiesForResolver();
-            base.PreprocessProjectAndIdentities();
+        }
+
+        protected override void ExecutePackageActions()
+        {
+            if (ForceInstall)
+            {
+                SubscribeToProgressEvents();
+                ForceInstallPackages(Identities, Projects);
+                UnsubscribeFromProgressEvents();
+            }
+            else
+            {
+                base.ExecutePackageActions();
+            }
+        }
+
+        /// <summary>
+        /// Parse user input for Id parameter. 
+        /// Id can be the name of a package, path to packages.config file or path to .nupkg file.
+        /// </summary>
+        private void ParseUserInputForId()
+        {
+            if (!string.IsNullOrEmpty(Id))
+            {
+                if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageReferenceFile))
+                {
+                    _readFromPackagesConfig = true;
+                }
+                else if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageExtension))
+                {
+                    _readFromDirectPackagePath = true;
+                    if (UriHelper.IsHttpSource(Id))
+                    {
+                        _isHttp = true;
+                        Source = NuGet.MachineCache.Default.Source;
+                    }
+                    else
+                    {
+                        string fullPath = Path.GetFullPath(Id);
+                        Source = Path.GetDirectoryName(fullPath);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -75,6 +136,48 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return identityList;
         }
 
+        private void FallbackToCacheIfNeccessary()
+        {
+            /**** Fallback to Cache logic***/
+            //1. Check if there is any http source (in active sources or Source switch)
+            //2. Check if any one of the UNC or local sources is available (in active sources)
+            //3. If none of the above is true, fallback to cache
+
+            //Check if any of the active package source is available. This function will return true if there is any http source in active sources
+            //For http sources, we will continue and fallback to cache at a later point if the resource is unavailable
+
+            if (String.IsNullOrEmpty(Source))
+            {
+                bool isAnySourceAvailable = false;
+                _currentSource = ActiveSourceRepository;
+                isAnySourceAvailable = UriHelper.IsAnySourceAvailable(PackageSourceProvider, _isNetworkAvailable);
+
+                //if no local or UNC source is available or no source is http, fallback to local cache
+                if (!isAnySourceAvailable)
+                {
+                    Source = NuGet.MachineCache.Default.Source;
+                    CacheStatusMessage(_currentSource, Source);
+                }
+            }
+
+            //At this point, Source might be value from -Source switch or NuGet Local Cache
+            /**** End of Fallback to Cache logic ***/
+        }
+
+        private void CacheStatusMessage(object currentSource, string cacheSource)
+        {
+            if (!String.IsNullOrEmpty(cacheSource))
+            {
+                _cacheStatusMessage = String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, currentSource, Source);
+            }
+            else
+            {
+                _cacheStatusMessage = String.Format(CultureInfo.CurrentCulture, _localCacheFailureMessage, currentSource);
+            }
+
+            Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, PackageSourceProvider.ActivePackageSource, Source));
+        }
+
         /// <summary>
         /// Returns single package identity for resolver when Id is specified
         /// </summary>
@@ -86,40 +189,19 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                NuGetVersion nVersion = ParseUserInputForVersion(Version);
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
                 PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
-                if (!_readFromDirectPackagePath)
-                {
-                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
-                }
+                identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
             }
             else
             {
                 // Get the latest Version from package repository.
-                Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, IncludePrerelease.IsPresent);
+                IEnumerable<FrameworkName> frameworks = this.Projects.FirstOrDefault().GetSupportedFrameworks();
+                Version = PowerShellPackage.GetLastestVersionForPackage(ActiveSourceRepository, Id, frameworks, IncludePrerelease.IsPresent);
                 identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
             }
 
             return new List<PackageIdentity>() { identity };
-        }
-
-        /// <summary>
-        /// Parse user input for Id parameter. 
-        /// Id can be the name of a package, path to packages.config file or path to .nupkg file.
-        /// </summary>
-        private void ParseUserInputForId()
-        {
-            if (!string.IsNullOrEmpty(Id))
-            {
-                if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageReferenceFile))
-                {
-                    _readFromPackagesConfig = true;
-                }
-                else if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageExtension))
-                {
-                    _readFromDirectPackagePath = true;
-                }
-            }
         }
 
         /// <summary>
@@ -142,6 +224,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 else
                 {
+                    // Example: install-package2 c:\temp\packages.config
                     using (FileStream stream = new FileStream(Id, FileMode.Open))
                     {
                         PackagesConfigReader reader = new PackagesConfigReader(stream);
@@ -169,30 +252,85 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private IEnumerable<PackageIdentity> CreatePackageIdentityFromNupkgPath()
         {
             PackageIdentity identity = null;
-            if (UriHelper.IsHttpSource(Id))
+            IPackage package = null;
+
+            try
             {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                try
+                // Example: install-package2 https://az320820.vo.msecnd.net/packages/microsoft.aspnet.mvc.4.0.20505.nupkg
+                if (_isHttp)
                 {
-                    string fullPath = Path.GetFullPath(Id);
-                    Source = Path.GetDirectoryName(fullPath);
-                    var package = new OptimizedZipPackage(fullPath);
-                    if (package != null)
+                    PackageIdentity packageIdentity = ParsePackageIdentityFromHttpSource(Id);
+                    IPackageCacheRepository packageCache = this.Projects.FirstOrDefault().TryGetFeature<IPackageCacheRepository>();
+                    IPackageName packageName = CoreConverters.SafeToPackageName(packageIdentity);
+                    SemanticVersion packageSemVer = CoreConverters.SafeToSemanticVersion(packageIdentity.Version);
+                    Uri downloadUri = new Uri(Id);
+                    PackageDownloader downloader = new PackageDownloader();
+
+                    // Try to download the package through the cache.
+                    bool success = packageCache.InvokeOnPackage(
+                        packageIdentity.Id,
+                        packageSemVer,
+                        (targetStream) =>
+                            downloader.DownloadPackage(
+                                new HttpClient(downloadUri),
+                                packageName,
+                                targetStream));
+                    if (success)
                     {
-                        Id = package.Id;
-                        Version = package.Version.ToString();
+                        // Try to get it from the cache again
+                        package = packageCache.FindPackage(packageIdentity.Id, packageSemVer);
                     }
+                }
+                else
+                {
+                    // Example: install-package2 c:\temp\packages\jQuery.1.10.2.nupkg
+                    string fullPath = Path.GetFullPath(Id);
+                    package = new OptimizedZipPackage(fullPath);
+                }
+
+                if (package != null)
+                {
+                    Id = package.Id;
+                    Version = package.Version.ToString();
                     identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
             }
+            catch (Exception ex)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParsePackages, Id, ex.Message);
+            }
+
             return new List<PackageIdentity>() { identity };
+        }
+
+        private PackageIdentity ParsePackageIdentityFromHttpSource(string sourceUrl)
+        {
+            if (!string.IsNullOrEmpty(sourceUrl))
+            {
+                string lastPart = sourceUrl.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+                lastPart = lastPart.Replace(NuGet.Constants.PackageExtension, "");
+                string[] parts = lastPart.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                StringBuilder builderForId = new StringBuilder();
+                StringBuilder builderForVersion = new StringBuilder();
+                foreach (string s in parts)
+                {
+                    int n;
+                    bool isNumeric = int.TryParse(s, out n);
+                    if (!isNumeric)
+                    {
+                        builderForId.Append(s);
+                        builderForId.Append(".");
+                    }
+                    else
+                    {
+                        builderForVersion.Append(s);
+                        builderForVersion.Append(".");
+                    }
+                }
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(builderForVersion.ToString().TrimSuffix("."));
+                return new PackageIdentity(builderForId.ToString().TrimSuffix("."), nVersion);
+            }
+            return null;
         }
 
         /// <summary>

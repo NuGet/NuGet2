@@ -19,13 +19,13 @@ namespace NuGet.Client.Installation
             // Preconditions:
             Debug.Assert(!packageManager.LocalRepository.IsReferenced(
                 action.PackageIdentity.Id,
-                CoreConverters.SafeToSemVer(action.PackageIdentity.Version)),
+                CoreConverters.SafeToSemanticVersion(action.PackageIdentity.Version)),
                 "Expected the purge operation would only be executed AFTER the package was no longer referenced!");
 
             // Get the package out of the project manager
             var package = packageManager.LocalRepository.FindPackage(
                 action.PackageIdentity.Id,
-                CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+                CoreConverters.SafeToSemanticVersion(action.PackageIdentity.Version));
             Debug.Assert(package != null);
 
             // Purge the package from the local repository

@@ -2,7 +2,9 @@
 using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace NuGet.Client.VisualStudio.PowerShell
@@ -10,7 +12,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// <summary>
     /// This command uninstalls the specified package from the specified project.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Uninstall, "Package2")]
+    [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
     public class UninstallPackageCommand : PackageActionBaseCommand
     {
         private ResolutionContext _context;
@@ -31,21 +33,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter]
         public SwitchParameter RemoveDependencies { get; set; }
-        
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            // For uninstall, use local repository for better performance
-            VsProject proj = GetProject(true);
-            SourceRepository localRepo = proj.TryGetFeature<SourceRepository>();
-            this.ActiveSourceRepository = localRepo;
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
+            base.Preprocess();
+            VsProject proj = this.Projects.FirstOrDefault();
+            Source = V2LocalRepository.Source;
+            this.ActiveSourceRepository = GetActiveRepository(Source);
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
             this.Identities = GetPackageIdentityForResolver();
-            base.PreprocessProjectAndIdentities();
         }
 
         /// <summary>
@@ -54,31 +50,28 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <returns></returns>
         private List<PackageIdentity> GetPackageIdentityForResolver()
         {
-            PackageIdentity identity = null;
+            VsProject target = this.GetProject(true);
+            InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
+            // If package Id cannot be found in Installed packages.
+            if (installedPackage == null)
+            {
+                WriteError(string.Format(Resources.Cmdlet_PackageNotInstalled, Id));
+            }
 
-            // If Version is specified by commandline parameter
+            PackageIdentity identity = installedPackage.Identity;
             if (!string.IsNullOrEmpty(Version))
             {
-                NuGetVersion nVersion = ParseUserInputForVersion(Version);
-                PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
-                identity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, pIdentity, true);
-            }
-            else
-            {
-                VsProject target = this.GetProject(true);
-                InstalledPackageReference installedPackage = GetInstalledReference(target, Id);
-                if (installedPackage == null)
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
+                // If specified Version does not match the installed version
+                if (nVersion != identity.Version)
                 {
-                    Log(MessageLevel.Error, Resources.Cmdlet_PackageNotInstalled, Id);
-                }
-                else
-                {
-                    identity = installedPackage.Identity;
-                    Version = identity.Version.ToNormalizedString();
+                    WriteError(string.Format(VsResources.UnknownPackageInProject, Id + " " + Version, target.Name));
                 }
             }
 
-            return new List<PackageIdentity>() { identity };
+            // Finally resolve the identity against local repository.
+            PackageIdentity resolvedIdentity = Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, identity, true);
+            return new List<PackageIdentity>() { resolvedIdentity };
         }
 
         public ResolutionContext ResolutionContext

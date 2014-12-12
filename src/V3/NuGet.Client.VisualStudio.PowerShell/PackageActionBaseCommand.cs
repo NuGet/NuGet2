@@ -2,11 +2,12 @@
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Resources;
-using NuGet.Versioning;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
@@ -29,7 +30,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public abstract class PackageActionBaseCommand : NuGetPowerShellBaseCommand
     {
         private PackageActionType _actionType;
-        private SourceRepository _activeSourceRepository;
+        private readonly IVsCommonOperations _vsCommonOperations;
+        private readonly IDeleteOnRestartManager _deleteOnRestartManager;
+        private IDisposable _expandedNodesDisposable;
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,
@@ -42,6 +45,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
             : base(packageSourceProvider, packageRepositoryFactory, svcServiceProvider, packageManagerFactory, solutionManager, clientEvents)
         {
             _actionType = actionType;
+            _vsCommonOperations = ServiceLocator.GetInstance<IVsCommonOperations>();
+            _deleteOnRestartManager = ServiceLocator.GetInstance<IDeleteOnRestartManager>();
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -53,7 +58,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter(Position = 2)]
         [ValidateNotNullOrEmpty]
-        public string Version { get; set; }
+        public virtual string Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
@@ -64,26 +69,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public ActionResolver PackageActionResolver { get; set; }
 
-        public SourceRepository ActiveSourceRepository
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(Source))
-                {
-                    _activeSourceRepository = CreateRepositoryFromSource(Source);
-                }
-                else
-                {
-                    _activeSourceRepository = RepositoryManager.ActiveRepository;
-                }
-                return _activeSourceRepository;
-            }
-            set
-            {
-                _activeSourceRepository = value;
-            }
-        }
-
         public IPackageRepository V2LocalRepository
         {
             get
@@ -93,83 +78,46 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        public IEnumerable<VsProject> Projects { get; set; }
-
         public IEnumerable<PackageIdentity> Identities { get; set; }
 
-        /// <summary>
-        /// Get Installed Package References for a single project
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
+        protected override void BeginProcessing()
         {
-            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                refs = installedList.GetInstalledPackages();
-            }
-            return refs;
+            base.BeginProcessing();
+
+            // remember currently expanded nodes so that we can leave them expanded 
+            // after the operation has finished.
+            SaveExpandedNodes();
         }
 
-        /// <summary>
-        /// Get Installed Package References a single project with specified packageId
-        /// </summary>
-        /// <returns></returns>
-        protected InstalledPackageReference GetInstalledReference(VsProject proj, string Id)
+        protected override void EndProcessing()
         {
-            InstalledPackageReference packageRef = null;
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                packageRef = installedList.GetInstalledPackage(Id);
-            }
-            return packageRef;
-        }
+            base.EndProcessing();
 
-        private void CheckForSolutionOpen()
-        {
-            if (!SolutionManager.IsSolutionOpen)
+            IList<string> packageDirectoriesMarkedForDeletion = _deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion();
+            if (packageDirectoriesMarkedForDeletion != null && packageDirectoriesMarkedForDeletion.Count != 0)
             {
-                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    VsResources.RequestRestartToCompleteUninstall,
+                    string.Join(", ", packageDirectoriesMarkedForDeletion));
+                WriteWarning(message);
             }
+
+            CollapseNodes();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected override void ProcessRecordCore()
         {
-            try
-            {
-                CheckForSolutionOpen();
-                PreprocessProjectAndIdentities();
-                ExecutePackageActions();
-            }
-            catch (Exception ex)
-            {
-                // unhandled exceptions should be terminating
-                ErrorHandler.HandleException(ex, terminating: true);
-            }
-            finally
-            {
-                UnsubscribeEvents();
-            }
+            CheckForSolutionOpen();
+            Preprocess();
+            ExecutePackageActions();
         }
 
-        protected virtual void PreprocessProjectAndIdentities()
+        protected virtual void Preprocess()
         {
             VsProject vsProject = GetProject(true);
             this.Projects = new List<VsProject> { vsProject };
-        }
-
-        protected NuGetVersion ParseUserInputForVersion(string version)
-        {
-            NuGetVersion nVersion;
-            bool success = NuGetVersion.TryParse(Version, out nVersion);
-            if (!success)
-            {
-                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
-            }
-            return nVersion;
         }
 
         protected virtual void ExecutePackageActions()
@@ -180,13 +128,27 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 ExecuteSinglePackageAction(identity, Projects);
             }
+
+            UnsubscribeFromProgressEvents();
         }
 
         /// <summary>
         /// Resolve and execute actions for a single package
         /// </summary>
         /// <param name="identity"></param>
+        /// <param name="projects"></param>
         protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects)
+        {
+            ExecuteSinglePackageAction(identity, projects, _actionType);
+        }
+
+        /// <summary>
+        /// Resolve and execute actions for a single package for specified package action type.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="projects"></param>
+        /// <param name="actionType"></param>
+        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects, PackageActionType actionType)
         {
             if (identity == null)
             {
@@ -198,7 +160,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // Resolve Actions
                 List<VsProject> targetProjects = projects.ToList();
                 Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction =
-                    PackageActionResolver.ResolveActionsAsync(identity, _actionType, targetProjects, Solution);
+                    PackageActionResolver.ResolveActionsAsync(identity, actionType, targetProjects, Solution);
 
                 IEnumerable<Client.Resolution.PackageAction> actions = resolverAction.Result;
 
@@ -228,7 +190,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
 
                 // Execute Actions
-                if (actions.Count() == 0 && _actionType == PackageActionType.Install)
+                if (actions.Count() == 0 && actionType == PackageActionType.Install)
                 {
                     Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, identity.Id);
                 }
@@ -242,18 +204,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // TODO: Consider adding the rollback behavior if exception is thrown.
             catch (Exception ex)
             {
-                if (ex.InnerException != null)
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
                 {
-                    this.Log(Client.MessageLevel.Warning, ex.InnerException.Message);
+                    WriteError(ex.InnerException.Message);
                 }
                 else
                 {
-                    this.Log(Client.MessageLevel.Warning, ex.Message);
+                    WriteError(ex.Message);
                 }
-            }
-            finally
-            {
-                UnsubscribeFromProgressEvents();
             }
         }
 
@@ -324,6 +282,22 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return list;
         }
 
+        private void SaveExpandedNodes()
+        {
+            // remember which nodes are currently open so that we can keep them open after the operation
+            _expandedNodesDisposable = _vsCommonOperations.SaveSolutionExplorerNodeStates(SolutionManager);
+        }
+
+        private void CollapseNodes()
+        {
+            // collapse all nodes in solution explorer that we expanded during the operation
+            if (_expandedNodesDisposable != null)
+            {
+                _expandedNodesDisposable.Dispose();
+                _expandedNodesDisposable = null;
+            }
+        }
+
         /// <summary>
         /// Get the VsProject by ProjectName. 
         /// If ProjectName is not specified, return the Default project of Tool window.
@@ -332,29 +306,73 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <returns></returns>
         public VsProject GetProject(bool throwIfNotExists)
         {
-            VsProject project = null;
-
-            // If the user does not specify a project then use the Default project
-            if (String.IsNullOrEmpty(ProjectName))
-            {
-                ProjectName = SolutionManager.DefaultProjectName;
-            }
-
-            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
-                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
-            if (dteProject != null)
-            {
-                project = Solution.GetProject(dteProject);
-            }
-
-            // If that project was invalid then throw
-            if (project == null && throwIfNotExists)
-            {
-                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-            }
-
+            VsProject project = GetProject(ProjectName, throwIfNotExists);
             return project;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for a single project
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
+        {
+            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                refs = installedList.GetInstalledPackages();
+            }
+            return refs;
+        }
+
+        /// <summary>
+        /// Get Installed Package References a single project with specified packageId
+        /// </summary>
+        /// <returns></returns>
+        protected InstalledPackageReference GetInstalledReference(VsProject proj, string Id)
+        {
+            InstalledPackageReference packageRef = null;
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                packageRef = installedList.GetInstalledPackage(Id);
+            }
+            return packageRef;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for all projects.
+        /// </summary>
+        /// <returns></returns>
+        protected Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
+        {
+            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
+            foreach (VsProject proj in Projects)
+            {
+                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
+                dic.Add(proj, list);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// Get installed package identity for specific package Id in all projects.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        protected Dictionary<VsProject, PackageIdentity> GetInstalledPackageWithId(string packageId)
+        {
+            Dictionary<VsProject, PackageIdentity> dic = new Dictionary<VsProject, PackageIdentity>();
+            foreach (VsProject proj in Projects)
+            {
+                InstalledPackageReference reference = GetInstalledReference(proj, packageId);
+                if (reference != null)
+                {
+                    PackageIdentity identity = reference.Identity;
+                    dic.Add(proj, identity);
+                }
+            }
+            return dic;
         }
     }
 }

@@ -6,13 +6,13 @@ function Get-SolutionPackage {
         [string]$Id,
         [string]$Version
     )
-    
+
     # Get the package entries from the solution
     $packages = Get-Package | ?{ $_.Id -eq $Id }
-    
+
     if($Version) {
         $actualVersion = [NuGet.SemanticVersion]::Parse($Version)
-        $packages = $packages | ?{ $_.Version -eq $actualVersion }
+        $packages = $packages | ?{[NuGet.SemanticVersion]::Parse($_.Version[0]) -eq $actualVersion }
     }
     
     $packages

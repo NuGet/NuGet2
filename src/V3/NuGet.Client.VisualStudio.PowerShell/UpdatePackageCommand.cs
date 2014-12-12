@@ -1,9 +1,8 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
 
 
@@ -23,7 +22,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 1. Follow up with UpdateAll UI implementation (not done yet)
     /// 2. Figure out the Utility to get list of packages installed to a project - CoreInteropInstalledPackagesList?
     /// 3. Figure out the right API to use to get latest version, safe version etc. 
-    [Cmdlet(VerbsData.Update, "Package2", DefaultParameterSetName = "All")]
+    [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
     public class UpdatePackageCommand : PackageInstallBaseCommand
     {
         private IProductUpdateService _productUpdateService;
@@ -42,11 +41,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
 
-        // We need to override id since it's mandatory in the base class. We don't
-        // want it to be mandatory here.
-        // Update-Package Reinstall feature is cut for V3. 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "Project")]
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "All")]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "Reinstall")]
         public override string Id
         {
             get
@@ -62,6 +59,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "All")]
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
+        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "Reinstall")]
         public override string ProjectName
         {
             get
@@ -75,24 +73,23 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
+        [Parameter(Position = 2, ParameterSetName = "Project")]
+        [ValidateNotNullOrEmpty]
+        public override string Version { get; set; }
+
         [Parameter]
         public SwitchParameter Safe { get; set; }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
+        [Parameter(Mandatory = true, ParameterSetName = "Reinstall")]
+        [Parameter(ParameterSetName = "All")]
+        public SwitchParameter Reinstall { get; set; }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
+            base.Preprocess();
             if (!_projectSpecified)
             {
                 this.Projects = GetAllProjectsInSolution();
-            }
-            else
-            {
-                base.PreprocessProjectAndIdentities();
             }
         }
 
@@ -100,6 +97,20 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             SubscribeToProgressEvents();
 
+            if (!Reinstall.IsPresent)
+            {
+                PerformPackageUpdates();
+            }
+            else
+            {
+                PerformPackageReinstalls();
+            }
+
+            UnsubscribeFromProgressEvents();
+        }
+
+        private void PerformPackageUpdates()
+        {
             // UpdateAll
             if (!_idSpecified)
             {
@@ -112,14 +123,24 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     foreach (PackageIdentity identity in identities)
                     {
                         // Find packages update
-                        PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, entry.Key, IncludePrerelease.IsPresent, Safe.IsPresent);
                         ExecuteSinglePackageAction(update, targetedProjects);
                     }
                 }
             }
-            else 
+            else
             {
+                // Resolve package Id to be updated from the local repository
+                PackageIdentity installedIdentity = new PackageIdentity(Id, null);
+                Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, installedIdentity, IncludePrerelease.IsPresent);
+
                 Dictionary<VsProject, PackageIdentity> dictionary = GetInstalledPackageWithId(Id);
+                // If package Id exists in Packages folder but is not actually installed to the current project, throw.
+                if (dictionary.Count == 0)
+                {
+                    WriteError(string.Format(VsResources.PackageNotInstalledInAnyProject, Id));
+                }
+
                 foreach (KeyValuePair<VsProject, PackageIdentity> entry in dictionary)
                 {
                     IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
@@ -128,13 +149,30 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     // Find package update
                     if (!string.IsNullOrEmpty(Version))
                     {
-                        NuGetVersion nVersion = ParseUserInputForVersion(Version);
-                        PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
-                        update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
+                        NuGetVersion nVersion;
+                        if (IsVersionEnum)
+                        {
+                            nVersion = PowerShellPackage.GetUpdateVersionForDependentPackage(ActiveSourceRepository, identity, UpdateVersionEnum, entry.Key.GetSupportedFrameworks(), IncludePrerelease.IsPresent);
+                        }
+                        else
+                        {
+                            nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
+                        }
+
+                        if (nVersion != null)
+                        {
+                            PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
+                            update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
+                        }
                     }
                     else
                     {
-                        update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, entry.Key, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        if (update.Version <= identity.Version)
+                        {
+                            update = null;
+                            Log(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
+                        }
                     }
 
                     ExecuteSinglePackageAction(update, targetedProjects);
@@ -142,39 +180,38 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        /// <summary>
-        /// Get Installed Package References for all projects.
-        /// </summary>
-        /// <returns></returns>
-        private Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
+        private void PerformPackageReinstalls()
         {
-            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
-            foreach (VsProject proj in Projects)
+            // ReinstallAll
+            if (!_idSpecified)
             {
-                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
-                dic.Add(proj, list);
-            }
-            return dic;
-        }
-
-        /// <summary>
-        /// Get installed package identity for specific package Id in all projects.
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        private Dictionary<VsProject, PackageIdentity> GetInstalledPackageWithId(string packageId)
-        {
-            Dictionary<VsProject, PackageIdentity> dic = new Dictionary<VsProject, PackageIdentity>();
-            foreach (VsProject proj in Projects)
-            {
-                InstalledPackageReference reference = GetInstalledReference(proj, packageId);
-                if (reference != null)
+                Dictionary<VsProject, List<PackageIdentity>> dictionary = GetInstalledPackagesForAllProjects();
+                foreach (KeyValuePair<VsProject, List<PackageIdentity>> entry in dictionary)
                 {
-                    PackageIdentity identity = reference.Identity;
-                    dic.Add(proj, identity);
+                    IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
+                    ForceInstallPackages(entry.Value, targetedProjects);
                 }
             }
-            return dic;
+            else
+            {
+                // Resolve package Id to be updated from the local repository
+                PackageIdentity installedIdentity = new PackageIdentity(Id, null);
+                Client.PackageRepositoryHelper.ResolvePackage(V2LocalRepository, installedIdentity, IncludePrerelease.IsPresent);
+
+                Dictionary<VsProject, PackageIdentity> dictionary = GetInstalledPackageWithId(Id);
+                // If package Id exists in Packages folder but is not actually installed to the current project, throw.
+                if (dictionary.Count == 0)
+                {
+                    WriteError(string.Format(VsResources.PackageNotInstalledInAnyProject, Id));
+                }
+
+                foreach (KeyValuePair<VsProject, PackageIdentity> entry in dictionary)
+                {
+                    IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
+                    PackageIdentity resolvedIdentity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, entry.Value, IncludePrerelease.IsPresent);
+                    ForceInstallPackage(resolvedIdentity, targetedProjects);
+                }
+            }
         }
 
         protected override void EndProcessing()

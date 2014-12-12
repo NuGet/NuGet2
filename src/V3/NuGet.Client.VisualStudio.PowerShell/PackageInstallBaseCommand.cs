@@ -1,7 +1,11 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
 using System.Management.Automation;
+using System.Linq;
+using System;
+using EnvDTE;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
@@ -18,6 +22,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             IHttpClientEvents clientEvents)
             : base(packageSourceProvider, packageRepositoryFactory, svcServiceProvider, packageManagerFactory, solutionManager, clientEvents, PackageActionType.Install)
         {
+            this.PackageSourceProvider = packageSourceProvider;
         }
 
         [Parameter, Alias("Prerelease")]
@@ -32,15 +37,56 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter]
         public DependencyBehavior? DependencyVersion { get; set; }
 
-        protected override void BeginProcessing()
+        public IVsPackageSourceProvider PackageSourceProvider { get; set; }
+
+        public bool ForceInstall { get; set; }
+
+        public bool IsVersionEnum { get; set; }
+
+        public DependencyVersion UpdateVersionEnum { get; set; }
+
+        protected override void Preprocess()
         {
-            base.BeginProcessing();
+            this.ActiveSourceRepository = GetActiveRepository(Source);
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
+            base.Preprocess();
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        /// <summary>
+        /// Used for Install-Package -Force and Update-Package -Reinstall
+        /// </summary>
+        /// <param name="identities"></param>
+        /// <param name="targetedProjects"></param>
+        protected void ForceInstallPackages(IEnumerable<PackageIdentity> identities, IEnumerable<VsProject> targetedProjects)
         {
-            base.PreprocessProjectAndIdentities();
+            // Install package to the Default project. 
+            VsProject project = targetedProjects.FirstOrDefault();
+            IEnumerable<InstalledPackageReference> references = GetInstalledReferences(project);
+            foreach (PackageIdentity identity in identities)
+            {
+                InstalledPackageReference alreadyInstalled = references.Where(p => p.Identity.Equals(identity)).FirstOrDefault();
+                if (alreadyInstalled != null)
+                {
+                    ForceInstallPackage(alreadyInstalled.Identity, targetedProjects);
+                }
+                else
+                {
+                    ExecuteSinglePackageAction(identity, targetedProjects);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Forcely install single package identity.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="targetedProjects"></param>
+        protected void ForceInstallPackage(PackageIdentity identity, IEnumerable<VsProject> targetedProjects)
+        {
+            // Forcely removed already installed package identity
+            ExecuteSinglePackageAction(identity, targetedProjects, PackageActionType.Uninstall);
+            // Install it back again.
+            ExecuteSinglePackageAction(identity, targetedProjects, PackageActionType.Install);
         }
 
         /// <summary>
@@ -53,10 +99,22 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context = new ResolutionContext();
                 _context.DependencyBehavior = GetDependencyBehavior();
                 _context.AllowPrerelease = IncludePrerelease.IsPresent;
-                // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (!string.IsNullOrEmpty(Version) && PowerShellPackage.IsPrereleaseVersion(Version))
+                _context.ForceRemove = ForceInstall;
+                // For forcely install. 
+                _context.RemoveDependencies = false;
+                if (!string.IsNullOrEmpty(Version))
                 {
-                    _context.AllowPrerelease = true;
+                    DependencyVersion updateVersion;
+                    IsVersionEnum = Enum.TryParse<DependencyVersion>(Version, true, out updateVersion);
+                    if (IsVersionEnum)
+                    {
+                        UpdateVersionEnum = updateVersion;
+                    }
+                    // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
+                    else if (PowerShellPackage.IsPrereleaseVersion(Version))
+                    {
+                        _context.AllowPrerelease = true;
+                    }
                 }
                 return _context;
             }
@@ -79,6 +137,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         private DependencyBehavior GetDependencyBehavior()
         {
+            if (ForceInstall)
+            {
+                return DependencyBehavior.Ignore;
+            }
+
             if (IgnoreDependencies.IsPresent)
             {
                 return DependencyBehavior.Ignore;
@@ -89,8 +152,40 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
             else
             {
+                // Read it from NuGet.Config and default to Lowest.
+                return GetDependencyVersion();
+            }
+        }
+
+        /// <summary>
+        /// Returns the user specified DependencyVersion in nuget.config.
+        /// </summary>
+        /// <returns>The user specified DependencyVersion value in nuget.config.</returns>
+        private DependencyBehavior GetDependencyVersion()
+        {
+            IMachineWideSettings _machineWideSettings = new VsMachineWideSettings();
+            IRepositorySettings _repositorySettings = ServiceLocator.GetInstance<IRepositorySettings>();
+            string configFolderPath = _repositorySettings.ConfigFolderPath;
+            IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
+            var settings = Settings.LoadDefaultSettings(
+                    configSettingsFileSystem,
+                    configFileName: null,
+                    machineWideSettings: _machineWideSettings);
+            string dependencyVersionValue = settings.GetConfigValue("DependencyVersion");
+            DependencyBehavior dependencyVersion;
+            if (Enum.TryParse(dependencyVersionValue, ignoreCase: true, result: out dependencyVersion))
+            {
+                return dependencyVersion;
+            }
+            else
+            {
                 return DependencyBehavior.Lowest;
             }
+        }
+
+        protected internal virtual IFileSystem GetConfigSettingsFileSystem(string configFolderPath)
+        {
+            return new SolutionFolderFileSystem(ServiceLocator.GetInstance<DTE>().Solution, ".nuget", configFolderPath);
         }
     }
 }

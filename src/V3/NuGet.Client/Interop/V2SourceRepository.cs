@@ -107,7 +107,7 @@ namespace NuGet.Client.Interop
             return Task.Factory.StartNew(() =>
             {
                 NuGetTraceSources.V2SourceRepository.Verbose("getpackage", "Getting metadata for {0} {1}", id, version);
-                var semver = CoreConverters.SafeToSemVer(version);
+                var semver = CoreConverters.SafeToSemanticVersion(version);
                 var package = _repository.FindPackage(id, semver);
 
                 // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
