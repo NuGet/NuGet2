@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.Composition.Hosting;
+using System.ComponentModel.Composition;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -21,8 +23,10 @@ using NuGetConsole;
 using NuGet.Client;
 using NuGetConsole.Implementation;
 using NuGet.Client.VisualStudio;
+
 using NuGet.Client.VisualStudio.UI;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using System.Reflection;
 
 namespace NuGet.Tools
 {
@@ -196,12 +200,49 @@ namespace NuGet.Tools
             }
         }
 
+        public void AssembleCalculatorComponents()
+        {
+            try
+            {
+                //Creating an instance of aggregate catalog. It aggregates other catalogs
+                var aggregateCatalog = new AggregateCatalog();
+
+                //Build the directory path where the parts will be available
+                var directoryPath = @"C:\Users\bhuvak\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Outercurve Foundation\NuGet Package Manager\3.0.0.0";
+
+
+                //Load parts from the available DLLs in the specified path 
+                //using the directory catalog
+                var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");
+
+                //Load parts from the current assembly if available
+                var asmCatalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());
+
+                //Add to the aggregate catalog
+                aggregateCatalog.Catalogs.Add(directoryCatalog);
+                aggregateCatalog.Catalogs.Add(asmCatalog);
+
+                //Crete the composition container
+                var container = new CompositionContainer(aggregateCatalog);
+
+                // Composable parts are created here i.e. 
+                // the Import and Export components assembles here
+                container.ComposeParts(this);
+                IEnumerable<Lazy<VsPackageManagerContext>> package =  container.GetExports<VsPackageManagerContext>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
         protected override void Initialize()
         {
+          //  AssembleCalculatorComponents();
             base.Initialize();
 
             VsNuGetDiagnostics.Initialize(

@@ -17,7 +17,10 @@ namespace NuGet.Client.VisualStudio
     [Export(typeof(V2Resource))]
     public class VsV2SearchResource : V2Resource, VsSearchResource
     {
-      
+      public VsV2SearchResource():base(null,null)
+        {
+
+        }
                      
         public VsV2SearchResource(IPackageRepository repo,string host):base(repo,host)
         {

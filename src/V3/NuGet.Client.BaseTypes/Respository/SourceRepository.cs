@@ -22,6 +22,19 @@ namespace NuGet.Client
     {
         public abstract PackageSource Source { get; }
         private readonly Dictionary<Type, Func<object>> _resourceFactories = new Dictionary<Type, Func<object>>();
+        private IEnumerable<Resource> _resources;
+
+        public virtual IEnumerable<Resource> Resources
+        {
+            get
+            {
+                return _resources;
+            }
+        }
+
+        public virtual bool TryGetRepository(PackageSource source) { return true; }
+        public virtual SourceRepository GetRepository(PackageSource source) { return null; }
+
         /// <summary>
         /// Retrieves an instance of the requested resource, throwing a <see cref="RequiredResourceNotSupportedException"/>
         /// if the resource is not supported by this host.

@@ -169,6 +169,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2.VisualStudio", "src\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj", "{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppv2v31", "src\TestAppv2v31\TestAppv2v31.csproj", "{14E47D13-C5BA-46DB-BCB9-07583F1B271F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
@@ -1166,6 +1168,26 @@ Global
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Mono Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{14E47D13-C5BA-46DB-BCB9-07583F1B271F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

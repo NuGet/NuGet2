@@ -15,8 +15,8 @@
     <ProjectGuid>{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuGet.Client.V2.VisualStudio</RootNamespace>
-    <AssemblyName>NuGet.Client.V2.VisualStudio</AssemblyName>
+    <RootNamespace>NuGet.Client.VisualStudio</RootNamespace>
+    <AssemblyName>NuGet.Client.VisualStudio</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

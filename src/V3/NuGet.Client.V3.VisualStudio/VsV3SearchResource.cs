@@ -18,6 +18,10 @@ namespace NuGet.Client.VisualStudio.Repository
     /// </summary>
     public class VsV3SearchResource : V3Resource, VsSearchResource
     {
+        public VsV3SearchResource():base(null,null)
+        {
+
+        }
 
         public VsV3SearchResource(string sourceUrl, string host)
             : base(sourceUrl, host)

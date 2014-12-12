@@ -29,7 +29,7 @@ namespace NuGet.Client.VisualStudio
             if (r)
             {
                 return new V2SourceRepository2(
-                    source, repoFactory.CreateRepository(source.Url), host);
+                    source, host);
 
             }
 

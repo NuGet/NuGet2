@@ -12,6 +12,8 @@ using System.Threading;
 using NuGet.Client.V3;
 using System.Runtime.Versioning;
 using NuGet.Client.Resources;
+using System.IO;
+using System.ComponentModel.Composition;
 
 namespace NuGet.Client
 {
@@ -21,14 +23,30 @@ namespace NuGet.Client
     /// *TODOS: Remove the direct methods like Search, GetPackageMetadata ....
     /// *TODOs: Version Utility.
     /// </summary>
+    [Export(typeof(SourceRepository))]
     public class V3SourceRepository2 : SourceRepository
     {       
         private PackageSource _source;      
         private NuGetV3Client _client;
-       
+        [ImportMany(typeof(V3Resource))]
+        private IEnumerable<Resource> _resources;
+
+        
+        public override IEnumerable<Resource> Resources
+        {
+            get
+            {
+                return _resources;
+            }
+        }
         public override PackageSource Source
         {
             get { return _source; }
+        }
+
+        public V3SourceRepository2()
+        {
+
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The HttpClient can be left open until VS shuts down.")]
@@ -67,5 +85,41 @@ namespace NuGet.Client
          
         }
 
+
+        public override bool TryGetRepository(PackageSource source)
+        {
+            return IsV3(source);
+        }
+
+        public override SourceRepository GetRepository(PackageSource source)
+        {
+            return new V3SourceRepository2(source, "testapp");
+        }
+
+        private static bool IsV3(PackageSource source)
+        {
+            var url = new Uri(source.Url);
+            if (url.IsFile || url.IsUnc)
+            {
+                return File.Exists(url.LocalPath);
+            }
+
+            using (var client = new NuGetV3Client(source.Url, "host"))
+            {
+                var v3index = client.GetFile(url);
+                if (v3index == null)
+                {
+                    return false;
+                }
+
+                var status = v3index.Result.Value<string>("version");
+                if (status != null && status.StartsWith("3.0"))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
     }
 }

@@ -17,6 +17,10 @@ namespace NuGet.Client.VisualStudio.Repository
     [Export(typeof(V2Resource))]
     public class VsV2MetadataResource : V2Resource,IVsMetadataResource
     {
+        public VsV2MetadataResource():base(null,null)
+        {
+
+        }
         public VsV2MetadataResource(IPackageRepository repo,string host):base(repo,host)
         {
 

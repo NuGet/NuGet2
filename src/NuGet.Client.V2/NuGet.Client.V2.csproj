@@ -33,6 +33,10 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Data, Version=1.0.1.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Data.1.0.1-master-43391912\lib\net45\NuGet.Data.dll</HintPath>
+    </Reference>
     <Reference Include="NuGet.Versioning">
       <HintPath>..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
     </Reference>
