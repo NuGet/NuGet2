@@ -5326,4 +5326,7 @@ nuget update -Self</value>
   <data name="PackageCommandDisableRules" xml:space="preserve">
     <value>';' delimited list of package analysis rules to disable. Specify '-Verbosity Detailed' to view the list of currently enabled rules.</value>
   </data>
+  <data name="InstallCommandDependencyBehavior" xml:space="preserve">
+    <value>Determines the behavior used to resolve dependencies. Acceptable values are Ignore, Lowest (Default), HighestPatch, HighestMinor, Highest</value>
+  </data>
 </root>

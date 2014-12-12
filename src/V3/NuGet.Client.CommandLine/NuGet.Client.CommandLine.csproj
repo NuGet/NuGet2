@@ -75,7 +75,9 @@
     <Compile Include="Common\ICommandManager.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\Verbosity.cs" />
-    <Compile Include="NuGetCommandResourceType.cs" />
+    <Compile Include="NuGetCommandResourceType.cs">
+      <DependentUpon>NuGetCommandResourceType.resx</DependentUpon>
+    </Compile>
     <Compile Include="NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -110,7 +112,6 @@
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NuGetCommandResourceType.resx">
-      <DependentUpon>NuGetCommandResourceType.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="NuGetResources.resx">

@@ -31,6 +31,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommandResourceType), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
+        [Option(typeof(NuGetCommandResourceType), "InstallCommandDependencyBehavior")]
+        public DependencyBehavior DependencyBehavior { get; set; }
+
         [ImportingConstructor]
         public InstallCommand()
             : base(MachineCache.Default)
@@ -38,6 +41,7 @@ namespace NuGet.Commands
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
             DisableParallelProcessing = EnvironmentUtility.IsMonoRuntime;
+            DependencyBehavior = Client.DependencyBehavior.Lowest;
         }
 
         public override void ExecuteCommand()
@@ -113,7 +117,7 @@ namespace NuGet.Commands
                 new ResolutionContext()
                 {
                     AllowPrerelease = Prerelease,
-                    DependencyBehavior = DependencyBehavior.Lowest,
+                    DependencyBehavior = DependencyBehavior,
                 });
 
             var actions = await actionResolver.ResolveActionsAsync(new PackageIdentity(packageId, version),
