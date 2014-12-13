@@ -18,6 +18,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             IHttpClientEvents clientEvents)
             : base(packageSourceProvider, packageRepositoryFactory, svcServiceProvider, packageManagerFactory, solutionManager, clientEvents, PackageActionType.Install)
         {
+            this.PackageSourceProvider = packageSourceProvider;
         }
 
         [Parameter, Alias("Prerelease")]
@@ -31,6 +32,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter]
         public DependencyBehavior? DependencyVersion { get; set; }
+
+        public IVsPackageSourceProvider PackageSourceProvider { get; set; }
 
         protected override void BeginProcessing()
         {

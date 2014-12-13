@@ -112,7 +112,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     foreach (PackageIdentity identity in identities)
                     {
                         // Find packages update
-                        PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        PackageIdentity update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, entry.Key, IncludePrerelease.IsPresent, Safe.IsPresent);
                         ExecuteSinglePackageAction(update, targetedProjects);
                     }
                 }
@@ -134,7 +134,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     }
                     else
                     {
-                        update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, IncludePrerelease.IsPresent, Safe.IsPresent);
+                        update = PowerShellPackage.GetLastestUpdateForPackage(ActiveSourceRepository, identity, entry.Key, IncludePrerelease.IsPresent, Safe.IsPresent);
                     }
 
                     ExecuteSinglePackageAction(update, targetedProjects);
