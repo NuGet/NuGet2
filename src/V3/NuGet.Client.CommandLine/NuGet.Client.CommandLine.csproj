@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Common\CommandLineConstants.cs" />
     <Compile Include="Common\CommandLineException.cs" />
