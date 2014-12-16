@@ -12,8 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
-using NuGet.Client;
-using NuGet.Client.VisualStudio.Models;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -23,7 +21,7 @@ namespace NuGet.Client.VisualStudio
         private readonly string _name;
         private readonly InstalledPackagesList _installedSolutionLevelPackages;
         private readonly IVsPackageManager _packageManager;
-
+        
         public override bool IsAvailable
         {
             get
@@ -106,12 +104,11 @@ namespace NuGet.Client.VisualStudio
             return Projects.Cast<VsProject>().FirstOrDefault(
                 p => String.Equals(p.DteProject.UniqueName, dteProject.UniqueName, StringComparison.OrdinalIgnoreCase));
         }
-
-        public override Task<IEnumerable<SearchResult>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
+        
+        public override Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken)
         {
-            return Task.Run(async () =>
-            {
-                Dictionary<string, SearchResult> result = new Dictionary<string, SearchResult>(
+            return Task.Run(async () => {
+                Dictionary<string, JObject> result = new Dictionary<string, JObject>(
                     StringComparer.OrdinalIgnoreCase);
                 foreach (var proj in Projects)
                 {
@@ -132,29 +129,32 @@ namespace NuGet.Client.VisualStudio
             });
         }
 
-        private static void AddToResult(Dictionary<string, SearchResult> result, SearchResult package)
+        private static void AddToResult(Dictionary<string, JObject> result, JObject package)
         {
-            SearchResult existingValue;
-            if (result.TryGetValue(package.Id, out existingValue))
+            var idVersion = GetIdVersion(package);
+
+            JObject existingValue;
+            if (result.TryGetValue(idVersion.Item1, out existingValue))
             {
                 // if package has higher version, replace the old value with 
-                // this package.              
-                if (package.Version > existingValue.Version)
+                // this package.
+                var existingIdVersion = GetIdVersion(existingValue);
+                if (idVersion.Item2 > existingIdVersion.Item2)
                 {
-                    result[package.Id] = package;
+                    result[idVersion.Item1] = package;
                 }
             }
             else
             {
-                result[package.Id] = package;
+                result[idVersion.Item1] = package;
             }
         }
 
-        //private static Tuple<string, NuGetVersion> GetIdVersion(JObject searchResult)
-        //{
-        //    string id = searchResult.Value<string>(Properties.PackageId);
-        //    var version = NuGetVersion.Parse(searchResult.Value<string>(Properties.LatestVersion));
-        //    return Tuple.Create(id, version);
-        //}
+        private static Tuple<string, NuGetVersion> GetIdVersion(JObject searchResult)
+        {
+            string id = searchResult.Value<string>(Properties.PackageId);
+            var version = NuGetVersion.Parse(searchResult.Value<string>(Properties.LatestVersion));
+            return Tuple.Create(id, version);
+        }
     }
 }
