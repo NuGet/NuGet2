@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
-using NuGet.Client.BaseTypes;
 using NuGet.Client;
-using NuGet.Client.VisualStudio;
 using NuGet.Client.VisualStudio.Models;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
-namespace TestAppv2v31
+namespace TestAppV2V3Switching
 {
     class Program
     {
@@ -44,7 +42,7 @@ namespace TestAppv2v31
             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
-            SourceRepository2 repo = new SourceRepository2(source, providers);
+            SourceRepository2 repo = new SourceRepository2(source, providers);           
             IDownload resource = (IDownload)repo.GetResource<IDownload>();
             Debug.Assert(resource != null);
             Debug.Assert(resource.GetType() == typeof(IDownload));            

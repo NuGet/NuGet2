@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Versioning;
-using NuGet.Client.BaseTypes;
 using Newtonsoft.Json.Linq;
 
 
