@@ -11,10 +11,17 @@ namespace NuGet.Client.VisualStudio.Models
     /// Model for search results shown by PowerShell console search.
     /// *TODOS: Should we extract out ID,version and summary to a base search model ? 
     /// </summary>
-    public class PowershellSearchMetadata
-    {
-        public string Id { get; set; }
-        public NuGetVersion Version { get; set; }
-        public string Summary { get; set; }
+    public sealed class PowershellSearchMetadata
+    {      
+        public PowershellSearchMetadata(string id,NuGetVersion version,string summary)
+        {
+            Id = id;
+            Version = version;
+            Summary = summary;
+        }
+        public string Id { get; private set; }
+        public NuGetVersion Version { get; private set; }
+        public string Summary { get; private set; }
+       
     }
 }
