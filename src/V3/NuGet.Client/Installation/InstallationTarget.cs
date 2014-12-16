@@ -11,7 +11,7 @@ using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
 using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
-using NuGet.Client.Resources;
+using NuGet.Client;
 using NewPackageAction = NuGet.Client.Resolution.PackageAction;
 
 namespace NuGet.Client.Installation

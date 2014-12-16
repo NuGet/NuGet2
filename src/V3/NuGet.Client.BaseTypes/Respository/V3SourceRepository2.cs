@@ -11,7 +11,7 @@ using System.Globalization;
 using System.Threading;
 using NuGet.Client.V3;
 using System.Runtime.Versioning;
-using NuGet.Client.Resources;
+using NuGet.Client;
 using System.IO;
 using System.ComponentModel.Composition;
 

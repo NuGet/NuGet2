@@ -14,6 +14,11 @@ namespace NuGet.Client
     {
         private string _host;
         private string _description;
+
+        public Resource()
+        {
+
+        }
                      
         public Resource(string host)
         {         

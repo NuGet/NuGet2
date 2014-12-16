@@ -11,6 +11,7 @@ using NuGet.Client;
 using NuGet.Client.VisualStudio;
 using NuGet.Client.VisualStudio.Models;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace TestAppv2v31
 {
@@ -86,17 +87,22 @@ namespace TestAppv2v31
             SourceRepository2 repo = new SourceRepository2(source, providers);
             VsSearchResource resource = (VsSearchResource)repo.GetResource<VsSearchResource>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(VsSearchResource));
+            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(VsSearchResource)));
             SearchFilter filter = new SearchFilter(); //create a dummy filter.
+            List<FrameworkName> fxNames = new List<FrameworkName>();
+            fxNames.Add(new FrameworkName(".NET Framework, Version=4.0"));
+            filter.SupportedFrameworks = fxNames;                       
             IEnumerable<VisualStudioUISearchMetaData> searchResults = resource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
+            Debug.Assert(searchResults.Count() > 0); // Check if non empty search result is returned.
+            Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is an result which has Elmah as title.
         }
 
         static void Main(string[] args)
         {
             Program p = new Program();
             p.AssembleComponents();
-            p.TestGetResourceGivesRequiredResourceType();
-            p.TestCachingWorks();
+          //  p.TestGetResourceGivesRequiredResourceType();
+           // p.TestCachingWorks();
             p.TestE2E();
             
         }

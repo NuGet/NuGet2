@@ -14,7 +14,7 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
-using NuGet.Client.Resources;
+using NuGet.Client;
 using NuGet.Client.VisualStudio.Models;
 
 namespace NuGet.Client.VisualStudio.UI

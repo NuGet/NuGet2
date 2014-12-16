@@ -8,7 +8,6 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
-using NuGet.Client.Resources;
 using NuGet.Client;
 
 namespace NuGet.Client

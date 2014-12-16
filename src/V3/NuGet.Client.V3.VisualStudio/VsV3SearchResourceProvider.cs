@@ -5,16 +5,41 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Client.V3;
 
 namespace NuGet.Client.V3.VisualStudio
 {
     [Export(typeof(IResourceProvider))]
-    [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(VsSearchResource))]
+    [ResourceProviderMetadata("VsV3SearchResourceProvider", typeof(VsSearchResource))]
     public class VsV3SearchResourceProvider : IResourceProvider
     {
         public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string host = "TestHost";
+                if (V3Utilities.IsV3(source))
+                {
+                    object repo = null;
+                    if (!cache.TryGetValue(source.Url, out repo))
+                    {
+                        repo = V3Utilities.GetV3Client(source, host);
+                        cache.Add(source.Url, repo);
+                    }
+                    resource = new VsV3SearchResource((NuGetV3Client)repo);
+                    return true;
+                }
+                else
+                {
+                    resource = null;
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                resource = null;
+                return false; //*TODOs:Do tracing and throw apppropriate exception here.
+            }       
         }
 
         public Resource Create(PackageSource source, ref IDictionary<string, object> cache)

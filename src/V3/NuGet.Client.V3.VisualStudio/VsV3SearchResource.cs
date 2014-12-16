@@ -9,16 +9,16 @@ using System.Text;
 using System.Threading.Tasks;
 using NuGet.Client;
 using NuGet.Client.VisualStudio.Models;
-using NuGet.Client.Resources;
 
-namespace NuGet.Client.VisualStudio.Repository
+
+namespace NuGet.Client.V3.VisualStudio
 {
     /// <summary>
     /// *TODOs: GetShortFrameworkName need to be used. 
     /// </summary>
     public class VsV3SearchResource : V3Resource, VsSearchResource
     {
-        public VsV3SearchResource():base(null,null)
+        public VsV3SearchResource(NuGetV3Client client):base(client)
         {
 
         }
