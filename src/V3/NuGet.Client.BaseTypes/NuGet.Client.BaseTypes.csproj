@@ -51,8 +51,8 @@
     <Compile Include="IInstallationTarget.cs" />
     <Compile Include="Installation\InstalledPackageReference.cs" />
     <Compile Include="Installation\InstalledPackagesList.cs" />
-    <Compile Include="Installation\PackageActionType.cs" />
-    <Compile Include="Installation\PackageIdentity.cs" />
+    <Compile Include="Package\PackageActionType.cs" />
+    <Compile Include="Package\PackageIdentity.cs" />
     <Compile Include="PackageSource.cs" />
     <Compile Include="Respository\IDownload.cs" />
     <Compile Include="Respository\IMetrics.cs" />

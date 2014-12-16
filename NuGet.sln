@@ -169,7 +169,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2.VisualStudio", "src\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj", "{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppV2V3Switching", "src\TestAppv2v31\TestAppV2V3Switching.csproj", "{14E47D13-C5BA-46DB-BCB9-07583F1B271F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppV2V3Switching", "src\TestAppV2V3Switching\TestAppV2V3Switching.csproj", "{14E47D13-C5BA-46DB-BCB9-07583F1B271F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V3Core", "src\V3\NuGet.Client.V3Core\NuGet.Client.V3Core.csproj", "{B11C19B6-5671-4FF0-8A88-AF08FC7EF15E}"
 EndProject

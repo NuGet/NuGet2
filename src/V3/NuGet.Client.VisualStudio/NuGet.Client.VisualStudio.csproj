@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\PowerShellAutoCompleteResource.cs" />
+    <Compile Include="Models\IPowerShellAutoComplete.cs" />
     <Compile Include="Models\PowershellSearchMetadata.cs" />
     <Compile Include="Models\VisualStudioUIPackageMetadata.cs" />
     <Compile Include="Models\VisualStudioUISearchMetaData.cs" />
