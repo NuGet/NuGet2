@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.Shell;
 using NuGet.Client.ProjectSystem;
 using NuGet.VisualStudio;
 using System.Diagnostics.CodeAnalysis;
-using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
 using System.IO;
 
@@ -59,42 +58,7 @@ namespace NuGet.Client.VisualStudio
                 _dte.Solution,
                 _solutionManager,
                 _packageManagerFactory.CreatePackageManagerToManageInstalledPackages());
-        }
-
-        public void AssembleCalculatorComponents()
-        {
-            try
-            {
-                //Creating an instance of aggregate catalog. It aggregates other catalogs
-                var aggregateCatalog = new AggregateCatalog();
-
-                //Build the directory path where the parts will be available
-                var directoryPath =@"C:\Users\bhuvak\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Outercurve Foundation\NuGet Package Manager\3.0.0.0";
-                   
-
-                //Load parts from the available DLLs in the specified path 
-                //using the directory catalog
-                var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");
-
-                //Load parts from the current assembly if available
-                var asmCatalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());
-
-                //Add to the aggregate catalog
-                aggregateCatalog.Catalogs.Add(directoryCatalog);
-                aggregateCatalog.Catalogs.Add(asmCatalog);
-
-                //Crete the composition container
-                var container = new CompositionContainer(aggregateCatalog);
-
-                // Composable parts are created here i.e. 
-                // the Import and Export components assembles here
-                container.ComposeParts(this);
-                container.GetExports<VsPackageManagerContext>();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+        }      
         }
     }
 }

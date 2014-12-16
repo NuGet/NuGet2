@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -69,6 +70,8 @@ namespace NuGet.Client
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may require computation")]
         IEnumerable<FrameworkName> GetSupportedFrameworks();
+
+        void AddMetricsMetadata(JObject metricsRecord);
 
     }
 }

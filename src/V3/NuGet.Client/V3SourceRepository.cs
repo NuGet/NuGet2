@@ -195,7 +195,7 @@ namespace NuGet.Client
                 payload.Add("dependentPackage", dependentPackage.Id);
                 payload.Add("dependentPackageVersion", dependentPackage.Version.ToNormalizedString());
             }
-           // target.AddMetricsMetadata(payload);
+            target.AddMetricsMetadata(payload);
 
             // Post the message
             await _http.PostAsync(metricsUrl, new StringContent(payload.ToString()));

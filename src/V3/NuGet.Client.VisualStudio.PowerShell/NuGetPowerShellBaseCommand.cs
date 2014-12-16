@@ -16,6 +16,7 @@ using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
+using NuGet.Client.VisualStudio;
 
 #if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;
