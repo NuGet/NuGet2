@@ -1,13 +1,9 @@
-﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
-using Newtonsoft.Json.Linq;
-using NuGet.Client.Installation;
-using NuGet.VisualStudio;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using System.Threading.Tasks;
+using System.Runtime.Versioning;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
@@ -47,95 +43,53 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void BeginProcessing()
         {
+            base.TargetProjectName = this.ProjectName;
             UseRemoteSourceOnly =  ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
             UseRemoteSource = ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
-            CollapseVersions = !AllVersions.IsPresent && ListAvailable; 
+            CollapseVersions = !AllVersions.IsPresent && ListAvailable;
+            if (UseRemoteSource || UseRemoteSourceOnly)
+            {
+                this.ActiveSourceRepository = GetActiveRepository(Source);
+            }
             base.BeginProcessing();
         }
 
         protected override void ProcessRecordCore()
         {
+            Preprocess();
+
+            IEnumerable<JObject> packagesToDisplay = Enumerable.Empty<JObject>();
             // If Remote & Updates set of parameters are not specified
             if (!UseRemoteSource)
             {
-                IEnumerable<JObject> installedPackages = FilterInstalledPackagesResults();
-                WritePackages(installedPackages);
+                CheckForSolutionOpen();
+                packagesToDisplay = FilterInstalledPackagesResults(Filter, Skip, First);
             }
             else
             {
+                Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, "Find-Package -Id <string> [-Version <string>] [-ListAll] [-Latest]");
+
                 // Connect to remote source to get list of available packages or updates
-            }
-        }
+                if (First == 0)
+                {
+                    First = Int32.MaxValue;
+                }
 
-        /// <summary>
-        /// Filter the installed packages list based on Filter, Skip and First parameters
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerable<JObject> FilterInstalledPackagesResults()
-        {
-            IEnumerable<InstallationTarget> targets = PreprocessProjects();
-            List<JObject> installedJObjects = GetInstalledJObjectInSolution(targets);
-            IEnumerable<JObject> installedPackages = Enumerable.Empty<JObject>();
+                if (UseRemoteSourceOnly)
+                {
+                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First, CollapseVersions);
+                }
+                // Get package updates from the remote source
+                else
+                {
+                    CheckForSolutionOpen();
+                    IEnumerable<JObject> updates = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
+                    packagesToDisplay = updates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
+                }
 
-            // Filter the results by string
-            if (!string.IsNullOrEmpty(Filter))
-            {
-                installedPackages = installedJObjects.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
+                // Output the list of package results to PowerShell console.
+                WritePackages(packagesToDisplay);
             }
-            else
-            {
-                installedPackages = installedJObjects;
-            }
-
-            // Skip and then take
-            installedPackages = installedPackages.Skip(Skip).ToList();
-            if (First != 0)
-            {
-                installedPackages = installedPackages.Take(First).ToList();
-            }
-            return installedPackages;
-        }
-
-        /// <summary>
-        /// Get current projects or all projects in the solution
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerable<InstallationTarget> PreprocessProjects()
-        {
-            List<InstallationTarget> targets = new List<InstallationTarget>();
-            if (!string.IsNullOrEmpty(ProjectName))
-            {
-                // Get current project
-                Project project = SolutionManager.GetProject(ProjectName);
-                VsProject target = Solution.GetProject(project);
-                targets.Add(target);
-            }
-            else
-            {
-                targets = Solution.GetAllTargetsRecursively().ToList();
-            }
-            return targets;
-        }
-
-        /// <summary>
-        /// Get all of the installed JObjects in the solution
-        /// </summary>
-        /// <param name="targets"></param>
-        /// <returns></returns>
-        protected List<JObject> GetInstalledJObjectInSolution(IEnumerable<InstallationTarget> targets)
-        {
-            List<JObject> list = new List<JObject>();
-            foreach (InstallationTarget target in targets)
-            {
-                InstalledPackagesList projectlist = target.InstalledPackages;
-                // Get all installed packages and metadata for project
-                Task<IEnumerable<JObject>> task = projectlist.GetAllInstalledPackagesAndMetadata();
-                IEnumerable<JObject> installedObjects = task.Result.ToList();
-
-                // Add to the solution's installed packages list
-                list.AddRange(installedObjects);
-            }
-            return list;
         }
     }
 }

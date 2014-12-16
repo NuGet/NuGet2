@@ -51,6 +51,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
             // typing InstallPackage TAB would download the entire feed.
             First = MaxReturnedPackages;
+            Preprocess();
         }
 
         protected override void EndProcessing()

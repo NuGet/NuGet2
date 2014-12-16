@@ -128,7 +128,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     // Find package update
                     if (!string.IsNullOrEmpty(Version))
                     {
-                        NuGetVersion nVersion = ParseUserInputForVersion(Version);
+                        NuGetVersion nVersion = GetNuGetVersionFromString(Version);
                         PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
                         update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
                     }

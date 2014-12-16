@@ -107,21 +107,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected override void ProcessRecordCore()
         {
-            try
-            {
-                CheckForSolutionOpen();
-                Preprocess();
-                ExecutePackageActions();
-            }
-            catch (Exception ex)
-            {
-                // unhandled exceptions should be terminating
-                ErrorHandler.HandleException(ex, terminating: true);
-            }
-            finally
-            {
-                UnsubscribeEvents();
-            }
+            CheckForSolutionOpen();
+            Preprocess();
+            ExecutePackageActions();
         }
 
         protected virtual void Preprocess()
@@ -129,17 +117,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.ActiveSourceRepository = GetActiveRepository(Source);
             VsProject vsProject = GetProject(true);
             this.Projects = new List<VsProject> { vsProject };
-        }
-
-        protected NuGetVersion ParseUserInputForVersion(string version)
-        {
-            NuGetVersion nVersion;
-            bool success = NuGetVersion.TryParse(Version, out nVersion);
-            if (!success)
-            {
-                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, Version);
-            }
-            return nVersion;
         }
 
         protected virtual void ExecutePackageActions()
@@ -302,28 +279,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <returns></returns>
         public VsProject GetProject(bool throwIfNotExists)
         {
-            VsProject project = null;
-
-            // If the user does not specify a project then use the Default project
-            if (String.IsNullOrEmpty(ProjectName))
-            {
-                ProjectName = SolutionManager.DefaultProjectName;
-            }
-
-            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
-                .FirstOrDefault(p => String.Equals(p.Name, ProjectName, StringComparison.OrdinalIgnoreCase) ||
-                                     String.Equals(p.FullName, ProjectName, StringComparison.OrdinalIgnoreCase));
-            if (dteProject != null)
-            {
-                project = Solution.GetProject(dteProject);
-            }
-
-            // If that project was invalid then throw
-            if (project == null && throwIfNotExists)
-            {
-                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-            }
-
+            VsProject project = GetProject(ProjectName, throwIfNotExists);
             return project;
         }
     }

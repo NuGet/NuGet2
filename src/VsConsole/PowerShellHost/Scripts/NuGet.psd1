@@ -69,7 +69,7 @@ CmdletsToExport = @(
     'Get-Project', 'Get-Project2'
     'Set-Project', 
     'Open-PackagePage', 'Open-PackagePage2'
-    'Consolidate-Package')
+    'Sync-Package')
 
 # Variables to export from this module
 VariablesToExport = ''

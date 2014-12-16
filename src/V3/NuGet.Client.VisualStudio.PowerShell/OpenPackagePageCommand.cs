@@ -39,7 +39,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void ProcessRecordCore()
         {
-            Log(Client.MessageLevel.Info, Resources.Cmdlet_CommandObsolete, "Open-PackagePage");
+            Log(Client.MessageLevel.Info, Resources.Cmdlet_CommandObsolete, "None");
         }
     }
 }

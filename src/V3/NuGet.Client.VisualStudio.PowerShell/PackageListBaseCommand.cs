@@ -1,15 +1,13 @@
-﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Management.Automation;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace NuGet.Client.VisualStudio.PowerShell
@@ -46,6 +44,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [ValidateRange(0, Int32.MaxValue)]
         public int Skip { get; set; }
 
+        public IEnumerable<VsProject> Projects { get; set; }
+
+        public string TargetProjectName { get; set; }
+
         /// <summary>
         /// Determines if local repository are not needed to process this command
         /// </summary>
@@ -58,99 +60,146 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected virtual bool CollapseVersions { get; set; }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
-        protected override void ProcessRecordCore()
-        {
-            try
-            {
-                CheckForSolutionOpen();
-                Preprocess();
-            }
-            catch (Exception ex)
-            {
-                // unhandled exceptions should be terminating
-                ErrorHandler.HandleException(ex, terminating: true);
-            }
-            finally
-            {
-                UnsubscribeEvents();
-            }
-        }
-
         protected virtual void Preprocess()
         {
             this.ActiveSourceRepository = GetActiveRepository(Source);
-            //VsProject vsProject = GetProject(true);
-            //this.Projects = new List<VsProject> { vsProject };
         }
 
-        protected IEnumerable<JObject> GetPackagesFromRemoteSource()
+        /// <summary>
+        /// Filter the installed packages list based on Filter, Skip and First parameters
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<JObject> FilterInstalledPackagesResults(string filter, int skip, int take)
         {
-            //IEnumerable<JObject> packages = PowerShellPackage.GetAllVersionsForPackage();
-            return null;
+            IEnumerable<InstallationTarget> targets = GetProjects();
+            List<JObject> installedJObjects = GetInstalledJObjectInSolution(targets);
+            IEnumerable<JObject> installedPackages = Enumerable.Empty<JObject>();
+
+            // Filter the results by string
+            if (!string.IsNullOrEmpty(filter))
+            {
+                installedPackages = installedJObjects.Where(p => p.Value<string>(Properties.PackageId).StartsWith(filter, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                installedPackages = installedJObjects;
+            }
+
+            // Skip and then take
+            installedPackages = installedPackages.Skip(skip).ToList();
+            if (take != 0)
+            {
+                installedPackages = installedPackages.Take(take).ToList();
+            }
+            return installedPackages;
         }
 
-        //private IProjectManager GetProjectManager(string projectName)
-        //{
-        //    Project project = SolutionManager.GetProject(projectName);
-        //    if (project == null)
-        //    {
-        //        ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-        //    }
-        //    IProjectManager projectManager = PackageManager.GetProjectManager(project);
-        //    Debug.Assert(projectManager != null);
-
-        //    return projectManager;
-        //}
-
-        protected virtual IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository, IQueryable<IPackage> packages)
+        protected IEnumerable<JObject> GetPackagesFromRemoteSource(string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take, bool collapseVersions)
         {
-            if (CollapseVersions)
+            IEnumerable<JObject> packages = Enumerable.Empty<JObject>();
+            if (collapseVersions)
             {
-                // In the event the client is going up against a v1 feed, do not try to fetch pre release packages since this flag does not exist.
-                if (IncludePrerelease && sourceRepository.SupportsPrereleasePackages)
+                packages = PowerShellPackage.GetLastestPackages(ActiveSourceRepository, packageId, names, allowPrerelease, skip, take);
+            }
+            else
+            {
+                packages = PowerShellPackage.GetAllVersionsForPackage(ActiveSourceRepository, packageId, names, allowPrerelease, skip, take);
+            }
+            return packages;
+        }
+
+        protected IEnumerable<JObject> GetPackageUpdatesFromRemoteSource(bool allowPrerelease, int skip, int take)
+        {
+            List<JObject> packages = new List<JObject>();
+            Dictionary<VsProject, List<PackageIdentity>> dictionary = GetInstalledPackagesForAllProjects();
+            foreach (KeyValuePair<VsProject, List<PackageIdentity>> entry in dictionary)
+            {
+                IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
+                List<PackageIdentity> identities = entry.Value;
+                // Execute update for each of the project inside the solution
+                foreach (PackageIdentity identity in identities)
                 {
-                    // Review: We should change this to show both the absolute latest and the latest versions but that requires changes to our collapsing behavior.
-                    packages = packages.Where(p => p.IsAbsoluteLatestVersion);
+                    // Find packages update
+                    JObject update = PowerShellPackage.GetLastestJObjectForPackage(ActiveSourceRepository, identity, entry.Key, allowPrerelease, false);
+                    NuGetVersion version = GetNuGetVersionFromString(update.Value<string>(Properties.Version));
+                    if (version > identity.Version)
+                    {
+                        packages.Add(update);
+                    }
                 }
-                else
-                {
-                    packages = packages.Where(p => p.IsLatestVersion);
-                }
             }
+            return packages;
+        }
 
-            if (UseRemoteSourceOnly && First != 0)
+        /// <summary>
+        /// Get Installed Package References for all projects.
+        /// </summary>
+        /// <returns></returns>
+        protected Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
+        {
+            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
+            IEnumerable<VsProject> projects = GetProjects();
+            foreach (VsProject proj in projects)
             {
-                // Optimization: If First parameter is specified, we'll wrap the IQueryable in a BufferedEnumerable to prevent consuming the entire result set.
-                packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
+                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
+                dic.Add(proj, list);
             }
+            return dic;
+        }
 
-            IEnumerable<IPackage> packagesToDisplay = packages.AsEnumerable()
-                                                              .Where(PackageExtensions.IsListed);
-
-            // When querying a remote source, collapse versions unless AllVersions is specified.
-            // We need to do this as the last step of the Queryable as the filtering occurs on the client.
-            if (CollapseVersions)
+        /// <summary>
+        /// Get Installed Package References for a single project
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
+        {
+            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
             {
-                // Review: We should perform the Listed check over OData for better perf
-                packagesToDisplay = packagesToDisplay.AsCollapsed();
+                refs = installedList.GetInstalledPackages();
             }
+            return refs;
+        }
 
-            if (!IncludePrerelease) //&& ListAvailable
+        /// <summary>
+        /// Get all of the installed JObjects in the solution
+        /// </summary>
+        /// <param name="targets"></param>
+        /// <returns></returns>
+        protected List<JObject> GetInstalledJObjectInSolution(IEnumerable<InstallationTarget> targets)
+        {
+            List<JObject> list = new List<JObject>();
+            foreach (InstallationTarget target in targets)
             {
-                // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions when displaying from a remote source.
-                // We don't need to filter packages when showing installed packages.
-                packagesToDisplay = packagesToDisplay.Where(p => p.IsReleaseVersion());
+                InstalledPackagesList projectlist = target.InstalledPackages;
+                // Get all installed packages and metadata for project
+                Task<IEnumerable<JObject>> task = projectlist.GetAllInstalledPackagesAndMetadata();
+                IEnumerable<JObject> installedObjects = task.Result.ToList();
+
+                // Add to the solution's installed packages list
+                list.AddRange(installedObjects);
             }
+            return list;
+        }
 
-            packagesToDisplay = packagesToDisplay.Skip(Skip);
-
-            if (First != 0)
+        /// <summary>
+        /// Get current projects or all projects in the solution
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<VsProject> GetProjects()
+        {
+            List<VsProject> projects = new List<VsProject>();
+            if (string.IsNullOrEmpty(TargetProjectName))
             {
-                packagesToDisplay = packagesToDisplay.Take(First);
+                projects = GetAllProjectsInSolution().ToList();
             }
-
-            return packagesToDisplay;
+            else
+            {
+                VsProject project = GetProject(TargetProjectName, true);
+                projects.Add(project);
+            }
+            return projects;
         }
 
         protected void WritePackages(IEnumerable<JObject> packages)

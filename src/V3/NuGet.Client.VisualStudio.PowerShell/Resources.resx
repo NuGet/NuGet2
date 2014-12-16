@@ -223,7 +223,7 @@
     <value>None</value>
   </data>
   <data name="Cmdlet_CommandObsolete" xml:space="preserve">
-    <value>The {0} Command has been deprecated. Type 'get-help NuGet' to see all available NuGet commands.</value>
+    <value>This Command/Parameter combination has been deprecated and will be removed in the next release. The new command that replaces it is {0}.</value>
   </data>
   <data name="Cmdlet_FailToSetProject" xml:space="preserve">
     <value>Failed to set {0} as the Default Project for PowerShell Console. </value>

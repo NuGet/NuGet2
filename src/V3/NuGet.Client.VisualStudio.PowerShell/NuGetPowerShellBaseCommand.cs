@@ -1,4 +1,11 @@
 ﻿using System;
+﻿using Microsoft.VisualStudio.Shell;
+using NuGet.Client.ProjectSystem;
+using NuGet.PowerShell.Commands;
+using NuGet.Versioning;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
+using NuGetConsole.Host.PowerShell.Implementation;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -415,6 +422,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #region Project APIs
 
         /// <summary>
+        /// Get the VsProject by ProjectName. 
+        /// If ProjectName is not specified, return the Default project of Tool window.
+        /// </summary>
+        /// <param name="throwIfNotExists"></param>
+        /// <returns></returns>
+        public VsProject GetProject(string projectName, bool throwIfNotExists)
+        {
+            VsProject project = null;
+
+            // If the user does not specify a project then use the Default project
+            if (String.IsNullOrEmpty(projectName))
+            {
+                projectName = SolutionManager.DefaultProjectName;
+            }
+
+            EnvDTE.Project dteProject = Solution.DteSolution.GetAllProjects()
+                .FirstOrDefault(p => String.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase) ||
+                                     String.Equals(p.FullName, projectName, StringComparison.OrdinalIgnoreCase));
+            if (dteProject != null)
+            {
+                project = Solution.GetProject(dteProject);
+            }
+
+            // If that project was invalid then throw
+            if (project == null && throwIfNotExists)
+            {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+            }
+
+            return project;
+        }
+
+        /// <summary>
         /// Return all projects in the solution matching the provided names. Wildcards are supported.
         /// This method will automatically generate error records for non-wildcarded project names that
         /// are not found.
@@ -556,7 +596,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
             }
         }
-
         #endregion Project APIs
 
         /// <summary>
@@ -604,6 +643,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return null;
+        }
+
+        protected NuGetVersion GetNuGetVersionFromString(string version)
+        {
+            NuGetVersion nVersion;
+            bool success = NuGetVersion.TryParse(version, out nVersion);
+            if (!success)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, version);
+            }
+            return nVersion;
         }
 
         public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object packageObject, Installation.InstallationTarget target)
