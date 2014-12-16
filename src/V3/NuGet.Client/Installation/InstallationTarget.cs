@@ -168,7 +168,7 @@ namespace NuGet.Client.Installation
         /// <param name="take"></param>
         /// <param name="cancelToken"></param>
         /// <returns></returns>
-        public abstract Task<IEnumerable<SearchResult>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken);
+        public abstract Task<IEnumerable<JObject>> SearchInstalled(SourceRepository source, string searchText, int skip, int take, CancellationToken cancelToken);
 
         /// <summary>
         /// Retrieves this target and all of it's sub-targets (Projects in a Solution, for example) in a single flat list.
