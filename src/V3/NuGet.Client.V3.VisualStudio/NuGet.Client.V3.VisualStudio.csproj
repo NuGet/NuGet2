@@ -58,9 +58,9 @@
       <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
       <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.V3Core\NuGet.Client.V3Core.csproj">
+    <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
       <Project>{b11c19b6-5671-4ff0-8a88-af08fc7ef15e}</Project>
-      <Name>NuGet.Client.V3Core</Name>
+      <Name>NuGet.Client.V3</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
       <Project>{2de18bab-dda1-4f71-9000-641198758399}</Project>

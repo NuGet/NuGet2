@@ -202,10 +202,6 @@
       <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
       <Name>NuGet.Client.V3Interop</Name>
     </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.V3\NuGet.Client.V3.csproj">
-      <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>
-      <Name>NuGet.Client.V3</Name>
-    </ProjectReference>
     <ProjectReference Include="..\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj">
       <Project>{a8efbe54-4136-4d15-8db7-3ffecee50682}</Project>
       <Name>NuGet.Client.VisualStudio.UI</Name>

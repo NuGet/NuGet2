@@ -22,32 +22,19 @@ namespace TestAppV2V3Switching
             {
                 //Creating an instance of aggregate catalog. It aggregates other catalogs
                 var aggregateCatalog = new AggregateCatalog();
-
                 //Build the directory path where the parts will be available
                 var directoryPath = @"C:\Client\nuget\src\TestAppV2V3Switching\bin\Debug";
                 var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");              
                 aggregateCatalog.Catalogs.Add(directoryCatalog);              
                 container = new CompositionContainer(aggregateCatalog);               
-                container.ComposeParts(this);
-         
+                container.ComposeParts(this);         
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-
-        public void TestResourceTypeBasedOnPackageSource()
-        {
-            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
-            Debug.Assert(providers.Count() > 0);
-            PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
-            SourceRepository2 repo = new SourceRepository2(source, providers);           
-            IDownload resource = (IDownload)repo.GetResource<IDownload>();
-            Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownload));            
-        }
-        
+                     
         public void TestGetResourceGivesRequiredResourceType()
         {
             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
@@ -58,23 +45,17 @@ namespace TestAppV2V3Switching
             Debug.Assert(resource != null);
             Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IDownload)));
         }
-        public void TestCachingWorks()
+
+        public void TestAppropriateExceptionThrownWhenResourceIsNotAvailable()
         {
             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
-            IDownload resource = (IDownload)repo.GetResource<IDownload>();
-            Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownload));
-
-           
-            source = new PackageSource("localcache", @"C:\client");
-            repo = new SourceRepository2(source, providers);
-            resource = (IDownload)repo.GetResource<IDownload>();
-            Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownload));
+            IMetrics resource = (IMetrics)repo.GetResource<IMetrics>();
+            Debug.Assert(resource == null); // no metrics resource would be availabe for v2 source.            
         }
+
         public void TestE2E()
         {
             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
@@ -97,8 +78,8 @@ namespace TestAppV2V3Switching
         {
             Program p = new Program();
             p.AssembleComponents();
-          //  p.TestGetResourceGivesRequiredResourceType();
-           // p.TestCachingWorks();
+            p.TestGetResourceGivesRequiredResourceType();
+            p.TestAppropriateExceptionThrownWhenResourceIsNotAvailable();
             p.TestE2E();
             
         }

@@ -7,8 +7,8 @@
     <ProjectGuid>{B11C19B6-5671-4FF0-8A88-AF08FC7EF15E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuGet.Client.V3Core</RootNamespace>
-    <AssemblyName>NuGet.Client.V3Core</AssemblyName>
+    <RootNamespace>NuGet.Client.V3</RootNamespace>
+    <AssemblyName>NuGet.Client.V3</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
