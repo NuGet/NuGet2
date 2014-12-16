@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
+using NuGet.Client;
 using NuGet.Client.V3;
+using NuGet.Client.VisualStudio.Models;
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
@@ -7,8 +9,6 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client;
-using NuGet.Client.VisualStudio.Models;
 
 
 namespace NuGet.Client.V3.VisualStudio

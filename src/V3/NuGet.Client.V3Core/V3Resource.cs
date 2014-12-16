@@ -1,9 +1,9 @@
-﻿using System;
+﻿using NuGet.Client.V3;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client.V3;
 
 namespace NuGet.Client.V3
 {

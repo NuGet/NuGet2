@@ -1,10 +1,10 @@
-﻿using NuGet.Versioning;
+﻿using NuGet.Client;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.Models
 {

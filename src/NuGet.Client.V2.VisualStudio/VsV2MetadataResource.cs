@@ -1,14 +1,14 @@
-﻿using System;
+﻿using NuGet.Client;
+using NuGet.Client.V2;
+using NuGet.Client.VisualStudio.Models;
+using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client;
-using NuGet.Client.VisualStudio.Models;
-using NuGet.Client.V2;
-using NuGet.Versioning;
-using System.ComponentModel.Composition;
 
 
 namespace NuGet.Client.V2.VisualStudio

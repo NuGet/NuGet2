@@ -1,11 +1,11 @@
-﻿using System;
+﻿using NuGet.Client;
+using NuGet.Client.VisualStudio.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client.VisualStudio.Models;
-using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.Models
 {

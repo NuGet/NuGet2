@@ -1,11 +1,11 @@
-﻿using NuGet.Client.VisualStudio.Models;
+﻿using NuGet.Client.V3;
+using NuGet.Client.VisualStudio.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Client.V3;
 
 namespace NuGet.Client.V3.VisualStudio
 {
