@@ -91,6 +91,7 @@
     <Compile Include="VsSourceRepositoryManager.cs" />
     <Compile Include="VsV2MetadataResource.cs" />
     <Compile Include="VsV2SearchResource.cs" />
+    <Compile Include="VsV2SearchResourceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

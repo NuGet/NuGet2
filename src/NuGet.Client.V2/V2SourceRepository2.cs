@@ -21,17 +21,17 @@ namespace NuGet.Client
         private readonly LocalPackageRepository _lprepo;
         private readonly PackageSource _source;
         private readonly string _userAgent;
-        [ImportMany(typeof(V2Resource))]
-        private IEnumerable<Resource> _resources;
+        //[ImportMany(typeof(V2Resource))]
+        //private IEnumerable<Resource> _resources;
 
 
-        public override IEnumerable<Resource> Resources
-        {
-            get
-            {
-                return _resources;
-            }
-        }
+        //public override IEnumerable<Resource> Resources
+        //{
+        //    get
+        //    {
+        //        return _resources;
+        //    }
+        //}
         public override PackageSource Source { get { return _source; } }
 
         public V2SourceRepository2()
@@ -84,15 +84,15 @@ namespace NuGet.Client
             throw new System.NotImplementedException();
         }
 
-        public override bool TryGetRepository(PackageSource source)
-        {
-            return IsV2(source);
-        }
+        //public override bool TryGetRepository(PackageSource source)
+        //{
+        //    return IsV2(source);
+        //}
 
-        public override SourceRepository GetRepository(PackageSource source)
-        {
-            return new V2SourceRepository2(source, "testapp");
-        }
+        //public override SourceRepository GetRepository(PackageSource source)
+        //{
+        //    return new V2SourceRepository2(source, "testapp");
+        //}
 
         private static bool IsV2(PackageSource source)
         {

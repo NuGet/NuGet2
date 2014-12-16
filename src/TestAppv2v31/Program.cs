@@ -10,13 +10,14 @@ using NuGet.Client.BaseTypes;
 using NuGet.Client;
 using NuGet.Client.VisualStudio;
 using NuGet.Client.VisualStudio.Models;
+using System.Diagnostics;
 
 namespace TestAppv2v31
 {
     class Program
     {
-
-        public  void AssembleCalculatorComponents()
+        private CompositionContainer container;
+        public  void AssembleComponents()
         {
             try
             {
@@ -27,31 +28,76 @@ namespace TestAppv2v31
                 var directoryPath = @"C:\Client\nuget\src\TestAppv2v31\bin\Debug";
                 var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");              
                 aggregateCatalog.Catalogs.Add(directoryCatalog);              
-                var container = new CompositionContainer(aggregateCatalog);               
+                container = new CompositionContainer(aggregateCatalog);               
                 container.ComposeParts(this);
-                IEnumerable<Lazy<SourceRepository>> repos = container.GetExports<SourceRepository>();
-                IEnumerable<Lazy<Resource>> resources = container.GetExports<Resource>();                
-                PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");               
-                if(repos.Any( p => p.Value.TryGetRepository(source)))
-                {
-                    //   SourceRepository class has a TryGetRepository and GetRepository which will implemented accordingly by V2SourceRepository and V3SourceRepository derived classed that returns V2Repo and V3Repo respectively.             
-                    SourceRepository repo = repos.FirstOrDefault(p => p.Value.TryGetRepository(source)).Value.GetRepository(source);                  
-                    VsSearchResource vsSearch = repo.GetRequiredResource<VsSearchResource>();
-                    SearchFilter filter = new SearchFilter(); //create a dummy filter.
-                    IEnumerable<VisualStudioUISearchMetaData> searchResults = vsSearch.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
-                }
-                
-               
+         
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
+
+        public void TestResourceTypeBasedOnPackageSource()
+        {
+            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            Debug.Assert(providers.Count() > 0);
+            PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
+            SourceRepository2 repo = new SourceRepository2(source, providers);
+            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            Debug.Assert(resource != null);
+            Debug.Assert(resource.GetType() == typeof(IDownloadResource));            
+        }
+
+
+
+        public void TestGetResourceGivesRequiredResourceType()
+        {
+            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            Debug.Assert(providers.Count() > 0);
+            PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
+            SourceRepository2 repo = new SourceRepository2(source, providers);
+            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            Debug.Assert(resource != null);
+            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IDownloadResource)));
+        }
+        public void TestCachingWorks()
+        {
+            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            Debug.Assert(providers.Count() > 0);
+            PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
+            SourceRepository2 repo = new SourceRepository2(source, providers);
+            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            Debug.Assert(resource != null);
+            Debug.Assert(resource.GetType() == typeof(IDownloadResource));
+
+           
+            source = new PackageSource("localcache", @"C:\client");
+            repo = new SourceRepository2(source, providers);
+            resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            Debug.Assert(resource != null);
+            Debug.Assert(resource.GetType() == typeof(IDownloadResource));
+        }
+        public void TestE2E()
+        {
+             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            Debug.Assert(providers.Count() > 0);
+            PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
+            SourceRepository2 repo = new SourceRepository2(source, providers);
+            VsSearchResource resource = (VsSearchResource)repo.GetResource<VsSearchResource>();
+            Debug.Assert(resource != null);
+            Debug.Assert(resource.GetType() == typeof(VsSearchResource));
+            SearchFilter filter = new SearchFilter(); //create a dummy filter.
+            IEnumerable<VisualStudioUISearchMetaData> searchResults = resource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
+        }
+
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.AssembleCalculatorComponents();
+            p.AssembleComponents();
+            p.TestGetResourceGivesRequiredResourceType();
+            p.TestCachingWorks();
+            p.TestE2E();
             
         }
     }

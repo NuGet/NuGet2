@@ -28,17 +28,17 @@ namespace NuGet.Client
     {       
         private PackageSource _source;      
         private NuGetV3Client _client;
-        [ImportMany(typeof(V3Resource))]
-        private IEnumerable<Resource> _resources;
+        //[ImportMany(typeof(V3Resource))]
+        //private IEnumerable<Resource> _resources;
 
         
-        public override IEnumerable<Resource> Resources
-        {
-            get
-            {
-                return _resources;
-            }
-        }
+        //public override IEnumerable<Resource> Resources
+        //{
+        //    get
+        //    {
+        //        return _resources;
+        //    }
+        //}
         public override PackageSource Source
         {
             get { return _source; }
@@ -86,15 +86,15 @@ namespace NuGet.Client
         }
 
 
-        public override bool TryGetRepository(PackageSource source)
-        {
-            return IsV3(source);
-        }
+        //public override bool TryGetRepository(PackageSource source)
+        //{
+        //    return IsV3(source);
+        //}
 
-        public override SourceRepository GetRepository(PackageSource source)
-        {
-            return new V3SourceRepository2(source, "testapp");
-        }
+        //public override SourceRepository GetRepository(PackageSource source)
+        //{
+        //    return new V3SourceRepository2(source, "testapp");
+        //}
 
         private static bool IsV3(PackageSource source)
         {
