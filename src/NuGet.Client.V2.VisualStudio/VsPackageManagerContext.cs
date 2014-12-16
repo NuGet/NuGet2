@@ -9,8 +9,6 @@ using Microsoft.VisualStudio.Shell;
 using NuGet.Client.ProjectSystem;
 using NuGet.VisualStudio;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.IO;
 
 namespace NuGet.Client.VisualStudio
 {
@@ -59,6 +57,5 @@ namespace NuGet.Client.VisualStudio
                 _solutionManager,
                 _packageManagerFactory.CreatePackageManagerToManageInstalledPackages());
         }
-    }
-    
+    }    
 }

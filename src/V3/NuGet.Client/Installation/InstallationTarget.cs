@@ -68,7 +68,14 @@ namespace NuGet.Client.Installation
         public abstract Solution OwnerSolution
         {
             get;
-        }        
+        }
+
+        /// <summary>
+        /// Allows the installation target to add data to a metrics record.
+        /// </summary>
+        public virtual void AddMetricsMetadata(JObject metricsRecord)
+        {
+        }
 
         /// <summary>
         /// Retrieves an instance of the requested feature, throwing a <see cref="RequiredFeatureNotSupportedException"/>
@@ -169,10 +176,5 @@ namespace NuGet.Client.Installation
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method can be expensive")]
         public abstract IEnumerable<InstallationTarget> GetAllTargetsRecursively();
 
-
-        public virtual void AddMetricsMetadata(JObject metricsRecord)
-        {
-           
-        }
     }
 }
