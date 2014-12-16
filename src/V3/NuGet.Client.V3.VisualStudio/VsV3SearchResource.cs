@@ -18,6 +18,12 @@ namespace NuGet.Client.V3.VisualStudio
     /// </summary>
     public class VsV3SearchResource : V3Resource, IVsSearch
     {
+        public VsV3SearchResource(V3Resource v3Resource)
+            : base(v3Resource)
+        {
+
+        }
+
         public VsV3SearchResource(NuGetV3Client client):base(client)
         {
 
@@ -29,7 +35,7 @@ namespace NuGet.Client.V3.VisualStudio
 
         }
 
-        public async Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public async Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             List<string> frameworkNames = new List<string>();
             foreach (FrameworkName fx in filters.SupportedFrameworks)
@@ -37,17 +43,17 @@ namespace NuGet.Client.V3.VisualStudio
                 frameworkNames.Add(fx.FullName);
             await V3Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
             IEnumerable<JObject> searchResultJsonObjects = await V3Client.Search(searchTerm, frameworkNames, filters.IncludePrerelease, skip, take, cancellationToken);
-            List<VisualStudioUISearchMetaData> visualStudioUISearchResults = new List<VisualStudioUISearchMetaData>();
+            List<VisualStudioUISearchMetadata> visualStudioUISearchResults = new List<VisualStudioUISearchMetadata>();
             foreach (JObject searchResultJson in searchResultJsonObjects)
                 visualStudioUISearchResults.Add(GetVisualStudioUISearchResult(searchResultJson, filters.IncludePrerelease));
             return visualStudioUISearchResults;
         }
-        private VisualStudioUISearchMetaData GetVisualStudioUISearchResult(JObject package, bool includePrerelease)
+        private VisualStudioUISearchMetadata GetVisualStudioUISearchResult(JObject package, bool includePrerelease)
         {
-            VisualStudioUISearchMetaData searchResult = new VisualStudioUISearchMetaData();
-            searchResult.Id = package.Value<string>(Properties.PackageId);
-            searchResult.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
-            searchResult.IconUrl = GetUri(package, Properties.IconUrl);
+           
+            string id = package.Value<string>(Properties.PackageId);
+            NuGetVersion version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
+            Uri iconUrl = GetUri(package, Properties.IconUrl);
 
             // get other versions
             var versionList = new List<NuGetVersion>();
@@ -74,18 +80,19 @@ namespace NuGet.Client.V3.VisualStudio
                     versionList.RemoveAll(v => v.IsPrerelease);
                 }
             }
-            if (!versionList.Contains(searchResult.Version))
+            if (!versionList.Contains(version))
             {
-                versionList.Add(searchResult.Version);
+                versionList.Add(version);
             }
 
-            searchResult.Versions = versionList;
-            searchResult.Summary = package.Value<string>(Properties.Summary);
-            if (string.IsNullOrWhiteSpace(searchResult.Summary))
+             IEnumerable<NuGetVersion> Versions = versionList;
+             string summary = package.Value<string>(Properties.Summary);
+            if (string.IsNullOrWhiteSpace(summary))
             {
                 // summary is empty. Use its description instead.
-                searchResult.Summary = package.Value<string>(Properties.Description);
+                summary = package.Value<string>(Properties.Description);
             }
+            VisualStudioUISearchMetadata searchResult = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,versions,null);
             return searchResult;
 
         }

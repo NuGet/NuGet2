@@ -47,9 +47,7 @@ namespace TestAppV2V3Switching
             Debug.Assert(resource != null);
             Debug.Assert(resource.GetType() == typeof(IDownload));            
         }
-
-
-
+        
         public void TestGetResourceGivesRequiredResourceType()
         {
             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
@@ -79,20 +77,20 @@ namespace TestAppV2V3Switching
         }
         public void TestE2E()
         {
-             IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
             IVsSearch resource = (IVsSearch)repo.GetResource<IVsSearch>();
-            Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IVsSearch)));
+            Debug.Assert(resource != null); //Check if we are able to obtain a resource
+            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IVsSearch))); //check if the resource is of type IVsSearch.
             SearchFilter filter = new SearchFilter(); //create a dummy filter.
             List<FrameworkName> fxNames = new List<FrameworkName>();
             fxNames.Add(new FrameworkName(".NET Framework, Version=4.0"));
             filter.SupportedFrameworks = fxNames;                       
-            IEnumerable<VisualStudioUISearchMetaData> searchResults = resource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
+            IEnumerable<VisualStudioUISearchMetadata> searchResults = resource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
             Debug.Assert(searchResults.Count() > 0); // Check if non empty search result is returned.
-            Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is an result which has Elmah as title.
+            Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is atleast one result which has Elmah as title.
         }
 
         static void Main(string[] args)

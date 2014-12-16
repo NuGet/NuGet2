@@ -11,40 +11,21 @@ namespace NuGet.Client.V2.VisualStudio
 {
     [Export(typeof(IResourceProvider))]
     [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(IVsSearch))]
-    public class VsV2SearchResourceProvider : IResourceProvider
+    public class VsV2SearchResourceProvider : V2ResourceProvider
     {
-        public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
+        public override bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
         {
-            try
+            VsV2SearchResource vsV2SearchResource;
+            if (base.TryCreateResource(source, ref cache, out resource))
             {
-                string host = "TestHost";
-                if (V2Utilities.IsV2(source))
-                {
-                    object repo = null;
-                    if (!cache.TryGetValue(source.Url, out repo))
-                    {
-                        repo = V2Utilities.GetV2SourceRepository(source, host);
-                        cache.Add(source.Url, repo);
-                    }
-                    resource = new VsV2SearchResource((IPackageRepository)repo, host);
-                    return true;
-                }
-                else
-                {
-                    resource = null;
-                    return false;
-                }
+                vsV2SearchResource = new VsV2SearchResource((V2Resource)resource);
+                resource = vsV2SearchResource;
+                return true;
             }
-            catch (Exception)
+            else
             {
-                resource = null;
-                return false; //*TODOs:Do tracing and throw apppropriate exception here.
-            }       
-        }
-
-        public Resource Create(PackageSource source, ref IDictionary<string, object> cache)
-        {
-            throw new NotImplementedException();
-        }
+                return false;
+            }
+        }       
     }
 }

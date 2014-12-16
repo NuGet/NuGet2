@@ -15,6 +15,11 @@ namespace NuGet.Client.V2
         {
 
         }
+        public V2DownloadResource(V2Resource v2Resource)
+            : base(v2Resource)
+        {
+
+        }
 
         public override string Description
         {

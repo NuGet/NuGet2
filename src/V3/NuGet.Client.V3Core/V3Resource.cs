@@ -10,9 +10,10 @@ namespace NuGet.Client.V3
     /// <summary>
     /// Represents a resource provided by a V3 server. [ Like search resource, metadata resource]
     /// </summary>
-    public abstract class V3Resource : Resource
+    public class V3Resource : Resource
     {
         private NuGetV3Client _v3Client;
+        private string _description = "Resource provided by a V3 server endpoint."
 
         public V3Resource(string sourceUrl, string host)
             : base(host)
@@ -35,5 +36,9 @@ namespace NuGet.Client.V3
             }
         }
 
+        public override string Description
+        {
+            get { return _description; }
+        }
     }
 }

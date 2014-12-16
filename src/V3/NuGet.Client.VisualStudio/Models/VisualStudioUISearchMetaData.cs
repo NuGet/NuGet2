@@ -11,9 +11,9 @@ namespace NuGet.Client.VisualStudio.Models
     /// <summary>
     /// Model for Search results displayed by Visual Studio Package Manager dialog UI.
     /// </summary>
-    public sealed class VisualStudioUISearchMetaData
+    public sealed class VisualStudioUISearchMetadata
     {
-        public VisualStudioUISearchMetaData(string id,NuGetVersion version,string summary,Uri iconUrl,IEnumerable<NuGetVersion> versions,VisualStudioUIPackageMetadata latestPackageMetadata)
+        public VisualStudioUISearchMetadata(string id,NuGetVersion version,string summary,Uri iconUrl,IEnumerable<NuGetVersion> versions,VisualStudioUIPackageMetadata latestPackageMetadata)
         {
             Id = id;
             Version = version;

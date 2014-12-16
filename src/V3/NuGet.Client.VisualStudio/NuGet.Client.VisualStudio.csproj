@@ -46,7 +46,7 @@
     <Compile Include="Models\IPowerShellAutoComplete.cs" />
     <Compile Include="Models\PowershellSearchMetadata.cs" />
     <Compile Include="Models\VisualStudioUIPackageMetadata.cs" />
-    <Compile Include="Models\VisualStudioUISearchMetaData.cs" />
+    <Compile Include="Models\VisualStudioUISearchMetadata.cs" />
     <Compile Include="Models\IVsMetadata.cs" />
     <Compile Include="Models\IVsSearch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

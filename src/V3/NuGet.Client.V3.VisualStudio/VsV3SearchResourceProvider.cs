@@ -11,40 +11,21 @@ namespace NuGet.Client.V3.VisualStudio
 {
     [Export(typeof(IResourceProvider))]
     [ResourceProviderMetadata("VsV3SearchResourceProvider", typeof(IVsSearch))]
-    public class VsV3SearchResourceProvider : IResourceProvider
+    public class VsV3SearchResourceProvider : V3ResourceProvider
     {
         public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
         {
-            try
+            VsV3SearchResource vsV3SearchResource;
+            if (base.TryCreateResource(source, ref cache, out resource))
             {
-                string host = "TestHost";
-                if (V3Utilities.IsV3(source))
-                {
-                    object repo = null;
-                    if (!cache.TryGetValue(source.Url, out repo))
-                    {
-                        repo = V3Utilities.GetV3Client(source, host);
-                        cache.Add(source.Url, repo);
-                    }
-                    resource = new VsV3SearchResource((NuGetV3Client)repo);
-                    return true;
-                }
-                else
-                {
-                    resource = null;
-                    return false;
-                }
+                vsV3SearchResource = new VsV3SearchResource((V3Resource)resource);
+                resource = vsV3SearchResource;
+                return true;
             }
-            catch (Exception)
+            else
             {
-                resource = null;
-                return false; //*TODOs:Do tracing and throw apppropriate exception here.
-            }       
-        }
-
-        public Resource Create(PackageSource source, ref IDictionary<string, object> cache)
-        {
-            throw new NotImplementedException();
+                return false;
+            }
         }
     }
 }

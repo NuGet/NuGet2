@@ -6,9 +6,16 @@ using System.Text;
 namespace NuGet.Client
 {
 
-    public interface IResourceProvider
+    public abstract class IResourceProvider
     {
-        bool TryCreateResource(PackageSource source,ref IDictionary<string,object> cache, out Resource resource);
-        Resource Create(PackageSource source, ref IDictionary<string, object> cache);
+        public abstract bool TryCreateResource(PackageSource source,ref IDictionary<string,object> cache, out Resource resource);
+        public virtual Resource Create(PackageSource source, ref IDictionary<string, object> cache)
+        {
+            Resource resource = null;
+            if (TryCreateResource(source, ref cache, out resource))
+                return resource;
+            else
+                return null; //*TODOs: Throw ResourceNotCreated exception ?
+        }
     }
 }

@@ -24,20 +24,20 @@ namespace NuGet.Client.VisualStudio.Models
             Copyright = copyright;
             MinClientVersion = minClientVersion;
         }
-        string Title { get; private set;}
-        IEnumerable<string> Authors { get; private set;}
-        IEnumerable<string> Owners { get; private set;}
-        Uri IconUrl { get; private set;}
-        Uri LicenseUrl { get; private set;}
-        Uri ProjectUrl { get; private set;}
-        bool RequireLicenseAcceptance { get; private set;}
-        string Description { get; private set;}
-        string Summary { get; private set;}
-        string ReleaseNotes { get; private set;}
-        string Language { get; private set;}
-        string Tags { get; private set;}
-        string Copyright { get; private set;}
+        public string Title { get; private set;}
+        public IEnumerable<string> Authors { get; private set;}
+        public IEnumerable<string> Owners { get; private set;}
+        public Uri IconUrl { get; private set;}
+        public Uri LicenseUrl { get; private set;}
+        public Uri ProjectUrl { get; private set;}
+        public bool RequireLicenseAcceptance { get; private set;}
+        public string Description { get; private set;}
+        public string Summary { get; private set;}
+        public string ReleaseNotes { get; private set;}
+        public string Language { get; private set;}
+        public string Tags { get; private set;}
+        public string Copyright { get; private set;}
         //IEnumerable<PackageDependencySet> DependencySets { get; private set;} *TODOs - copy PackageDependencySet from core to client.baprivate setypes. It has Iversionspec and a whole bunch of things need to be copied or moved.
-        Version MinClientVersion { get; private set;}
+        public Version MinClientVersion { get; private set;}
     }
 }

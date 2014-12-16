@@ -12,7 +12,7 @@ namespace NuGet.Client.VisualStudio.Models
     public interface IVsSearch
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-         Task<IEnumerable<VisualStudioUISearchMetaData>> GetSearchResultsForVisualStudioUI(
+         Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(
             string searchTerm,
             SearchFilter filters,
             int skip,

@@ -142,10 +142,6 @@
       <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
       <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
-      <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>
-      <Name>NuGet.Client.V3</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Strings.resx">
