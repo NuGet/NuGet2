@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Versioning;
 using NuGet.Client.BaseTypes;
+using Newtonsoft.Json.Linq;
 
 
 namespace NuGet.Client
@@ -13,7 +14,7 @@ namespace NuGet.Client
     public abstract class InstalledPackagesList
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This method make require computation.")]
-        public abstract Task<IEnumerable<PackageMetadata>> GetAllInstalledPackagesAndMetadata();
+        public abstract Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata();
 
         /// <summary>
         /// Searches the list of installed packages
@@ -21,7 +22,7 @@ namespace NuGet.Client
         /// <param name="searchTerm"></param>
         /// <param name="cancelToken"></param>
         /// <returns>Returns a list of JSON objects suitable for rendering by the Package Manager Dialog</returns>
-        public abstract Task<IEnumerable<SearchResult>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken);
+        public abstract Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken);
 
         /// <summary>
         /// Retrieves a list of installed packages
