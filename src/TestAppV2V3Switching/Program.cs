@@ -24,7 +24,7 @@ namespace TestAppV2V3Switching
                 var aggregateCatalog = new AggregateCatalog();
 
                 //Build the directory path where the parts will be available
-                var directoryPath = @"C:\Client\nuget\src\TestAppv2v31\bin\Debug";
+                var directoryPath = @"C:\Client\nuget\src\TestAppV2V3Switching\bin\Debug";
                 var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");              
                 aggregateCatalog.Catalogs.Add(directoryCatalog);              
                 container = new CompositionContainer(aggregateCatalog);               

@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client
 {
-  /// <summary>
+    /// <summary>
     /// Represents a Server endpoint. Exposes methods to get a specific resource like Search resoure, Metrics service and so on for the given server endpoint.
-    /// </summary>
-    // TODO: it needs to implement IDisposable.
-    // *TODOs: Define RequiredResourceNotFound exception instead of general exception.       
+    /// This will be the replacement for existing SourceRepository class.
+    /// </summary>  
+    // *TODOs: Define ResourceNotFound exception instead of general exception ? 
     public  class SourceRepository2
     {
         [ImportMany]
@@ -25,7 +25,9 @@ namespace NuGet.Client
         private readonly PackageSource _source;
         private static IDictionary<string, object> _cache = new Dictionary<string, object>();
 
-        public SourceRepository2(PackageSource source, IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers)
+        //*TODOs: Providers should be automatically imported when run inside vs context. Right now passing triggering it as part of testapp and passing it as param.
+        public SourceRepository2(PackageSource source, IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers) 
+            
         {
             _source = source;
             _providers = providers;

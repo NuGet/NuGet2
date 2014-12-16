@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace NuGet.Client.V2
 {
     /// <summary>
-    /// *TODOs: Pass in the host name all the way from TryGetResource();
+    /// Resource provider for V2 download.
     /// </summary>
     [Export(typeof(IResourceProvider))]
     [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownload))]

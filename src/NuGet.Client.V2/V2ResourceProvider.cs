@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V2
 {
+    /// <summary>
+    /// Partial implementation for IResourceProvider to do the common V2 specific stuff.
+    /// </summary>
     public abstract class V2ResourceProvider : IResourceProvider
     {
         public override bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
