@@ -85,14 +85,14 @@ namespace NuGet.Client.V3.VisualStudio
                 versionList.Add(version);
             }
 
-             IEnumerable<NuGetVersion> Versions = versionList;
+             IEnumerable<NuGetVersion> nuGetVersions = versionList;
              string summary = package.Value<string>(Properties.Summary);
             if (string.IsNullOrWhiteSpace(summary))
             {
                 // summary is empty. Use its description instead.
                 summary = package.Value<string>(Properties.Description);
             }
-            VisualStudioUISearchMetadata searchResult = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,versions,null);
+            VisualStudioUISearchMetadata searchResult = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,nuGetVersions,null);
             return searchResult;
 
         }

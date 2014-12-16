@@ -75,13 +75,13 @@ namespace NuGet.Client.V2.VisualStudio
             string id = package.Id;
             NuGetVersion version = SafeToNuGetVer(package.Version);
             String summary = package.Summary;
-            IEnumerable<NuGetVersion> versions = versions.Select(p => SafeToNuGetVer(p.Version));
+            IEnumerable<NuGetVersion> nuGetVersions = versions.Select(p => SafeToNuGetVer(p.Version));
             if (string.IsNullOrWhiteSpace(package.Summary))
                 summary = package.Summary;
             else
                 summary = package.Description;
             Uri iconUrl = package.IconUrl;
-            VisualStudioUISearchMetadata searchMetaData = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,versions,null);
+            VisualStudioUISearchMetadata searchMetaData = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,nuGetVersions,null);
             return searchMetaData;
         }
         

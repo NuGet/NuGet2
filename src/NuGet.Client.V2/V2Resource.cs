@@ -14,7 +14,7 @@ namespace NuGet.Client.V2
     public class V2Resource :Resource
     {
         private IPackageRepository _v2Client;
-        public  string _host;
+        private string _host;
         private string _description = "A Resource exposed by V2 server endpoint.";
                      
         public V2Resource(IPackageRepository repo,string host):base(host)
