@@ -8,7 +8,6 @@ using Newtonsoft.Json.Linq;
 using NuGet.Client.Diagnostics;
 using NuGet.Client.Interop;
 using NuGet.Versioning;
-using NuGet.Client;
 
 namespace NuGet.Client
 {
@@ -48,7 +47,7 @@ namespace NuGet.Client
             return _localRepository.Exists(packageId);
         }
 
-        public override async Task<IEnumerable<SearchResult>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
+        public override async Task<IEnumerable<JObject>> Search(SourceRepository source, string searchTerm, int skip, int take, CancellationToken cancelToken)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("search", "Search: {0}", searchTerm);
             var installedPackages = await Task.Factory.StartNew(() =>
@@ -56,7 +55,7 @@ namespace NuGet.Client
                     .Skip(skip).Take(take).ToList());
 
             // start CreatePackageSearchResult() for all packages in parallel
-            var createPackageSearchResultTasks = new List<Task<SearchResult>>();
+            var createPackageSearchResultTasks = new List<Task<JObject>>();
             foreach (var p in installedPackages)
             {
                 var task = CreatePackageSearchResult(source, p);
@@ -64,7 +63,7 @@ namespace NuGet.Client
             }
 
             // collect results
-            var result = new List<SearchResult>();
+            var result = new List<JObject>();
             foreach (var task in createPackageSearchResultTasks)
             {
                 var searchResult = await task;
@@ -73,7 +72,7 @@ namespace NuGet.Client
             return result;
         }
 
-        private static async Task<SearchResult> CreatePackageSearchResult(SourceRepository source, IPackage package)
+        private static async Task<JObject> CreatePackageSearchResult(SourceRepository source, IPackage package)
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("loading_versions", "Loading versions for {0} from {1}", package.Id, source.Source.Url);
 
@@ -84,35 +83,18 @@ namespace NuGet.Client
                 var v = SemanticVersion.Parse(p.Value<string>(Properties.Version));
                 versions.Add(v);
             }
-            SearchResult searchMetaData = new SearchResult();
-            searchMetaData.Version = CoreConverters.SafeToNuGetVer(package.Version);
-            searchMetaData.Summary = package.Summary;
-            //searchMetaData.Versions = versions.Select(p => CoreConverters.SafeToNuGetVer(p));
-            if (string.IsNullOrWhiteSpace(package.Summary))
-                searchMetaData.Summary = package.Summary;
-            else
-                searchMetaData.Summary = package.Description;
-            //searchMetaData.IconUrl = package.IconUrl;
-            return searchMetaData;
+            
+            var result = PackageJsonLd.CreatePackageSearchResult(package, versions);
+            return result;
         }
 
-        public override Task<IEnumerable<PackageMetadata>> GetAllInstalledPackagesAndMetadata()
+        public override Task<IEnumerable<JObject>> GetAllInstalledPackagesAndMetadata()
         {
             NuGetTraceSources.CoreInteropInstalledPackagesList.Verbose("getallmetadata", "Get all installed packages and metadata");
             return Task.FromResult(
                 _localRepository
                     .GetPackages().ToList()
-                    .Select(p => CreatePackageMetaData(p)));
-        
-        }
-
-        private PackageMetadata CreatePackageMetaData(IPackageMetadata package)
-        {
-            PackageMetadata p = new PackageMetadata();
-            p.Id = package.Id;
-            p.Summary = package.Summary;
-            p.Version = CoreConverters.SafeToNuGetVer(package.Version);
-            return p;
+                    .Select(p => PackageJsonLd.CreatePackage(p)));
         }
     }
 }
