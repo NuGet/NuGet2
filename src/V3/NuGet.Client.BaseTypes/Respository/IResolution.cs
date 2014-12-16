@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client
 {
-    public interface IResolutionResource
+    public interface IResolution
     {
         PackageIdentity ResolvePackage(string id, string version);
     }
