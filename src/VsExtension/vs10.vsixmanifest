@@ -28,7 +28,6 @@
     <MefComponent>|Console|</MefComponent>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>|VisualStudio|</MefComponent>
- <MefComponent>|NuGet.Client.V2.VisualStudio|</MefComponent>
 	<MefComponent>|ShimV3|</MefComponent>
     <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
   </Content>
