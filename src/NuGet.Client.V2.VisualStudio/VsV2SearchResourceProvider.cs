@@ -7,10 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuGet.Client.VisualStudio
+namespace NuGet.Client.V2.VisualStudio
 {
     [Export(typeof(IResourceProvider))]
-    [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(VsSearchResource))]
+    [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(IVsSearch))]
     public class VsV2SearchResourceProvider : IResourceProvider
     {
         public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)

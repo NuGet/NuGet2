@@ -30,7 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NuGet.Versioning">
@@ -52,10 +53,9 @@
     <Compile Include="Installation\InstalledPackagesList.cs" />
     <Compile Include="Installation\PackageAction.cs" />
     <Compile Include="Installation\PackageIdentity.cs" />
-    <Compile Include="PackageMetadata.cs" />
     <Compile Include="PackageSource.cs" />
-    <Compile Include="Respository\IDownloadResource.cs" />
-    <Compile Include="Respository\IMetricsResource.cs" />
+    <Compile Include="Respository\IDownload.cs" />
+    <Compile Include="Respository\IMetrics.cs" />
     <Compile Include="Respository\IResolutionResource.cs" />
     <Compile Include="Respository\IResourceProvider.cs" />
     <Compile Include="Respository\IResourceProviderMetadata.cs" />
@@ -64,17 +64,11 @@
     <Compile Include="Respository\ResourceProviderMetadata.cs" />
     <Compile Include="Respository\SourceRepository.cs" />
     <Compile Include="Respository\SourceRepository2.cs" />
-    <Compile Include="Respository\V3Resource.cs" />
-    <Compile Include="Respository\V3SourceRepository2.cs" />
     <Compile Include="SearchFilter.cs" />
-    <Compile Include="SearchResult.cs" />
     <Compile Include="UserAgentUtil.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
-      <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>
-      <Name>NuGet.Client.V3</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

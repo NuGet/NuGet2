@@ -43,13 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\NuGetVersion.cs" />
     <Compile Include="Models\PowerShellAutoCompleteResource.cs" />
     <Compile Include="Models\PowershellSearchMetadata.cs" />
     <Compile Include="Models\VisualStudioUIPackageMetadata.cs" />
     <Compile Include="Models\VisualStudioUISearchMetaData.cs" />
-    <Compile Include="Models\VsMetadataResource.cs" />
-    <Compile Include="Models\VsSearchResource.cs" />
+    <Compile Include="Models\IVsMetadata.cs" />
+    <Compile Include="Models\IVsSearch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,9 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="NuGet.Data, Version=1.0.1.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NuGet.Data.1.0.1-master-43391912\lib\net45\NuGet.Data.dll</HintPath>
@@ -54,7 +51,6 @@
     <Compile Include="V2DownloadResource.cs" />
     <Compile Include="V2DownloadResourceProvider.cs" />
     <Compile Include="V2Resource.cs" />
-    <Compile Include="V2SourceRepository2.cs" />
     <Compile Include="V2Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,7 +63,9 @@
       <Name>NuGet.Client.BaseTypes</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

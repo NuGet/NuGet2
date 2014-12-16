@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 using NuGet.Client;
 using NuGet.Client.VisualStudio.Models;
 using NuGet.Client.V2;
-using NuGet.Client.BaseTypes;
 using NuGet.Versioning;
 using System.ComponentModel.Composition;
 
 
-namespace NuGet.Client.VisualStudio.Repository
+namespace NuGet.Client.V2.VisualStudio
 {
     [Export(typeof(V2Resource))]
-    public class VsV2MetadataResource : V2Resource,IVsMetadataResource
+    public class VsV2MetadataResource : V2Resource,IVsMetadata
     {
         public VsV2MetadataResource():base(null,null)
         {

@@ -16,7 +16,7 @@ namespace NuGet.Client.V3.VisualStudio
     /// <summary>
     /// *TODOs: GetShortFrameworkName need to be used. 
     /// </summary>
-    public class VsV3SearchResource : V3Resource, VsSearchResource
+    public class VsV3SearchResource : V3Resource, IVsSearch
     {
         public VsV3SearchResource(NuGetV3Client client):base(client)
         {

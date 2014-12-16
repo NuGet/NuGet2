@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client
 {
-    public interface IDownloadResource
+    public interface IDownload
     {
       Uri GetNupkgUrlForDownload(string id, NuGetVersion version);
     }

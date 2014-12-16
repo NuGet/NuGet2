@@ -10,7 +10,7 @@ using NuGet.Client.V3;
 namespace NuGet.Client.V3.VisualStudio
 {
     [Export(typeof(IResourceProvider))]
-    [ResourceProviderMetadata("VsV3SearchResourceProvider", typeof(VsSearchResource))]
+    [ResourceProviderMetadata("VsV3SearchResourceProvider", typeof(IVsSearch))]
     public class VsV3SearchResourceProvider : IResourceProvider
     {
         public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)

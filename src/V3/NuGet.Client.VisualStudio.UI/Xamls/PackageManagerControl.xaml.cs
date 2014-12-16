@@ -454,7 +454,7 @@ namespace NuGet.Client.VisualStudio.UI
                 }
                 else
                 {
-                     VsSearchResource searchResource = sourceRepository.TryGetResource<VsSearchResource>();
+                     IVsSearch searchResource = sourceRepository.TryGetResource<IVsSearch>();
                     if (searchResource != null)
                     {
                         var loader = new PackageLoader(

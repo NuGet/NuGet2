@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client
 {
-    public interface IMetricsResource
+    public interface IMetrics
     {
         void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget installationTarget);
     }

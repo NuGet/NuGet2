@@ -21,7 +21,7 @@ namespace NuGet.Client.VisualStudio.Models
         string Language { get; set;}
         string Tags { get; set;}
         string Copyright { get; set;}
-      //  IEnumerable<PackageDependencySet> DependencySets { get; set;}
+      //  IEnumerable<PackageDependencySet> DependencySets { get; set;} *TODOs - copy PackageDependencySet from core to client.basetypes.
         Version MinClientVersion { get; set;}
     }
 }

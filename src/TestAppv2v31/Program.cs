@@ -45,9 +45,9 @@ namespace TestAppv2v31
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
-            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            IDownload resource = (IDownload)repo.GetResource<IDownload>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownloadResource));            
+            Debug.Assert(resource.GetType() == typeof(IDownload));            
         }
 
 
@@ -58,9 +58,9 @@ namespace TestAppv2v31
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
-            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            IDownload resource = (IDownload)repo.GetResource<IDownload>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IDownloadResource)));
+            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IDownload)));
         }
         public void TestCachingWorks()
         {
@@ -68,16 +68,16 @@ namespace TestAppv2v31
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
-            IDownloadResource resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            IDownload resource = (IDownload)repo.GetResource<IDownload>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownloadResource));
+            Debug.Assert(resource.GetType() == typeof(IDownload));
 
            
             source = new PackageSource("localcache", @"C:\client");
             repo = new SourceRepository2(source, providers);
-            resource = (IDownloadResource)repo.GetResource<IDownloadResource>();
+            resource = (IDownload)repo.GetResource<IDownload>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType() == typeof(IDownloadResource));
+            Debug.Assert(resource.GetType() == typeof(IDownload));
         }
         public void TestE2E()
         {
@@ -85,9 +85,9 @@ namespace TestAppv2v31
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
-            VsSearchResource resource = (VsSearchResource)repo.GetResource<VsSearchResource>();
+            IVsSearch resource = (IVsSearch)repo.GetResource<IVsSearch>();
             Debug.Assert(resource != null);
-            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(VsSearchResource)));
+            Debug.Assert(resource.GetType().GetInterfaces().Contains(typeof(IVsSearch)));
             SearchFilter filter = new SearchFilter(); //create a dummy filter.
             List<FrameworkName> fxNames = new List<FrameworkName>();
             fxNames.Add(new FrameworkName(".NET Framework, Version=4.0"));

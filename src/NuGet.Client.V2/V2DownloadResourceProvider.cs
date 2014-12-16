@@ -12,7 +12,7 @@ namespace NuGet.Client.V2
     /// *TODOs: Pass in the host name all the way from TryGetResource();
     /// </summary>
     [Export(typeof(IResourceProvider))]
-    [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownloadResource))]
+    [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownload))]
     public class V2DownloadResourceProvider : IResourceProvider
     {
         public bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
