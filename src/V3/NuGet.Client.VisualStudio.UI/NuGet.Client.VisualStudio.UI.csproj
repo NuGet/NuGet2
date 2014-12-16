@@ -37,9 +37,8 @@
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="$(ShellAssembly)" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -100,6 +99,7 @@
     <Compile Include="Models\UiDetailedPackage.cs" />
     <Compile Include="Models\UiPackageDependency.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="PackageLoader.cs" />
     <Compile Include="PackageManagerEditorFactory.cs" />
     <Compile Include="PackageManagerWindowPane.cs" />
     <Compile Include="PackageSolutionDetailControlModel.cs" />
@@ -165,9 +165,6 @@
     <Compile Include="Xamls\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xamls\SearchControl.xaml.cs">
-      <DependentUpon>SearchControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Xamls\UpdateAvailableIndicator.xaml.cs">
       <DependentUpon>UpdateAvailableIndicator.xaml</DependentUpon>
     </Compile>
@@ -230,10 +227,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Xamls\LicenseAcceptanceWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Xamls\SearchControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

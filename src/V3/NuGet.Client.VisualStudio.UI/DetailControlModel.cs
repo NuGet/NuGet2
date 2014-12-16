@@ -19,7 +19,7 @@ namespace NuGet.Client.VisualStudio.UI
     {
         protected InstallationTarget _target;
         protected List<NuGetVersion> _allPackages;
-        private UiSearchResultPackage _searchResultPackage;
+        protected UiSearchResultPackage _searchResultPackage;
 
         private Dictionary<NuGetVersion, UiPackageMetadata> _metadataDict;
 
@@ -34,7 +34,7 @@ namespace NuGet.Client.VisualStudio.UI
             CreateActions();
         }
 
-        public void Refresh()
+        public virtual void Refresh()
         {
             CreateActions();
         }

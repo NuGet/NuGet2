@@ -10,11 +10,11 @@
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              x:Name="_self"
              mc:Ignorable="d"
-             d:DesignHeight="523" d:DesignWidth="900">
+             d:DesignHeight="523" d:DesignWidth="900" Loaded="ControlLoaded" Unloaded="ControlUnloaded">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources.xaml" />
+                <ResourceDictionary Source="Resources.xaml" />                
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -83,14 +83,13 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="24,8,0,0" MinHeight="24">
-                    <Tools:SearchControl
+                    <Border 
                         Grid.Column="6"
                         VerticalAlignment="Center"
-                        x:Name="_searchControl"
-                        SearchStart="_searchControl_SearchStart"
+                        x:Name="_searchControlParent"
                         MinHeight="24"
-                        MinWidth="224" />
-
+                        MinWidth="224" />   
+                     
                     <Button
                         Margin="24,0"
                         VerticalAlignment="Center"

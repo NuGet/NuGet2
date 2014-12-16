@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Internal.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell.Interop;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
@@ -20,14 +23,9 @@ namespace NuGet.Client.VisualStudio.UI
     /// <summary>
     /// Interaction logic for PackageManagerControl.xaml
     /// </summary>
-    public partial class PackageManagerControl : UserControl
+    public partial class PackageManagerControl : UserControl, IVsWindowSearch
     {
         private const int PageSize = 10;
-
-        // Copied from file Constants.cs in NuGet.Core:
-        // This is temporary until we fix the gallery to have proper first class support for this.
-        // The magic unpublished date is 1900-01-01T00:00:00
-        public static readonly DateTimeOffset Unpublished = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.FromHours(-8));
 
         private bool _initialized;
 
@@ -62,6 +60,8 @@ namespace NuGet.Client.VisualStudio.UI
         private PackageRestoreBar _restoreBar;
         private IPackageRestoreManager _packageRestoreManager;
 
+        private IVsWindowSearchHost _windowSearchHost;
+
         public PackageManagerControl(PackageManagerModel model, IUserInterfaceService ui)
         {
             UI = ui;
@@ -70,7 +70,9 @@ namespace NuGet.Client.VisualStudio.UI
 
             InitializeComponent();
 
-            _searchControl.Text = model.SearchText;
+            var factory = ServiceLocator.GetGlobalService<SVsWindowSearchHostFactory, IVsWindowSearchHostFactory>();
+            _windowSearchHost = factory.CreateWindowSearchHost(_searchControlParent);
+
             _filter.Items.Add(Resx.Resources.Filter_All);
             _filter.Items.Add(Resx.Resources.Filter_Installed);
             _filter.Items.Add(Resx.Resources.Filter_UpdateAvailable);
@@ -85,7 +87,6 @@ namespace NuGet.Client.VisualStudio.UI
             _outputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
 
             InitSourceRepoList();
-            this.Unloaded += PackageManagerControl_Unloaded;
             _initialized = true;
 
             Model.Sources.PackageSourcesChanged += Sources_PackageSourcesChanged;
@@ -134,11 +135,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private void PackageManagerControl_Unloaded(object sender, RoutedEventArgs e)
-        {
-            RemoveRestoreBar();
-        }
-
         private void AddRestoreBar()
         {
             _restoreBar = new PackageRestoreBar(_packageRestoreManager);
@@ -148,8 +144,11 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void RemoveRestoreBar()
         {
-            _restoreBar.CleanUp();
-            _packageRestoreManager.PackagesMissingStatusChanged -= packageRestoreManager_PackagesMissingStatusChanged;
+            if (_restoreBar != null)
+            {
+                _restoreBar.CleanUp();
+                _packageRestoreManager.PackagesMissingStatusChanged -= packageRestoreManager_PackagesMissingStatusChanged;
+            }
         }
 
         private void packageRestoreManager_PackagesMissingStatusChanged(object sender, PackagesMissingStatusEventArgs e)
@@ -217,189 +216,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private class PackageLoaderOption
-        {
-            public bool IncludePrerelease { get; set; }
-
-            public bool ShowUpdatesAvailable { get; set; }
-        }
-
-        private class PackageLoader : ILoader
-        {
-            // where to get the package list
-            private Func<int, CancellationToken, Task<IEnumerable<JObject>>> _loader;
-
-            private InstallationTarget _target;
-
-            private PackageLoaderOption _option;
-
-            private SourceRepository _source;
-
-            public PackageLoader(
-                Func<int, CancellationToken, Task<IEnumerable<JObject>>> loader,
-                SourceRepository source,
-                InstallationTarget target,
-                PackageLoaderOption option,
-                string searchText)
-            {
-                _loader = loader;
-                _target = target;
-                _option = option;
-                _source = source;
-
-                LoadingMessage = string.IsNullOrWhiteSpace(searchText) ?
-                    Resx.Resources.Text_Loading :
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        Resx.Resources.Text_Searching,
-                        searchText);
-            }
-
-            public string LoadingMessage
-            {
-                get;
-                private set;
-            }
-
-            public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
-            {
-                var results = await _loader(startIndex, ct);
-
-                List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
-                int resultCount = 0;
-                foreach (var package in results)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    ++resultCount;
-
-                    var searchResultPackage = new UiSearchResultPackage(_source);
-                    searchResultPackage.Id = package.Value<string>(Properties.PackageId);
-                    searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
-
-                    searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
-
-                    // get other versions
-                    var versionList = new List<NuGetVersion>();
-                    var versions = package.Value<JArray>(Properties.Versions);
-                    if (versions != null)
-                    {   
-                        if (versions[0].Type == JTokenType.String)
-                        {
-                            // TODO: this part should be removed once the new end point is up and running.
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                                .ToList();
-                        }
-                        else
-                        {
-                            versionList = versions
-                                .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
-                                .ToList();
-                        }
-
-                        if (!_option.IncludePrerelease)
-                        {
-                            // remove prerelease version if includePrelease is false
-                            versionList.RemoveAll(v => v.IsPrerelease);
-                        }
-                    }
-                    if (!versionList.Contains(searchResultPackage.Version))
-                    {
-                        versionList.Add(searchResultPackage.Version);
-                    }
-
-                    searchResultPackage.Versions = versionList;
-                    searchResultPackage.Status = PackageManagerControl.GetPackageStatus(
-                        searchResultPackage.Id,
-                        _target,
-                        searchResultPackage.Versions);
-
-                    // filter out prerelease version when needed.
-                    if (searchResultPackage.Version.IsPrerelease &&
-                       !_option.IncludePrerelease &&
-                        searchResultPackage.Status == PackageStatus.NotInstalled)
-                    {
-                        continue;
-                    }
-
-                    if (_option.ShowUpdatesAvailable &&
-                        searchResultPackage.Status != PackageStatus.UpdateAvailable)
-                    {
-                        continue;
-                    }
-
-                    searchResultPackage.Summary = package.Value<string>(Properties.Summary);
-                    if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
-                    {
-                        // summary is empty. Use its description instead.
-                        searchResultPackage.Summary = package.Value<string>(Properties.Description);
-                    }
-
-                    packages.Add(searchResultPackage);
-                }
-
-                ct.ThrowIfCancellationRequested();
-                return new LoadResult()
-                {
-                    Items = packages,
-                    HasMoreItems = resultCount == PageSize,
-                    NextStartIndex = startIndex + resultCount
-                };
-            }
-
-            // Get all versions of the package
-            private List<UiPackageMetadata> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
-            {
-                var retValue = new List<UiPackageMetadata>();
-                if (versions == null)
-                {
-                    return retValue;
-                }
-
-                // If repo is AggregateRepository, the package duplicates can be returned by
-                // FindPackagesById(), so Distinct is needed here to remove the duplicates.
-                foreach (var token in versions)
-                {
-                    Debug.Assert(token.Type == JTokenType.Object);
-                    JObject version = (JObject)token;
-                    var detailedPackage = DetailControlModel.CreateDetailedPackage(version);
-
-                    if (detailedPackage.Version.IsPrerelease &&
-                        !_option.IncludePrerelease &&
-                        detailedPackage.Version != searchResultVersion)
-                    {
-                        // don't include prerelease version if includePrerelease is false
-                        continue;
-                    }
-
-                    if (detailedPackage.Published <= Unpublished &&
-                        detailedPackage.Version != searchResultVersion)
-                    {
-                        // don't include unlisted package
-                        continue;
-                    }
-
-                    retValue.Add(detailedPackage);
-                }
-
-                return retValue;
-            }
-
-            private Uri GetUri(JObject json, string property)
-            {
-                if (json[property] == null)
-                {
-                    return null;
-                }
-                string str = json[property].ToString();
-                if (String.IsNullOrEmpty(str))
-                {
-                    return null;
-                }
-                return new Uri(str);
-            }
-        }
-
         private bool ShowInstalled
         {
             get
@@ -437,76 +253,29 @@ namespace NuGet.Client.VisualStudio.UI
 
         private void SearchPackageInActivePackageSource()
         {
-            var searchText = _searchControl.Text;
-            var supportedFrameworks = Target.GetSupportedFrameworks();
-
-            // search online
+            var searchText = _windowSearchHost.SearchQuery.SearchString;            
             var activeSource = _sourceRepoList.SelectedItem as PackageSource;
             var sourceRepository = Sources.CreateSourceRepository(activeSource);
 
-            PackageLoaderOption option = new PackageLoaderOption()
+            Filter filter = Filter.All;
+            if (Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem))
             {
-                IncludePrerelease = this.IncludePrerelease,
-                ShowUpdatesAvailable = this.ShowUpdatesAvailable
-            };
+                filter = Filter.Installed;
+            }
+            else if (Resx.Resources.Filter_UpdateAvailable.Equals(_filter.SelectedItem))
+            {
+                filter = Filter.UpdatesAvailable;
+            }
+            PackageLoaderOption option = new PackageLoaderOption(
+                filter,
+                IncludePrerelease);
 
-            if (ShowInstalled || ShowUpdatesAvailable)
-            {
-                // search installed packages
-                var loader = new PackageLoader(
-                    (startIndex, ct) =>
-                        Target.SearchInstalled(
-                            sourceRepository,
-                            searchText,
-                            startIndex,
-                            PageSize,
-                            ct),
-                    sourceRepository,
-                    Target,
-                    option,
-                    searchText);
-                _packageList.Loader = loader;
-            }
-            else
-            {
-                // search in active package source
-                if (activeSource == null)
-                {
-                    var loader = new PackageLoader(
-                        (startIndex, ct) =>
-                        {
-                            return Task.Factory.StartNew(() =>
-                            {
-                                return Enumerable.Empty<JObject>();
-                            });
-                        },
-                        sourceRepository,
-                        Target,
-                        option,
-                        searchText);
-                    _packageList.Loader = loader;
-                }
-                else
-                {
-                    var loader = new PackageLoader(
-                        (startIndex, ct) =>
-                            sourceRepository.Search(
-                            searchText,
-                            new SearchFilter()
-                            {
-                                SupportedFrameworks = supportedFrameworks,
-                                IncludePrerelease = option.IncludePrerelease
-                            },
-                            startIndex,
-                            PageSize,
-                            ct),
-                        sourceRepository,
-                        Target,
-                        option,
-                        searchText);
-                    _packageList.Loader = loader;
-                }
-            }
+            var loader = new PackageLoader(
+                sourceRepository,
+                Target,
+                option,
+                searchText);
+            _packageList.Loader = loader;
         }
 
         private void SettingsButtonClick(object sender, RoutedEventArgs e)
@@ -613,7 +382,7 @@ namespace NuGet.Client.VisualStudio.UI
         /// <param name="target">The installation target.</param>
         /// <param name="allVersions">List of all versions of the package.</param>
         /// <returns>The status of the package in the installation target.</returns>
-        private static PackageStatus GetPackageStatus(
+        public static PackageStatus GetPackageStatus(
             string packageId,
             InstallationTarget target,
             IEnumerable<NuGetVersion> allVersions)
@@ -733,9 +502,9 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.Show();
                 var executor = new ActionExecutor();
                 await Task.Run(
-                    () => 
-                    { 
-                        executor.ExecuteActions(actions, progressDialog); 
+                    () =>
+                    {
+                        executor.ExecuteActions(actions, progressDialog);
                     });
 
                 UpdatePackageStatus();
@@ -773,6 +542,65 @@ namespace NuGet.Client.VisualStudio.UI
             }
 
             SearchPackageInActivePackageSource();
+        }
+
+        private void ControlLoaded(object sender, RoutedEventArgs e)
+        {
+            _windowSearchHost.SetupSearch(this);
+            _windowSearchHost.IsVisible = true;
+        }
+
+        private void ControlUnloaded(object sender, RoutedEventArgs e)
+        {
+            _windowSearchHost.TerminateSearch();
+            RemoveRestoreBar();
+        }
+
+        public Guid Category
+        {
+            get
+            {
+                return Guid.Empty;
+            }
+        }
+
+        public void ClearSearch()
+        {
+            SearchPackageInActivePackageSource();
+        }
+
+        public IVsSearchTask CreateSearch(uint dwCookie, IVsSearchQuery pSearchQuery, IVsSearchCallback pSearchCallback)
+        {
+            SearchPackageInActivePackageSource();
+            return null;
+        }
+
+        public bool OnNavigationKeyDown(uint dwNavigationKey, uint dwModifiers)
+        {
+            // We are not interesting in intercepting navigation keys, so return "not handled"
+            return false;
+        }
+
+        public void ProvideSearchSettings(IVsUIDataSource pSearchSettings)
+        {
+            var settings = (SearchSettingsDataSource)pSearchSettings;
+            settings.ControlMinWidth = (uint)_searchControlParent.MinWidth;
+            settings.ControlMaxWidth = uint.MaxValue;
+        }
+
+        public bool SearchEnabled
+        {
+            get { return true; }
+        }
+
+        public IVsEnumWindowSearchFilters SearchFiltersEnum
+        {
+            get { return null; }
+        }
+
+        public IVsEnumWindowSearchOptions SearchOptionsEnum
+        {
+            get { return null; }
         }
     }
 }
