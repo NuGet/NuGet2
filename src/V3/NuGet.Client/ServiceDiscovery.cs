@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Diagnostics;
 
-namespace NuGet.ServiceDiscovery
+namespace NuGet.Client
 {
     // Let's not use NuGet's HttpClient for this.
     using HttpClient = System.Net.Http.HttpClient;
