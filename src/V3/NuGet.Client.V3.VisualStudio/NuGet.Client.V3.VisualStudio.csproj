@@ -33,6 +33,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Client.APIV3">
+      <HintPath>..\..\..\lib\NuGet.Client.APIV3.dll</HintPath>
+    </Reference>
     <Reference Include="NuGet.Versioning">
       <HintPath>..\..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
     </Reference>
@@ -58,10 +61,6 @@
     <ProjectReference Include="..\NuGet.Client.V3Core\NuGet.Client.V3Core.csproj">
       <Project>{b11c19b6-5671-4ff0-8a88-af08fc7ef15e}</Project>
       <Name>NuGet.Client.V3Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.V3\NuGet.Client.V3.csproj">
-      <Project>{72b86845-f376-4884-a0f2-ad3473ccebed}</Project>
-      <Name>NuGet.Client.V3</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
       <Project>{2de18bab-dda1-4f71-9000-641198758399}</Project>
