@@ -168,5 +168,11 @@ namespace NuGet.Client.Installation
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method can be expensive")]
         public abstract IEnumerable<InstallationTarget> GetAllTargetsRecursively();
+
+
+        public virtual void AddMetricsMetadata(JObject metricsRecord)
+        {
+           
+        }
     }
 }

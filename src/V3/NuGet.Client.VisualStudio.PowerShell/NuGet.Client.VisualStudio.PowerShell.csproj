@@ -88,6 +88,10 @@
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj">
+      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
+      <Name>NuGet.Client.V2.VisualStudio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Versioning\Versioning.csproj">
       <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
       <Name>Versioning</Name>
@@ -115,10 +119,6 @@
     <ProjectReference Include="..\NuGet.Client.BaseTypes\NuGet.Client.BaseTypes.csproj">
       <Project>{05b640ad-133d-4b36-8df0-036323d7873e}</Project>
       <Name>NuGet.Client.BaseTypes</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client.VisualStudio\NuGet.Client.VisualStudio.csproj">
-      <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
-      <Name>NuGet.Client.VisualStudio</Name>
     </ProjectReference>
     <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
       <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
