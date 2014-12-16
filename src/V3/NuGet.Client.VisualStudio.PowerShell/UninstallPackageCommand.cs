@@ -42,10 +42,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
             this.Identities = GetPackageIdentityForResolver();
-            base.PreprocessProjectAndIdentities();
+            base.Preprocess();
         }
 
         /// <summary>

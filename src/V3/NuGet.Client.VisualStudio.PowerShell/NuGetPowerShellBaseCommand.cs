@@ -38,6 +38,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private IVsPackageManagerFactory _packageManagerFactory;
         private ISolutionManager _solutionManager;
         private VsPackageManagerContext _VsContext;
+        private SourceRepository _activeSourceRepository;
         private readonly IHttpClientEvents _httpClientEvents;
         internal const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         internal const string PowerConsoleHostName = "Package Manager Host";
@@ -74,17 +75,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        internal VsSourceRepositoryManager RepositoryManager
-        {
-            get
-            {
-                return _repoManager;
-            }
-            set
-            {
-                _repoManager = value;
-            }
-        }
+        internal IEnumerable<VsProject> Projects { get; set; }
 
         internal IVsPackageManagerFactory PackageManagerFactory
         {
@@ -105,6 +96,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 return _solutionManager;
             }
         }
+
+        public SourceRepository ActiveSourceRepository { get; set; }
 
         internal bool IsSyncMode
         {
@@ -150,6 +143,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuGetBaseCmdlet.
         /// </summary>
         protected abstract void ProcessRecordCore();
+
+        protected void CheckForSolutionOpen()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+        }
 
         protected override void BeginProcessing()
         {
@@ -557,6 +558,25 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         #endregion Project APIs
+
+        /// <summary>
+        /// Get the active SourceRepository for current solution.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        protected SourceRepository GetActiveRepository(string source)
+        {
+            SourceRepository activeSourceRepository = null;
+            if (!string.IsNullOrEmpty(source))
+            {
+                activeSourceRepository = CreateRepositoryFromSource(source);
+            }
+            else if (_activeSourceRepository == null)
+            {
+                activeSourceRepository = _repoManager.ActiveRepository;
+            }
+            return activeSourceRepository;
+        }
 
         /// <summary>
         /// Create a package repository from the source by trying to resolve relative paths.

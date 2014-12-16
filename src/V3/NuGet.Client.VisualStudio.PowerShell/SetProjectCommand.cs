@@ -27,7 +27,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
         }
 
-        [Parameter(Mandatory = false, Position = 0, ParameterSetName = ParameterSetByName, ValueFromPipelineByPropertyName = true)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
         public string Name { get; set; }

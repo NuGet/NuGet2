@@ -19,31 +19,16 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 2. For parameters that are cut/modified, emit useful message for directing users to the new useage pattern.
     [Cmdlet(VerbsCommon.Get, "Package2", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
-    public class GetPackageCommand : NuGetPowerShellBaseCommand
+    public class GetPackageCommand : PackageListBaseCommand
     {
-        private readonly IProductUpdateService _productUpdateService;
-        private int _firstValue;
-        private bool _firstValueSpecified;
-
         public GetPackageCommand() :
-            base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
-                 ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-                 ServiceLocator.GetInstance<SVsServiceProvider>(),
-                 ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                 ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IHttpClientEvents>())
+            base()
         {
-            _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
 
         [Parameter(Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
-
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
-        [ValidateNotNullOrEmpty]
-        public string Source { get; set; }
 
         [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
         [ValidateNotNullOrEmpty]
@@ -60,31 +45,33 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter(ParameterSetName = "Updates")]
         public SwitchParameter AllVersions { get; set; }
 
-        [Parameter(ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName = "Updates")]
-        [Alias("Prerelease")]
-        public SwitchParameter IncludePrerelease { get; set; }
-
-        [Parameter]
-        [ValidateRange(0, Int32.MaxValue)]
-        public int First
+        protected override void BeginProcessing()
         {
-            get
+            UseRemoteSourceOnly =  ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+            UseRemoteSource = ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
+            CollapseVersions = !AllVersions.IsPresent && ListAvailable; 
+            base.BeginProcessing();
+        }
+
+        protected override void ProcessRecordCore()
+        {
+            // If Remote & Updates set of parameters are not specified
+            if (!UseRemoteSource)
             {
-                return _firstValue;
+                IEnumerable<JObject> installedPackages = FilterInstalledPackagesResults();
+                WritePackages(installedPackages);
             }
-            set
+            else
             {
-                _firstValue = value;
-                _firstValueSpecified = true;
+                // Connect to remote source to get list of available packages or updates
             }
         }
 
-        [Parameter]
-        [ValidateRange(0, Int32.MaxValue)]
-        public int Skip { get; set; }   
-
-        protected override void ProcessRecordCore()
+        /// <summary>
+        /// Filter the installed packages list based on Filter, Skip and First parameters
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<JObject> FilterInstalledPackagesResults()
         {
             IEnumerable<InstallationTarget> targets = PreprocessProjects();
             List<JObject> installedJObjects = GetInstalledJObjectInSolution(targets);
@@ -102,16 +89,17 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
             // Skip and then take
             installedPackages = installedPackages.Skip(Skip).ToList();
-            if (_firstValueSpecified)
+            if (First != 0)
             {
                 installedPackages = installedPackages.Take(First).ToList();
             }
-
-            // Get the PowerShellPackageView
-            var view = PowerShellPackage.GetPowerShellPackageView(installedPackages);
-            WriteObject(view, enumerateCollection: true);
+            return installedPackages;
         }
 
+        /// <summary>
+        /// Get current projects or all projects in the solution
+        /// </summary>
+        /// <returns></returns>
         protected IEnumerable<InstallationTarget> PreprocessProjects()
         {
             List<InstallationTarget> targets = new List<InstallationTarget>();
@@ -129,6 +117,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return targets;
         }
 
+        /// <summary>
+        /// Get all of the installed JObjects in the solution
+        /// </summary>
+        /// <param name="targets"></param>
+        /// <returns></returns>
         protected List<JObject> GetInstalledJObjectInSolution(IEnumerable<InstallationTarget> targets)
         {
             List<JObject> list = new List<JObject>();

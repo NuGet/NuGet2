@@ -31,6 +31,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 2. Add new path/package recognition feature
     /// 3. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
     /// 4. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
+    /// 5. Implement Add-BindingRedirect for V3
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
     public class InstallPackageCommand : PackageInstallBaseCommand
     {
@@ -64,9 +65,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return NetworkInterface.GetIsNetworkAvailable();
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
-            base.PreprocessProjectAndIdentities();
+            base.Preprocess();
             ParseUserInputForId();
             this.Identities = GetIdentitiesForResolver();
         }

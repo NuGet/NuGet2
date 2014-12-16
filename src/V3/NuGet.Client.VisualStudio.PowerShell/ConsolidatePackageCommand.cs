@@ -35,7 +35,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
             this.Projects = GetAllProjectsInSolution();
             this.Identities = GetConsolidatedPackageIdentityForResolver();

@@ -40,7 +40,38 @@ namespace NuGet.Client.VisualStudio.PowerShell
         // TODO List
         // 1. The unlisted packages are not filtered out. The plan is that Server will return unlisted packages.
         // Test EntityFramework 7.0.0-beta1 is not installed when specify -pre.
-        // 2. GetLastestVersionForPackage supports local repository such as UNC share.
+        public static IEnumerable<NuGetVersion> GetAllVersionsForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, NuGetVersion nugetVersion = null, bool isSafe = false)
+        {
+            int skip = 0;
+            int take = 30;
+            // Specify the search filter for prerelease and target framework
+            SearchFilter filter = new SearchFilter();
+            filter.IncludePrerelease = allowPrerelease;
+            filter.SupportedFrameworks = names;
+
+            IEnumerable<NuGetVersion> allVersions = Enumerable.Empty<NuGetVersion>();
+            try
+            {
+                Task<IEnumerable<JObject>> task = repo.Search(packageId, filter, skip, take, cancellationToken: CancellationToken.None);
+                IEnumerable<JObject> packages = task.Result;
+                // Get the package with the specific Id.
+                JObject package = packages.Where(p => string.Equals(p.Value<string>(Properties.PackageId), packageId, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+                // Get all version of the package
+                allVersions = packages.Select(p => NuGetVersion.Parse(p.Value<string>(Properties.Version)));
+            }
+            catch (Exception)
+            {
+                if (allVersions.IsEmpty())
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.UnknownPackage, packageId));
+                }
+            }
+            return allVersions;
+        }
+
         public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, NuGetVersion nugetVersion = null, bool isSafe = false)
         {
             int skip = 0;

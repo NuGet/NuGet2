@@ -29,7 +29,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public abstract class PackageActionBaseCommand : NuGetPowerShellBaseCommand
     {
         private PackageActionType _actionType;
-        private SourceRepository _activeSourceRepository;
 
         public PackageActionBaseCommand(
             IVsPackageSourceProvider packageSourceProvider,
@@ -64,26 +63,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public ActionResolver PackageActionResolver { get; set; }
 
-        public SourceRepository ActiveSourceRepository
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(Source))
-                {
-                    _activeSourceRepository = CreateRepositoryFromSource(Source);
-                }
-                else if (_activeSourceRepository == null)
-                {
-                    _activeSourceRepository = RepositoryManager.ActiveRepository;
-                }
-                return _activeSourceRepository;
-            }
-            set
-            {
-                _activeSourceRepository = value;
-            }
-        }
-
         public IPackageRepository V2LocalRepository
         {
             get
@@ -92,8 +71,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 return packageManager.LocalRepository;
             }
         }
-
-        public IEnumerable<VsProject> Projects { get; set; }
 
         public IEnumerable<PackageIdentity> Identities { get; set; }
 
@@ -127,21 +104,13 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return packageRef;
         }
 
-        private void CheckForSolutionOpen()
-        {
-            if (!SolutionManager.IsSolutionOpen)
-            {
-                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
-            }
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected override void ProcessRecordCore()
         {
             try
             {
                 CheckForSolutionOpen();
-                PreprocessProjectAndIdentities();
+                Preprocess();
                 ExecutePackageActions();
             }
             catch (Exception ex)
@@ -155,8 +124,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected virtual void PreprocessProjectAndIdentities()
+        protected virtual void Preprocess()
         {
+            this.ActiveSourceRepository = GetActiveRepository(Source);
             VsProject vsProject = GetProject(true);
             this.Projects = new List<VsProject> { vsProject };
         }

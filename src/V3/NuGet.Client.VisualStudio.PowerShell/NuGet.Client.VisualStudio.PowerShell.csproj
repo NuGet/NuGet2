@@ -77,6 +77,7 @@
     <Compile Include="NuGetPowerShellBaseCommand.cs" />
     <Compile Include="OpenPackagePageCommand.cs" />
     <Compile Include="PackageInstallBaseCommand.cs" />
+    <Compile Include="PackageListBaseCommand.cs" />
     <Compile Include="PackageRepositoryHelper.cs" />
     <Compile Include="PackageActionBaseCommand.cs" />
     <Compile Include="PackagesConfigReader.cs" />

@@ -84,7 +84,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
         }
 
-        protected override void PreprocessProjectAndIdentities()
+        protected override void Preprocess()
         {
             if (!_projectSpecified)
             {
@@ -92,7 +92,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
             else
             {
-                base.PreprocessProjectAndIdentities();
+                base.Preprocess();
             }
         }
 
