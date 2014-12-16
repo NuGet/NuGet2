@@ -18,15 +18,29 @@ namespace NuGet.Client.VisualStudio.UI
             : base(target, searchResultPackage)
         {
             Debug.Assert(!target.IsSolution);
+            UpdateInstalledVersion();
+        }
 
-            var installed = _target.InstalledPackages.GetInstalledPackage(searchResultPackage.Id);
+        private void UpdateInstalledVersion()
+        {
+            var installed = _target.InstalledPackages.GetInstalledPackage(_searchResultPackage.Id);
             if (installed != null)
             {
                 InstalledVersion = string.Format(
                     CultureInfo.CurrentCulture,
                     Resx.Resources.Text_InstalledVersion,
-                    installed.Identity.Version.ToNormalizedString());         
+                    installed.Identity.Version.ToNormalizedString());
             }
+            else
+            {
+                InstalledVersion = null;
+            }
+        }
+
+        public override void Refresh()
+        {
+            base.Refresh();
+            UpdateInstalledVersion();
         }
 
         protected override bool CanUpdate()
@@ -107,10 +121,19 @@ namespace NuGet.Client.VisualStudio.UI
             // no-op
         }
 
+        private string _installedVersion;
+
         public string InstalledVersion
         {
-            get;
-            private set;
+            get
+            {
+                return _installedVersion;
+            }
+            private set
+            {
+                _installedVersion = value;
+                OnPropertyChanged("InstalledVersion");
+            }
         }
     }
 }
