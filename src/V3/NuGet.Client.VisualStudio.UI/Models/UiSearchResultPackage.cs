@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using NuGet.Client;
+using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using NuGet.Versioning;
-using NuGet.Client;
 
 namespace NuGet.Client.VisualStudio.UI
 {
