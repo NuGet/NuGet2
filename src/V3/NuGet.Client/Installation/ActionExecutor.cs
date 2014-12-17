@@ -18,9 +18,27 @@ namespace NuGet.Client.Installation
         void Rollback(NewPackageAction action, IExecutionContext context); // Rollbacks should not be cancelled, it's a Bad Idea(TM)
     }
 
+    public class UserAction
+    {
+        public UserAction(PackageActionType action, PackageIdentity package)
+        {
+            Action = action;
+            PackageIdentity = package;
+        }
+
+        public PackageActionType Action { get; private set; }
+
+        public PackageIdentity PackageIdentity { get; private set; }
+    }
+
     // TODO: need to consider which actions can be executed async and how.
     public class ActionExecutor
     {
+        public static readonly string ReadmeFileName = "readme.txt";
+
+        private UserAction _userAction;
+        private string _readmeFilePath;
+
         private static readonly Dictionary<PackageActionType, IActionHandler> _actionHandlers = new Dictionary<PackageActionType, IActionHandler>()
         {
             { PackageActionType.Download, new DownloadActionHandler() },
@@ -29,15 +47,27 @@ namespace NuGet.Client.Installation
             { PackageActionType.Purge, new PurgeActionHandler() },
         };
 
+        /// <summary>
+        /// Executes actions in response to the user action.
+        /// </summary>
+        /// <param name="actions">The actions to execute.</param>
+        /// <param name="context">The context in which to execute the actions.</param>
+        /// <param name="userAction">The user action from which <paramref name="actions"/> are resolved.</param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By defintion we want to catch all exceptions")]
-        public void ExecuteActions(IEnumerable<NewPackageAction> actions, IExecutionContext context)
+        public void ExecuteActions(
+            IEnumerable<NewPackageAction> actions,
+            IExecutionContext context,
+            UserAction userAction = null)
         {
             // Capture actions we've already done so we can roll them back in case of an error
             var executedActions = new List<NewPackageAction>();
 
+            _userAction = userAction;
             ExceptionDispatchInfo capturedException = null;
             try
             {
+                _readmeFilePath = null;
+
                 foreach (var action in actions)
                 {
                     IActionHandler handler;
@@ -59,6 +89,13 @@ namespace NuGet.Client.Installation
                         handler.Execute(action, context, CancellationToken.None);
                         executedActions.Add(action);
                     }
+
+                    UpdateReadmeFilePath(action);
+                }
+
+                if (_readmeFilePath != null)
+                {
+                    context.OpenFile(_readmeFilePath);
                 }
             }
             catch (Exception ex)
@@ -72,6 +109,47 @@ namespace NuGet.Client.Installation
                 Rollback(executedActions, context);
                 capturedException.Throw();
             }
+        }
+
+        private void UpdateReadmeFilePath(NewPackageAction action)
+        {
+            if (_userAction == null || _userAction.Action != PackageActionType.Install)
+            {
+                // display readme file only when installing packages
+                return;
+            }
+
+            // look for readme file
+            if (action.PackageIdentity.Equals(_userAction.PackageIdentity) &&
+                action.ActionType == PackageActionType.Install)
+            {
+                _readmeFilePath = GetReadmeFilePath(action);
+            }
+        }
+
+        private string GetReadmeFilePath(NewPackageAction action)
+        {
+            // Get the package manager and project manager from the target
+            var packageManager = action.Target.TryGetFeature<IPackageManager>();
+            if (packageManager == null)
+            {
+                return null;
+            }
+
+            // Get the package from the shared repository
+            var package = packageManager.LocalRepository.FindPackage(
+                action.PackageIdentity.Id, CoreConverters.SafeToSemVer(action.PackageIdentity.Version));
+
+            if (package != null &&
+                package.GetFiles().Any(f => f.Path.Equals(ReadmeFileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var packageInstalledPath = packageManager.PathResolver.GetInstallPath(package);
+                return System.IO.Path.Combine(
+                    packageInstalledPath,
+                    ReadmeFileName);
+            }
+
+            return null;
         }
 
         protected virtual void Rollback(ICollection<NewPackageAction> executedActions, IExecutionContext context)

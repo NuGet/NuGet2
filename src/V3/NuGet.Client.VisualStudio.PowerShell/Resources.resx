@@ -235,9 +235,9 @@
     <value>Package with the Id '{0}' is not installed to the current project.</value>
   </data>
   <data name="Cmdlet_FailToParsePackages" xml:space="preserve">
-    <value>Fail to parse package identities from file {0} with exception: {1}</value>
+    <value>Failed to parse package identities from file {0} with exception: {1}</value>
   </data>
   <data name="Cmdlet_FailToParseVersion" xml:space="preserve">
-    <value>Fail to parse the input of Version parameter: {0} to a valid Semantic version. </value>
+    <value>Failed to parse the input of Version parameter: {0} to a valid Semantic version. </value>
   </data>
 </root>

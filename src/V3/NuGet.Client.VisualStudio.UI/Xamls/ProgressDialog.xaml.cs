@@ -200,5 +200,11 @@ namespace NuGet.Client.VisualStudio.UI
             var executor = new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>());
             executor.ExecuteScript(packageInstallPath, scriptRelativePath, package, target, this);
         }
+
+        public void OpenFile(string fullPath)
+        {
+            var commonOperations = ServiceLocator.GetInstance<IVsCommonOperations>();
+            commonOperations.OpenFile(fullPath);
+        }
     }
 }
