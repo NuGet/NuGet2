@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    [Export(typeof(V2Resource))]
+ 
     public class VsV2SearchResource : V2Resource, IVsSearch
     {
         private readonly string _description = "Represents the search resource for a V2 server endpoint.";

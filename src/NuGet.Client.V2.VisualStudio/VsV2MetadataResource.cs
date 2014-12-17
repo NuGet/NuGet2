@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    [Export(typeof(V2Resource))]
+    
     public class VsV2MetadataResource : V2Resource,IVsMetadata
     {
         public VsV2MetadataResource() : base(null, null) { }
