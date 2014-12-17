@@ -85,6 +85,8 @@ namespace NuGet.Client
         /// to expose IPackage.</param>
         /// <param name="target">The target.</param>
         void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, InstallationTarget target);
+
+        void OpenFile(string fullPath);
     }
 
     public class NullExecutionContext : IExecutionContext
@@ -110,6 +112,11 @@ namespace NuGet.Client
         }
 
         public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, InstallationTarget target)
+        {
+            // no-op
+        }
+
+        public void OpenFile(string fullPath)
         {
             // no-op
         }

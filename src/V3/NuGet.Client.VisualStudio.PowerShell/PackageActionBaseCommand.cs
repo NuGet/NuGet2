@@ -234,8 +234,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 else
                 {
+                    var userAction = new UserAction(_actionType, identity);
                     ActionExecutor executor = new ActionExecutor();
-                    executor.ExecuteActions(actions, this);
+                    executor.ExecuteActions(actions, this, userAction);
                 }
             }
             // TODO: Consider adding the rollback behavior if exception is thrown.

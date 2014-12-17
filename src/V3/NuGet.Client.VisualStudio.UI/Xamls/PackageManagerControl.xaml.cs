@@ -498,13 +498,14 @@ namespace NuGet.Client.VisualStudio.UI
                 }
 
                 // Create the executor and execute the actions
+                var userAction = detailControl.GetUserAction();
                 progressDialog.FileConflictAction = detailControl.FileConflictAction;
                 progressDialog.Show();
                 var executor = new ActionExecutor();
                 await Task.Run(
-                    () =>
-                    {
-                        executor.ExecuteActions(actions, progressDialog);
+                    () => 
+                    { 
+                        executor.ExecuteActions(actions, progressDialog, userAction); 
                     });
 
                 UpdatePackageStatus();

@@ -49,6 +49,18 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        public UserAction GetUserAction()
+        {
+            var model = (DetailControlModel)DataContext;
+            var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
+                PackageActionType.Uninstall :
+                PackageActionType.Install;
+
+            return new UserAction(
+                action,
+                new PackageIdentity(model.Id, model.SelectedVersion.Version));
+        }
+
         public async Task<IEnumerable<PackageAction>> ResolveActionsAsync()
         {
             var model = (DetailControlModel)DataContext;

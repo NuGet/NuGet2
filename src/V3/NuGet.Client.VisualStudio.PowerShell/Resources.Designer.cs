@@ -79,7 +79,7 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fail to parse package identities from file {0} with exception: {1}.
+        ///   Looks up a localized string similar to Failed to parse package identities from file {0} with exception: {1}.
         /// </summary>
         internal static string Cmdlet_FailToParsePackages {
             get {
@@ -88,7 +88,7 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fail to parse the input of Version parameter: {0} to a valid Semantic version. .
+        ///   Looks up a localized string similar to Failed to parse the input of Version parameter: {0} to a valid Semantic version. .
         /// </summary>
         internal static string Cmdlet_FailToParseVersion {
             get {

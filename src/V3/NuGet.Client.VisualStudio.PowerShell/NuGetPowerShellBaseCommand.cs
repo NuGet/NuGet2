@@ -1,10 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell;
-using NuGet.Client.ProjectSystem;
-using NuGet.PowerShell.Commands;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
-using NuGetConsole.Host.PowerShell.Implementation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,6 +10,12 @@ using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
+using Microsoft.VisualStudio.Shell;
+using NuGet.Client.ProjectSystem;
+using NuGet.PowerShell.Commands;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
+using NuGetConsole.Host.PowerShell.Implementation;
 
 #if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;
@@ -66,7 +66,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _httpClientEvents = clientEvents;
         }
 
-        internal VsSolution Solution 
+        internal VsSolution Solution
         {
             get
             {
@@ -412,6 +412,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #endregion Logging
 
         #region Project APIs
+
         /// <summary>
         /// Return all projects in the solution matching the provided names. Wildcards are supported.
         /// This method will automatically generate error records for non-wildcarded project names that
@@ -627,6 +628,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 psVariable.Remove("__package");
                 psVariable.Remove("__project");
             }
+        }
+
+        public void OpenFile(string fullPath)
+        {
+            var commonOperations = ServiceLocator.GetInstance<IVsCommonOperations>();
+            commonOperations.OpenFile(fullPath);
         }
     }
 
