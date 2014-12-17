@@ -43,7 +43,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter(ParameterSetName = "Updates")]
         public SwitchParameter AllVersions { get; set; }
 
-        protected override void BeginProcessing()
+        protected override void Preprocess()
         {
             base.TargetProjectName = this.ProjectName;
             UseRemoteSourceOnly =  ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
@@ -53,7 +53,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 this.ActiveSourceRepository = GetActiveRepository(Source);
             }
-            base.BeginProcessing();
         }
 
         protected override void ProcessRecordCore()
@@ -67,24 +66,34 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 CheckForSolutionOpen();
                 packagesToDisplay = FilterInstalledPackagesResults(Filter, Skip, First);
                 WritePackages(packagesToDisplay, VersionType.single);
+                return;
             }
             else
             {
-                Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, "Find-Package -Id <string> [-Version <string>] [-ListAll] [-Latest]");
-
                 // Connect to remote source to get list of available packages or updates
                 if (First == 0)
                 {
                     First = PageSize;
                 }
 
+                // Find avaiable packages from the online sources and not taking targetframeworks into account. 
                 if (UseRemoteSourceOnly)
                 {
+                    string replacementText = string.Empty;
+                    if (!CollapseVersions)
+                    {
+                        replacementText = "Find-Package <-Id> -ListAll";
+                    }
+                    else
+                    {
+                        replacementText = "Find-Package <-Id>";
+                    }
+                    Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, replacementText);
                     packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
                 }
                 else
                 {
-                    // Get package updates from the remote source
+                    // Get package updates from the remote source and take targetframeworks into account.
                     CheckForSolutionOpen();
                     IEnumerable<JObject> updates = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
                     packagesToDisplay = updates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));

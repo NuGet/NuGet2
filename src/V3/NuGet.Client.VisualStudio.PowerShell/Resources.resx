@@ -223,10 +223,7 @@
     <value>None</value>
   </data>
   <data name="Cmdlet_CommandObsolete" xml:space="preserve">
-    <value>This Command/Parameter combination has been deprecated and will be removed in the next release. Please consider using the new command that replaces it: '{0}'</value>
-  </data>
-  <data name="Cmdlet_FailToSetProject" xml:space="preserve">
-    <value>Failed to set {0} as the Default Project for PowerShell Console. </value>
+    <value>This Command/Parameter combination has been deprecated and will be removed in the next release. Please consider using the new command that replaces it: '{0}'.</value>
   </data>
   <data name="Cmdlet_ProjectSet" xml:space="preserve">
     <value>The 'Default project' has been successfully set as '{0}'.</value>
@@ -239,5 +236,11 @@
   </data>
   <data name="Cmdlet_FailToParseVersion" xml:space="preserve">
     <value>Failed to parse the input of Version parameter: {0} to a valid Semantic version. </value>
+  </data>
+  <data name="Cmdlet_PackageSourceNotFound" xml:space="preserve">
+    <value>Package source '{0}' is not matching any of the enabled package sources.</value>
+  </data>
+  <data name="Cmdlet_PackageSourceSet" xml:space="preserve">
+    <value>The 'Package source' has been successfully set as '{0}'.</value>
   </data>
 </root>

@@ -61,7 +61,7 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This Command/Parameter combination has been deprecated and will be removed in the next release. Please consider using the new command that replaces it: &apos;{0}&apos;.
+        ///   Looks up a localized string similar to This Command/Parameter combination has been deprecated and will be removed in the next release. Please consider using the new command that replaces it: &apos;{0}&apos;..
         /// </summary>
         internal static string Cmdlet_CommandObsolete {
             get {
@@ -93,15 +93,6 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         internal static string Cmdlet_FailToParseVersion {
             get {
                 return ResourceManager.GetString("Cmdlet_FailToParseVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to set {0} as the Default Project for PowerShell Console. .
-        /// </summary>
-        internal static string Cmdlet_FailToSetProject {
-            get {
-                return ResourceManager.GetString("Cmdlet_FailToSetProject", resourceCulture);
             }
         }
         
@@ -345,6 +336,24 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         internal static string Cmdlet_PackageOperation {
             get {
                 return ResourceManager.GetString("Cmdlet_PackageOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package source &apos;{0}&apos; is not matching any of the enabled package sources..
+        /// </summary>
+        internal static string Cmdlet_PackageSourceNotFound {
+            get {
+                return ResourceManager.GetString("Cmdlet_PackageSourceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;Package source&apos; has been successfully set as &apos;{0}&apos;..
+        /// </summary>
+        internal static string Cmdlet_PackageSourceSet {
+            get {
+                return ResourceManager.GetString("Cmdlet_PackageSourceSet", resourceCulture);
             }
         }
         

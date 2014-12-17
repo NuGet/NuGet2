@@ -222,6 +222,38 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return latestJObject;
         }
 
+        public static JObject GetPackageByIdAndVersion(SourceRepository sourceRepository, string packageId, string version, bool allowPrereleaseVersions)
+        {
+            NuGetVersion nVersion = GetNuGetVersionFromString(version);
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            Task<JObject> task = sourceRepository.GetPackageMetadata(packageId, nVersion);
+            JObject package = task.Result;
+            if (package == null)
+            {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.UnknownPackageSpecificVersion, packageId, version));
+            }
+            return package;
+        }
+
+        public static NuGetVersion GetNuGetVersionFromString(string version)
+        {
+            NuGetVersion nVersion;
+            bool success = NuGetVersion.TryParse(version, out nVersion);
+            if (!success)
+            {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    Resources.Cmdlet_FailToParseVersion, version));
+            }
+            return nVersion;
+        }
+
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>

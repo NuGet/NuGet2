@@ -598,6 +598,38 @@ namespace NuGet.Client.VisualStudio.PowerShell
         #endregion Project APIs
 
         /// <summary>
+        /// This method will set the active package source of PowerShell Console by source name.
+        /// </summary>
+        /// <param name="projectNames">The project name to be set to.</param>
+        /// <returns>Boolean indicating success or failure.</returns>
+        protected bool SetPackageSourceByName(string sourceName)
+        {
+            var host = PowerShellHostService.CreateHost(PowerConsoleHostName, false);
+            var allSourceNames = host.GetPackageSources().ToList();
+            string match = allSourceNames.Where(p => string.Equals(p, sourceName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            if (string.IsNullOrEmpty(match))
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_PackageSourceNotFound, sourceName);
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    host.ActivePackageSource = match;
+                    this.ActiveSourceRepository = GetActiveRepository(match);
+                    Log(Client.MessageLevel.Info, Resources.Cmdlet_PackageSourceSet, match);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteError(ex);
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// Get the active SourceRepository for current solution.
         /// </summary>
         /// <param name="source"></param>
@@ -642,17 +674,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
 
             return null;
-        }
-
-        protected NuGetVersion GetNuGetVersionFromString(string version)
-        {
-            NuGetVersion nVersion;
-            bool success = NuGetVersion.TryParse(version, out nVersion);
-            if (!success)
-            {
-                Log(MessageLevel.Error, Resources.Cmdlet_FailToParseVersion, version);
-            }
-            return nVersion;
         }
 
         public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object packageObject, Installation.InstallationTarget target)

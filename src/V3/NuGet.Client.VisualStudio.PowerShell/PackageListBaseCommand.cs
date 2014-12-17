@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
-    public class PackageListBaseCommand : NuGetPowerShellBaseCommand
+    public abstract class PackageListBaseCommand : NuGetPowerShellBaseCommand
     {
         private bool _hasConnectedToHttpSource;
         private IProductUpdateService _productUpdateService;
@@ -60,10 +60,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected virtual bool CollapseVersions { get; set; }
 
-        protected virtual void Preprocess()
-        {
-            this.ActiveSourceRepository = GetActiveRepository(Source);
-        }
+        protected abstract void Preprocess();
 
         protected override void ProcessRecordCore()
         {
@@ -118,14 +115,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     // Find packages update
                     JObject update = PowerShellPackage.GetLastestJObjectForPackage(ActiveSourceRepository, identity, entry.Key, allowPrerelease, false);
-                    NuGetVersion version = GetNuGetVersionFromString(update.Value<string>(Properties.Version));
+                    NuGetVersion version = PowerShellPackage.GetNuGetVersionFromString(update.Value<string>(Properties.Version));
                     if (version > identity.Version)
                     {
                         packages.Add(update);
                     }
                 }
             }
-            return packages;
+            return packages.Skip(skip).Take(take).ToList();
         }
 
         /// <summary>

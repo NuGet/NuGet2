@@ -163,7 +163,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // If Version is specified by commandline parameter
             if (!string.IsNullOrEmpty(Version))
             {
-                NuGetVersion nVersion = GetNuGetVersionFromString(Version);
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
                 PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
                 if (!_readFromDirectPackagePath)
                 {

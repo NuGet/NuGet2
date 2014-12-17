@@ -69,6 +69,7 @@
       <Link>ProgressActivityIds.cs</Link>
     </Compile>
     <Compile Include="AddBindingRedirectCommand.cs" />
+    <Compile Include="SetSourceCommand.cs" />
     <Compile Include="SyncPackageCommand.cs" />
     <Compile Include="FindPackageCommand.cs" />
     <Compile Include="GetPackageCommand.cs" />
