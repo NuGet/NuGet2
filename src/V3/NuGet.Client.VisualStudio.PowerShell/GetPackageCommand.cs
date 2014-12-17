@@ -17,6 +17,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : PackageListBaseCommand
     {
+        private const int PageSize = 30;
+
         public GetPackageCommand() :
             base()
         {
@@ -72,7 +74,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // Connect to remote source to get list of available packages or updates
                 if (First == 0)
                 {
-                    First = Int32.MaxValue;
+                    First = PageSize;
                 }
 
                 if (UseRemoteSourceOnly)
