@@ -3,6 +3,7 @@ using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace NuGet.Client.VisualStudio.PowerShell
@@ -31,21 +32,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter]
         public SwitchParameter RemoveDependencies { get; set; }
-        
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            // For uninstall, use local repository for better performance
-            VsProject proj = GetProject(true);
-            SourceRepository localRepo = proj.TryGetFeature<SourceRepository>();
-            this.ActiveSourceRepository = localRepo;
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
 
         protected override void Preprocess()
         {
-            this.Identities = GetPackageIdentityForResolver();
             base.Preprocess();
+            VsProject proj = this.Projects.FirstOrDefault();
+            SourceRepository localRepo = proj.TryGetFeature<SourceRepository>();
+            this.ActiveSourceRepository = localRepo;
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
+            this.Identities = GetPackageIdentityForResolver();
         }
 
         /// <summary>

@@ -114,7 +114,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected virtual void Preprocess()
         {
-            this.ActiveSourceRepository = GetActiveRepository(Source);
             VsProject vsProject = GetProject(true);
             this.Projects = new List<VsProject> { vsProject };
         }

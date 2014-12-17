@@ -54,12 +54,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _isNetworkAvailable = isNetworkAvailable();
         }
 
-        protected override void BeginProcessing()
-        {
-            FallbackToCacheIfNeccessary();
-            base.BeginProcessing();
-        }
-
         private static bool isNetworkAvailable()
         {
             return NetworkInterface.GetIsNetworkAvailable();
@@ -67,6 +61,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void Preprocess()
         {
+            FallbackToCacheIfNeccessary();
+            // Process active repository and projects
             base.Preprocess();
             ParseUserInputForId();
             this.Identities = GetIdentitiesForResolver();

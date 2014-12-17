@@ -35,14 +35,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public IVsPackageSourceProvider PackageSourceProvider { get; set; }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
-
         protected override void Preprocess()
         {
+            this.ActiveSourceRepository = GetActiveRepository(Source);
+            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
             base.Preprocess();
         }
 

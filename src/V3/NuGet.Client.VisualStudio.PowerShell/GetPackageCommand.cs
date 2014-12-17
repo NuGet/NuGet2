@@ -86,10 +86,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     IEnumerable<JObject> updates = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
                     packagesToDisplay = updates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
                 }
-
-                // Output the list of package results to PowerShell console.
-                WritePackages(packagesToDisplay);
             }
+
+            // Output the list of package results to PowerShell console.
+            WritePackages(packagesToDisplay);
         }
     }
 }

@@ -16,13 +16,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public class FindPackageCommand : PackageListBaseCommand
     {
         private const int MaxReturnedPackages = 30;
-        private IProductUpdateService _productUpdateService;
-        private bool _hasConnectedToHttpSource;
 
         public FindPackageCommand()
             : base()
         {
-            _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -58,15 +55,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             base.EndProcessing();
             CheckForNuGetUpdate();
-        }
-
-        private void CheckForNuGetUpdate()
-        {
-            _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
-            if (_productUpdateService != null && _hasConnectedToHttpSource)
-            {
-                _productUpdateService.CheckForAvailableUpdateAsync();
-            }
         }
     }
 }

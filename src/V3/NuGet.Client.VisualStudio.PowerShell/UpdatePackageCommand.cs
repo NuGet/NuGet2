@@ -78,21 +78,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter]
         public SwitchParameter Safe { get; set; }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
-        }
-
         protected override void Preprocess()
         {
+            base.Preprocess();
             if (!_projectSpecified)
             {
                 this.Projects = GetAllProjectsInSolution();
-            }
-            else
-            {
-                base.Preprocess();
             }
         }
 

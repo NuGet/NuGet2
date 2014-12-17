@@ -15,6 +15,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public class PackageListBaseCommand : NuGetPowerShellBaseCommand
     {
         private bool _hasConnectedToHttpSource;
+        private IProductUpdateService _productUpdateService;
 
         public PackageListBaseCommand()
             : base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -24,6 +25,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>())
         {
+            _productUpdateService = ServiceLocator.GetInstance<IProductUpdateService>();
         }
                 
         [Parameter(Position = 2, ParameterSetName = "Remote")]
@@ -44,8 +46,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [ValidateRange(0, Int32.MaxValue)]
         public int Skip { get; set; }
 
-        public IEnumerable<VsProject> Projects { get; set; }
-
         public string TargetProjectName { get; set; }
 
         /// <summary>
@@ -63,6 +63,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected virtual void Preprocess()
         {
             this.ActiveSourceRepository = GetActiveRepository(Source);
+        }
+
+        protected override void ProcessRecordCore()
+        {
         }
 
         /// <summary>
@@ -207,6 +211,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
             // Get the PowerShellPackageView
             var view = PowerShellPackage.GetPowerShellPackageView(packages);
             WriteObject(view, enumerateCollection: true);
+        }
+
+        protected void CheckForNuGetUpdate()
+        {
+            _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
+            if (_productUpdateService != null && _hasConnectedToHttpSource)
+            {
+                _productUpdateService.CheckForAvailableUpdateAsync();
+            }
         }
     }
 }

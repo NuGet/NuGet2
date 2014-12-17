@@ -45,7 +45,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private IVsPackageManagerFactory _packageManagerFactory;
         private ISolutionManager _solutionManager;
         private VsPackageManagerContext _VsContext;
-        private SourceRepository _activeSourceRepository;
         private readonly IHttpClientEvents _httpClientEvents;
         internal const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         internal const string PowerConsoleHostName = "Package Manager Host";
@@ -610,7 +609,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 activeSourceRepository = CreateRepositoryFromSource(source);
             }
-            else if (_activeSourceRepository == null)
+            else if (activeSourceRepository == null)
             {
                 activeSourceRepository = _repoManager.ActiveRepository;
             }

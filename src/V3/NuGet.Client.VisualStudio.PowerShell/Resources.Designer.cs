@@ -61,7 +61,7 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This Command/Parameter combination has been deprecated and will be removed in the next release. The new command that replaces it is {0}..
+        ///   Looks up a localized string similar to This Command/Parameter combination has been deprecated and will be removed in the next release. Please consider using the new command that replaces it: &apos;{0}&apos;.
         /// </summary>
         internal static string Cmdlet_CommandObsolete {
             get {

@@ -29,7 +29,18 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 PowerShellPackage package = new PowerShellPackage();
                 package.Id = json.Value<string>(Properties.PackageId);
-                package.Version = NuGetVersion.Parse(json.Value<string>(Properties.Version));
+
+                // TODO: Update the logic here.
+                NuGetVersion nVersion = NuGetVersion.Parse(json.Value<string>(Properties.LatestVersion));
+                if (nVersion == null)
+                {
+                    nVersion = NuGetVersion.Parse(json.Value<string>(Properties.Version));
+                }
+                else
+                {
+                    package.Version = NuGetVersion.Parse(nVersion.ToNormalizedString());
+                }
+
                 package.Description = json.Value<string>(Properties.Description);
                 if (string.IsNullOrEmpty(package.Description))
                 {
@@ -97,8 +108,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 Task<IEnumerable<JObject>> task = repo.Search(packageId, filter, skip, take, cancellationToken: CancellationToken.None);
                 packages = task.Result;
-                // Get the package with the specific Id.
-                //packages = packages.Where(string.Equals(p => p.Value<string>(Properties.LatestVersion));
             }
             catch (Exception)
             {
