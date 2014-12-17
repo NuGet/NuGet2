@@ -66,6 +66,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 CheckForSolutionOpen();
                 packagesToDisplay = FilterInstalledPackagesResults(Filter, Skip, First);
+                WritePackages(packagesToDisplay, VersionType.single);
             }
             else
             {
@@ -79,19 +80,26 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
                 if (UseRemoteSourceOnly)
                 {
-                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First, CollapseVersions);
+                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
                 }
-                // Get package updates from the remote source
                 else
                 {
+                    // Get package updates from the remote source
                     CheckForSolutionOpen();
                     IEnumerable<JObject> updates = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
                     packagesToDisplay = updates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
                 }
-            }
 
-            // Output the list of package results to PowerShell console.
-            WritePackages(packagesToDisplay);
+                // Output list of packages to the PowerShell Console
+                if (!CollapseVersions)
+                {
+                    WritePackages(packagesToDisplay, VersionType.all);
+                }
+                else
+                {
+                    WritePackages(packagesToDisplay, VersionType.latest);
+                }
+            }
         }
     }
 }

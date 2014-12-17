@@ -98,17 +98,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return installedPackages;
         }
 
-        protected IEnumerable<JObject> GetPackagesFromRemoteSource(string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take, bool collapseVersions)
+        protected IEnumerable<JObject> GetPackagesFromRemoteSource(string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take)
         {
             IEnumerable<JObject> packages = Enumerable.Empty<JObject>();
-            if (collapseVersions)
-            {
-                packages = PowerShellPackage.GetLastestPackages(ActiveSourceRepository, packageId, names, allowPrerelease, skip, take);
-            }
-            else
-            {
-                packages = PowerShellPackage.GetAllVersionsForPackage(ActiveSourceRepository, packageId, names, allowPrerelease, skip, take);
-            }
+            packages = PowerShellPackage.GetPackageVersions(ActiveSourceRepository, packageId, names, allowPrerelease, skip, take);
             return packages;
         }
 
@@ -206,10 +199,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return projects;
         }
 
-        protected void WritePackages(IEnumerable<JObject> packages)
+        protected void WritePackages(IEnumerable<JObject> packages, VersionType versionType)
         {
             // Get the PowerShellPackageView
-            var view = PowerShellPackage.GetPowerShellPackageView(packages);
+            var view = PowerShellPackage.GetPowerShellPackageView(packages, versionType);
             WriteObject(view, enumerateCollection: true);
         }
 

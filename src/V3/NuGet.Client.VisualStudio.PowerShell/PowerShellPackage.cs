@@ -14,31 +14,63 @@ namespace NuGet.Client.VisualStudio.PowerShell
     // TODO List
     // 1. The unlisted packages are not filtered out. The plan is that Server will return unlisted packages.
     // Test EntityFramework 7.0.0-beta1 is not installed when specify -pre.
+    // 2. Should we add Title to the display? If so, need to embed title field in the search result.
     public class PowerShellPackage
     {
         public string Id { get; set; }
 
-        public NuGetVersion Version { get; set; }
+        public List<NuGetVersion> Version { get; set; }
 
         public string Description { get; set; }
 
-        public static List<PowerShellPackage> GetPowerShellPackageView(IEnumerable<JObject> metadata)
+        /// <summary>
+        /// Get the view of PowerShell Package. Use for Get-Package command. 
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <param name="versionType"></param>
+        /// <returns></returns>
+        public static List<PowerShellPackage> GetPowerShellPackageView(IEnumerable<JObject> metadata, VersionType versionType)
         {
             List<PowerShellPackage> view = new List<PowerShellPackage>();
             foreach (JObject json in metadata)
             {
                 PowerShellPackage package = new PowerShellPackage();
                 package.Id = json.Value<string>(Properties.PackageId);
+                package.Version = new List<NuGetVersion>();
+                string version = string.Empty;
+                NuGetVersion nVersion;
 
-                // TODO: Update the logic here.
-                NuGetVersion nVersion = NuGetVersion.Parse(json.Value<string>(Properties.LatestVersion));
-                if (nVersion == null)
+                switch (versionType)
                 {
-                    nVersion = NuGetVersion.Parse(json.Value<string>(Properties.Version));
-                }
-                else
-                {
-                    package.Version = NuGetVersion.Parse(nVersion.ToNormalizedString());
+                    case VersionType.all:
+                        JArray versions = json.Value<JArray>(Properties.Versions);
+                        if (!versions.IsEmpty())
+                        {
+                            if (versions.FirstOrDefault().Type == JTokenType.Object)
+                            {
+                                package.Version = versions.Select(j => NuGetVersion.Parse((string)j["version"]))
+                                    .OrderByDescending(v => v)
+                                    .ToList();
+                            }
+
+                            if (versions.FirstOrDefault().Type == JTokenType.String)
+                            {
+                                package.Version = versions.Select(j => (NuGetVersion.Parse((string)j)))
+                                    .OrderByDescending(v => v)
+                                    .ToList();
+                            }
+                        }
+                        break;
+                    case VersionType.latest:
+                        version = json.Value<string>(Properties.LatestVersion);
+                        nVersion = NuGetVersion.Parse(version);
+                        package.Version.Add(nVersion);
+                        break;
+                    case VersionType.single:
+                        version = json.Value<string>(Properties.Version);
+                        nVersion = NuGetVersion.Parse(version);
+                        package.Version.Add(nVersion);
+                        break;
                 }
 
                 package.Description = json.Value<string>(Properties.Description);
@@ -61,7 +93,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <param name="skip"></param>
         /// <param name="take"></param>
         /// <returns></returns>
-        public static IEnumerable<JObject> GetAllVersionsForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take)
+        public static IEnumerable<JObject> GetPackageVersions(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take)
         {
             // Specify the search filter for prerelease and target framework
             SearchFilter filter = new SearchFilter();
@@ -84,41 +116,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
             }
             return searchResults;
-        }
-
-        /// <summary>
-        /// Return the latest version of packages that match the search tearm of packageID
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="packageId"></param>
-        /// <param name="names"></param>
-        /// <param name="allowPrerelease"></param>
-        /// <param name="skip"></param>
-        /// <param name="take"></param>
-        /// <returns></returns>
-        public static IEnumerable<JObject> GetLastestPackages(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take)
-        {
-            // Specify the search filter for prerelease and target framework
-            SearchFilter filter = new SearchFilter();
-            filter.IncludePrerelease = allowPrerelease;
-            filter.SupportedFrameworks = names;
-
-            IEnumerable<JObject> packages = Enumerable.Empty<JObject>();
-            try
-            {
-                Task<IEnumerable<JObject>> task = repo.Search(packageId, filter, skip, take, cancellationToken: CancellationToken.None);
-                packages = task.Result;
-            }
-            catch (Exception)
-            {
-                if (packages.IsEmpty())
-                {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                        NuGetResources.UnknownPackage, packageId));
-                }
-            }
-            return packages;
         }
 
         public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, 
@@ -241,5 +238,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
             bool isPrerelease = !String.IsNullOrEmpty(sVersion.SpecialVersion);
             return isPrerelease;
         }
+    }
+
+    public enum VersionType
+    {
+        all,
+        latest,
+        single
     }
 }
