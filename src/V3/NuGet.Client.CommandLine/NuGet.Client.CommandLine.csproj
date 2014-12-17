@@ -65,6 +65,7 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
+    <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CommandLineConstants.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="Common\CommandLineMachineWideSettings.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Common\FilesystemInstallationTarget.cs" />
     <Compile Include="Common\ICommandManager.cs" />
     <Compile Include="Common\IConsole.cs" />
+    <Compile Include="Common\SelfUpdater.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="NuGetCommandResourceType.cs">
       <DependentUpon>NuGetCommandResourceType.resx</DependentUpon>
