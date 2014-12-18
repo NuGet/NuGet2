@@ -190,11 +190,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 if (ex.InnerException != null)
                 {
-                    this.Log(Client.MessageLevel.Warning, ex.InnerException.Message);
+                    this.Log(MessageLevel.Warning, ex.InnerException.Message);
                 }
                 else
                 {
-                    this.Log(Client.MessageLevel.Warning, ex.Message);
+                    this.Log(MessageLevel.Warning, ex.Message);
                 }
             }
             finally

@@ -243,4 +243,7 @@
   <data name="Cmdlet_PackageSourceSet" xml:space="preserve">
     <value>The 'Package source' has been successfully set as '{0}'.</value>
   </data>
+  <data name="Cmdlet_CommandRemoved" xml:space="preserve">
+    <value>The {0} Command has been deprecated and will be removed in the next release. Please modify your PowerShell scripts accordingly. </value>
+  </data>
 </root>

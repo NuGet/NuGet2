@@ -70,6 +70,15 @@ namespace NuGet.Client.VisualStudio.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The {0} Command has been deprecated and will be removed in the next release. Please modify your PowerShell scripts accordingly. .
+        /// </summary>
+        internal static string Cmdlet_CommandRemoved {
+            get {
+                return ResourceManager.GetString("Cmdlet_CommandRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creating package at {0}....
         /// </summary>
         internal static string Cmdlet_CreatingPackage {

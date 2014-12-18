@@ -195,7 +195,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         #region Logging
 
-        public void Log(Client.MessageLevel level, string message, params object[] args)
+        public void Log(MessageLevel level, string message, params object[] args)
         {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
             LogCore(level, formattedMessage);
@@ -332,23 +332,23 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        protected virtual void LogCore(Client.MessageLevel level, string formattedMessage)
+        protected virtual void LogCore(MessageLevel level, string formattedMessage)
         {
             switch (level)
             {
-                case Client.MessageLevel.Debug:
+                case MessageLevel.Debug:
                     WriteVerbose(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Warning:
+                case MessageLevel.Warning:
                     WriteWarning(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Info:
+                case MessageLevel.Info:
                     WriteLine(formattedMessage);
                     break;
 
-                case Client.MessageLevel.Error:
+                case MessageLevel.Error:
                     WriteError(formattedMessage);
                     break;
             }
@@ -585,7 +585,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     matchIndex = allValidProjectNames.IndexOf(match);
                     host.SetDefaultProjectIndex(matchIndex);
                     _solutionManager.DefaultProjectName = match;
-                    Log(Client.MessageLevel.Info, Resources.Cmdlet_ProjectSet, match);
+                    Log(MessageLevel.Info, Resources.Cmdlet_ProjectSet, match);
                     return true;
                 }
                 catch (Exception ex)
@@ -618,7 +618,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     host.ActivePackageSource = match;
                     this.ActiveSourceRepository = GetActiveRepository(match);
-                    Log(Client.MessageLevel.Info, Resources.Cmdlet_PackageSourceSet, match);
+                    Log(MessageLevel.Info, Resources.Cmdlet_PackageSourceSet, match);
                     return true;
                 }
                 catch (Exception ex)
