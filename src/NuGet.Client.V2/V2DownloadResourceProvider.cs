@@ -15,10 +15,10 @@ namespace NuGet.Client.V2
     [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownload))]
     public class V2DownloadResourceProvider : V2ResourceProvider
     {
-        public override bool TryCreateResource(PackageSource source, ref IDictionary<string, object> cache, out Resource resource)
+        public override bool TryCreateResource(PackageSource source, out Resource resource)
         {
             V2DownloadResource v2DownloadResource;
-           if(base.TryCreateResource(source, ref cache, out resource))
+           if(base.TryCreateResource(source, out resource))
            {
                v2DownloadResource = new V2DownloadResource((V2Resource)resource);
                resource = v2DownloadResource;

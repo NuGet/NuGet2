@@ -43,6 +43,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Versioning">
+      <HintPath>..\..\..\packages\NuGet.Versioning.1.0.3\lib\portable-net40+win\NuGet.Versioning.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -241,10 +244,6 @@
     <ProjectReference Include="..\..\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj">
       <Project>{4e58e50b-8aaf-49eb-92c9-1bc4729d93c4}</Project>
       <Name>NuGet.Client.V2.VisualStudio</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Versioning\Versioning.csproj">
-      <Project>{0333984f-e0a3-44fb-afe9-a1207da1e975}</Project>
-      <Name>Versioning</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
       <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>
