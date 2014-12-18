@@ -23,7 +23,7 @@ namespace TestAppV2V3Switching
                 //Creating an instance of aggregate catalog. It aggregates other catalogs
                 var aggregateCatalog = new AggregateCatalog();
                 //Build the directory path where the parts will be available
-                var directoryPath = @"C:\Client\nuget\src\TestAppV2V3Switching\bin\Debug";
+                var directoryPath = Environment.CurrentDirectory;
                 var directoryCatalog = new DirectoryCatalog(directoryPath, "*.dll");              
                 aggregateCatalog.Catalogs.Add(directoryCatalog);              
                 container = new CompositionContainer(aggregateCatalog);               
