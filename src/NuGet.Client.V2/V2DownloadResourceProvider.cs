@@ -11,7 +11,7 @@ namespace NuGet.Client.V2
     /// <summary>
     /// Resource provider for V2 download.
     /// </summary>
-    [Export(typeof(IResourceProvider))]
+    [Export(typeof(ResourceProvider))]
     [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownload))]
     public class V2DownloadResourceProvider : V2ResourceProvider
     {

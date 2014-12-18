@@ -37,7 +37,7 @@ namespace TestAppV2V3Switching
                      
         public void TestGetResourceGivesRequiredResourceType()
         {
-            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<ResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
@@ -48,7 +48,7 @@ namespace TestAppV2V3Switching
 
         public void TestAppropriateExceptionThrownWhenResourceIsNotAvailable()
         {
-            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<ResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);
@@ -58,7 +58,7 @@ namespace TestAppV2V3Switching
 
         public void TestE2E()
         {
-            IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<IResourceProvider, IResourceProviderMetadata>();
+            IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> providers = container.GetExports<ResourceProvider, IResourceProviderMetadata>();
             Debug.Assert(providers.Count() > 0);
             PackageSource source = new PackageSource("nuget.org", "https://nuget.org/api/v2");
             SourceRepository2 repo = new SourceRepository2(source, providers);

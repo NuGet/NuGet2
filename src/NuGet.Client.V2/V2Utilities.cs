@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V2
 {
-    public class V2Utilities
+    public static class V2Utilities
     {
         public static bool IsV2(PackageSource source)
         {
             var url = new Uri(source.Url);
-            if (url.IsFile || url.IsUnc)
+            if (url.IsFile || url.IsUnc) // Check if a local path or a UNC share is specified. For Local path sources, we will continue to create V2 resources for now.
             {
                 return true;
             }

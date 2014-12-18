@@ -9,6 +9,6 @@ namespace NuGet.Client
 {
     public interface IDownload
     {
-      Uri GetNupkgUrlForDownload(string id, NuGetVersion version);
+      PackageDownloadMetadata GetNupkgUrlForDownload(PackageIdentity identity); 
     }
 }

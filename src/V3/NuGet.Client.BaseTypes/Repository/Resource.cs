@@ -12,31 +12,13 @@ namespace NuGet.Client
     /// </summary>
     public abstract class Resource
     {
-        private string _host;
-        private string _description;
-
-        public Resource()
-        {
-
-        }
-                     
-        public Resource(string host)
-        {         
-            _host = host;            
-        }
-        
+        protected string _host;             
         public string Host
         {
             get
             {
                 return _host;
-            }
-           
-        }
-        public abstract string Description
-        {
-            get;            
-        } 
-            
+            }           
+        }            
     }
 }

@@ -16,14 +16,7 @@ namespace NuGet.Client.V2.VisualStudio
  
     public class VsV2SearchResource : V2Resource, IVsSearch
     {
-        private readonly string _description = "Represents the search resource for a V2 server endpoint.";
-        public VsV2SearchResource(V2Resource v2Resource) : base(v2Resource) { }        
-        public VsV2SearchResource() : base(null, null) { }
-        public VsV2SearchResource(IPackageRepository repo, string host) : base(repo, host) { }
-        public override string Description
-        {
-            get { return _description; }
-        }
+        public VsV2SearchResource(V2Resource v2Resource) : base(v2Resource) { }                   
         public Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
   
@@ -73,8 +66,6 @@ namespace NuGet.Client.V2.VisualStudio
             {
                 versions = new[] { package };
             }
-
-           
             string id = package.Id;
             NuGetVersion version = SafeToNuGetVer(package.Version);
             String summary = package.Summary;

@@ -11,7 +11,7 @@ namespace NuGet.Client
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)] 
     public class ResourceProviderMetadata : ExportAttribute,IResourceProviderMetadata
     {
-        public ResourceProviderMetadata(string resourceName,Type resourceType):base(typeof(IResourceProvider))
+        public ResourceProviderMetadata(string resourceName,Type resourceType):base(typeof(ResourceProvider))
         {
             ProviderName = resourceName;
             ResourceType = resourceType;

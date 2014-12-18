@@ -21,12 +21,11 @@ namespace NuGet.Client
     public  class SourceRepository2
     {
         [ImportMany]
-        private IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> _providers { get; set; }
-        private readonly PackageSource _source;
-        private static IDictionary<string, object> _cache = new Dictionary<string, object>();
+        private IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> _providers { get; set; }
+        private readonly PackageSource _source;       
 
         //*TODOs: Providers should be automatically imported when run inside vs context. Right now passing triggering it as part of testapp and passing it as param.
-        public SourceRepository2(PackageSource source, IEnumerable<Lazy<IResourceProvider, IResourceProviderMetadata>> providers) 
+        public SourceRepository2(PackageSource source, IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> providers) 
             
         {
             _source = source;
@@ -35,12 +34,13 @@ namespace NuGet.Client
 
         public object GetResource(Type resourceType)
         {            
-            foreach(Lazy<IResourceProvider,IResourceProviderMetadata>  provider in _providers)
+            foreach(Lazy<ResourceProvider,IResourceProviderMetadata>  provider in _providers)
             {
+                //Each provider will expose the "ResourceType" that it can create. Filter the provider based on the current "resourceType" that is requested and invoke TryCreateResource on it.
                 if (provider.Metadata.ResourceType == resourceType)
                 {
                     Resource resource = null;
-                    if (provider.Value.TryCreateResource(_source, ref _cache, out resource))
+                    if (provider.Value.TryCreateResource(_source, out resource))
                     {
                         return resource;
                     }

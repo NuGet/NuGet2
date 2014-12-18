@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V3
 {
-    public class V3Utilities
+    public static class V3Utilities
     {
         public static bool IsV3(PackageSource source)
         {

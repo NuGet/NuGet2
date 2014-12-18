@@ -34,8 +34,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NuGet.Versioning">
-      <HintPath>..\..\Versioning\bin\Debug\NuGet.Versioning.dll</HintPath>
+    <Reference Include="NuGet.Versioning, Version=1.0.3.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NuGet.Versioning.1.0.3\lib\portable-net40+win\NuGet.Versioning.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -54,16 +55,17 @@
     <Compile Include="Package\PackageActionType.cs" />
     <Compile Include="Package\PackageIdentity.cs" />
     <Compile Include="PackageSource.cs" />
-    <Compile Include="Respository\IDownload.cs" />
-    <Compile Include="Respository\IMetrics.cs" />
-    <Compile Include="Respository\IResolution.cs" />
-    <Compile Include="Respository\IResourceProvider.cs" />
-    <Compile Include="Respository\IResourceProviderMetadata.cs" />
-    <Compile Include="Respository\Resource.cs" />
+    <Compile Include="Repository\IDownload.cs" />
+    <Compile Include="Repository\IMetrics.cs" />
+    <Compile Include="Repository\IResolution.cs" />
+    <Compile Include="Repository\ResourceProvider.cs" />
+    <Compile Include="Repository\IResourceProviderMetadata.cs" />
+    <Compile Include="Repository\PackageDownloadMetadata.cs" />
+    <Compile Include="Repository\Resource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Respository\ResourceProviderMetadata.cs" />
-    <Compile Include="Respository\SourceRepository.cs" />
-    <Compile Include="Respository\SourceRepository2.cs" />
+    <Compile Include="Repository\ResourceProviderMetadata.cs" />
+    <Compile Include="Repository\SourceRepository.cs" />
+    <Compile Include="Repository\SourceRepository2.cs" />
     <Compile Include="SearchFilter.cs" />
     <Compile Include="UserAgentUtil.cs" />
   </ItemGroup>

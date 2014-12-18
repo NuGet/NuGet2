@@ -19,22 +19,8 @@ namespace NuGet.Client.V3.VisualStudio
     public class VsV3SearchResource : V3Resource, IVsSearch
     {
         public VsV3SearchResource(V3Resource v3Resource)
-            : base(v3Resource)
-        {
-
-        }
-
-        public VsV3SearchResource(NuGetV3Client client):base(client)
-        {
-
-        }
-
-        public VsV3SearchResource(string sourceUrl, string host)
-            : base(sourceUrl, host)
-        {
-
-        }
-
+            : base(v3Resource) { }
+     
         public async Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             List<string> frameworkNames = new List<string>();
@@ -111,9 +97,6 @@ namespace NuGet.Client.V3.VisualStudio
         }
 
 
-        public override string Description
-        {
-            get { throw new NotImplementedException(); }
-        }
+     
     }
 }
