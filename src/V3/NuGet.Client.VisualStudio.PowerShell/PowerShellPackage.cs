@@ -216,7 +216,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
             JObject latestJObject = null;
             if (latestVersion != null)
             {
-                Task<JObject> task = repo.GetPackageMetadata(identity.Id, identity.Version);
+                NuGetVersion nVersion = GetNuGetVersionFromString(latestVersion);
+                Task<JObject> task = repo.GetPackageMetadata(identity.Id, nVersion);
                 latestJObject = task.Result;
             }
             return latestJObject;

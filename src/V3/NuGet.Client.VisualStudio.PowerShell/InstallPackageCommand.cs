@@ -32,6 +32,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// 3. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
     /// 4. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
     /// 5. Implement Add-BindingRedirect for V3
+    /// 6. Add -Force and -NoCache feature
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
     public class InstallPackageCommand : PackageInstallBaseCommand
     {

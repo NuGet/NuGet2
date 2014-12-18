@@ -28,11 +28,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public virtual string Id { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = "Version")]
+        [Parameter(Mandatory = true, ParameterSetName = "Updates")]
         [ValidateNotNullOrEmpty]
         public string Version { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = "All")]
+        [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAll { get; set; }
 

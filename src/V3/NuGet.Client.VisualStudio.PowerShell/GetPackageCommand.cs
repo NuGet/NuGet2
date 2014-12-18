@@ -46,7 +46,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected override void Preprocess()
         {
             base.TargetProjectName = this.ProjectName;
-            UseRemoteSourceOnly =  ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+            UseRemoteSourceOnly = ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
             UseRemoteSource = ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
             CollapseVersions = !AllVersions.IsPresent && ListAvailable;
             if (UseRemoteSource || UseRemoteSourceOnly)
@@ -79,34 +79,29 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // Find avaiable packages from the online sources and not taking targetframeworks into account. 
                 if (UseRemoteSourceOnly)
                 {
-                    string replacementText = string.Empty;
+                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
                     if (!CollapseVersions)
                     {
-                        replacementText = "Find-Package <-Id> -ListAll";
+                        Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, "Find-Package <-Id> -ListAll");
+                        WritePackages(packagesToDisplay, VersionType.all);
                     }
                     else
                     {
-                        replacementText = "Find-Package <-Id>";
+                        Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, "Find-Package <-Id>");
+                        WritePackages(packagesToDisplay, VersionType.latest);
                     }
-                    Log(MessageLevel.Warning, Resources.Cmdlet_CommandObsolete, replacementText);
-                    packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
                 }
                 else
                 {
                     // Get package updates from the remote source and take targetframeworks into account.
                     CheckForSolutionOpen();
-                    IEnumerable<JObject> updates = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
-                    packagesToDisplay = updates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
-                }
-
-                // Output list of packages to the PowerShell Console
-                if (!CollapseVersions)
-                {
-                    WritePackages(packagesToDisplay, VersionType.all);
-                }
-                else
-                {
-                    WritePackages(packagesToDisplay, VersionType.latest);
+                    packagesToDisplay = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
+                    if (!string.IsNullOrEmpty(Filter))
+                    {
+                        packagesToDisplay = packagesToDisplay.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
+                    }
+                    WritePackages(packagesToDisplay, VersionType.single);
+                    // TODO: implement all versions
                 }
             }
         }
