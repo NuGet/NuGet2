@@ -17,7 +17,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : PackageListBaseCommand
     {
-        private const int PageSize = 30;
+        private const int PageSize = 50;
 
         public GetPackageCommand() :
             base()
@@ -59,12 +59,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             Preprocess();
 
-            IEnumerable<JObject> packagesToDisplay = Enumerable.Empty<JObject>();
             // If Remote & Updates set of parameters are not specified
             if (!UseRemoteSource)
             {
                 CheckForSolutionOpen();
-                packagesToDisplay = FilterInstalledPackagesResults(Filter, Skip, First);
+                Dictionary<VsProject, IEnumerable<JObject>> packagesToDisplay = new Dictionary<VsProject, IEnumerable<JObject>>();
+                packagesToDisplay = GetInstalledPackages(Filter, Skip, First);
                 WritePackages(packagesToDisplay, VersionType.single);
                 return;
             }
@@ -79,6 +79,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // Find avaiable packages from the online sources and not taking targetframeworks into account. 
                 if (UseRemoteSourceOnly)
                 {
+                    IEnumerable<JObject> packagesToDisplay = Enumerable.Empty<JObject>();
                     packagesToDisplay = GetPackagesFromRemoteSource(Filter, Enumerable.Empty<FrameworkName>(), IncludePrerelease.IsPresent, Skip, First);
                     if (!CollapseVersions)
                     {
@@ -95,13 +96,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     // Get package updates from the remote source and take targetframeworks into account.
                     CheckForSolutionOpen();
-                    packagesToDisplay = GetPackageUpdatesFromRemoteSource(IncludePrerelease.IsPresent, Skip, First);
-                    if (!string.IsNullOrEmpty(Filter))
-                    {
-                        packagesToDisplay = packagesToDisplay.Where(p => p.Value<string>(Properties.PackageId).StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
-                    }
+                    Dictionary<VsProject, IEnumerable<JObject>> packagesToDisplay = new Dictionary<VsProject, IEnumerable<JObject>>();
+                    packagesToDisplay = GetPackageUpdatesFromRemoteSource(Filter, IncludePrerelease.IsPresent, Skip, First, AllVersions.IsPresent);
                     WritePackages(packagesToDisplay, VersionType.single);
-                    // TODO: implement all versions
                 }
             }
         }

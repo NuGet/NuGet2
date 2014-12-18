@@ -121,6 +121,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, 
             NuGetVersion nugetVersion = null, bool isSafe = false, int skip = 0, int take = 30)
         {
+            if (packageId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             // Specify the search filter for prerelease and target framework
             SearchFilter filter = new SearchFilter();
             filter.IncludePrerelease = allowPrerelease;
@@ -210,17 +215,34 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <param name="identity"></param>
         /// <param name="allowPrerelease"></param>
         /// <returns></returns>
-        public static JObject GetLastestJObjectForPackage(SourceRepository repo, PackageIdentity identity, VsProject project, bool allowPrerelease, bool isSafe)
+        public static List<JObject> GetLastestJObjectsForPackage(SourceRepository repo, JObject jObject, VsProject project, bool allowPrerelease, int skip, int take, bool takeAllVersions)
         {
-            string latestVersion = GetLastestVersionForPackage(repo, identity.Id, project.GetSupportedFrameworks(), allowPrerelease, identity.Version, isSafe);
-            JObject latestJObject = null;
-            if (latestVersion != null)
+            List<JObject> jObjects = new List<JObject>();
+            string id = jObject.Value<string>(Properties.PackageId);
+            string version = jObject.Value<string>(Properties.Version);
+            NuGetVersion nVersion = GetNuGetVersionFromString(version);
+
+            if (!takeAllVersions)
             {
-                NuGetVersion nVersion = GetNuGetVersionFromString(latestVersion);
-                Task<JObject> task = repo.GetPackageMetadata(identity.Id, nVersion);
-                latestJObject = task.Result;
+                string latestVersion = GetLastestVersionForPackage(repo, id, project.GetSupportedFrameworks(), allowPrerelease, nVersion, false);
+                if (latestVersion != null)
+                {
+                    NuGetVersion laVersion = GetNuGetVersionFromString(latestVersion);
+                    Task<JObject> task = repo.GetPackageMetadata(id, laVersion);
+                    JObject latestJObject = task.Result;
+                    jObjects.Add(latestJObject);
+                }
             }
-            return latestJObject;
+            else
+            {
+                Task<IEnumerable<JObject>> task = repo.GetPackageMetadataById(id);
+                IEnumerable<JObject> allVersions = task.Result;
+                jObjects = allVersions.Where(p => string.Equals(p.Value<string>(Properties.PackageId), id, StringComparison.OrdinalIgnoreCase))
+                    .Skip(skip)
+                    .Take(take)
+                    .ToList();
+            }
+            return jObjects;
         }
 
         public static JObject GetPackageByIdAndVersion(SourceRepository sourceRepository, string packageId, string version, bool allowPrereleaseVersions)
@@ -245,14 +267,21 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public static NuGetVersion GetNuGetVersionFromString(string version)
         {
             NuGetVersion nVersion;
-            bool success = NuGetVersion.TryParse(version, out nVersion);
-            if (!success)
+            if (version == null)
             {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    Resources.Cmdlet_FailToParseVersion, version));
+                throw new ArgumentNullException();
             }
-            return nVersion;
+            else
+            {
+                bool success = NuGetVersion.TryParse(version, out nVersion);
+                if (!success)
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        Resources.Cmdlet_FailToParseVersion, version));
+                }
+                return nVersion;
+            }
         }
 
         /// <summary>
@@ -270,6 +299,42 @@ namespace NuGet.Client.VisualStudio.PowerShell
             SemanticVersion sVersion = new SemanticVersion(version);
             bool isPrerelease = !String.IsNullOrEmpty(sVersion.SpecialVersion);
             return isPrerelease;
+        }
+    }
+
+    public class PowerShellPackageWithProject
+    {
+        public string Id { get; set; }
+
+        public List<NuGetVersion> Version { get; set; }
+
+        public string ProjectName { get; set; }
+
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Get the view of PowerShell Package. Use for Get-Package command. 
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <param name="versionType"></param>
+        /// <returns></returns>
+        public static List<PowerShellPackageWithProject> GetPowerShellPackageView(Dictionary<VsProject, IEnumerable<JObject>> dictionary, VersionType versionType)
+        {
+            List<PowerShellPackageWithProject> views = new List<PowerShellPackageWithProject>();
+            foreach (KeyValuePair<VsProject, IEnumerable<JObject>> entry in dictionary)
+            {
+                List<PowerShellPackage> packages = PowerShellPackage.GetPowerShellPackageView(entry.Value, versionType);
+                foreach (PowerShellPackage package in packages)
+                {
+                    PowerShellPackageWithProject view = new PowerShellPackageWithProject();
+                    view.Id = package.Id;
+                    view.Version = package.Version;
+                    view.Description = package.Description;
+                    view.ProjectName = entry.Key.Name;
+                    views.Add(view);
+                }
+            }
+            return views;
         }
     }
 

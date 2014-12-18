@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json.Linq;
-using NuGet.Client.Installation;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
@@ -70,27 +69,28 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// Filter the installed packages list based on Filter, Skip and First parameters
         /// </summary>
         /// <returns></returns>
-        protected IEnumerable<JObject> FilterInstalledPackagesResults(string filter, int skip, int take)
+        protected Dictionary<VsProject, IEnumerable<JObject>> GetInstalledPackages(string filter, int skip, int take)
         {
-            IEnumerable<InstallationTarget> targets = GetProjects();
-            List<JObject> installedJObjects = GetInstalledJObjectInSolution(targets);
-            IEnumerable<JObject> installedPackages = Enumerable.Empty<JObject>();
+            IEnumerable<VsProject> targets = GetProjects();
+            Dictionary<VsProject, IEnumerable<JObject>> installedPackages = new Dictionary<VsProject, IEnumerable<JObject>>();
 
-            // Filter the results by string
-            if (!string.IsNullOrEmpty(filter))
+            foreach (VsProject project in targets)
             {
-                installedPackages = installedJObjects.Where(p => p.Value<string>(Properties.PackageId).StartsWith(filter, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                installedPackages = installedJObjects;
-            }
+                Task<IEnumerable<JObject>> task = project.InstalledPackages.GetAllInstalledPackagesAndMetadata();
+                IEnumerable<JObject> installedJObjects = task.Result;
+                // Filter the results by string
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    installedJObjects = installedJObjects.Where(p => p.Value<string>(Properties.PackageId).StartsWith(filter, StringComparison.OrdinalIgnoreCase));
+                }
 
-            // Skip and then take
-            installedPackages = installedPackages.Skip(skip).ToList();
-            if (take != 0)
-            {
-                installedPackages = installedPackages.Take(take).ToList();
+                // Skip and then take
+                installedJObjects = installedJObjects.Skip(skip);
+                if (take != 0)
+                {
+                    installedJObjects = installedJObjects.Take(take);
+                }
+                installedPackages.Add(project, installedJObjects);
             }
             return installedPackages;
         }
@@ -102,79 +102,39 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return packages;
         }
 
-        protected IEnumerable<JObject> GetPackageUpdatesFromRemoteSource(bool allowPrerelease, int skip, int take)
+        protected Dictionary<VsProject, IEnumerable<JObject>> GetPackageUpdatesFromRemoteSource(string filter, bool allowPrerelease, int skip, int take, bool allVersions)
         {
-            List<JObject> packages = new List<JObject>();
-            Dictionary<VsProject, List<PackageIdentity>> dictionary = GetInstalledPackagesForAllProjects();
-            foreach (KeyValuePair<VsProject, List<PackageIdentity>> entry in dictionary)
+            IEnumerable<VsProject> targets = GetProjects();
+            Dictionary<VsProject, IEnumerable<JObject>> packageUpdates = new Dictionary<VsProject, IEnumerable<JObject>>();
+
+            foreach (VsProject project in targets)
             {
-                IEnumerable<VsProject> targetedProjects = new List<VsProject> { entry.Key };
-                List<PackageIdentity> identities = entry.Value;
-                // Execute update for each of the project inside the solution
-                foreach (PackageIdentity identity in identities)
+                Task<IEnumerable<JObject>> task = project.InstalledPackages.GetAllInstalledPackagesAndMetadata();
+                IEnumerable<JObject> installedJObjects = task.Result;
+                List<JObject> filteredUpdates = new List<JObject>();
+
+                foreach (JObject jObject in installedJObjects)
                 {
                     // Find packages update
-                    JObject update = PowerShellPackage.GetLastestJObjectForPackage(ActiveSourceRepository, identity, entry.Key, allowPrerelease, false);
-                    NuGetVersion version = PowerShellPackage.GetNuGetVersionFromString(update.Value<string>(Properties.Version));
-                    if (version > identity.Version)
+                    List<JObject> updates = PowerShellPackage.GetLastestJObjectsForPackage(ActiveSourceRepository, jObject, project, allowPrerelease, skip, take, allVersions);
+                    NuGetVersion originalVersion = PowerShellPackage.GetNuGetVersionFromString(jObject.Value<string>(Properties.Version));
+                    foreach (JObject update in updates)
                     {
-                        packages.Add(update);
+                        NuGetVersion version = PowerShellPackage.GetNuGetVersionFromString(update.Value<string>(Properties.Version));
+                        if (version > originalVersion)
+                        {
+                            filteredUpdates.Add(update);
+                        }
+
+                        if (!string.IsNullOrEmpty(filter))
+                        {
+                            filteredUpdates = filteredUpdates.Where(p => p.Value<string>(Properties.PackageId).StartsWith(filter, StringComparison.OrdinalIgnoreCase)).ToList();
+                        }
                     }
                 }
+                packageUpdates.Add(project, filteredUpdates);
             }
-            return packages.Skip(skip).Take(take).ToList();
-        }
-
-        /// <summary>
-        /// Get Installed Package References for all projects.
-        /// </summary>
-        /// <returns></returns>
-        protected Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
-        {
-            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
-            IEnumerable<VsProject> projects = GetProjects();
-            foreach (VsProject proj in projects)
-            {
-                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
-                dic.Add(proj, list);
-            }
-            return dic;
-        }
-
-        /// <summary>
-        /// Get Installed Package References for a single project
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
-        {
-            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                refs = installedList.GetInstalledPackages();
-            }
-            return refs;
-        }
-
-        /// <summary>
-        /// Get all of the installed JObjects in the solution
-        /// </summary>
-        /// <param name="targets"></param>
-        /// <returns></returns>
-        protected List<JObject> GetInstalledJObjectInSolution(IEnumerable<InstallationTarget> targets)
-        {
-            List<JObject> list = new List<JObject>();
-            foreach (InstallationTarget target in targets)
-            {
-                InstalledPackagesList projectlist = target.InstalledPackages;
-                // Get all installed packages and metadata for project
-                Task<IEnumerable<JObject>> task = projectlist.GetAllInstalledPackagesAndMetadata();
-                IEnumerable<JObject> installedObjects = task.Result.ToList();
-
-                // Add to the solution's installed packages list
-                list.AddRange(installedObjects);
-            }
-            return list;
+            return packageUpdates;
         }
 
         /// <summary>
@@ -200,6 +160,13 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             // Get the PowerShellPackageView
             var view = PowerShellPackage.GetPowerShellPackageView(packages, versionType);
+            WriteObject(view, enumerateCollection: true);
+        }
+
+        protected void WritePackages(Dictionary<VsProject, IEnumerable<JObject>> dictionary, VersionType versionType)
+        {
+            // Get the PowerShellPackageView
+            var view = PowerShellPackageWithProject.GetPowerShellPackageView(dictionary, versionType);
             WriteObject(view, enumerateCollection: true);
         }
 
