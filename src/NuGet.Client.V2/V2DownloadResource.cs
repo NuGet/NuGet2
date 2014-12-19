@@ -10,8 +10,8 @@ namespace NuGet.Client.V2
 {
     public class V2DownloadResource : V2Resource,IDownload
     {       
-        public V2DownloadResource(V2Resource v2Resource)
-            : base(v2Resource) {}
+        public V2DownloadResource(V2Resource resource)
+            : base(resource) {}
       
         public PackageDownloadMetadata GetNupkgUrlForDownload(PackageIdentity identity)
         {

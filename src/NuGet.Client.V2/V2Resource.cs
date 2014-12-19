@@ -13,13 +13,14 @@ namespace NuGet.Client.V2
     /// </summary>
     public class V2Resource :Resource
     {
-        protected IPackageRepository _v2Client;              
+        private IPackageRepository _v2Client;              
       
-        public V2Resource(V2Resource v2Resource)            
+        public V2Resource(V2Resource resource)            
         {
-            _v2Client = v2Resource.V2Client;
-            _host = v2Resource.Host;
+            _v2Client = resource.V2Client;
+            _host = resource.Host;
         }
+
         public V2Resource(IPackageRepository repo,string host)
         {
             _v2Client = repo;

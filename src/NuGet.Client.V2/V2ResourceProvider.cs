@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.Client.V2
 {
@@ -11,6 +8,7 @@ namespace NuGet.Client.V2
     /// </summary>
     public abstract class V2ResourceProvider : ResourceProvider
     {
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override bool TryCreateResource(PackageSource source, out Resource resource)
         {
             try
@@ -30,7 +28,7 @@ namespace NuGet.Client.V2
                         return false;
                     }
                 }
-                resource = new V2Resource((IPackageRepository)repo,host); //Create a resource and return it.
+                resource = new V2Resource((IPackageRepository)repo, host); //Create a resource and return it.
                 return true;
             }
             catch (Exception)
@@ -38,6 +36,6 @@ namespace NuGet.Client.V2
                 resource = null;
                 return false; //*TODOs:Do tracing and throw apppropriate exception here.
             }
-        }     
+        }
     }
 }
