@@ -26,9 +26,6 @@ namespace NuGet.Commands
             get { return _sources; }
         }
 
-        [Option(typeof(NuGetCommandResourceType), "ListCommandVerboseListDescription")]
-        public bool Verbose { get; set; }
-
         [Option(typeof(NuGetCommandResourceType), "ListCommandAllVersionsDescription")]
         public bool AllVersions { get; set; }
 
@@ -37,12 +34,6 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-            if (Verbose)
-            {
-                Console.WriteWarning(LocalizedResourceManager.GetString("Option_VerboseDeprecated"));
-                Verbosity = Verbosity.Detailed;
-            }
-
             int page = 100;
             int skip = 0;
             IEnumerable<JObject> packages = null;
@@ -50,7 +41,7 @@ namespace NuGet.Commands
             {
                 packages = GetPackages(skip, page).Result;
                 skip += page;
-                if (packages.Count() == 0) break;
+                if (!packages.Any()) break;
                 PrintPackages(packages);
             }
             while (true);
@@ -62,80 +53,67 @@ namespace NuGet.Commands
 
             string searchTerm = Arguments != null ? Arguments.FirstOrDefault() : null;
 
-            var Packages = await sourceRepository.Search(searchTerm, new SearchFilter() { IncludePrerelease = Prerelease, SupportedFrameworks = new FrameworkName[0] }, skip, page, CancellationToken.None);
+            var packages = await sourceRepository.Search(searchTerm, new SearchFilter() { IncludePrerelease = Prerelease, SupportedFrameworks = new FrameworkName[0] }, skip, page, CancellationToken.None);
 
-            return Packages;
+            return packages;
         }
 
         private void PrintPackages(IEnumerable<JObject> packages)
         {
             bool hasPackages = false;
+            Action<string, string, JObject> funcPrintPackage = Verbosity == Verbosity.Detailed ? (Action<string, string, JObject>)PrintPackageDetailed : PrintPackage;
 
-            if (packages != null)
+            if (packages != null && packages.Any())
             {
-                if (Verbosity == Verbosity.Detailed)
+                foreach (var p in packages)
                 {
-                    /***********************************************
-                     * Package-Name
-                     *  1.0.0.2010
-                     *  This is the package Description
-                     * 
-                     * Package-Name-Two
-                     *  2.0.0.2010
-                     *  This is the second package Description
-                     ***********************************************/
-                    foreach (var p in packages)
+                    if (AllVersions)
                     {
-                        if (AllVersions)
+                        JArray versions = (JArray)p[Properties.Versions];
+                        foreach (var version in versions)
                         {
-                            JArray versions = (JArray)p[Properties.Versions];
-                            foreach (var version in versions)
-                            {
-                                Console.PrintJustified(0, p[Properties.PackageId].ToString());
-                                Console.PrintJustified(1, version.ToString());
-                                Console.PrintJustified(1, p[Properties.Summary].ToString());
-                            }
+                            funcPrintPackage(p[Properties.PackageId].ToString(), version.ToString(), p);
                         }
-                        else
-                        {
-                            Console.PrintJustified(0, p[Properties.PackageId].ToString());
-                            Console.PrintJustified(1, p[Properties.LatestVersion].ToString());
-                            Console.PrintJustified(1, p[Properties.Summary].ToString());
-                        }
-
-                        Console.WriteLine();
-                        hasPackages = true;
                     }
-                }
-                else
-                {
-                    /***********************************************
-                     * Package-Name 1.0.0.2010
-                     * Package-Name-Two 2.0.0.2010
-                     ***********************************************/
-                    foreach (var p in packages)
+                    else
                     {
-                        if (AllVersions)
-                        {
-                            JArray versions = (JArray)p[Properties.Versions];
-                            foreach (var version in versions)
-                            {
-                                Console.PrintJustified(0, p[Properties.PackageId].ToString() + " " + version.ToString());
-                            }
-                        }
-                        else
-                        {
-                            Console.PrintJustified(0, p[Properties.PackageId].ToString() + " " + p[Properties.LatestVersion].ToString());
-                        }
-                        hasPackages = true;
-                    }
+                        funcPrintPackage(p[Properties.PackageId].ToString(), p[Properties.LatestVersion].ToString(), p);
+                    }    
+                    hasPackages = true;
                 }
             }
-
+            
             if (!hasPackages)
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("ListCommandNoPackages"));
             }
+
+        }
+
+        private void PrintPackageDetailed(string packageId, string version, JObject package)
+        {
+            /***********************************************
+            * Package-Name
+            *  1.0.0.2010
+            *  This is the package Summary
+            * 
+            * Package-Name-Two
+            *  2.0.0.2010
+            *  This is the second package Summary
+            ***********************************************/
+            Console.PrintJustified(0, packageId);
+            Console.PrintJustified(1, version);
+            Console.PrintJustified(1, package[Properties.Summary].ToString()?? string.Empty);
+            Console.WriteLine();
+        }
+
+        private void PrintPackage(string packageId, string version, JObject package)
+        {
+            /***********************************************
+            * Package-Name 1.0.0.2010
+            * Package-Name-Two 2.0.0.2010
+            ***********************************************/
+            Console.PrintJustified(0, packageId + " " + version);
         }
     }
 }
