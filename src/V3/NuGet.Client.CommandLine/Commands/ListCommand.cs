@@ -60,7 +60,6 @@ namespace NuGet.Commands
 
         private void PrintPackages(IEnumerable<JObject> packages)
         {
-            bool hasPackages = false;
             Action<string, string, JObject> funcPrintPackage = Verbosity == Verbosity.Detailed ? (Action<string, string, JObject>)PrintPackageDetailed : PrintPackage;
 
             if (packages != null && packages.Any())
@@ -79,11 +78,9 @@ namespace NuGet.Commands
                     {
                         funcPrintPackage(p[Properties.PackageId].ToString(), p[Properties.LatestVersion].ToString(), p);
                     }    
-                    hasPackages = true;
                 }
             }
-            
-            if (!hasPackages)
+            else
             {
                 Console.WriteLine(LocalizedResourceManager.GetString("ListCommandNoPackages"));
             }
