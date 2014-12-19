@@ -52,7 +52,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         [Parameter(Position = 2)]
         [ValidateNotNullOrEmpty]
-        public string Version { get; set; }
+        public virtual string Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
@@ -73,36 +73,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         public IEnumerable<PackageIdentity> Identities { get; set; }
-
-        /// <summary>
-        /// Get Installed Package References for a single project
-        /// </summary>
-        /// <returns></returns>
-        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
-        {
-            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                refs = installedList.GetInstalledPackages();
-            }
-            return refs;
-        }
-
-        /// <summary>
-        /// Get Installed Package References a single project with specified packageId
-        /// </summary>
-        /// <returns></returns>
-        protected InstalledPackageReference GetInstalledReference(VsProject proj, string Id)
-        {
-            InstalledPackageReference packageRef = null;
-            InstalledPackagesList installedList = proj.InstalledPackages;
-            if (installedList != null)
-            {
-                packageRef = installedList.GetInstalledPackage(Id);
-            }
-            return packageRef;
-        }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected override void ProcessRecordCore()
@@ -126,13 +96,27 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 ExecuteSinglePackageAction(identity, Projects);
             }
+
+            UnsubscribeFromProgressEvents();
         }
 
         /// <summary>
         /// Resolve and execute actions for a single package
         /// </summary>
         /// <param name="identity"></param>
+        /// <param name="projects"></param>
         protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects)
+        {
+            ExecuteSinglePackageAction(identity, projects, _actionType);
+        }
+
+        /// <summary>
+        /// Resolve and execute actions for a single package for specified package action type.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="projects"></param>
+        /// <param name="actionType"></param>
+        protected void ExecuteSinglePackageAction(PackageIdentity identity, IEnumerable<VsProject> projects, PackageActionType actionType)
         {
             if (identity == null)
             {
@@ -144,7 +128,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // Resolve Actions
                 List<VsProject> targetProjects = projects.ToList();
                 Task<IEnumerable<Client.Resolution.PackageAction>> resolverAction =
-                    PackageActionResolver.ResolveActionsAsync(identity, _actionType, targetProjects, Solution);
+                    PackageActionResolver.ResolveActionsAsync(identity, actionType, targetProjects, Solution);
 
                 IEnumerable<Client.Resolution.PackageAction> actions = resolverAction.Result;
 
@@ -174,7 +158,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
 
                 // Execute Actions
-                if (actions.Count() == 0 && _actionType == PackageActionType.Install)
+                if (actions.Count() == 0 && actionType == PackageActionType.Install)
                 {
                     Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, identity.Id);
                 }
@@ -196,10 +180,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     this.Log(MessageLevel.Warning, ex.Message);
                 }
-            }
-            finally
-            {
-                UnsubscribeFromProgressEvents();
             }
         }
 
@@ -280,6 +260,71 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             VsProject project = GetProject(ProjectName, throwIfNotExists);
             return project;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for a single project
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<InstalledPackageReference> GetInstalledReferences(VsProject proj)
+        {
+            IEnumerable<InstalledPackageReference> refs = Enumerable.Empty<InstalledPackageReference>();
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                refs = installedList.GetInstalledPackages();
+            }
+            return refs;
+        }
+
+        /// <summary>
+        /// Get Installed Package References a single project with specified packageId
+        /// </summary>
+        /// <returns></returns>
+        protected InstalledPackageReference GetInstalledReference(VsProject proj, string Id)
+        {
+            InstalledPackageReference packageRef = null;
+            InstalledPackagesList installedList = proj.InstalledPackages;
+            if (installedList != null)
+            {
+                packageRef = installedList.GetInstalledPackage(Id);
+            }
+            return packageRef;
+        }
+
+        /// <summary>
+        /// Get Installed Package References for all projects.
+        /// </summary>
+        /// <returns></returns>
+        protected Dictionary<VsProject, List<PackageIdentity>> GetInstalledPackagesForAllProjects()
+        {
+            Dictionary<VsProject, List<PackageIdentity>> dic = new Dictionary<VsProject, List<PackageIdentity>>();
+            foreach (VsProject proj in Projects)
+            {
+                List<PackageIdentity> list = GetInstalledReferences(proj).Select(r => r.Identity).ToList();
+                dic.Add(proj, list);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// Get installed package identity for specific package Id in all projects.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        protected Dictionary<VsProject, PackageIdentity> GetInstalledPackageWithId(string packageId)
+        {
+            Dictionary<VsProject, PackageIdentity> dic = new Dictionary<VsProject, PackageIdentity>();
+            foreach (VsProject proj in Projects)
+            {
+                InstalledPackageReference reference = GetInstalledReference(proj, packageId);
+                if (reference != null)
+                {
+                    PackageIdentity identity = reference.Identity;
+                    dic.Add(proj, identity);
+                }
+            }
+            return dic;
         }
     }
 }

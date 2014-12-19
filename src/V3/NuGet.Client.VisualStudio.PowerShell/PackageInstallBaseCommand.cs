@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using NuGet.Client.Resolution;
 using NuGet.VisualStudio;
+using System.Collections.Generic;
 using System.Management.Automation;
+using System.Linq;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
@@ -35,11 +37,50 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public IVsPackageSourceProvider PackageSourceProvider { get; set; }
 
+        public bool ForceInstall { get; set; }
+
         protected override void Preprocess()
         {
             this.ActiveSourceRepository = GetActiveRepository(Source);
             this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
             base.Preprocess();
+        }
+
+        /// <summary>
+        /// Used for Install-Package -Force and Update-Package -Reinstall
+        /// </summary>
+        /// <param name="identities"></param>
+        /// <param name="targetedProjects"></param>
+        protected void ForceInstallPackages(IEnumerable<PackageIdentity> identities, IEnumerable<VsProject> targetedProjects)
+        {
+            // Install package to the Default project. 
+            VsProject project = targetedProjects.FirstOrDefault();
+            IEnumerable<InstalledPackageReference> references = GetInstalledReferences(project);
+            foreach (PackageIdentity identity in identities)
+            {
+                InstalledPackageReference alreadyInstalled = references.Where(p => p.Identity.Equals(identity)).FirstOrDefault();
+                if (alreadyInstalled != null)
+                {
+                    ForceInstallPackage(alreadyInstalled.Identity, targetedProjects);
+                }
+                else
+                {
+                    ExecuteSinglePackageAction(identity, targetedProjects);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Forcely install single package identity.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="targetedProjects"></param>
+        protected void ForceInstallPackage(PackageIdentity identity, IEnumerable<VsProject> targetedProjects)
+        {
+            // Forcely removed already installed package identity
+            ExecuteSinglePackageAction(identity, targetedProjects, PackageActionType.Uninstall);
+            // Install it back again.
+            ExecuteSinglePackageAction(identity, targetedProjects, PackageActionType.Install);
         }
 
         /// <summary>
@@ -52,6 +93,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context = new ResolutionContext();
                 _context.DependencyBehavior = GetDependencyBehavior();
                 _context.AllowPrerelease = IncludePrerelease.IsPresent;
+                _context.ForceRemove = ForceInstall;
+                // For forcely install. 
+                _context.RemoveDependencies = false;
                 // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
                 if (!string.IsNullOrEmpty(Version) && PowerShellPackage.IsPrereleaseVersion(Version))
                 {
@@ -78,6 +122,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         private DependencyBehavior GetDependencyBehavior()
         {
+            if (ForceInstall)
+            {
+                return DependencyBehavior.Ignore;
+            }
+
             if (IgnoreDependencies.IsPresent)
             {
                 return DependencyBehavior.Ignore;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
@@ -55,6 +56,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
             _isNetworkAvailable = isNetworkAvailable();
         }
 
+        [Parameter]
+        public SwitchParameter Force { get; set; }
+
         private static bool isNetworkAvailable()
         {
             return NetworkInterface.GetIsNetworkAvailable();
@@ -62,11 +66,26 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void Preprocess()
         {
+            ForceInstall = Force.IsPresent;
             FallbackToCacheIfNeccessary();
             // Process active repository and projects
             base.Preprocess();
             ParseUserInputForId();
             this.Identities = GetIdentitiesForResolver();
+        }
+
+        protected override void ExecutePackageActions()
+        {
+            if (ForceInstall)
+            {
+                SubscribeToProgressEvents();
+                ForceInstallPackages(Identities, Projects);
+                UnsubscribeFromProgressEvents();
+            }
+            else
+            {
+                base.ExecutePackageActions();
+            }
         }
 
         /// <summary>

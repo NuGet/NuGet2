@@ -8,13 +8,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// <summary>
     /// This cmdlet set the Default project of PowerShell tool window
     /// </summary>
-    [Cmdlet(VerbsCommon.Set, "Source", DefaultParameterSetName = ParameterSetByName)]
+    [Cmdlet(VerbsCommon.Set, "Source")]
     [OutputType(typeof(string))]
     public class SetSourceCommand : NuGetPowerShellBaseCommand
     {
-        private const string ParameterSetByName = "ByName";
-        private const string ParameterSetAllProjects = "AllProjects";
-
         public SetSourceCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
