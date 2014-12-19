@@ -118,8 +118,51 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return searchResults;
         }
 
-        public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, 
-            NuGetVersion nugetVersion = null, bool isSafe = false, int skip = 0, int take = 30)
+        /// <summary>
+        /// Get all versions of a specific package with packageId
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="packageId"></param>
+        /// <param name="names"></param>
+        /// <param name="allowPrerelease"></param>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public static IEnumerable<NuGetVersion> GetAllVersionsForPackageId(JObject package)
+        {
+            // Get all versions of package
+            var versionList = new List<NuGetVersion>();
+            var versions = package.Value<JArray>(Properties.Versions);
+            if (versions != null)
+            {
+                if (versions[0].Type == JTokenType.String)
+                {
+                    // TODO: this part should be removed once the new end point is up and running.
+                    versionList = versions
+                        .Select(v => NuGetVersion.Parse(v.Value<string>()))
+                        .ToList();
+                }
+                else
+                {
+                    versionList = versions
+                        .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
+                        .ToList();
+                }
+            }
+            return versionList;
+        }
+
+        /// <summary>
+        /// Get JObject of a specific package with packageId
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="packageId"></param>
+        /// <param name="names"></param>
+        /// <param name="allowPrerelease"></param>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public static JObject GetJObjectForPackageId(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease, int skip, int take)
         {
             if (packageId == null)
             {
@@ -130,15 +173,34 @@ namespace NuGet.Client.VisualStudio.PowerShell
             SearchFilter filter = new SearchFilter();
             filter.IncludePrerelease = allowPrerelease;
             filter.SupportedFrameworks = names;
+            JObject package = null;
 
-            string version = String.Empty;
             try
             {
                 Task<IEnumerable<JObject>> task = repo.Search(packageId, filter, skip, take, cancellationToken: CancellationToken.None);
                 IEnumerable<JObject> packages = task.Result;
                 // Get the package with the specific Id.
-                JObject package = packages.Where(p => string.Equals(p.Value<string>(Properties.PackageId), packageId, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                package = packages.Where(p => string.Equals(p.Value<string>(Properties.PackageId), packageId, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                if (package == null)
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.UnknownPackage, packageId));
+                }
+            }
+            return package;
+        }
 
+        public static string GetLastestVersionForPackage(SourceRepository repo, string packageId, IEnumerable<FrameworkName> names, bool allowPrerelease,
+            NuGetVersion nugetVersion = null, bool isSafe = false, int skip = 0, int take = 30)
+        {
+            string version = string.Empty;
+            try
+            {
+                JObject package = GetJObjectForPackageId(repo, packageId, names, allowPrerelease, skip, take);
                 // Return latest version if Safe is not required and latestVersion is not null or empty.
                 version = package.Value<String>(Properties.LatestVersion);
                 if (!isSafe && !string.IsNullOrEmpty(version))
@@ -148,24 +210,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
                 // Continue to get the latest version when above condition is not met.
                 IEnumerable<NuGetVersion> allVersions = Enumerable.Empty<NuGetVersion>();
-                var versionList = new List<NuGetVersion>();
-                var versions = package.Value<JArray>(Properties.Versions);
-                if (versions != null)
-                {
-                    if (versions[0].Type == JTokenType.String)
-                    {
-                        // TODO: this part should be removed once the new end point is up and running.
-                        versionList = versions
-                            .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                            .ToList();
-                    }
-                    else
-                    {
-                        versionList = versions
-                            .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
-                            .ToList();
-                    }
-                }
+                var versionList = GetAllVersionsForPackageId(package);
 
                 if (isSafe && nugetVersion != null)
                 {
@@ -245,6 +290,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return jObjects;
         }
 
+        /// <summary>
+        /// Get the JObject of a package with known packageId and version
+        /// </summary>
+        /// <param name="sourceRepository"></param>
+        /// <param name="packageId"></param>
+        /// <param name="version"></param>
+        /// <param name="allowPrereleaseVersions"></param>
+        /// <returns></returns>
         public static JObject GetPackageByIdAndVersion(SourceRepository sourceRepository, string packageId, string version, bool allowPrereleaseVersions)
         {
             NuGetVersion nVersion = GetNuGetVersionFromString(version);
@@ -264,6 +317,11 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return package;
         }
 
+        /// <summary>
+        /// Parse the NuGetVersion from string
+        /// </summary>
+        /// <param name="version"></param>
+        /// <returns></returns>
         public static NuGetVersion GetNuGetVersionFromString(string version)
         {
             NuGetVersion nVersion;
@@ -287,11 +345,67 @@ namespace NuGet.Client.VisualStudio.PowerShell
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
-        public static VersionRange GetSafeRange(NuGetVersion version, bool includePrerlease)
+        public static VersionRange GetSafeRange(NuGetVersion version, bool includePrerelease)
         {
             SemanticVersion max = new SemanticVersion(new Version(version.Major, version.Minor + 1));
             NuGetVersion maxVersion = NuGetVersion.Parse(max.ToString());
-            return new VersionRange(version, true, maxVersion, false, includePrerlease);
+            return new VersionRange(version, true, maxVersion, false, includePrerelease);
+        }
+
+        /// <summary>
+        /// Get the update version for Dependent package, based on the specification of Highest, HighestMinor, HighestPatch and Lowest.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="identity"></param>
+        /// <param name="updateVersion"></param>
+        /// <param name="names"></param>
+        /// <param name="allowPrerelease"></param>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public static NuGetVersion GetUpdateVersionForDependentPackage(SourceRepository repo, PackageIdentity identity, DependencyVersion updateVersion, IEnumerable<FrameworkName> names, bool allowPrerelease,
+            int skip = 0, int take = 30)
+        {
+            if (identity == null)
+            {
+                return null;
+            }
+
+            JObject package = GetJObjectForPackageId(repo, identity.Id, names, allowPrerelease, skip, take);
+            IEnumerable<NuGetVersion> allVersions = GetAllVersionsForPackageId(package);
+            // Find all versions that are higher than the package's current version
+            allVersions = allVersions.Where(p => p > identity.Version).OrderByDescending(v => v);
+
+            if (updateVersion == DependencyVersion.Lowest)
+            {
+                return allVersions.LastOrDefault();
+            }
+            else if (updateVersion == DependencyVersion.Highest)
+            {
+                return allVersions.FirstOrDefault();
+            }
+            else if (updateVersion == DependencyVersion.HighestPatch)
+            {
+                var groups = from p in allVersions
+                             group p by new { p.Version.Major, p.Version.Minor } into g
+                             orderby g.Key.Major, g.Key.Minor
+                             select g;
+                return (from p in groups.First()
+                        orderby p.Version descending
+                        select p).FirstOrDefault();
+            }
+            else if (updateVersion == DependencyVersion.HighestMinor)
+            {
+                var groups = from p in allVersions
+                             group p by new { p.Version.Major } into g
+                             orderby g.Key.Major
+                             select g;
+                return (from p in groups.First()
+                        orderby p.Version descending
+                        select p).FirstOrDefault();
+            }
+
+            throw new ArgumentOutOfRangeException("updateVersion");
         }
 
         public static bool IsPrereleaseVersion(string version)
