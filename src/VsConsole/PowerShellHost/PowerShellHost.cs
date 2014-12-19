@@ -407,7 +407,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         public string[] GetPackageSources()
         {
-            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().Select(ps => ps.Name).ToArray();
+            // Starting NuGet 3.0 RC, AggregateSource will not be displayed in the Package source dropdown box of PowerShell console.
+            return _packageSourceProvider.GetEnabledPackageSources().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject
