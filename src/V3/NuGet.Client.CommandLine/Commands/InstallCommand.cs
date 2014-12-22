@@ -120,32 +120,32 @@ namespace NuGet.Commands
                     DependencyBehavior = DependencyBehavior,
                 });
 
-            var actions = await actionResolver.ResolveActionsAsync(new PackageIdentity(packageId, version),
+            var packageActions = await actionResolver.ResolveActionsAsync(new PackageIdentity(packageId, version),
                 PackageActionType.Install,
                 new FilesystemInstallationTarget(packageManager));
 
             if (Verbosity == NuGet.Verbosity.Detailed)
             {
                 Console.WriteLine("Actions returned by resolver");
-                foreach (var action in actions)
+                foreach (var action in packageActions)
                 {
                     Console.WriteLine(action.ActionType.ToString() + "-" + action.PackageIdentity.ToString());
                 }
             }
 
-            actions = actions.Where(a => a.ActionType == PackageActionType.Download || a.ActionType == PackageActionType.Purge);
+            packageActions = packageActions.Where(a => a.ActionType == PackageActionType.Download || a.ActionType == PackageActionType.Purge);
 
             if (Verbosity == NuGet.Verbosity.Detailed)
             {
                 Console.WriteLine("After reducing actions to just Download and Purge");
-                foreach (var action in actions)
+                foreach (var action in packageActions)
                 {
                     Console.WriteLine(action.ActionType.ToString() + "-" + action.PackageIdentity.ToString());
                 }
             }
 
             var actionExecutor = new ActionExecutor();
-            await actionExecutor.ExecuteActionsAsync(actions, Console, CancellationToken.None);
+            actionExecutor.ExecuteActions(packageActions, Console);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Security;
 
 namespace NuGet.Common
 {
-    public interface IConsole : IExecutionLogger, ILogger
+    public interface IConsole : IExecutionContext, ILogger
     {
         int CursorLeft { get; set; }
         int WindowWidth { get; set; }

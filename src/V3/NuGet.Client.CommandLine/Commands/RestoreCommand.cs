@@ -315,7 +315,7 @@ namespace NuGet.Commands
                     return true;
                 }
 
-                var packageAction = new NewPackageAction(Client.Resolution.PackageActionType.Download,
+                var packageAction = new NewPackageAction(NuGet.Client.PackageActionType.Download,
                     packageIdentity, packageJSON, filesystemInstallationTarget, SourceRepository, null);
 
                 // BUGBUG: See PackageExtractor.cs for locking mechanism used to handle concurrency
@@ -323,7 +323,7 @@ namespace NuGet.Commands
 
                 // BUGBUG: This is likely inefficient. Consider collecting all actions first and executing them in 1 shot
                 var packageActions = new List<NewPackageAction>() { packageAction };
-                actionExecutor.ExecuteActionsAsync(packageActions, Console, CancellationToken.None).Wait();
+                actionExecutor.ExecuteActions(packageActions, Console);
                 return true;
             }
         }
@@ -402,12 +402,12 @@ namespace NuGet.Commands
 
             var packageManager = CreatePackageManager(packagesFolderFileSystem, useSideBySidePaths: true);
             var filesystemInstallationTarget = new FilesystemInstallationTarget(packageManager);
-            var packageAction = satellitePackages.Select(packageJSON => new NewPackageAction(Client.Resolution.PackageActionType.Download,
+            var packageActions = satellitePackages.Select(packageJSON => new NewPackageAction(NuGet.Client.PackageActionType.Download,
                     new PackageIdentity(packageJSON[Properties.PackageId].ToString(), new NuGetVersion (packageJSON[Properties.Version].ToString())), packageJSON, filesystemInstallationTarget, SourceRepository, null));
 
             // BUGBUG: See PackageExtractor.cs for locking mechanism used to handle concurrency
             NuGet.Client.Installation.ActionExecutor actionExecutor = new Client.Installation.ActionExecutor();
-            actionExecutor.ExecuteActionsAsync(packageAction, CancellationToken.None).Wait();
+            actionExecutor.ExecuteActions(packageActions, Console);
 
             return true;
         }

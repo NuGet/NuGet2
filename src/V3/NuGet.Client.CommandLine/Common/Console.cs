@@ -384,5 +384,15 @@ namespace NuGet.Common
                 }
             }
         }
+
+        public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, Client.Installation.InstallationTarget target)
+        {
+            // no-op
+        }
+
+        public void OpenFile(string fullPath)
+        {
+            // no-op
+        }
     }
 }
