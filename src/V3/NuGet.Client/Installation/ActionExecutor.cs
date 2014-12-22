@@ -127,7 +127,7 @@ namespace NuGet.Client.Installation
             }
         }
 
-        private string GetReadmeFilePath(NewPackageAction action)
+        private static string GetReadmeFilePath(NewPackageAction action)
         {
             // Get the package manager and project manager from the target
             var packageManager = action.Target.TryGetFeature<IPackageManager>();
