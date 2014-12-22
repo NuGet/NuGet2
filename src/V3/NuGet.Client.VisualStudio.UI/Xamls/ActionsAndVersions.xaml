@@ -16,6 +16,10 @@
                 <ResourceDictionary Source="Resources.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Tools:VersionToVersionForDisplayConverter x:Key="VersionToVersionForDisplayConverter" />
+
+            <ControlTemplate x:Key="SeparatorControlTemplate">
+                <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
+            </ControlTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -35,7 +39,6 @@
             FontWeight="Bold"
             Text="{x:Static resx:Resources.Label_Action}" />
         <ComboBox
-            x:Name="_actions"
             Grid.Row="3"
             Grid.Column="0"
             MinWidth="150"
@@ -57,23 +60,6 @@
             MinHeight="24"
             Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}"
             ItemsSource="{Binding Path=Versions}"
-            SelectedItem="{Binding Path=SelectedVersion}">
-            <ComboBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
-                    <Style.Triggers>
-                        <!-- generate a separator if value is null -->
-                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                                        <Separator HorizontalAlignment="Stretch" IsEnabled="False" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ComboBox.ItemContainerStyle>
-        </ComboBox>
+            SelectedItem="{Binding Path=SelectedVersion}" />
     </Grid>
 </UserControl>

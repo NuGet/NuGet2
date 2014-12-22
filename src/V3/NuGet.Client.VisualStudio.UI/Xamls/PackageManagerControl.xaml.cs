@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Internal.VisualStudio.PlatformUI;
+using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
-using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Versioning;
@@ -72,6 +69,8 @@ namespace NuGet.Client.VisualStudio.UI
 
             var factory = ServiceLocator.GetGlobalService<SVsWindowSearchHostFactory, IVsWindowSearchHostFactory>();
             _windowSearchHost = factory.CreateWindowSearchHost(_searchControlParent);
+            _windowSearchHost.SetupSearch(this);
+            _windowSearchHost.IsVisible = true;
 
             _filter.Items.Add(Resx.Resources.Filter_All);
             _filter.Items.Add(Resx.Resources.Filter_Installed);
@@ -126,7 +125,7 @@ namespace NuGet.Client.VisualStudio.UI
                         null;
 
                     // start search explicitly.
-                    SearchPackageInActivePackageSource();
+                    SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
                 }
             }
             finally
@@ -251,9 +250,8 @@ namespace NuGet.Client.VisualStudio.UI
             return Sources.CreateSourceRepository(activeSource);
         }
 
-        private void SearchPackageInActivePackageSource()
+        private void SearchPackageInActivePackageSource(string searchText)
         {
-            var searchText = _windowSearchHost.SearchQuery.SearchString;            
             var activeSource = _sourceRepoList.SelectedItem as PackageSource;
             var sourceRepository = Sources.CreateSourceRepository(activeSource);
 
@@ -320,6 +318,7 @@ namespace NuGet.Client.VisualStudio.UI
                     newModel.Options = oldModel.Options;
                 }
                 _packageDetail.DataContext = newModel;
+                _packageDetail.ScrollToHome();
                 await newModel.LoadPackageMetadaAsync();
             }
         }
@@ -336,14 +335,14 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 Sources.ChangeActiveSource(newSource);
             }
-            SearchPackageInActivePackageSource();
+            SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
         }
 
         private void _filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_initialized)
             {
-                SearchPackageInActivePackageSource();
+                SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
             }
         }
 
@@ -503,9 +502,9 @@ namespace NuGet.Client.VisualStudio.UI
                 progressDialog.Show();
                 var executor = new ActionExecutor();
                 await Task.Run(
-                    () => 
-                    { 
-                        executor.ExecuteActions(actions, progressDialog, userAction); 
+                    () =>
+                    {
+                        executor.ExecuteActions(actions, progressDialog, userAction);
                     });
 
                 UpdatePackageStatus();
@@ -532,7 +531,7 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            SearchPackageInActivePackageSource();
+            SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
         }
 
         private void _checkboxPrerelease_CheckChanged(object sender, RoutedEventArgs e)
@@ -542,19 +541,26 @@ namespace NuGet.Client.VisualStudio.UI
                 return;
             }
 
-            SearchPackageInActivePackageSource();
+            SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
         }
 
-        private void ControlLoaded(object sender, RoutedEventArgs e)
+        internal class SearchQuery : IVsSearchQuery
         {
-            _windowSearchHost.SetupSearch(this);
-            _windowSearchHost.IsVisible = true;
-        }
+            public uint GetTokens(uint dwMaxTokens, IVsSearchToken[] rgpSearchTokens)
+            {
+                return 0;
+            }
 
-        private void ControlUnloaded(object sender, RoutedEventArgs e)
-        {
-            _windowSearchHost.TerminateSearch();
-            RemoveRestoreBar();
+            public uint ParseError
+            {
+                get { return 0; }
+            }
+
+            public string SearchString
+            {
+                get;
+                set;
+            }
         }
 
         public Guid Category
@@ -567,12 +573,12 @@ namespace NuGet.Client.VisualStudio.UI
 
         public void ClearSearch()
         {
-            SearchPackageInActivePackageSource();
+            SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
         }
 
         public IVsSearchTask CreateSearch(uint dwCookie, IVsSearchQuery pSearchQuery, IVsSearchCallback pSearchCallback)
         {
-            SearchPackageInActivePackageSource();
+            SearchPackageInActivePackageSource(pSearchQuery.SearchString);
             return null;
         }
 
@@ -587,6 +593,17 @@ namespace NuGet.Client.VisualStudio.UI
             var settings = (SearchSettingsDataSource)pSearchSettings;
             settings.ControlMinWidth = (uint)_searchControlParent.MinWidth;
             settings.ControlMaxWidth = uint.MaxValue;
+            settings.SearchWatermark = GetSearchText();
+        }
+
+        // Returns the text to be displayed in the search box.
+        private string GetSearchText()
+        {
+            var focusOnSearchKeyGesture = (KeyGesture)InputBindings.OfType<KeyBinding>().First(
+                x => x.Command == Commands.FocusOnSearchBox).Gesture;
+            return string.Format(CultureInfo.CurrentCulture,
+                Resx.Resources.Text_SearchBoxText,
+                focusOnSearchKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture));                
         }
 
         public bool SearchEnabled
@@ -602,6 +619,28 @@ namespace NuGet.Client.VisualStudio.UI
         public IVsEnumWindowSearchOptions SearchOptionsEnum
         {
             get { return null; }
+        }
+
+        private void FocusOnSearchBox_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            _windowSearchHost.Activate();
+        }
+
+        public void Search(string searchText)
+        {
+            if (String.IsNullOrWhiteSpace(searchText))
+            {
+                return;
+            }
+
+            _windowSearchHost.Activate();
+            _windowSearchHost.SearchAsync(new SearchQuery() { SearchString = searchText });
+        }
+
+        public void CleanUp()
+        {
+            _windowSearchHost.TerminateSearch();
+            RemoveRestoreBar();
         }
     }
 }

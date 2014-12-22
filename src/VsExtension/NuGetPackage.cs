@@ -438,11 +438,12 @@ namespace NuGet.Tools
             var windowFrame = FindExistingWindowFrame(project);
             if (windowFrame == null)
             {
-                windowFrame = CreateNewWindowFrame(project, searchText);
+                windowFrame = CreateNewWindowFrame(project);
             }
 
             if (windowFrame != null)
             {
+                Search(windowFrame, searchText);
                 windowFrame.Show();
             }
         }
@@ -456,7 +457,7 @@ namespace NuGet.Tools
             return (T)propertyValue;
         }
 
-        private IVsWindowFrame CreateNewWindowFrame(Project project, string searchText)
+        private IVsWindowFrame CreateNewWindowFrame(Project project)
         {
             var vsProject = project.ToVsHierarchy();
             var documentName = project.UniqueName;
@@ -497,12 +498,11 @@ namespace NuGet.Tools
             }
 
             // Create the doc window using the hiearchy & item id.
-            return CreateDocWindow(project, searchText, documentName, hier, itemId);
+            return CreateDocWindow(project, documentName, hier, itemId);
         }
 
         private IVsWindowFrame CreateDocWindow(
             Project project,
-            string searchText,
             string documentName,
             IVsHierarchy hier,
             uint itemId)
@@ -515,7 +515,6 @@ namespace NuGet.Tools
             var myDoc = new PackageManagerModel(
                 context.SourceManager, 
                 context.GetCurrentVsSolution().GetProject(project));
-            myDoc.SearchText = searchText;
 
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
             var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
@@ -585,7 +584,10 @@ namespace NuGet.Tools
                 int hr = windowFrame.GetProperty(
                     (int)__VSFPROPID.VSFPROPID_DocData,
                     out property);
-                if (hr == VSConstants.S_OK && property is IVsSolution)
+                var packageManagerControl = GetPackageManagerControl(windowFrame);
+                if (hr == VSConstants.S_OK && 
+                    property is IVsSolution &&
+                    packageManagerControl != null)
                 {
                     return windowFrame;
                 }
@@ -618,65 +620,116 @@ namespace NuGet.Tools
             }
         }
 
+        private IVsWindowFrame CreateDocWindowForSolution()
+        {
+            // TODO: Need to wait until solution is loaded
+
+            IVsWindowFrame windowFrame = null;          
+            IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            uint windowFlags =
+                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
+
+            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
+            var currentSolution = context.GetCurrentSolution();
+            if (!currentSolution.Projects.Any())
+            {
+                // there are no supported projects.
+                MessageHelper.ShowWarningMessage(VsResources.NoSupportedProjectsInSolution, Resources.ErrorDialogBoxTitle);
+                return windowFrame;
+            }
+
+            var myDoc = new PackageManagerModel(context.SourceManager, currentSolution);
+            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
+            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+            var guidCommandUI = Guid.Empty;
+            var caption = String.Format(
+                CultureInfo.CurrentCulture,
+                Resx.Resources.Label_NuGetWindowCaption,
+                myDoc.Target.Name);
+            var documentName = _dte.Solution.FullName;
+            int hr = uiShell.CreateDocumentWindow(
+                windowFlags,
+                documentName,
+                (IVsUIHierarchy)solution,
+                (uint)VSConstants.VSITEMID.Root,
+                ppunkDocView,
+                ppunkDocData,
+                ref guidEditorType,
+                null,
+                ref guidCommandUI,
+                null,
+                caption,
+                string.Empty,
+                null,
+                out windowFrame);
+            ErrorHandler.ThrowOnFailure(hr);
+            return windowFrame;
+        }
+
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
         {
-            string parameterString = null;
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null)
-            {
-                parameterString = args.InValue as string;
-            }
-            var searchText = GetSearchText(parameterString);
-
             var windowFrame = FindExistingSolutionWindowFrame();
             if (windowFrame == null)
             {
                 // Create the window frame
-                //!!! Need to wait until solution is loaded
-                IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
-                IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-                uint windowFlags =
-                    (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
-                    (uint)_VSRDTFLAGS.RDT_DontSaveAs;
-
-                var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-                var currentSolution = context.GetCurrentSolution();
-                if (!currentSolution.Projects.Any())
-                {
-                    // there are no supported projects.
-                    MessageHelper.ShowWarningMessage(VsResources.NoSupportedProjectsInSolution, Resources.ErrorDialogBoxTitle);
-                    return;
-                }
-
-                var myDoc = new PackageManagerModel(context.SourceManager, currentSolution);
-                var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
-                var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-                var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-                var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
-                var guidCommandUI = Guid.Empty;
-                var caption = String.Format(
-                    CultureInfo.CurrentCulture,
-                    Resx.Resources.Label_NuGetWindowCaption,
-                    myDoc.Target.Name);
-                var documentName = _dte.Solution.FullName;
-                int hr = uiShell.CreateDocumentWindow(
-                    windowFlags,
-                    documentName,
-                    (IVsUIHierarchy)solution,
-                    (uint)VSConstants.VSITEMID.Root,
-                    ppunkDocView,
-                    ppunkDocData,
-                    ref guidEditorType,
-                    null,
-                    ref guidCommandUI,
-                    null,
-                    caption,
-                    string.Empty,
-                    null,
-                    out windowFrame);
-                ErrorHandler.ThrowOnFailure(hr);
+                windowFrame = CreateDocWindowForSolution();
             }
-            windowFrame.Show();
+
+            if (windowFrame != null)
+            {
+                // process search string
+                string parameterString = null;
+                OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
+                if (args != null)
+                {
+                    parameterString = args.InValue as string;
+                }
+                var searchText = GetSearchText(parameterString);
+                Search(windowFrame, searchText);
+
+                windowFrame.Show();
+            }
+        }
+
+        // Gets the package manager control hosted in the window frame.
+        private PackageManagerControl GetPackageManagerControl(IVsWindowFrame windowFrame)
+        {
+            object property;
+            int hr = windowFrame.GetProperty(
+                (int)__VSFPROPID.VSFPROPID_DocView,
+                out property);
+
+            var windowPane = property as PackageManagerWindowPane;
+            if (windowPane == null)
+            {
+                return null;
+            }
+
+            var packageManagerControl = windowPane.Content as PackageManagerControl;
+            return packageManagerControl;
+        }
+
+        /// <summary>
+        /// Search for packages using the searchText.
+        /// </summary>
+        /// <param name="windowFrame">A window frame that hosts the PackageManagerControl.</param>
+        /// <param name="searchText">Search text.</param>
+        private void Search(IVsWindowFrame windowFrame, string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                return;
+            }
+
+            var packageManagerControl = GetPackageManagerControl(windowFrame);
+            if (packageManagerControl != null)
+            {
+                packageManagerControl.Search(searchText);
+            }
         }
 
         private void EnablePackagesRestore(object sender, EventArgs args)

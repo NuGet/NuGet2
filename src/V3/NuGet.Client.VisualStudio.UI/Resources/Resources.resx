@@ -300,9 +300,6 @@
   <data name="WindowTitle_Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Label_Search" xml:space="preserve">
-    <value>Search:</value>
-  </data>
   <data name="Checkbox_IncludePrerelease" xml:space="preserve">
     <value>Include Prerelease</value>
   </data>
@@ -362,5 +359,9 @@
   </data>
   <data name="Checkbox_RemoveDependencies" xml:space="preserve">
     <value>Remove dependencies</value>
+  </data>
+  <data name="Text_SearchBoxText" xml:space="preserve">
+    <value>Search ({0})</value>
+    <comment>The text to be displayed in the search box</comment>
   </data>
 </root>

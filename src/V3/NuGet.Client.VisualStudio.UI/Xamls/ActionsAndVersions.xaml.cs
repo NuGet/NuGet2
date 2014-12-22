@@ -23,6 +23,17 @@ namespace NuGet.Client.VisualStudio.UI
         public ActionsAndVersions()
         {
             InitializeComponent();
+
+            // Change ItemContainerStyle of the _versions combobox so that 
+            // for a null value, a separator is generated.
+            var dataTrigger = new DataTrigger();
+            dataTrigger.Binding = new Binding();
+            dataTrigger.Value = null;
+            dataTrigger.Setters.Add(new Setter(ComboBoxItem.TemplateProperty, this.FindResource("SeparatorControlTemplate")));
+
+            var style = new Style(typeof(ComboBoxItem), _versions.ItemContainerStyle);
+            style.Triggers.Add(dataTrigger);
+            _versions.ItemContainerStyle = style;
         }
     }
 }

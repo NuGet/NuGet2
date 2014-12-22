@@ -49,6 +49,11 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        public void ScrollToHome()
+        {
+            _root.ScrollToHome();
+        }
+
         public UserAction GetUserAction()
         {
             var model = (DetailControlModel)DataContext;

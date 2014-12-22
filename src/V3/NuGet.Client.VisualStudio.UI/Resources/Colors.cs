@@ -56,5 +56,29 @@ namespace NuGet.Client.VisualStudio.UI.Resources
                 return VsBrushes.BrandedUITextKey;
             }
         }
+
+        public static object ControlLinkTextKey
+        {
+            get
+            {
+                return Microsoft.VisualStudio.Shell.VsBrushes.ControlLinkTextKey;
+            }
+        }
+
+        public static object ControlLinkTextHoverKey
+        {
+            get
+            {
+                return Microsoft.VisualStudio.Shell.VsBrushes.ControlLinkTextHoverKey;
+            }
+        }
+
+        public static object WindowTextKey
+        {
+            get
+            {
+                return Microsoft.VisualStudio.Shell.VsBrushes.WindowTextKey;
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@
     xmlns:ui ="clr-namespace:NuGet.Client.VisualStudio.UI"
     x:Name="_self"
     ShowInTaskbar="False"
-    WindowStyle="SingleBorderWindow"    
+    WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
     Title="{Binding Title}"
     Height="500" Width="500">
@@ -20,10 +20,10 @@
 
     <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <TextBlock
             Grid.Row="0"
@@ -35,17 +35,20 @@
             Grid.Row="1"
             Margin="12,4,12,0"
             TextWrapping="Wrap"
-            Text="{x:Static resx:Resources.Text_Changes}"/>
+            Text="{x:Static resx:Resources.Text_Changes}" />
 
-        <Border 
+        <Border
             Grid.Row="2"
             Margin="12,12"
             BorderBrush="{DynamicResource {x:Static resx:Brushes.BorderBrush}}"
             BorderThickness="1">
-            <ScrollViewer 
+            <ScrollViewer
                 HorizontalScrollBarVisibility="Auto"
-                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
-                <ItemsControl ItemsSource="{Binding Path=PreviewResults}">
+                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                IsTabStop="True" >
+                <ItemsControl
+                    ItemsSource="{Binding Path=PreviewResults}"
+                    IsTabStop="False">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="6, 6">
@@ -54,15 +57,15 @@
                                     Text="{Binding Path=Name}" />
 
                                 <!-- Updated packages -->
-                                <StackPanel Margin="0,8" 
-                                            Visibility="{Binding Path=Updated,Converter={StaticResource EnumerableToVisibilityConverter}}"
-                                            >
+                                <StackPanel Margin="0,8"
+                                            Visibility="{Binding Path=Updated,Converter={StaticResource EnumerableToVisibilityConverter}}">
                                     <TextBlock
-                        FontWeight="Bold"
-                        Text="{x:Static resx:Resources.Label_UpdatedPackages}" />
+                                        FontWeight="Bold"
+                                        Text="{x:Static resx:Resources.Label_UpdatedPackages}" />
                                     <ItemsControl
-                        Margin="10,0,0,0"
-                        ItemsSource="{Binding Path=Updated}">
+                                        Margin="10,0,0,0"
+                                        ItemsSource="{Binding Path=Updated}"
+                                        IsTabStop="False">
                                     </ItemsControl>
                                 </StackPanel>
 
@@ -73,8 +76,9 @@
                         FontWeight="Bold"
                         Text="{x:Static resx:Resources.Label_InstalledPackages}" />
                                     <ItemsControl
-                        Margin="10,0,0,0"
-                        ItemsSource="{Binding Path=Added}">
+                                        Margin="10,0,0,0"
+                                        ItemsSource="{Binding Path=Added}"
+                                        IsTabStop="False">
                                     </ItemsControl>
                                 </StackPanel>
 
@@ -85,8 +89,9 @@
                         FontWeight="Bold"
                         Text="{x:Static resx:Resources.Label_UninstalledPackages}" />
                                     <ItemsControl
-                        Margin="10,0,0,0"
-                        ItemsSource="{Binding Path=Deleted}">
+                                        Margin="10,0,0,0"
+                                        ItemsSource="{Binding Path=Deleted}"
+                                        IsTabStop="False">
                                     </ItemsControl>
                                 </StackPanel>
                             </StackPanel>
@@ -96,19 +101,19 @@
             </ScrollViewer>
         </Border>
 
-        <Grid Grid.Row="3" Background="{Binding ElementName=_self, Path=Background}" >
+        <Grid Grid.Row="3" Background="{Binding ElementName=_self, Path=Background}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" 
+            <Button Grid.Column="1"
                     MinWidth="86"
                     MinHeight="24"
                     Margin="0,12"
                     AutomationProperties.AutomationId="OK"
                     Content="{x:Static resx:Resources.Button_OK}" Click="OkButtonClicked" />
-            <Button Grid.Column="2" 
+            <Button Grid.Column="2"
                     MinWidth="86"
                     MinHeight="24"
                     Margin="6,12,12,12"

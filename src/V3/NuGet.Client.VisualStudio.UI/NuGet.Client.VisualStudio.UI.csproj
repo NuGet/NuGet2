@@ -109,6 +109,7 @@
     <Compile Include="Models\UiPackageDependencySet.cs" />
     <Compile Include="Models\UiSearchResultPackage.cs" />
     <Compile Include="Resources\Colors.cs" />
+    <Compile Include="Resources\Commands.cs" />
     <Compile Include="VersionForDisplay.cs" />
     <Compile Include="VsDialogWindow.cs" />
     <Compile Include="Xamls\ActionsAndVersions.xaml.cs">

@@ -30,7 +30,10 @@
                     <Run Text="{Binding Authors, Mode=OneTime}" />
                     </TextBlock>
                     <TextBlock AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTerm_{0}'}">
-                    <Hyperlink AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTermLink_{0}'}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">
+                    <Hyperlink AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTermLink_{0}'}" 
+                               NavigateUri="{Binding LicenseUrl, Mode=OneTime}"  
+                               Style="{StaticResource HyperlinkStyle}"
+                               RequestNavigate="OnViewLicenseTermsRequestNavigate">
                         <Run Text="View License" />
                     </Hyperlink>
                     </TextBlock>
@@ -62,6 +65,7 @@
             Grid.Row="2"
             Margin="12,8"
             MinHeight="130"
+            IsTabStop="False"
             ItemsSource="{Binding}"
             ItemTemplate="{StaticResource LicenseItemTemplate}">
             <ItemsControl.Template>

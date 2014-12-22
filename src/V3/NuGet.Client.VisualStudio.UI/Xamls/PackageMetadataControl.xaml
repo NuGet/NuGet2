@@ -18,12 +18,12 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
+
         <!-- descriptions -->
         <TextBlock
                 Grid.Row="0"
@@ -94,6 +94,7 @@
                         Margin="8,8,0,0"
                         Grid.Row="2" Grid.Column="1">
                         <Hyperlink NavigateUri="{Binding Path=LicenseUrl}"
+                                   Style="{StaticResource HyperlinkStyle}"
                                    Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
                             <Run Text="{Binding Path=LicenseUrl}" />
                         </Hyperlink>
@@ -138,6 +139,7 @@
                         Margin="8,8,0,0"
                         Grid.Row="5" Grid.Column="1">
                         <Hyperlink NavigateUri="{Binding Path=ProjectUrl}"
+                                   Style="{StaticResource HyperlinkStyle}"
                                    Command="{x:Static Tools:PackageManagerControlCommands.OpenExternalLink}">
                             <Run Text="{Binding Path=ProjectUrl}" />
                         </Hyperlink>
@@ -159,22 +161,23 @@
 
         <!-- dependencies -->
         <StackPanel Grid.Row="3"
-                        Margin="0,8">
+                    Margin="0,8">
             <TextBlock
-                    FontWeight="Bold" Margin="0,8,0,0"
-                    Text="{x:Static resx:Resources.Label_Dependencies}" />
+                FontWeight="Bold" Margin="0,8,0,0"
+                Text="{x:Static resx:Resources.Label_Dependencies}" />
 
             <ItemsControl
-                    ItemsSource="{Binding Path=DependencySets}"
-                    Visibility="{Binding Path=HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Margin="8,0,0,0">
+                ItemsSource="{Binding Path=DependencySets}"
+                Visibility="{Binding Path=HasDependencies,Converter={StaticResource BooleanToVisibilityConverter}}"
+                IsTabStop="False"
+                Margin="8,0,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical" Margin="0,8,0,0">
                             <TextBlock
                                 Text="{Binding TargetFramework}" FontWeight="Bold"
                                 Visibility="{Binding TargetFramework,Converter={StaticResource NullToVisibilityConverter}}" />
-                            <ItemsControl ItemsSource="{Binding Dependencies}">
+                            <ItemsControl ItemsSource="{Binding Dependencies}" IsTabStop="False">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}"></TextBlock>

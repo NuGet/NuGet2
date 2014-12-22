@@ -31,24 +31,6 @@ namespace NuGet.Client.VisualStudio.UI
             Target = target;
         }
 
-        private string _searchText;
-
-        public string SearchText
-        {
-            get
-            {
-                return _searchText;
-            }
-            set
-            {
-                if (_searchText != value)
-                {
-                    _searchText = value;
-                    OnPropertyChanged("SearchText");
-                }
-            }
-        }
-
         #region IVsPersistDocData
 
         public int Close()

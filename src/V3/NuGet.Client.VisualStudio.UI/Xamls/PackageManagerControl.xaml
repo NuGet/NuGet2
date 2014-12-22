@@ -10,7 +10,7 @@
              Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
              x:Name="_self"
              mc:Ignorable="d"
-             d:DesignHeight="523" d:DesignWidth="900" Loaded="ControlLoaded" Unloaded="ControlUnloaded">
+             d:DesignHeight="523" d:DesignWidth="900">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,6 +18,14 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+    <UserControl.CommandBindings>
+        <CommandBinding
+            Command="{x:Static Tools:Commands.FocusOnSearchBox}"
+            Executed="FocusOnSearchBox_Executed" />
+    </UserControl.CommandBindings>
+    <UserControl.InputBindings>
+        <KeyBinding Command="{x:Static Tools:Commands.FocusOnSearchBox}" Gesture="CTRL+E" />
+    </UserControl.InputBindings>
     <Grid>
         <Grid x:Name="_root">
             <Grid.RowDefinitions>
