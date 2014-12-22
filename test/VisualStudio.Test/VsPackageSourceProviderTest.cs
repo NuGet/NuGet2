@@ -429,8 +429,8 @@ namespace NuGet.VisualStudio.Test
   <disabledPackageSources>
     <add key=""Windows 8 Packages"" value=""true"" />
   </disabledPackageSources>
-</configuration>",
-                  configFileContent);
+</configuration>".Replace("\r", ""),
+                  configFileContent.Replace("\r", ""));
         }
 
         [Fact]
@@ -649,8 +649,8 @@ namespace NuGet.VisualStudio.Test
   <activePackageSource>
     <add key=""Windows 8 Packages"" value=""https://www.nuget.org/api/v2/curated-feeds/windows8-packages/"" />
   </activePackageSource>
-</configuration>",
-                  configFileContent);
+</configuration>".Replace("\r", ""),
+                  configFileContent.Replace("\r", ""));
         }
 
         private static void AssertPackageSource(PackageSource ps, string name, string source)
