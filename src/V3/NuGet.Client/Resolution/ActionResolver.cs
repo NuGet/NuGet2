@@ -29,6 +29,58 @@ namespace NuGet.Client.Resolution
         public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(
             PackageIdentity packageIdentity,
             PackageActionType operation,
+            InstallationTarget target)
+        {
+            // Construct the Action Resolver
+            var oldResolver = new OldResolver();
+
+            // Apply context settings
+            ApplyContext(oldResolver);
+
+            var packageManager = target.GetRequiredFeature<IPackageManager>();
+            var nullProjectManager = new NullProjectManager(new CoreInteropPackageManager(packageManager.LocalRepository, new CoreInteropSourceRepository(_source)));
+
+            oldResolver.AddOperation(
+                MapNewToOldActionType(operation),
+                await CreateVirtualPackage(packageIdentity.Id, packageIdentity.Version),
+                nullProjectManager);
+
+            // Resolve actions!
+            var actions = await Task.Factory.StartNew(() => oldResolver.ResolveActions());
+
+            // Convert the actions
+            var converted =
+                from action in actions
+                select new PackageAction(
+                    MapOldToNewActionType(action.ActionType),
+                    new PackageIdentity(
+                        action.Package.Id,
+                        new NuGetVersion(
+                            action.Package.Version.Version,
+                            action.Package.Version.SpecialVersion)),
+                    UnwrapPackage(action.Package),
+                    target,
+                    _source,
+                    packageIdentity);
+
+            // Identify update operations so we can mark them as such.
+            foreach (var group in converted.GroupBy(c => c.PackageIdentity.Id))
+            {
+                var installs = group.Where(p => p.ActionType == PackageActionType.Install).ToList();
+                var uninstalls = group.Where(p => p.ActionType == PackageActionType.Uninstall).ToList();
+                if (installs.Count > 0 && uninstalls.Count > 0)
+                {
+                    var maxInstall = installs.OrderByDescending(a => a.PackageIdentity.Version).First();
+                    maxInstall.IsUpdate = true;
+                }
+            }
+
+            return converted;
+        }
+
+        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(
+            PackageIdentity packageIdentity,
+            PackageActionType operation,
             IEnumerable<Project> targetedProjects,
             Solution solution)
         {

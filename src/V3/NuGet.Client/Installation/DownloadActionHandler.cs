@@ -39,7 +39,7 @@ namespace NuGet.Client.Installation
 
             // Get required features from the target
             var packageManager = action.Target.GetRequiredFeature<IPackageManager>();
-            var packageCache = action.Target.GetRequiredFeature<IPackageCacheRepository>();
+            var packageCache = action.Target.TryGetFeature<IPackageCacheRepository>();
 
             // Load the package
             IPackage package;
@@ -85,43 +85,47 @@ namespace NuGet.Client.Installation
             var packageName = CoreConverters.SafeToPackageName(packageIdentity);
             var downloader = new PackageDownloader();
 
-            var package = packageCache.FindPackage(packageName.Id, packageSemVer);
-            if (package != null)
+            IPackage package = null;
+            if (packageCache != null)
             {
-                NuGetTraceSources.ActionExecutor.Info(
-                    "download/cachehit",
-                    "[{0}] Download: Cache Hit!",
-                    packageIdentity);
-                // Success!
-                return package;
-            }
+                package = packageCache.FindPackage(packageName.Id, packageSemVer);
+                if (package != null)
+                {
+                    NuGetTraceSources.ActionExecutor.Info(
+                        "download/cachehit",
+                        "[{0}] Download: Cache Hit!",
+                        packageIdentity);
+                    // Success!
+                    return package;
+                }
 
-            if (downloadUri == null)
-            {
-                throw new InvalidOperationException(String.Format(
-                    CultureInfo.CurrentCulture,
-                    Strings.DownloadActionHandler_NoDownloadUrl,
-                    packageIdentity));
-            }
+                if (downloadUri == null)
+                {
+                    throw new InvalidOperationException(String.Format(
+                        CultureInfo.CurrentCulture,
+                        Strings.DownloadActionHandler_NoDownloadUrl,
+                        packageIdentity));
+                }
 
-            // Try to download the package through the cache.
-            bool success = packageCache.InvokeOnPackage(
-                packageIdentity.Id,
-                packageSemVer,
-                (targetStream) =>
-                    downloader.DownloadPackage(
-                        new HttpClient(downloadUri),
-                        packageName,
-                        targetStream));
-            if (success)
-            {
-                NuGetTraceSources.ActionExecutor.Info(
-                    "download/downloadedtocache",
-                    "[{0}] Download: Downloaded to cache",
-                    packageName);
+                // Try to download the package through the cache.
+                bool success = packageCache.InvokeOnPackage(
+                    packageIdentity.Id,
+                    packageSemVer,
+                    (targetStream) =>
+                        downloader.DownloadPackage(
+                            new HttpClient(downloadUri),
+                            packageName,
+                            targetStream));
+                if (success)
+                {
+                    NuGetTraceSources.ActionExecutor.Info(
+                        "download/downloadedtocache",
+                        "[{0}] Download: Downloaded to cache",
+                        packageName);
 
-                // Try to get it from the cache again
-                package = packageCache.FindPackage(packageIdentity.Id, packageSemVer);
+                    // Try to get it from the cache again
+                    package = packageCache.FindPackage(packageIdentity.Id, packageSemVer);
+                }
             }
 
             // Either:

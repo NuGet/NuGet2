@@ -151,6 +151,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V3Interop", "src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj", "{9FE9B712-F684-43EC-8F20-F452C60437CB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.CommandLine", "src\V3\NuGet.Client.CommandLine\NuGet.Client.CommandLine.csproj", "{253F3206-BEF0-4F7E-8D04-570E7E339643}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio.PowerShell", "src\V3\NuGet.Client.VisualStudio.PowerShell\NuGet.Client.VisualStudio.PowerShell.csproj", "{37465016-5F91-478B-B4E3-DC78B025797A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2", "src\NuGet.Client.V2\NuGet.Client.V2.csproj", "{07536C1C-85C7-4150-ADA3-5705E7A9E3CA}"
@@ -974,6 +976,26 @@ Global
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Mono Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Release|Any CPU.Build.0 = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{253F3206-BEF0-4F7E-8D04-570E7E339643}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{37465016-5F91-478B-B4E3-DC78B025797A}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
 		{37465016-5F91-478B-B4E3-DC78B025797A}.Coverage|Any CPU.Build.0 = Release|Any CPU
 		{37465016-5F91-478B-B4E3-DC78B025797A}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
@@ -1057,6 +1079,7 @@ Global
 		{61C7D2E8-79A2-4645-AA84-3C81C89588E9} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{56EF26E3-35FE-4857-BCE3-438089339C83} = {F7AB250E-2479-4C9A-AFB2-67A9954918C3}
 		{9FE9B712-F684-43EC-8F20-F452C60437CB} = {F7AB250E-2479-4C9A-AFB2-67A9954918C3}
+		{253F3206-BEF0-4F7E-8D04-570E7E339643} = {F7AB250E-2479-4C9A-AFB2-67A9954918C3}
 		{37465016-5F91-478B-B4E3-DC78B025797A} = {F7AB250E-2479-4C9A-AFB2-67A9954918C3}
 	EndGlobalSection
 EndGlobal
