@@ -13,7 +13,7 @@ namespace NuGet.Client.V2
         public V2DownloadResource(V2Resource resource)
             : base(resource) {}
       
-        public PackageDownloadMetadata GetNupkgUrlForDownload(PackageIdentity identity)
+        Task<PackageDownloadMetadata> IDownload.GetNupkgUrlForDownload(PackageIdentity identity)
         {
             throw new NotImplementedException();
         }
