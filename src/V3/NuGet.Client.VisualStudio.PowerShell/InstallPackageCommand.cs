@@ -28,12 +28,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This command installs the specified package into the specified project.
     /// </summary>
     /// TODO List
-    /// 1. Filter unlisted packages from latest version, if version is not specified by user
-    /// 2. Add new path/package recognition feature
-    /// 3. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
-    /// 4. Add back popping up Readme.txt feature. Should be one of the Resolver actions. 
-    /// 5. Implement Add-BindingRedirect for V3
-    /// 6. Add -Force and -NoCache feature
+    /// 1. Add new path/package recognition feature
+    /// 2. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
+    /// 3. Implement Add-BindingRedirect for V3
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
     public class InstallPackageCommand : PackageInstallBaseCommand
     {

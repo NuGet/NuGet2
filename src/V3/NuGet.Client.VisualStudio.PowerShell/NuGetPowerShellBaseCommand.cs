@@ -17,12 +17,6 @@ using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
-using Microsoft.VisualStudio.Shell;
-using NuGet.Client.ProjectSystem;
-using NuGet.PowerShell.Commands;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
-using NuGetConsole.Host.PowerShell.Implementation;
 
 #if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;

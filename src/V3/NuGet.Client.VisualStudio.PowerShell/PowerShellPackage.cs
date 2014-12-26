@@ -12,9 +12,7 @@ using System.Threading.Tasks;
 namespace NuGet.Client.VisualStudio.PowerShell
 {
     // TODO List
-    // 1. The unlisted packages are not filtered out. The plan is that Server will return unlisted packages.
-    // Test EntityFramework 7.0.0-beta1 is not installed when specify -pre.
-    // 2. Should we add Title to the display? If so, need to embed title field in the search result.
+    // 1. Should we add Title to the display? If so, need to embed title field in the search result.
     public class PowerShellPackage
     {
         public string Id { get; set; }
