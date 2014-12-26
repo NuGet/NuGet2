@@ -51,7 +51,7 @@ namespace NuGet.Client
                     packageRef.RequireReinstallation);
         }
 
-        internal static NuGet.SemanticVersion SafeToSemVer(SimpleVersion ver)
+        public static NuGet.SemanticVersion SafeToSemVer(SimpleVersion ver)
         {
             if (ver == null)
             {
@@ -77,7 +77,7 @@ namespace NuGet.Client
             };
         }
 
-        internal static IPackageName SafeToPackageName(PackageIdentity packageIdentity)
+        public static IPackageName SafeToPackageName(PackageIdentity packageIdentity)
         {
             if (packageIdentity == null)
             {

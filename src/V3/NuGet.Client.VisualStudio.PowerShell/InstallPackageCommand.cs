@@ -4,7 +4,6 @@ using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,7 +27,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     /// This command installs the specified package into the specified project.
     /// </summary>
     /// TODO List
-    /// 1. Add new path/package recognition feature
+    /// 1. Be able to resolve dependency packages from other enabled package sources, if active repo does not contain them.
     /// 2. Add back WriteDisClaimer before installing packages. Should be one of the Resolver actions.
     /// 3. Implement Add-BindingRedirect for V3
     [Cmdlet(VerbsLifecycle.Install, "Package2")]
@@ -218,6 +217,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 }
                 else
                 {
+                    // Example: install-package2 c:\temp\packages.config
                     using (FileStream stream = new FileStream(Id, FileMode.Open))
                     {
                         PackagesConfigReader reader = new PackagesConfigReader(stream);
@@ -245,30 +245,89 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private IEnumerable<PackageIdentity> CreatePackageIdentityFromNupkgPath()
         {
             PackageIdentity identity = null;
-            if (UriHelper.IsHttpSource(Id))
+            IPackage package = null;
+
+            try
             {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                try
+                // Example: install-package2 https://az320820.vo.msecnd.net/packages/microsoft.aspnet.mvc.4.0.20505.nupkg
+                if (UriHelper.IsHttpSource(Id))
                 {
-                    string fullPath = Path.GetFullPath(Id);
-                    Source = Path.GetDirectoryName(fullPath);
-                    var package = new OptimizedZipPackage(fullPath);
-                    if (package != null)
+                    PackageIdentity packageIdentity = ParsePackageIdentityFromHttpSource(Id);
+                    IPackageCacheRepository packageCache = this.Projects.FirstOrDefault().TryGetFeature<IPackageCacheRepository>();
+                    IPackageName packageName = CoreConverters.SafeToPackageName(packageIdentity);
+                    SemanticVersion packageSemVer = CoreConverters.SafeToSemVer(packageIdentity.Version);
+                    Uri downloadUri = new Uri(Id);
+                    PackageDownloader downloader = new PackageDownloader();
+
+                    // Try to download the package through the cache.
+                    bool success = packageCache.InvokeOnPackage(
+                        packageIdentity.Id,
+                        packageSemVer,
+                        (targetStream) =>
+                            downloader.DownloadPackage(
+                                new HttpClient(downloadUri),
+                                packageName,
+                                targetStream));
+                    if (success)
                     {
-                        Id = package.Id;
-                        Version = package.Version.ToString();
+                        // Try to get it from the cache again
+                        package = packageCache.FindPackage(packageIdentity.Id, packageSemVer);
+                        Source = NuGet.MachineCache.Default.Source;
                     }
-                    identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
                 }
-                catch (Exception ex)
+                else
                 {
-                    Debug.WriteLine(ex.Message);
+                    // Example: install-package2 c:\temp\packages\jQuery.1.10.2.nupkg
+                    string fullPath = Path.GetFullPath(Id);
+                    package = new OptimizedZipPackage(fullPath);
+                    Source = Path.GetDirectoryName(fullPath);
+                }
+
+                if (package != null)
+                {
+                    Id = package.Id;
+                    Version = package.Version.ToString();
+                    identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
+                    this.ActiveSourceRepository = GetActiveRepository(Source);
+                    this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
                 }
             }
+            catch (Exception ex)
+            {
+                Log(MessageLevel.Error, Resources.Cmdlet_FailToParsePackages, Id, ex.Message);
+            }
+
             return new List<PackageIdentity>() { identity };
+        }
+
+        private PackageIdentity ParsePackageIdentityFromHttpSource(string sourceUrl)
+        {
+            if (!string.IsNullOrEmpty(sourceUrl))
+            {
+                string lastPart = sourceUrl.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+                lastPart = lastPart.Replace(NuGet.Constants.PackageExtension, "");
+                string[] parts = lastPart.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                StringBuilder builderForId = new StringBuilder();
+                StringBuilder builderForVersion = new StringBuilder();
+                foreach (string s in parts)
+                {
+                    int n;
+                    bool isNumeric = int.TryParse(s, out n);
+                    if (!isNumeric)
+                    {
+                        builderForId.Append(s);
+                        builderForId.Append(".");
+                    }
+                    else
+                    {
+                        builderForVersion.Append(s);
+                        builderForVersion.Append(".");
+                    }
+                }
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(builderForVersion.ToString().TrimSuffix("."));
+                return new PackageIdentity(builderForId.ToString().TrimSuffix("."), nVersion);
+            }
+            return null;
         }
 
         /// <summary>
