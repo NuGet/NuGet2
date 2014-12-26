@@ -1,15 +1,8 @@
-﻿using EnvDTE;
+﻿using System;
+using System.ComponentModel;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NuGet.Client;
-using NuGet.Client.Resolution;
 using NuGet.Client.Installation;
-using System.ComponentModel;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -23,8 +16,9 @@ namespace NuGet.Client.VisualStudio.UI
     public class PackageManagerModel : IVsPersistDocData, INotifyPropertyChanged
     {
         public SourceRepositoryManager Sources { get; private set; }
+
         public InstallationTarget Target { get; private set; }
-        
+
         public PackageManagerModel(SourceRepositoryManager sources, InstallationTarget target)
         {
             Sources = sources;
@@ -91,7 +85,7 @@ namespace NuGet.Client.VisualStudio.UI
             return VSConstants.E_NOTIMPL;
         }
 
-        #endregion
+        #endregion IVsPersistDocData
 
         public event PropertyChangedEventHandler PropertyChanged;
 

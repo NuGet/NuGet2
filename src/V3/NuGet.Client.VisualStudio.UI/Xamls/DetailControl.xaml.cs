@@ -66,7 +66,7 @@ namespace NuGet.Client.VisualStudio.UI
                 new PackageIdentity(model.Id, model.SelectedVersion.Version));
         }
 
-        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync()
+        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(IExecutionLogger logger)
         {
             var model = (DetailControlModel)DataContext;
             var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
@@ -93,6 +93,7 @@ namespace NuGet.Client.VisualStudio.UI
                     ForceRemove = model.Options.ForceRemove,
                     RemoveDependencies = model.Options.RemoveDependencies
                 });
+            resolver.Logger = logger;
 
             IEnumerable<Project> targetProjects;
             var solutionModel = DataContext as PackageSolutionDetailControlModel;

@@ -6,7 +6,6 @@ using NuGetConsole;
 
 namespace NuGet.VisualStudio
 {
-
     /// <summary>
     /// This class implements the IConsole interface in order to integrate with the PowerShellHost.
     /// It sends PowerShell host outputs to the VS Output tool window.
@@ -128,6 +127,10 @@ namespace NuGet.VisualStudio
         public void Clear()
         {
             Start();
+
+            var f = _outputWindow as IVsWindowFrame;
+
+            _outputWindowPane.Activate();
             _outputWindowPane.Clear();
         }
 

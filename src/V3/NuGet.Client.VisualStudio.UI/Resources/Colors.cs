@@ -80,5 +80,13 @@ namespace NuGet.Client.VisualStudio.UI.Resources
                 return Microsoft.VisualStudio.Shell.VsBrushes.WindowTextKey;
             }
         }
+
+        public static Microsoft.VisualStudio.Shell.ThemeResourceKey IndicatorFillBrushKey
+        {
+            get
+            {
+                return Microsoft.VisualStudio.PlatformUI.ProgressBarColors.IndicatorFillBrushKey;
+            }
+        }
     }
 }

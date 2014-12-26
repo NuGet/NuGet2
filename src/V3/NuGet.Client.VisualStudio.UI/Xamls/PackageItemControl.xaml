@@ -39,7 +39,7 @@
                     Source="{Binding IconUrl}"
                     Height="32"
                     Width="32"
-                    RenderOptions.BitmapScalingMode="HighQuality"
+                    RenderOptions.BitmapScalingMode="HighQuality"                    
                     VerticalAlignment="Top"
                     Margin="0,0,16,0" />
 

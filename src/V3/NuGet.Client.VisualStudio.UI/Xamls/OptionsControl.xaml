@@ -58,7 +58,7 @@
                 Grid.Row="0"
                 Grid.Column="1"
                 HorizontalAlignment="Left"
-                MinHeight="24"
+                MinHeight="22"
                 MinWidth="150"
                 ItemsSource="{Binding Path=Options.DependencyBehaviors}"
                 SelectedItem="{Binding Path=Options.SelectedDependencyBehavior}"
@@ -72,7 +72,7 @@
                 Text="{x:Static resx:Resources.Label_FileConflictAction}" />
             <ComboBox
                 Grid.Row="6" Grid.Column="1"
-                MinHeight="24"
+                MinHeight="22"
                 MinWidth="150"
                 HorizontalAlignment="Left"
                 ItemsSource="{Binding Path=Options.FileConflictActions}"

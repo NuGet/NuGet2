@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace NuGet.Client.V2
 {
@@ -32,7 +33,10 @@ namespace NuGet.Client.V2
              }
              else
              {
-                 throw new InvalidOperationException(string.Format("Unable to get download metadata for package {0}",identity.Id));
+                 // TODO: move the string into a resoure file
+                 throw new InvalidOperationException(string.Format(
+                     CultureInfo.CurrentCulture,
+                     "Unable to get download metadata for package {0}",identity.Id));
              }
          });
         }

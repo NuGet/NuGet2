@@ -39,7 +39,7 @@ namespace NuGet.Client.VisualStudio.UI
             set;
         }
 
-        public void RequestToClose()
+        public void CloseWindow()
         {
             TimeSpan timeOpened = DateTime.UtcNow - _loadedTime;
             if (timeOpened < minimumVisibleTime)

@@ -157,7 +157,7 @@
     <value>Author(s):</value>
   </data>
   <data name="Label_DatePublished" xml:space="preserve">
-    <value>Date Published:</value>
+    <value>Date published:</value>
   </data>
   <data name="Label_Dependencies" xml:space="preserve">
     <value>Dependencies</value>
@@ -285,9 +285,6 @@
   <data name="Text_NoItemsFound" xml:space="preserve">
     <value>No items found</value>
   </data>
-  <data name="Text_NoMoreItems" xml:space="preserve">
-    <value>No more items</value>
-  </data>
   <data name="Text_Ready" xml:space="preserve">
     <value>Ready</value>
   </data>
@@ -301,7 +298,7 @@
     <value>Error</value>
   </data>
   <data name="Checkbox_IncludePrerelease" xml:space="preserve">
-    <value>Include Prerelease</value>
+    <value>Include prerelease</value>
   </data>
   <data name="Filter_UpdateAvailable" xml:space="preserve">
     <value>Update available</value>

@@ -20,6 +20,12 @@ namespace NuGet.Client.Resolution
         private readonly SourceRepository _source;
         private readonly ResolutionContext _context;
 
+        public IExecutionLogger Logger
+        {
+            get;
+            set;
+        }
+
         public ActionResolver(SourceRepository source, ResolutionContext context)
         {
             _source = source;
@@ -33,6 +39,10 @@ namespace NuGet.Client.Resolution
         {
             // Construct the Action Resolver
             var oldResolver = new OldResolver();
+            if (Logger != null)
+            {
+                oldResolver.Logger = new ShimLogger(Logger);
+            }
 
             // Apply context settings
             ApplyContext(oldResolver);
@@ -86,6 +96,10 @@ namespace NuGet.Client.Resolution
         {
             // Construct the Action Resolver
             var resolver = new OldResolver();
+            if (Logger != null)
+            {
+                resolver.Logger = new ShimLogger(Logger);
+            }
 
             // Apply context settings
             ApplyContext(resolver);

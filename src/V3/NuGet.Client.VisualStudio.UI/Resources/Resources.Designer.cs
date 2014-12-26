@@ -196,7 +196,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Include Prerelease.
+        ///   Looks up a localized string similar to Include prerelease.
         /// </summary>
         public static string Checkbox_IncludePrerelease {
             get {
@@ -349,7 +349,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date Published:.
+        ///   Looks up a localized string similar to Date published:.
         /// </summary>
         public static string Label_DatePublished {
             get {
@@ -651,15 +651,6 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Text_NoItemsFound {
             get {
                 return ResourceManager.GetString("Text_NoItemsFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No more items.
-        /// </summary>
-        public static string Text_NoMoreItems {
-            get {
-                return ResourceManager.GetString("Text_NoMoreItems", resourceCulture);
             }
         }
         

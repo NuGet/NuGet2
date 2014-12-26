@@ -30,8 +30,6 @@ namespace NuGet.Client.VisualStudio.UI
         // list in response to PackageSourcesChanged event.
         private bool _dontStartNewSearch;
 
-        private int _busyCount;
-
         public PackageManagerModel Model { get; private set; }
 
         public SourceRepositoryManager Sources
@@ -63,7 +61,6 @@ namespace NuGet.Client.VisualStudio.UI
         {
             UI = ui;
             Model = model;
-            _busyCount = 0;
 
             InitializeComponent();
 
@@ -190,28 +187,6 @@ namespace NuGet.Client.VisualStudio.UI
             if (Sources.ActiveRepository != null)
             {
                 _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
-            }
-        }
-
-        private void SetBusy(bool busy)
-        {
-            if (busy)
-            {
-                _busyCount++;
-                if (_busyCount > 0)
-                {
-                    _busyControl.Visibility = System.Windows.Visibility.Visible;
-                    this.IsEnabled = false;
-                }
-            }
-            else
-            {
-                _busyCount--;
-                if (_busyCount <= 0)
-                {
-                    _busyControl.Visibility = System.Windows.Visibility.Collapsed;
-                    this.IsEnabled = true;
-                }
             }
         }
 
@@ -465,18 +440,39 @@ namespace NuGet.Client.VisualStudio.UI
             return w.ShowModal() == true;
         }
 
+        private void ActivateOutputWindow()
+        {
+            var uiShell = ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>();
+            if (uiShell == null)
+            {
+                return;
+            }
+
+            var guid = new Guid(EnvDTE.Constants.vsWindowKindOutput);
+            IVsWindowFrame f = null;
+            uiShell.FindToolWindow(0, ref guid, out f);
+            if (f == null)
+            {
+                return;
+            }
+
+            f.Show();
+        }
+
         // perform the user selected action
         internal async void PerformAction(DetailControl detailControl)
         {
-            SetBusy(true);
+            ActivateOutputWindow();
             _outputConsole.Clear();
             var progressDialog = new ProgressDialog(_outputConsole);
             progressDialog.Owner = Window.GetWindow(this);
             progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            progressDialog.FileConflictAction = detailControl.FileConflictAction;
+            progressDialog.Show();
 
             try
             {
-                var actions = await detailControl.ResolveActionsAsync();
+                var actions = await detailControl.ResolveActionsAsync(progressDialog);
 
                 // show preview
                 var model = (DetailControlModel)_packageDetail.DataContext;
@@ -497,9 +493,7 @@ namespace NuGet.Client.VisualStudio.UI
                 }
 
                 // Create the executor and execute the actions
-                var userAction = detailControl.GetUserAction();
-                progressDialog.FileConflictAction = detailControl.FileConflictAction;
-                progressDialog.Show();
+                var userAction = detailControl.GetUserAction();                
                 var executor = new ActionExecutor();
                 await Task.Run(
                     () =>
@@ -519,8 +513,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
             finally
             {
-                progressDialog.RequestToClose();
-                SetBusy(false);
+                progressDialog.CloseWindow();
             }
         }
 

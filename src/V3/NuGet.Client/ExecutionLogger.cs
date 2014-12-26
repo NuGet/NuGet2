@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using NuGet.Client.Installation;
+
 namespace NuGet.Client
 {
     public enum MessageLevel
@@ -77,11 +78,11 @@ namespace NuGet.Client
         /// <summary>
         /// Execute powershell script in the package
         /// </summary>
-        /// <param name="packageInstallPath">The full root path of the installed package. E.g. 
+        /// <param name="packageInstallPath">The full root path of the installed package. E.g.
         /// c:\temp\packages\jquery2.1.1</param>
-        /// <param name="scriptRelativePath">The path of the script file relative to <paramref name="packageInstallPath"/>. 
+        /// <param name="scriptRelativePath">The path of the script file relative to <paramref name="packageInstallPath"/>.
         /// E.g. tools\init.ps1</param>
-        /// <param name="package">The package. The type of parameter package is object because we don't want 
+        /// <param name="package">The package. The type of parameter package is object because we don't want
         /// to expose IPackage.</param>
         /// <param name="target">The target.</param>
         void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, InstallationTarget target);

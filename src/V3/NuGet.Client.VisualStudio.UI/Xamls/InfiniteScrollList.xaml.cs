@@ -87,29 +87,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 var r = await Loader.LoadItems(_startIndex, _cts.Token);
 
-                _items.RemoveAt(_items.Count - 1);
-                foreach (var obj in r.Items)
-                {
-                    _items.Add(obj);
-                }
-
-                if (!r.HasMoreItems)
-                {
-                    if (_items.Count == 0)
-                    {
-                        _loadingStatusIndicator.Status = LoadingStatus.NoItemsFound;
-                    }
-                    else
-                    {
-                        _loadingStatusIndicator.Status = LoadingStatus.NoMoreItems;
-                    }
-                }
-                else
-                {
-                    _loadingStatusIndicator.Status = LoadingStatus.Ready;
-                    _startIndex = r.NextStartIndex;
-                }
-                _items.Add(_loadingStatusIndicator);
+                UpdatePackageList(r);
 
                 // select the first item if none was selected before
                 if (_list.SelectedIndex == -1 && _items.Count > 1)
@@ -139,6 +117,44 @@ namespace NuGet.Client.VisualStudio.UI
             if (_cts == newCts)
             {
                 _cts = null;
+            }
+        }
+
+        private void UpdatePackageList(LoadResult r)
+        {
+            // remove the loading status indicator if it's in the list
+            if (_items[_items.Count - 1] == _loadingStatusIndicator)
+            {
+                _items.RemoveAt(_items.Count - 1);
+            }
+
+            // add newly loaded items
+            foreach (var obj in r.Items)
+            {
+                _items.Add(obj);
+            }
+
+            // update loading status indicator
+            if (!r.HasMoreItems)
+            {
+                if (_items.Count == 0)
+                {
+                    _loadingStatusIndicator.Status = LoadingStatus.NoItemsFound;
+                }
+                else
+                {
+                    _loadingStatusIndicator.Status = LoadingStatus.NoMoreItems;
+                }
+            }
+            else
+            {
+                _loadingStatusIndicator.Status = LoadingStatus.Ready;
+                _startIndex = r.NextStartIndex;
+            }
+
+            if (_loadingStatusIndicator.Status != LoadingStatus.NoMoreItems)
+            {
+                _items.Add(_loadingStatusIndicator);
             }
         }
 

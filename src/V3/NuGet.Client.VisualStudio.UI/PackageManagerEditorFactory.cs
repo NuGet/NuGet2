@@ -3,12 +3,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell;
 using EnvDTE;
-using NuGet.Client.VisualStudio;
-using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -21,7 +19,7 @@ namespace NuGet.Client.VisualStudio.UI
         private ServiceProvider vsServiceProvider;
         private readonly IUserInterfaceService _ui;
         private readonly VsPackageManagerContext _context;
-        
+
         public PackageManagerEditorFactory(
             VsPackageManagerContext context,
             IUserInterfaceService ui)
@@ -64,23 +62,23 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         // This method is called by the Environment (inside IVsUIShellOpenDocument::
-        // OpenStandardEditor and OpenSpecificEditor) to map a LOGICAL view to a 
+        // OpenStandardEditor and OpenSpecificEditor) to map a LOGICAL view to a
         // PHYSICAL view. A LOGICAL view identifies the purpose of the view that is
-        // desired (e.g. a view appropriate for Debugging [LOGVIEWID_Debugging], or a 
+        // desired (e.g. a view appropriate for Debugging [LOGVIEWID_Debugging], or a
         // view appropriate for text view manipulation as by navigating to a find
-        // result [LOGVIEWID_TextView]). A PHYSICAL view identifies an actual type 
-        // of view implementation that an IVsEditorFactory can create. 
+        // result [LOGVIEWID_TextView]). A PHYSICAL view identifies an actual type
+        // of view implementation that an IVsEditorFactory can create.
         //
-        // NOTE: Physical views are identified by a string of your choice with the 
-        // one constraint that the default/primary physical view for an editor  
+        // NOTE: Physical views are identified by a string of your choice with the
+        // one constraint that the default/primary physical view for an editor
         // *MUST* use a NULL string as its physical view name (*pbstrPhysicalView = NULL).
         //
         // NOTE: It is essential that the implementation of MapLogicalView properly
         // validates that the LogicalView desired is actually supported by the editor.
         // If an unsupported LogicalView is requested then E_NOTIMPL must be returned.
         //
-        // NOTE: The special Logical Views supported by an Editor Factory must also 
-        // be registered in the local registry hive. LOGVIEWID_Primary is implicitly 
+        // NOTE: The special Logical Views supported by an Editor Factory must also
+        // be registered in the local registry hive. LOGVIEWID_Primary is implicitly
         // supported by all editor types and does not need to be registered.
         // For example, an editor that supports a ViewCode/ViewDesigner scenario
         // might register something like the following:
@@ -113,31 +111,31 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         /// <summary>
-        /// Used by the editor factory to create an editor instance. the environment first determines the 
-        /// editor factory with the highest priority for opening the file and then calls 
-        /// IVsEditorFactory.CreateEditorInstance. If the environment is unable to instantiate the document data 
-        /// in that editor, it will find the editor with the next highest priority and attempt to so that same 
-        /// thing. 
+        /// Used by the editor factory to create an editor instance. the environment first determines the
+        /// editor factory with the highest priority for opening the file and then calls
+        /// IVsEditorFactory.CreateEditorInstance. If the environment is unable to instantiate the document data
+        /// in that editor, it will find the editor with the next highest priority and attempt to so that same
+        /// thing.
         /// NOTE: The priority of our editor is 32 as mentioned in the attributes on the package class.
-        /// 
-        /// Since our editor supports opening only a single view for an instance of the document data, if we 
-        /// are requested to open document data that is already instantiated in another editor, or even our 
+        ///
+        /// Since our editor supports opening only a single view for an instance of the document data, if we
+        /// are requested to open document data that is already instantiated in another editor, or even our
         /// editor, we return a value VS_E_INCOMPATIBLEDOCDATA.
         /// </summary>
-        /// <param name="grfCreateDoc">Flags determining when to create the editor. Only open and silent flags 
+        /// <param name="grfCreateDoc">Flags determining when to create the editor. Only open and silent flags
         /// are valid
         /// </param>
         /// <param name="pszMkDocument">path to the file to be opened</param>
         /// <param name="pszPhysicalView">name of the physical view</param>
         /// <param name="pvHier">pointer to the IVsHierarchy interface</param>
         /// <param name="itemid">Item identifier of this editor instance</param>
-        /// <param name="punkDocDataExisting">This parameter is used to determine if a document buffer 
+        /// <param name="punkDocDataExisting">This parameter is used to determine if a document buffer
         /// (DocData object) has already been created
         /// </param>
         /// <param name="ppunkDocView">Pointer to the IUnknown interface for the DocView object</param>
         /// <param name="ppunkDocData">Pointer to the IUnknown interface for the DocData object</param>
         /// <param name="pbstrEditorCaption">Caption mentioned by the editor for the doc window</param>
-        /// <param name="pguidCmdUI">the Command UI Guid. Any UI element that is visible in the editor has 
+        /// <param name="pguidCmdUI">the Command UI Guid. Any UI element that is visible in the editor has
         /// to use this GUID. This is specified in the .vsct file
         /// </param>
         /// <param name="pgrfCDW">Flags for CreateDocumentWindow</param>
@@ -183,15 +181,15 @@ namespace NuGet.Client.VisualStudio.UI
                 out project));
 
             var myDoc = new PackageManagerModel(
-                _context.SourceManager, 
+                _context.SourceManager,
                 _context.GetCurrentVsSolution().GetProject((Project)project));
             var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            
+
             return VSConstants.S_OK;
         }
 
-        #endregion
+        #endregion IVsEditorFactory Members
     }
 }

@@ -24,6 +24,7 @@
     <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" />
             <RowDefinition/>
         </Grid.RowDefinitions>
         
@@ -32,9 +33,17 @@
             Margin="12,8,12,0"
             Text="{x:Static resx:Resources.Text_Progress}"
             FontSize="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font122PercentSizeConverter}}" />
-        
+        <ProgressBar 
+            Grid.Row="1"
+            Margin="12,8,12,0"
+            Background="Transparent"
+            BorderThickness="0"
+            Height="4"
+            Foreground="{DynamicResource {x:Static resx:Brushes.IndicatorFillBrushKey}}"
+            IsIndeterminate="True"/>
+
         <RichTextBox 
-            Grid.Row="1" 
+            Grid.Row="2" 
             Margin="12" 
             AcceptsReturn="True" 
             IsReadOnly="True" 

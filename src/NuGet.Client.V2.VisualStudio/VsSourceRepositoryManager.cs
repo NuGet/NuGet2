@@ -74,7 +74,7 @@ namespace NuGet.Client.VisualStudio
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]      
         [ImportMany(typeof(ResourceProvider))]
-        public IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> providers {get;set;}
+        public IEnumerable<Lazy<ResourceProvider, IResourceProviderMetadata>> Providers {get;set;}
 
         [ImportingConstructor]
         public VsSourceRepositoryManager(IVsPackageSourceProvider sourceProvider, IPackageRepositoryFactory repoFactory)

@@ -4,24 +4,20 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Client.VisualStudio;
+using NuGet.Client.VisualStudio.UI;
 using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
-
 using NuGetConsole;
-using NuGet.Client;
 using NuGetConsole.Implementation;
-using NuGet.Client.VisualStudio;
-using NuGet.Client.VisualStudio.UI;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Tools
@@ -60,6 +56,7 @@ namespace NuGet.Tools
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
         public const string ProductVersion = "2.8.0.0";
+
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;
@@ -215,7 +212,7 @@ namespace NuGet.Tools
                 ServiceLocator.GetInstance<VsPackageManagerContext>(),
                 ServiceLocator.GetInstance<IUserInterfaceService>()));
 
-            // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
+            // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService().
             // Doing so is illegal and may cause VS to hang.
 
             _dte = (DTE)GetService(typeof(SDTE));
@@ -241,7 +238,7 @@ namespace NuGet.Tools
                 //ShimControllerProvider.Controller.Enable(VsPackageSourceProvider);
             }
 
-            // when NuGet loads, if the current solution has package 
+            // when NuGet loads, if the current solution has package
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
             // the <Import> element added.
@@ -249,7 +246,7 @@ namespace NuGet.Tools
             {
                 if (VsVersionHelper.IsVisualStudio2013)
                 {
-                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block 
+                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block
                     // until this completes.
                     ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
                     PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false)));
@@ -260,7 +257,7 @@ namespace NuGet.Tools
                 }
             }
 
-            // when NuGet loads, if the current solution has some package 
+            // when NuGet loads, if the current solution has some package
             // folders marked for deletion (because a previous uninstalltion didn't succeed),
             // delete them now.
             if (SolutionManager.IsSolutionOpen)
@@ -390,7 +387,7 @@ namespace NuGet.Tools
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
-        IEnumerable<IVsWindowFrame> EnumDocumentWindows(IVsUIShell uiShell)
+        private IEnumerable<IVsWindowFrame> EnumDocumentWindows(IVsUIShell uiShell)
         {
             IEnumWindowFrames ppenum;
             int hr = uiShell.GetDocumentWindowEnum(out ppenum);
@@ -401,7 +398,7 @@ namespace NuGet.Tools
 
             IVsWindowFrame[] windowFrames = new IVsWindowFrame[1];
             uint frameCount;
-            while (ppenum.Next(1, windowFrames, out frameCount) == VSConstants.S_OK && 
+            while (ppenum.Next(1, windowFrames, out frameCount) == VSConstants.S_OK &&
                 frameCount == 1)
             {
                 yield return windowFrames[0];
@@ -422,7 +419,7 @@ namespace NuGet.Tools
                 {
                     var packageManagerWindowPane = (PackageManagerWindowPane)docView;
                     var target = packageManagerWindowPane.Model.Target as VsProject;
-                    if (target != null && 
+                    if (target != null &&
                         String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
                     {
                         return windowFrame;
@@ -447,6 +444,7 @@ namespace NuGet.Tools
                 windowFrame.Show();
             }
         }
+
         private static T GetProperty<T>(IVsHierarchy hier, __VSHPROPID propertyId)
         {
             object propertyValue;
@@ -466,7 +464,7 @@ namespace NuGet.Tools
             // already registered.
             var rdt = (IVsRunningDocumentTable)GetService(typeof(IVsRunningDocumentTable));
             IVsHierarchy hier;
-            uint itemId;            
+            uint itemId;
             IntPtr docData = IntPtr.Zero;
             int hr;
 
@@ -513,7 +511,7 @@ namespace NuGet.Tools
 
             var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
             var myDoc = new PackageManagerModel(
-                context.SourceManager, 
+                context.SourceManager,
                 context.GetCurrentVsSolution().GetProject(project));
 
             var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
@@ -525,7 +523,7 @@ namespace NuGet.Tools
                 CultureInfo.CurrentCulture,
                 Resx.Resources.Label_NuGetWindowCaption,
                 myDoc.Target.Name);
-            
+
             IVsWindowFrame windowFrame;
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
             int hr = uiShell.CreateDocumentWindow(
@@ -585,7 +583,7 @@ namespace NuGet.Tools
                     (int)__VSFPROPID.VSFPROPID_DocData,
                     out property);
                 var packageManagerControl = GetPackageManagerControl(windowFrame);
-                if (hr == VSConstants.S_OK && 
+                if (hr == VSConstants.S_OK &&
                     property is IVsSolution &&
                     packageManagerControl != null)
                 {
@@ -624,7 +622,7 @@ namespace NuGet.Tools
         {
             // TODO: Need to wait until solution is loaded
 
-            IVsWindowFrame windowFrame = null;          
+            IVsWindowFrame windowFrame = null;
             IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
             uint windowFlags =

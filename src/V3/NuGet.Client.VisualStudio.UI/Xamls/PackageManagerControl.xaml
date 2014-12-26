@@ -46,7 +46,6 @@
                 <StackPanel Orientation="Horizontal" Margin="24,8,0,0">
                     <TextBlock
                         Grid.Column="0"
-                        FontWeight="Bold"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_Repository}" />
 
@@ -56,7 +55,7 @@
                         VerticalAlignment="Center"
                         DisplayMemberPath="Name"
                         MinWidth="130"
-                        MinHeight="24"
+                        MinHeight="22"
                         Grid.Column="1"
                         SelectionChanged="_sourceRepoList_SelectionChanged"
                         Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
@@ -64,7 +63,6 @@
                     <TextBlock
                         Grid.Column="2"
                         Margin="24,0,0,0"
-                        FontWeight="Bold"
                         VerticalAlignment="Center"
                         Text="{x:Static resx:Resources.Label_Filter}" />
 
@@ -75,7 +73,7 @@
                         SelectedIndex="0"
                         x:Name="_filter"
                         MinWidth="130"
-                        MinHeight="24"
+                        MinHeight="22"
                         SelectionChanged="_filter_SelectionChanged"
                         Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
 
@@ -95,7 +93,7 @@
                         Grid.Column="6"
                         VerticalAlignment="Center"
                         x:Name="_searchControlParent"
-                        MinHeight="24"
+                        MinHeight="22"
                         MinWidth="224" />   
                      
                     <Button
@@ -158,10 +156,6 @@
                                   VerticalAlignment="Stretch"
                                   BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                   BorderThickness="1,0" />
-
-                    <Tools:BusyControl  x:Name="_listBusyControl" Grid.Column="0" Visibility="Collapsed" Cancellable="True">
-                    </Tools:BusyControl>
-
                     <Tools:DetailControl
                         x:Name="_packageDetail"
                         Grid.Column="2"
@@ -169,6 +163,5 @@
                 </Grid>
             </Border>
         </Grid>
-        <Tools:BusyControl x:Name="_busyControl" Visibility="Collapsed"></Tools:BusyControl>
     </Grid>
 </UserControl>

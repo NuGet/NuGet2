@@ -42,7 +42,7 @@
             Grid.Row="3"
             Grid.Column="0"
             MinWidth="150"
-            MinHeight="24"
+            MinHeight="22"
             ItemsSource="{Binding Path=Actions}"
             SelectedItem="{Binding Path=SelectedAction}"
             Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}" />
@@ -57,7 +57,7 @@
             Grid.Row="3"
             Grid.Column="2"
             MinWidth="150"
-            MinHeight="24"
+            MinHeight="22"
             Style="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type tp:AutomationComboBox}, ResourceId=ThemedComboBoxStyle}}"
             ItemsSource="{Binding Path=Versions}"
             SelectedItem="{Binding Path=SelectedVersion}" />

@@ -10,13 +10,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type self:LoadingStatusIndicator}">
-            <Grid Margin="0,8">
-                <TextBlock Name="_noMoreItems"
-                           FontStyle="Italic"
-                           HorizontalAlignment="Center"
-                           Text="{x:Static resx:Resources.Text_NoMoreItems}"
-                           Visibility="Collapsed" />
-
+            <Grid Margin="0,8">                
                 <TextBlock Name="_noItemsFound"
                            FontStyle="Italic"
                            HorizontalAlignment="Center"
@@ -63,11 +57,6 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Status}" Value="Ready">
                     <Setter TargetName="_ready"
-                            Property="Visibility"
-                            Value="Visible" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Status}" Value="NoMoreItems">
-                    <Setter TargetName="_noMoreItems"
                             Property="Visibility"
                             Value="Visible" />
                 </DataTrigger>
