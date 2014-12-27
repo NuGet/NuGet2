@@ -4,6 +4,7 @@ using NuGet.VisualStudio;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Linq;
+using System;
 
 namespace NuGet.Client.VisualStudio.PowerShell
 {
@@ -38,6 +39,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
         public IVsPackageSourceProvider PackageSourceProvider { get; set; }
 
         public bool ForceInstall { get; set; }
+
+        public DependencyVersion UpdateVersionEnum { get; set; }
 
         protected override void Preprocess()
         {
@@ -97,9 +100,18 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 // For forcely install. 
                 _context.RemoveDependencies = false;
                 // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                if (!string.IsNullOrEmpty(Version) && PowerShellPackage.IsPrereleaseVersion(Version))
+                DependencyVersion updateVersion;
+                if (!string.IsNullOrEmpty(Version))
                 {
-                    _context.AllowPrerelease = true;
+                    bool isVersionEnum = Enum.TryParse<DependencyVersion>(Version, true, out updateVersion);
+                    if (isVersionEnum)
+                    {
+                        UpdateVersionEnum = updateVersion;
+                    }
+                    else if (PowerShellPackage.IsPrereleaseVersion(Version))
+                    {
+                        _context.AllowPrerelease = true;
+                    }
                 }
                 return _context;
             }

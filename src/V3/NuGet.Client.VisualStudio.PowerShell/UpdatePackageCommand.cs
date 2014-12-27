@@ -5,6 +5,7 @@ using NuGet.VisualStudio;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using System;
 
 
 #if VS14
@@ -140,9 +141,22 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     // Find package update
                     if (!string.IsNullOrEmpty(Version))
                     {
-                        NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
-                        PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
-                        update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
+                        NuGetVersion nVersion;
+                        // TODO: Fix this
+                        if (UpdateVersionEnum != null)
+                        {
+                            nVersion = PowerShellPackage.GetUpdateVersionForDependentPackage(ActiveSourceRepository, identity, updateVersion, entry.Key.GetSupportedFrameworks(), IncludePrerelease.IsPresent);
+                        }
+                        else
+                        {
+                            nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
+                        }
+
+                        if (nVersion != null)
+                        {
+                            PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
+                            update = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
+                        }
                     }
                     else
                     {

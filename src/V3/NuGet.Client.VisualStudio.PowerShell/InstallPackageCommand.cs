@@ -181,10 +181,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             {
                 NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(Version);
                 PackageIdentity pIdentity = new PackageIdentity(Id, nVersion);
-                if (!_readFromDirectPackagePath)
-                {
-                    identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
-                }
+                identity = Client.PackageRepositoryHelper.ResolvePackage(ActiveSourceRepository, V2LocalRepository, pIdentity, IncludePrerelease.IsPresent);
             }
             else
             {
