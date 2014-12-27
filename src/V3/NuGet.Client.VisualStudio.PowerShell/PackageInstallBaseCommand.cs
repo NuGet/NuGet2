@@ -40,7 +40,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public bool ForceInstall { get; set; }
 
-        public DependencyVersion UpdateVersionEnum { get; set; }
+        public bool IsVersionEnum { get; set; }
 
         protected override void Preprocess()
         {
@@ -99,16 +99,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 _context.ForceRemove = ForceInstall;
                 // For forcely install. 
                 _context.RemoveDependencies = false;
-                // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                DependencyVersion updateVersion;
                 if (!string.IsNullOrEmpty(Version))
                 {
-                    bool isVersionEnum = Enum.TryParse<DependencyVersion>(Version, true, out updateVersion);
-                    if (isVersionEnum)
-                    {
-                        UpdateVersionEnum = updateVersion;
-                    }
-                    else if (PowerShellPackage.IsPrereleaseVersion(Version))
+                    DependencyVersion updateVersion;
+                    IsVersionEnum = Enum.TryParse<DependencyVersion>(Version, true, out updateVersion);
+                    // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
+                    if (!IsVersionEnum && PowerShellPackage.IsPrereleaseVersion(Version))
                     {
                         _context.AllowPrerelease = true;
                     }

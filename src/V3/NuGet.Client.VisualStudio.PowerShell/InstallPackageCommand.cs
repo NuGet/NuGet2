@@ -64,9 +64,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             ForceInstall = Force.IsPresent;
             FallbackToCacheIfNeccessary();
+            ParseUserInputForId();
             // Process active repository and projects
             base.Preprocess();
-            ParseUserInputForId();
             this.Identities = GetIdentitiesForResolver();
         }
 
@@ -99,6 +99,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 else if (Id.ToLowerInvariant().EndsWith(NuGet.Constants.PackageExtension))
                 {
                     _readFromDirectPackagePath = true;
+                    if (UriHelper.IsHttpSource(Id))
+                    {
+                        Source = NuGet.MachineCache.Default.Source;
+                    }
+                    else
+                    {
+                        string fullPath = Path.GetFullPath(Id);
+                        Source = Path.GetDirectoryName(fullPath);
+                    }
                 }
             }
         }
@@ -269,7 +278,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     {
                         // Try to get it from the cache again
                         package = packageCache.FindPackage(packageIdentity.Id, packageSemVer);
-                        Source = NuGet.MachineCache.Default.Source;
                     }
                 }
                 else
@@ -277,7 +285,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     // Example: install-package2 c:\temp\packages\jQuery.1.10.2.nupkg
                     string fullPath = Path.GetFullPath(Id);
                     package = new OptimizedZipPackage(fullPath);
-                    Source = Path.GetDirectoryName(fullPath);
                 }
 
                 if (package != null)
@@ -285,8 +292,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     Id = package.Id;
                     Version = package.Version.ToString();
                     identity = new PackageIdentity(Id, NuGetVersion.Parse(Version));
-                    this.ActiveSourceRepository = GetActiveRepository(Source);
-                    this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
                 }
             }
             catch (Exception ex)
