@@ -50,6 +50,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="V2DownloadResource.cs" />
     <Compile Include="V2DownloadResourceProvider.cs" />
+    <Compile Include="V2MetadataResource.cs" />
+    <Compile Include="V2MetadataResourceProvider.cs" />
     <Compile Include="V2Resource.cs" />
     <Compile Include="V2ResourceProvider.cs" />
     <Compile Include="V2Utilities.cs" />

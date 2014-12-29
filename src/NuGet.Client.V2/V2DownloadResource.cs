@@ -27,7 +27,7 @@ namespace NuGet.Client.V2
              {
                  LocalPackageRepository lrepo = V2Client as LocalPackageRepository;
                  SemanticVersion semVer = new SemanticVersion(identity.Version.Version);
-                 return new PackageDownloadMetadata(new Uri(Path.Combine(V2Client.Source,  lrepo.PathResolver.GetPackageFileName(identity.Id, semVer)));
+                 return new PackageDownloadMetadata(new Uri(Path.Combine(V2Client.Source,  lrepo.PathResolver.GetPackageFileName(identity.Id, semVer))));
              }
              else
              {

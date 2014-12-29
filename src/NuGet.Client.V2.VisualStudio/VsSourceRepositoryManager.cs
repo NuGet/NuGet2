@@ -1,6 +1,7 @@
 ﻿using NuGet.Client;
 using NuGet.Client.Interop;
 using NuGet.Client.VisualStudio.Models;
+using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
 using System.Collections.Concurrent;
@@ -124,16 +125,19 @@ namespace NuGet.Client.VisualStudio
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects live until end of process, at which point they will be disposed automatically")]
         private SourceRepository CreateRepo(PackageSource source)
         {
-            SourceRepository2 repo2 = new SourceRepository2(source, providers);
-            IVsSearch searchResource = repo2.GetResource<IVsSearch>();
-            Debug.Assert(searchResource != null);
-            SearchFilter filter = new SearchFilter(); //create a dummy filter.
-            List<FrameworkName> fxNames = new List<FrameworkName>();
-            fxNames.Add(new FrameworkName(".NET Framework, Version=4.0"));
-            filter.SupportedFrameworks = fxNames;
-            IEnumerable<VisualStudioUISearchMetadata> searchResults = searchResource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
-            Debug.Assert(searchResults.Count() > 0); // Check if non empty search result is returned.
-            Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is atleast one result which has Elmah as title.
+            //Temp code to illustrate the usage of new SourceRepo and resources
+            //SourceRepository2 repo2 = new SourceRepository2(source, providers);
+            //IVsSearch searchResource = repo2.GetResource<IVsSearch>();
+            //Debug.Assert(searchResource != null);
+            //SearchFilter filter = new SearchFilter(); //create a dummy filter.
+            //List<FrameworkName> fxNames = new List<FrameworkName>();
+            //fxNames.Add(new FrameworkName(".NET Framework, Version=4.0"));
+            //filter.SupportedFrameworks = fxNames;
+            //IEnumerable<VisualStudioUISearchMetadata> searchResults = searchResource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
+            //Debug.Assert(searchResults.Count() > 0); // Check if non empty search result is returned.
+            //Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is atleast one result which has Elmah as title.
+           
+
             return new AutoDetectSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
          
         }
