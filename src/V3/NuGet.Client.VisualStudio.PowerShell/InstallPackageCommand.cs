@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using System;
@@ -35,6 +34,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     {
         private bool _readFromPackagesConfig;
         private bool _readFromDirectPackagePath;
+        private bool _isHttp;
         private bool _isNetworkAvailable;
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
         private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
@@ -101,6 +101,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     _readFromDirectPackagePath = true;
                     if (UriHelper.IsHttpSource(Id))
                     {
+                        _isHttp = true;
                         Source = NuGet.MachineCache.Default.Source;
                     }
                     else
@@ -256,7 +257,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             try
             {
                 // Example: install-package2 https://az320820.vo.msecnd.net/packages/microsoft.aspnet.mvc.4.0.20505.nupkg
-                if (UriHelper.IsHttpSource(Id))
+                if (_isHttp)
                 {
                     PackageIdentity packageIdentity = ParsePackageIdentityFromHttpSource(Id);
                     IPackageCacheRepository packageCache = this.Projects.FirstOrDefault().TryGetFeature<IPackageCacheRepository>();

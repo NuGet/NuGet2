@@ -142,11 +142,9 @@ namespace NuGet.Client.VisualStudio.PowerShell
                     if (!string.IsNullOrEmpty(Version))
                     {
                         NuGetVersion nVersion;
-                        // TODO: Fix this
                         if (IsVersionEnum)
                         {
-                            DependencyVersion updateVersion = (DependencyVersion)Enum.Parse(typeof(DependencyVersion), Version, true);
-                            nVersion = PowerShellPackage.GetUpdateVersionForDependentPackage(ActiveSourceRepository, identity, updateVersion, entry.Key.GetSupportedFrameworks(), IncludePrerelease.IsPresent);
+                            nVersion = PowerShellPackage.GetUpdateVersionForDependentPackage(ActiveSourceRepository, identity, UpdateVersionEnum, entry.Key.GetSupportedFrameworks(), IncludePrerelease.IsPresent);
                         }
                         else
                         {

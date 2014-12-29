@@ -42,6 +42,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         public bool IsVersionEnum { get; set; }
 
+        public DependencyVersion UpdateVersionEnum { get; set; }
+
         protected override void Preprocess()
         {
             this.ActiveSourceRepository = GetActiveRepository(Source);
@@ -103,8 +105,12 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     DependencyVersion updateVersion;
                     IsVersionEnum = Enum.TryParse<DependencyVersion>(Version, true, out updateVersion);
+                    if (IsVersionEnum)
+                    {
+                        UpdateVersionEnum = updateVersion;
+                    }
                     // If Version is prerelease, automatically allow prerelease (i.e. append -Prerelease switch).
-                    if (!IsVersionEnum && PowerShellPackage.IsPrereleaseVersion(Version))
+                    else if (PowerShellPackage.IsPrereleaseVersion(Version))
                     {
                         _context.AllowPrerelease = true;
                     }

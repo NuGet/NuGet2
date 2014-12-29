@@ -58,16 +58,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Common\CommonResources.cs">
-      <Link>CommonResources.cs</Link>
+      <Link>Helper\CommonResources.cs</Link>
     </Compile>
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\IErrorHandler.cs">
-      <Link>IErrorHandler.cs</Link>
+      <Link>Helper\IErrorHandler.cs</Link>
     </Compile>
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\NuGetErrorId.cs">
-      <Link>NuGetErrorId.cs</Link>
+      <Link>Helper\NuGetErrorId.cs</Link>
     </Compile>
     <Compile Include="..\..\VsConsole\PowerShellCmdlets\ProgressActivityIds.cs">
-      <Link>ProgressActivityIds.cs</Link>
+      <Link>Helper\ProgressActivityIds.cs</Link>
     </Compile>
     <Compile Include="AddBindingRedirectCommand.cs" />
     <Compile Include="SetSourceCommand.cs" />
@@ -80,11 +80,11 @@
     <Compile Include="OpenPackagePageCommand.cs" />
     <Compile Include="PackageInstallBaseCommand.cs" />
     <Compile Include="PackageListBaseCommand.cs" />
-    <Compile Include="PackageRepositoryHelper.cs" />
+    <Compile Include="Helper\PackageRepositoryHelper.cs" />
     <Compile Include="PackageActionBaseCommand.cs" />
-    <Compile Include="PackagesConfigReader.cs" />
-    <Compile Include="PowerShellPackage.cs" />
-    <Compile Include="PowerShellPreviewResult.cs" />
+    <Compile Include="Helper\PackagesConfigReader.cs" />
+    <Compile Include="Helper\PowerShellPackage.cs" />
+    <Compile Include="Helper\PowerShellPreviewResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -136,7 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\Common\CommonResources.resx">
-      <Link>CommonResources.resx</Link>
+      <Link>Helper\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
