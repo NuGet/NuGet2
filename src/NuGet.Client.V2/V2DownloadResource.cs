@@ -2,6 +2,7 @@
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,9 +14,26 @@ namespace NuGet.Client.V2
         public V2DownloadResource(V2Resource resource)
             : base(resource) {}
       
-        Task<PackageDownloadMetadata> IDownload.GetNupkgUrlForDownload(PackageIdentity identity)
+        public Task<PackageDownloadMetadata> GetNupkgUrlForDownload(PackageIdentity identity)
         {
-            throw new NotImplementedException();
+          //*TODOs: Temp implementation. Need to do erorr handling and stuff.
+          return Task.Factory.StartNew(() =>
+         {
+             if(V2Client is DataServicePackageRepository)            
+             {                 
+                 return new PackageDownloadMetadata(new Uri(Path.Combine(V2Client.Source, "api/v2/" + identity.Id + "." + identity.Version + "*.nupkg")));      //Not sure if there is some other standard way to get the Url from a dataservice repo.           
+             }
+             else if(V2Client is LocalPackageRepository)
+             {
+                 LocalPackageRepository lrepo = V2Client as LocalPackageRepository;
+                 SemanticVersion semVer = new SemanticVersion(identity.Version.Version);
+                 return new PackageDownloadMetadata(new Uri(Path.Combine(V2Client.Source,  lrepo.PathResolver.GetPackageFileName(identity.Id, semVer)));
+             }
+             else
+             {
+                 throw new InvalidOperationException(string.Format("Unable to get download metadata for package {0}",identity.Id));
+             }
+         });
         }
     }
 }
