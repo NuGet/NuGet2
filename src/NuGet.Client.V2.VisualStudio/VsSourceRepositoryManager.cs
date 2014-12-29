@@ -125,7 +125,7 @@ namespace NuGet.Client.VisualStudio
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects live until end of process, at which point they will be disposed automatically")]
         private SourceRepository CreateRepo(PackageSource source)
         {
-            //Temp code to illustrate the usage of new SourceRepo and resources
+            //Temp code to illustrate the usage of new SourceRepo and resources and to do quick testing to see if all the resources are available at this point in codepath. This will be removed in next iteration.
             //SourceRepository2 repo2 = new SourceRepository2(source, providers);
             //IVsSearch searchResource = repo2.GetResource<IVsSearch>();
             //Debug.Assert(searchResource != null);
@@ -136,8 +136,12 @@ namespace NuGet.Client.VisualStudio
             //IEnumerable<VisualStudioUISearchMetadata> searchResults = searchResource.GetSearchResultsForVisualStudioUI("Elmah", filter, 0, 100, new System.Threading.CancellationToken()).Result;
             //Debug.Assert(searchResults.Count() > 0); // Check if non empty search result is returned.
             //Debug.Assert(searchResults.Any(p => p.Id.Equals("Elmah", StringComparison.OrdinalIgnoreCase))); //check if there is atleast one result which has Elmah as title.
-           
-
+            //IDownload download = repo2.GetResource<IDownload>();
+            //PackageDownloadMetadata downloadMetadata = download.GetNupkgUrlForDownload(new PackageIdentity("jQuery", new NuGetVersion("1.6.4"))).Result;
+            //Debug.Assert(downloadMetadata.NupkgDownloadUrl.ToString().Contains("1.6.4"));
+            //IMetadata metadata = repo2.GetResource<IMetadata>();
+            //NuGetVersion latestVersion = metadata.GetLatestVersion("jQuery").Result;
+            //Debug.Assert(latestVersion.ToString().Equals("2.1.1"));
             return new AutoDetectSourceRepository(source, VsVersionHelper.FullVsEdition, _repoFactory);
          
         }
