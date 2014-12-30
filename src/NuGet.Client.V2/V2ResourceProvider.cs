@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace NuGet.Client.V2
 {
@@ -9,15 +10,16 @@ namespace NuGet.Client.V2
     public abstract class V2ResourceProvider : ResourceProvider
     {
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override bool TryCreateResource(PackageSource source, out Resource resource)
+        public async override Task<Resource> Create(PackageSource source)
         {
+            Resource resource = null;
             try
             {
                 object repo = null;
                 string host = "TestHost";
                 if (!packageSourceCache.TryGetValue(source.Url, out repo)) //Check if the source is already present in the cache.
                 {
-                    if (V2Utilities.IsV2(source)) //if it's not in cache, then check if it is V2.
+                    if (await V2Utilities.IsV2(source)) //if it's not in cache, then check if it is V2.
                     {
                         repo = V2Utilities.GetV2SourceRepository(source, host); //Get a IPackageRepo object and add it to the cache.
                         packageSourceCache.Add(source.Url, repo);
@@ -25,16 +27,16 @@ namespace NuGet.Client.V2
                     else
                     {
                         resource = null; //if it's not V2, then return.
-                        return false;
+                        return resource;
                     }
                 }
                 resource = new V2Resource((IPackageRepository)repo, host); //Create a resource and return it.
-                return true;
+                return resource;
             }
             catch (Exception)
             {
                 resource = null;
-                return false; //*TODOs:Do tracing and throw apppropriate exception here.
+                return resource; //*TODOs:Do tracing and throw apppropriate exception here.
             }
         }
     }

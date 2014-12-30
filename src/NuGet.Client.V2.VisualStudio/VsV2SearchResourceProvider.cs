@@ -13,19 +13,16 @@ namespace NuGet.Client.V2.VisualStudio
     [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(IVsSearch))]
     public class VsV2SearchResourceProvider : V2ResourceProvider
     {
-        public override bool TryCreateResource(PackageSource source, out Resource resource)
+        public async override Task<Resource> Create(PackageSource source)
         {
             VsV2SearchResource vsV2SearchResource;
-            if (base.TryCreateResource(source,out resource))
+            Resource resource = await base.Create(source);
+            if (resource != null)
             {
                 vsV2SearchResource = new VsV2SearchResource((V2Resource)resource);
                 resource = vsV2SearchResource;
-                return true;
             }
-            else
-            {
-                return false;
-            }
+            return resource;
         }       
     }
 }
