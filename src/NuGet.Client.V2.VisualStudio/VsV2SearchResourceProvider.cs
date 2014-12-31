@@ -1,11 +1,5 @@
-﻿using NuGet.Client.V2;
+﻿using System.ComponentModel.Composition;
 using NuGet.Client.VisualStudio.Models;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NuGet.Client.V2.VisualStudio
 {
@@ -13,19 +7,18 @@ namespace NuGet.Client.V2.VisualStudio
     [ResourceProviderMetadata("VsV2SearchResourceProvider", typeof(IVsSearch))]
     public class VsV2SearchResourceProvider : V2ResourceProvider
     {
-        public override bool TryCreateResource(PackageSource source, out Resource resource)
+        public override async System.Threading.Tasks.Task<Resource> Create(PackageSource source)
         {
-            VsV2SearchResource vsV2SearchResource;
-            if (base.TryCreateResource(source,out resource))
+            var resource = await base.Create(source);
+            if (resource != null)
             {
-                vsV2SearchResource = new VsV2SearchResource((V2Resource)resource);
-                resource = vsV2SearchResource;
-                return true;
+                var vsV2SearchResource = new VsV2SearchResource((V2Resource)resource);
+                return vsV2SearchResource;
             }
             else
             {
-                return false;
+                return null;
             }
-        }       
+        }
     }
 }

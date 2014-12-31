@@ -15,19 +15,18 @@ namespace NuGet.Client.V2
     [ResourceProviderMetadata("V2DownloadResourceProvider", typeof(IDownload))]
     public class V2DownloadResourceProvider : V2ResourceProvider
     {
-        public override bool TryCreateResource(PackageSource source, out Resource resource)
+        public override async Task<Resource> Create(PackageSource source)
         {
-            V2DownloadResource v2DownloadResource;
-           if(base.TryCreateResource(source, out resource))
-           {
-               v2DownloadResource = new V2DownloadResource((V2Resource)resource);
-               resource = v2DownloadResource;
-               return true;
-           }
-           else
-           {
-               return false;
-           }
+            var resource = await base.Create(source);
+            if (resource != null)
+            {
+                var v2DownloadResource = new V2DownloadResource((V2Resource)resource);
+                return v2DownloadResource;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

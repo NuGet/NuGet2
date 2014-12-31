@@ -17,5 +17,10 @@ namespace NuGet.Client
             }
             return VersionUtility.ParseFrameworkName(name);
         }
+
+        public static string GetShortFrameworkName(FrameworkName frameworkName)
+        {
+            return VersionUtility.GetShortFrameworkName(frameworkName);
+        }
     }
 }

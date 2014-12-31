@@ -1,31 +1,29 @@
-﻿using NuGet.Client;
-using NuGet.Client.V2;
-using NuGet.Client.VisualStudio.Models;
-using NuGet.Versioning;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using NuGet.Client.VisualStudio.Models;
+using NuGet.Versioning;
 
 namespace NuGet.Client.V2.VisualStudio
 {
- 
     public class VsV2SearchResource : V2Resource, IVsSearch
     {
-        public VsV2SearchResource(V2Resource resource) : base(resource) { }                   
+        public VsV2SearchResource(V2Resource resource)
+            : base(resource)
+        {
+        }
+
         public Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
-  
             return Task.Factory.StartNew(() =>
             {
                 var query = V2Client.Search(
                     searchTerm,
-                    filters.SupportedFrameworks.Select(fx => fx.FullName),
-                    filters.IncludePrerelease);
+                    filters.SupportedFrameworks,
+                    filters.IncludePrerelease,
+                    filters.IncludeDelisted);
 
                 // V2 sometimes requires that we also use an OData filter for latest/latest prerelease version
                 if (filters.IncludePrerelease)
@@ -57,10 +55,11 @@ namespace NuGet.Client.V2.VisualStudio
                     .Select(p => CreatePackageSearchResult(p, cancellationToken))
                     .ToList();
             }, cancellationToken);
-        }     
+        }
+
         private VisualStudioUISearchMetadata CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();         
+            cancellationToken.ThrowIfCancellationRequested();
             var versions = V2Client.FindPackagesById(package.Id);
             if (!versions.Any())
             {
@@ -68,17 +67,18 @@ namespace NuGet.Client.V2.VisualStudio
             }
             string id = package.Id;
             NuGetVersion version = SafeToNuGetVer(package.Version);
-            String summary = package.Summary;
+            string summary = package.Summary;
             IEnumerable<NuGetVersion> nuGetVersions = versions.Select(p => SafeToNuGetVer(p.Version));
-            if (string.IsNullOrWhiteSpace(package.Summary))
-                summary = package.Summary;
-            else
+            if (string.IsNullOrWhiteSpace(summary))
+            {
                 summary = package.Description;
+            }
+
             Uri iconUrl = package.IconUrl;
-            VisualStudioUISearchMetadata searchMetaData = new VisualStudioUISearchMetadata(id,version,summary,iconUrl,nuGetVersions,null);
+            VisualStudioUISearchMetadata searchMetaData = new VisualStudioUISearchMetadata(id, version, summary, iconUrl, nuGetVersions, null);
             return searchMetaData;
         }
-              
+
         private static NuGetVersion SafeToNuGetVer(SemanticVersion semanticVersion)
         {
             if (semanticVersion == null)
@@ -89,6 +89,5 @@ namespace NuGet.Client.V2.VisualStudio
                 semanticVersion.Version,
                 semanticVersion.SpecialVersion);
         }
-      
     }
 }

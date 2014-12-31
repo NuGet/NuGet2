@@ -53,7 +53,7 @@ namespace NuGet.Commands
 
             string searchTerm = Arguments != null ? Arguments.FirstOrDefault() : null;
 
-            var packages = await sourceRepository.Search(searchTerm, new SearchFilter() { IncludePrerelease = Prerelease, SupportedFrameworks = new FrameworkName[0] }, skip, page, CancellationToken.None);
+            var packages = await sourceRepository.Search(searchTerm, new SearchFilter() { IncludePrerelease = Prerelease, SupportedFrameworks = new string[0] }, skip, page, CancellationToken.None);
 
             return packages;
         }

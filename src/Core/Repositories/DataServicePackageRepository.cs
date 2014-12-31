@@ -254,12 +254,8 @@ namespace NuGet
                 return q.AsQueryable();
             }
 
-            // Convert the list of framework names into short names
-            var shortFrameworkNames = targetFrameworks.Select(name => new FrameworkName(name))
-                                                      .Select(VersionUtility.GetShortFrameworkName);
-
             // Create a '|' separated string of framework names
-            string targetFrameworkString = String.Join("|", shortFrameworkNames);
+            string targetFrameworkString = String.Join("|", targetFrameworks);
 
             var searchParameters = new Dictionary<string, object> {
                 { "searchTerm", "'" + UrlEncodeOdataParameter(searchTerm) + "'" },

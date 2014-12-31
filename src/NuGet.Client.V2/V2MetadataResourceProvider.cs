@@ -11,18 +11,17 @@ namespace NuGet.Client.V2
     [ResourceProviderMetadata("V2MetadataResourceProvider", typeof(IMetadata))]
     public class V2MetadataResourceProvider : V2ResourceProvider
     {
-        public override bool TryCreateResource(PackageSource source, out Resource resource)
+        public override async Task<Resource> Create(PackageSource source)
         {
-            V2MetadataResource v2MetadataResource;
-            if (base.TryCreateResource(source, out resource))
+            var resource = await base.Create(source);
+            if (resource != null)
             {
-                v2MetadataResource = new V2MetadataResource((V2Resource)resource);
-                resource = v2MetadataResource;
-                return true;
+                var v2MetadataResource = new V2MetadataResource((V2Resource)resource);
+                return v2MetadataResource;
             }
             else
             {
-                return false;
+                return null;
             }
         }
     }

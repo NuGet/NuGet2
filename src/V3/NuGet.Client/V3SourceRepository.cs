@@ -119,7 +119,7 @@ namespace NuGet.Client
             string frameworks =
                 String.Join("&",
                     filters.SupportedFrameworks.Select(
-                        fx => "supportedFramework=" + VersionUtility.GetShortFrameworkName(fx)));
+                        fx => "supportedFramework=" + fx));
 
             if (!String.IsNullOrEmpty(frameworks))
             {

@@ -53,8 +53,9 @@ namespace NuGet.Client.Interop
             {
                 var query = _repository.Search(
                     searchTerm,
-                    filters.SupportedFrameworks.Select(fx => fx.FullName),
-                    filters.IncludePrerelease);
+                    filters.SupportedFrameworks,
+                    filters.IncludePrerelease,
+                    filters.IncludeDelisted);
 
                 // V2 sometimes requires that we also use an OData filter for latest/latest prerelease version
                 if (filters.IncludePrerelease)

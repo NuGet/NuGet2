@@ -89,35 +89,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void SearchSendsShortTargetFrameworkNames()
-        {
-            // Arrange
-            var client = new Mock<IHttpClient>();
-            var context = new Mock<IDataServiceContext>();
-            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
-            repository.Object.Context = context.Object;
-            context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
-            context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
-                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
-                   {
-                       // Assert
-                       Assert.Equal("Search", entitySet);
-                       Assert.Equal(2, parameters.Count);
-                       Assert.Equal("'dante''s%20inferno'", parameters["searchTerm"]);
-                       Assert.Equal("'net40%7Csl40%7Cwp%7Cnetmf11'", parameters["targetFramework"]);
-                   })
-                   .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
-
-            // Act
-            repository.Object.Search("dante's inferno", new[] {
-                VersionUtility.ParseFrameworkName("net40").FullName,
-                VersionUtility.ParseFrameworkName("sl40").FullName,
-                VersionUtility.ParseFrameworkName("sl3-wp").FullName,
-                VersionUtility.ParseFrameworkName("netmf11").FullName,
-            }, allowPrereleaseVersions: false);
-        }
-
-        [Fact]
         public void SearchSendsPrereleaseFlagIfSet()
         {
             // Arrange
@@ -142,10 +113,10 @@ namespace NuGet.Test
 
             // Act
             repository.Object.Search("dante's inferno", new[] {
-                VersionUtility.ParseFrameworkName("net40").FullName,
-                VersionUtility.ParseFrameworkName("sl40").FullName,
-                VersionUtility.ParseFrameworkName("sl3-wp").FullName,
-                VersionUtility.ParseFrameworkName("netmf11").FullName,
+                VersionUtility.GetShortFrameworkName(VersionUtility.ParseFrameworkName("net40")),
+                VersionUtility.GetShortFrameworkName(VersionUtility.ParseFrameworkName("sl40")),
+                VersionUtility.GetShortFrameworkName(VersionUtility.ParseFrameworkName("sl3-wp")),
+                VersionUtility.GetShortFrameworkName(VersionUtility.ParseFrameworkName("netmf11")),
             }, allowPrereleaseVersions: true);
 
             context.Verify();

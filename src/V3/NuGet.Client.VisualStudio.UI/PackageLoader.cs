@@ -5,17 +5,11 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using Microsoft.Internal.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell.Interop;
 using Newtonsoft.Json.Linq;
 using NuGet.Client.Installation;
-using NuGet.Client.Resolution;
+using NuGet.Client.VisualStudio.Models;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
-using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -37,8 +31,8 @@ namespace NuGet.Client.VisualStudio.UI
             IncludePrerelease = includePrerelease;
         }
 
-        public Filter Filter {get; private set; }
-        
+        public Filter Filter { get; private set; }
+
         public bool IncludePrerelease { get; private set; }
     }
 
@@ -86,38 +80,65 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        private Task<IEnumerable<JObject>> Search(int startIndex, CancellationToken ct)
+        // TODO: temporary code. Need to change InstallationTarget.SearchInstalled to return 
+        // the right type.
+        private static VisualStudioUISearchMetadata CreateResult(JObject obj)
+        {
+            string id = obj.Value<string>(Properties.PackageId);
+            var version = NuGetVersion.Parse(obj.Value<string>(Properties.LatestVersion)); 
+            string description = obj.Value<string>(Properties.Description);
+            var iconUrl = GetUri(obj, Properties.IconUrl);
+
+            var versions = (obj.Value<JArray>(Properties.Versions) ?? Enumerable.Empty<JToken>())
+                .Select(t => NuGetVersion.Parse(t.Value<string>(Properties.Version)));
+
+            VisualStudioUISearchMetadata r = new VisualStudioUISearchMetadata(
+                id,
+                version,
+                description,
+                iconUrl,
+                versions: versions,
+                latestPackageMetadata: null);
+            return r;
+        }
+
+        private async Task<IEnumerable<VisualStudioUISearchMetadata>> Search(int startIndex, CancellationToken ct)
         {
             if (_option.Filter == Filter.Installed ||
                 _option.Filter == Filter.UpdatesAvailable)
             {
                 // search in target
-                return _target.SearchInstalled(
+                var packages = await _target.SearchInstalled(
                     _source,
                     _searchText,
                     startIndex,
                     _pageSize,
                     ct);
+                return packages.Select(p => CreateResult(p));
             }
             else
             {
                 // search in source
                 if (_source == null)
                 {
-                    return Task.Run(() =>
-                    {
-                        return Enumerable.Empty<JObject>();
-                    });
+                    return Enumerable.Empty<VisualStudioUISearchMetadata>();
                 }
                 else
                 {
-                    return _source.Search(
+                    // TODO: hacky code to get SourceRepo2. Will be removed later.
+                    var s = ServiceLocator.GetInstance<VsPackageManagerContext>();
+                    var sourceManager = s.SourceManager as VsSourceRepositoryManager;
+                    var repo2 = sourceManager.CreateRepo2(_source.Source);
+
+                    var searchFilter = new SearchFilter();
+                    searchFilter.SupportedFrameworks = _target.GetSupportedFrameworks()
+                        .Select(fn => FrameworkNameHelper.GetShortFrameworkName(fn));
+                    searchFilter.IncludePrerelease = _option.IncludePrerelease;
+
+                    var search = await repo2.GetResource<IVsSearch>();
+                    return await search.GetSearchResultsForVisualStudioUI(
                         _searchText,
-                        new SearchFilter()
-                        {
-                            SupportedFrameworks = _target.GetSupportedFrameworks(),
-                            IncludePrerelease = _option.IncludePrerelease
-                        },
+                        searchFilter,
                         startIndex,
                         _pageSize,
                         ct);
@@ -127,9 +148,8 @@ namespace NuGet.Client.VisualStudio.UI
 
         public async Task<LoadResult> LoadItems(int startIndex, CancellationToken ct)
         {
-            var results = await Search(startIndex, ct);
-
             List<UiSearchResultPackage> packages = new List<UiSearchResultPackage>();
+            var results = await Search(startIndex, ct);
             int resultCount = 0;
             foreach (var package in results)
             {
@@ -137,36 +157,18 @@ namespace NuGet.Client.VisualStudio.UI
                 ++resultCount;
 
                 var searchResultPackage = new UiSearchResultPackage(_source);
-                searchResultPackage.Id = package.Value<string>(Properties.PackageId);
-                searchResultPackage.Version = NuGetVersion.Parse(package.Value<string>(Properties.LatestVersion));
-
-                searchResultPackage.IconUrl = GetUri(package, Properties.IconUrl);
+                searchResultPackage.Id = package.Id;
+                searchResultPackage.Version = package.Version;
+                searchResultPackage.IconUrl = package.IconUrl;
 
                 // get other versions
-                var versionList = new List<NuGetVersion>();
-                var versions = package.Value<JArray>(Properties.Versions);
-                if (versions != null)
+                var versionList = package.Versions.ToList();
+                if (!_option.IncludePrerelease)
                 {
-                    if (versions[0].Type == JTokenType.String)
-                    {
-                        // TODO: this part should be removed once the new end point is up and running.
-                        versionList = versions
-                            .Select(v => NuGetVersion.Parse(v.Value<string>()))
-                            .ToList();
-                    }
-                    else
-                    {
-                        versionList = versions
-                            .Select(v => NuGetVersion.Parse(v.Value<string>("version")))
-                            .ToList();
-                    }
-
-                    if (!_option.IncludePrerelease)
-                    {
-                        // remove prerelease version if includePrelease is false
-                        versionList.RemoveAll(v => v.IsPrerelease);
-                    }
+                    // remove prerelease version if includePrelease is false
+                    versionList.RemoveAll(v => v.IsPrerelease);
                 }
+
                 if (!versionList.Contains(searchResultPackage.Version))
                 {
                     versionList.Add(searchResultPackage.Version);
@@ -192,13 +194,7 @@ namespace NuGet.Client.VisualStudio.UI
                     continue;
                 }
 
-                searchResultPackage.Summary = package.Value<string>(Properties.Summary);
-                if (string.IsNullOrWhiteSpace(searchResultPackage.Summary))
-                {
-                    // summary is empty. Use its description instead.
-                    searchResultPackage.Summary = package.Value<string>(Properties.Description);
-                }
-
+                searchResultPackage.Summary = package.Summary;
                 packages.Add(searchResultPackage);
             }
 
@@ -249,7 +245,7 @@ namespace NuGet.Client.VisualStudio.UI
             return retValue;
         }
 
-        private Uri GetUri(JObject json, string property)
+        private static Uri GetUri(JObject json, string property)
         {
             if (json[property] == null)
             {
