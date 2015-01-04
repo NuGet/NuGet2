@@ -304,17 +304,17 @@
       <HintPath>..\..\packages\NuGet.Client.BaseTypes.0.1.9-a20141231204536-119\lib\net45\NuGet.Client.BaseTypes.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Client.V3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NuGet.Client.V3.1.0.0-a20141231205406-980\lib\net45\NuGet.Client.V3.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="NuGet.Client.V3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a54e26fdc1b81123, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Client.V3.1.0.0-a20150104044415-762\lib\net45\NuGet.Client.V3.dll</HintPath>
     </Reference>
-    <Reference Include="NuGet.Client.V3.VisualStudio, Version=0.1.4.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NuGet.Client.V3.VisualStudio.0.1.4-a20141231224234-030\lib\net45\NuGet.Client.V3.VisualStudio.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="NuGet.Client.V3.VisualStudio, Version=0.1.4.0, Culture=neutral, PublicKeyToken=a54e26fdc1b81123, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Client.V3.VisualStudio.0.1.4-a20150104044346-096\lib\net45\NuGet.Client.V3.VisualStudio.dll</HintPath>
     </Reference>
-    <Reference Include="NuGet.Client.VisualStudio, Version=0.1.3.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NuGet.Client.VisualStudio.0.1.3-a20141231204717-158\lib\net45\NuGet.Client.VisualStudio.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="NuGet.Client.VisualStudio, Version=0.1.3.0, Culture=neutral, PublicKeyToken=a54e26fdc1b81123, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NuGet.Client.VisualStudio.0.1.3-a20150103231730-450\lib\net45\NuGet.Client.VisualStudio.dll</HintPath>
     </Reference>
     <Reference Include="NuGet.Data, Version=1.0.1.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

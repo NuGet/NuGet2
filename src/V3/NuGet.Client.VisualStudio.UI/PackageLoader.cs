@@ -135,7 +135,7 @@ namespace NuGet.Client.VisualStudio.UI
                         .Select(fn => FrameworkNameHelper.GetShortFrameworkName(fn));
                     searchFilter.IncludePrerelease = _option.IncludePrerelease;
 
-                    var search = await repo2.GetResource<IVsSearch>();
+                    var search = await repo2.GetResource<IVisualStudioUISearch>();
                     return await search.GetSearchResultsForVisualStudioUI(
                         _searchText,
                         searchFilter,
