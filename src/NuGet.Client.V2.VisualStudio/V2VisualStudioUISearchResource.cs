@@ -8,9 +8,9 @@ using NuGet.Versioning;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    public class VsV2SearchResource : V2Resource, IVsSearch
+    public class V2VisualStudioUISearchResource : V2Resource, IVisualStudioUISearch
     {
-        public VsV2SearchResource(V2Resource resource)
+        public V2VisualStudioUISearchResource(V2Resource resource)
             : base(resource)
         {
         }
