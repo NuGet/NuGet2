@@ -48,7 +48,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
         protected override void Preprocess()
         {
             this.ActiveSourceRepository = GetActiveRepository(Source);
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
+            this.PackageActionResolver = new ActionResolver(
+                ActiveSourceRepository,
+                CreateDependencyResolutionSource(),
+                ResolutionContext);
             base.Preprocess();
         }
 

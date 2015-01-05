@@ -225,6 +225,12 @@ namespace NuGet.Client.VisualStudio.UI
             return Sources.CreateSourceRepository(activeSource);
         }
 
+        internal SourceRepository CreateAggregateSourceRepository()
+        {
+            return new DependencyResolutionRepository(
+                Sources.AvailableSources.Select(s => Sources.CreateSourceRepository(s)));
+        }
+
         private void SearchPackageInActivePackageSource(string searchText)
         {
             var activeSource = _sourceRepoList.SelectedItem as PackageSource;

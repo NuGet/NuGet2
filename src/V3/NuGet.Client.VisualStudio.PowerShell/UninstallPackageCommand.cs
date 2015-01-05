@@ -40,7 +40,10 @@ namespace NuGet.Client.VisualStudio.PowerShell
             VsProject proj = this.Projects.FirstOrDefault();
             Source = V2LocalRepository.Source;
             this.ActiveSourceRepository = GetActiveRepository(Source);
-            this.PackageActionResolver = new ActionResolver(ActiveSourceRepository, ResolutionContext);
+            this.PackageActionResolver = new ActionResolver(
+                ActiveSourceRepository,
+                CreateDependencyResolutionSource(),
+                ResolutionContext);
             this.Identities = GetPackageIdentityForResolver();
         }
 

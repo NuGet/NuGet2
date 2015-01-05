@@ -113,7 +113,9 @@ namespace NuGet.Commands
                         NuGet.Resources.NuGetResources.UnknownPackageSpecificVersion, packageId, version));
             }
 
-            var actionResolver = new ActionResolver(SourceRepository,
+            var actionResolver = new ActionResolver(
+                SourceRepository,
+                SourceRepository,
                 new ResolutionContext()
                 {
                     AllowPrerelease = Prerelease,

@@ -25,7 +25,11 @@ namespace NuGet
         {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, ISharedPackageRepository localRepository)
+        public PackageManager(
+            IPackageRepository sourceRepository, 
+            IPackagePathResolver pathResolver, 
+            IFileSystem fileSystem, 
+            ISharedPackageRepository localRepository)
         {
             if (sourceRepository == null)
             {
@@ -45,6 +49,7 @@ namespace NuGet
             }
 
             SourceRepository = sourceRepository;
+            DependencyResolver = new DependencyResolverFromRepo(sourceRepository);
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
@@ -59,6 +64,12 @@ namespace NuGet
         }
 
         public IPackageRepository SourceRepository
+        {
+            get;
+            private set;
+        }
+
+        public IDependencyResolver2 DependencyResolver
         {
             get;
             private set;

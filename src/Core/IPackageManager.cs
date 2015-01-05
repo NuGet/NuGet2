@@ -25,6 +25,8 @@ namespace NuGet
         /// </summary>
         IPackageRepository SourceRepository { get; }
 
+        IDependencyResolver2 DependencyResolver { get; }
+
         /// <summary>
         /// PathResolver used to determine paths for installed packages.
         /// </summary>

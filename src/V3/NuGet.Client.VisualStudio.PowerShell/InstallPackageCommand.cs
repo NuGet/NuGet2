@@ -327,8 +327,8 @@ namespace NuGet.Client.VisualStudio.PowerShell
                         builderForVersion.Append(".");
                     }
                 }
-                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(builderForVersion.ToString().TrimSuffix("."));
-                return new PackageIdentity(builderForId.ToString().TrimSuffix("."), nVersion);
+                NuGetVersion nVersion = PowerShellPackage.GetNuGetVersionFromString(builderForVersion.ToString().TrimEnd('.'));
+                return new PackageIdentity(builderForId.ToString().TrimEnd('.'), nVersion);
             }
             return null;
         }

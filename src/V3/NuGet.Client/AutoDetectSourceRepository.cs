@@ -156,4 +156,60 @@ namespace NuGet.Client
             _repo.RecordMetric(actionType, packageIdentity, dependentPackage, isUpdate, target);
         }
     }
+
+    public class DependencyResolutionRepository : SourceRepository
+    {
+        List<SourceRepository> _sources;
+
+        public DependencyResolutionRepository(IEnumerable<SourceRepository> sources)
+        {
+            _sources = sources.ToList();
+        }
+        
+        public override async Task<Newtonsoft.Json.Linq.JObject> GetPackageMetadata(string id, Versioning.NuGetVersion version)
+        {
+            foreach (var source in _sources)
+            {
+                var result = await source.GetPackageMetadata(id, version);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public override async Task<IEnumerable<Newtonsoft.Json.Linq.JObject>> GetPackageMetadataById(string packageId)
+        {
+            foreach (var source in _sources)
+            {
+                var result = await source.GetPackageMetadataById(packageId);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public override void RecordMetric(PackageActionType actionType, PackageIdentity packageIdentity, PackageIdentity dependentPackage, bool isUpdate, IInstallationTarget target)
+        {
+            // should not be called
+            throw new NotImplementedException();
+        }
+
+        public override Task<IEnumerable<Newtonsoft.Json.Linq.JObject>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
+        {
+            // should not be called
+            throw new NotImplementedException();
+        }
+
+        public override PackageSource Source
+        {
+            // should not be called
+            get { return null; }
+        }
+    }
 }

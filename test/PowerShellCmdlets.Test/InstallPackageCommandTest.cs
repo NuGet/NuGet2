@@ -269,55 +269,6 @@ namespace NuGet.PowerShell.Commands.Test
             }
         }
 
-        // !!! This test should be moved into VsPackageManagerFactory tests.
-        [Fact]
-        public void InstallPackageCmdletCreatesFallbackRepository()
-        {
-            // Arrange
-            IPackageRepository repoA = new MockPackageRepository("A");
-            IPackageRepository repoB = new MockPackageRepository("B");
-            
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
-            repositoryFactory.Setup(c => c.CreateRepository("A")).Returns(repoA);
-            repositoryFactory.Setup(c => c.CreateRepository("B")).Returns(repoB);
-            var sourceProvider = GetPackageSourceProvider(new PackageSource("A"), new PackageSource("B"));
-            var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(c => c.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
-            var repositorySettings = new Mock<IRepositorySettings>();
-            repositorySettings.Setup(c => c.RepositoryPath).Returns(@"c:\repositoryPath");
-            repositorySettings.Setup(c => c.ConfigFolderPath).Returns(@"c:\configFolder");
-
-            var solutionManager = new Mock<ISolutionManager>();
-            var vsPackageManagerFactory = new TestVsPackageManagerFactory(
-                solutionManager.Object, 
-                repositoryFactory.Object, 
-                sourceProvider, 
-                fileSystemProvider.Object, 
-                repositorySettings.Object, 
-                new Mock<VsPackageInstallerEvents>().Object,
-                repoA, // repoA is the active repository
-                /* multiFrameworkTargeting */ null,
-                /* machineWideSettings */ null);
-
-            // Act
-            var packageManager = vsPackageManagerFactory.CreatePackageManager();
-
-            // Assert: the source repo is a FallbackRepository, with source A as
-            // primary and aggregate of sources A, B as dependency resolver repository.
-            var sourceRepo = packageManager.SourceRepository as FallbackRepository;
-            Assert.NotNull(sourceRepo);
-            Assert.Equal("A", sourceRepo.SourceRepository.Source);
-
-            var dependencyResolverRepo = sourceRepo.DependencyResolver as AggregateRepository;
-            Assert.NotNull(dependencyResolverRepo);
-            Assert.True(dependencyResolverRepo.ResolveDependenciesVertically);
-
-            var repos = dependencyResolverRepo.Repositories.ToList();
-            Assert.Equal(2, repos.Count);
-            Assert.Equal("A", repos[0].Source);
-            Assert.Equal("B", repos[1].Source);
-        }
-
         /* !!!
         [Fact]
         public void InstallPackageCmdletFallsbackToCacheWhenNetworkIsUnavailable()

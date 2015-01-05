@@ -38,6 +38,7 @@ namespace NuGet.Commands
         protected void InitializeSourceRepository()
         {
             SourceRepository = SourceRepositoryHelper.CreateSourceRepository(SourceProvider, Source);
+
         }
 
         protected void CalculateEffectivePackageSaveMode()

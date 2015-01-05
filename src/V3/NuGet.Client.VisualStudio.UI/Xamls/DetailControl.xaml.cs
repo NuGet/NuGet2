@@ -84,8 +84,11 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
             }
+
+            var dependencyResolutionRepo = Control.CreateAggregateSourceRepository();
             var resolver = new ActionResolver(
                 repo,
+                dependencyResolutionRepo,
                 new ResolutionContext()
                 {
                     DependencyBehavior = model.Options.SelectedDependencyBehavior.Behavior,

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using NuGet.Client.Diagnostics;
 using NuGet.V3Interop;
 
@@ -23,10 +20,20 @@ namespace NuGet.Client.Interop
             get { return _sourceRepo; }
         }
 
-        public CoreInteropPackageManager(ISharedPackageRepository sharedRepo, CoreInteropSourceRepository sourceRepo)
+        public IDependencyResolver2 DependencyResolver
+        {
+            get;
+            private set;
+        }
+
+        public CoreInteropPackageManager(
+            ISharedPackageRepository sharedRepo,
+            IDependencyResolver2 dependencyResolver,
+            CoreInteropSourceRepository sourceRepo)
         {
             _sharedRepo = sharedRepo;
             _sourceRepo = sourceRepo;
+            DependencyResolver = dependencyResolver;
         }
 
         public bool IsProjectLevel(IPackage package)
@@ -39,6 +46,7 @@ namespace NuGet.Client.Interop
         }
 
         #region Unimplemented Stuff
+
         public IFileSystem FileSystem
         {
             get
@@ -88,6 +96,7 @@ namespace NuGet.Client.Interop
 
         // Suppress 'The event ... is never used' warning
 #pragma warning disable 0067
+
         public event EventHandler<PackageOperationEventArgs> PackageInstalled;
 
         public event EventHandler<PackageOperationEventArgs> PackageInstalling;
@@ -95,6 +104,7 @@ namespace NuGet.Client.Interop
         public event EventHandler<PackageOperationEventArgs> PackageUninstalled;
 
         public event EventHandler<PackageOperationEventArgs> PackageUninstalling;
+
 #pragma warning restore 0067
 
         public void Execute(PackageOperation operation)
@@ -128,6 +138,7 @@ namespace NuGet.Client.Interop
             System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!");
             throw new NotImplementedException();
         }
-        #endregion
+
+        #endregion Unimplemented Stuff
     }
 }

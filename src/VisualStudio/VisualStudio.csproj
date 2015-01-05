@@ -44,7 +44,6 @@
     <Compile Include="Extensibility\VsPackageEventHandler.cs" />
     <Compile Include="Extensibility\VsPackageMetadata.cs" />
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
-    <Compile Include="FallbackRepository.cs" />
     <Compile Include="DeleteOnRestart\IDeleteOnRestartManager.cs" />
     <Compile Include="FrameworkAssemblyResolver.cs" />
     <Compile Include="IRegistryKey.cs" />

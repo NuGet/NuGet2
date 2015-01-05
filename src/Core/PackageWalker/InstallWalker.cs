@@ -23,24 +23,24 @@ namespace NuGet
 
         // this ctor is used for unit tests
         internal InstallWalker(IPackageRepository localRepository,
-                               IPackageRepository sourceRepository,
+                               IDependencyResolver2 dependencyResolver,
                                ILogger logger,
                                bool ignoreDependencies,
                                bool allowPrereleaseVersions,
                                DependencyVersion dependencyVersion)
-            : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions, dependencyVersion)
+            : this(localRepository, dependencyResolver, null, logger, ignoreDependencies, allowPrereleaseVersions, dependencyVersion)
         {
         }
 
         public InstallWalker(IPackageRepository localRepository,
-                             IPackageRepository sourceRepository,
+                             IDependencyResolver2 dependencyResolver,
                              FrameworkName targetFramework,
                              ILogger logger,
                              bool ignoreDependencies,
                              bool allowPrereleaseVersions,
                              DependencyVersion dependencyVersion) :
             this(localRepository,
-                 sourceRepository,
+                 dependencyResolver,
                  constraintProvider: NullConstraintProvider.Instance,
                  targetFramework: targetFramework,
                  logger: logger,
@@ -51,7 +51,7 @@ namespace NuGet
         }
         
         public InstallWalker(IPackageRepository localRepository,
-                             IPackageRepository sourceRepository,
+                             IDependencyResolver2 dependencyResolver,
                              IPackageConstraintProvider constraintProvider,
                              FrameworkName targetFramework,
                              ILogger logger,
@@ -61,9 +61,9 @@ namespace NuGet
             : base(targetFramework)
         {
 
-            if (sourceRepository == null)
+            if (dependencyResolver == null)
             {
-                throw new ArgumentNullException("sourceRepository");
+                throw new ArgumentNullException("dependencyResolver");
             }
             if (localRepository == null)
             {
@@ -76,7 +76,7 @@ namespace NuGet
 
             Repository = localRepository;
             Logger = logger;
-            SourceRepository = sourceRepository;
+            DependencyResolver = dependencyResolver;
             _ignoreDependencies = ignoreDependencies;
             ConstraintProvider = constraintProvider;
             _operations = new OperationLookup();
@@ -143,7 +143,7 @@ namespace NuGet
             }
         }
 
-        protected IPackageRepository SourceRepository
+        protected IDependencyResolver2 DependencyResolver
         {
             get;
             private set;
@@ -254,6 +254,24 @@ namespace NuGet
             return dependencies.SelectDependency(DependencyVersion);
         }
 
+        private static IEnumerable<IPackage> FindCompatiblePackages(
+            IDependencyResolver2 dependencyResolver,
+            IPackageConstraintProvider constraintProvider,
+            IEnumerable<string> packageIds,
+            IPackage package,
+            FrameworkName targetFramework,
+            bool allowPrereleaseVersions)
+        {
+            return (from p in dependencyResolver.FindPackages(packageIds)
+                    where allowPrereleaseVersions || p.IsReleaseVersion()
+                    let dependency = p.FindDependency(package.Id, targetFramework)
+                    let otherConstaint = constraintProvider.GetConstraint(p.Id)
+                    where dependency != null &&
+                          dependency.VersionSpec.Satisfies(package.Version) &&
+                          (otherConstaint == null || otherConstaint.Satisfies(package.Version))
+                    select p);
+        }
+
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
         private bool TryUpdate(IEnumerable<IPackage> dependents, ConflictResult conflictResult, IPackage package, out IEnumerable<IPackage> incompatiblePackages)
         {
@@ -268,7 +286,9 @@ namespace NuGet
             }
 
             // Get compatible packages in one batch so we don't have to make requests for each one
-            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package, TargetFramework, AllowPrereleaseVersions)
+            var packages = from p in FindCompatiblePackages(
+                           DependencyResolver,
+                           ConstraintProvider, dependentsLookup.Keys, package, TargetFramework, AllowPrereleaseVersions)
                            group p by p.Id into g
                            let oldPackage = dependentsLookup[g.Key]
                            select new
@@ -404,7 +424,7 @@ namespace NuGet
             //That way we will downgrade dependencies when parent package is downgraded.
             if (!_isDowngrade)
             {
-                IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
+                IPackage package = DependencyResolveUtility.ResolveDependency(Repository, dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false, dependencyVersion: DependencyVersion);
                 if (package != null)
                 {
                     return package;
@@ -412,7 +432,7 @@ namespace NuGet
             }
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, dependencyVersion: DependencyVersion);
+            IPackage sourcePackage = DependencyResolver.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true, dependencyVersion: DependencyVersion);
             return sourcePackage;
         }
 

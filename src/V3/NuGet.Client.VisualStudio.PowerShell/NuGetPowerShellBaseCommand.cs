@@ -32,7 +32,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
     public abstract class NuGetPowerShellBaseCommand : PSCmdlet, IExecutionContext, IErrorHandler
     {
         private VsSourceRepositoryManager _repoManager;
-        private IVsPackageSourceProvider _packageSourceProvider;
+        protected IVsPackageSourceProvider _packageSourceProvider;
         private IPackageRepositoryFactory _repositoryFactory;
         private SVsServiceProvider _serviceProvider;
         private IVsPackageManagerFactory _packageManagerFactory;

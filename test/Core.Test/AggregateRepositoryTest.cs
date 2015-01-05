@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Versioning;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.Test
 {
-
     public class AggregateRepositoryTest
     {
         [Fact]
@@ -18,7 +16,7 @@ namespace NuGet.Test
             IPackage a = PackageUtility.CreatePackage("A"),
                      b = PackageUtility.CreatePackage("B"),
                      c = PackageUtility.CreatePackage("C");
-            var repository = new AggregateRepository(new[] { 
+            var repository = new AggregateRepository(new[] {
                 new MockPackageRepository { c, a },
                 new MockPackageRepository { b, a }
             });
@@ -91,7 +89,6 @@ namespace NuGet.Test
             Assert.Equal("D", packages[3].Id);
             Assert.Equal("E", packages[4].Id);
         }
-
 
         [Fact]
         public void GetPackagesRemoveDuplicatesIfTheyAreTheSameVersion()
@@ -206,14 +203,14 @@ namespace NuGet.Test
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
 
-            var repository = new AggregateRepository(new[] { 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A"), 
-                }, 
+            var repository = new AggregateRepository(new[] {
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("A"),
+                },
                 mockRepository.Object,
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("B"), 
-                } 
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("B"),
+                }
             });
             repository.IgnoreFailingRepositories = true;
 
@@ -236,13 +233,13 @@ namespace NuGet.Test
             var mockRepositoryWithLookup = packageLookup.As<IPackageRepository>();
             mockRepositoryWithLookup.Setup(c => c.GetPackages()).Throws(new InvalidOperationException());
 
-            var repository = new AggregateRepository(new[] { 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A"), 
-                }, 
+            var repository = new AggregateRepository(new[] {
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("A"),
+                },
                 mockRepository.Object,
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("B"), 
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("B"),
                 },
                 mockRepositoryWithLookup.Object
             });
@@ -264,20 +261,26 @@ namespace NuGet.Test
             var mockRepoWithLookup = new Mock<IPackageRepository>();
             mockRepository.As<IDependencyResolver>().Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false, It.IsAny<bool>(), DependencyVersion.Lowest));
 
-            var repository = new AggregateRepository(new[] { 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A"), 
-                }, 
+            var repository = new AggregateRepository(new[] {
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("A"),
+                },
                 mockRepository.Object,
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("B"), 
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("B"),
                 },
                 mockRepoWithLookup.Object
             });
             repository.IgnoreFailingRepositories = true;
 
             // Act
-            var package = repository.ResolveDependency(new PackageDependency("C"), null, allowPrereleaseVersions: false, preferListedPackages: false);
+            var package = DependencyResolveUtility.ResolveDependency(
+                repository, 
+                new PackageDependency("C"), 
+                null, 
+                allowPrereleaseVersions: false, 
+                preferListedPackages: false,
+                dependencyVersion: DependencyVersion.Lowest);
 
             // Assert
             Assert.Null(package);
@@ -290,13 +293,13 @@ namespace NuGet.Test
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
 
-            var repository = new AggregateRepository(new[] { 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A"), 
-                }, 
+            var repository = new AggregateRepository(new[] {
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("A"),
+                },
                 mockRepository.Object,
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("B"), 
+                new MockPackageRepository {
+                    PackageUtility.CreatePackage("B"),
                 },
             });
             repository.IgnoreFailingRepositories = true;
@@ -338,7 +341,7 @@ namespace NuGet.Test
 
             var aggregateRepository = new AggregateRepository(new[] { repo1.Object, repo2.Object }) { IgnoreFailingRepositories = true };
 
-            // Act 
+            // Act
             for (int i = 0; i < 5; i++)
             {
                 aggregateRepository.GetPackages();
@@ -360,7 +363,7 @@ namespace NuGet.Test
 
             var aggregateRepository = new AggregateRepository(new[] { repo1, repo2 });
 
-            // Act 
+            // Act
             var exists = aggregateRepository.Exists("Abc", new SemanticVersion("1.0"));
 
             // Assert

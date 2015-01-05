@@ -40,7 +40,10 @@ namespace NuGet.Client.Interop
             }
         }
 
-        public CoreInteropProjectManager(InstallationTarget target, SourceRepository activeSource)
+        public CoreInteropProjectManager(
+            InstallationTarget target, 
+            SourceRepository activeSource,
+            IDependencyResolver2 dependencyResolver)
         {
             // Get the required features from the target
             _sharedRepo = target.GetRequiredFeature<ISharedPackageRepository>();
@@ -49,7 +52,10 @@ namespace NuGet.Client.Interop
             _target = target;
 
             _sourceRepo = new CoreInteropSourceRepository(activeSource);
-            _pacman = new CoreInteropPackageManager(_sharedRepo, _sourceRepo);
+            _pacman = new CoreInteropPackageManager(
+                _sharedRepo,
+                dependencyResolver,
+                _sourceRepo);
         }
 
         #region Unimplemented stuff.

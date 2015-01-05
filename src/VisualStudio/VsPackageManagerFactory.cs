@@ -105,6 +105,8 @@ namespace NuGet.VisualStudio
             return CreatePackageManager(_activePackageSourceRepository, useFallbackForDependencies: true);
         }
 
+        // TODO: fallback repository is removed. Update the documentation.
+
         /// <summary>
         /// Creates a VsPackageManager that is used to manage install packages.
         /// The local repository is used as the primary source, and other active sources are 
@@ -112,7 +114,7 @@ namespace NuGet.VisualStudio
         /// repository, which is the normal case, this package manager will not need to query
         /// any remote sources at all. Other active sources are 
         /// used as fall back repository so that it still works even if user has used 
-        /// install-package -IgnoreDependencies.
+        /// install-package -IgnoreDependencies.        
         /// </summary>
         /// <returns>The VsPackageManager created.</returns>
         public IVsPackageManager CreatePackageManagerToManageInstalledPackages()
@@ -121,16 +123,11 @@ namespace NuGet.VisualStudio
             var aggregateRepository = _packageSourceProvider.CreateAggregateRepository(
                 _repositoryFactory, ignoreFailingRepositories: true);
             aggregateRepository.ResolveDependenciesVertically = true;
-            var fallbackRepository = new FallbackRepository(info.Repository, aggregateRepository);
-            return CreatePackageManager(fallbackRepository, useFallbackForDependencies: false);
+            return CreatePackageManager(aggregateRepository, useFallbackForDependencies: false);
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies)
         {
-            if (useFallbackForDependencies)
-            {
-                repository = CreateFallbackRepository(repository);
-            }
             RepositoryInfo info = GetRepositoryInfo();
             var packageManager = new VsPackageManager(_solutionManager,
                                         repository,
@@ -162,6 +159,8 @@ namespace NuGet.VisualStudio
             return CreatePackageManager(priorityRepository, useFallbackForDependencies: false);
         }
 
+        // TODO: fallback repository is removed. Update the documentation.
+
         /// <summary>
         /// Creates a FallbackRepository with an aggregate repository that also contains the primaryRepository.
         /// </summary>
@@ -175,7 +174,7 @@ namespace NuGet.VisualStudio
 
             var aggregateRepository = _packageSourceProvider.CreateAggregateRepository(_repositoryFactory, ignoreFailingRepositories: true);
             aggregateRepository.ResolveDependenciesVertically = true;
-            return new FallbackRepository(primaryRepository, aggregateRepository);
+            return aggregateRepository;
         }
 
         private static bool IsAggregateRepository(IPackageRepository repository)

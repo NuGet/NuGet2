@@ -8,7 +8,7 @@ namespace NuGet
 
         // this ctor is used for unit tests
         internal UpdateWalker(IPackageRepository localRepository,
-                            IPackageRepository sourceRepository,
+                            IDependencyResolver2 sourceRepository,
                             IDependentsResolver dependentsResolver,
                             IPackageConstraintProvider constraintProvider,
                             ILogger logger,
@@ -19,7 +19,7 @@ namespace NuGet
         }
 
         public UpdateWalker(IPackageRepository localRepository,
-                            IPackageRepository sourceRepository,
+                            IDependencyResolver2 sourceRepository,
                             IDependentsResolver dependentsResolver,
                             IPackageConstraintProvider constraintProvider,
                             FrameworkName targetFramework, 

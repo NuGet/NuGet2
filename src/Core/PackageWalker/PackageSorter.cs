@@ -52,7 +52,7 @@ namespace NuGet
 
         protected override IPackage ResolveDependency(PackageDependency dependency)
         {
-            return _repository.ResolveDependency(dependency, allowPrereleaseVersions: true, preferListedPackages: false);
+            return DependencyResolveUtility.ResolveDependency(_repository, dependency, allowPrereleaseVersions: true, preferListedPackages: false);
         }
 
         protected override void OnDependencyResolveError(PackageDependency dependency)

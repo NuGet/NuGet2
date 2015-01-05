@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using EnvDTE;
 
 #if VS14
@@ -12,8 +11,6 @@ using Microsoft.VisualStudio.ProjectSystem.Interop;
 #endif
 
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.Resources;
-using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -90,11 +87,6 @@ namespace NuGet.VisualStudio
             // Create the project system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
 
-            /* +++???
-            // The source repository of the project is an aggregate since it might need to look for all
-            // available packages to perform updates on dependent packages
-            var sourceRepository = CreateProjectManagerSourceRepository(); */
-
 #if VS14
             if (projectSystem is INuGetPackageManager)
             {
@@ -112,7 +104,7 @@ namespace NuGet.VisualStudio
             // Ensure that this repository is registered with the shared repository if it needs to be
             if (repository != null)
             {
-            repository.RegisterIfNecessary();
+                repository.RegisterIfNecessary();
             }
 
             var projectManager = new VsProjectManager(this, PathResolver, projectSystem, repository);
@@ -231,7 +223,7 @@ namespace NuGet.VisualStudio
 
         public IPackage FindLocalPackage(string packageId, out bool appliesToProject)
         {
-            // It doesn't matter if there are multiple versions of the package installed at solution level, 
+            // It doesn't matter if there are multiple versions of the package installed at solution level,
             // we just want to know that one exists.
             var packages = LocalRepository.FindPackagesById(packageId).OrderByDescending(p => p.Version).ToList();
 
@@ -345,24 +337,11 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private IPackageRepository CreateProjectManagerSourceRepository()
-        {
-            // The source repo for the project manager is the aggregate of the shared repo and the selected repo. 
-            // For dependency resolution, we want VS to look for packages in the selected source and then use the fallback logic
-            var fallbackRepository = SourceRepository as FallbackRepository;
-            if (fallbackRepository != null)
-            {
-                var primaryRepositories = new[] { _sharedRepository, fallbackRepository.SourceRepository.Clone() };
-                return new FallbackRepository(new AggregateRepository(primaryRepositories), fallbackRepository.DependencyResolver);
-            }
-            return new AggregateRepository(new[] { _sharedRepository, SourceRepository.Clone() });
-        }
-
         protected override void OnUninstalled(PackageOperationEventArgs e)
         {
             base.OnUninstalled(e);
 
-            PackageEvents.NotifyUninstalled(e);            
+            PackageEvents.NotifyUninstalled(e);
             _deleteOnRestartManager.MarkPackageDirectoryForDeletion(e.Package);
         }
 
@@ -408,7 +387,7 @@ namespace NuGet.VisualStudio
         protected override void OnInstalled(PackageOperationEventArgs e)
         {
             base.OnInstalled(e);
-            PackageEvents.NotifyInstalled(e);            
+            PackageEvents.NotifyInstalled(e);
         }
 
         protected override void OnUninstalling(PackageOperationEventArgs e)

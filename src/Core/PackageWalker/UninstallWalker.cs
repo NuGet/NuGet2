@@ -161,7 +161,7 @@ namespace NuGet
 
         protected override IPackage ResolveDependency(PackageDependency dependency)
         {
-            return Repository.ResolveDependency(dependency, allowPrereleaseVersions: true, preferListedPackages: false);
+            return DependencyResolveUtility.ResolveDependency(Repository, dependency, allowPrereleaseVersions: true, preferListedPackages: false);
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents)

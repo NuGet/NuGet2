@@ -117,34 +117,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Dialog10\Dialog10.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
-      <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
-      <Name>Dialog10</Name>
-      <Aliases>dialog10</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Dialog11\Dialog11.csproj" Condition="$(VisualStudioVersion)=='10.0' or $(VisualStudioVersion)=='11.0'">
-      <Project>{fd1e159b-a36f-49e4-856d-8555a20d09cf}</Project>
-      <Name>Dialog11</Name>
-      <Aliases>dialog11</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Dialog12\Dialog12.csproj" Condition="$(VisualStudioVersion)=='12.0'">
-      <Project>{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}</Project>
-      <Name>Dialog12</Name>
-      <Aliases>dialog12</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Dialog14\Dialog14.csproj" Condition="$(VisualStudioVersion)=='14.0'">
-      <Project>{6F5E90CC-F106-4524-8E98-58C2E9F1D6FF}</Project>
-      <Name>Dialog14</Name>
-      <Aliases>dialog14</Aliases>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
     <ProjectReference Include="..\DialogServices\DialogServices.csproj">
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
       <Name>DialogServices</Name>

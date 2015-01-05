@@ -75,9 +75,12 @@ namespace NuGet.ServerExtensions
 
         public int MirrorPackage(IPackage package, FrameworkName targetFramework, bool allowPrereleaseVersions, MirrorDependenciesMode mirrorDependenciesMode)
         {
+            var repo = mirrorDependenciesMode == MirrorDependenciesMode.Fail ? 
+                TargetRepository : 
+                SourceRepository;
             return Execute(package, new InstallWalker(
                 TargetRepository,
-                sourceRepository: mirrorDependenciesMode == MirrorDependenciesMode.Fail ? TargetRepository : SourceRepository,
+                dependencyResolver: new DependencyResolverFromRepo(repo),
                 targetFramework: targetFramework,
                 logger: Logger,
                 ignoreDependencies: mirrorDependenciesMode == MirrorDependenciesMode.Ignore,

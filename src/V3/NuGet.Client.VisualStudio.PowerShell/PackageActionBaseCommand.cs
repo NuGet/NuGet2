@@ -78,6 +78,15 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
+        // Creates the source repository used to resolve dependencies
+        protected SourceRepository CreateDependencyResolutionSource()
+        {
+            return new DependencyResolutionRepository(
+            _packageSourceProvider.LoadPackageSources()
+                .Where(s => s.IsEnabled)
+                .Select(s => CreateRepositoryFromSource(s.Name)));
+        }
+
         public IEnumerable<PackageIdentity> Identities { get; set; }
 
         protected override void BeginProcessing()

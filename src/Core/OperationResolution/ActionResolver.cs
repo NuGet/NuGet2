@@ -147,7 +147,7 @@ namespace NuGet.Resolver
             };
             var updateWalker = new UpdateWalker(
                 projectRepo,
-                operation.ProjectManager.PackageManager.SourceRepository,
+                operation.ProjectManager.PackageManager.DependencyResolver,
                 dependentsWalker,
                 operation.ProjectManager.ConstraintProvider,
                 operation.ProjectManager.Project.TargetFramework,
@@ -207,7 +207,7 @@ namespace NuGet.Resolver
             var repo = _virtualPackageRepos[operation.ProjectManager.PackageManager];
             var installWalker = new InstallWalker(
                 repo,
-                operation.ProjectManager.PackageManager.SourceRepository,
+                operation.ProjectManager.PackageManager.DependencyResolver,
                 targetFramework: null,
                 logger: Logger,
                 ignoreDependencies: IgnoreDependencies,
@@ -230,7 +230,7 @@ namespace NuGet.Resolver
             var repo = _virtualPackageRepos[operation.ProjectManager.PackageManager];            
             var updateWalker = new UpdateWalker(
                 repo,
-                operation.ProjectManager.PackageManager.SourceRepository,
+                operation.ProjectManager.PackageManager.DependencyResolver,
                 new DependentsWalker(repo, targetFramework: null)
                 {
                     DependencyVersion = DependencyVersion

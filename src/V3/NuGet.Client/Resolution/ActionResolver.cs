@@ -20,15 +20,21 @@ namespace NuGet.Client.Resolution
         private readonly SourceRepository _source;
         private readonly ResolutionContext _context;
 
+        private readonly IDependencyResolver2 _dependencyResolver;
+
         public IExecutionLogger Logger
         {
             get;
             set;
         }
 
-        public ActionResolver(SourceRepository source, ResolutionContext context)
+        public ActionResolver(
+            SourceRepository source,
+            SourceRepository dependencyResolutionSource,
+            ResolutionContext context)
         {
             _source = source;
+            _dependencyResolver = new DependencyResolverFromSourceRepo(dependencyResolutionSource);
             _context = context;
         }
 
@@ -48,7 +54,12 @@ namespace NuGet.Client.Resolution
             ApplyContext(oldResolver);
 
             var packageManager = target.GetRequiredFeature<IPackageManager>();
-            var nullProjectManager = new NullProjectManager(new CoreInteropPackageManager(packageManager.LocalRepository, new CoreInteropSourceRepository(_source)));
+
+            var nullProjectManager = new NullProjectManager(
+                new CoreInteropPackageManager(
+                    packageManager.LocalRepository,
+                    _dependencyResolver,
+                    new CoreInteropSourceRepository(_source)));
 
             oldResolver.AddOperation(
                 MapNewToOldActionType(operation),
@@ -111,14 +122,14 @@ namespace NuGet.Client.Resolution
                 resolver.AddOperation(
                     MapNewToOldActionType(operation),
                     await CreateVirtualPackage(packageIdentity.Id, packageIdentity.Version),
-                    new CoreInteropProjectManager(project, _source));
+                    new CoreInteropProjectManager(project, _source, _dependencyResolver));
             }
 
             // Resolve actions!
             var actions = await Task.Factory.StartNew(() => resolver.ResolveActions());
 
             // Convert the actions
-            var converted = 
+            var converted =
                 from action in actions
                 let projectAction = action as PackageProjectAction
                 select new PackageAction(
@@ -262,6 +273,33 @@ namespace NuGet.Client.Resolution
                             operation),
                         "operation");
             }
+        }
+    }
+
+    internal class DependencyResolverFromSourceRepo : IDependencyResolver2
+    {
+        SourceRepository _source;
+
+        public DependencyResolverFromSourceRepo(SourceRepository source)
+        {
+            _source = source;
+        }
+
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages, DependencyVersion dependencyVersion)
+        {
+            return DependencyResolveUtility.ResolveDependencyCore(
+                new CoreInteropSourceRepository(_source),
+                dependency,
+                constraintProvider,
+                allowPrereleaseVersions,
+                preferListedPackages,
+                dependencyVersion); 
+        }
+
+        public IEnumerable<IPackage> FindPackages(IEnumerable<string> packageIds)
+        {
+            return packageIds.SelectMany(id =>
+                _source.GetPackageMetadataById(id).Result.Select(PackageJsonLd.PackageFromJson));
         }
     }
 }
