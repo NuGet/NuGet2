@@ -45,6 +45,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,6 +65,9 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strings.Designer.cs" />
+    <Compile Include="V2PowerShellAutocompleteResource.cs" />
+    <Compile Include="V2VisualStudioUIMetatdataResourcerProvider.cs" />
+    <Compile Include="V2PowerShellAutocompleteResourceProvider.cs" />
     <Compile Include="VsNuGetAwareProject.cs" />
     <Compile Include="VsNuGetDiagnostics.cs" />
     <Compile Include="VsNuGetTraceSources.cs" />
