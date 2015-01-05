@@ -49,16 +49,7 @@ namespace NuGet.Client.V2.VisualStudio
         public Task<IEnumerable<VisualStudioUIPackageMetadata>> GetPackageMetadataForAllVersionsForVisualStudioUI(string packageId)
         {
             return Task.Factory.StartNew(() =>
-            {
-              
-                string repoRoot = null;
-                IPackagePathResolver resolver = null;
-                LocalPackageRepository _lprepo = V2Client as LocalPackageRepository;
-                if (_lprepo != null)
-                {
-                    repoRoot = _lprepo.Source;
-                    resolver = _lprepo.PathResolver;
-                }
+            { 
                 return V2Client.FindPackagesById(packageId).Select(p => GetVisualStudioUIPackageMetadata(p));
             });
         }
