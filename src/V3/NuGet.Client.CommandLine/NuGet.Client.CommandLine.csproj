@@ -45,9 +45,9 @@
       <HintPath>..\..\..\packages\NuGet.Client.BaseTypes.0.1.9-a20141231204536-119\lib\net45\NuGet.Client.BaseTypes.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Client.V3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a54e26fdc1b81123, processorArchitecture=MSIL">
+    <Reference Include="NuGet.Client.V3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\packages\NuGet.Client.V3.1.0.0-a20150104044415-762\lib\net45\NuGet.Client.V3.dll</HintPath>
+      <HintPath>..\..\..\packages\NuGet.Client.V3.1.0.0-a20150105190653-502\lib\net45\NuGet.Client.V3.dll</HintPath>
     </Reference>
     <Reference Include="NuGet.Data, Version=1.0.1.0, Culture=neutral, PublicKeyToken=2e465378e3b1a8dd, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\NuGet.Data.1.0.1-master-43391912\lib\net45\NuGet.Data.dll</HintPath>
