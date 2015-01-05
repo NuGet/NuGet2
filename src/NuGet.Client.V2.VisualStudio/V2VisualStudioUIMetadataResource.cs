@@ -42,15 +42,6 @@ namespace NuGet.Client.V2.VisualStudio
                     return null;
                 }
 
-                string repoRoot = null;
-                IPackagePathResolver resolver = null;
-                LocalPackageRepository _lprepo = V2Client as LocalPackageRepository;
-                if (_lprepo != null)
-                {
-                    repoRoot = _lprepo.Source;
-                    resolver = _lprepo.PathResolver;
-                }
-
                 return GetVisualStudioUIPackageMetadata(package);
             });
         }

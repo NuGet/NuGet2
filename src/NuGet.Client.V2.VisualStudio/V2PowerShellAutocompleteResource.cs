@@ -12,9 +12,9 @@ using System.Runtime.Serialization.Json;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    public class V2PowerShellAutocompleteResource : V2Resource, IPowerShellAutoComplete
+    public class V2PowerShellAutoCompleteResource : V2Resource, IPowerShellAutoComplete
     {
-        public V2PowerShellAutocompleteResource(V2Resource resource)
+        public V2PowerShellAutoCompleteResource(V2Resource resource)
             : base(resource)
         {
         }
