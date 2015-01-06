@@ -3,6 +3,8 @@ using System.ComponentModel;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Client.Installation;
+using NuGet.ProjectManagement;
+using NuGet.PackageManagement;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -15,11 +17,11 @@ namespace NuGet.Client.VisualStudio.UI
     /// </remarks>
     public class PackageManagerModel : IVsPersistDocData, INotifyPropertyChanged
     {
-        public SourceRepositoryManager Sources { get; private set; }
+        public SourceRepositoryProvider Sources { get; private set; }
 
-        public InstallationTarget Target { get; private set; }
+        public NuGetProject Target { get; private set; }
 
-        public PackageManagerModel(SourceRepositoryManager sources, InstallationTarget target)
+        public PackageManagerModel(SourceRepositoryProvider sources, NuGetProject target)
         {
             Sources = sources;
             Target = target;

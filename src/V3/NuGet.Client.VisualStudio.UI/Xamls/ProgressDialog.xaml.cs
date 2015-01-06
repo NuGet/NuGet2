@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using NuGet.VisualStudio;
 using NuGetConsole;
+using NuGet.ProjectManagement;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -195,10 +196,12 @@ namespace NuGet.Client.VisualStudio.UI
             return FileConflictAction;
         }
 
-        public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, Installation.InstallationTarget target)
+        public void ExecuteScript(string packageInstallPath, string scriptRelativePath, object package, NuGetProject target)
         {
-            var executor = new VsPowerShellScriptExecutor(ServiceLocator.GetInstance<IScriptExecutor>());
-            executor.ExecuteScript(packageInstallPath, scriptRelativePath, package, target, this);
+            throw new NotImplementedException();
+
+            //var executor = ServiceLocator.GetInstance<IScriptExecutor>();
+            //executor.ExecuteScript(packageInstallPath, scriptRelativePath, package, target, this);
         }
 
         public void OpenFile(string fullPath)

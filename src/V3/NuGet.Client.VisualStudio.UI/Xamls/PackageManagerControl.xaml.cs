@@ -8,12 +8,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.Client.Installation;
-using NuGet.Client.Resolution;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using NuGetConsole;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.ProjectManagement;
+using NuGet.PackageManagement;
+using NuGet.Configuration;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -32,7 +33,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public PackageManagerModel Model { get; private set; }
 
-        public SourceRepositoryManager Sources
+        public SourceRepositoryProvider Sources
         {
             get
             {
@@ -40,7 +41,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        public InstallationTarget Target
+        public NuGetProject Target
         {
             get
             {
@@ -85,7 +86,8 @@ namespace NuGet.Client.VisualStudio.UI
             InitSourceRepoList();
             _initialized = true;
 
-            Model.Sources.PackageSourcesChanged += Sources_PackageSourcesChanged;
+            // TODO: add support for this again later
+            //Model.Sources.PackageSourcesChanged += Sources_PackageSourcesChanged;
         }
 
         private void Sources_PackageSourcesChanged(object sender, EventArgs e)
@@ -97,7 +99,7 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 var oldActiveSource = _sourceRepoList.SelectedItem as PackageSource;
-                var newSources = new List<PackageSource>(Sources.AvailableSources);
+                var newSources = new List<PackageSource>(Sources.GetRepositories().Where(d => d.Source.IsEnabled).Select(d => d.Source));
 
                 // Update the source repo list with the new value.
                 _sourceRepoList.Items.Clear();
@@ -358,7 +360,7 @@ namespace NuGet.Client.VisualStudio.UI
         /// <returns>The status of the package in the installation target.</returns>
         public static PackageStatus GetPackageStatus(
             string packageId,
-            InstallationTarget target,
+            NuGetProject target,
             IEnumerable<NuGetVersion> allVersions)
         {
             var latestStableVersion = allVersions

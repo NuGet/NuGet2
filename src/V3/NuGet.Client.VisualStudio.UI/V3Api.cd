@@ -8,7 +8,7 @@
   </Comment>
   <Class Name="NuGet.Client.VisualStudio.UI.PackageManagerModel" Collapsed="true">
     <Position X="1.5" Y="3" Width="2" />
-    <AssociationLine Name="Target" Type="NuGet.Client.Installation.InstallationTarget">
+    <AssociationLine Name="Target" Type="NuGet.Client.Installation.NuGetProject">
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="0.339" Y="0.081" />
       </MemberNameLabel>
@@ -34,7 +34,7 @@
     <Position X="5" Y="3" Width="2" />
     <TypeIdentifier />
   </Class>
-  <Class Name="NuGet.Client.Installation.InstallationTarget" Collapsed="true">
+  <Class Name="NuGet.Client.Installation.NuGetProject" Collapsed="true">
     <Position X="5.25" Y="4.25" Width="1.5" />
     <TypeIdentifier />
     <ShowAsAssociation>

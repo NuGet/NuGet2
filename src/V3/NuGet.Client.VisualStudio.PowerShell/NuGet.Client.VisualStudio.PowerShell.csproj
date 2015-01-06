@@ -126,10 +126,6 @@
       <Project>{5a79eef3-51c0-4a14-8d37-50ef38ad835d}</Project>
       <Name>PowerShellHost</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
-      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
-      <Name>NuGet.Client</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\Common\CommonResources.resx">

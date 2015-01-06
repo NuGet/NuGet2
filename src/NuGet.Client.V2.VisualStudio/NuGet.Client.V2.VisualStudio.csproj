@@ -94,14 +94,6 @@
       <Project>{6fd11460-39a3-4a10-ba63-7541b0a7d053}</Project>
       <Name>Console.Types</Name>
     </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj">
-      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
-      <Name>NuGet.Client.V3Interop</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client\NuGet.Client.csproj">
-      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
-      <Name>NuGet.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
       <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>
       <Name>VisualStudio</Name>

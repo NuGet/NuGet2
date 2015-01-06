@@ -5,9 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using NuGet.Client.Installation;
 using NuGet.Versioning;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.ProjectManagement;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -17,14 +17,14 @@ namespace NuGet.Client.VisualStudio.UI
     /// </summary>
     public abstract class DetailControlModel : INotifyPropertyChanged
     {
-        protected InstallationTarget _target;
+        protected NuGetProject _target;
         protected List<NuGetVersion> _allPackages;
         protected UiSearchResultPackage _searchResultPackage;
 
         private Dictionary<NuGetVersion, UiPackageMetadata> _metadataDict;
 
         public DetailControlModel(
-            InstallationTarget target,
+            NuGetProject target,
             UiSearchResultPackage searchResultPackage)
         {
             _target = target;
@@ -229,33 +229,6 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 PackageMetadata = p;
             }
-        }
-
-        public static UiPackageMetadata CreateDetailedPackage(JObject metadata)
-        {            
-            var detailedPackage = new UiPackageMetadata();
-            detailedPackage.Version = NuGetVersion.Parse(metadata.Value<string>(Properties.Version));
-            string publishedStr = metadata.Value<string>(Properties.Published);
-            if (!String.IsNullOrEmpty(publishedStr))
-            {
-                detailedPackage.Published = DateTime.Parse(publishedStr);
-            }
-
-            detailedPackage.Summary = metadata.Value<string>(Properties.Summary);
-            detailedPackage.Description = metadata.Value<string>(Properties.Description);
-            detailedPackage.Authors = metadata.Value<string>(Properties.Authors);
-            detailedPackage.Owners = metadata.Value<string>(Properties.Owners);
-            detailedPackage.IconUrl = GetUri(metadata, Properties.IconUrl);
-            detailedPackage.LicenseUrl = GetUri(metadata, Properties.LicenseUrl);
-            detailedPackage.ProjectUrl = GetUri(metadata, Properties.ProjectUrl);
-            detailedPackage.Tags = String.Join(" ", (metadata.Value<JArray>(Properties.Tags) ?? Enumerable.Empty<JToken>()).Select(t => t.ToString()));
-            detailedPackage.DownloadCount = metadata.Value<int>(Properties.DownloadCount);
-            detailedPackage.DependencySets = (metadata.Value<JArray>(Properties.DependencyGroups) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependencySet((JObject)obj));
-
-            detailedPackage.HasDependencies = detailedPackage.DependencySets.Any(
-                set => set.Dependencies != null && set.Dependencies.Count > 0);
-
-            return detailedPackage;
         }
 
         private static Uri GetUri(JObject json, string property)

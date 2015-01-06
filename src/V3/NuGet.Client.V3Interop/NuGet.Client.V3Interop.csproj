@@ -87,10 +87,6 @@
       <Project>{f879f274-efa0-4157-8404-33a19b4e6aec}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NuGet.Client\NuGet.Client.csproj">
-      <Project>{56ef26e3-35fe-4857-bce3-438089339c83}</Project>
-      <Name>NuGet.Client</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="xml\Metadata.xml" />

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using NuGet.Client.Resolution;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -26,7 +25,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public PreviewWindowModel(
             IEnumerable<PackageAction> actions, 
-            Installation.InstallationTarget target)
+            Installation.NuGetProject target)
         {
             _previewResults = PreviewResult.CreatePreview(actions, target);
             Title = Resources.Resources.WindowTitle_Preview;

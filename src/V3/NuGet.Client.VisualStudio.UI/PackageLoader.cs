@@ -6,11 +6,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using NuGet.Client.Installation;
-using NuGet.Client.VisualStudio.Models;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.ProjectManagement;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -39,7 +38,7 @@ namespace NuGet.Client.VisualStudio.UI
     internal class PackageLoader : ILoader
     {
         // the installation target
-        private InstallationTarget _target;
+        private NuGetProject _target;
 
         private PackageLoaderOption _option;
 
@@ -57,7 +56,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public PackageLoader(
             SourceRepository source,
-            InstallationTarget target,
+            NuGetProject target,
             PackageLoaderOption option,
             string searchText)
         {
@@ -80,29 +79,7 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        // TODO: temporary code. Need to change InstallationTarget.SearchInstalled to return 
-        // the right type.
-        private static VisualStudioUISearchMetadata CreateResult(JObject obj)
-        {
-            string id = obj.Value<string>(Properties.PackageId);
-            var version = NuGetVersion.Parse(obj.Value<string>(Properties.LatestVersion)); 
-            string description = obj.Value<string>(Properties.Description);
-            var iconUrl = GetUri(obj, Properties.IconUrl);
-
-            var versions = (obj.Value<JArray>(Properties.Versions) ?? Enumerable.Empty<JToken>())
-                .Select(t => NuGetVersion.Parse(t.Value<string>(Properties.Version)));
-
-            VisualStudioUISearchMetadata r = new VisualStudioUISearchMetadata(
-                id,
-                version,
-                description,
-                iconUrl,
-                versions: versions,
-                latestPackageMetadata: null);
-            return r;
-        }
-
-        private async Task<IEnumerable<VisualStudioUISearchMetadata>> Search(int startIndex, CancellationToken ct)
+        private async Task<IEnumerable<UISearchMetadata>> Search(int startIndex, CancellationToken ct)
         {
             if (_option.Filter == Filter.Installed ||
                 _option.Filter == Filter.UpdatesAvailable)
@@ -114,34 +91,18 @@ namespace NuGet.Client.VisualStudio.UI
                     startIndex,
                     _pageSize,
                     ct);
-                return packages.Select(p => CreateResult(p));
+                return packages;
             }
             else
             {
                 // search in source
                 if (_source == null)
                 {
-                    return Enumerable.Empty<VisualStudioUISearchMetadata>();
+                    return Enumerable.Empty<UISearchMetadata>();
                 }
                 else
                 {
-                    // TODO: hacky code to get SourceRepo2. Will be removed later.
-                    var s = ServiceLocator.GetInstance<VsPackageManagerContext>();
-                    var sourceManager = s.SourceManager as VsSourceRepositoryManager;
-                    var repo2 = sourceManager.CreateRepo2(_source.Source);
-
-                    var searchFilter = new SearchFilter();
-                    searchFilter.SupportedFrameworks = _target.GetSupportedFrameworks()
-                        .Select(fn => FrameworkNameHelper.GetShortFrameworkName(fn));
-                    searchFilter.IncludePrerelease = _option.IncludePrerelease;
-
-                    var search = await repo2.GetResource<IVsSearch>();
-                    return await search.GetSearchResultsForVisualStudioUI(
-                        _searchText,
-                        searchFilter,
-                        startIndex,
-                        _pageSize,
-                        ct);
+                    return _source.GetResource<V3UISearchResource>();
                 }
             }
         }

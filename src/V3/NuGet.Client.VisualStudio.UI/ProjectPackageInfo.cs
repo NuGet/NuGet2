@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
+using NuGet.ProjectManagement;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -44,7 +45,7 @@ namespace NuGet.Client.VisualStudio.UI
             set;
         }
 
-        public Project Project
+        public NuGetProject Project
         {
             get;
             private set;
@@ -58,10 +59,10 @@ namespace NuGet.Client.VisualStudio.UI
             private set;
         }
 
-        public PackageInstallationInfo(Project project, NuGetVersion version, bool enabled)
+        public PackageInstallationInfo(NuGetProject project, NuGetVersion version, bool enabled)
         {
             Project = project;
-            _name = Project.Name;
+            _name = "NOT IMPL"; // TODO: implement this
             _selected = enabled;
             Version = version;
             Enabled = enabled;
@@ -69,7 +70,7 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         // Create PackageInstallationInfo for the solution.
-        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, Project project)
+        public PackageInstallationInfo(string name, NuGetVersion version, bool enabled, NuGetProject project)
         {
             _name = name;
             Version = version;

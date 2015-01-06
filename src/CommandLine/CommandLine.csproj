@@ -137,10 +137,6 @@
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj">
-      <Project>{9fe9b712-f684-43ec-8f20-f452c60437cb}</Project>
-      <Name>NuGet.Client.V3Interop</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

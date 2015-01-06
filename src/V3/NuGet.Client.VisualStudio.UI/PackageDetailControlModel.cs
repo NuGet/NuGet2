@@ -2,9 +2,11 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using NuGet.Client.Installation;
 using NuGet.Versioning;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.ProjectManagement;
+using System;
+using NuGet.Packaging;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -13,23 +15,23 @@ namespace NuGet.Client.VisualStudio.UI
     public class PackageDetailControlModel : DetailControlModel
     {
         public PackageDetailControlModel(
-            InstallationTarget target,
+            NuGetProject target,
             UiSearchResultPackage searchResultPackage)
             : base(target, searchResultPackage)
         {
-            Debug.Assert(!target.IsSolution);
             UpdateInstalledVersion();
         }
 
         private void UpdateInstalledVersion()
         {
-            var installed = _target.InstalledPackages.GetInstalledPackage(_searchResultPackage.Id);
+            var installed = _target.GetInstalledPackages().Where(p =>
+                StringComparer.OrdinalIgnoreCase.Equals(p.PackageIdentity.Id, Id)).SingleOrDefault();
             if (installed != null)
             {
                 InstalledVersion = string.Format(
                     CultureInfo.CurrentCulture,
                     Resx.Resources.Text_InstalledVersion,
-                    installed.Identity.Version.ToNormalizedString());
+                    installed.PackageIdentity.Version.ToNormalizedString());
             }
             else
             {
@@ -43,20 +45,26 @@ namespace NuGet.Client.VisualStudio.UI
             UpdateInstalledVersion();
         }
 
+        private static bool HasId(string id, IEnumerable<PackageReference> packages)
+        {
+            return packages.Any(p =>
+                StringComparer.OrdinalIgnoreCase.Equals(p.PackageIdentity.Id, id));
+        }
+
         protected override bool CanUpdate()
         {
-            return _target.InstalledPackages.IsInstalled(Id) &&
+            return HasId(Id, _target.GetInstalledPackages()) &&
                 _allPackages.Count >= 2;
         }
 
         protected override bool CanInstall()
         {
-            return !_target.InstalledPackages.IsInstalled(Id);
+            return !HasId(Id, _target.GetInstalledPackages());
         }
 
         protected override bool CanUninstall()
         {
-            return _target.InstalledPackages.IsInstalled(Id);
+            return HasId(Id, _target.GetInstalledPackages());
         }
 
         protected override bool CanConsolidate()
@@ -67,13 +75,15 @@ namespace NuGet.Client.VisualStudio.UI
         protected override void CreateVersions()
         {
             _versions = new List<VersionForDisplay>();
-            var installedVersion = _target.InstalledPackages.GetInstalledPackage(Id);
+            var installedVersion = _target.GetInstalledPackages().Where(p =>
+                StringComparer.OrdinalIgnoreCase.Equals(p.PackageIdentity.Id, Id)).SingleOrDefault();
+
             var allVersions = _allPackages.OrderByDescending(v => v);
             var latestStableVersion = allVersions.FirstOrDefault(v => !v.IsPrerelease);
 
             if (SelectedAction == Resx.Resources.Action_Uninstall)
             {
-                _versions.Add(new VersionForDisplay(installedVersion.Identity.Version, string.Empty));
+                _versions.Add(new VersionForDisplay(installedVersion.PackageIdentity.Version, string.Empty));
             }
             else if (SelectedAction == Resx.Resources.Action_Install)
             {
@@ -94,7 +104,7 @@ namespace NuGet.Client.VisualStudio.UI
             {
                 // update
                 if (latestStableVersion != null &&
-                    latestStableVersion != installedVersion.Identity.Version)
+                    latestStableVersion != installedVersion.PackageIdentity.Version)
                 {
                     _versions.Add(new VersionForDisplay(latestStableVersion, Resx.Resources.Version_LatestStable));
 
@@ -102,7 +112,7 @@ namespace NuGet.Client.VisualStudio.UI
                     _versions.Add(null);
                 }
 
-                foreach (var version in allVersions.Where(v => v != installedVersion.Identity.Version))
+                foreach (var version in allVersions.Where(v => v != installedVersion.PackageIdentity.Version))
                 {
                     _versions.Add(new VersionForDisplay(version, string.Empty));
                 }

@@ -1,4 +1,5 @@
-﻿namespace NuGet.Client.VisualStudio.UI
+﻿using NuGet.Resolver;
+namespace NuGet.Client.VisualStudio.UI
 {
     // Represents an item in the DependencyBehavior combobox.
     public class DependencyBehaviorItem
