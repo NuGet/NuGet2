@@ -181,17 +181,15 @@ namespace NuGet.Client.VisualStudio.UI
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
 
-            throw new NotImplementedException();
+            var myDoc = new PackageManagerModel(
+                _context.Sources,
+                _context.Target);
 
-            //var myDoc = new PackageManagerModel(
-            //    _context.SourceManager,
-            //    _context.GetCurrentVsSolution().GetProject((Project)project));
+            var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
+            ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
 
-            //var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
-            //ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            //ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-
-            //return VSConstants.S_OK;
+            return VSConstants.S_OK;
         }
 
         #endregion IVsEditorFactory Members
