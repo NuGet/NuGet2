@@ -19,6 +19,8 @@ using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using NuGet.ProjectManagement;
+using NuGet.Client.VisualStudio.Common;
 
 namespace NuGet.Tools
 {
@@ -201,8 +203,9 @@ namespace NuGet.Tools
         {
             base.Initialize();
 
-            VsNuGetDiagnostics.Initialize(
-                ServiceLocator.GetInstance<IDebugConsoleController>());
+            // TODO: Readd this
+            //VsNuGetDiagnostics.Initialize(
+            //    ServiceLocator.GetInstance<IDebugConsoleController>());
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
@@ -418,12 +421,13 @@ namespace NuGet.Tools
                 if (hr == VSConstants.S_OK && docView is PackageManagerWindowPane)
                 {
                     var packageManagerWindowPane = (PackageManagerWindowPane)docView;
-                    var target = packageManagerWindowPane.Model.Target as VsProject;
-                    if (target != null &&
-                        String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return windowFrame;
-                    }
+                    var target = packageManagerWindowPane.Model.Target as NuGetProject;
+                    throw new NotImplementedException();
+                    //if (target != null &&
+                    //    String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return windowFrame;
+                    //}
                 }
             }
 
@@ -505,44 +509,46 @@ namespace NuGet.Tools
             IVsHierarchy hier,
             uint itemId)
         {
-            uint windowFlags =
-                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
-                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
+            //uint windowFlags =
+            //    (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+            //    (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
             var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-            var myDoc = new PackageManagerModel(
-                context.SourceManager,
-                context.GetCurrentVsSolution().GetProject(project));
 
-            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
-            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
-            var guidCommandUI = Guid.Empty;
-            var caption = String.Format(
-                CultureInfo.CurrentCulture,
-                Resx.Resources.Label_NuGetWindowCaption,
-                myDoc.Target.Name);
+            throw new NotImplementedException();
+            //var myDoc = new PackageManagerModel(
+            //    context.SourceManager,
+            //    context.GetCurrentVsSolution().GetProject(project));
 
-            IVsWindowFrame windowFrame;
-            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-            int hr = uiShell.CreateDocumentWindow(
-                windowFlags,
-                documentName,
-                (IVsUIHierarchy)hier,
-                itemId,
-                ppunkDocView,
-                ppunkDocData,
-                ref guidEditorType,
-                null,
-                ref guidCommandUI,
-                null,
-                caption,
-                string.Empty,
-                null,
-                out windowFrame);
-            ErrorHandler.ThrowOnFailure(hr);
-            return windowFrame;
+            //var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
+            //var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            //var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            //var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+            //var guidCommandUI = Guid.Empty;
+            //var caption = String.Format(
+            //    CultureInfo.CurrentCulture,
+            //    Resx.Resources.Label_NuGetWindowCaption,
+            //    myDoc.Target.Name);
+
+            //IVsWindowFrame windowFrame;
+            //IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            //int hr = uiShell.CreateDocumentWindow(
+            //    windowFlags,
+            //    documentName,
+            //    (IVsUIHierarchy)hier,
+            //    itemId,
+            //    ppunkDocView,
+            //    ppunkDocData,
+            //    ref guidEditorType,
+            //    null,
+            //    ref guidCommandUI,
+            //    null,
+            //    caption,
+            //    string.Empty,
+            //    null,
+            //    out windowFrame);
+            //ErrorHandler.ThrowOnFailure(hr);
+            //return windowFrame;
         }
 
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
@@ -622,50 +628,52 @@ namespace NuGet.Tools
         {
             // TODO: Need to wait until solution is loaded
 
-            IVsWindowFrame windowFrame = null;
-            IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
-            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-            uint windowFlags =
-                (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
-                (uint)_VSRDTFLAGS.RDT_DontSaveAs;
+            throw new NotImplementedException();
 
-            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-            var currentSolution = context.GetCurrentSolution();
-            if (!currentSolution.Projects.Any())
-            {
-                // there are no supported projects.
-                MessageHelper.ShowWarningMessage(VsResources.NoSupportedProjectsInSolution, Resources.ErrorDialogBoxTitle);
-                return windowFrame;
-            }
+            //IVsWindowFrame windowFrame = null;
+            //IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
+            //IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            //uint windowFlags =
+            //    (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
+            //    (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            var myDoc = new PackageManagerModel(context.SourceManager, currentSolution);
-            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
-            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
-            var guidCommandUI = Guid.Empty;
-            var caption = String.Format(
-                CultureInfo.CurrentCulture,
-                Resx.Resources.Label_NuGetWindowCaption,
-                myDoc.Target.Name);
-            var documentName = _dte.Solution.FullName;
-            int hr = uiShell.CreateDocumentWindow(
-                windowFlags,
-                documentName,
-                (IVsUIHierarchy)solution,
-                (uint)VSConstants.VSITEMID.Root,
-                ppunkDocView,
-                ppunkDocData,
-                ref guidEditorType,
-                null,
-                ref guidCommandUI,
-                null,
-                caption,
-                string.Empty,
-                null,
-                out windowFrame);
-            ErrorHandler.ThrowOnFailure(hr);
-            return windowFrame;
+            //var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
+            //var currentSolution = context.GetCurrentSolution();
+            //if (!currentSolution.Projects.Any())
+            //{
+            //    // there are no supported projects.
+            //    MessageHelper.ShowWarningMessage(VsResources.NoSupportedProjectsInSolution, Resources.ErrorDialogBoxTitle);
+            //    return windowFrame;
+            //}
+
+            //var myDoc = new PackageManagerModel(context.SourceManager, currentSolution);
+            //var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
+            //var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            //var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            //var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+            //var guidCommandUI = Guid.Empty;
+            //var caption = String.Format(
+            //    CultureInfo.CurrentCulture,
+            //    Resx.Resources.Label_NuGetWindowCaption,
+            //    myDoc.Target.Name);
+            //var documentName = _dte.Solution.FullName;
+            //int hr = uiShell.CreateDocumentWindow(
+            //    windowFlags,
+            //    documentName,
+            //    (IVsUIHierarchy)solution,
+            //    (uint)VSConstants.VSITEMID.Root,
+            //    ppunkDocView,
+            //    ppunkDocData,
+            //    ref guidEditorType,
+            //    null,
+            //    ref guidCommandUI,
+            //    null,
+            //    caption,
+            //    string.Empty,
+            //    null,
+            //    out windowFrame);
+            //ErrorHandler.ThrowOnFailure(hr);
+            //return windowFrame;
         }
 
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)

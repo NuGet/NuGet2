@@ -259,6 +259,10 @@
     <Resource Include="Resources\packageicon.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\NuGet.Client.VisualStudio.Common\NuGet.Client.VisualStudio.Common.csproj">
+      <Project>{34cac7eb-8fce-424d-92c4-ebd3290b4523}</Project>
+      <Name>NuGet.Client.VisualStudio.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
       <Project>{6146ca62-cc16-422c-a105-3e81f7452aa6}</Project>
       <Name>VisualStudio</Name>

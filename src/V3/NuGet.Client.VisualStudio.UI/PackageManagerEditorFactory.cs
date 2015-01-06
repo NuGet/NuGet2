@@ -7,6 +7,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Client.VisualStudio.Common;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -18,10 +19,10 @@ namespace NuGet.Client.VisualStudio.UI
 
         private ServiceProvider vsServiceProvider;
         private readonly IUserInterfaceService _ui;
-        private readonly V3PackageManagerContext _context;
+        private readonly VsPackageManagerContext _context;
 
         public PackageManagerEditorFactory(
-            V3PackageManagerContext context,
+            VsPackageManagerContext context,
             IUserInterfaceService ui)
         {
             _context = context;
