@@ -183,6 +183,7 @@ namespace NuGet.Client.VisualStudio.UI
             var myDoc = new PackageManagerModel(
                 _context.SourceManager,
                 _context.GetCurrentVsSolution().GetProject((Project)project));
+
             var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
             ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(myDoc);

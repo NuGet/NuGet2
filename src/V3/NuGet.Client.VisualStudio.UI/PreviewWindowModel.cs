@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NuGet.ProjectManagement;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace NuGet.Client.VisualStudio.UI
 
         public PreviewWindowModel(
             IEnumerable<PackageAction> actions, 
-            Installation.NuGetProject target)
+            NuGetProject target)
         {
             _previewResults = PreviewResult.CreatePreview(actions, target);
             Title = Resources.Resources.WindowTitle_Preview;

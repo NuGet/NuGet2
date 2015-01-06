@@ -1,3 +1,5 @@
+using NuGet.PackagingCore;
+using NuGet.ProjectManagement;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,9 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using NuGet.Client.Installation;
-using NuGet.Client.ProjectSystem;
-using NuGet.Client.Resolution;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -95,7 +94,7 @@ namespace NuGet.Client.VisualStudio.UI
                 });
             resolver.Logger = logger;
 
-            IEnumerable<Project> targetProjects;
+            IEnumerable<NuGetProject> targetProjects;
             var solutionModel = DataContext as PackageSolutionDetailControlModel;
             if (solutionModel != null)
             {
@@ -105,7 +104,7 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                var project = Control.Target as Project;
+                var project = Control.Target as NuGetProject;
                 targetProjects = new[] { project };
                 Debug.Assert(project != null);
             }

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.Client.Installation;
 using NuGet.ProjectManagement;
 using NuGet.PackageManagement;
 
