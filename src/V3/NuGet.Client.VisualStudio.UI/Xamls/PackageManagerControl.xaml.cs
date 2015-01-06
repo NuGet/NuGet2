@@ -99,7 +99,7 @@ namespace NuGet.Client.VisualStudio.UI
             try
             {
                 var oldActiveSource = _sourceRepoList.SelectedItem as PackageSource;
-                var newSources = new List<PackageSource>(Sources.GetRepositories().Where(d => d.Source.IsEnabled).Select(d => d.Source));
+                var newSources = new List<PackageSource>(Sources.GetRepositories().Where(d => d.PackageSource.IsEnabled).Select(d => d.PackageSource));
 
                 // Update the source repo list with the new value.
                 _sourceRepoList.Items.Clear();
@@ -153,23 +153,23 @@ namespace NuGet.Client.VisualStudio.UI
         {
             // PackageRestoreManager fires this event even when solution is closed.
             // Don't do anything if solution is closed.
-            if (!Target.IsAvailable)
-            {
-                return;
-            }
+            //if (!Target.IsAvailable)
+            //{
+            //    return;
+            //}
 
-            if (!e.PackagesMissing)
-            {
-                // packages are restored. Update the UI
-                if (Target.IsSolution)
-                {
-                    // TODO: update UI here
-                }
-                else
-                {
-                    // TODO: update UI here
-                }
-            }
+            //if (!e.PackagesMissing)
+            //{
+            //    // packages are restored. Update the UI
+            //    if (Target.IsSolution)
+            //    {
+            //        // TODO: update UI here
+            //    }
+            //    else
+            //    {
+            //        // TODO: update UI here
+            //    }
+            //}
         }
 
         private void InitSourceRepoList()
@@ -177,19 +177,22 @@ namespace NuGet.Client.VisualStudio.UI
             _label.Text = string.Format(
                 CultureInfo.CurrentCulture,
                 Resx.Resources.Label_PackageManager,
-                Target.Name);
+                "TODO PROJECT NAME");
 
             // init source repo list
             _sourceRepoList.Items.Clear();
-            foreach (var source in Sources.AvailableSources)
+            foreach (var source in Sources.GetRepositories())
             {
                 _sourceRepoList.Items.Add(source);
             }
 
-            if (Sources.ActiveRepository != null)
-            {
-                _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
-            }
+            // TODO: fix this
+            _sourceRepoList.SelectedItem = Sources.GetRepositories().FirstOrDefault();
+
+            //if (Sources.ActiveRepository != null)
+            //{
+            //    _sourceRepoList.SelectedItem = Sources.ActiveRepository.Source;
+            //}
         }
 
         private bool ShowInstalled
@@ -224,13 +227,13 @@ namespace NuGet.Client.VisualStudio.UI
                 return null;
             }
 
-            return Sources.CreateSourceRepository(activeSource);
+            return Sources.GetRepositories().Where(e => e.PackageSource.Source == activeSource.Source).SingleOrDefault();
         }
 
         private void SearchPackageInActivePackageSource(string searchText)
         {
             var activeSource = _sourceRepoList.SelectedItem as PackageSource;
-            var sourceRepository = Sources.CreateSourceRepository(activeSource);
+            var sourceRepository = Sources.GetRepositories().Where(e => e.PackageSource.Source == activeSource.Source).SingleOrDefault();
 
             Filter filter = Filter.All;
             if (Resx.Resources.Filter_Installed.Equals(_filter.SelectedItem))
@@ -276,18 +279,21 @@ namespace NuGet.Client.VisualStudio.UI
             else
             {
                 DetailControlModel newModel;
-                if (Target.IsSolution)
-                {
-                    newModel = new PackageSolutionDetailControlModel(
-                        (VsSolution)Target,
-                        selectedPackage);
-                }
-                else
-                {
-                    newModel = new PackageDetailControlModel(
+                //if (Target.IsSolution)
+                //{
+                //    newModel = new PackageSolutionDetailControlModel(
+                //        (VsSolution)Target,
+                //        selectedPackage);
+                //}
+                //else
+                //{
+                //    newModel = new PackageDetailControlModel(
+                //        Target,
+                //        selectedPackage);
+                //}
+                newModel = new PackageDetailControlModel(
                         Target,
                         selectedPackage);
-                }
 
                 var oldModel = _packageDetail.DataContext as DetailControlModel;
                 if (oldModel != null)
@@ -310,7 +316,8 @@ namespace NuGet.Client.VisualStudio.UI
             var newSource = _sourceRepoList.SelectedItem as PackageSource;
             if (newSource != null)
             {
-                Sources.ChangeActiveSource(newSource);
+                throw new NotImplementedException();
+                // Sources.ChangeActiveSource(newSource);
             }
             SearchPackageInActivePackageSource(_windowSearchHost.SearchQuery.SearchString);
         }
@@ -368,16 +375,16 @@ namespace NuGet.Client.VisualStudio.UI
                 .Max(p => p);
 
             // Get the minimum version installed in any target project/solution
-            var minimumInstalledPackage = target.GetAllTargetsRecursively()
-                .Select(t => t.InstalledPackages.GetInstalledPackage(packageId))
+            var minimumInstalledPackage = target.GetInstalledPackages()
                 .Where(p => p != null)
-                .OrderBy(r => r.Identity.Version)
+                .Where(p => StringComparer.OrdinalIgnoreCase.Equals(p.PackageIdentity.Id, packageId))
+                .OrderBy(r => r.PackageIdentity.Version)
                 .FirstOrDefault();
 
             PackageStatus status;
             if (minimumInstalledPackage != null)
             {
-                if (minimumInstalledPackage.Identity.Version < latestStableVersion)
+                if (minimumInstalledPackage.PackageIdentity.Version < latestStableVersion)
                 {
                     status = PackageStatus.UpdateAvailable;
                 }
@@ -398,14 +405,14 @@ namespace NuGet.Client.VisualStudio.UI
         {
             var licensePackages = operations.Where(op =>
                 op.ActionType == PackageActionType.Install &&
-                op.Package.Value<bool>("requireLicenseAcceptance"));
+                op.Package.RequireLicenseAcceptance);
 
             // display license window if necessary
             if (licensePackages.Any())
             {
                 // Hacky distinct without writing a custom comparer
                 var licenseModels = licensePackages
-                    .GroupBy(a => Tuple.Create(a.Package["id"], a.Package["version"]))
+                    .GroupBy(a => Tuple.Create(a.PackageIdentity.Id, a.PackageIdentity.Version.ToNormalizedString()))
                     .Select(g =>
                     {
                         dynamic p = g.First().Package;
@@ -437,9 +444,10 @@ namespace NuGet.Client.VisualStudio.UI
         /// <returns>True if nuget should continue to perform the actions. Otherwise false.</returns>
         private bool PreviewActions(IEnumerable<PackageAction> actions)
         {
-            var w = new PreviewWindow();
-            w.DataContext = new PreviewWindowModel(actions, Target);
-            return w.ShowModal() == true;
+            throw new NotImplementedException();
+            //var w = new PreviewWindow();
+            //w.DataContext = new PreviewWindowModel(actions, Target);
+            //return w.ShowModal() == true;
         }
 
         private void ActivateOutputWindow()
@@ -472,51 +480,54 @@ namespace NuGet.Client.VisualStudio.UI
             progressDialog.FileConflictAction = detailControl.FileConflictAction;
             progressDialog.Show();
 
-            try
-            {
-                var actions = await detailControl.ResolveActionsAsync(progressDialog);
+            await Task.Delay(1);
+            throw new NotImplementedException();
 
-                // show preview
-                var model = (DetailControlModel)_packageDetail.DataContext;
-                if (model.Options.ShowPreviewWindow)
-                {
-                    var shouldContinue = PreviewActions(actions);
-                    if (!shouldContinue)
-                    {
-                        return;
-                    }
-                }
+            //try
+            //{
+            //    var actions = await detailControl.ResolveActionsAsync(progressDialog);
 
-                // show license agreeement
-                bool acceptLicense = ShowLicenseAgreement(actions);
-                if (!acceptLicense)
-                {
-                    return;
-                }
+            //    // show preview
+            //    var model = (DetailControlModel)_packageDetail.DataContext;
+            //    if (model.Options.ShowPreviewWindow)
+            //    {
+            //        var shouldContinue = PreviewActions(actions);
+            //        if (!shouldContinue)
+            //        {
+            //            return;
+            //        }
+            //    }
 
-                // Create the executor and execute the actions
-                var userAction = detailControl.GetUserAction();                
-                var executor = new ActionExecutor();
-                await Task.Run(
-                    () =>
-                    {
-                        executor.ExecuteActions(actions, progressDialog, userAction);
-                    });
+            //    // show license agreeement
+            //    bool acceptLicense = ShowLicenseAgreement(actions);
+            //    if (!acceptLicense)
+            //    {
+            //        return;
+            //    }
 
-                UpdatePackageStatus();
-                detailControl.Refresh();
-            }
-            catch (Exception ex)
-            {
-                var errorDialog = new ErrorReportingDialog(
-                    ex.Message,
-                    ex.ToString());
-                errorDialog.ShowModal();
-            }
-            finally
-            {
-                progressDialog.CloseWindow();
-            }
+            //    // Create the executor and execute the actions
+            //    var userAction = detailControl.GetUserAction();                
+            //    var executor = new ActionExecutor();
+            //    await Task.Run(
+            //        () =>
+            //        {
+            //            executor.ExecuteActions(actions, progressDialog, userAction);
+            //        });
+
+            //    UpdatePackageStatus();
+            //    detailControl.Refresh();
+            //}
+            //catch (Exception ex)
+            //{
+            //    var errorDialog = new ErrorReportingDialog(
+            //        ex.Message,
+            //        ex.ToString());
+            //    errorDialog.ShowModal();
+            //}
+            //finally
+            //{
+            //    progressDialog.CloseWindow();
+            //}
         }
 
         private void _searchControl_SearchStart(object sender, EventArgs e)

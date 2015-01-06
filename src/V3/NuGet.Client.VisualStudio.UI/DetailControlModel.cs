@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 using NuGet.ProjectManagement;
@@ -27,6 +26,10 @@ namespace NuGet.Client.VisualStudio.UI
             NuGetProject target,
             UiSearchResultPackage searchResultPackage)
         {
+
+            // TODO: remove this
+            _metadataDict = new Dictionary<NuGetVersion, UiPackageMetadata>();
+
             _target = target;
             _searchResultPackage = searchResultPackage;
             _allPackages = new List<NuGetVersion>(searchResultPackage.Versions);
@@ -151,7 +154,7 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         protected abstract void CreateVersions();
-        
+
         // indicates whether the selected action is install or uninstall.
         bool _selectedActionIsInstall;
 
@@ -213,53 +216,56 @@ namespace NuGet.Client.VisualStudio.UI
 
         public async Task LoadPackageMetadaAsync()
         {
-            var metadata = await _searchResultPackage.GetPackageMetadataAsync();
-            var dict = new Dictionary<NuGetVersion, UiPackageMetadata>();
-            foreach (var item in metadata)
-            {
-                var packageMetadata = CreateDetailedPackage(item);
-                dict[packageMetadata.Version] = packageMetadata;                
-            }
+            await Task.Delay(1);
+            throw new NotImplementedException();
 
-            _metadataDict = dict;
+            //var metadata = await _searchResultPackage.GetPackageMetadataAsync();
+            //var dict = new Dictionary<NuGetVersion, UiPackageMetadata>();
+            //foreach (var item in metadata)
+            //{
+            //    var packageMetadata = CreateDetailedPackage(item);
+            //    dict[packageMetadata.Version] = packageMetadata;
+            //}
 
-            UiPackageMetadata p;
-            if (SelectedVersion != null &&
-                _metadataDict.TryGetValue(SelectedVersion.Version, out p))
-            {
-                PackageMetadata = p;
-            }
+            //_metadataDict = dict;
+
+            //UiPackageMetadata p;
+            //if (SelectedVersion != null &&
+            //    _metadataDict.TryGetValue(SelectedVersion.Version, out p))
+            //{
+            //    PackageMetadata = p;
+            //}
         }
 
-        private static Uri GetUri(JObject json, string property)
-        {
-            if (json[property] == null)
-            {
-                return null;
-            }
-            string str = json[property].ToString();
-            if (String.IsNullOrEmpty(str))
-            {
-                return null;
-            }
-            return new Uri(str);
-        }
+        //private static Uri GetUri(JObject json, string property)
+        //{
+        //    if (json[property] == null)
+        //    {
+        //        return null;
+        //    }
+        //    string str = json[property].ToString();
+        //    if (String.IsNullOrEmpty(str))
+        //    {
+        //        return null;
+        //    }
+        //    return new Uri(str);
+        //}
 
-        private static UiPackageDependencySet LoadDependencySet(JObject set)
-        {
-            var fxName = set.Value<string>(Properties.TargetFramework);
-            return new UiPackageDependencySet(
-                String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelper.ParsePossiblyShortenedFrameworkName(fxName),
-                (set.Value<JArray>(Properties.Dependencies) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
-        }
+        //private static UiPackageDependencySet LoadDependencySet(JObject set)
+        //{
+        //    var fxName = set.Value<string>(Properties.TargetFramework);
+        //    return new UiPackageDependencySet(
+        //        String.IsNullOrEmpty(fxName) ? null : FrameworkNameHelper.ParsePossiblyShortenedFrameworkName(fxName),
+        //        (set.Value<JArray>(Properties.Dependencies) ?? Enumerable.Empty<JToken>()).Select(obj => LoadDependency((JObject)obj)));
+        //}
 
-        private static UiPackageDependency LoadDependency(JObject dep)
-        {
-            var ver = dep.Value<string>(Properties.Range);
-            return new UiPackageDependency(
-                dep.Value<string>(Properties.PackageId),
-                String.IsNullOrEmpty(ver) ? null : VersionRange.Parse(ver));
-        }
+        //private static UiPackageDependency LoadDependency(JObject dep)
+        //{
+        //    var ver = dep.Value<string>(Properties.Range);
+        //    return new UiPackageDependency(
+        //        dep.Value<string>(Properties.PackageId),
+        //        String.IsNullOrEmpty(ver) ? null : VersionRange.Parse(ver));
+        //}
 
         protected abstract void OnSelectedVersionChanged();
 
@@ -267,7 +273,7 @@ namespace NuGet.Client.VisualStudio.UI
         {
             get
             {
-                return _target.IsSolution;
+                return false;
             }
         }
 

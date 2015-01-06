@@ -320,6 +320,8 @@
     <None Include="Properties\install.ps1" />
     <None Include="Properties\NuGet.VisualStudio.nuspec" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="V3\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

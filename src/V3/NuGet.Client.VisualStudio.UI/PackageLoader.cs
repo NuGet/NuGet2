@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
@@ -84,14 +83,16 @@ namespace NuGet.Client.VisualStudio.UI
             if (_option.Filter == Filter.Installed ||
                 _option.Filter == Filter.UpdatesAvailable)
             {
+                await Task.Delay(1);
+                throw new NotImplementedException();
                 // search in target
-                var packages = await _target.SearchInstalled(
-                    _source,
-                    _searchText,
-                    startIndex,
-                    _pageSize,
-                    ct);
-                return packages;
+                //var packages = await _target.SearchInstalled(
+                //    _source,
+                //    _searchText,
+                //    startIndex,
+                //    _pageSize,
+                //    ct);
+                //return packages;
             }
             else
             {
@@ -102,7 +103,9 @@ namespace NuGet.Client.VisualStudio.UI
                 }
                 else
                 {
-                    return _source.GetResource<V3UISearchResource>();
+                    var searchResource = _source.GetResource<UISearchResource>();
+
+                    throw new NotImplementedException();
                 }
             }
         }
@@ -169,55 +172,55 @@ namespace NuGet.Client.VisualStudio.UI
         }
 
         // Get all versions of the package
-        private List<UiPackageMetadata> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
-        {
-            var retValue = new List<UiPackageMetadata>();
-            if (versions == null)
-            {
-                return retValue;
-            }
+        //private List<UiPackageMetadata> LoadVersions(JArray versions, NuGetVersion searchResultVersion)
+        //{
+        //    var retValue = new List<UiPackageMetadata>();
+        //    if (versions == null)
+        //    {
+        //        return retValue;
+        //    }
 
-            // If repo is AggregateRepository, the package duplicates can be returned by
-            // FindPackagesById(), so Distinct is needed here to remove the duplicates.
-            foreach (var token in versions)
-            {
-                Debug.Assert(token.Type == JTokenType.Object);
-                JObject version = (JObject)token;
-                var detailedPackage = DetailControlModel.CreateDetailedPackage(version);
+        //    // If repo is AggregateRepository, the package duplicates can be returned by
+        //    // FindPackagesById(), so Distinct is needed here to remove the duplicates.
+        //    foreach (var token in versions)
+        //    {
+        //        Debug.Assert(token.Type == JTokenType.Object);
+        //        JObject version = (JObject)token;
+        //        var detailedPackage = DetailControlModel.CreateDetailedPackage(version);
 
-                if (detailedPackage.Version.IsPrerelease &&
-                    !_option.IncludePrerelease &&
-                    detailedPackage.Version != searchResultVersion)
-                {
-                    // don't include prerelease version if includePrerelease is false
-                    continue;
-                }
+        //        if (detailedPackage.Version.IsPrerelease &&
+        //            !_option.IncludePrerelease &&
+        //            detailedPackage.Version != searchResultVersion)
+        //        {
+        //            // don't include prerelease version if includePrerelease is false
+        //            continue;
+        //        }
 
-                if (detailedPackage.Published <= Unpublished &&
-                    detailedPackage.Version != searchResultVersion)
-                {
-                    // don't include unlisted package
-                    continue;
-                }
+        //        if (detailedPackage.Published <= Unpublished &&
+        //            detailedPackage.Version != searchResultVersion)
+        //        {
+        //            // don't include unlisted package
+        //            continue;
+        //        }
 
-                retValue.Add(detailedPackage);
-            }
+        //        retValue.Add(detailedPackage);
+        //    }
 
-            return retValue;
-        }
+        //    return retValue;
+        //}
 
-        private static Uri GetUri(JObject json, string property)
-        {
-            if (json[property] == null)
-            {
-                return null;
-            }
-            string str = json[property].ToString();
-            if (String.IsNullOrEmpty(str))
-            {
-                return null;
-            }
-            return new Uri(str);
-        }
+        //private static Uri GetUri(JObject json, string property)
+        //{
+        //    if (json[property] == null)
+        //    {
+        //        return null;
+        //    }
+        //    string str = json[property].ToString();
+        //    if (String.IsNullOrEmpty(str))
+        //    {
+        //        return null;
+        //    }
+        //    return new Uri(str);
+        //}
     }
 }

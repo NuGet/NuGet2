@@ -155,6 +155,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2", "src\NuGe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V2.VisualStudio", "src\NuGet.Client.V2.VisualStudio\NuGet.Client.V2.VisualStudio.csproj", "{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio.Common", "src\NuGet.Client.VisualStudio.Common\NuGet.Client.VisualStudio.Common.csproj", "{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
@@ -1012,6 +1014,26 @@ Global
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4E58E50B-8AAF-49EB-92C9-1BC4729D93C4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Mono Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{34CAC7EB-8FCE-424D-92C4-EBD3290B4523}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

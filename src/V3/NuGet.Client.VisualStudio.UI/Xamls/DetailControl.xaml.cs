@@ -65,56 +65,56 @@ namespace NuGet.Client.VisualStudio.UI
                 new PackageIdentity(model.Id, model.SelectedVersion.Version));
         }
 
-        public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(IExecutionLogger logger)
-        {
-            var model = (DetailControlModel)DataContext;
-            var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
-                PackageActionType.Uninstall :
-                PackageActionType.Install;
+        //public async Task<IEnumerable<PackageAction>> ResolveActionsAsync(IExecutionContext logger)
+        //{
+        //    var model = (DetailControlModel)DataContext;
+        //    var action = model.SelectedAction == Resx.Resources.Action_Uninstall ?
+        //        PackageActionType.Uninstall :
+        //        PackageActionType.Install;
 
-            // Create resolver
-            var repo = Control.CreateActiveRepository();
-            if (action == PackageActionType.Uninstall)
-            {
-                // for uninstall, use local repo
-                repo = Control.Target.TryGetFeature<SourceRepository>();
-            }
-            if (repo == null)
-            {
-                throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
-            }
-            var resolver = new ActionResolver(
-                repo,
-                new ResolutionContext()
-                {
-                    DependencyBehavior = model.Options.SelectedDependencyBehavior.Behavior,
-                    AllowPrerelease = Control.IncludePrerelease,
-                    ForceRemove = model.Options.ForceRemove,
-                    RemoveDependencies = model.Options.RemoveDependencies
-                });
-            resolver.Logger = logger;
+        //    // Create resolver
+        //    var repo = Control.CreateActiveRepository();
+        //    if (action == PackageActionType.Uninstall)
+        //    {
+        //        // for uninstall, use local repo
+        //        repo = Control.Target.TryGetFeature<SourceRepository>();
+        //    }
+        //    if (repo == null)
+        //    {
+        //        throw new InvalidOperationException(Resx.Resources.Error_NoActiveRepository);
+        //    }
+        //    var resolver = new ActionResolver(
+        //        repo,
+        //        new ResolutionContext()
+        //        {
+        //            DependencyBehavior = model.Options.SelectedDependencyBehavior.Behavior,
+        //            AllowPrerelease = Control.IncludePrerelease,
+        //            ForceRemove = model.Options.ForceRemove,
+        //            RemoveDependencies = model.Options.RemoveDependencies
+        //        });
+        //    resolver.Logger = logger;
 
-            IEnumerable<NuGetProject> targetProjects;
-            var solutionModel = DataContext as PackageSolutionDetailControlModel;
-            if (solutionModel != null)
-            {
-                targetProjects = solutionModel.Projects
-                   .Where(p => p.Selected)
-                   .Select(p => p.Project);
-            }
-            else
-            {
-                var project = Control.Target as NuGetProject;
-                targetProjects = new[] { project };
-                Debug.Assert(project != null);
-            }
+        //    IEnumerable<NuGetProject> targetProjects;
+        //    var solutionModel = DataContext as PackageSolutionDetailControlModel;
+        //    if (solutionModel != null)
+        //    {
+        //        targetProjects = solutionModel.Projects
+        //           .Where(p => p.Selected)
+        //           .Select(p => p.Project);
+        //    }
+        //    else
+        //    {
+        //        var project = Control.Target as NuGetProject;
+        //        targetProjects = new[] { project };
+        //        Debug.Assert(project != null);
+        //    }
 
-            return await resolver.ResolveActionsAsync(
-                new PackageIdentity(model.Id, model.SelectedVersion.Version),
-                action,
-                targetProjects,
-                Control.Target.OwnerSolution);
-        }
+        //    return await resolver.ResolveActionsAsync(
+        //        new PackageIdentity(model.Id, model.SelectedVersion.Version),
+        //        action,
+        //        targetProjects,
+        //        Control.Target.OwnerSolution);
+        //}
 
         public void Refresh()
         {

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using NuGet.ProjectManagement;
+using NuGet.Resolver;
+using System.Collections.Generic;
 using Resx = NuGet.Client.VisualStudio.UI.Resources;
 
 namespace NuGet.Client.VisualStudio.UI

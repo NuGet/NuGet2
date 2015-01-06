@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using NuGet.Client.ProjectSystem;
 using NuGet.Versioning;
 using NuGet.ProjectManagement;
 

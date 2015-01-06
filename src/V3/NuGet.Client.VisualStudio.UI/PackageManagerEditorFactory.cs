@@ -18,10 +18,10 @@ namespace NuGet.Client.VisualStudio.UI
 
         private ServiceProvider vsServiceProvider;
         private readonly IUserInterfaceService _ui;
-        private readonly VsPackageManagerContext _context;
+        private readonly V3PackageManagerContext _context;
 
         public PackageManagerEditorFactory(
-            VsPackageManagerContext context,
+            V3PackageManagerContext context,
             IUserInterfaceService ui)
         {
             _context = context;
@@ -180,15 +180,17 @@ namespace NuGet.Client.VisualStudio.UI
                 (int)__VSHPROPID.VSHPROPID_ExtObject,
                 out project));
 
-            var myDoc = new PackageManagerModel(
-                _context.SourceManager,
-                _context.GetCurrentVsSolution().GetProject((Project)project));
+            throw new NotImplementedException();
 
-            var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
-            ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+            //var myDoc = new PackageManagerModel(
+            //    _context.SourceManager,
+            //    _context.GetCurrentVsSolution().GetProject((Project)project));
 
-            return VSConstants.S_OK;
+            //var NewEditor = new PackageManagerWindowPane(myDoc, _ui);
+            //ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
+            //ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
+
+            //return VSConstants.S_OK;
         }
 
         #endregion IVsEditorFactory Members
