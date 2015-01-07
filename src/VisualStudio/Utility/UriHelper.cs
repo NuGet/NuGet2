@@ -59,6 +59,11 @@ namespace NuGet.VisualStudio
             {
                 return packageSourceProvider.GetEnabledPackageSources().Any(s => IsHttpSource(s.Source));
             }
+            // For API V3, the source could be a local .json file.
+            else if (activeSource.Source.Contains(".json"))
+            {
+                return true;
+            }
             else
             {
                 return IsHttpSource(activeSource.Source);

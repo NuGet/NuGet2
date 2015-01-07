@@ -39,7 +39,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
         private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
         private string _cacheStatusMessage = String.Empty;
-        private object _currentSource = String.Empty;
+        private SourceRepository _currentSource = null;
 
         public InstallPackageCommand() :
             base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
@@ -149,14 +149,14 @@ namespace NuGet.Client.VisualStudio.PowerShell
             if (String.IsNullOrEmpty(Source))
             {
                 bool isAnySourceAvailable = false;
-                _currentSource = ActiveSourceRepository;
+                _currentSource = GetActiveRepository(Source);
                 isAnySourceAvailable = UriHelper.IsAnySourceAvailable(PackageSourceProvider, _isNetworkAvailable);
 
                 //if no local or UNC source is available or no source is http, fallback to local cache
                 if (!isAnySourceAvailable)
                 {
                     Source = NuGet.MachineCache.Default.Source;
-                    CacheStatusMessage(_currentSource, Source);
+                    CacheStatusMessage(_currentSource.Source.Name, Source);
                 }
             }
 
