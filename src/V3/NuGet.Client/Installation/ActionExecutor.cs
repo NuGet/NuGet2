@@ -90,6 +90,22 @@ namespace NuGet.Client.Installation
                         executedActions.Add(action);
                     }
 
+                    // Add binding redirects when neccessary.
+                    // Note that the current implementation is kind of inefficient.
+                    // AddBindingRedirects is run every time after an install or uninstall, 
+                    // so it's called multiple times if multiple packages are installed/uninstalled. 
+                    // But in fact, it's only needed to be called per project 
+                    // once after all packages are installed uninstalled.
+                    var packageManager = action.Target.TryGetFeature<IPackageManager>();
+                    var projectManager = action.Target.TryGetFeature<IProjectManager>();
+                    if (packageManager != null &&
+                        projectManager != null &&
+                        packageManager.BindingRedirectEnabled &&
+                        projectManager.Project.IsBindingRedirectSupported)
+                    {
+                        packageManager.AddBindingRedirects(projectManager);
+                    }
+
                     UpdateReadmeFilePath(action);
                 }
 
