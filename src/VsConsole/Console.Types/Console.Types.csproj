@@ -32,7 +32,6 @@
     <Compile Include="ICommandTokenizerProvider.cs" />
     <Compile Include="IConsole.cs" />
     <Compile Include="IConsoleDispatcher.cs" />
-    <Compile Include="IConsoleInitializer.cs" />
     <Compile Include="IHost.cs" />
     <Compile Include="IHostMetadata.cs" />
     <Compile Include="IHostProvider.cs" />
