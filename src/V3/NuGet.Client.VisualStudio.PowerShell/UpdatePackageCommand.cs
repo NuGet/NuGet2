@@ -86,6 +86,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
 
         protected override void Preprocess()
         {
+            ForceInstall = Reinstall.IsPresent;
             base.Preprocess();
             if (!_projectSpecified)
             {
