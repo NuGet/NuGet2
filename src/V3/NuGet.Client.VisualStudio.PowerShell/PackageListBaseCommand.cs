@@ -13,8 +13,6 @@ namespace NuGet.Client.VisualStudio.PowerShell
 {
     public abstract class PackageListBaseCommand : NuGetPowerShellBaseCommand
     {
-
-
         public PackageListBaseCommand()
             : base(ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IPackageRepositoryFactory>(),

@@ -51,6 +51,9 @@
           <maml:name>IncludePrerelease</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
+          <maml:name>Force</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
           <maml:name>FileConflictAction</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
@@ -111,6 +114,12 @@
         <maml:name>IncludePrerelease</maml:name>
         <maml:description>
           <maml:para>Indicates whether this command will consider prerelease packages. If omitted, only stable packages are considered.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Force</maml:name>
+        <maml:description>
+          <maml:para>Install a package forcely to the project. If the same version is already installed, will uninstall and then install.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -191,6 +200,156 @@
     </maml:relatedLinks>
   </command:command>
 
+  <!-- Find-Package command -->
+  <command:command
+      xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+      xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
+      xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+      <command:name>
+        Find-Package
+      </command:name>
+      <maml:description>
+        <maml:para>Gets the set of installed packages with specified Id/keyword from the package source.</maml:para>
+      </maml:description>
+      <command:verb>Find</command:verb>
+      <command:noun>Package</command:noun>
+      <dev:version></dev:version>
+    </command:details>
+
+    <maml:description>
+      <maml:para>Gets the set of installed packages with specified Id/keyword from the package source..</maml:para>
+    </maml:description>
+
+    <!-- Cmdlet syntax section-->
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Find-Package</maml:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Id</maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="named">
+          <maml:name>Source</maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>ListAll</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>First</maml:name>
+          <command:parameterValue required="true">int</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>Skip</maml:name>
+          <command:parameterValue required="true">int</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>IncludePrerelease</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>ExactMatch</maml:name>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+
+    <!-- Cmdlet parameter section  -->
+    <command:parameters>
+      <command:parameter required="true" position="1">
+        <maml:name>Id</maml:name>
+        <maml:description>
+          <maml:para>Specifies the package ID of the package to find.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+        <dev:defaultValue></dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Source</maml:name>
+        <maml:description>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. When set to a local file system path, Source can be either absolute or relative to the current directory. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>ListAll</maml:name>
+        <maml:description>
+          <maml:para>Gets all versions of packages available from the online package source.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>First</maml:name>
+        <maml:description>
+          <maml:para>Specifies the number of packages to return from the beginning of the list.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Skip</maml:name>
+        <maml:description>
+          <maml:para>Skips (does not return) the specified number of packages, counting from the beginning of the list.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>IncludePrerelease</maml:name>
+        <maml:description>
+          <maml:para>Indicates whether to include prerelease packages in the returned results.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>ExactMatch</maml:name>
+        <maml:description>
+          <maml:para>Indicates whether to return packages with the exact packageID (case-insensitive).</maml:para>
+        </maml:description>
+      </command:parameter>
+    </command:parameters>
+
+    <!-- Examples section  -->
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Find-Package Elmah</dev:code>
+        <dev:remarks>
+          <maml:para>
+            Description
+            ------------------------------------------------------------------
+            Returns packages available from the package source.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Find-Package jquery -ListAll -ExactMatch</dev:code>
+        <dev:remarks>
+          <maml:para>
+            Description
+            ------------------------------------------------------------------
+            Returns jquery package with all versions available from the package source.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+
+    <!-- Link section  -->
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online version:</maml:linkText>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Get-Package</maml:linkText>
+        <maml:uri/>
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+
   <!-- Get-Package command -->
   <command:command
       xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
@@ -202,7 +361,7 @@
         Get-Package
       </command:name>
       <maml:description>
-        <maml:para>Gets the set of installed packages. Use the -ListAvailable flag to list packages available from the package source.</maml:para>
+        <maml:para>Gets the set of installed packages. Use the -Updates flag to list packages updates available from the package source.</maml:para>
       </maml:description>
       <command:verb>Get</command:verb>
       <command:noun>Package</command:noun>
@@ -210,7 +369,7 @@
     </command:details>
 
     <maml:description>
-      <maml:para>Gets the set of installed packages. Use the -ListAvailable flag to list packages available from the package source.</maml:para>
+      <maml:para>Gets the set of installed packages. Use the -Updates flag to list packages updates available from the package source.</maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
@@ -248,6 +407,9 @@
         </command:parameter>
         <command:parameter required="false" position="named">
           <maml:name>IncludePrerelease</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>PageSize</maml:name>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -311,6 +473,12 @@
           <maml:para>Indicates whether to include prerelease packages in the returned results.</maml:para>
         </maml:description>
       </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>PageSize</maml:name>
+        <maml:description>
+          <maml:para>Used with -ListAvailable. When specified, paging will be enabled to display the list of packages.</maml:para>
+        </maml:description>
+      </command:parameter>
     </command:parameters>
 
     <!-- Examples section  -->
@@ -343,12 +511,12 @@
       </command:example>
       <command:example>
         <maml:title>----------  EXAMPLE 3  ----------</maml:title>
-        <dev:code>PM&gt; Get-Package -ListAvailable</dev:code>
+        <dev:code>PM&gt; Get-Package -ListAvailable -PageSize 30</dev:code>
         <dev:remarks>
           <maml:para>
             Description
             ------------------------------------------------------------------
-            Returns a list of packages available online in the current package source.
+            Returns a list of packages available online in the current package source in the page size of 30.
           </maml:para>
           <maml:para></maml:para>
           <maml:para></maml:para>
@@ -393,7 +561,7 @@
       </maml:navigationLink>
     </maml:relatedLinks>
   </command:command>
-
+  
   <!-- Uninstall-Package command -->
   <command:command
       xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
@@ -658,7 +826,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Version</maml:name>
         <maml:description>
-          <maml:para>Specifies the version that the package will be upgraded to. If omitted, defaults to the latest version.</maml:para>
+          <maml:para>Specifies the version that the package will be upgraded to. If omitted, defaults to the latest version. Now it takes Highest, HighestMinor, HighestPatch and Lowest to calculate the version of packages to be updated to.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -760,6 +928,179 @@
     </maml:relatedLinks>
   </command:command>
 
+  <!-- Sync-Package command -->
+  <command:command
+      xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+      xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
+      xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+      <command:name>
+        Sync-Package
+      </command:name>
+      <maml:description>
+        <maml:para>Get the version of installed package from specified/default project and sync the version to the rest of projects in the solution.</maml:para>
+      </maml:description>
+      <command:verb>Uninstall</command:verb>
+      <command:noun>Package</command:noun>
+      <dev:version></dev:version>
+    </command:details>
+
+    <maml:description>
+      <maml:para>Get the version of installed package from specified/default project and sync the version to the rest of projects in the solution.
+      </maml:para>
+    </maml:description>
+
+    <command:syntax>
+    <command:syntaxItem>
+      <maml:name>Sync-Package</maml:name>
+      <command:parameter required="true" position="1">
+        <maml:name>Id</maml:name>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>IgnoreDependencies</maml:name>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>ProjectName</maml:name>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="2">
+        <maml:name>Version</maml:name>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="3">
+        <maml:name>Source</maml:name>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>IncludePrerelease</maml:name>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>FileConflictAction</maml:name>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>DependencyVersion</maml:name>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>WhatIf</maml:name>
+      </command:parameter>
+    </command:syntaxItem>
+    </command:syntax>
+
+    <!-- Cmdlet parameter section  -->
+    <command:parameters>
+      <command:parameter required="true" position="1">
+        <maml:name>Id</maml:name>
+        <maml:description>
+          <maml:para>Specifies the package ID of the package to install.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+        <dev:defaultValue></dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>IgnoreDependencies</maml:name>
+        <maml:description>
+          <maml:para>Installs only this package and not its dependencies.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>ProjectName</maml:name>
+        <maml:description>
+          <maml:para>Specifies the project to install the package into. If ommitted, the default project is chosen.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Source</maml:name>
+        <maml:description>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. When set to a local file system path, Source can be either absolute or relative to the current directory. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Version</maml:name>
+        <maml:description>
+          <maml:para>Specifies the version of the package to install. If omitted, defaults to the latest version.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">
+          string
+        </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>IncludePrerelease</maml:name>
+        <maml:description>
+          <maml:para>Indicates whether this command will consider prerelease packages. If omitted, only stable packages are considered.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>FileConflictAction</maml:name>
+        <maml:description>
+          <maml:para>Indicates what this command should do if a file from the package's content folder already exists in the project.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>DependencyVersion</maml:name>
+        <maml:description>
+          <maml:para>Specifies which dependency package version to install. If omitted, this defaults to the lowest required version.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>WhatIf</maml:name>
+        <maml:description>
+          <maml:para>Displays the actions that would be taken and the effect of the command, instead of executing the command.</maml:para>
+        </maml:description>
+      </command:parameter>
+    </command:parameters>
+
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Sync-Package Elmah</dev:code>
+        <dev:remarks>
+          <maml:para>
+            Description
+            ------------------------------------------------------------------
+            Sync the version of Elmah package from the default project to the rest of projects in the solution.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Sync-Package Elmah -ProjectName ClassLibrary1</dev:code>
+        <dev:remarks>
+          <maml:para>
+            Description
+            ------------------------------------------------------------------
+            Sync the version of Elmah package from the ClassLibrary1 project to the rest of projects in the solution.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+
+    <!-- Link section  -->
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online version:</maml:linkText>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Uninstall-Package</maml:linkText>
+        <maml:uri/>
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  
   <!-- Add-BindingRedirect command -->
   <command:command
       xmlns:maml="http://schemas.microsoft.com/maml/2004/10"

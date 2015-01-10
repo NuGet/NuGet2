@@ -67,9 +67,9 @@ CmdletsToExport = @(
     'Update-Package',
     'Get-Package', 
     'Get-Project',
-    'Set-Project', 'Set-Source'
     'Open-PackagePage', 
-    'Sync-Package', 'Find-Package'
+    'Sync-Package', 
+	'Find-Package'
 	'Add-BindingRedirect')
 
 # Variables to export from this module
