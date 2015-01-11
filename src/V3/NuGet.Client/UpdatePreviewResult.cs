@@ -1,4 +1,5 @@
 ﻿
+using NuGet.PackagingCore;
 namespace NuGet.Client
 {
     public class UpdatePreviewResult

@@ -1,6 +1,6 @@
 ﻿using NuGet.Client;
 using NuGet.Client.V2;
-using NuGet.Client.VisualStudio.Models;
+using NuGet.Client.VisualStudio;
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
@@ -10,51 +10,61 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using NuGet.Client.VisualStudio;
+using NuGet.Frameworks;
+using NuGet.PackagingCore;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    
-    public class V2VisualStudioUIMetadataResource : V2Resource, IVisualStudioUIMetadata
+
+    public class V2UIMetadataResource :  UIMetadataResource
     {
-        public V2VisualStudioUIMetadataResource(V2Resource resource)
-            : base(resource)
+        private readonly IPackageRepository V2Client;
+        public V2UIMetadataResource(V2Resource resource)            
         {
+            V2Client = resource.V2Client;
         }
 
-        public  Task<VisualStudioUIPackageMetadata> GetPackageMetadataForVisualStudioUI(string packageId, NuGetVersion version)
+        public override Task<IEnumerable<UIPackageMetadata>> GetMetadata(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken token)
         {
             return Task.Factory.StartNew(() =>
-            {              
-                var semver = new SemanticVersion(version.ToNormalizedString());
-                var package = V2Client.FindPackage(packageId, semver);
-
-                // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
-                if (package == null)
-                {
-                    var packages = V2Client.FindPackagesById(packageId);
-                    package = packages.FirstOrDefault(p => Equals(p.Version, semver));
-                }
-
-                // If still null, fail
-                if (package == null)
-                {
-                    return null;
-                }
-
-                return GetVisualStudioUIPackageMetadata(package);
-            });
-        }
-
-        public Task<IEnumerable<VisualStudioUIPackageMetadata>> GetPackageMetadataForAllVersionsForVisualStudioUI(string packageId)
-        {
-            return Task.Factory.StartNew(() =>
-            { 
+            {
                 return V2Client.FindPackagesById(packageId).Select(p => GetVisualStudioUIPackageMetadata(p));
             });
         }
 
-        private static VisualStudioUIPackageMetadata GetVisualStudioUIPackageMetadata(IPackage package)
+        public override Task<IEnumerable<UIPackageMetadata>> GetMetadata(IEnumerable<PackagingCore.PackageIdentity> packages, bool includePrerelease, bool includeUnlisted, CancellationToken token)
+        {
+
+            return Task.Factory.StartNew(() =>
+            {
+                List<UIPackageMetadata> packageMetadataList = new List<Client.VisualStudio.UIPackageMetadata>();
+                foreach (var identity in packages)
+                {
+                    var semver = new SemanticVersion(identity.Version.ToNormalizedString());
+                    var package = V2Client.FindPackage(identity.Id, semver);
+
+                    // Sometimes, V2 APIs seem to fail to return a value for Packages(Id=,Version=) requests...
+
+                    if (package == null)
+                    {
+                        var packagesList = V2Client.FindPackagesById(identity.Id);
+                        package = packagesList.FirstOrDefault(p => Equals(p.Version, semver));
+                    }
+
+                    // If still null, fail
+                    if (package == null)
+                    {
+                        return null;
+                    }
+
+                    packageMetadataList.Add(GetVisualStudioUIPackageMetadata(package));
+                }
+                return packageMetadataList.AsEnumerable();
+            });
+        }
+
+        private static UIPackageMetadata GetVisualStudioUIPackageMetadata(IPackage package)
         {
             NuGetVersion Version = NuGetVersion.Parse(package.Version.ToString());          
             DateTimeOffset? Published = package.Published;
@@ -68,27 +78,30 @@ namespace NuGet.Client.V2.VisualStudio
             Uri ProjectUrl = package.ProjectUrl;
             string Tags = package.Tags;
             int DownloadCount = package.DownloadCount;
-            IEnumerable<VisualStudioUIPackageDependencySet> DependencySets = package.DependencySets.Select(p => GetVisualStudioUIPackageDependencySet(p));
+            IEnumerable<UIPackageDependencySet> DependencySets = package.DependencySets.Select(p => GetVisualStudioUIPackageDependencySet(p));
 
             bool HasDependencies = DependencySets.Any(
                 set => set.Dependencies != null && set.Dependencies.Count > 0);
+            PackageIdentity identity = new PackageIdentity(package.Id, Version);
 
-            return new VisualStudioUIPackageMetadata(Version, Summary, Description, Authors, Owners, IconUrl, LicenseUrl, ProjectUrl, Tags, DownloadCount, Published, DependencySets, HasDependencies);
+            return new UIPackageMetadata(identity, Summary, Description, Authors, Owners, IconUrl, LicenseUrl, ProjectUrl, Tags, DownloadCount, Published, DependencySets, HasDependencies);
         }
 
-        private static VisualStudioUIPackageDependency GetVisualStudioUIPackageDependency(PackageDependency dependency)
+        private static NuGet.PackagingCore.PackageDependency GetVisualStudioUIPackageDependency(PackageDependency dependency)
         {
             string id = dependency.Id;
             VersionRange versionRange = dependency.VersionSpec == null ? null : VersionRange.Parse(dependency.VersionSpec.ToString());
-            return new VisualStudioUIPackageDependency(id, versionRange);
+            return new NuGet.PackagingCore.PackageDependency(id, versionRange);
         }
 
-        private static VisualStudioUIPackageDependencySet GetVisualStudioUIPackageDependencySet(PackageDependencySet dependencySet)
+        private static UIPackageDependencySet GetVisualStudioUIPackageDependencySet(PackageDependencySet dependencySet)
         {
-            IEnumerable<VisualStudioUIPackageDependency> visualStudioUIPackageDependencies = dependencySet.Dependencies.Select(d => GetVisualStudioUIPackageDependency(d));
-            FrameworkName fxName = dependencySet.TargetFramework;
-            return new VisualStudioUIPackageDependencySet(fxName, visualStudioUIPackageDependencies);
+            IEnumerable<NuGet.PackagingCore.PackageDependency> visualStudioUIPackageDependencies = dependencySet.Dependencies.Select(d => GetVisualStudioUIPackageDependency(d));
+            NuGetFramework fxName = NuGetFramework.Parse(dependencySet.TargetFramework.FullName);            
+            return new UIPackageDependencySet(fxName, visualStudioUIPackageDependencies);
         }
+
+
       
     }
 }

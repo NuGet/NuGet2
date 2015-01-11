@@ -11,20 +11,18 @@ namespace NuGet.Client.V2
     /// Represents a resource provided by a V2 server. [ Like search resource, metadata resource]
     /// *TODOS: Add a trace source , Resource description ?
     /// </summary>
-    public class V2Resource :Resource
+    public class V2Resource : INuGetResource
     {
         private IPackageRepository _v2Client;              
       
         public V2Resource(V2Resource resource)            
         {
-            _v2Client = resource.V2Client;
-            _host = resource.Host;
+            _v2Client = resource.V2Client;           
         }
 
-        public V2Resource(IPackageRepository repo,string host)
+        public V2Resource(IPackageRepository repo)
         {
-            _v2Client = repo;
-            _host = host;
+            _v2Client = repo;           
         }
 
         public IPackageRepository V2Client

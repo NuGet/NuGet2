@@ -8,6 +8,8 @@ using NuGet.Client.Diagnostics;
 using NuGet.Client.Installation;
 using NuGet.Client.Resolution;
 using NuGet.Client;
+using NuGet.PackagingCore;
+using NuGet.Resolver;
 
 namespace NuGet.Client.Interop
 {

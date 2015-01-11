@@ -5,14 +5,15 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Configuration;
 
 namespace NuGet.Client.V2
 {
     public static class V2Utilities
     {
-        public static async Task<bool> IsV2(PackageSource source)
+        public static async Task<bool> IsV2(Configuration.PackageSource source)
         {
-            var url = new Uri(source.Url);
+            var url = new Uri(source.Password);
 
             // If the url is a directory, then it's a V2 source
             if (url.IsFile || url.IsUnc) 
@@ -38,13 +39,13 @@ namespace NuGet.Client.V2
             }
         }
 
-        public static IPackageRepository GetV2SourceRepository(PackageSource source, string host)
+        public static IPackageRepository GetV2SourceRepository(Configuration.PackageSource source)
         {           
-            IPackageRepository repo = new PackageRepositoryFactory().CreateRepository(source.Url);
+            IPackageRepository repo = new PackageRepositoryFactory().CreateRepository(source.Source);
             LocalPackageRepository _lprepo = repo as LocalPackageRepository;
             if (_lprepo != null)
                 return _lprepo;
-            string _userAgent = UserAgentUtil.GetUserAgent("NuGet.Client.Interop", host);
+            string _userAgent = UserAgentUtil.GetUserAgent("NuGet.Client.Interop", "host");
             var events = repo as IHttpClientEvents;
             if (events != null)
             {

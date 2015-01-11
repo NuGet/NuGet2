@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client.VisualStudio.Models;
+using NuGet.Client.VisualStudio;
 using NuGet.Versioning;
+using NuGet.PackagingCore;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    public class V2VisualStudioUISearchResource : V2Resource, IVisualStudioUISearch
+    public class V2UISearchResource : UISearchResource
     {
-        public V2VisualStudioUISearchResource(V2Resource resource)
-            : base(resource)
+        private readonly IPackageRepository V2Client;
+        public V2UISearchResource(V2Resource resource)            
         {
+            V2Client = resource.V2Client;
+        }
+        public V2UISearchResource(IPackageRepository repo)
+        {
+            V2Client = repo;
         }
 
-        public Task<IEnumerable<VisualStudioUISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public Task<IEnumerable<UISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -46,7 +52,7 @@ namespace NuGet.Client.V2.VisualStudio
                 }
 
                 // Now apply skip and take and the rest of the party
-                return (IEnumerable<VisualStudioUISearchMetadata>)query
+                return (IEnumerable<UISearchMetadata>)query
                     .Skip(skip)
                     .Take(take)
                     .ToList()
@@ -57,7 +63,7 @@ namespace NuGet.Client.V2.VisualStudio
             }, cancellationToken);
         }
 
-        private VisualStudioUISearchMetadata CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
+        private UISearchMetadata CreatePackageSearchResult(IPackage package, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var versions = V2Client.FindPackagesById(package.Id);
@@ -75,7 +81,8 @@ namespace NuGet.Client.V2.VisualStudio
             }
 
             Uri iconUrl = package.IconUrl;
-            VisualStudioUISearchMetadata searchMetaData = new VisualStudioUISearchMetadata(id, version, summary, iconUrl, nuGetVersions, null);
+            PackageIdentity identity = new PackageIdentity(id, version);
+            UISearchMetadata searchMetaData = new UISearchMetadata(identity, summary, iconUrl, nuGetVersions, null);
             return searchMetaData;
         }
 

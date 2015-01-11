@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -7,22 +8,32 @@ using System.Threading.Tasks;
 
 namespace NuGet.Client.V2
 {
-    [Export(typeof(ResourceProvider))]
-    [ResourceProviderMetadata("V2MetadataResourceProvider", typeof(IMetadata))]
+    [Export(typeof(INuGetResourceProvider))]
+    [NuGetResourceProviderMetadata(typeof(MetadataResource))]
     public class V2MetadataResourceProvider : V2ResourceProvider
     {
-        public override async Task<Resource> Create(PackageSource source)
+        private readonly ConcurrentDictionary<Configuration.PackageSource, MetadataResource> _cache = new ConcurrentDictionary<Configuration.PackageSource,MetadataResource>();
+
+        public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {
-            var resource = await base.Create(source);
-            if (resource != null)
+            MetadataResource v2MetadataResource;
+            if (!_cache.TryGetValue(source.PackageSource, out v2MetadataResource))
             {
-                var v2MetadataResource = new V2MetadataResource((V2Resource)resource);
-                return v2MetadataResource;
+                if (base.TryCreate(source, out resource))
+                {
+
+                    v2MetadataResource = new V2MetadataResource((V2Resource)resource);
+                    _cache.TryAdd(source.PackageSource, v2MetadataResource);
+                }
+
+                resource = v2MetadataResource;
+                return true;
             }
             else
             {
-                return null;
-            }
+                resource = null;
+                return false;
+            } 
         }
     }
 }

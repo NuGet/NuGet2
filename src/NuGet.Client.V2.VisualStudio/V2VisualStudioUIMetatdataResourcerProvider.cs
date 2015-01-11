@@ -1,23 +1,34 @@
 ﻿using System.ComponentModel.Composition;
-using NuGet.Client.VisualStudio.Models;
+using NuGet.Client.VisualStudio;
+using System.Collections.Concurrent;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    [Export(typeof(ResourceProvider))]
-    [ResourceProviderMetadata("V2VisualStudioUIMetatdataResourceProvider", typeof(IVisualStudioUIMetadata))]
-    public class V2VisualStudioUIMetadataResourceProvider : V2ResourceProvider
+    [Export(typeof(INuGetResourceProvider))]
+    [NuGetResourceProviderMetadata(typeof(UIMetadataResource))]
+    public class V2UIMetadataResourceProvider : V2ResourceProvider
     {
-        public override async System.Threading.Tasks.Task<Resource> Create(PackageSource source)
+        private readonly ConcurrentDictionary<Configuration.PackageSource, UIMetadataResource> _cache;
+
+        public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {
-            var resource = await base.Create(source);
-            if (resource != null)
+            UIMetadataResource v2UIMetadataResource;
+            if (!_cache.TryGetValue(source.PackageSource, out v2UIMetadataResource))
             {
-                var vsV2MetatdataResource = new V2VisualStudioUIMetadataResource((V2Resource)resource);
-                return vsV2MetatdataResource;
+                if (base.TryCreate(source, out resource))
+                {
+
+                    v2UIMetadataResource = new V2UIMetadataResource((V2Resource)resource);
+                    _cache.TryAdd(source.PackageSource, v2UIMetadataResource);
+                }
+
+                resource = v2UIMetadataResource;
+                return true;
             }
             else
             {
-                return null;
+                resource = null;
+                return false;
             }
         }
     }

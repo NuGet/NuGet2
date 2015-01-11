@@ -1,23 +1,34 @@
 ﻿using System.ComponentModel.Composition;
-using NuGet.Client.VisualStudio.Models;
+using NuGet.Client.VisualStudio;
+using System.Collections.Concurrent;
 
 namespace NuGet.Client.V2.VisualStudio
 {
-    [Export(typeof(ResourceProvider))]
-    [ResourceProviderMetadata("V2PowerShellAutocompleteResourceProvider", typeof(IPowerShellAutoComplete))]
+    [Export(typeof(INuGetResourceProvider))]
+    [NuGetResourceProviderMetadata(typeof(PSAutoCompleteResource))]
     public class V2PowerShellAutoCompleteResourceProvider : V2ResourceProvider
     {
-        public override async System.Threading.Tasks.Task<Resource> Create(PackageSource source)
+        private readonly ConcurrentDictionary<Configuration.PackageSource, PSAutoCompleteResource> _cache;
+
+        public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {
-            var resource = await base.Create(source);
-            if (resource != null)
+            PSAutoCompleteResource v2PowerShellAutoCompleteResource;
+            if (!_cache.TryGetValue(source.PackageSource, out v2PowerShellAutoCompleteResource))
             {
-                var vsV2SearchResource = new V2PowerShellAutoCompleteResource((V2Resource)resource);
-                return vsV2SearchResource;
+                if (base.TryCreate(source, out resource))
+                {
+
+                    v2PowerShellAutoCompleteResource = new V2PowerShellAutoCompleteResource((V2Resource)resource);
+                    _cache.TryAdd(source.PackageSource, v2PowerShellAutoCompleteResource);
+                }
+
+                resource = v2PowerShellAutoCompleteResource;
+                return true;
             }
             else
             {
-                return null;
+                resource = null;
+                return false;
             }
         }
     }
