@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using NuGet.Client.ProjectSystem;
@@ -10,12 +11,22 @@ namespace NuGet.Client.VisualStudio.UI
     // - A version of the package is installed. In this case, property Version is not null. 
     //   Property IsSolution indicates if the package is installed in the solution or in a project.
     // - The package is not installed in a project/solution. In this case, property Version is null.
-    public class PackageInstallationInfo
+    public class PackageInstallationInfo : IComparable<PackageInstallationInfo>,
+        INotifyPropertyChanged
     {
+        private NuGetVersion _version;
+
         public NuGetVersion Version
         {
-            get;
-            private set;
+            get
+            {
+                return _version;
+            }
+            set
+            {
+                _version = value;
+                UpdateDisplayText();
+            }
         }
 
         public event EventHandler SelectedChanged;
@@ -30,18 +41,34 @@ namespace NuGet.Client.VisualStudio.UI
             }
             set
             {
-                _selected = value;
-                if (SelectedChanged != null)
+                if (_selected != value)
                 {
-                    SelectedChanged(this, EventArgs.Empty);
+                    _selected = value;
+                    if (SelectedChanged != null)
+                    {
+                        SelectedChanged(this, EventArgs.Empty);
+                    }
+                    OnPropertyChanged("Selected");
                 }
             }
         }
 
+        private bool _enabled;
+
         public bool Enabled
         {
-            get;
-            set;
+            get
+            {
+                return _enabled;
+            }
+            set
+            {
+                if (_enabled != value)
+                {
+                    _enabled = value;
+                    OnPropertyChanged("Enabled");
+                }
+            }
         }
 
         public Project Project
@@ -66,6 +93,8 @@ namespace NuGet.Client.VisualStudio.UI
             Version = version;
             Enabled = enabled;
             IsSolution = false;
+
+            UpdateDisplayText();
         }
 
         // Create PackageInstallationInfo for the solution.
@@ -80,19 +109,55 @@ namespace NuGet.Client.VisualStudio.UI
             // this is just a placeholder and will not be really used. It's used to avoid
             // lots of null checks in our code.
             Project = project;
+
+            UpdateDisplayText();
         }
 
-        public override string ToString()
+        private string _displayText;
+
+        // the text to be displayed in UI
+        public string DisplayText
+        {
+            get
+            {
+                return _displayText;
+            }
+            set
+            {
+                if (_displayText != value)
+                {
+                    _displayText = value;
+                    OnPropertyChanged("DisplayText");
+                }
+            }
+        }
+
+        private void UpdateDisplayText()
         {
             if (Version == null)
             {
-                return _name;
+                DisplayText = _name;
             }
             else
             {
-                return string.Format("{0} ({1})", _name,
+                DisplayText = string.Format("{0} ({1})", _name,
                     Version.ToNormalizedString());
             }
         }
-    }
+
+        public int CompareTo(PackageInstallationInfo other)
+        {
+            return this._name.CompareTo(other._name);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }    
 }

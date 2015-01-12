@@ -30,6 +30,8 @@ namespace NuGet.Client.VisualStudio.UI
         // list in response to PackageSourcesChanged event.
         private bool _dontStartNewSearch;
 
+        private DetailControlModel _detailModel;
+
         public PackageManagerModel Model { get; private set; }
 
         public SourceRepositoryManager Sources
@@ -62,6 +64,15 @@ namespace NuGet.Client.VisualStudio.UI
             UI = ui;
             Model = model;
 
+            if (Target.IsSolution)
+            {
+                _detailModel = new PackageSolutionDetailControlModel((VsSolution)Target);
+            }
+            else
+            {
+                _detailModel = new PackageDetailControlModel(Target);
+            }
+
             InitializeComponent();
 
             var factory = ServiceLocator.GetGlobalService<SVsWindowSearchHostFactory, IVsWindowSearchHostFactory>();
@@ -83,6 +94,8 @@ namespace NuGet.Client.VisualStudio.UI
             _outputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
 
             InitSourceRepoList();
+
+            
             _initialized = true;
 
             Model.Sources.PackageSourcesChanged += Sources_PackageSourcesChanged;
@@ -279,28 +292,10 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                DetailControlModel newModel;
-                if (Target.IsSolution)
-                {
-                    newModel = new PackageSolutionDetailControlModel(
-                        (VsSolution)Target,
-                        selectedPackage);
-                }
-                else
-                {
-                    newModel = new PackageDetailControlModel(
-                        Target,
-                        selectedPackage);
-                }
-
-                var oldModel = _packageDetail.DataContext as DetailControlModel;
-                if (oldModel != null)
-                {
-                    newModel.Options = oldModel.Options;
-                }
-                _packageDetail.DataContext = newModel;
+                _detailModel.SetCurrentPackage(selectedPackage);
+                _packageDetail.DataContext = _detailModel;
                 _packageDetail.ScrollToHome();
-                await newModel.LoadPackageMetadaAsync();
+                await _detailModel.LoadPackageMetadaAsync();
             }
         }
 
@@ -471,10 +466,11 @@ namespace NuGet.Client.VisualStudio.UI
             ActivateOutputWindow();
             _outputConsole.Clear();
             var executionContext = new VisualStudioExecutionContext(_outputConsole);
-            executionContext.FileConflictAction = detailControl.FileConflictAction;
+            executionContext.FileConflictAction = detailControl.FileConflictAction;           
 
             try
             {
+                this.IsEnabled = false;
                 var actions = await detailControl.ResolveActionsAsync(executionContext);
 
                 // show preview
@@ -496,7 +492,7 @@ namespace NuGet.Client.VisualStudio.UI
                 }
 
                 // Create the executor and execute the actions
-                var userAction = detailControl.GetUserAction();                
+                var userAction = detailControl.GetUserAction();
                 var executor = new ActionExecutor();
                 await Task.Run(
                     () =>
@@ -513,6 +509,10 @@ namespace NuGet.Client.VisualStudio.UI
                     ex.Message,
                     ex.ToString());
                 errorDialog.ShowModal();
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 

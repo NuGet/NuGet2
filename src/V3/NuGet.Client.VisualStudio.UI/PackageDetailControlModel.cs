@@ -12,12 +12,15 @@ namespace NuGet.Client.VisualStudio.UI
     // It has two mode: Project, or Solution
     public class PackageDetailControlModel : DetailControlModel
     {
-        public PackageDetailControlModel(
-            InstallationTarget target,
-            UiSearchResultPackage searchResultPackage)
-            : base(target, searchResultPackage)
+        public PackageDetailControlModel(InstallationTarget target)
+            : base(target)
         {
             Debug.Assert(!target.IsSolution);
+        }
+
+        public override void SetCurrentPackage(UiSearchResultPackage searchResultPackage)
+        {
+            base.SetCurrentPackage(searchResultPackage);
             UpdateInstalledVersion();
         }
 

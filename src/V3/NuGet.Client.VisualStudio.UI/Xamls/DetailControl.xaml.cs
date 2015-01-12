@@ -24,6 +24,10 @@ namespace NuGet.Client.VisualStudio.UI
         public DetailControl()
         {
             InitializeComponent();
+
+            // TODO: will be adjusted later
+            _projectList.MaxHeight = _self.FontSize * 8;
+
             this.DataContextChanged += PackageSolutionDetailControl_DataContextChanged;
         }
 
@@ -141,6 +145,28 @@ namespace NuGet.Client.VisualStudio.UI
                 var model = (DetailControlModel)DataContext;
                 return model.Options.SelectedFileConflictAction.Action;
             }
+        }
+
+        private void CheckAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            model.CheckAllProjects();
+        }
+
+        private void UncheckAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            model.UncheckAllProjects();
         }    
     }
 }

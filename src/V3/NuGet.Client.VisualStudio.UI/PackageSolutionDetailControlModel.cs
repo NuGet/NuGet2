@@ -5,8 +5,11 @@ namespace NuGet.Client.VisualStudio.UI
 {
     public class PackageSolutionDetailControlModel : DetailControlModel
     {
-        // list of projects where the package is installed
+        // list of projects to be displayed in the UI
         private List<PackageInstallationInfo> _projects;
+
+        private List<PackageInstallationInfo> _allProjects;
+
 
         public VsSolution Solution
         {
@@ -40,9 +43,24 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
+        private bool _showAll;
+
+        // Indicates if all projects are displayed or only applicable projectss are displayed
+        public bool ShowAll
+        {
+            get
+            {
+                return _showAll;
+            }
+            set
+            {
+                _showAll = value;
+                UpdateProjectList();
+            }
+        }
         protected override void OnSelectedVersionChanged()
         {
-            CreateProjectList();
+            UpdateProjectList();
         }
 
         protected override void CreateVersions()
@@ -91,11 +109,27 @@ namespace NuGet.Client.VisualStudio.UI
             OnPropertyChanged("Versions");
         }
 
-        public PackageSolutionDetailControlModel(
-            VsSolution solution,
-            UiSearchResultPackage searchResultPackage) :
-            base(solution, searchResultPackage)
+        public PackageSolutionDetailControlModel(VsSolution solution) :
+            base(solution)
         {
+            // create project list
+            _allProjects = Solution.Projects.Select(p =>new PackageInstallationInfo(p, null, true))
+                .ToList();
+            _allProjects.Sort();
+            _allProjects.ForEach(p =>
+            {
+                p.SelectedChanged += (sender, e) =>
+                {
+                    UpdateActionEnabled();
+                };
+            });
+        }
+
+        private void UpdateActionEnabled()
+        {
+            ActionEnabled = 
+                _projects != null &&
+                _projects.Any(i => i.Selected);
         }
 
         protected override bool CanUpdate()
@@ -148,101 +182,111 @@ namespace NuGet.Client.VisualStudio.UI
             return installedVersions.Count() >= 2;
         }
 
-        private void CreateProjectList()
+        private void UpdateProjectList()
         {
-            _projects = new List<PackageInstallationInfo>();
+            // update properties of _allProject list
+            _allProjects.ForEach(p =>
+            {
+                var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
+                if (installed != null)
+                {
+                    p.Version = installed.Identity.Version;
+                }
+                else
+                {
+                    p.Version = null;
+                }
+            });
+
 
             if (SelectedAction == Resources.Resources.Action_Consolidate)
             {
-                // project list contains projects that have the package installed.
-                // The project with the same version installed is included, but disabled.
-                foreach (var project in Solution.Projects)
+                // only projects that have the package installed are selected.
+                // The project with the same version installed is selected, but disabled.
+                _allProjects.ForEach(p =>
                 {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Id);
+                    var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
                     if (installed != null)
                     {
-                        var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled);
-                        _projects.Add(info);
+                        p.Selected = true;
+                        p.Enabled = installed.Identity.Version != SelectedVersion.Version;
                     }
-                }
+                    else
+                    {
+                        p.Selected = false;
+                        p.Enabled = false;                        
+                    }
+                });
             }
             else if (SelectedAction == Resources.Resources.Action_Update)
             {
-                // project list contains projects/solution that have the package
-                // installed. The project/solution with the same version installed
-                // is included, but disabled.
-                foreach (var project in Solution.Projects)
+                // only projects that have the package of a different version installed are enabled
+                _allProjects.ForEach(p =>
                 {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Id);
-                    if (installed != null)
-                    {
-                        var enabled = installed.Identity.Version != SelectedVersion.Version;
-                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled);
-                        _projects.Add(info);
-                    }
-                }
-
-                var v = Solution.InstalledPackages.GetInstalledPackage(Id);
-                if (v != null)
-                {
-                    var enabled = v.Identity.Version != SelectedVersion.Version;
-                    var info = new PackageInstallationInfo(
-                        Solution.Name,
-                        SelectedVersion.Version,
-                        enabled,
-                        Solution.Projects.First());
-                    _projects.Add(info);
-                }
+                    var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
+                    p.Enabled = installed != null &&
+                        installed.Identity.Version != SelectedVersion.Version;
+                    p.Selected = p.Enabled;
+                });
             }
             else if (SelectedAction == Resources.Resources.Action_Install)
             {
-                // project list contains projects that do not have the package installed.
-                foreach (var project in Solution.Projects)
+                // only projects that do not have the package installed are enabled
+                _allProjects.ForEach(p =>
                 {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Id);
-                    if (installed == null)
-                    {
-                        var info = new PackageInstallationInfo(project, null, enabled: true);
-                        _projects.Add(info);
-                    }
-                }
+                    var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
+                    p.Enabled = installed == null;
+                    p.Selected = p.Enabled;
+                });
             }
             else if (SelectedAction == Resources.Resources.Action_Uninstall)
             {
-                // project list contains projects/solution that have the same version installed.
-                foreach (var project in Solution.Projects)
+                // only projects that have the selected version installed are enabled
+                _allProjects.ForEach(p =>
                 {
-                    var installed = project.InstalledPackages.GetInstalledPackage(Id);
-                    if (installed != null &&
-                        installed.Identity.Version == SelectedVersion.Version)
-                    {
-                        var info = new PackageInstallationInfo(project, installed.Identity.Version, enabled: true);
-                        _projects.Add(info);
-                    }
-                }
-
-                var v = Solution.InstalledPackages.GetInstalledPackage(Id);
-                if (v != null)
-                {
-                    var enabled = v.Identity.Version == SelectedVersion.Version;
-                    var info = new PackageInstallationInfo(
-                        Solution.Name,
-                        SelectedVersion.Version,
-                        enabled,
-                        Solution.Projects.First());
-                    _projects.Add(info);
-                }
+                    var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
+                    p.Enabled = installed != null &&
+                        installed.Identity.Version == SelectedVersion.Version;
+                    p.Selected = p.Enabled;
+                });
             }
 
-            foreach (var p in _projects)
+            if (ShowAll)
             {
-                p.SelectedChanged += (sender, e) =>
-                {
-                    ActionEnabled = _projects.Any(i => i.Selected);
-                };
+                _projects = _allProjects;
             }
-            ActionEnabled = _projects.Any(i => i.Selected);
+            else
+            {
+                _projects = _allProjects.Where(
+                    p => p.Enabled || p.Selected).ToList();
+            }
+            UpdateActionEnabled();
+
+            OnPropertyChanged("Projects");
+        }
+
+        internal void UncheckAllProjects()
+        {
+            _projects.ForEach(p =>
+            {
+                if (p.Enabled)
+                {
+                    p.Selected = false;
+                }
+            });
+
+            OnPropertyChanged("Projects");
+        }
+
+        internal void CheckAllProjects()
+        {
+            _projects.ForEach(p =>
+            {
+                if (p.Enabled)
+                {
+                    p.Selected = true;
+                }
+            });
 
             OnPropertyChanged("Projects");
         }

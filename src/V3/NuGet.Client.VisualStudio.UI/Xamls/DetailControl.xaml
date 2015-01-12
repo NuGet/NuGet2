@@ -44,7 +44,7 @@
                     Height="32"
                     Width="32"
                     Style="{StaticResource PackageIconImageStyle}"
-                    RenderOptions.BitmapScalingMode="HighQuality"/>
+                    RenderOptions.BitmapScalingMode="HighQuality" />
                 <TextBlock
                     Text="{Binding Path=Id}"
                     FontSize="{Binding ElementName=_self,Path=FontSize,Converter={StaticResource Font155PercentSizeConverter}}" />
@@ -60,21 +60,32 @@
                         Visibility="{Binding Path=IsSolution,Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     Text="{x:Static resx:Resources.Label_Projects}" />
-                <ItemsControl
+
+                <StackPanel Orientation="Horizontal" Margin="0,5">
+                    <Button Click="CheckAllButton_Click">Check All</Button>
+                    <Button Margin="5,0" Click="UncheckAllButton_Click">Uncheck All</Button>
+                    <CheckBox IsChecked="{Binding Path=ShowAll}">Show All</CheckBox>
+                </StackPanel>
+                
+                <ScrollViewer
+                    x:Name="_projectList"
+                    VerticalScrollBarVisibility="Auto" >
+                    <ItemsControl
                     ItemsSource="{Binding Path=Projects}"
-                    IsTabStop="False" >
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox
-                                Content="{Binding}"
+                    IsTabStop="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                Content="{Binding Path=DisplayText}"
                                 Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
                                 Margin="16,8,0,0"
                                 VerticalContentAlignment="Center"
                                 IsChecked="{Binding Path=Selected}"
                                 IsEnabled="{Binding Path=Enabled}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </StackPanel>
 
             <!-- Installed Version  -->

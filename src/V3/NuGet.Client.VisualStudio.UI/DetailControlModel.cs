@@ -20,17 +20,21 @@ namespace NuGet.Client.VisualStudio.UI
         protected InstallationTarget _target;
         protected List<NuGetVersion> _allPackages;
         protected UiSearchResultPackage _searchResultPackage;
-
         private Dictionary<NuGetVersion, UiPackageMetadata> _metadataDict;
 
-        public DetailControlModel(
-            InstallationTarget target,
-            UiSearchResultPackage searchResultPackage)
+        public DetailControlModel(InstallationTarget target)
         {
             _target = target;
+            _options = new Options();
+        }
+
+        public virtual void SetCurrentPackage(UiSearchResultPackage searchResultPackage)
+        {
             _searchResultPackage = searchResultPackage;
+            OnPropertyChanged("Id");
+            OnPropertyChanged("IconUrl");
+
             _allPackages = new List<NuGetVersion>(searchResultPackage.Versions);
-            _options = new UI.Options();
             CreateActions();
         }
 
@@ -305,11 +309,6 @@ namespace NuGet.Client.VisualStudio.UI
             get
             {
                 return _options;
-            }
-            set
-            {
-                _options = value;
-                OnPropertyChanged("Options");
             }
         }
     }

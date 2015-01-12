@@ -58,7 +58,8 @@ namespace NuGet.Client
         {
             var previewResults = new List<PreviewResult>();
 
-            foreach (var targetProject in target.GetAllTargetsRecursively())
+            foreach (var targetProject in target.GetAllTargetsRecursively().OrderBy(
+                p => p.Name))
             {
                 var result = CalculatePreviewForProject(actions, targetProject);
 
