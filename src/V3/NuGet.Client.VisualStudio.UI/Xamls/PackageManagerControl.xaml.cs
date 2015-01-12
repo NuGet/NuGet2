@@ -470,15 +470,12 @@ namespace NuGet.Client.VisualStudio.UI
         {
             ActivateOutputWindow();
             _outputConsole.Clear();
-            var progressDialog = new ProgressDialog(_outputConsole);
-            progressDialog.Owner = Window.GetWindow(this);
-            progressDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            progressDialog.FileConflictAction = detailControl.FileConflictAction;
-            progressDialog.Show();
+            var executionContext = new VisualStudioExecutionContext(_outputConsole);
+            executionContext.FileConflictAction = detailControl.FileConflictAction;
 
             try
             {
-                var actions = await detailControl.ResolveActionsAsync(progressDialog);
+                var actions = await detailControl.ResolveActionsAsync(executionContext);
 
                 // show preview
                 var model = (DetailControlModel)_packageDetail.DataContext;
@@ -504,7 +501,7 @@ namespace NuGet.Client.VisualStudio.UI
                 await Task.Run(
                     () =>
                     {
-                        executor.ExecuteActions(actions, progressDialog, userAction);
+                        executor.ExecuteActions(actions, executionContext, userAction);
                     });
 
                 UpdatePackageStatus();
@@ -516,10 +513,6 @@ namespace NuGet.Client.VisualStudio.UI
                     ex.Message,
                     ex.ToString());
                 errorDialog.ShowModal();
-            }
-            finally
-            {
-                progressDialog.CloseWindow();
             }
         }
 

@@ -38,7 +38,7 @@
     <Reference Include="$(ShellAssembly)" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-	<Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json">
@@ -115,6 +115,7 @@
     <Compile Include="Resources\Colors.cs" />
     <Compile Include="Resources\Commands.cs" />
     <Compile Include="VersionForDisplay.cs" />
+    <Compile Include="VisualStudioExecutionContext.cs" />
     <Compile Include="VsDialogWindow.cs" />
     <Compile Include="Xamls\ActionsAndVersions.xaml.cs">
       <DependentUpon>ActionsAndVersions.xaml</DependentUpon>
