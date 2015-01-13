@@ -11,14 +11,14 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Client.VisualStudio;
-using NuGet.Client.VisualStudio.UI;
+using NuGet.PackageManagement.UI;
 using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-using Resx = NuGet.Client.VisualStudio.UI.Resources;
+using Resx = NuGet.PackageManagement.UI.Resources;
 
 namespace NuGet.Tools
 {
@@ -44,12 +44,7 @@ namespace NuGet.Tools
     [FontAndColorsRegistration(
         "Package Manager Console",
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
-        "{" + GuidList.guidNuGetPkgString + "}")]
-    [ProvideEditorExtension(typeof(PackageManagerEditorFactory), ".PackageManagerDocumentWindow", 50,
-              ProjectGuid = "{D1DCDB85-C5E8-11d2-BFCA-00C04F990235}",
-              TemplateDir = "Templates",
-              NameResourceID = 300,
-              DefaultName = "PackageManagerDocumentWindow")]
+        "{" + GuidList.guidNuGetPkgString + "}")]    
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Package, IVsPackageExtensionProvider
     {
@@ -201,16 +196,12 @@ namespace NuGet.Tools
         {
             base.Initialize();
 
-            VsNuGetDiagnostics.Initialize(
-                ServiceLocator.GetInstance<IDebugConsoleController>());
+            // ***
+            // VsNuGetDiagnostics.Initialize(
+            //    ServiceLocator.GetInstance<IDebugConsoleController>());
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
-
-            //Create Editor Factory. Note that the base Package class will call Dispose on it.
-            base.RegisterEditorFactory(new PackageManagerEditorFactory(
-                ServiceLocator.GetInstance<VsPackageManagerContext>(),
-                ServiceLocator.GetInstance<IUserInterfaceService>()));
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService().
             // Doing so is illegal and may cause VS to hang.
@@ -418,12 +409,24 @@ namespace NuGet.Tools
                 if (hr == VSConstants.S_OK && docView is PackageManagerWindowPane)
                 {
                     var packageManagerWindowPane = (PackageManagerWindowPane)docView;
-                    var target = packageManagerWindowPane.Model.Target as VsProject;
+                    var projects = packageManagerWindowPane.Model.Context.Projects;
+                    if (projects.Count() != 1)
+                    {
+                        continue;
+                    }
+                   
+                    var existingProject = projects.First();
+
+                    return null;
+                    
+                    // **** 
+                    /*
+                    var target = packageManagerWindowPane.Model.Context.Projects .Target as VsProject;
                     if (target != null &&
                         String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
                     {
                         return windowFrame;
-                    }
+                    } */
                 }
             }
 
@@ -509,20 +512,27 @@ namespace NuGet.Tools
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            var context = ServiceLocator.GetInstance<VsPackageManagerContext>();
-            var myDoc = new PackageManagerModel(
-                context.SourceManager,
-                context.GetCurrentVsSolution().GetProject(project));
+            var uiContextFactory = ServiceLocator.GetInstance<INuGetUIContextFactory>();
+            var uiContext = uiContextFactory.Create( // *** project 
+                null);
 
-            var NewEditor = new PackageManagerWindowPane(myDoc, ServiceLocator.GetInstance<IUserInterfaceService>());
-            var ppunkDocView = Marshal.GetIUnknownForObject(NewEditor);
-            var ppunkDocData = Marshal.GetIUnknownForObject(myDoc);
-            var guidEditorType = PackageManagerEditorFactory.EditorFactoryGuid;
+            var uiFactory = ServiceLocator.GetInstance<INuGetUIFactory>();
+            var uiController = uiFactory.Create( // *** project
+                null);
+
+            var model = new PackageManagerModel(uiController, uiContext);
+
+            var windowPane = new PackageManagerWindowPane(model);
+            var ppunkDocView = Marshal.GetIUnknownForObject(windowPane);
+            var ppunkDocData = Marshal.GetIUnknownForObject(model);
+            var guidEditorType = Guid.Empty;
             var guidCommandUI = Guid.Empty;
             var caption = String.Format(
                 CultureInfo.CurrentCulture,
-                Resx.Resources.Label_NuGetWindowCaption,
-                myDoc.Target.Name);
+                Resx.Label_NuGetWindowCaption,
+                "project name" // **** myDoc.Target.Name);
+                );
+                
 
             IVsWindowFrame windowFrame;
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
@@ -618,6 +628,7 @@ namespace NuGet.Tools
             }
         }
 
+        /* ****
         private IVsWindowFrame CreateDocWindowForSolution()
         {
             // TODO: Need to wait until solution is loaded
@@ -667,9 +678,11 @@ namespace NuGet.Tools
             ErrorHandler.ThrowOnFailure(hr);
             return windowFrame;
         }
+        */
 
         private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
         {
+            /* ***
             var windowFrame = FindExistingSolutionWindowFrame();
             if (windowFrame == null)
             {
@@ -690,7 +703,7 @@ namespace NuGet.Tools
                 Search(windowFrame, searchText);
 
                 windowFrame.Show();
-            }
+            } */
         }
 
         // Gets the package manager control hosted in the window frame.

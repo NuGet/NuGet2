@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22310.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
@@ -136,8 +136,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V3", "V3", "{F7AB250E-2479-4C9A-AFB2-67A9954918C3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client", "src\V3\NuGet.Client\NuGet.Client.csproj", "{56EF26E3-35FE-4857-BCE3-438089339C83}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.VisualStudio.UI", "src\V3\NuGet.Client.VisualStudio.UI\NuGet.Client.VisualStudio.UI.csproj", "{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Client.V3Interop", "src\V3\NuGet.Client.V3Interop\NuGet.Client.V3Interop.csproj", "{9FE9B712-F684-43EC-8F20-F452C60437CB}"
 EndProject
@@ -832,26 +830,6 @@ Global
 		{56EF26E3-35FE-4857-BCE3-438089339C83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{56EF26E3-35FE-4857-BCE3-438089339C83}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{56EF26E3-35FE-4857-BCE3-438089339C83}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Coverage|Any CPU.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Release|Any CPU.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Mono Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{A8EFBE54-4136-4D15-8DB7-3FFECEE50682}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
 		{9FE9B712-F684-43EC-8F20-F452C60437CB}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
