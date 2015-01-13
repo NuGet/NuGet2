@@ -25,7 +25,7 @@
     <MefComponent>|VisualStudio|</MefComponent>
     <MefComponent>NuGet.Client.V3.dll</MefComponent>
     <MefComponent>NuGet.Client.V3.VisualStudio.dll</MefComponent>
-    <MefComponent>NuGet.PackageManagement.UI</MefComponent>
+	<MefComponent>NuGet.PackageManagement.UI.dll</MefComponent>
     <MefComponent>|NuGet.Client.V3Interop|</MefComponent>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>

@@ -19,6 +19,7 @@ using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 using Resx = NuGet.PackageManagement.UI.Resources;
+using NuGet.ProjectManagement;
 
 namespace NuGet.Tools
 {
@@ -416,17 +417,11 @@ namespace NuGet.Tools
                     }
                    
                     var existingProject = projects.First();
-
-                    return null;
-                    
-                    // **** 
-                    /*
-                    var target = packageManagerWindowPane.Model.Context.Projects .Target as VsProject;
-                    if (target != null &&
-                        String.Equals(target.DteProject.UniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
+                    var uniqueName = existingProject.GetMetadata<string>(NuGetProjectMetadataKeys.Name);
+                    if (String.Equals(uniqueName, project.UniqueName, StringComparison.OrdinalIgnoreCase))
                     {
                         return windowFrame;
-                    } */
+                    }
                 }
             }
 
@@ -512,13 +507,14 @@ namespace NuGet.Tools
                 (uint)_VSRDTFLAGS.RDT_DontAddToMRU |
                 (uint)_VSRDTFLAGS.RDT_DontSaveAs;
 
-            var uiContextFactory = ServiceLocator.GetInstance<INuGetUIContextFactory>();
-            var uiContext = uiContextFactory.Create( // *** project 
-                null);
+            var solutionManager = ServiceLocator.GetInstance<PackageManagement.ISolutionManager>();
+            var nugetProject = solutionManager.GetNuGetProject(project.Name); // *** use safe name here
+
+            var uiContextFactory = ServiceLocator.GetInstance<INuGetUIContextFactory>();            
+            var uiContext = uiContextFactory.Create(new [] { nugetProject });
 
             var uiFactory = ServiceLocator.GetInstance<INuGetUIFactory>();
-            var uiController = uiFactory.Create( // *** project
-                null);
+            var uiController = uiFactory.Create(new [] { nugetProject } );
 
             var model = new PackageManagerModel(uiController, uiContext);
 
@@ -530,9 +526,8 @@ namespace NuGet.Tools
             var caption = String.Format(
                 CultureInfo.CurrentCulture,
                 Resx.Label_NuGetWindowCaption,
-                "project name" // **** myDoc.Target.Name);
-                );
-                
+                project.Name // **** myDoc.Target.Name);
+                );                
 
             IVsWindowFrame windowFrame;
             IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
