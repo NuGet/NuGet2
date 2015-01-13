@@ -54,39 +54,10 @@
             <Tools:ActionsAndVersions Grid.Row="1"  Margin="0,8" />
 
             <!-- Project list -->
-            <StackPanel Grid.Row="2"
-                        Orientation="Vertical"
-                        Margin="0,12,0,8"
-                        Visibility="{Binding Path=IsSolution,Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
-                    Text="{x:Static resx:Resources.Label_Projects}" />
-
-                <StackPanel Orientation="Horizontal" Margin="0,5">
-                    <Button Click="CheckAllButton_Click">Check All</Button>
-                    <Button Margin="5,0" Click="UncheckAllButton_Click">Uncheck All</Button>
-                    <CheckBox IsChecked="{Binding Path=ShowAll}">Show All</CheckBox>
-                </StackPanel>
-                
-                <ScrollViewer
-                    x:Name="_projectList"
-                    VerticalScrollBarVisibility="Auto" >
-                    <ItemsControl
-                    ItemsSource="{Binding Path=Projects}"
-                    IsTabStop="False">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                Content="{Binding Path=DisplayText}"
-                                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                                Margin="16,8,0,0"
-                                VerticalContentAlignment="Center"
-                                IsChecked="{Binding Path=Selected}"
-                                IsEnabled="{Binding Path=Enabled}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </StackPanel>
+            <Tools:ProjectList
+                Grid.Row="2"
+                Margin="0,12,0,8"
+                Visibility="{Binding Path=IsSolution,Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <!-- Installed Version  -->
             <StackPanel Grid.Row="2"
