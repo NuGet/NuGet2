@@ -50,7 +50,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             this.ActiveSourceRepository = GetActiveRepository(Source);
             this.PackageActionResolver = new ActionResolver(
                 ActiveSourceRepository,
-                CreateDependencyResolutionSource(),
+                CreateDependencyResolutionSource(ActiveSourceRepository),
                 ResolutionContext);
             base.Preprocess();
         }

@@ -1,17 +1,16 @@
-﻿using Microsoft.VisualStudio.Shell;
-using NuGet.Client.Installation;
-using NuGet.Client.Resolution;
-using NuGet.Resources;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
-
+using Microsoft.VisualStudio.Shell;
+using NuGet.Client.Installation;
+using NuGet.Client.Resolution;
+using NuGet.Resources;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 #if VS14
 using Microsoft.VisualStudio.ProjectSystem.Interop;
@@ -78,13 +77,18 @@ namespace NuGet.Client.VisualStudio.PowerShell
             }
         }
 
-        // Creates the source repository used to resolve dependencies
-        protected SourceRepository CreateDependencyResolutionSource()
+        // Creates the source repository used to resolve dependencies        
+        protected SourceRepository CreateDependencyResolutionSource(SourceRepository primarySource)
         {
-            return new DependencyResolutionRepository(
-            _packageSourceProvider.LoadPackageSources()
+            var repos = new List<SourceRepository>();
+            if (primarySource != null)
+            {
+                repos.Add(primarySource);
+            }
+            repos.AddRange(_packageSourceProvider.LoadPackageSources()
                 .Where(s => s.IsEnabled)
                 .Select(s => CreateRepositoryFromSource(s.Name)));
+            return new DependencyResolutionRepository(repos);
         }
 
         public IEnumerable<PackageIdentity> Identities { get; set; }
@@ -93,7 +97,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         {
             base.BeginProcessing();
 
-            // remember currently expanded nodes so that we can leave them expanded 
+            // remember currently expanded nodes so that we can leave them expanded
             // after the operation has finished.
             SaveExpandedNodes();
         }
@@ -239,7 +243,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
             return psResults;
         }
 
-        private IEnumerable<PowerShellPreviewResult> AddToPowerShellPreviewResult(List<PowerShellPreviewResult> list, 
+        private IEnumerable<PowerShellPreviewResult> AddToPowerShellPreviewResult(List<PowerShellPreviewResult> list,
             PreviewResult result, PowerShellPackageAction action, VsProject proj)
         {
             IEnumerable<PackageIdentity> identities = null;
@@ -281,7 +285,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
                 {
                     PowerShellPreviewResult previewRes = new PowerShellPreviewResult();
                     previewRes.Id = updateResult.Old.Id;
-                    previewRes.Action = string.Format("{0} ({1} => {2})", 
+                    previewRes.Action = string.Format("{0} ({1} => {2})",
                         action.ToString(), updateResult.Old.Version.ToNormalizedString(), updateResult.New.Version.ToNormalizedString());
                     list.Add(previewRes);
                     previewRes.ProjectName = proj.Name;
@@ -308,7 +312,7 @@ namespace NuGet.Client.VisualStudio.PowerShell
         }
 
         /// <summary>
-        /// Get the VsProject by ProjectName. 
+        /// Get the VsProject by ProjectName.
         /// If ProjectName is not specified, return the Default project of Tool window.
         /// </summary>
         /// <param name="throwIfNotExists"></param>

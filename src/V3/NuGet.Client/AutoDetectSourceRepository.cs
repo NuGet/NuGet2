@@ -185,7 +185,7 @@ namespace NuGet.Client
             foreach (var source in _sources)
             {
                 var result = await source.GetPackageMetadataById(packageId);
-                if (result != null)
+                if (result != null && result.Any())
                 {
                     return result;
                 }
