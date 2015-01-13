@@ -15,11 +15,14 @@ using NuGet.PackageManagement.UI;
 using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using NuGet.VisualStudio11;
+//*** using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 using Resx = NuGet.PackageManagement.UI.Resources;
 using NuGet.ProjectManagement;
+using NuGet.PackageManagement;
+using NuGet.ProjectManagement.VisualStudio;
+using NuGet.Configuration;
 
 namespace NuGet.Tools
 {
@@ -39,7 +42,7 @@ namespace NuGet.Tools
         Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(PackageSourceOptionsPage), "NuGet Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(GeneralOptionPage), "NuGet Package Manager", "General", 113, 115, true)]
-    [ProvideSearchProvider(typeof(NuGetSearchProvider), "NuGet Search")]
+    // *** [ProvideSearchProvider(typeof(NuGetSearchProvider), "NuGet Search")]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [ProvideAutoLoad(GuidList.guidAutoLoadNuGetString)]
     [FontAndColorsRegistration(
@@ -63,13 +66,12 @@ namespace NuGet.Tools
         private bool? _isVisualizerSupported;
         private IPackageRestoreManager _packageRestoreManager;
         private ISolutionManager _solutionManager;
-        private IDeleteOnRestartManager _deleteOnRestart;
+        //*** private IDeleteOnRestartManager _deleteOnRestart;
         private OleMenuCommand _managePackageDialogCommand;
         private OleMenuCommand _managePackageForSolutionDialogCommand;
         private OleMenuCommandService _mcs;
         private bool _powerConsoleCommandExecuting;
         private IMachineWideSettings _machineWideSettings;
-        private IShimControllerProvider _shimControllerProvider;
 
         private Dictionary<Project, int> _projectToToolWindowId;
 
@@ -123,31 +125,6 @@ namespace NuGet.Tools
             }
         }
 
-        private IShimControllerProvider ShimControllerProvider
-        {
-            get
-            {
-                if (_shimControllerProvider == null)
-                {
-                    _shimControllerProvider = ServiceLocator.GetInstance<IShimControllerProvider>();
-                    Debug.Assert(_shimControllerProvider != null);
-                }
-
-                return _shimControllerProvider;
-            }
-        }
-
-        private IVsPackageSourceProvider VsPackageSourceProvider
-        {
-            get
-            {
-                var vsPackageSource = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
-                Debug.Assert(vsPackageSource != null);
-
-                return vsPackageSource;
-            }
-        }
-
         private ISolutionManager SolutionManager
         {
             get
@@ -161,6 +138,7 @@ namespace NuGet.Tools
             }
         }
 
+        /* ****
         private IDeleteOnRestartManager DeleteOnRestart
         {
             get
@@ -174,6 +152,7 @@ namespace NuGet.Tools
                 return _deleteOnRestart;
             }
         }
+        */
 
         private IMachineWideSettings MachineWideSettings
         {
@@ -218,17 +197,10 @@ namespace NuGet.Tools
             Debug.Assert(webProxy != null);
 
             var settings = Settings.LoadDefaultSettings(
-                _solutionManager == null ? null : _solutionManager.SolutionFileSystem,
+                _solutionManager == null ? null : _solutionManager.SolutionDirectory,
                 configFileName: null,
                 machineWideSettings: MachineWideSettings);
             var packageSourceProvider = new PackageSourceProvider(settings);
-            HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
-
-            // Add the v3 shim client
-            if (ShimControllerProvider != null)
-            {
-                //ShimControllerProvider.Controller.Enable(VsPackageSourceProvider);
-            }
 
             // when NuGet loads, if the current solution has package
             // restore mode enabled, we make sure every thing is set up correctly.
@@ -236,7 +208,7 @@ namespace NuGet.Tools
             // the <Import> element added.
             if (PackageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
-                if (VsVersionHelper.IsVisualStudio2013)
+                if (_dte != null) // *** VsVersionHelper.IsVisualStudio2013)
                 {
                     // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block
                     // until this completes.
@@ -249,13 +221,14 @@ namespace NuGet.Tools
                 }
             }
 
+            /* ****
             // when NuGet loads, if the current solution has some package
             // folders marked for deletion (because a previous uninstalltion didn't succeed),
             // delete them now.
             if (SolutionManager.IsSolutionOpen)
             {
                 DeleteOnRestart.DeleteMarkedPackageDirectories();
-            }
+            } */
         }
 
         private void AddMenuCommandHandlers()
@@ -372,11 +345,12 @@ namespace NuGet.Tools
         /// </summary>
         private void ExecuteVisualizer(object sender, EventArgs e)
         {
+            /* ***
             var visualizer = new NuGet.Dialog.Visualizer(
                 ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                 ServiceLocator.GetInstance<ISolutionManager>());
             string outputFile = visualizer.CreateGraph();
-            _dte.ItemOperations.OpenFile(outputFile);
+            _dte.ItemOperations.OpenFile(outputFile); */
         }
 
         private IEnumerable<IVsWindowFrame> EnumDocumentWindows(IVsUIShell uiShell)
@@ -455,7 +429,7 @@ namespace NuGet.Tools
 
         private IVsWindowFrame CreateNewWindowFrame(Project project)
         {
-            var vsProject = project.ToVsHierarchy();
+            var vsProject = VsHierarchyUtility.ToVsHierarchy(project);
             var documentName = project.UniqueName;
 
             // Find existing hierarchy and item id of the document window if it's
@@ -560,8 +534,12 @@ namespace NuGet.Tools
             }
             var searchText = GetSearchText(parameterString);
 
-            Project project = VsMonitorSelection.GetActiveProject();
-            if (project != null && !project.IsUnloaded() && project.IsSupported())
+            // *** temp code            
+            Project project =  NuGet.Tools.Utilities.VsUtility.GetActiveProject(VsMonitorSelection);
+
+            if (project != null &&
+                !NuGet.Tools.Utilities.VsUtility.IsUnloaded(project) && 
+                EnvDTEProjectUtility.IsSupported(project))
             {
                 ShowDocWindow(project, searchText);
             }
@@ -740,7 +718,7 @@ namespace NuGet.Tools
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
-            if (VsVersionHelper.IsVisualStudio2013)
+            if (sender != null) // *** VsVersionHelper.IsVisualStudio2013)
             {
                 // This method is called by the UI thread when the user clicks the menu item. To avoid
                 // hangs on CPS project systems this needs to be done on a background thread.
@@ -825,8 +803,9 @@ namespace NuGet.Tools
         {
             get
             {
-                Project project = VsMonitorSelection.GetActiveProject();
-                return project != null && !project.IsUnloaded() && project.IsSupported();
+                Project project = NuGet.Tools.Utilities.VsUtility.GetActiveProject(VsMonitorSelection);
+                return project != null && !NuGet.Tools.Utilities.VsUtility.IsUnloaded(project) 
+                    && EnvDTEProjectUtility.IsSupported(project);
             }
         }
 
@@ -844,20 +823,19 @@ namespace NuGet.Tools
 
         public dynamic CreateExtensionInstance(ref Guid extensionPoint, ref Guid instance)
         {
+            /* ***
             if (instance == typeof(NuGetSearchProvider).GUID)
             {
                 return new NuGetSearchProvider(_mcs, _managePackageDialogCommand, _managePackageForSolutionDialogCommand);
             }
-
-            return null;
+            */
+            return null; 
         }
 
         private void OnBeginShutDown()
         {
             _dteEvents.OnBeginShutdown -= OnBeginShutDown;
             _dteEvents = null;
-
-            OptimizedZipPackage.PurgeCache();
-        }
+        }        
     }
 }
