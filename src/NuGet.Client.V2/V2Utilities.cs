@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using NuGet.Configuration;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace NuGet.Client.V2
 {
@@ -13,30 +16,24 @@ namespace NuGet.Client.V2
     {
         public static async Task<bool> IsV2(Configuration.PackageSource source)
         {
-            var url = new Uri(source.Password);
+            var url = new Uri(source.Source);
 
-            // If the url is a directory, then it's a V2 source
-            if (url.IsFile || url.IsUnc) 
-            {
-                return !File.Exists(url.LocalPath);
-            }
-
-            using (var client = new Data.DataClient())
-            {
-                var result = await client.GetFile(url);
-                if (result == null)
+                // If the url is a directory, then it's a V2 source
+                if (url.IsFile || url.IsUnc) 
                 {
-                    return false;
+                    return !File.Exists(url.LocalPath);
                 }
+                var result = await GetContent(url);              
 
-                var raw = result.Value<string>("raw");
-                if (raw != null && raw.IndexOf("Packages", StringComparison.OrdinalIgnoreCase) != -1)
+                if (result!= null && result.IndexOf("Packages", StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     return true;
                 }
-
-                return false;
-            }
+                else
+                {
+                    return false;
+                }
+                          
         }
 
         public static IPackageRepository GetV2SourceRepository(Configuration.PackageSource source)
@@ -61,5 +58,12 @@ namespace NuGet.Client.V2
             return repo;
         }
 
+        public static async Task<string> GetContent(Uri address)
+        {
+            System.Net.Http.HttpClient client = new System.Net.Http.HttpClient();
+            var response = await client.GetAsync(address);
+            return  await response.Content.ReadAsStringAsync();         
+        }
+        
     }
 }

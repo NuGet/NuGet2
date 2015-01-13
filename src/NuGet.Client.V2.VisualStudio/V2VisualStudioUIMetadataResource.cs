@@ -1,6 +1,8 @@
 ﻿using NuGet.Client;
 using NuGet.Client.V2;
 using NuGet.Client.VisualStudio;
+using NuGet.Frameworks;
+using NuGet.PackagingCore;
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
@@ -10,9 +12,6 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using NuGet.Client.VisualStudio;
-using NuGet.Frameworks;
-using NuGet.PackagingCore;
 
 namespace NuGet.Client.V2.VisualStudio
 {
@@ -79,12 +78,13 @@ namespace NuGet.Client.V2.VisualStudio
             string Tags = package.Tags;
             int DownloadCount = package.DownloadCount;
             IEnumerable<UIPackageDependencySet> DependencySets = package.DependencySets.Select(p => GetVisualStudioUIPackageDependencySet(p));
+            bool requiresLiceneseAcceptance = package.RequireLicenseAcceptance;
 
             bool HasDependencies = DependencySets.Any(
                 set => set.Dependencies != null && set.Dependencies.Count > 0);
             PackageIdentity identity = new PackageIdentity(package.Id, Version);
 
-            return new UIPackageMetadata(identity, Summary, Description, Authors, Owners, IconUrl, LicenseUrl, ProjectUrl, Tags, DownloadCount, Published, DependencySets, HasDependencies);
+            return new UIPackageMetadata(identity, Summary, Description, Authors, Owners, IconUrl, LicenseUrl, ProjectUrl, Tags, DownloadCount, Published, DependencySets, HasDependencies, requiresLiceneseAcceptance);
         }
 
         private static NuGet.PackagingCore.PackageDependency GetVisualStudioUIPackageDependency(PackageDependency dependency)
@@ -97,7 +97,9 @@ namespace NuGet.Client.V2.VisualStudio
         private static UIPackageDependencySet GetVisualStudioUIPackageDependencySet(PackageDependencySet dependencySet)
         {
             IEnumerable<NuGet.PackagingCore.PackageDependency> visualStudioUIPackageDependencies = dependencySet.Dependencies.Select(d => GetVisualStudioUIPackageDependency(d));
-            NuGetFramework fxName = NuGetFramework.Parse(dependencySet.TargetFramework.FullName);            
+            NuGetFramework fxName = NuGetFramework.AnyFramework;
+            if(dependencySet.TargetFramework != null)
+             fxName = NuGetFramework.Parse(dependencySet.TargetFramework.FullName);            
             return new UIPackageDependencySet(fxName, visualStudioUIPackageDependencies);
         }
 

@@ -21,7 +21,12 @@ namespace NuGet.Client.V2.VisualStudio
             V2Client = repo;
         }
 
-        public Task<IEnumerable<UISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
+        public override Task<IEnumerable<UISearchMetadata>> Search(string searchTerm, SearchFilter filters, int skip, int take, CancellationToken cancellationToken)
+        {
+            return GetSearchResultsForVisualStudioUI(searchTerm, filters, skip, take, cancellationToken);
+        }
+
+        private Task<IEnumerable<UISearchMetadata>> GetSearchResultsForVisualStudioUI(string searchTerm, SearchFilter filters, int skip, int take, System.Threading.CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -96,5 +101,7 @@ namespace NuGet.Client.V2.VisualStudio
                 semanticVersion.Version,
                 semanticVersion.SpecialVersion);
         }
+
+      
     }
 }

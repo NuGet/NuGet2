@@ -8,7 +8,7 @@ namespace NuGet.Client.V2.VisualStudio
     [NuGetResourceProviderMetadata(typeof(PSAutoCompleteResource))]
     public class V2PowerShellAutoCompleteResourceProvider : V2ResourceProvider
     {
-        private readonly ConcurrentDictionary<Configuration.PackageSource, PSAutoCompleteResource> _cache;
+        private readonly ConcurrentDictionary<Configuration.PackageSource, PSAutoCompleteResource> _cache = new ConcurrentDictionary<Configuration.PackageSource,PSAutoCompleteResource>();
 
         public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {

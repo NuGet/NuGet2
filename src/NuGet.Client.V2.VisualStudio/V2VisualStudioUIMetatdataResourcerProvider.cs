@@ -8,7 +8,7 @@ namespace NuGet.Client.V2.VisualStudio
     [NuGetResourceProviderMetadata(typeof(UIMetadataResource))]
     public class V2UIMetadataResourceProvider : V2ResourceProvider
     {
-        private readonly ConcurrentDictionary<Configuration.PackageSource, UIMetadataResource> _cache;
+        private readonly ConcurrentDictionary<Configuration.PackageSource, UIMetadataResource> _cache = new ConcurrentDictionary<Configuration.PackageSource, UIMetadataResource>();
 
         public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {

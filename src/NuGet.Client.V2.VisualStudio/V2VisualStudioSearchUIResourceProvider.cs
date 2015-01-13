@@ -8,7 +8,7 @@ namespace NuGet.Client.V2.VisualStudio
     [NuGetResourceProviderMetadata(typeof(UISearchResource))]
     public class V2UISearchResourceProvider : V2ResourceProvider
     {
-        private readonly ConcurrentDictionary<Configuration.PackageSource, UISearchResource> _cache;
+        private readonly ConcurrentDictionary<Configuration.PackageSource, UISearchResource> _cache = new ConcurrentDictionary<Configuration.PackageSource,UISearchResource>();
 
         public override bool TryCreate(SourceRepository source, out INuGetResource resource)
         {
