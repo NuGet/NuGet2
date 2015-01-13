@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NuGet.VisualStudio;
 
 namespace NuGet.Client.VisualStudio.UI
 {
@@ -23,6 +24,17 @@ namespace NuGet.Client.VisualStudio.UI
         public OptionsControl()
         {
             InitializeComponent();
+        }
+
+        private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
+        {
+            Hyperlink hyperlink = e.OriginalSource as Hyperlink;
+            if (hyperlink != null && hyperlink.NavigateUri != null)
+            {
+                var ui = ServiceLocator.GetInstance<IUserInterfaceService>();
+                ui.LaunchExternalLink(hyperlink.NavigateUri);
+                e.Handled = true;
+            }
         }
     }
 }

@@ -361,4 +361,7 @@
     <value>Search ({0})</value>
     <comment>The text to be displayed in the search box</comment>
   </data>
+  <data name="Link_LearnAboutOptions" xml:space="preserve">
+    <value>Learn about Options</value>
+  </data>
 </root>
