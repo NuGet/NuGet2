@@ -61,7 +61,7 @@
                             <CheckBox
                         Content="{Binding Path=DisplayText}"
                         Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                        Margin="6,4,0,4"
+                        Margin="6,4,0,2"
                         VerticalContentAlignment="Center"
                         IsChecked="{Binding Path=Selected}"
                         IsEnabled="{Binding Path=Enabled}" />
