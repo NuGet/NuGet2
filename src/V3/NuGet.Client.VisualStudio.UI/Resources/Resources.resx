@@ -365,7 +365,7 @@
     <value>Learn about Options</value>
   </data>
   <data name="Text_ShowAll" xml:space="preserve">
-    <value>Show All</value>
+    <value>Show all</value>
   </data>
   <data name="Checkbox_ProjectSelection" xml:space="preserve">
     <value>{0} projects</value>

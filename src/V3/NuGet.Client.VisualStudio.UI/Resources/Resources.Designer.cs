@@ -718,7 +718,7 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show All.
+        ///   Looks up a localized string similar to Show all.
         /// </summary>
         public static string Text_ShowAll {
             get {
