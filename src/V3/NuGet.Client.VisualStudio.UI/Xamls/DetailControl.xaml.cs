@@ -26,7 +26,7 @@ namespace NuGet.Client.VisualStudio.UI
             InitializeComponent();
 
             // TODO: will be adjusted later
-            _projectList.MaxHeight = _self.FontSize * 8;
+            _projectList.MaxHeight = _self.FontSize * 10;
 
             this.DataContextChanged += PackageSolutionDetailControl_DataContextChanged;
         }

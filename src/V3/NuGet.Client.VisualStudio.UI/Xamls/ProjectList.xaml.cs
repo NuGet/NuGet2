@@ -24,5 +24,27 @@ namespace NuGet.Client.VisualStudio.UI
         {
             InitializeComponent();
         }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            model.CheckAllProjects();
+        }
+
+        private void _checkBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var model = (PackageSolutionDetailControlModel)DataContext;
+            if (model == null)
+            {
+                return;
+            }
+
+            model.UncheckAllProjects();
+        }
     }
 }

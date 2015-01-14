@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace NuGet.Client.VisualStudio.UI
@@ -10,6 +11,9 @@ namespace NuGet.Client.VisualStudio.UI
 
         private List<PackageInstallationInfo> _allProjects;
 
+        // indicates that the model is updating the checkbox state. In this case, 
+        // the CheckAllProject() & UncheckAllProject() should be no-op.
+        private bool _updatingCheckbox;
 
         public VsSolution Solution
         {
@@ -43,21 +47,6 @@ namespace NuGet.Client.VisualStudio.UI
             }
         }
 
-        private bool _showAll;
-
-        // Indicates if all projects are displayed or only applicable projectss are displayed
-        public bool ShowAll
-        {
-            get
-            {
-                return _showAll;
-            }
-            set
-            {
-                _showAll = value;
-                UpdateProjectList();
-            }
-        }
         protected override void OnSelectedVersionChanged()
         {
             UpdateProjectList();
@@ -121,6 +110,7 @@ namespace NuGet.Client.VisualStudio.UI
                 p.SelectedChanged += (sender, e) =>
                 {
                     UpdateActionEnabled();
+                    UpdateSelectCheckbox();
                 };
             });
         }
@@ -201,21 +191,15 @@ namespace NuGet.Client.VisualStudio.UI
 
             if (SelectedAction == Resources.Resources.Action_Consolidate)
             {
-                // only projects that have the package installed are selected.
-                // The project with the same version installed is selected, but disabled.
+                // only projects that have the package installed, but with a
+                // different version, are enabled.
+                // The project with the same version installed is not enabled.
                 _allProjects.ForEach(p =>
                 {
                     var installed = p.Project.InstalledPackages.GetInstalledPackage(Id);
-                    if (installed != null)
-                    {
-                        p.Selected = true;
-                        p.Enabled = installed.Identity.Version != SelectedVersion.Version;
-                    }
-                    else
-                    {
-                        p.Selected = false;
-                        p.Enabled = false;                        
-                    }
+                    p.Enabled = installed != null &&
+                        installed.Identity.Version != SelectedVersion.Version;
+                    p.Selected = p.Enabled;
                 });
             }
             else if (SelectedAction == Resources.Resources.Action_Update)
@@ -257,16 +241,83 @@ namespace NuGet.Client.VisualStudio.UI
             }
             else
             {
-                _projects = _allProjects.Where(
-                    p => p.Enabled || p.Selected).ToList();
+                _projects = _allProjects.Where(p => p.Enabled).ToList();
             }
-            UpdateActionEnabled();
 
+            UpdateActionEnabled();
+            UpdateSelectCheckbox();
             OnPropertyChanged("Projects");
+        }
+
+        private bool? _checkboxState;
+
+        public bool? CheckboxState
+        {
+            get 
+            {
+                return _checkboxState;
+            }
+            set
+            {
+                _checkboxState = value;
+                OnPropertyChanged("CheckboxState");
+            }
+        }
+
+        private string _selectCheckboxText;
+
+        // The text of the project selection checkbox
+        public string SelectCheckboxText
+        {
+            get
+            {
+                return _selectCheckboxText;
+            }
+            set
+            {
+                _selectCheckboxText = value;
+                OnPropertyChanged("SelectCheckboxText");
+            }
+        }
+        
+        private void UpdateSelectCheckbox()
+        {
+            if (_projects == null)
+            {
+                return;
+            }
+
+            _updatingCheckbox = true;            
+            var countTotal = _projects.Count(p => p.Enabled);
+
+            SelectCheckboxText = string.Format(
+                CultureInfo.CurrentCulture,
+                Resources.Resources.Checkbox_ProjectSelection,
+                countTotal);
+
+            var countSelected = _projects.Count(p => p.Selected);
+            if (countSelected == 0)
+            {
+                CheckboxState = false;
+            }
+            else if (countSelected == countTotal)
+            {
+                CheckboxState = true;
+            }
+            else
+            {
+                CheckboxState = null;
+            }
+            _updatingCheckbox = false;
         }
 
         internal void UncheckAllProjects()
         {
+            if (_updatingCheckbox)
+            {
+                return;
+            }
+
             _projects.ForEach(p =>
             {
                 if (p.Enabled)
@@ -274,12 +325,15 @@ namespace NuGet.Client.VisualStudio.UI
                     p.Selected = false;
                 }
             });
-
-            OnPropertyChanged("Projects");
         }
 
         internal void CheckAllProjects()
         {
+            if (_updatingCheckbox)
+            {
+                return;
+            }
+
             _projects.ForEach(p =>
             {
                 if (p.Enabled)
@@ -289,6 +343,23 @@ namespace NuGet.Client.VisualStudio.UI
             });
 
             OnPropertyChanged("Projects");
+        }
+
+        private bool _showAll;
+
+        // The checked state of the Show All check box
+        public bool ShowAll
+        {
+            get
+            {
+                return _showAll;
+            }
+            set
+            {
+                _showAll = value;
+
+                UpdateProjectList();
+            }
         }
     }
 }

@@ -205,6 +205,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} projects.
+        /// </summary>
+        public static string Checkbox_ProjectSelection {
+            get {
+                return ResourceManager.GetString("Checkbox_ProjectSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove dependencies.
         /// </summary>
         public static string Checkbox_RemoveDependencies {
@@ -705,6 +714,15 @@ namespace NuGet.Client.VisualStudio.UI.Resources {
         public static string Text_Searching {
             get {
                 return ResourceManager.GetString("Text_Searching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show All.
+        /// </summary>
+        public static string Text_ShowAll {
+            get {
+                return ResourceManager.GetString("Text_ShowAll", resourceCulture);
             }
         }
         

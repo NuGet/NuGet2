@@ -13,29 +13,62 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <StackPanel
-        Orientation="Vertical">
-        <TextBlock
-                    Text="{x:Static resx:Resources.Label_Projects}" />
-
-        <ItemsControl
-                            BorderThickness="1"
-                            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                            ScrollViewer.VerticalScrollBarVisibility="Auto"
-                            x:Name="_projectList"
-                    ItemsSource="{Binding Path=Projects}"
-                    IsTabStop="False">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <CheckBox
-                                Content="{Binding Path=DisplayText}"
-                                Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
-                                Margin="16,4,0,4"
-                                VerticalContentAlignment="Center"
-                                IsChecked="{Binding Path=Selected}"
-                                IsEnabled="{Binding Path=Enabled}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock 
+            Grid.Row="0"
+            Text="{x:Static resx:Resources.Label_Projects}" />
+        
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0" 
+                      x:Name="_checkBox"
+                      Margin="6,0,0,0"
+                      IsChecked="{Binding CheckboxState}"
+                      IsThreeState="False" 
+                      Checked="CheckBox_Checked" 
+                      Unchecked="_checkBox_Unchecked"
+                      Content="{Binding SelectCheckboxText}" />
+            <CheckBox Grid.Column="1"
+                      Margin="0,0,6,0"
+                      HorizontalAlignment="Right"
+                      IsChecked="{Binding ShowAll}"
+                      Content="{x:Static resx:Resources.Text_ShowAll}"/>
+        </Grid>
+        <Border
+            Grid.Row="4"
+            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+            BorderThickness="1">
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                IsTabStop="True" >
+                <ItemsControl
+            x:Name="_projectList"
+            ItemsSource="{Binding Path=Projects}"
+            IsTabStop="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                        Content="{Binding Path=DisplayText}"
+                        Foreground="{DynamicResource {x:Static resx:Brushes.UIText}}"
+                        Margin="6,4,0,4"
+                        VerticalContentAlignment="Center"
+                        IsChecked="{Binding Path=Selected}"
+                        IsEnabled="{Binding Path=Enabled}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
 </UserControl>
