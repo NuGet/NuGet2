@@ -321,7 +321,7 @@ namespace NuGet.VsEvents
                 WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesForProject, projectName);            
                 WriteLine(VerbosityLevel.Detailed, Resources.RestoringPackagesListedInFile, 
                     projectPackageReferenceFile.FullPath);
-                RestorePackages(projectPackageReferenceFile.FullPath, fileSystem);
+                RestorePackages(projectPackageReferenceFile.FullPath, projectName, fileSystem);
             }
             finally
             {
@@ -379,7 +379,7 @@ namespace NuGet.VsEvents
         /// <param name="packageReferenceFileFullPath">The package reference file full path.</param>
         /// <param name="fileSystem">The file system that represents the packages folder.</param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")] 
-        private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
+        private void RestorePackages(string packageReferenceFileFullPath, string projectName, IFileSystem fileSystem)
         {
             if (packageReferenceFileFullPath == null)
             {
@@ -442,7 +442,7 @@ namespace NuGet.VsEvents
                     var message = String.Format(
                         CultureInfo.CurrentCulture,
                         Resources.PackageRestoreFailedForProject,
-                        string.Empty,
+                        projectName,
                         exceptionMessage);
                     WriteLine(VerbosityLevel.Quiet, message);
                     ActivityLog.LogError(LogEntrySource, message);
@@ -466,7 +466,7 @@ namespace NuGet.VsEvents
 
             try
             {
-                RestorePackages(_packageReferenceFileList.SolutionPackageReferenceFile, fileSystem);
+                RestorePackages(_packageReferenceFileList.SolutionPackageReferenceFile, solution.FullName, fileSystem);
             }
             catch (Exception ex)
             {
