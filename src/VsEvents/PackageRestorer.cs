@@ -323,21 +323,6 @@ namespace NuGet.VsEvents
                     projectPackageReferenceFile.FullPath);
                 RestorePackages(projectPackageReferenceFile.FullPath, fileSystem);
             }
-            catch (Exception ex)
-            {
-                var exceptionMessage = _msBuildOutputVerbosity >= (int)VerbosityLevel.Detailed ?
-                    ex.ToString() :
-                    ex.Message;
-                var message = String.Format(
-                    CultureInfo.CurrentCulture, 
-                    Resources.PackageRestoreFailedForProject, projectName, 
-                    exceptionMessage);
-                WriteLine(VerbosityLevel.Quiet, message);
-                ActivityLog.LogError(LogEntrySource, message);
-                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, 
-                    TaskPriority.High, message, hierarchyItem: null);
-                _hasError = true;
-            }
             finally
             {
                 WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinishedForProject, projectName);
@@ -393,6 +378,7 @@ namespace NuGet.VsEvents
         /// </summary>
         /// <param name="packageReferenceFileFullPath">The package reference file full path.</param>
         /// <param name="fileSystem">The file system that represents the packages folder.</param>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")] 
         private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
         {
             if (packageReferenceFileFullPath == null)
@@ -443,8 +429,27 @@ namespace NuGet.VsEvents
                     return;
                 }
 
-                RestorePackage(package);
-                ++currentCount;
+                try
+                {
+                    RestorePackage(package);
+                    ++currentCount;
+                }
+                catch (Exception ex)
+                {
+                    var exceptionMessage = _msBuildOutputVerbosity >= (int)VerbosityLevel.Detailed ?
+                        ex.ToString() :
+                        ex.Message;
+                    var message = String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.PackageRestoreFailedForProject,
+                        string.Empty,
+                        exceptionMessage);
+                    WriteLine(VerbosityLevel.Quiet, message);
+                    ActivityLog.LogError(LogEntrySource, message);
+                    VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error,
+                        TaskPriority.High, message, hierarchyItem: null);
+                    _hasError = true;
+                }
             }
         }
 
