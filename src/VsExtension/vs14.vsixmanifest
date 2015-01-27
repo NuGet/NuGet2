@@ -6,7 +6,8 @@
     <Version>2.8.0.0</Version>
     <Description xml:space="preserve">A collection of tools to automate the process of downloading, installing, upgrading, configuring, and removing packages from a VS Project.</Description>
     <Locale>1033</Locale>
-	<Icon>Resources\nuget_32.png</Icon>
+	<Icon>Resources/nuget_96.png</Icon>
+	<PreviewImage>Resources/nuget_256.png</PreviewImage>
     <MoreInfoUrl>http://docs.nuget.org/</MoreInfoUrl>
     <License>LICENSE.txt</License>
     <SupportedProducts>
