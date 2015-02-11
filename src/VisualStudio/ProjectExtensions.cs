@@ -43,18 +43,18 @@ namespace NuGet.VisualStudio
         private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder, VsConstants.TDSItemTypeGuid };
 
         // List of project types that cannot have references added to them
-        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] 
-            { 
-                VsConstants.WixProjectTypeGuid, 
+        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[]
+            {
+                VsConstants.WixProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
             };
 
         // List of project types that cannot have binding redirects added
-        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] 
-            { 
-                VsConstants.WixProjectTypeGuid, 
-                VsConstants.JsProjectTypeGuid, 
-                VsConstants.NemerleProjectTypeGuid, 
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[]
+            {
+                VsConstants.WixProjectTypeGuid,
+                VsConstants.JsProjectTypeGuid,
+                VsConstants.NemerleProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
                 VsConstants.SynergexProjectTypeGuid,
                 VsConstants.NomadForVisualStudioProjectTypeGuid,
@@ -286,7 +286,7 @@ namespace NuGet.VisualStudio
             return project.GetProjectTypeGuids().Length == 1 &&
                    outputType == prjOutputType.prjOutputTypeLibrary;
         }
-        
+
         public static bool IsJavaScriptProject(this Project project)
         {
             return project != null && VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
@@ -296,7 +296,7 @@ namespace NuGet.VisualStudio
         {
             // XNA projects will have this property set
             const string xnaPropertyValue = "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel";
-            return project != null && 
+            return project != null &&
                    "Windows Phone OS 7.1".Equals(project.GetPropertyValue<string>(xnaPropertyValue), StringComparison.OrdinalIgnoreCase);
         }
 
@@ -358,7 +358,7 @@ namespace NuGet.VisualStudio
             Regex matcher = filter.Equals("*.*", StringComparison.OrdinalIgnoreCase) ? null : GetFilterRegex(filter);
 
             return from ProjectItem p in projectItems
-                   where desiredKind.Equals(p.Kind, StringComparison.OrdinalIgnoreCase) && 
+                   where desiredKind.Equals(p.Kind, StringComparison.OrdinalIgnoreCase) &&
                          (matcher == null || matcher.IsMatch(p.Name))
                    select p;
         }
@@ -604,14 +604,17 @@ namespace NuGet.VisualStudio
                     return null;
                 }
 
-                var properties = retValue.GetType().GetProperties().Where(p => p.Name == "Value");
-                if (properties.Count() != 1)
+                if (!(retValue is INuGetPackageManager))
                 {
-                    return null;
+                    // Workaround a bug in Dev14 prereleases where Lazy<INuGetPackageManager> was returned.
+                    var properties = retValue.GetType().GetProperties().Where(p => p.Name == "Value");
+                    if (properties.Count() == 1)
+                    {
+                        retValue = properties.First().GetValue(retValue);
+                    }
                 }
 
-                var v = properties.First().GetValue(retValue) as INuGetPackageManager;
-                return v as INuGetPackageManager;
+                return retValue as INuGetPackageManager;
             }
         }
 #endif
