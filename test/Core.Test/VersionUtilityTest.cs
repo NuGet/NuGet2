@@ -353,6 +353,17 @@ namespace NuGet.Test
         }
 
         [Theory]
+        [InlineData("dnx451", "4.5.1", "DNX")]
+        [InlineData("dnxcore50", "5.0", "DNXCore")]
+        [InlineData("dnx451", "4.5.1", "DNX")]
+        [InlineData("dnxcore50", "5.0", "DNXCore")]
+        [InlineData("dnx451", "4.5.1", "DNX")]
+        [InlineData("dnxCORE50", "5.0", "DNXCore")]
+        [InlineData("DNX50", "5.0", "DNX")]
+        [InlineData("DNXCORE50", "5.0", "DNXCore")]
+        [InlineData("dnx51", "5.1", "DNX")]
+        [InlineData("dnxcore51", "5.1", "DNXCore")]
+        // legacy
         [InlineData("aspnet50", "5.0", "ASP.Net")]
         [InlineData("aspnetcore50", "5.0", "ASP.NetCore")]
         [InlineData("asp.net50", "5.0", "ASP.Net")]
@@ -361,8 +372,6 @@ namespace NuGet.Test
         [InlineData("ASPNETCORE50", "5.0", "ASP.NetCore")]
         [InlineData("ASP.NET50", "5.0", "ASP.Net")]
         [InlineData("ASP.NETCORE50", "5.0", "ASP.NetCore")]
-
-        // 5.1 doesn't exist (at least at time of writing), just verifying the logic
         [InlineData("aspnet51", "5.1", "ASP.Net")]
         [InlineData("aspnetcore51", "5.1", "ASP.NetCore")]
         public void ParseFrameworkNameNormalizesSupportedASPNetFrameworkNames(string shortName, string version, string identifier)
@@ -576,6 +585,8 @@ namespace NuGet.Test
         [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
         [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
         [InlineData(@"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
+        [InlineData(@"dnx451\foo.dll", "DNX", "4.5.1")]
+        [InlineData(@"dnxcore50\foo.dll", "DNXCore", "5.0")]
         public void ParseFrameworkFolderName(string path, string identifier, string version)
         {
             // Arrange
@@ -1349,10 +1360,12 @@ namespace NuGet.Test
         [Theory]
         [InlineData("ASP.Net, Version=5.0", "aspnet50")]
         [InlineData("ASP.NetCore, Version=5.0", "aspnetcore50")]
-
-        // No such thing as ASP.Net, Version=5.1 at time of writing, just testing the logic
         [InlineData("ASP.Net, Version=5.1", "aspnet51")]
         [InlineData("ASP.NetCore, Version=5.1", "aspnetcore51")]
+        [InlineData("DNX, Version=4.5.1", "dnx451")]
+        [InlineData("DNXCore, Version=5.0", "dnxcore50")]
+        [InlineData("DNX, Version=5.1", "dnx51")]
+        [InlineData("DNXCore, Version=5.1", "dnxcore51")]
         public void GetShortNameForASPNetAndASPNetCoreWorks(string longName, string expectedShortName)
         {
             // Arrange
@@ -1516,7 +1529,53 @@ namespace NuGet.Test
         }
 
         [Theory]
-        
+        // COMPATIBLE: Same framework, easy first case
+        [InlineData("dnx451", "dnx451", true)]
+        [InlineData("dnxcore50", "dnxcore50", true)]
+
+        // COMPATIBLE: Project targeting later framework
+        [InlineData("dnx452", "dnx451", true)]
+        [InlineData("dnx452", "net451", true)]
+        [InlineData("dnx452", "net40", true)]
+        [InlineData("dnx452", "net20", true)]
+        [InlineData("dnxcore51", "dnxcore50", true)]
+
+        // NOT COMPATIBLE: dnx into dnxcore and vice-versa
+        [InlineData("dnx451", "dnxcore50", false)]
+        [InlineData("dnxcore50", "dnx451", false)]
+
+        // COMPATIBLE: dnx project, net package (any version)
+        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
+        [InlineData("dnx451", "net451", true)]
+        [InlineData("dnx451", "net40", true)]
+        [InlineData("dnx451", "net20", true)]
+        [InlineData("dnx451", "net50", true)]
+        [InlineData("dnx451", "net60", true)]
+        [InlineData("dnx451", "net70", true)]
+
+        // NOT COMPATIBLE: Package targeting later framework
+        [InlineData("dnx451", "dnx51", false)]
+        [InlineData("dnxcore50", "dnxcore51", false)]
+
+        // NOT COMPATIBLE: dnxcore project, netcore/win package (any version)
+        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
+        [InlineData("dnxcore50", "netcore70", false)]
+        [InlineData("dnxcore50", "netcore60", false)]
+        [InlineData("dnxcore50", "netcore50", false)]
+        [InlineData("dnxcore50", "netcore451", false)]
+        [InlineData("dnxcore50", "netcore45", false)]
+        [InlineData("dnxcore50", "win81", false)]
+        [InlineData("dnxcore50", "win80", false)]
+
+        // COMPATIBLE: Portable Packages
+        [InlineData("dnx451", "portable-net45+win81", true)]
+
+        // NOT COMPATIBLE: Portable Packages
+        [InlineData("dnx451", "portable-sl50+win81", false)]
+        [InlineData("dnxcore50", "portable-net45+win81", false)]
+        [InlineData("dnxcore50", "portable-net45+sl40", false)]
+
+        // TODO: remove these legacy tests
         // COMPATIBLE: Same framework, easy first case
         [InlineData("aspnet50", "aspnet50", true)]
         [InlineData("aspnetcore50", "aspnetcore50", true)]
@@ -1563,6 +1622,42 @@ namespace NuGet.Test
         [InlineData("aspnetcore50", "portable-net45+win81", false)]
         [InlineData("aspnetcore50", "portable-net45+sl40", false)]
         public void IsCompatibleMatrixForASPNetFrameworks(string projectFramework, string packageFramework, bool compatible)
+        {
+            Assert.Equal(
+                VersionUtility.IsCompatible(
+                    VersionUtility.ParseFrameworkName(projectFramework),
+                    VersionUtility.ParseFrameworkName(packageFramework)),
+                compatible);
+        }
+
+        [Theory]
+        [InlineData("dnx451", "aspnet50", true)]
+        [InlineData("dnxcore50", "aspnetcore50", true)]
+        [InlineData("aspnet50", "dnx451", false)]
+        [InlineData("aspnetcore50", "dnxcore50", false)]
+        [InlineData("dnx", "aspnet50", true)]
+        [InlineData("dnxcore", "aspnetcore50", true)]
+        [InlineData("aspnet", "dnx451", false)]
+        [InlineData("aspnetcore", "dnxcore50", false)]
+        [InlineData("dnx451", "aspnet", true)]
+        [InlineData("dnxcore50", "aspnetcore", true)]
+        [InlineData("aspnet50", "dnx", false)]
+        [InlineData("aspnetcore50", "dnxcore", false)]
+        public void IsCompatibleMatrixForDNXAspTempFrameworks(string projectFramework, string packageFramework, bool compatible)
+        {
+            Assert.Equal(
+                VersionUtility.IsCompatible(
+                    VersionUtility.ParseFrameworkName(projectFramework),
+                    VersionUtility.ParseFrameworkName(packageFramework)),
+                compatible);
+        }
+
+        [Theory]
+        // Core is a recognized framework but the exact rules for compat are still being worked out
+        // [InlineData("dnxcore50", "core50", true)]
+        // [InlineData("core50", "dnxcore50", false)]
+        [InlineData("core50", "core50", true)]
+        public void IsCompatibleMatrixForCoreFrameworks(string projectFramework, string packageFramework, bool compatible)
         {
             Assert.Equal(
                 VersionUtility.IsCompatible(

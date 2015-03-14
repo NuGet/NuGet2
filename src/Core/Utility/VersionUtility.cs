@@ -19,6 +19,12 @@ namespace NuGet
         private const string PortableFrameworkIdentifier = ".NETPortable";
         private const string AspNetFrameworkIdentifier = "ASP.Net";
         private const string AspNetCoreFrameworkIdentifier = "ASP.NetCore";
+        private const string DnxFrameworkIdentifier = "DNX";
+        private const string DnxFrameworkShortName = "dnx";
+        private const string DnxCoreFrameworkIdentifier = "DNXCore";
+        private const string DnxCoreFrameworkShortName = "dnxcore";
+        private const string CoreFrameworkIdentifier = "Core";
+        private const string CoreFrameworkShortName = "core";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -78,11 +84,18 @@ namespace NuGet
             { "Windows", "Windows" },
             { "win", "Windows" },
 
-            // ASP.Net
+            // ASP.Net (TODO: Remove these eventually)
             { "aspnet", AspNetFrameworkIdentifier },
             { "aspnetcore", AspNetCoreFrameworkIdentifier },
             { "asp.net", AspNetFrameworkIdentifier },
             { "asp.netcore", AspNetCoreFrameworkIdentifier },
+
+            // DNX 
+            { DnxFrameworkShortName, DnxFrameworkIdentifier },
+            { DnxCoreFrameworkShortName, DnxCoreFrameworkIdentifier },
+
+            // Core
+            { CoreFrameworkShortName, CoreFrameworkIdentifier },
 
             // Native
             { "native", "native"},
@@ -121,6 +134,9 @@ namespace NuGet
         private static readonly Dictionary<string, string> _identifierToFrameworkFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { NetFrameworkIdentifier, "net" },
             { ".NETMicroFramework", "netmf" },
+            { DnxFrameworkIdentifier, DnxFrameworkShortName },
+            { DnxCoreFrameworkIdentifier, DnxCoreFrameworkShortName },
+            { CoreFrameworkIdentifier, CoreFrameworkShortName },
             { AspNetFrameworkIdentifier, "aspnet" },
             { AspNetCoreFrameworkIdentifier, "aspnetcore" },
             { "Silverlight", "sl" },
@@ -180,7 +196,17 @@ namespace NuGet
         private static readonly Version MaxVersion = new Version(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue);
         private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
         {
-            { AspNetFrameworkIdentifier, new FrameworkName(".NETFramework", MaxVersion) },
+            // Allow a core package to be installed in a dnxcore project 
+            // { DnxCoreFrameworkIdentifier, new FrameworkName(CoreFrameworkIdentifier, MaxVersion) },
+
+            // Allow an aspnetcore package to be installed in a dnxcore project 
+            { DnxCoreFrameworkIdentifier, new FrameworkName(AspNetCoreFrameworkIdentifier, MaxVersion) },
+
+            // Allow an aspnet package to be installed in a dnx project
+            { DnxFrameworkIdentifier, new FrameworkName(AspNetFrameworkIdentifier, MaxVersion) },
+
+            // Allow a net package to be installed in an aspnet (or dnx, transitively by above) project
+            { AspNetFrameworkIdentifier, new FrameworkName(NetFrameworkIdentifier, MaxVersion) }
         };
 
         public static Version DefaultTargetFrameworkVersion
@@ -847,6 +873,8 @@ namespace NuGet
             packageTargetFrameworkName = NormalizeFrameworkName(packageTargetFrameworkName);
             projectFrameworkName = NormalizeFrameworkName(projectFrameworkName);
 
+        check:
+
             if (!projectFrameworkName.Identifier.Equals(packageTargetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
                 // Try to convert the project framework into an equivalent target framework
@@ -856,11 +884,10 @@ namespace NuGet
                 //  If the Project Targets ASP.Net, Version=5.0. It can accept Packages targetting .NETFramework, Version=4.5.1
                 //  so since the identifiers don't match, we need to "translate" the project target framework to .NETFramework
                 //  however, we still want direct ASP.Net == ASP.Net matches, so we do this ONLY if the identifiers don't already match
-                FrameworkName equivalentFramework;
-                if (_equivalentProjectFrameworks.TryGetValue(projectFrameworkName.Identifier, out equivalentFramework) &&
-                    equivalentFramework.Identifier.Equals(packageTargetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+                if (_equivalentProjectFrameworks.TryGetValue(projectFrameworkName.Identifier, out projectFrameworkName))
                 {
-                    projectFrameworkName = equivalentFramework;
+                    // Goto might be evil but it's so nice to use here
+                    goto check;
                 }
                 else
                 {
@@ -1073,7 +1100,7 @@ namespace NuGet
             foreach (var optionalProjectFramework in projectFrameworkProfile.OptionalFrameworks)
             {
                 var compatiblePackageTargetFramework = packageTargetFrameworkProfile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(f, optionalProjectFramework));
-                if(compatiblePackageTargetFramework == null || compatiblePackageTargetFramework.Version > optionalProjectFramework.Version)
+                if (compatiblePackageTargetFramework == null || compatiblePackageTargetFramework.Version > optionalProjectFramework.Version)
                 {
                     inCompatibleOptionalFrameworkCount++;
                 }
