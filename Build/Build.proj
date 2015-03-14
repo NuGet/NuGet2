@@ -53,7 +53,7 @@
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
         <MinorVersion>8</MinorVersion>
-        <Patch>4</Patch>
+        <Patch>5</Patch>
         <PrereleaseTag></PrereleaseTag>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
