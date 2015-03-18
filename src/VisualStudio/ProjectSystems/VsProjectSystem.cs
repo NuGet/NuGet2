@@ -1,3 +1,9 @@
+using EnvDTE;
+using Microsoft.CSharp.RuntimeBinder;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio.Resources;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,11 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-using EnvDTE;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using Project = EnvDTE.Project;
@@ -539,6 +540,12 @@ namespace NuGet.VisualStudio
 
             }
             catch (NotImplementedException)
+            {
+
+            }
+            // 'Microsoft.VisualStudio.FSharp.ProjectSystem.Automation.OAAssemblyReference' does not contain
+            // a definition for 'SpecificVersion'.
+            catch (RuntimeBinderException)
             {
 
             }
