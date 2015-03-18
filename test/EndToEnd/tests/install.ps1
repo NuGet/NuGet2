@@ -2739,3 +2739,35 @@ function Test-InstallPackageWithoutDependencyVersion
     Assert-Package $p A 1.0
     Assert-Package $p B 1.0.0
 }
+
+# Tests that when a package contains DNX targetframework names
+# it can be installed to regular dotnet project
+function Test-InstallDNXPackageIntoRegularDotNetProject
+{
+    param($context)
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package NewtonSoftJsonWithDNX -version 6.0.8 -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p NewtonSoftJsonWithDNX 6.0.8
+}
+
+# Tests that when a package contains matching and also two unknown targetframework names
+# will not throw exceptions during install
+function Test-InstallPackageWithUnknownTargetFrameworksWontThrow
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package TwoUnknownFramework -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p TwoUnknownFramework 1.0.0
+}
