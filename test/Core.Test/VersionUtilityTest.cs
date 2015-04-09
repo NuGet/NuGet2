@@ -9,6 +9,20 @@ namespace NuGet.Test
 {
     public class VersionUtilityTest
     {
+        [Fact]
+        public void ParseUAPFrameworkShortName()
+        {
+            var shortName = VersionUtility.GetShortFrameworkName(new FrameworkName("UAP, Version=v10.0.10030"));
+            Assert.Equal("UAP10.0.10030", shortName);
+        }
+
+        [Fact]
+        public void ParseUAPFrameworkName()
+        {
+            var name = VersionUtility.ParseFrameworkName("uap10.0.10030");
+            Assert.Equal("UAP,Version=v10.0.10030", name.ToString());
+        }
+
         [Theory]
         [InlineData("boo\\foo.dll", "foo.dll")]
         [InlineData("far\\sub\\sub2\\foo.dll", "sub\\sub2\\foo.dll")]

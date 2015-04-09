@@ -25,6 +25,8 @@ namespace NuGet
         private const string DnxCoreFrameworkShortName = "dnxcore";
         private const string CoreFrameworkIdentifier = "Core";
         private const string CoreFrameworkShortName = "core";
+        private const string UAPFrameworkIdentifier = "UAP";
+        private const string UAPFrameworkShortName = "uap";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -96,6 +98,9 @@ namespace NuGet
 
             // Core
             { CoreFrameworkShortName, CoreFrameworkIdentifier },
+
+            // UAP
+            { UAPFrameworkShortName, UAPFrameworkIdentifier },
 
             // Native
             { "native", "native"},
@@ -206,7 +211,7 @@ namespace NuGet
             { DnxFrameworkIdentifier, new FrameworkName(AspNetFrameworkIdentifier, MaxVersion) },
 
             // Allow a net package to be installed in an aspnet (or dnx, transitively by above) project
-            { AspNetFrameworkIdentifier, new FrameworkName(NetFrameworkIdentifier, MaxVersion) }
+            { AspNetFrameworkIdentifier, new FrameworkName(NetFrameworkIdentifier, MaxVersion) },
         };
 
         public static Version DefaultTargetFrameworkVersion
@@ -642,7 +647,19 @@ namespace NuGet
                 if (frameworkName.Version > new Version())
                 {
                     // Remove the . from versions
-                    name += frameworkName.Version.ToString().Replace(".", String.Empty);
+                    if (frameworkName.Version.Major > 9 
+                        || frameworkName.Version.Minor > 9 
+                        || frameworkName.Version.Revision > 9 
+                        || frameworkName.Version.Build > 9)
+                    {
+                        // This version has digits over 10 and must be expressed using decimals
+                        name += GetDecimalVersionString(frameworkName.Version);
+                    }
+                    else
+                    {
+                        // Express the version without decimals
+                        name += frameworkName.Version.ToString().Replace(".", String.Empty);
+                    }
                 }
 
                 if (String.IsNullOrEmpty(frameworkName.Profile))
@@ -657,6 +674,53 @@ namespace NuGet
             }
 
             return name + "-" + profile;
+        }
+
+        private static string GetDecimalVersionString(Version version)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (version != null)
+            {
+                Stack<int> versionParts = new Stack<int>();
+
+                versionParts.Push(version.Major > 0 ? version.Major : 0);
+                versionParts.Push(version.Minor > 0 ? version.Minor : 0);
+                versionParts.Push(version.Build > 0 ? version.Build : 0);
+                versionParts.Push(version.Revision > 0 ? version.Revision : 0);
+
+                // if any parts of the version are over 9 we need to use decimals
+                bool useDecimals = versionParts.Any(x => x > 9);
+
+                // remove all trailing zeros
+                while (versionParts.Count > 0 && versionParts.Peek() <= 0)
+                {
+                    versionParts.Pop();
+                }
+
+                // write the version string out backwards
+                while (versionParts.Count > 0)
+                {
+                    // avoid adding a decimal if this is the first digit, but if we are down 
+                    // to only 2 numbers left we have to add a decimal otherwise 10.0 becomes 1.0
+                    // during the parse
+                    if (useDecimals)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            sb.Insert(0, ".");
+                        }
+                        else if (versionParts.Count == 1)
+                        {
+                            sb.Append(".0");
+                        }
+                    }
+
+                    sb.Insert(0, versionParts.Pop());
+                }
+            }
+
+            return sb.ToString();
         }
 
         public static string GetTargetFrameworkLogString(FrameworkName targetFramework)
