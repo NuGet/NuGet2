@@ -30,7 +30,7 @@ namespace NuGet
     {
         private readonly IFileSystem _repositoryFileSystem;
         private readonly string _packageFileName;
-        private readonly string _packageName;
+        private readonly string _packagePath;
 
         /// <summary>
         /// Create an uninstance of UnzippedPackage class
@@ -54,11 +54,36 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageName");
             }
 
-            _packageName = packageName;
             _packageFileName = packageName + Constants.PackageExtension;
+            _packagePath = packageName;
             _repositoryFileSystem = repositoryFileSystem;
 
-            EnsureManifest();
+            // we look for the .nuspec file at jQuery.1.4\jQuery.1.4.nuspec
+            string manifestFile = Path.Combine(packageName, packageName + Constants.ManifestExtension);
+            EnsureManifest(manifestFile);
+        }
+
+        public UnzippedPackage(IFileSystem repositoryFileSystem, string packageId, SemanticVersion version)
+        {
+            if (repositoryFileSystem == null)
+            {
+                throw new ArgumentNullException("repositoryFileSystem");
+            }
+
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            if (version == null)
+            {
+                throw new ArgumentNullException("version");
+            }
+
+            _repositoryFileSystem = repositoryFileSystem;
+            _packagePath = Path.Combine(packageId, version.ToNormalizedString());
+            _packageFileName = Path.Combine(_packagePath, packageId + "." + version.ToNormalizedString() + Constants.PackageExtension);
+            EnsureManifest(Path.Combine(_packagePath, packageId + Constants.ManifestExtension));
         }
 
         public override Stream GetStream()
@@ -70,7 +95,7 @@ namespace NuGet
             }
 
             // if not exists, check under \A.1.0.0\A.1.0.0.nupkg
-            string path = Path.Combine(_packageName, _packageFileName);
+            string path = Path.Combine(_packagePath, _packageFileName);
             return _repositoryFileSystem.OpenFile(path);
         }
 
@@ -98,7 +123,7 @@ namespace NuGet
 
         protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesCore()
         {
-            string libDirectory = Path.Combine(_packageName, Constants.LibDirectory);
+            string libDirectory = Path.Combine(_packagePath, Constants.LibDirectory);
 
             return from p in _repositoryFileSystem.GetFiles(libDirectory, "*.*", recursive: true)
                    let targetPath = GetPackageRelativePath(p)
@@ -112,7 +137,7 @@ namespace NuGet
 
         private IEnumerable<string> GetPackageFilePaths()
         {
-            return from p in _repositoryFileSystem.GetFiles(_packageName, "*.*", recursive: true)
+            return from p in _repositoryFileSystem.GetFiles(_packagePath, "*.*", recursive: true)
                    where !PackageHelper.IsManifest(p) && !PackageHelper.IsPackageFile(p)
                    select p;
         }
@@ -121,26 +146,24 @@ namespace NuGet
         {
             // Package paths returned by the file system contain the package name. We need to yank this out of the package name because the paths we are interested in are
             // package relative paths.
-            Debug.Assert(path.StartsWith(_packageName, StringComparison.OrdinalIgnoreCase));
-            return path.Substring(_packageName.Length + 1);
+            Debug.Assert(path.StartsWith(_packagePath, StringComparison.OrdinalIgnoreCase));
+            return path.Substring(_packagePath.Length + 1);
         }
 
-        private void EnsureManifest()
+        private void EnsureManifest(string manifestFilePath)
         {
-            // we look for the .nuspec file at jQuery.1.4\jQuery.1.4.nuspec
-            string manifestFile = Path.Combine(_packageName, _packageName + Constants.ManifestExtension);
-            if (!_repositoryFileSystem.FileExists(manifestFile))
+            if (!_repositoryFileSystem.FileExists(manifestFilePath))
             {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_NotFound, _repositoryFileSystem.GetFullPath(manifestFile)));
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_NotFound, _repositoryFileSystem.GetFullPath(manifestFilePath)));
             }
 
-            using (Stream manifestStream = _repositoryFileSystem.OpenFile(manifestFile))
+            using (Stream manifestStream = _repositoryFileSystem.OpenFile(manifestFilePath))
             {
                 ReadManifest(manifestStream);
             }
 
-            Published = _repositoryFileSystem.GetLastModified(manifestFile);
+            Published = _repositoryFileSystem.GetLastModified(manifestFilePath);
         }
     }
 }

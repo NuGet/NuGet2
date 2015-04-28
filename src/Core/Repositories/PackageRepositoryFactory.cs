@@ -32,7 +32,7 @@ namespace NuGet
             Uri uri = new Uri(packageSource);
             if (uri.IsFile)
             {
-                return new LocalPackageRepository(uri.LocalPath);
+                return new LazyLocalPackageRepository(uri.LocalPath);
             }
 
             var client = HttpClientFactory(uri);

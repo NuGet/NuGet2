@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
@@ -88,6 +89,26 @@ namespace NuGet
             }
 
             return package;
+        }
+
+        internal static Stream GetManifestStream(Stream packageStream)
+        {
+            Package package = Package.Open(packageStream);
+            PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.PackageRelationshipNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
+
+            if (relationshipType == null)
+            {
+                throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
+            }
+
+            PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
+
+            if (manifestPart == null)
+            {
+                throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
+            }
+
+            return manifestPart.GetStream();
         }
     }
 }

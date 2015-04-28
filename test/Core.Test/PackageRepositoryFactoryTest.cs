@@ -1,10 +1,9 @@
-using System.Linq;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
-
     public class PackageRepositoryFactoryTest
     {
         [Fact]
@@ -14,18 +13,20 @@ namespace NuGet.Test
             ExceptionAssert.ThrowsArgNull(() => new PackageRepositoryFactory().CreateRepository(null), "packageSource");
         }
 
-        [Fact]
-        public void CreateRepositoryReturnsLocalRepositoryIfSourceIsPhysicalPath()
+        [Theory]
+        [InlineData(@"C:\packages\")]
+        [InlineData(@"\\folder\sub-folder")]
+        [InlineData("file://some-folder/some-dir")]
+        public void CreateRepositoryReturnsLocalRepositoryIfSourceIsPhysicalPath(string path)
         {
             // Arrange
-            var paths = new[] { @"C:\packages\", 
-                                 @"\\folder\sub-folder",
-                                 "file://some-folder/some-dir"};
             var factory = new PackageRepositoryFactory();
 
-            // Act and Assert
-            Assert.True(paths.Select(factory.CreateRepository)
-                               .All(p => p is LocalPackageRepository));
+            // Act
+            var repository = factory.CreateRepository(path);
+
+            // Assert
+            Assert.IsType<LazyLocalPackageRepository>(repository);
         }
 
         [Fact]

@@ -114,6 +114,8 @@
     <Compile Include="PackageWalker\DependencyVersion.cs" />
     <Compile Include="PackageWalker\NuGetVersionNotSatisfiedException.cs" />
     <Compile Include="ProjectSystem\ProjectImportLocation.cs" />
+    <Compile Include="Repositories\LazyLocalPackageRepository.cs" />
+    <Compile Include="Repositories\ExpandedPackageRepository.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />

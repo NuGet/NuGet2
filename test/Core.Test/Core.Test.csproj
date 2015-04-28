@@ -67,7 +67,9 @@
     <Compile Include="DataServiceQueryWrapperTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
+    <Compile Include="ExpandedPackageRepositoryTests.cs" />
     <Compile Include="Extensions\VersionExtensionsTest.cs" />
+    <Compile Include="LazyLocalPackageRepositoryTest.cs" />
     <Compile Include="LocalPackageTest.cs" />
     <Compile Include="MachineCacheTest.cs" />
     <Compile Include="ManifestFileTest.cs" />

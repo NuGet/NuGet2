@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
 
@@ -18,6 +19,7 @@ namespace NuGet
         private static readonly Regex _semanticVersionRegex = new Regex(@"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>-[a-z][0-9a-z-]*)?$", _flags);
         private static readonly Regex _strictSemanticVersionRegex = new Regex(@"^(?<Version>\d+(\.\d+){2})(?<Release>-[a-z][0-9a-z-]*)?$", _flags);
         private readonly string _originalString;
+        private string _normalizedVersionString;
 
         public SemanticVersion(string version)
             : this(Parse(version))
@@ -120,7 +122,7 @@ namespace NuGet
             {
                 // if 'a' has less than 4 elements, we pad the '0' at the end 
                 // to make it 4.
-                var b = new string[4] { "0", "0", "0", "0"};
+                var b = new string[4] { "0", "0", "0", "0" };
                 Array.Copy(a, 0, b, 0, a.Length);
                 return b;
             }
@@ -288,6 +290,43 @@ namespace NuGet
         public override string ToString()
         {
             return _originalString;
+        }
+
+        /// <summary>
+        /// Returns the normalized string representation of this instance of <see cref="SemanticVersion"/>.
+        /// If the instance can be strictly parsed as a <see cref="SemanticVersion"/>, the normalized version
+        /// string if of the format {major}.{minor}.{build}[-{special-version}]. If the instance has a non-zero
+        /// value for <see cref="Version.Revision"/>, the format is {major}.{minor}.{build}.{revision}[-{special-version}].
+        /// </summary>
+        /// <returns>The normalized string representation.</returns>
+        public string ToNormalizedString()
+        {
+            if (_normalizedVersionString == null)
+            {
+                var builder = new StringBuilder();
+                builder
+                    .Append(Version.Major)
+                    .Append('.')
+                    .Append(Version.Minor)
+                    .Append('.')
+                    .Append(Math.Max(0, Version.Build));
+
+                if (Version.Revision > 0)
+                {
+                    builder.Append('.')
+                           .Append(Version.Revision);
+                }
+
+                if (!string.IsNullOrEmpty(SpecialVersion))
+                {
+                    builder.Append('-')
+                           .Append(SpecialVersion);
+                }
+
+                _normalizedVersionString = builder.ToString();
+            }
+
+            return _normalizedVersionString;
         }
 
         public bool Equals(SemanticVersion other)

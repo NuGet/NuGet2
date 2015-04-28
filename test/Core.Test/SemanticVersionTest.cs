@@ -329,5 +329,31 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(expectedComponents, components);
         }
+
+        [Theory]
+        [InlineData("1.0", "1.0.0")]
+        [InlineData("1.7", "1.7.0")]
+        [InlineData("1.0.0.0", "1.0.0")]
+        [InlineData("1.0.0", "1.0.0")]
+        [InlineData("1.2.3", "1.2.3")]
+        [InlineData("1.2.03", "1.2.3")]
+        [InlineData("1.2.0.4", "1.2.0.4")]
+        [InlineData("1.2.3.4", "1.2.3.4")]
+        [InlineData("1.2-special", "1.2.0-special")]
+        [InlineData("1.2.3-special", "1.2.3-special")]
+        [InlineData("1.2.3.5-special", "1.2.3.5-special")]
+        [InlineData("1.2.0.5-special", "1.2.0.5-special")]
+        public void NormalizeVersion_NormalizesVersionTo3Digits(string versionString, string expected)
+        {
+            // Arrange
+            var version = new SemanticVersion(versionString);
+
+            // Act
+            var result = version.ToNormalizedString();
+
+            // Assert
+            Assert.Equal(result, expected);
+        }
+
     }
 }
