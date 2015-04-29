@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -66,7 +67,8 @@ namespace NuGet
 
             Func<IPackageRepository, bool> supportsPrereleasePackages = Wrap(r => r.SupportsPrereleasePackages, defaultValue: true);
             _supportsPrereleasePackages = new Lazy<bool>(() => _repositories.All(supportsPrereleasePackages));
-            IgnoreFailingRepositories = true;
+            IgnoreFailingRepositories = repositories.OfType<AggregateRepository>().All(r => r.IgnoreFailingRepositories);
+            Logger = repositories.OfType<AggregateRepository>().Select(r => r.Logger).FirstOrDefault(l => l != NullLogger.Instance);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]

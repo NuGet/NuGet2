@@ -70,7 +70,7 @@ namespace NuGet.VisualStudio
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
             var activePackageSourceRepository = ServiceLocator.GetInstance<IPackageRepository>();
-            var repository = new PriorityPackageRepository(NuGet.MachineCache.Default, activePackageSourceRepository);
+            var repository = new AggregateRepository(new[] { MachineCache.Default, activePackageSourceRepository });
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var packageManager = packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
 

@@ -69,7 +69,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             string expectedPath = @"x:\working-dir\packages\";
-            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
+            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
             installCommand.Setup(s => s.CreateFileSystem(@"x:\solution-dir\.nuget"))
                           .Returns<string>(_ => GetFileSystemWithDefaultConfig(expectedPath, repositoryRoot: @"x:\solution-dir\.nuget"))
                           .Verifiable();
@@ -88,7 +88,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             string expectedPath = @"x:\working-dir\packages\";
-            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
+            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
             installCommand.Setup(s => s.CreateFileSystem(@"x:\solution-dir\.nuget"))
                 .Returns<string>(_ => GetFileSystemWithDefaultConfig(expectedPath, settingsFilePath: @"x:\solution-dir\nuget.config", repositoryRoot: @"x:\solution-dir\.nuget"))
                           .Verifiable();
@@ -123,7 +123,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithConfigWithCredential();
             var installCommand = new Mock<TestInstallCommand>(
-                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, 
+                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, null, 
                 Settings.LoadDefaultSettings(fileSystem, null, null))
                 {
                     CallBase = true
@@ -848,6 +848,46 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.Verify();
         }
 
+        [Fact]
+        public void InstallCommandUsesRemoteIfCacheHasOldDependencyVersion()
+        {
+            // Arrange
+            var newPackageDependency = PackageUtility.CreatePackage("Foo", "1.1");
+            var newPackage = PackageUtility.CreatePackage("Foo.UI", "1.1",
+                dependencies: new[] { new PackageDependency("Foo", VersionUtility.ParseVersionSpec("[1.1]")) });
+            var repository = new MockPackageRepository { newPackageDependency, newPackage };
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("Some source")).Returns(repository);
+
+            var fileSystem = new MockFileSystem();
+            var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
+            localCache.Setup(c => c.GetPackages()).Returns(new[] { PackageUtility.CreatePackage("Foo", "1.0") }.AsQueryable()).Verifiable();
+            
+            var localRepository = new MockPackageRepository();
+            var installCommand = new TestInstallCommand(
+                repositoryFactory.Object,
+                GetSourceProvider(new[] { new PackageSource("Some source", "Some source name") }),
+                fileSystem,
+                machineCacheRepository: localCache.Object,
+                localRepository: localRepository)
+            {
+                NoCache = false,
+                Version = "1.1"
+            };
+            installCommand.Arguments.Add("Foo.UI");
+            installCommand.Source.Add("Some Source name");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            var installedPackages = localRepository.GetPackages().ToList();
+            Assert.Equal(2, installedPackages.Count);
+            Assert.Same(newPackageDependency, installedPackages[0]);
+            Assert.Same(newPackage, installedPackages[1]);
+            localCache.Verify();
+        }
+
         private static IPackageRepositoryFactory GetFactory()
         {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
@@ -884,12 +924,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageManager _packageManager;
+            private readonly IPackageRepository _localRepository;
 
             public TestInstallCommand(IPackageRepositoryFactory factory,
                                       IPackageSourceProvider sourceProvider,
                                       IFileSystem fileSystem = null,
                                       IPackageManager packageManager = null,
                                       IPackageRepository machineCacheRepository = null,
+                                      IPackageRepository localRepository = null,
                                       bool allowPackageRestore = true,
                                       ISettings settings = null)
                 : base(machineCacheRepository ?? new MockPackageRepository())
@@ -899,6 +941,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 Settings = settings ?? CreateSettings(allowPackageRestore);
                 _fileSystem = fileSystem ?? new MockFileSystem();
                 _packageManager = packageManager;
+                _localRepository = localRepository;
             }
 
             private static ISettings CreateSettings(bool allowPackageRestore)
@@ -916,7 +959,21 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             protected override IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useSideBySidePaths, bool checkDowngrade)
             {
-                return _packageManager ?? base.CreatePackageManager(fileSystem, useSideBySidePaths, checkDowngrade);
+                if (_packageManager != null)
+                {
+                    return _packageManager;
+                }
+
+                if (_localRepository != null)
+                {
+                    return new PackageManager(CreateRepository(),
+                        new DefaultPackagePathResolver(fileSystem, useSideBySidePaths), fileSystem, _localRepository)
+                    {
+                        CheckDowngrade = checkDowngrade
+                    };
+                }
+
+                return base.CreatePackageManager(fileSystem, useSideBySidePaths, checkDowngrade);
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path)

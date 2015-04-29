@@ -356,7 +356,7 @@ namespace NuGet.VsEvents
             // as secondary source.            
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var allSources = packageManagerFactory.CreatePackageManagerWithAllPackageSources().SourceRepository;
-            var repository = new PriorityPackageRepository(NuGet.MachineCache.Default, allSources);
+            var repository = new AggregateRepository(new[] { MachineCache.Default, allSources });
             var packageManager = packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id, package.Version.ToString()))
             {

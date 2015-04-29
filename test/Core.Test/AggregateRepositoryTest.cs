@@ -321,10 +321,8 @@ namespace NuGet.Test
                 return new MockPackageRepository();
             });
 
-            var aggregateRepository = new AggregateRepository(repositories);
-
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => aggregateRepository.Repositories.Select(c => c.Source).ToList(), "Repository exception");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new AggregateRepository(repositories).Repositories.ToList(), "Repository exception");
         }
 
         [Fact]

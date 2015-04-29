@@ -84,7 +84,7 @@ namespace NuGet.Commands
             }
             else
             {
-                return new PriorityPackageRepository(CacheRepository, repository);
+                return new AggregateRepository(new[] { CacheRepository, repository });
             }
         }
 
