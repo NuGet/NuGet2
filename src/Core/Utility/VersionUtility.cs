@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
 using CompatibilityMapping = System.Collections.Generic.Dictionary<string, string[]>;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet
 {
@@ -813,6 +814,7 @@ namespace NuGet
             return null;
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static bool TryGetCompatibleItems<T>(FrameworkName projectFramework, IEnumerable<T> items, out IEnumerable<T> compatibleItems) where T : IFrameworkTargetable
         {
             if (!items.Any())
