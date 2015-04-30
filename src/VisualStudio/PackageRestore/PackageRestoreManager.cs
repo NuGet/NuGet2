@@ -9,11 +9,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 using EnvDTE;
-using Microsoft.VisualStudio.Project;
-using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
@@ -170,9 +167,11 @@ namespace NuGet.VisualStudio
             }
             finally
             {
-                int canceled;
-
-                InvokeOnUIThread(() => waitDialog.EndWaitDialog(out canceled));
+                InvokeOnUIThread(() =>
+                {
+                    int canceled;
+                    waitDialog.EndWaitDialog(out canceled);
+                });
             }
 
             if (fromActivation)
@@ -629,7 +628,14 @@ namespace NuGet.VisualStudio
         {
             if (Application.Current != null)
             {
-                Application.Current.Dispatcher.Invoke(action);
+                try
+                {
+                    Application.Current.Dispatcher.Invoke(action);
+                }
+                catch (TaskCanceledException)
+                {
+                    // Thrown if VS is closed while the action is being processed.
+                }
             }
             else
             {
