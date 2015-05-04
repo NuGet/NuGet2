@@ -40,8 +40,8 @@ namespace NuGet.Test
                 Version = "2.0.30619.9000",
                 Title = "NuGet.Test",
                 Description = "",
-                Copyright = "\x00a9 Outercurve. All rights reserved.",
-                Authors = "Outercurve Foundation",
+                Copyright = "\x00a9 .NET Foundation. All rights reserved.",
+                Authors = ".NET Foundation",
             };
             var projectMock = new Mock<Project>();
             var factory = new ProjectFactory(projectMock.Object);
@@ -51,15 +51,15 @@ namespace NuGet.Test
             var actual = Preprocessor.Process(inputSpec.AsStream(), factory, false);
 
             // assert
-            Assert.Equal("Outercurve Foundation", author);
+            Assert.Equal(".NET Foundation", author);
             const string expected = @"<?xml version=""1.0""?>
 <package>
     <metadata>
         <id>ProjectFactoryTest</id>
         <version>2.0.30619.9000</version>
         <description></description>
-        <authors>Outercurve Foundation</authors>
-        <copyright>© Outercurve. All rights reserved.</copyright>
+        <authors>.NET Foundation</authors>
+        <copyright>© .NET Foundation. All rights reserved.</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
         <tags>nuget</tags>
@@ -94,10 +94,10 @@ namespace NuGet.Test
         <OutputType>Library</OutputType>
         <RootNamespace>NuGet.Test</RootNamespace>
         <AssemblyName>" + testAssembly.GetName().Name + @"</AssemblyName>
-        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>    
+        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>
         <OutputPath>.</OutputPath> <!-- Force it to look for the assembly in the base path -->
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include=""..\..\Dummy.cs"">
           <Link>Dummy.cs</Link>
@@ -125,7 +125,7 @@ namespace NuGet.Test
         <id>" + testAssembly.GetName().Name + @"</id>
         <version>" + testAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion + @"</version>
         <description></description>
-        <authors>Outercurve</authors>
+        <authors>.NET Foundation</authors>
         <copyright>" + testAssembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright + @"</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
@@ -160,10 +160,10 @@ namespace NuGet.Test
         <OutputType>Library</OutputType>
         <RootNamespace>NuGet.Test</RootNamespace>
         <AssemblyName>" + testAssembly.GetName().Name + @"</AssemblyName>
-        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>    
+        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>
         <OutputPath>.</OutputPath> <!-- Force it to look for the assembly in the base path -->
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include=""..\..\Dummy.cs"">
           <Link>Dummy.cs</Link>
@@ -232,10 +232,10 @@ namespace NuGet.Test
         <OutputType>Library</OutputType>
         <RootNamespace>NuGet.Test</RootNamespace>
         <AssemblyName>" + testAssembly.GetName().Name + @"</AssemblyName>
-        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>    
+        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>
         <OutputPath>.</OutputPath> <!-- Force it to look for the assembly in the base path -->
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include=""..\..\Dummy.cs"">
           <Link>Dummy.cs</Link>
@@ -249,14 +249,14 @@ namespace NuGet.Test
             var basePath = Path.GetDirectoryName(testAssembly.CodeBase);
             var cmdLineProperties = new Dictionary<string, string>
                 {
-                    { "overriden", "Outercurve" }
+                    { "overriden", ".NET Foundation" }
                 };
             var project = new Project(XmlReader.Create(new StringReader(projectXml)), cmdLineProperties, null);
             project.FullPath = Path.Combine(project.DirectoryPath, "test.csproj");
 
             var factory = new ProjectFactory(project) { Build = false };
             // Cmdline properties are added to the factory, see PackCommand.cs(351)
-            factory.ProjectProperties["overriden"] = "Outercurve";
+            factory.ProjectProperties["overriden"] = ".NET Foundation";
 
             // Act
             var packageBuilder = factory.CreateBuilder(basePath);
@@ -269,7 +269,7 @@ namespace NuGet.Test
         <id>" + testAssembly.GetName().Name + @"</id>
         <version>" + testAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion + @"</version>
         <description></description>
-        <authors>Outercurve</authors>
+        <authors>.NET Foundation</authors>
         <copyright>" + testAssembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright + @"</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
@@ -290,7 +290,7 @@ namespace NuGet.Test
         <id>$id$</id>
         <version>$version$</version>
         <description>$description$</description>
-        <authors>Outercurve</authors>
+        <authors>.NET Foundation</authors>
         <copyright>$copyright$</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
@@ -304,10 +304,10 @@ namespace NuGet.Test
         <OutputType>Library</OutputType>
         <RootNamespace>NuGet.Test</RootNamespace>
         <AssemblyName>" + testAssembly.GetName().Name + @"</AssemblyName>
-        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>    
+        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>
         <OutputPath>.</OutputPath> <!-- Force it to look for the assembly in the base path -->
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include=""..\..\Dummy.cs"">
           <Link>Dummy.cs</Link>
@@ -321,14 +321,14 @@ namespace NuGet.Test
             var basePath = Path.GetDirectoryName(testAssembly.CodeBase);
             var cmdLineProperties = new Dictionary<string, string>
                 {
-                    { "id", "Outercurve" }
+                    { "id", "DNF" }
                 };
             var project = new Project(XmlReader.Create(new StringReader(projectXml)), cmdLineProperties, null);
             project.FullPath = Path.Combine(project.DirectoryPath, "test.csproj");
 
             var factory = new ProjectFactory(project) { Build = false };
             // Cmdline properties are added to the factory, see PackCommand.cs(351)
-            factory.ProjectProperties["id"] = "Outercurve";
+            factory.ProjectProperties["id"] = "DNF";
 
             // Act
             var packageBuilder = factory.CreateBuilder(basePath);
@@ -338,10 +338,10 @@ namespace NuGet.Test
             var expected = @"<?xml version=""1.0""?>
 <package>
     <metadata>
-        <id>Outercurve</id>
+        <id>DNF</id>
         <version>" + testAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion + @"</version>
         <description></description>
-        <authors>Outercurve</authors>
+        <authors>.NET Foundation</authors>
         <copyright>" + testAssembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright + @"</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
@@ -363,10 +363,10 @@ namespace NuGet.Test
         <OutputType>Library</OutputType>
         <RootNamespace>NuGet.Test</RootNamespace>
         <AssemblyName>" + testAssembly.GetName().Name + @"</AssemblyName>
-        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>    
+        <TargetFrameworkProfile Condition="" '$(TargetFrameworkVersion)' == 'v4.0' "">Client</TargetFrameworkProfile>
         <OutputPath>.</OutputPath> <!-- Force it to look for the assembly in the base path -->
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include=""..\..\Dummy.cs"">
           <Link>Dummy.cs</Link>
@@ -385,7 +385,7 @@ namespace NuGet.Test
                 };
             var project = new Project(XmlReader.Create(new StringReader(projectXml)), cmdLineProperties, null);
             project.FullPath = Path.Combine(project.DirectoryPath, "test.csproj");
-            
+
             // Act
             var factory = new ProjectFactory(project) { Build = false };
             factory.ProjectProperties.Add("MyGlobalProperty", "false"); // This shouldn't be applied

@@ -4,7 +4,7 @@
         <id>$id$</id>
         <version>$version$</version>
         <description>$description$</description>
-        <authors>Outercurve Foundation</authors>
+        <authors>.NET Foundation</authors>
         <owners>$author$</owners>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>

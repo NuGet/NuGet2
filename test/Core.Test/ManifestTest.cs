@@ -69,11 +69,11 @@ namespace NuGet.Test
                     Description = "desc",
                 },
                 Files = new List<ManifestFile> {
-                    new ManifestFile { 
+                    new ManifestFile {
                         Source = "|",
                         Target = "<"
                     },
-                    new ManifestFile { 
+                    new ManifestFile {
                         Source = @"foo\bar\|>",
                         Target = "lib"
                     },
@@ -144,7 +144,7 @@ namespace NuGet.Test
                     DependencySets = new List<ManifestDependencySet> {
                             new ManifestDependencySet {
                                 TargetFramework = null,
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = null }
                                     }
@@ -167,7 +167,7 @@ namespace NuGet.Test
                 Metadata = new ManifestMetadata { Id = "Test-Pack", Version = "1.0.0", Description = "Test description", Authors = "NuGet Test" }
             };
 
-            // Act 
+            // Act
             var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
@@ -211,14 +211,14 @@ namespace NuGet.Test
             {
                 new ManifestReferenceSet {
                     TargetFramework = null,
-                    References = new List<ManifestReference> 
+                    References = new List<ManifestReference>
                     {
                         new ManifestReference { File = "Test.dll" },
                     }
                 },
                 new ManifestReferenceSet {
                     TargetFramework = "hello",
-                    References = new List<ManifestReference> 
+                    References = new List<ManifestReference>
                     {
                         new ManifestReference { File = "world.winmd" },
                     }
@@ -226,7 +226,7 @@ namespace NuGet.Test
             };
 
             // Arrange
-            var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: "Outercurve",
+            var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: ".NET Foundation",
                 licenseUrl: "http://nuget.org/license", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
                 requiresLicenseAcceptance: true, developmentDependency: true, description: "This is not a description",
                 summary: "This is a summary", releaseNotes: "Release notes",
@@ -244,7 +244,7 @@ namespace NuGet.Test
                     Id = "Test-Pack2",
                     Version = "1.0.0-alpha",
                     Description = "This is not a description",
-                    Authors = "Outercurve",
+                    Authors = ".NET Foundation",
                     LicenseUrl = "http://nuget.org/license",
                     ProjectUrl = "http://nuget.org/project",
                     IconUrl = "https://nuget.org/icon",
@@ -258,7 +258,7 @@ namespace NuGet.Test
                     DependencySets = new List<ManifestDependencySet> {
                             new ManifestDependencySet {
                                 TargetFramework = null,
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "Test", Version = "1.2.0" }
                                     }
@@ -269,14 +269,14 @@ namespace NuGet.Test
                     {
                         new ManifestReferenceSet {
                             TargetFramework = null,
-                            References = new List<ManifestReference> 
+                            References = new List<ManifestReference>
                             {
                                 new ManifestReference { File = "Test.dll" },
                             }
                         },
                         new ManifestReferenceSet {
                             TargetFramework = "hello",
-                            References = new List<ManifestReference> 
+                            References = new List<ManifestReference>
                             {
                                 new ManifestReference { File = "world.winmd" },
                             }
@@ -286,7 +286,7 @@ namespace NuGet.Test
                 }
             };
 
-            // Act 
+            // Act
             var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
@@ -297,22 +297,22 @@ namespace NuGet.Test
         public void ReadFromReadsFilesAndExpandsDelimitedFileList()
         {
             // Arrange
-            var manifestStream = CreateManifest(files: new[] { 
-                    new ManifestFile { Source = "Foo.cs", Target = "src" }, 
+            var manifestStream = CreateManifest(files: new[] {
+                    new ManifestFile { Source = "Foo.cs", Target = "src" },
                     new ManifestFile { Source = @"**\bin\*.dll;**\bin\*.exe", Target = @"lib\net40", Exclude = @"**\*Test*" }
             });
 
             var expectedManifest = new Manifest
             {
                 Metadata = new ManifestMetadata { Id = "Test-Pack", Version = "1.0.0", Description = "Test description", Authors = "NuGet Test" },
-                Files = new List<ManifestFile> { 
-                    new ManifestFile { Source = "Foo.cs", Target = "src" }, 
+                Files = new List<ManifestFile> {
+                    new ManifestFile { Source = "Foo.cs", Target = "src" },
                     new ManifestFile { Source = @"**\bin\*.dll", Target = @"lib\net40", Exclude = @"**\*Test*" },
                     new ManifestFile { Source = @"**\bin\*.exe", Target = @"lib\net40", Exclude = @"**\*Test*" },
                 }
             };
 
-            // Act 
+            // Act
             var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
@@ -332,7 +332,7 @@ namespace NuGet.Test
     <owners>Luan</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
-    
+
     <extra>This element is not defined in schema.</extra>
   </metadata>
   <clark>meko</clark>
@@ -366,7 +366,7 @@ namespace NuGet.Test
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
     <description>Descriptions</description>
-    
+
     <extra>This element is not defined in schema.</extra>
   </metadata>
   <clark>meko</clark>
@@ -484,7 +484,7 @@ namespace NuGet.Test
                     DependencySets = new List<ManifestDependencySet> {
                             new ManifestDependencySet {
                                 TargetFramework = ".NETFramework40",
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "B" }
                                     }
@@ -492,7 +492,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = null,
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "A" }
                                     }
@@ -500,7 +500,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = null,
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "C" }
                                     }
@@ -508,7 +508,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = "Silverlight35",
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "D" }
                                     }
@@ -516,7 +516,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = "net40",
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "E" }
                                     }
@@ -524,7 +524,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = "sl35",
-                                Dependencies = new List<ManifestDependency> 
+                                Dependencies = new List<ManifestDependency>
                                     {
                                         new ManifestDependency { Id = "F" }
                                     }
@@ -532,7 +532,7 @@ namespace NuGet.Test
 
                             new ManifestDependencySet {
                                 TargetFramework = "winrt45",
-                                Dependencies = new List<ManifestDependency>() 
+                                Dependencies = new List<ManifestDependency>()
                             },
                     }
                 }
@@ -572,8 +572,8 @@ namespace NuGet.Test
             manifest.Metadata.Authors = "author";
             manifest.Metadata.Version = "1.0.0";
             manifest.Metadata.Description = "description";
-            
-            manifest.Files = new List<ManifestFile>();            
+
+            manifest.Files = new List<ManifestFile>();
             var file = new ManifestFile();
             file.Source = "file_source";
             file.Target = "file_target";
@@ -719,7 +719,7 @@ namespace NuGet.Test
             {
                 metadata.Add(new XAttribute("minClientVersion", minClientVersion));
             }
-            
+
             document.Root.Add(metadata);
 
             if (title != null)

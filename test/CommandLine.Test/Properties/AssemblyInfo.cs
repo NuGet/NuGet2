@@ -1,4 +1,4 @@
 using System.Reflection;
 
 // Exercises the new metadata-driven manifest authoring
-[assembly: AssemblyMetadata("owner", "Outercurve")]
+[assembly: AssemblyMetadata("owner", ".NET Foundation")]

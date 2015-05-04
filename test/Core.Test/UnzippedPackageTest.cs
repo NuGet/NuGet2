@@ -54,10 +54,10 @@ namespace NuGet.Test
             Assert.Equal(1, package.Authors.Count());
             Assert.Equal("dotnetjunky", package.Authors.ElementAt(0));
             Assert.Equal(1, package.Owners.Count());
-            Assert.Equal("Outercurve", package.Owners.ElementAt(0));
+            Assert.Equal(".NET Foundation", package.Owners.ElementAt(0));
             Assert.Equal("http://www.nuget.com/license", package.LicenseUrl.ToString());
             Assert.Equal("http://www.nuget.com/", package.ProjectUrl.ToString());
-            Assert.Equal("http://www.outercurve.com/", package.IconUrl.ToString());
+            Assert.Equal("http://www.dotnetfoundation.org/", package.IconUrl.ToString());
             Assert.Equal(1, package.DependencySets.Count());
             Assert.Equal("bing", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).Id);
             Assert.Equal(new SemanticVersion("1.0-RC"), package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.MinVersion);
@@ -75,7 +75,7 @@ namespace NuGet.Test
             Assert.Equal("System", package.FrameworkAssemblies.ElementAt(0).AssemblyName);
             Assert.Equal(1, package.FrameworkAssemblies.ElementAt(0).SupportedFrameworks.Count());
             Assert.Equal(
-                new FrameworkName(".NETFramework", new Version("4.5")), 
+                new FrameworkName(".NETFramework", new Version("4.5")),
                 package.FrameworkAssemblies.ElementAt(0).SupportedFrameworks.ElementAt(0));
         }
 
@@ -275,7 +275,7 @@ namespace NuGet.Test
     <id>{0}</id>
     <version>{1}</version>
     <authors>dotnetjunky</authors>
-    <owners />    
+    <owners />
     <title />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>My package description.</description>
@@ -295,10 +295,10 @@ namespace NuGet.Test
   <metadata>
     <version>1.0.0</version>
     <authors>dotnetjunky</authors>
-    <owners>Outercurve</owners>
+    <owners>.NET Foundation</owners>
     <licenseUrl>http://www.nuget.com/license</licenseUrl>
     <projectUrl>http://www.nuget.com</projectUrl>
-    <iconUrl>http://www.outercurve.com</iconUrl>
+    <iconUrl>http://www.dotnetfoundation.org</iconUrl>
     <dependencies>
       <dependency id=""bing"" version=""1.0-RC"" />
     </dependencies>
@@ -315,7 +315,7 @@ namespace NuGet.Test
     <description>My package description.</description>
     <summary>This is jumpo package.</summary>
     <releaseNotes>New jumpo.</releaseNotes>
-    <copyright>Outercurve Foundation</copyright>
+    <copyright>.NET Foundation</copyright>
     <language>ar-EG</language>
     <tags>haha void</tags>
   </metadata>

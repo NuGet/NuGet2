@@ -34,7 +34,7 @@ namespace NuGet.Test
                 Version = "1.0",
                 Authors = "A, B",
                 Description = "Description",
-                FrameworkAssemblies = new List<ManifestFrameworkAssembly> {  
+                FrameworkAssemblies = new List<ManifestFrameworkAssembly> {
                     new ManifestFrameworkAssembly { AssemblyName = "System.Data.dll" }
                 }
             };
@@ -56,7 +56,7 @@ namespace NuGet.Test
                 Version = "1.0",
                 Authors = "A, B",
                 Description = "Description",
-                Copyright = "© Outercurve Foundation"
+                Copyright = "© .NET Foundation"
             };
 
             // Act
@@ -76,7 +76,7 @@ namespace NuGet.Test
                 Version = "1.0",
                 Authors = "A, B",
                 Description = "Description",
-                FrameworkAssemblies = new List<ManifestFrameworkAssembly> {  
+                FrameworkAssemblies = new List<ManifestFrameworkAssembly> {
                     new ManifestFrameworkAssembly { AssemblyName = "System.Data.dll" }
                 },
                 ReferenceSets = new List<ManifestReferenceSet> {

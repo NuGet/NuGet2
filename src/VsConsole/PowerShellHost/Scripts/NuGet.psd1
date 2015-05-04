@@ -13,10 +13,10 @@ GUID = '76e6f9c4-7045-44c0-a557-17fab0835c12'
 Author = 'NuGet Team'
 
 # Company or vendor of this module
-CompanyName = 'Outercurve Foundation'
+CompanyName = '.NET Foundation'
 
 # Copyright statement for this module
-Copyright = '(c) 2010 Outercurve Foundation. All rights reserved.'
+Copyright = '(c) 2015 .NET Foundation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'NuGet PowerShell module used for the Package Manager Console'
@@ -62,13 +62,13 @@ FunctionsToExport = @('Register-TabExpansion')
 
 # Cmdlets to export from this module
 CmdletsToExport = @(
-    'Install-Package', 
+    'Install-Package',
     'Uninstall-Package',
     'Update-Package',
-    'Get-Package', 
+    'Get-Package',
     'Get-Project',
     'Set-Project', 'Set-Source'
-    'Open-PackagePage', 
+    'Open-PackagePage',
     'Sync-Package', 'Find-Package'
 	'Add-BindingRedirect')
 
