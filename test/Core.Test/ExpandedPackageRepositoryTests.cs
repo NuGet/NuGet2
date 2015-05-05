@@ -236,18 +236,6 @@ namespace NuGet.Test
         public void AddPackage_AddsExpandedPackageToThePackageDirectory()
         {
             // Arrange
-            var expectedManifest =
-@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>MyPackage</id>
-    <version>1.0.0-beta2</version>
-    <authors>test</authors>
-    <owners>test</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Test description</description>
-  </metadata>
-</package>";
             var fileSystem = new MockFileSystem();
             var repository = new ExpandedPackageRepository(fileSystem);
             var package = GetPackage();
@@ -256,7 +244,9 @@ namespace NuGet.Test
             repository.AddPackage(package);
 
             // Assert
-            Assert.Equal(expectedManifest, fileSystem.ReadAllText(@"MyPackage\1.0.0-beta2\MyPackage.nuspec"));
+            var reader = Manifest.ReadFrom(fileSystem.OpenFile(@"MyPackage\1.0.0-beta2\MyPackage.nuspec"), validateSchema: true);
+            Assert.Equal("MyPackage", reader.Metadata.Id);
+            Assert.Equal("1.0.0-beta2", reader.Metadata.Version);
             Assert.Equal("Preapplication content", fileSystem.ReadAllText(@"MyPackage\1.0.0-beta2\content\net40\App_code\PreapplicationStartCode.cs"));
             Assert.Equal("package.targets content", fileSystem.ReadAllText(@"MyPackage\1.0.0-beta2\tools\net40\package.targets"));
             Assert.Equal("lib contents", fileSystem.ReadAllText(@"MyPackage\1.0.0-beta2\lib\net40\MyPackage.dll"));

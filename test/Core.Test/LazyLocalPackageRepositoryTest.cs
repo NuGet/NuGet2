@@ -161,18 +161,6 @@ namespace NuGet.Test
         public void PackageAddAndRemovalOperationsAreDeferredToUnderlyingExpandedPackageRepository()
         {
             // Arrange
-            var expectedManifest =
-@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd"">
-  <metadata>
-    <id>MyPackage</id>
-    <version>1.0.0-beta2</version>
-    <authors>test</authors>
-    <owners>test</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Test description</description>
-  </metadata>
-</package>";
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(Path.Combine("Foo", "1.0.0", "Foo.1.0.0.nupkg"));
             fileSystem.AddFile(Path.Combine("Foo", "1.0.0", "Foo.nuspec"));
@@ -184,8 +172,9 @@ namespace NuGet.Test
             repository.AddPackage(package);
 
             // Assert - 1
-            Assert.Equal(expectedManifest,
-                fileSystem.ReadAllText(Path.Combine("MyPackage", "1.0.0-beta2", "MyPackage.nuspec")));
+            var reader = Manifest.ReadFrom(fileSystem.OpenFile(@"MyPackage\1.0.0-beta2\MyPackage.nuspec"), validateSchema: true);
+            Assert.Equal("MyPackage", reader.Metadata.Id);
+            Assert.Equal("1.0.0-beta2", reader.Metadata.Version);
             Assert.True(package.GetStream().ContentEquals(
                 fileSystem.OpenFile(Path.Combine("MyPackage", "1.0.0-beta2", "MyPackage.1.0.0-beta2.nupkg"))));
 
