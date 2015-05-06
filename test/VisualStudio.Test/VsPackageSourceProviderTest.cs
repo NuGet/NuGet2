@@ -112,8 +112,8 @@ namespace NuGet.VisualStudio.Test
             var userSettings = new Mock<ISettings>();
             userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] {
-                            new SettingValue("Test1", "https://test1", true),
-                            new SettingValue("Test2", "https://test2", false)
+                            new SettingValue("Test1", "https://test1", true) { Priority = 1 },
+                            new SettingValue("Test2", "https://test2", false) { Priority = 2 }
                         });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);

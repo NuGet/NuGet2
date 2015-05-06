@@ -145,7 +145,7 @@ namespace NuGet.Test
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidDataException>(
-                () => settings.GetValues("packageSources", isPath: true), 
+                () => settings.GetValues("packageSources", isPath: true),
                 @"Unable to parse config file 'x:\test\NuGet.Config'.");
         }
 
@@ -381,7 +381,7 @@ namespace NuGet.Test
         {
             // Arrange
             var mockFileSystem = new MockFileSystem();
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
+            var values = new List<SettingValue>() { new SettingValue("key", "value", isMachineWide: false) };
             var settings = new Settings(mockFileSystem);
 
             // Act & Assert
@@ -404,7 +404,7 @@ namespace NuGet.Test
         {
             // Arrange
             var mockFileSystem = new MockFileSystem();
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("", "value") };
+            var values = new List<SettingValue>() { new SettingValue("", "value", isMachineWide: false) };
             var settings = new Settings(mockFileSystem);
 
             // Act & Assert
@@ -424,7 +424,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
+            var values = new List<SettingValue>() { new SettingValue("key", "value", isMachineWide: false) };
             Settings settings = new Settings(mockFileSystem);
 
             // Act
@@ -455,7 +455,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("keyTwo", "valueTwo") };
+            var values = new List<SettingValue>() { new SettingValue("keyTwo", "valueTwo", isMachineWide: false) };
             Settings settings = new Settings(mockFileSystem);
 
             // Act
@@ -485,7 +485,7 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "NewValue") };
+            var values = new List<SettingValue>() { new SettingValue("key", "NewValue", isMachineWide: false) };
             Settings settings = new Settings(mockFileSystem);
 
             // Act
@@ -514,8 +514,8 @@ namespace NuGet.Test
   </SectionName>
 </configuration>";
             mockFileSystem.AddFile(nugetConfigPath, config);
-            var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key1", "Value1"),
-                                                                    new KeyValuePair<string, string>("key2", "Value2") };
+            var values = new List<SettingValue>() { new SettingValue("key1", "Value1", isMachineWide: false),
+                                                    new SettingValue("key2", "Value2", isMachineWide: false) };
             Settings settings = new Settings(mockFileSystem);
 
             // Act
@@ -1665,6 +1665,42 @@ namespace NuGet.Test
             Assert.Equal("user2", v);
             v = settings2.GetValue("SectionName", "key1", isPath: false);
             Assert.Equal("value1", v);
+        }
+
+        [Fact]
+        public void GetSettingValues_ReadsAttributeValues_FromElements()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem();
+
+            mockFileSystem.AddFile(@"NuGet.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key2"" value=""value2"" data-key2=""key2"" />
+    <clear />
+    <add key=""key3"" value=""value3"" data-key3=""key3"" />
+    <add key=""key4"" value=""value4"" data-key4=""key4"" someAttr=""someAttrValue"" />
+  </SectionName>
+</configuration>");
+
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
+
+            // Act
+            var result = settings.GetValues("SectionName", isPath: false);
+
+            // Assert'
+            Assert.Equal(2, result.Count);
+            Assert.Equal("key3", result[0].Key);
+            Assert.Equal("value3", result[0].Value);
+            Assert.Equal(1, result[0].AdditionalData.Count);
+            Assert.Equal("key3", result[0].AdditionalData["data-key3"]);
+
+            Assert.Equal("key4", result[1].Key);
+            Assert.Equal("value4", result[1].Value);
+            Assert.Equal(2, result[1].AdditionalData.Count);
+            Assert.Equal("key4", result[1].AdditionalData["data-key4"]);
+            Assert.Equal("someAttrValue", result[1].AdditionalData["someAttr"]);
         }
     }
 }

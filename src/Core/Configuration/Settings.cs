@@ -17,7 +17,8 @@ namespace NuGet
         private readonly string _fileName;
         // next config file to read if any
         private Settings _next;
-
+        // The priority of this setting file
+        private int _priority;
         private readonly bool _isMachineWideSettings;
 
         public Settings(IFileSystem fileSystem)
@@ -123,10 +124,13 @@ namespace NuGet
                 return NullSettings.Instance;
             }
 
+            validSettingFiles[0]._priority = validSettingFiles.Count;
+
             // if multiple setting files were loaded, chain them in a linked list
             for (int i = 1; i < validSettingFiles.Count; ++i)
             {
                 validSettingFiles[i]._next = validSettingFiles[i - 1];
+                validSettingFiles[i]._priority = validSettingFiles[i - 1]._priority - 1;
             }
 
             // return the linked list head. Typicall, it's either the config file in %ProgramData%\NuGet\Config,
@@ -153,7 +157,7 @@ namespace NuGet
                 {
                     var defaultSettingsFilePath = Path.Combine(appDataPath, "NuGet", Constants.SettingsFileName);
                     appDataSettings = ReadSettings(
-                        fileSystem ?? new PhysicalFileSystem(Directory.GetCurrentDirectory()), 
+                        fileSystem ?? new PhysicalFileSystem(Directory.GetCurrentDirectory()),
                         defaultSettingsFilePath);
                 }
             }
@@ -199,7 +203,7 @@ namespace NuGet
             string combinedPath = Path.Combine(paths);
 
             while (true)
-            {   
+            {
                 string directory = Path.Combine(basePath, combinedPath);
 
                 // load setting files in directory
@@ -316,23 +320,22 @@ namespace NuGet
 
             var settingValues = new List<SettingValue>();
             var curr = this;
-            int priority = 0;
+
             while (curr != null)
             {
-                curr.PopulateValues(section, settingValues, isPath, priority);
+                curr.PopulateValues(section, settingValues, isPath);
                 curr = curr._next;
-                ++priority;
             }
-   
+
             return settingValues.AsReadOnly();
         }
 
-        private void PopulateValues(string section, List<SettingValue> current, bool isPath, int priority)
+        private void PopulateValues(string section, List<SettingValue> current, bool isPath)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement != null)
             {
-                ReadSection(sectionElement, current, isPath, priority);
+                ReadSection(sectionElement, current, isPath);
             }
         }
 
@@ -350,17 +353,17 @@ namespace NuGet
 
             var values = new List<SettingValue>();
             var curr = this;
-            int priority = 0;
+
             while (curr != null)
             {
-                curr.PopulateNestedValues(section, subsection, values, priority);
+                curr.PopulateNestedValues(section, subsection, values);
                 curr = curr._next;
             }
 
             return values;
         }
 
-        private void PopulateNestedValues(string section, string subsection, List<SettingValue> current, int priority)
+        private void PopulateNestedValues(string section, string subsection, List<SettingValue> current)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement == null)
@@ -372,7 +375,7 @@ namespace NuGet
             {
                 return;
             }
-            ReadSection(subsectionElement, current, isPath: false, priority: priority);
+            ReadSection(subsectionElement, current, isPath: false);
         }
 
         public void SetValue(string section, string key, string value)
@@ -394,11 +397,11 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
             var sectionElement = GetOrCreateSection(_config.Root, section);
-            SetValueInternal(sectionElement, key, value);
+            SetValueInternal(sectionElement, key, value, attributes: null);
             Save();
         }
 
-        public void SetValues(string section, IList<KeyValuePair<string, string>> values)
+        public void SetValues(string section, IReadOnlyList<SettingValue> values)
         {
             // machine wide settings cannot be changed.
             if (IsMachineWideSettings)
@@ -422,11 +425,88 @@ namespace NuGet
             }
 
             var sectionElement = GetOrCreateSection(_config.Root, section);
-            foreach (var kvp in values)
+            foreach (var value in values)
             {
-                SetValueInternal(sectionElement, kvp.Key, kvp.Value);
+                SetValueInternal(sectionElement, value.Key, value.Value, value.AdditionalData);
             }
             Save();
+        }
+
+        public void UpdateSections(string section, IReadOnlyList<SettingValue> values)
+        {
+            // machine wide settings cannot be changed.
+            if (IsMachineWideSettings)
+            {
+                if (_next == null)
+                {
+                    throw new InvalidOperationException(NuGetResources.Error_NoWritableConfig);
+                }
+
+                _next.UpdateSections(section, values);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(section))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException("values");
+            }
+
+            var sectionElement = GetSection(_config.Root, section);
+            if (sectionElement != null)
+            {
+                sectionElement.RemoveIndented();
+            }
+
+            var valuesToWrite = _next == null ? values : values.Where(v => v.Priority < _next._priority);
+
+            if (valuesToWrite.Any())
+            {
+                sectionElement = GetOrCreateSection(_config.Root, section);
+            }
+
+            foreach (var value in valuesToWrite)
+            {
+                var element = new XElement("add");
+                SetElementValues(element, value.Key, value.Value, value.AdditionalData);
+                sectionElement.AddIndented(element);
+            }
+
+            Save();
+
+            if (_next != null)
+            {
+                _next.UpdateSections(section, values.Where(v => v.Priority >= _next._priority).ToList());
+            }
+        }
+
+        private static void SetElementValues(XElement element, string key, string value, IDictionary<string, string> attributes)
+        {
+            foreach (var existingAttribute in element.Attributes())
+            {
+                if (!string.Equals(existingAttribute.Name.LocalName, "key", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(existingAttribute.Name.LocalName, "value", StringComparison.OrdinalIgnoreCase) &&
+                    !attributes.ContainsKey(existingAttribute.Name.LocalName))
+                {
+                    // Remove previously existing attributes that are no longer present.
+                    existingAttribute.Remove();
+                }
+            }
+
+            element.SetAttributeValue("key", key);
+            element.SetAttributeValue("value", value);
+
+            if (attributes != null)
+            {
+                foreach (var attribute in attributes)
+                {
+                    element.SetAttributeValue(attribute.Key, attribute.Value);
+                }
+            }
         }
 
         public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
@@ -457,12 +537,13 @@ namespace NuGet
 
             foreach (var kvp in values)
             {
-                SetValueInternal(element, kvp.Key, kvp.Value);
+                SetValueInternal(element, kvp.Key, kvp.Value, attributes: null);
             }
             Save();
         }
 
-        private void SetValueInternal(XElement sectionElement, string key, string value)
+
+        private void SetValueInternal(XElement sectionElement, string key, string value, IDictionary<string, string> attributes)
         {
             if (String.IsNullOrEmpty(key))
             {
@@ -474,16 +555,17 @@ namespace NuGet
             }
 
             var element = FindElementByKey(sectionElement, key, null);
+
             if (element != null)
             {
-                element.SetAttributeValue("value", value);
+                SetElementValues(element, key, value, attributes);
                 Save();
             }
             else
             {
-                sectionElement.AddIndented(new XElement("add",
-                                                    new XAttribute("key", key),
-                                                    new XAttribute("value", value)));
+                element = new XElement("add");
+                SetElementValues(element, key, value, attributes);
+                sectionElement.AddIndented(element);
             }
         }
 
@@ -537,7 +619,7 @@ namespace NuGet
 
                 return _next.DeleteSection(section);
             }
-            
+
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -557,8 +639,7 @@ namespace NuGet
         private void ReadSection(
             XContainer sectionElement,
             ICollection<SettingValue> values,
-            bool isPath,
-            int priority)
+            bool isPath)
         {
             var elements = sectionElement.Elements();
 
@@ -567,8 +648,7 @@ namespace NuGet
                 string elementName = element.Name.LocalName;
                 if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase))
                 {
-                    var v = ReadValue(element, isPath);
-                    values.Add(new SettingValue(v.Key, v.Value, _isMachineWideSettings, priority));
+                    values.Add(ReadSettingsValue(element, isPath));
                 }
                 else if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
                 {
@@ -585,7 +665,7 @@ namespace NuGet
         // When isPath is true, then the setting value is checked to see if it can be interpreted
         // as relative path. If it can, the returned value will be the full path of the relative path.
         // If it cannot be interpreted as relative path, the value is returned as-is.
-        private KeyValuePair<string, string> ReadValue(XElement element, bool isPath)
+        private SettingValue ReadSettingsValue(XElement element, bool isPath)
         {
             var keyAttribute = element.Attribute("key");
             var valueAttribute = element.Attribute("value");
@@ -603,7 +683,18 @@ namespace NuGet
                 value = _fileSystem.GetFullPath(Path.Combine(configDirectory, value));
             }
 
-            return new KeyValuePair<string, string>(keyAttribute.Value, value);
+            var settingValue = new SettingValue(keyAttribute.Value, value, IsMachineWideSettings, _priority);
+            foreach (var attribute in element.Attributes())
+            {
+                // Add all attributes other than ConfigurationContants.KeyAttribute and ConfigurationContants.ValueAttribute to AdditionalValues
+                if (!string.Equals(attribute.Name.LocalName, "key", StringComparison.Ordinal) &&
+                    !string.Equals(attribute.Name.LocalName, "value", StringComparison.Ordinal))
+                {
+                    settingValue.AdditionalData[attribute.Name.LocalName] = attribute.Value;
+                }
+            }
+
+            return settingValue;
         }
 
         private static XElement GetSection(XElement parentElement, string section)
@@ -642,7 +733,7 @@ namespace NuGet
             }
             return result;
         }
-        
+
         /// <remarks>
         /// Order is most significant (e.g. applied last) to least significant (applied first)
         /// ex:
@@ -735,7 +826,7 @@ namespace NuGet
                     }
                 }
             }
-            
+
         }
     }
 }

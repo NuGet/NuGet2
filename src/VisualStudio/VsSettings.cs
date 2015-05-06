@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void SetValues(string section, IList<KeyValuePair<string, string>> values)
+        public void SetValues(string section, IReadOnlyList<SettingValue> values)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
@@ -137,6 +137,18 @@ namespace NuGet.VisualStudio
             else
             {
                 _defaultSettings.SetValues(section, values);
+            }
+        }
+
+        public void UpdateSections(string section, IReadOnlyList<SettingValue> values)
+        {
+            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
+            {
+                SolutionSettings.UpdateSections(section, values);
+            }
+            else
+            {
+                _defaultSettings.UpdateSections(section, values);
             }
         }
 

@@ -6,6 +6,8 @@ namespace NuGet
     [DataContract]
     public class PackageSource : IEquatable<PackageSource>
     {
+        public static readonly int DefaultProtocolVersion = 2;
+
         private readonly int _hashCode;
 
         [DataMember]
@@ -29,6 +31,8 @@ namespace NuGet
         public string Password { get; set; }
 
         public bool IsPasswordClearText { get; set; }
+
+        public int ProtocolVersion { get; set; }
 
         public PackageSource(string source) :
             this(source, source, isEnabled: true)
@@ -61,6 +65,7 @@ namespace NuGet
             Source = source;
             IsEnabled = isEnabled;
             IsOfficial = isOfficial;
+            ProtocolVersion = DefaultProtocolVersion;
             _hashCode = Name.ToUpperInvariant().GetHashCode() * 3137 + Source.ToUpperInvariant().GetHashCode();
         }
 
@@ -97,7 +102,14 @@ namespace NuGet
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText, IsMachineWide = IsMachineWide };
+            return new PackageSource(Source, Name, IsEnabled, IsOfficial)
+            {
+                UserName = UserName,
+                Password = Password,
+                IsPasswordClearText = IsPasswordClearText,
+                IsMachineWide = IsMachineWide,
+                ProtocolVersion = ProtocolVersion
+            };
         }
     }
 }
