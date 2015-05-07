@@ -1372,6 +1372,23 @@ namespace NuGet.Test
         }
 
         [Theory]
+        [InlineData("netcore45", "win")]
+        [InlineData("netcore451", "win81")]
+        [InlineData("netcore50", ".NETCore50")]
+        [InlineData("netcore53", ".NETCore53")]
+        public void GetShortNameForNetCoreFrameworks(string frameworkName, string expected)
+        {
+            // Arrange
+            FrameworkName framework = VersionUtility.ParseFrameworkName(frameworkName);
+
+            // Act
+            string actual = VersionUtility.GetShortFrameworkName(framework);
+
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
         [InlineData("ASP.Net, Version=5.0", "aspnet50")]
         [InlineData("ASP.NetCore, Version=5.0", "aspnetcore50")]
         [InlineData("ASP.Net, Version=5.1", "aspnet51")]
@@ -1502,6 +1519,24 @@ namespace NuGet.Test
         [InlineData("portable-netcore45+sl4", "silverlight45")]
         [InlineData("portable-net40+win8+sl4+wp71+wpa81", "wp81")]
         public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework(string packageFramework, string projectFramework)
+        {
+            // Arrange
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
+
+            // Assert
+            Assert.True(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("netcore45", "win")]
+        [InlineData("netcore451", "win81")]
+        [InlineData("win", "netcore45")]
+        [InlineData("win81", "netcore451")]
+        public void IsCompatibleReturnsTrueForNetCoreAndWinFrameworks(string packageFramework, string projectFramework)
         {
             // Arrange
             var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
