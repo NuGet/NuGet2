@@ -54,7 +54,7 @@
         <MajorVersion>2</MajorVersion>
         <MinorVersion>8</MinorVersion>
         <Patch>6</Patch>
-        <PrereleaseTag></PrereleaseTag>
+        <PrereleaseTag Condition=" '$(PrereleaseTag)' == '' "></PrereleaseTag>
 
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
