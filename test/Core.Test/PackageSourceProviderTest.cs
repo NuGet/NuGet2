@@ -124,9 +124,9 @@ namespace NuGet.Test
             // disable package "three"
             settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new[] { new SettingValue("three", "true", false) });
 
-            IReadOnlyList<SettingValue> savedSettingValues = null;
-            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback<string, IReadOnlyList<SettingValue>>((_, savedVals) => { savedSettingValues = savedVals; })
+            IList<SettingValue> savedSettingValues = null;
+            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback<string, IList<SettingValue>>((_, savedVals) => { savedSettingValues = savedVals; })
                     .Verifiable();
 
             var provider = CreatePackageSourceProvider(settings.Object,
@@ -172,8 +172,8 @@ namespace NuGet.Test
             settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
             settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new SettingValue[0]);
             settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
-            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> values) =>
                     {
                         Assert.Equal(3, values.Count);
                         Assert.Equal("one", values[0].Key);
@@ -185,8 +185,8 @@ namespace NuGet.Test
                     })
                     .Verifiable();
 
-            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IList<SettingValue>>()))
+                .Callback((string section, IList<SettingValue> values) =>
                 {
                     Assert.Empty(values);
                 })
@@ -218,8 +218,8 @@ namespace NuGet.Test
                                      new SettingValue("three", "three", false) { Priority = 2 }
                                 });
 
-            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> values) =>
                     {
                         // verifies that only sources "two" and "three" are passed.
                         // the machine wide source "one" is not.
@@ -231,8 +231,8 @@ namespace NuGet.Test
                     })
                     .Verifiable();
 
-            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IList<SettingValue>>()))
+                .Callback((string section, IList<SettingValue> values) =>
                 {
                     // verifies that the machine wide source "one" is passed here
                     // since it is disabled.                    
@@ -575,8 +575,8 @@ namespace NuGet.Test
             settings.Setup(s => s.GetValues("disabledPackageSources", false)).Returns(new SettingValue[0]);
             settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
 
-            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> valuePairs) =>
+            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> valuePairs) =>
                     {
                         Assert.Equal(1, valuePairs.Count);
                         Assert.Equal("nuget.org", valuePairs[0].Key);
@@ -584,8 +584,8 @@ namespace NuGet.Test
                     })
                     .Verifiable();
 
-            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                .Callback((string section, IReadOnlyList<SettingValue> valuePairs) =>
+            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IList<SettingValue>>()))
+                .Callback((string section, IList<SettingValue> valuePairs) =>
                 {
                     Assert.Empty(valuePairs);
                 })
@@ -783,8 +783,8 @@ namespace NuGet.Test
                 .Verifiable();
             settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
 
-            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("packageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> values) =>
                     {
                         Assert.Equal(3, values.Count);
                         Assert.Equal("one", values[0].Key);
@@ -796,8 +796,8 @@ namespace NuGet.Test
                     })
                     .Verifiable();
 
-            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> values) =>
                     {
                         Assert.Empty(values);
                     })
@@ -819,8 +819,8 @@ namespace NuGet.Test
             // Arrange
             var sources = new[] { new PackageSource("one"), new PackageSource("two", "two", isEnabled: false), new PackageSource("three") };
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IReadOnlyList<SettingValue>>()))
-                    .Callback((string section, IReadOnlyList<SettingValue> values) =>
+            settings.Setup(s => s.UpdateSections("disabledPackageSources", It.IsAny<IList<SettingValue>>()))
+                    .Callback((string section, IList<SettingValue> values) =>
                     {
                         Assert.Equal(1, values.Count);
                         Assert.Equal("two", values[0].Key);

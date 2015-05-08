@@ -9,6 +9,7 @@
     <AssemblyName>NuGet.Core</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile Condition=" '$(MonoBuild)' == '' And '$(TargetFrameworkVersion)' == 'v4.0' ">Client</TargetFrameworkProfile>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>

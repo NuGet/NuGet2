@@ -401,7 +401,7 @@ namespace NuGet
             Save();
         }
 
-        public void SetValues(string section, IReadOnlyList<SettingValue> values)
+        public void SetValues(string section, IList<SettingValue> values)
         {
             // machine wide settings cannot be changed.
             if (IsMachineWideSettings)
@@ -432,7 +432,7 @@ namespace NuGet
             Save();
         }
 
-        public void UpdateSections(string section, IReadOnlyList<SettingValue> values)
+        public void UpdateSections(string section, IList<SettingValue> values)
         {
             // machine wide settings cannot be changed.
             if (IsMachineWideSettings)

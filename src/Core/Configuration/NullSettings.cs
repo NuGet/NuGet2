@@ -34,12 +34,12 @@ namespace NuGet
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidNullSettingsOperation, "SetValue"));
         }
 
-        public void SetValues(string section, IReadOnlyList<SettingValue> values)
+        public void SetValues(string section, IList<SettingValue> values)
         {
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidNullSettingsOperation, "SetValues"));
         }
 
-        public void UpdateSections(string section, IReadOnlyList<SettingValue> values)
+        public void UpdateSections(string section, IList<SettingValue> values)
         {
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidNullSettingsOperation, "UpdateSections"));
         }

@@ -56,7 +56,7 @@ namespace NuGet
         /// </summary>
         /// <param name="section">The name of the section.</param>
         /// <param name="values">The values to set.</param>
-        void SetValues(string section, IReadOnlyList<SettingValue> values);
+        void SetValues(string section, IList<SettingValue> values);
 
         /// <summary>
         /// Updates the <paramref name="values" /> across multiple <see cref="ISettings"/> instances in the hierarchy.
@@ -64,7 +64,7 @@ namespace NuGet
         /// </summary>
         /// <param name="section">The name of the section.</param>
         /// <param name="values">The values to set.</param>
-        void UpdateSections(string section, IReadOnlyList<SettingValue> values);
+        void UpdateSections(string section, IList<SettingValue> values);
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the best fit for this internal class")]
         void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values);
