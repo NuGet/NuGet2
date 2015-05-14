@@ -32,6 +32,11 @@ namespace NuGet
         public static readonly string ToolsDirectory = "tools";
 
         /// <summary>
+        /// Represents the ".nupkg.sha512" extension.
+        /// </summary>
+        public static readonly string HashFileExtension = PackageExtension + ".sha512";
+
+        /// <summary>
         /// Represents the build directory in the package.
         /// </summary>
         public static readonly string BuildDirectory = "build";

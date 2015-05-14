@@ -31,6 +31,23 @@ namespace NuGet
         {
         }
 
+        public ZipPackage(Func<Stream> packageStreamFactory, Func<Stream> manifestStreamFactory)
+        {
+            if (packageStreamFactory == null)
+            {
+                throw new ArgumentNullException("packageStreamFactory");
+            }
+
+            if (manifestStreamFactory == null)
+            {
+                throw new ArgumentNullException("manifestStreamFactory");
+            }
+
+            _enableCaching = false;
+            _streamFactory = packageStreamFactory;
+            EnsureManifest(manifestStreamFactory);
+        }
+
         public ZipPackage(Stream stream)
         {
             if (stream == null)
@@ -39,7 +56,10 @@ namespace NuGet
             }
             _enableCaching = false;
             _streamFactory = stream.ToStreamFactory();
-            EnsureManifest();
+            using (stream = _streamFactory())
+            {
+                EnsureManifest(() => GetManifestStreamFromPackage(stream));
+            }
         }
 
         private ZipPackage(string filePath, bool enableCaching)
@@ -50,7 +70,10 @@ namespace NuGet
             }
             _enableCaching = enableCaching;
             _streamFactory = () => File.OpenRead(filePath);
-            EnsureManifest();
+            using (var stream = _streamFactory())
+            {
+                EnsureManifest(() => GetManifestStreamFromPackage(stream));
+            }
         }
 
         internal ZipPackage(Func<Stream> streamFactory, bool enableCaching)
@@ -61,7 +84,10 @@ namespace NuGet
             }
             _enableCaching = enableCaching;
             _streamFactory = streamFactory;
-            EnsureManifest();
+            using (var stream = _streamFactory())
+            {
+                EnsureManifest(() => GetManifestStreamFromPackage(stream));
+            }
         }
 
         public override Stream GetStream()
@@ -135,31 +161,33 @@ namespace NuGet
             }
         }
 
-        private void EnsureManifest()
+        private void EnsureManifest(Func<Stream> manifestStreamFactory)
         {
-            using (Stream stream = _streamFactory())
+            using (Stream manifestStream = manifestStreamFactory())
             {
-                Package package = Package.Open(stream);
-
-                PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.PackageRelationshipNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
-
-                if (relationshipType == null)
-                {
-                    throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
-                }
-
-                PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
-
-                if (manifestPart == null)
-                {
-                    throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
-                }
-
-                using (Stream manifestStream = manifestPart.GetStream())
-                {
-                    ReadManifest(manifestStream);
-                }
+                ReadManifest(manifestStream);
             }
+        }
+
+        private static Stream GetManifestStreamFromPackage(Stream packageStream)
+        {
+            Package package = Package.Open(packageStream);
+
+            PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.PackageRelationshipNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
+
+            if (relationshipType == null)
+            {
+                throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
+            }
+
+            PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
+
+            if (manifestPart == null)
+            {
+                throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
+            }
+
+            return manifestPart.GetStream();
         }
 
         private string GetFilesCacheKey()

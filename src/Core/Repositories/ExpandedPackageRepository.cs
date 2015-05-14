@@ -1,8 +1,7 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Packaging;
 using System.Linq;
+using System.Text;
 
 namespace NuGet
 {
@@ -13,15 +12,19 @@ namespace NuGet
     public class ExpandedPackageRepository : PackageRepositoryBase, IPackageLookup
     {
         private readonly IFileSystem _fileSystem;
+        private readonly IHashProvider _hashProvider;
 
-        public ExpandedPackageRepository(string physicalPath)
-            : this(new PhysicalFileSystem(physicalPath))
+        public ExpandedPackageRepository(IFileSystem fileSystem)
+            : this(fileSystem, new CryptoHashProvider())
         {
         }
 
-        public ExpandedPackageRepository(IFileSystem fileSystem)
+        public ExpandedPackageRepository(
+            IFileSystem fileSystem,
+            IHashProvider hashProvider)
         {
             _fileSystem = fileSystem;
+            _hashProvider = hashProvider;
         }
 
         public override string Source
@@ -36,20 +39,17 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            var packagePath = GetPackagePath(package.Id, package.Version);
-            foreach (var file in package.GetFiles())
-            {
-                using (var stream = file.GetStream())
-                {
-                    _fileSystem.AddFile(Path.Combine(packagePath, file.Path), stream);
-                }
-            }
+            var packagePath = GetPackageRoot(package.Id, package.Version);
+            var nupkgPath = Path.Combine(packagePath, package.Id + "." + package.Version.ToNormalizedString() + Constants.PackageExtension);
 
             using (var stream = package.GetStream())
             {
-                var nupkgPath = Path.Combine(packagePath, package.Id + "." + package.Version.ToNormalizedString() + Constants.PackageExtension);
                 _fileSystem.AddFile(nupkgPath, stream);
             }
+
+            var hashBytes = Encoding.UTF8.GetBytes(package.GetHash(_hashProvider));
+            var hashFilePath = Path.ChangeExtension(nupkgPath, Constants.HashFileExtension);
+            _fileSystem.AddFile(hashFilePath, hashFileStream => { hashFileStream.Write(hashBytes, 0, hashBytes.Length); });
 
             using (var stream = package.GetStream())
             {
@@ -65,27 +65,25 @@ namespace NuGet
         {
             if (Exists(package.Id, package.Version))
             {
-                var packagePath = GetPackagePath(package.Id, package.Version);
+                var packagePath = GetPackageRoot(package.Id, package.Version);
                 _fileSystem.DeleteDirectorySafe(packagePath, recursive: true);
             }
         }
 
         public bool Exists(string packageId, SemanticVersion version)
         {
-            var packagePath = GetPackagePath(packageId, version);
-            var manifestPath = Path.Combine(packagePath, packageId + Constants.ManifestExtension);
-            return _fileSystem.FileExists(manifestPath);
+            var hashFilePath = Path.ChangeExtension(GetPackagePath(packageId, version), Constants.HashFileExtension);
+            return _fileSystem.FileExists(hashFilePath);
         }
 
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
-            var packagePath = GetPackagePath(packageId, version);
-            if (_fileSystem.FileExists(Path.Combine(packagePath, packageId + Constants.ManifestExtension)))
+            if (!Exists(packageId, version))
             {
-                return new UnzippedPackage(_fileSystem, packageId, version);
+                return null;
             }
 
-            return null;
+            return GetPackageInternal(packageId, version);
         }
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)
@@ -95,9 +93,9 @@ namespace NuGet
                 var versionDirectoryName = Path.GetFileName(versionDirectory);
                 SemanticVersion version;
                 if (SemanticVersion.TryParse(versionDirectoryName, out version) &&
-                    _fileSystem.FileExists(Path.Combine(versionDirectory, packageId + Constants.ManifestExtension)))
+                    Exists(packageId, version))
                 {
-                    yield return new UnzippedPackage(_fileSystem, packageId, version);
+                    yield return GetPackageInternal(packageId, version);
                 }
             }
         }
@@ -112,9 +110,23 @@ namespace NuGet
                 }).AsQueryable();
         }
 
-        private static string GetPackagePath(string packageId, SemanticVersion version)
+        private static string GetPackageRoot(string packageId, SemanticVersion version)
         {
             return Path.Combine(packageId, version.ToNormalizedString());
+        }
+
+        private IPackage GetPackageInternal(string packageId, SemanticVersion version)
+        {
+            var packagePath = GetPackagePath(packageId, version);
+            var manifestPath = Path.Combine(GetPackageRoot(packageId, version), packageId + Constants.ManifestExtension);
+            return new ZipPackage(() => _fileSystem.OpenFile(packagePath), () => _fileSystem.OpenFile(manifestPath));
+        }
+
+        private static string GetPackagePath(string packageId, SemanticVersion version)
+        {
+            return Path.Combine(
+                GetPackageRoot(packageId, version),
+                packageId + "." + version.ToNormalizedString() + Constants.PackageExtension);
         }
     }
 }

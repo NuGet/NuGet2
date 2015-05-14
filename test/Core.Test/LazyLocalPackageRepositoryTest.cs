@@ -135,6 +135,7 @@ namespace NuGet.Test
             // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(Path.Combine("MyPackage", "1.0.0-beta2", "MyPackage.1.0.0-beta2.nupkg"));
+            fileSystem.AddFile(Path.Combine("MyPackage", "1.0.0-beta2", "MyPackage.1.0.0-beta2.nupkg.sha512"));
             fileSystem.AddFile(Path.Combine("MyPackage", "1.0.0-beta2", "MyPackage.nuspec"),
                 @"<?xml version=""1.0""?><package><metadata><id>MyPackage</id><version>1.0.0-beta2</version><authors>None</authors><description>None</description></metadata></package>");
             var repository = new LazyLocalPackageRepository(fileSystem);
