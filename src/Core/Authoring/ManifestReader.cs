@@ -134,6 +134,13 @@ namespace NuGet
                 case "references":
                     manifestMetadata.ReferenceSets = ReadReferenceSets(element);
                     break;
+                case "packageType":
+                    manifestMetadata.PackageType = new PackageTypeMetadata
+                    {
+                        Value = value,
+                        Version = element.GetOptionalAttributeValue("version")
+                    };
+                    break;
             }
         }
 

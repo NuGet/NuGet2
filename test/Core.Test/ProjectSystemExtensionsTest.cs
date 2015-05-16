@@ -213,7 +213,7 @@ namespace NuGet.Test
             var logger = new Mock<ILogger>();
 
             // Arrange
-            var project = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"), "x:\\root");
+            var project = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false), "x:\\root");
             project.AddFile("a.txt", "this is a");
             project.AddFile("c.txt", "this is c");
             project.Logger = logger.Object;

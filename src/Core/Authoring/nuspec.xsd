@@ -30,13 +30,22 @@
         </xs:sequence>
         <xs:attribute name="targetFramework" type="xs:string" use="optional" />
     </xs:complexType>
-    
+
     <xs:element name="package">
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="metadata" maxOccurs="1" minOccurs="1">
                     <xs:complexType>
                         <xs:all>
+                            <xs:element name="packageType" maxOccurs="1" minOccurs="0">
+                              <xs:complexType>
+                                <xs:simpleContent>
+                                  <xs:extension base="xs:string">
+                                    <xs:attribute name="version" type="xs:string" use="required" />
+                                  </xs:extension>
+                                </xs:simpleContent>
+                              </xs:complexType>
+                            </xs:element>
                             <xs:element name="id" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="version" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="title" maxOccurs="1" minOccurs="0" type="xs:string" />

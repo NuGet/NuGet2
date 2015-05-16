@@ -49,7 +49,7 @@ namespace NuGet.Test
             IPackage packageA = PackageUtility.CreatePackage(
                 "A",
                 "1.0",
-                assemblyReferences: new[] { "lib\\a.dll"});
+                assemblyReferences: new[] { "lib\\a.dll" });
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -128,9 +128,9 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
 
             var projectManager = new ProjectManager(
-                sourceRepository, 
-                new DefaultPackagePathResolver(projectSystem), 
-                projectSystem, 
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
                 localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage(
@@ -171,7 +171,7 @@ namespace NuGet.Test
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false), new [] { "a.dll" }),
                         new PackageReferenceSet(null, new [] { "b.dll" })
                     }
                 );
@@ -201,8 +201,8 @@ namespace NuGet.Test
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45"), new [] { "b.dll" })
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45", useManagedCodeConventions: false), new [] { "b.dll" })
                     }
                 );
 
@@ -265,7 +265,7 @@ namespace NuGet.Test
             IPackage packageB = PackageUtility.CreatePackage(
                "B",
                "1.0",
-               dependencies: new [] { new PackageDependency("A", VersionUtility.ParseVersionSpec("1.1.0")) },
+               dependencies: new[] { new PackageDependency("A", VersionUtility.ParseVersionSpec("1.1.0")) },
                assemblyReferences: new[] { "lib\\b.dll" });
 
             sourceRepository.AddPackage(packageA1);
@@ -401,8 +401,8 @@ namespace NuGet.Test
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "c.dll" }),
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45"), new [] { "d.dll" })
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false), new [] { "c.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45", useManagedCodeConventions: false), new [] { "d.dll" })
                     }
                 );
 
@@ -431,8 +431,8 @@ namespace NuGet.Test
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("sl50"), new [] { "a.dll" }),
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("sl50", useManagedCodeConventions: false), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8", useManagedCodeConventions: false), new [] { "b.dll" })
                     }
                 );
 
@@ -487,14 +487,19 @@ namespace NuGet.Test
         {
             // Arrange
             var portableCollection = new NetPortableProfileCollection();
-            portableCollection.Add(new NetPortableProfile("Profile104", new [] { VersionUtility.ParseFrameworkName("net45"), VersionUtility.ParseFrameworkName("sl5")}));
+            portableCollection.Add(new NetPortableProfile("Profile104", 
+                new[] 
+                { 
+                    VersionUtility.ParseFrameworkName("net45", useManagedCodeConventions: false), 
+                    VersionUtility.ParseFrameworkName("sl5", useManagedCodeConventions: false) 
+                }));
 
             NetPortableProfileTable.Profiles = portableCollection;
 
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETPortable, Version=1.0, Profile=Profile104"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt"});
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt" });
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -524,7 +529,7 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net4+wp8+windows8"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net4+wp8+windows8", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable-windows8+sl4+wp8+net4\\portable.txt", "me.txt" });
             sourceRepository.AddPackage(packageA);
@@ -542,16 +547,16 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+wp8+windows8"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+wp8+windows8", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             var dependencySets = new PackageDependencySet[] 
             {
                 new PackageDependencySet(targetFramework: null, dependencies: new [] { PackageDependency.CreateDependency("B", "1.0.0")}),
-                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("net45"), dependencies: new PackageDependency[0] { }),
-                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("win8"), dependencies: new PackageDependency[0] { }),
-                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("wp8"), dependencies: new PackageDependency[0] { }),
-                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("portable-net45+win8+wp8"), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("net45", useManagedCodeConventions: false), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("win8", useManagedCodeConventions: false), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("wp8", useManagedCodeConventions: false), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("portable-net45+win8+wp8", useManagedCodeConventions: false), dependencies: new PackageDependency[0] { }),
             };
 
             IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0", new[] { "me.txt" }, dependencySets: dependencySets);
@@ -576,7 +581,7 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net45"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net45", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "netcf\\you.dll", "lib\\portable-sl4+net45+wp8+windows8\\portable.dll", "lib\\me.dll" });
             sourceRepository.AddPackage(packageA);
@@ -598,12 +603,12 @@ namespace NuGet.Test
             Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
 
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
-            string expectedErrorMessage = 
+            string expectedErrorMessage =
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 1.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
@@ -618,11 +623,11 @@ namespace NuGet.Test
             Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
 
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage(
-                "A", 
-                "1.0", 
+                "A",
+                "1.0",
                 assemblyReferences: new[] { "lib\\me.dll" },
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
             IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
@@ -644,7 +649,7 @@ namespace NuGet.Test
             Version requiredVersion = nugetVersion;
 
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
@@ -669,7 +674,7 @@ namespace NuGet.Test
             }
 
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
@@ -690,7 +695,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(new FrameworkName(projectFramework));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable40-net40+wp7+silverlight4+windows\\two.txt", pickedContentFile});
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable40-net40+wp7+silverlight4+windows\\two.txt", pickedContentFile });
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -754,7 +759,7 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("sl4"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("sl4", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "sl3\\_._", "me.txt" });
             sourceRepository.AddPackage(packageA);
@@ -792,11 +797,11 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage(
-                "A", 
-                "1.0", 
+                "A",
+                "1.0",
                 new[] { "portable-net45+sl5+wp8\\one.txt",
                         "portable-net45+sl5+wp71\\two.txt",
                         "portable-net45+sl5+wp71+win8\\three.txt",
@@ -804,7 +809,7 @@ namespace NuGet.Test
                         "portable-net40+sl4+wp71+win8\\five.txt",
                         "portable-net40+sl4+wp7+win8\\six.txt",
                         "portable-wp8+win8\\seven.txt" });
-            
+
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -826,7 +831,7 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage(
                 "A",
@@ -859,7 +864,7 @@ namespace NuGet.Test
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("netcore45"));
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("netcore45", useManagedCodeConventions: false));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage(
                 "A",
@@ -901,7 +906,7 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageA20);
             sourceRepository.AddPackage(packageB10);
             sourceRepository.AddPackage(packageA10);
-            
+
             // Act & Assert
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
             Assert.False(projectManager.LocalRepository.Exists(packageA20));
@@ -940,7 +945,7 @@ namespace NuGet.Test
             Assert.False(projectManager.LocalRepository.Exists(packageB20));
             Assert.True(projectManager.LocalRepository.Exists(packageB10));
         }
-          
+
         [Fact]
         public void RemovingUnknownPackageReferenceThrows()
         {
@@ -978,7 +983,7 @@ fdsalk;fj;lkdsajfl;kdsa
 ");
             // Act 
             projectManager.RemovePackageReference("A");
-            
+
             // Assert
             Assert.False(projectManager.LocalRepository.Exists(packageA));
             Assert.False(projectSystem.FileExists("a.file"));
@@ -1001,7 +1006,7 @@ SDAFLKDSAJFL;KJDSAL;KFJL;DSAKJFL;KDSA
 
             var mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(p => p.GetFiles()).Returns(new[] { contentFile.Object });
-            
+
             sourceRepository.AddPackage(packageA);
 
             projectManager.AddPackageReference("A");
@@ -1308,7 +1313,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", 
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 new[] { "a", "b", "packages.config.pp", "PACKAGES.config.transform", "packages.config.install.xdt", "packages.config.uninstall.xdt" });
             sourceRepository.AddPackage(packageA);
 
@@ -1730,7 +1735,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0]
-            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0", 
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                content: new[] { "foo" });
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 content: new[] { "foo" });
@@ -1866,7 +1871,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             sourceRepository.AddPackage(packageA20);
 
             // Act & Assert
-            projectManager.UpdatePackageReference(packageA20, updateDependencies: true, allowPrereleaseVersions: true);            
+            projectManager.UpdatePackageReference(packageA20, updateDependencies: true, allowPrereleaseVersions: true);
             Assert.True(projectManager.LocalRepository.Exists(packageA20));
             Assert.False(projectManager.LocalRepository.Exists(packageA10));
         }
@@ -1976,8 +1981,8 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectSystem = new MockProjectSystem();
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
-            var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] {"good"});
-            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] {"excellent"});
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" });
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);
@@ -2032,9 +2037,9 @@ fdsalk;fj;lkdsajfl;kdsa");
 
             var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
             var packageA2 = PackageUtility.CreatePackage(
-                "A", 
-                "2.0-alpha", 
-                content: new string[] { "excellent" }, 
+                "A",
+                "2.0-alpha",
+                content: new string[] { "excellent" },
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
@@ -2327,7 +2332,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             Assert.True(projectManager.LocalRepository.Exists(packageB20));
             Assert.True(projectManager.LocalRepository.Exists(packageC20));
         }
-        
+
         [Fact]
         public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents()
         {
@@ -2478,8 +2483,8 @@ fdsalk;fj;lkdsajfl;kdsa");
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8", useManagedCodeConventions: false), new [] { "b.dll" })
                     }
                 );
 
@@ -2516,8 +2521,8 @@ fdsalk;fj;lkdsajfl;kdsa");
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50"), new [] { "a.dll" }),
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50", useManagedCodeConventions: false), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8", useManagedCodeConventions: false), new [] { "b.dll" })
                     }
                 );
 
@@ -2554,7 +2559,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
             mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
                     new PackageReferenceSet[] { 
-                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50", useManagedCodeConventions: false), new [] { "a.dll" }),
                         new PackageReferenceSet(null, new [] { "b.dll" })
                     }
                 );
@@ -2618,7 +2623,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"), "x:\\root");
             projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.props", ProjectImportLocation.Top);
             projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.targets", ProjectImportLocation.Bottom);
-            
+
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -2724,7 +2729,7 @@ fdsalk;fj;lkdsajfl;kdsa");
 
             // Act & Assert            
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => projectManager.AddPackageReference("A"), 
+                () => projectManager.AddPackageReference("A"),
                 "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v2.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
             Assert.False(localRepository.Exists(mockPackage.Object));
         }
@@ -2737,12 +2742,12 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, localRepository);
-            mockProjectSystem.Setup(m => m.TargetFramework).Returns(VersionUtility.ParseFrameworkName("net20"));
+            mockProjectSystem.Setup(m => m.TargetFramework).Returns(VersionUtility.ParseFrameworkName("net20", useManagedCodeConventions: false));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
             mockPackage.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             mockPackage.Setup(m => m.Listed).Returns(true);
-            var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { VersionUtility.ParseFrameworkName("net50") });
+            var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { VersionUtility.ParseFrameworkName("net50", useManagedCodeConventions: false) });
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(new[] { frameworkReference });
             sourceRepository.AddPackage(mockPackage.Object);
 
@@ -2762,7 +2767,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var packageA = PackageUtility.CreatePackage("A", "1.0");
-            
+
             var mockPackageA = Mock.Get(packageA);
             var files = PackageUtility.CreateFiles(new[] { "build\\native\\A.targets", "build\\native\\a.props" });
             mockPackageA.Setup(p => p.GetFiles()).Returns(files);
@@ -2790,14 +2795,14 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            
-            var packageA = PackageUtility.CreatePackage("A", "1.0", new [] { "hello.txt" });
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "hello.txt" });
             var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") });
 
             var mockPackageB = Mock.Get(packageB);
             var files = PackageUtility.CreateFiles(new[] { "readme.txt", "foo.bar" });
             mockPackageB.Setup(p => p.GetFiles()).Returns(files);
-            
+
             mockRepository.AddPackage(packageA);
             mockRepository.AddPackage(packageB);
 
@@ -2819,7 +2824,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             var packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "hello.txt" });
-            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") }, tools: new [] { "aaaa.txt" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") }, tools: new[] { "aaaa.txt" });
 
             mockRepository.AddPackage(packageA);
             mockRepository.AddPackage(packageB);
@@ -3150,8 +3155,8 @@ fdsalk;fj;lkdsajfl;kdsa");
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new [] { new PackageDependency("B") });
-            var packageB = PackageUtility.CreatePackage("B", "1.0-alpha", new [] { "net\\hello.txt" });
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", "1.0-alpha", new[] { "net\\hello.txt" });
             mockRepository.AddPackage(packageA);
             mockRepository.AddPackage(packageB);
 
@@ -3386,7 +3391,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var dependecySets = CreateDependencySet(".NETFramework, Version=" + dependencyVersion, dependency);
 
             IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
-                                                                dependencySets: new [] { dependecySets }, 
+                                                                dependencySets: new[] { dependecySets },
                                                                 content: new[] { "a.txt" });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b.txt" });
@@ -3396,7 +3401,7 @@ fdsalk;fj;lkdsajfl;kdsa");
 
             // Act
             projectManager.AddPackageReference("A");
-            
+
             // Assert
             Assert.True(projectManager.LocalRepository.Exists("A"));
             Assert.True(projectManager.LocalRepository.Exists("B"));
@@ -3493,11 +3498,11 @@ fdsalk;fj;lkdsajfl;kdsa");
 
             var dependency = new PackageDependency("B", null);
             var dependencySet = new PackageDependencySet(
-                new FrameworkName(".NETFramework", new Version(dependencyVersion)), 
-                new PackageDependency[] {dependency});
+                new FrameworkName(".NETFramework", new Version(dependencyVersion)),
+                new PackageDependency[] { dependency });
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "a.txt" });
-            Mock.Get(packageA).Setup(p => p.DependencySets).Returns(new [] {dependencySet});
+            Mock.Get(packageA).Setup(p => p.DependencySets).Returns(new[] { dependencySet });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b.txt" });
 
@@ -3628,7 +3633,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             sourceRepository.AddPackage(packageA2);
 
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
-            
+
             Assert.True(projectManager.LocalRepository.Exists("A"));
             Assert.False(projectManager.LocalRepository.Exists("B"));
 
@@ -3693,7 +3698,7 @@ fdsalk;fj;lkdsajfl;kdsa");
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
 
             var localRepository = new Mock<IPackageReferenceRepository>();
-            localRepository.Setup(p => p.AddPackage("A", 
+            localRepository.Setup(p => p.AddPackage("A",
                                                     new SemanticVersion("1.0"),
                                                     false,
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
@@ -3704,9 +3709,9 @@ fdsalk;fj;lkdsajfl;kdsa");
                                                     new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
 
             var projectManager = new ProjectManager(
-                sourceRepository, 
-                new DefaultPackagePathResolver(projectSystem), 
-                projectSystem, 
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
                 localRepository.Object);
 
             var dependency = new PackageDependency("B", null);
@@ -3732,14 +3737,14 @@ fdsalk;fj;lkdsajfl;kdsa");
         public void SafeUpdatingADependencyDoesNotUninstallPackage()
         {
             // Arrange
-            
+
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
 
-            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new [] { new PackageDependency("C"), new PackageDependency("B") });
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("C"), new PackageDependency("B") });
             var packageB10 = PackageUtility.CreatePackage("B", "1.0", dependencies: new[] { new PackageDependency("C") });
             var packageB101 = PackageUtility.CreatePackage("B", "1.0.1", dependencies: new[] { new PackageDependency("C") });
             var packageC = PackageUtility.CreatePackage("C", "1.0", content: new[] { "1.txt" });
-            
+
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository { packageA, packageB10, packageB101, packageC };
 
@@ -3763,6 +3768,87 @@ fdsalk;fj;lkdsajfl;kdsa");
             Assert.Contains(packageA, localRepository);
             Assert.Contains(packageB10, localRepository);
             Assert.Contains(packageC, localRepository);
+        }
+
+        [Fact]
+        public void AddPackageReferenceIgnoresUnknownFrameworkName()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+wp8+windows8", useManagedCodeConventions: true));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            var dependencySets = new PackageDependencySet[] 
+            {
+                new PackageDependencySet(targetFramework: null, dependencies: new [] { PackageDependency.CreateDependency("B", "1.0.0")}),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("net45", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("win8", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("wp8", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("bazFx", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("portable-net45+win8+wp8", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("portable-net45+win8+wp8+fooFx", useManagedCodeConventions: true), dependencies: new PackageDependency[0] { }),
+            };
+
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets(
+                "A",
+                "1.0",
+                new[] { @"portable-net45+wp8+win80\me1.txt", @"portable-net45+wp8+fooFx\me2.txt" },
+                dependencySets: dependencySets);
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0", new[] { @"net45\you.txt", @"bazFx\baz2-file.txt" });
+
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+
+            // Act
+            projectManager.AddPackageReference("A", null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.False(projectManager.LocalRepository.Exists("B"));
+
+            Assert.True(projectSystem.FileExists("me1.txt"));
+            Assert.False(projectSystem.FileExists("you.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReference_WorksForNewTargetFrameworks()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName("CoreDotPortableNet, Version = 6.0"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            var assemblyReferences = new[]
+            {
+                PackageUtility.CreateAssemblyReference(@"lib\net40\Assembly1.dll", VersionUtility.ParseFrameworkFolderName("net40", useManagedCodeConventions: true)),
+                PackageUtility.CreateAssemblyReference(@"lib\CoreDotPortableNet\Assembly2.dll", VersionUtility.ParseFrameworkFolderName("CoreDotPortableNet", useManagedCodeConventions: true)),
+            };
+
+            IPackage package = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                content: new[] { @"portable-net45+wp8+win80\me1.txt", @"portable-net45+wp8+fooFx\me2.txt", @"CoreDotPortableNet45\test\CoreFile.txt" },
+                assemblyReferences: assemblyReferences,
+                tools: null,
+                dependencySets: null,
+                downloadCount: 0,
+                description: null,
+                summary: null,
+                listed: true,
+                tags: null,
+                language: null,
+                satelliteAssemblies: null,
+                packageType: new PackageType("Managed", new Version("2.0")));
+
+            sourceRepository.AddPackage(package);
+
+            // Act
+            projectManager.AddPackageReference("A", null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+
+            Assert.True(projectSystem.FileExists(@"test\CoreFile.txt"));
+            Assert.True(projectSystem.ReferenceExists(@"Assembly2.dll"));
         }
 
         private ProjectManager CreateProjectManager()

@@ -352,7 +352,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         private static IList<IPackageFile> GetPackageFiles(params string[] paths)
         {
             return (from p in paths
-                    select new PhysicalPackageFile { SourcePath = p, TargetPath = p } as IPackageFile
+                    select new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = p, TargetPath = p } as IPackageFile
             ).ToList();
         }
     }

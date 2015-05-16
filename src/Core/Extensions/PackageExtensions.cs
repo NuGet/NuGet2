@@ -25,6 +25,12 @@ namespace NuGet
             return package.Listed || package.Published > Constants.Unpublished;
         }
 
+        public static bool UsesManagedCodeConventions(this IPackageMetadata package)
+        {
+            return package.PackageType.Name.Equals(PackageType.Managed.Name) &&
+                package.PackageType.Version >= PackageType.Managed.Version;
+        }
+
         /// <summary>
         /// A package is deemed to be a satellite package if it has a language property set, the id of the package is of the format [.*].[Language]
         /// and it has at least one dependency with an id that maps to the core package .
@@ -266,7 +272,7 @@ namespace NuGet
         {
             return from p in packages where p.IsLatestVersion select p;
         }
-        
+
         /// <summary>
         /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
         /// </summary>
@@ -303,12 +309,12 @@ namespace NuGet
 
             MemberExpression propertyExpression;
 
-            if (propertyName.Equals("Id", StringComparison.OrdinalIgnoreCase)) 
+            if (propertyName.Equals("Id", StringComparison.OrdinalIgnoreCase))
             {
                 var cast = Expression.TypeAs(packageParameterExpression, typeof(IPackageName));
                 propertyExpression = Expression.Property(cast, propertyName);
             }
-            else 
+            else
             {
                 propertyExpression = Expression.Property(packageParameterExpression, propertyName);
             }

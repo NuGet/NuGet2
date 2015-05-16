@@ -110,7 +110,7 @@ namespace NuGet.Server.Infrastructure
             if (EnableFrameworkFiltering && targetFrameworks.Any())
             {
                 // Get the list of framework names
-                var frameworkNames = targetFrameworks.Select(frameworkName => VersionUtility.ParseFrameworkName(frameworkName));
+                var frameworkNames = targetFrameworks.Select(frameworkName => VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: true));
 
                 packages = packages.Where(package => frameworkNames.Any(frameworkName => VersionUtility.IsCompatible(frameworkName, cache[package].SupportedFrameworks)));
             }

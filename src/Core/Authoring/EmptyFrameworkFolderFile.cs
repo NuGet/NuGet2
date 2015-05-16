@@ -9,8 +9,8 @@ namespace NuGet
     /// </summary>
     internal sealed class EmptyFrameworkFolderFile : PhysicalPackageFile
     {
-        public EmptyFrameworkFolderFile(string directoryPathInPackage) :
-            base(() => Stream.Null)
+        public EmptyFrameworkFolderFile(string directoryPathInPackage, bool useManagedCodeConventions) :
+            base(() => Stream.Null, useManagedCodeConventions)
         {
             if (directoryPathInPackage == null)
             {

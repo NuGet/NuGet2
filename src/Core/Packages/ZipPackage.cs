@@ -131,7 +131,7 @@ namespace NuGet
                     string effectivePath;
                     fileFrameworks = from part in package.GetParts()
                                      where IsPackageFile(part)
-                                     select VersionUtility.ParseFrameworkNameFromFilePath(UriUtility.GetPath(part.Uri), out effectivePath);
+                                     select VersionUtility.ParseFrameworkNameFromFilePath(UriUtility.GetPath(part.Uri), this.UsesManagedCodeConventions(), out effectivePath);
 
                 }
             }
@@ -165,7 +165,7 @@ namespace NuGet
         {
             return (from file in GetFiles()
                     where IsAssemblyReference(file.Path)
-                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
+                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file, this.UsesManagedCodeConventions())).ToList();
         }
 
         private List<IPackageFile> GetFilesNoCache()
@@ -176,7 +176,7 @@ namespace NuGet
 
                 return (from part in package.GetParts()
                         where IsPackageFile(part)
-                        select (IPackageFile)new ZipPackageFile(part)).ToList();
+                        select (IPackageFile)new ZipPackageFile(part, this.UsesManagedCodeConventions())).ToList();
             }
         }
 

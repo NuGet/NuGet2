@@ -162,7 +162,8 @@ namespace NuGet.Test
                                               string tags,
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
-                                              string minClientVersion = null)
+                                              string minClientVersion = null,
+                                              PackageType packageType = null)
         {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -170,10 +171,11 @@ namespace NuGet.Test
             dependencySets = dependencySets ?? Enumerable.Empty<PackageDependencySet>();
             tools = tools ?? Enumerable.Empty<string>();
             description = description ?? "Mock package " + id;
+            packageType = packageType ?? PackageType.Default;
 
             var allFiles = new List<IPackageFile>();
-            allFiles.AddRange(CreateFiles(content, "content"));
-            allFiles.AddRange(CreateFiles(tools, "tools"));
+            allFiles.AddRange(CreateFiles(content, "content", packageType != PackageType.Default));
+            allFiles.AddRange(CreateFiles(tools, "tools", packageType != PackageType.Default));
             allFiles.AddRange(assemblyReferences);
             allFiles.AddRange(satelliteAssemblies);
 
@@ -207,6 +209,8 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Copyright).Returns("");
             mockPackage.Setup(m => m.MinClientVersion).Returns(minClientVersion == null ? new Version() : Version.Parse(minClientVersion));
             mockPackage.Setup(m => m.PackageAssemblyReferences).Returns(new PackageReferenceSet[0]);
+            mockPackage.Setup(m => m.PackageType).Returns(packageType);
+
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);
@@ -273,7 +277,7 @@ namespace NuGet.Test
             if (fileName.StartsWith("lib\\"))
             {
                 fileName = fileName.Substring(4);
-                return VersionUtility.ParseFrameworkFolderName(fileName, strictParsing: false, effectivePath: out effectivePath);
+                return VersionUtility.ParseFrameworkFolderName(fileName, strictParsing: false, useManagedCodeConventions: false, effectivePath: out effectivePath);
             }
 
             effectivePath = fileName;
@@ -291,28 +295,31 @@ namespace NuGet.Test
             return mockAssemblyReference.Object;
         }
 
-        public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "")
+        public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "", bool useManagedCodeConventions = false)
         {
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames)
             {
-                var mockFile = CreateMockedPackageFile(directory, fileName);
+                var mockFile = CreateMockedPackageFile(directory, fileName, useManagedCodeConventions: useManagedCodeConventions);
                 files.Add(mockFile.Object);
             }
             return files;
         }
 
-        public static Mock<IPackageFile> CreateMockedPackageFile(string directory, string fileName, string content = null)
+        public static Mock<IPackageFile> CreateMockedPackageFile(string directory, string fileName, string content = null, bool useManagedCodeConventions = false)
         {
             string path = PathFixUtility.FixPath(Path.Combine(directory, fileName));
             content = content ?? path;
-            
+
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns(path);
             mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(content)));
 
             string effectivePath;
-            FrameworkName fn = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
+            FrameworkName fn = VersionUtility.ParseFrameworkNameFromFilePath(
+                path,
+                useManagedCodeConventions: useManagedCodeConventions,
+                effectivePath: out effectivePath);
             mockFile.Setup(m => m.TargetFramework).Returns(fn);
             mockFile.Setup(m => m.EffectivePath).Returns(effectivePath);
             mockFile.Setup(m => m.SupportedFrameworks).Returns(

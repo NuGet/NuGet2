@@ -925,7 +925,7 @@ namespace NuGet.Test
                 Description = "Test",
             };
             builder.Authors.Add("Test");
-            builder.Files.Add(new PhysicalPackageFile { TargetPath = @"lib\Foo.dll" });
+            builder.Files.Add(new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\Foo.dll" });
             builder.PackageAssemblyReferences.Add(new PackageReferenceSet(null, new string[] { "Bar.dll" }));
 
             ExceptionAssert.Throws<InvalidDataException>(() => builder.Save(new MemoryStream()),
@@ -989,23 +989,32 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "Cannot create a package that has no dependencies nor content.");
         }
 
-        [Fact]
-        public void PackageBuilderThrowsIfXmlIsMalformed()
+        [Theory]
+        [InlineData("kjdkfj", "Data at the root level is invalid. Line 1, position 1.")]
+        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>", "Root element is missing.")]
+        public void PackageBuilderThrowsIfXmlIsMalformed(string manifestContent, string expectedMessage)
         {
             // Arrange
-            string spec1 = "kjdkfj";
-            string spec2 = @"<?xml version=""1.0"" encoding=""utf-8""?>";
-            string spec3 = @"<?xml version=""1.0"" encoding=""utf-8""?><package />";
-            string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
-
             // Switch to invariant culture to ensure the error message is in english.
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act and Assert
-            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
-            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
+            ExceptionAssert.Throws<XmlException>(
+                () => new PackageBuilder(manifestContent.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default),
+                expectedMessage);
+            //ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), );
+            //ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
+            //ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
+        }
+
+        [Theory]
+        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?><package />")]
+        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>")]
+        public void PackageBuilderThrowsIfMetadataHasMissingContent(string manifestContent)
+        {
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => new PackageBuilder(manifestContent.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default));
         }
 
         [Fact]
@@ -1024,7 +1033,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -1041,7 +1050,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 100 characters.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "Id must not exceed 100 characters.");
         }
 
         [Fact]
@@ -1061,7 +1070,7 @@ Description is required.");
   </metadata>
 </package>";
 
-            var builder = new PackageBuilder(spec.AsStream(), null);
+            var builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(
@@ -1085,7 +1094,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -1104,7 +1113,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -1123,7 +1132,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -1146,7 +1155,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The required attribute 'id' is missing.");
         }
 
         [Fact]
@@ -1169,7 +1178,7 @@ Description is required.");
 </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "<references> element must not contain both <group> and <reference> child elements.");
+            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "<references> element must not contain both <group> and <reference> child elements.");
         }
 
         [Fact]
@@ -1196,7 +1205,7 @@ Description is required.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The required attribute 'src' is missing.");
         }
 
         [Fact]
@@ -1220,7 +1229,7 @@ Description is required.");
 </package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default));
         }
 
         [Fact]
@@ -1244,7 +1253,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
             var authors = builder.Authors.ToList();
             var owners = builder.Owners.ToList();
             var tags = builder.Tags.ToList();
@@ -1287,7 +1296,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
             var authors = builder.Authors.ToList();
             var owners = builder.Owners.ToList();
 
@@ -1325,7 +1334,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
             var authors = builder.Authors.ToList();
             var owners = builder.Owners.ToList();
 
@@ -1367,7 +1376,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
             var authors = builder.Authors.ToList();
 
             // Assert
@@ -1418,7 +1427,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Assert
             Assert.Equal(1, builder.DependencySets.Count);
@@ -1457,7 +1466,7 @@ Description is required.");
 </package>";
 
             // Act
-            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Assert
             Assert.Equal(3, builder.DependencySets.Count);
@@ -1505,7 +1514,7 @@ Description is required.");
 
             // Act
             ExceptionAssert.Throws<InvalidDataException>(
-                () => { new PackageBuilder(spec.AsStream(), null); },
+                () => { new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default); },
                 "<dependencies> element must not contain both <group> and <dependency> child elements.");
         }
 
@@ -1527,7 +1536,7 @@ Description is required.");
 </package>";
 
             // Act
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "LicenseUrl cannot be empty.");
         }
 
         [Fact]
@@ -1548,7 +1557,7 @@ Description is required.");
 </package>";
 
             // Act
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "LicenseUrl cannot be empty.");
         }
 
         [Fact]
@@ -1556,9 +1565,9 @@ Description is required.");
         {
             // Arrange
             var files = new[] {
-                new PhysicalPackageFile { TargetPath = @"lib\net40\foo.dll" },
-                new PhysicalPackageFile { TargetPath = @"lib\net40\bar.dll" },
-                new PhysicalPackageFile { TargetPath = @"lib\net40\baz.exe" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net40\foo.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net40\bar.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net40\baz.exe" },
             };
             var packageAssemblyReferences = new PackageReferenceSet(null, new string[] { "foo.dll", "bar", "baz" });
 
@@ -1574,9 +1583,9 @@ Description is required.");
         {
             // Arrange
             var files = new[] {
-                new PhysicalPackageFile { TargetPath = @"lib\net20\foo.dll" },
-                new PhysicalPackageFile { TargetPath = @"lib\net20\bar.dll" },
-                new PhysicalPackageFile { TargetPath = @"lib\net20\baz.qux" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net20\foo.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net20\bar.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"lib\net20\baz.qux" },
             };
             var packageAssemblyReferences = new PackageReferenceSet(new FrameworkName("Silverlight, Version=1.0"), new string[] { "foo.dll", "bar", "baz" });
 
@@ -1685,7 +1694,7 @@ Description is required.");
 </package>";
 
             // Act
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), @"LicenseUrl cannot be empty.
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), @"LicenseUrl cannot be empty.
 Enabling license acceptance requires a license url.");
         }
 
@@ -1710,7 +1719,7 @@ Enabling license acceptance requires a license url.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act
-            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null), "Invalid URI: The format of the URI could not be determined.");
+            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "Invalid URI: The format of the URI could not be determined.");
         }
 
         [Fact]
@@ -1800,7 +1809,9 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default),
+                "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
         }
 
         [Fact]
@@ -1818,7 +1829,9 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of '' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default),
+                "The schema version of '' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
         }
 
         [Fact]
@@ -1837,7 +1850,7 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act
-            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
+            var packageBuilder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
@@ -1866,7 +1879,7 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act
-            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
+            var packageBuilder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
@@ -1896,7 +1909,7 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act
-            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
+            var packageBuilder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
@@ -1918,7 +1931,7 @@ Enabling license acceptance requires a license url.");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -1955,6 +1968,160 @@ Enabling license acceptance requires a license url.");
             }
         }
 
+        [Fact]
+        public void SettingPackageTypeVersion_ResultsInMinClientVersionBeingSet()
+        {
+            // Arrange
+            var builder = new PackageBuilder();
+
+            // Act
+            builder.PackageType = new PackageType("Managed", new Version("2.0"));
+
+            // Assert
+            Assert.Equal(new Version(2, 8, 6), builder.MinClientVersion);
+        }
+
+        [Fact]
+        public void SettingPackageTypeVersion_DoesNotChangeMinClientVersionIfItIsAlreadyHigerThan286()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                MinClientVersion = new Version(2, 9, 0)
+            };
+
+            // Act
+            builder.PackageType = new PackageType("Managed", new Version("2.0"));
+
+            // Assert
+            Assert.Equal(new Version(2, 9, 0), builder.MinClientVersion);
+        }
+
+        [Theory]
+        [InlineData("1.0")]
+        [InlineData("2.1")]
+        [InlineData("3.0")]
+        public void Save_ThrowsIfThePackageTypeVersionIsOutOfRange(string version)
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                Id = "someid",
+                Version = new SemanticVersion("3.0.0"),
+                Description = "Some desc",
+                PackageType = new PackageType("Managed", new Version(version))
+            };
+            builder.Files.Add(CreatePackageFile(@"lib\net40\test.dll"));
+
+            // Act and Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => { builder.Save(Stream.Null); });
+            Assert.Equal("Unsupported package type version '" + version + "'.", ex.Message);
+        }
+
+        [Fact]
+        public void PackageBuilder_ReadsPackageTypeAndVersionFromNuspec()
+        {
+            string spec = 
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <packageType version=""2.0"">Managed</packageType>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
+    <language>en-US</language>
+  </metadata>
+</package>";
+
+            // Act
+            var packageBuilder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: PackageType.Default);
+
+            // Assert
+            Assert.Equal("Managed", packageBuilder.PackageType.Name);
+            Assert.Equal(new Version(2, 0), packageBuilder.PackageType.Version);
+            Assert.Equal(new Version(2, 8, 6), packageBuilder.MinClientVersion);
+        }
+
+        [Fact]
+        public void PackageBuilder_OverridesMinClientVersionFromNuspec_IfPackageTypeIsSpecified()
+        {
+            string spec =
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata minClientVersion=""2.6.9"">
+    <packageType version=""2.0"">Managed</packageType>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <description>This is the Description (With, Comma-Separated, Words, in Parentheses).</description>
+    <language>en-US</language>
+  </metadata>
+</package>";
+
+            // Act
+            var packageBuilder = new PackageBuilder(spec.AsStream(), basePath: null, propertyProvider: NullPropertyProvider.Instance, includeEmptyDirectories: false, packageType: null);
+
+            // Assert
+            Assert.Equal("Managed", packageBuilder.PackageType.Name);
+            Assert.Equal(new Version(2, 0), packageBuilder.PackageType.Version);
+            Assert.Equal(new Version(2, 8, 6), packageBuilder.MinClientVersion);
+        }
+
+        [Fact]
+        public void SettingMinClientVersion_ToLowerVersion_ThrowsIfPackageTypeIsSet()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                PackageType = new PackageType("Managed", new Version("2.0"))
+            };
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgumentException<ArgumentOutOfRangeException>(
+                () => { builder.MinClientVersion = new Version(2, 8, 1); },
+                "value",
+                "The minimum client version must be greater than '2.8.6' when quirks mode is enabled.");
+        }
+
+        [Fact]
+        public void SettingMinClientVersion_ToHigherVersion_WorksWhenQuirksModeVersionIsSet()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                PackageType = new PackageType("Managed", new Version("2.0"))
+            };
+
+            // Act
+            builder.MinClientVersion = new Version(2, 8, 7);
+
+            // Assert
+            Assert.Equal(new Version(2, 8, 7), builder.MinClientVersion);
+            Assert.Equal(new Version(2, 0), builder.PackageType.Version);
+        }
+
+        [Fact]
+        public void Save_ThrowsIfPackageTypeIsEnabledAndFilesDoNotSpecifyTargetFramework()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                Id = "Some-id",
+                Version = SemanticVersion.Parse("1.0.0"),
+                Description = "Some description",
+                PackageType = new PackageType("Managed", new Version("2.0"))
+            };
+            builder.Authors.Add("test");
+            builder.Files.Add(CreatePackageFile(@"lib\net40\Foo.dll"));
+            builder.Files.Add(CreatePackageFile(@"content\Bar.dll"));
+            builder.Files.Add(CreatePackageFile(@"lib\Baz.dll"));
+
+            // Act and Assert 
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()),
+                @"The following paths do not map to a well-known target framework: content\Bar.dll, lib\Baz.dll.");
+        }
+
         private static IPackageFile CreatePackageFile(string name)
         {
             var file = new Mock<IPackageFile>();
@@ -1962,7 +2129,7 @@ Enabling license acceptance requires a license url.");
             file.Setup(f => f.GetStream()).Returns(new MemoryStream());
 
             string effectivePath;
-            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, useManagedCodeConventions: false, effectivePath: out effectivePath);
             file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
             file.SetupGet(f => f.TargetFramework).Returns(fx);
 

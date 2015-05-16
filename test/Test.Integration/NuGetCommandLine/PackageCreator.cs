@@ -53,7 +53,10 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             file.Setup(f => f.GetStream()).Returns(new MemoryStream());
 
             string effectivePath;
-            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(
+                name,
+                useManagedCodeConventions: false,
+                effectivePath: out effectivePath);
             file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
             file.SetupGet(f => f.TargetFramework).Returns(fx);
 

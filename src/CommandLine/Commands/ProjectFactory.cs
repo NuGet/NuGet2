@@ -118,6 +118,8 @@ namespace NuGet.Commands
             }
         }
 
+        public PackageType PackageType { get; set; }
+
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
         public PackageBuilder CreateBuilder(string basePath)
         {
@@ -125,7 +127,10 @@ namespace NuGet.Commands
 
             Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("PackagingFilesFromOutputPath"), Path.GetDirectoryName(TargetPath));
 
-            var builder = new PackageBuilder();
+            var builder = new PackageBuilder
+            {
+                PackageType = PackageType
+            };
 
             try
             {
@@ -242,8 +247,8 @@ namespace NuGet.Commands
                 if (TargetFramework != null)
                 {
                     Logger.Log(
-                        MessageLevel.Info, 
-                        LocalizedResourceManager.GetString("BuildingProjectTargetingFramework"), 
+                        MessageLevel.Info,
+                        LocalizedResourceManager.GetString("BuildingProjectTargetingFramework"),
                         _project.FullPath,
                         TargetFramework);
                 }
@@ -253,7 +258,7 @@ namespace NuGet.Commands
                     BuildRequestData requestData = new BuildRequestData(_project.FullPath, ProjectProperties, _project.ToolsVersion, new string[0], null);
                     var parameters = new BuildParameters(projectCollection)
                                      {
-                                         Loggers = new[] { new ConsoleLogger { Verbosity = LoggerVerbosity.Quiet }},
+                                         Loggers = new[] { new ConsoleLogger { Verbosity = LoggerVerbosity.Quiet } },
                                          NodeExeLocation = typeof(ProjectFactory).Assembly.Location,
                                          ToolsetDefinitionLocations = projectCollection.ToolsetLocations
                                      };
@@ -306,7 +311,7 @@ namespace NuGet.Commands
         {
             // This property isn't available on xbuild (mono)
             var property = typeof(ProjectProperty).GetProperty("IsGlobalProperty", BindingFlags.Public | BindingFlags.Instance);
-            if(property != null) 
+            if (property != null)
             {
                 return (bool)property.GetValue(projectProperty, null);
             }
@@ -386,14 +391,14 @@ namespace NuGet.Commands
             foreach (var item in _project.GetItems(ProjectReferenceItemType))
             {
                 string fullPath = item.GetMetadataValue("FullPath");
-                if (!string.IsNullOrEmpty(fullPath) && 
+                if (!string.IsNullOrEmpty(fullPath) &&
                     !NuspecFileExists(fullPath) &&
                     alreadyAppliedProjects.GetLoadedProjects(fullPath).IsEmpty())
                 {
                     var project = new Project(
-                        fullPath, 
-                        globalProperties: null, 
-                        toolsVersion: null, 
+                        fullPath,
+                        globalProperties: null,
+                        toolsVersion: null,
                         projectCollection: alreadyAppliedProjects);
                     var referencedProject = new ProjectFactory(project);
                     referencedProject.Logger = _logger;
@@ -562,7 +567,7 @@ namespace NuGet.Commands
                             targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
                         }
                     }
-                    var packageFile = new PhysicalPackageFile
+                    var packageFile = new PhysicalPackageFile(builder.UsesManagedCodeConventions())
                     {
                         SourcePath = file,
                         TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
@@ -613,7 +618,7 @@ namespace NuGet.Commands
             builder.DependencySets.Add(new PackageDependencySet(null, dependencies.Values));
         }
 
-        private void AddDependencies(Dictionary<String,Tuple<IPackage,PackageDependency>> packagesAndDependencies)
+        private void AddDependencies(Dictionary<String, Tuple<IPackage, PackageDependency>> packagesAndDependencies)
         {
             var file = PackageReferenceFile.CreateFromProject(_project.FullPath);
             if (!File.Exists(file.FullPath))
@@ -626,7 +631,7 @@ namespace NuGet.Commands
             IPackageRepository repository = GetPackagesRepository();
 
             // Collect all packages
-            IDictionary<PackageName, PackageReference> packageReferences = 
+            IDictionary<PackageName, PackageReference> packageReferences =
                 file.GetPackageReferences()
                 .Where(r => !r.IsDevelopmentDependency)
                 .ToDictionary(r => new PackageName(r.Id, r.Version));
@@ -640,7 +645,7 @@ namespace NuGet.Commands
                     {
                         IVersionSpec spec = GetVersionConstraint(packageReferences, package);
                         var dependency = new PackageDependency(package.Id, spec);
-                        packagesAndDependencies.Add(package.Id, new Tuple<IPackage,PackageDependency>(package, dependency));
+                        packagesAndDependencies.Add(package.Id, new Tuple<IPackage, PackageDependency>(package, dependency));
                     }
                 }
             }
@@ -678,7 +683,7 @@ namespace NuGet.Commands
                 {
                     // Replace the original file with a file that removes the transforms
                     builder.Files.Remove(file);
-                    builder.Files.Add(new ReverseTransformFormFile(file, tranfromGroup));
+                    builder.Files.Add(new ReverseTransformFormFile(file, tranfromGroup, builder.UsesManagedCodeConventions()));
                 }
             }
         }
@@ -750,12 +755,12 @@ namespace NuGet.Commands
             if (string.IsNullOrEmpty(target))
             {
                 target = defaultValue;
-            }            
+            }
 
             if (!string.IsNullOrEmpty(target) && Directory.Exists(target))
             {
                 return new SharedPackageRepository(target);
-            }            
+            }
 
             return null;
         }
@@ -882,7 +887,7 @@ namespace NuGet.Commands
 
                 // if IncludeReferencedProjects is true and we are adding source files,
                 // add projectName as part of the target to avoid file conflicts.
-                string targetPath = IncludeReferencedProjects && itemType == SourcesItemType ?               
+                string targetPath = IncludeReferencedProjects && itemType == SourcesItemType ?
                     Path.Combine(targetFolder, projectName, targetFilePath) :
                     Path.Combine(targetFolder, targetFilePath);
 
@@ -901,7 +906,7 @@ namespace NuGet.Commands
                     Logger.Log(MessageLevel.Info, LocalizedResourceManager.GetString("PackageCommandFileFromDependencyIsChanged"), targetFilePath);
                 }
 
-                var packageFile = new PhysicalPackageFile
+                var packageFile = new PhysicalPackageFile(builder.UsesManagedCodeConventions())
                 {
                     SourcePath = fullPath,
                     TargetPath = targetPath
@@ -921,8 +926,8 @@ namespace NuGet.Commands
             {
                 _logger.Log(
                     MessageLevel.Warning,
-                    LocalizedResourceManager.GetString("FileNotAddedToPackage"), 
-                    packageFile.SourcePath, 
+                    LocalizedResourceManager.GetString("FileNotAddedToPackage"),
+                    packageFile.SourcePath,
                     packageFile.TargetPath);
             }
         }
@@ -1020,11 +1025,14 @@ namespace NuGet.Commands
             private readonly Lazy<Func<Stream>> _streamFactory;
             private readonly string _effectivePath;
 
-            public ReverseTransformFormFile(IPackageFile file, IEnumerable<IPackageFile> transforms)
+            public ReverseTransformFormFile(IPackageFile file, IEnumerable<IPackageFile> transforms, bool useManagedCodeConventions)
             {
                 Path = file.Path + ".transform";
                 _streamFactory = new Lazy<Func<Stream>>(() => ReverseTransform(file, transforms), isThreadSafe: false);
-                TargetFramework = VersionUtility.ParseFrameworkNameFromFilePath(Path, out _effectivePath);
+                TargetFramework = VersionUtility.ParseFrameworkNameFromFilePath(
+                    Path,
+                    useManagedCodeConventions: useManagedCodeConventions,
+                    effectivePath: out _effectivePath);
             }
 
             public string Path

@@ -115,7 +115,7 @@ namespace NuGet
         {
             string effectivePath;
             IEnumerable<FrameworkName> fileFrameworks = from file in GetPackageFilePaths().Select(GetPackageRelativePath)
-                                                        let targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(file, out effectivePath)
+                                                        let targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(file, this.UsesManagedCodeConventions(), out effectivePath)
                                                         where targetFramework != null
                                                         select targetFramework;
             return base.GetSupportedFrameworks()
@@ -126,7 +126,7 @@ namespace NuGet
         protected override IEnumerable<IPackageFile> GetFilesBase()
         {
             return from p in GetPackageFilePaths()
-                   select new PhysicalPackageFile
+                   select new PhysicalPackageFile(this.UsesManagedCodeConventions())
                           {
                               SourcePath = _repositoryFileSystem.GetFullPath(p),
                               TargetPath = GetPackageRelativePath(p)
@@ -140,7 +140,7 @@ namespace NuGet
             return from p in _repositoryFileSystem.GetFiles(libDirectory, "*.*", recursive: true)
                    let targetPath = GetPackageRelativePath(p)
                    where IsAssemblyReference(targetPath)
-                   select new PhysicalPackageAssemblyReference
+                   select new PhysicalPackageAssemblyReference(this.UsesManagedCodeConventions())
                             {
                                 SourcePath = _repositoryFileSystem.GetFullPath(p),
                                 TargetPath = targetPath

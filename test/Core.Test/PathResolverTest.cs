@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -246,9 +244,9 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new[] { 
-                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
-                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
-                new PhysicalPackageFile { SourcePath = @"baz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"baz.pdb" },
             };
 
             // Act
@@ -265,10 +263,10 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new[] { 
-                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
-                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
-                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
-                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"baz.dll" },
             };
 
             // Act
@@ -286,10 +284,10 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new[] { 
-                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
-                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
-                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
-                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"baz.dll" },
             };
 
             // Act
@@ -307,10 +305,10 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new[] { 
-                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
-                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
-                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
-                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"baz.dll" },
             };
 
             // Act
@@ -328,10 +326,10 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new[] { 
-                new PhysicalPackageFile { SourcePath = @"foo.dll" }, 
-                new PhysicalPackageFile { SourcePath = @"content\foo.dll" },
-                new PhysicalPackageFile { SourcePath = @"bin\debug\baz.dll" },
-                new PhysicalPackageFile { SourcePath = @"bin\debug\notbaz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"foo.dll" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"content\foo.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"bin\debug\baz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = @"bin\debug\notbaz.dll" },
             };
 
             // Act
@@ -348,12 +346,12 @@ namespace NuGet.Test
         {
             // Arrange
             var files = new List<IPackageFile>(new[] { 
-                new PhysicalPackageFile { TargetPath = @"foo.dll" }, 
-                new PhysicalPackageFile { TargetPath = @"content\foo.dll" },
-                new PhysicalPackageFile { TargetPath = @"bin\debug\baz.dll" },
-                new PhysicalPackageFile { TargetPath = @"bin\debug\notbaz.dll" },
-                new PhysicalPackageFile { TargetPath = @"bin\debug\baz.pdb" },
-                new PhysicalPackageFile { TargetPath = @"bin\debug\notbaz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"foo.dll" }, 
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"content\foo.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"bin\debug\baz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"bin\debug\notbaz.dll" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"bin\debug\baz.pdb" },
+                new PhysicalPackageFile(useManagedCodeConventions: false) { TargetPath = @"bin\debug\notbaz.pdb" },
             });
 
             // Act

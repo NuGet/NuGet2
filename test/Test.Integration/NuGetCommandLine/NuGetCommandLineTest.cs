@@ -1268,7 +1268,6 @@ public class Baz {
             }
         }
 
-
         [Fact]
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput()
         {
@@ -1333,6 +1332,47 @@ public class Cl_{0} {{
         }
 
         [Fact]
+        public void PackageCommand_FailsIfPackageTypeIsSetToManagedAndOneOrMoreFilesDoNotConformToStrictTFMRules()
+        {
+            //Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
+                File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "content"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools"));
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\unknown\\abc.dll"), "assembly");
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\def.dll"), "assembly");
+                File.WriteAllText(Path.Combine(OneSpecfolder, "content", "hello.txt"), "hello");
+                File.WriteAllText(Path.Combine(OneSpecfolder, "tools", "install.ps1"), "script");
+
+                string[] args = new string[] { "pack", "-type", "Managed", "-typeVersion", "2.0" };
+                Directory.SetCurrentDirectory(OneSpecfolder);
+
+                //Act
+                int result = Program.Main(args);
+
+                //Assert
+                Assert.Equal(1, result);
+                string output = consoleOutput.ToString();
+                Assert.Contains("The following paths do not map to a well-known target framework: " +
+                    @"content\hello.txt, lib\def.dll, tools\install.ps1.", output);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
+        [Fact]
         public void PackageCommand_TestDefaultPackageIssueRules()
         {
             //Arrange
@@ -1383,13 +1423,99 @@ public class Cl_{0} {{
                 Assert.True(output.Contains("Successfully created package"));
 
                 // Asserts for package issues
-                Assert.True(output.Contains("6 issue(s) found with package 'Antlr'."));
-                Assert.True(output.Contains("Invalid framework folder"));
-                Assert.True(output.Contains("Assembly not inside a framework folder"));
-                Assert.True(output.Contains("Assembly outside lib folder"));
-                Assert.True(output.Contains("PowerShell file outside tools folder"));
-                Assert.True(output.Contains("Transform file outside content folder."));
-                Assert.True(output.Contains("Unrecognized PowerShell file"));
+                Assert.Contains("9 issue(s) found with package 'Antlr'.", output);
+                Assert.Contains("Description: The folder 'unknown' under 'lib' is not recognized as a valid framework " +
+                    "name or a supported culture identifier.", output);
+                Assert.Contains(@"The file 'content\hello.dll' is directly placed under the 'content' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The file 'lib\def.dll' is directly placed under the 'lib' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The file 'lib\mylibrary.xml' is directly placed under the 'lib' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The file 'tools\myscript.ps1' is directly placed under the 'tools' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The file 'tools\web.config.transform' is directly placed under the 'tools' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The script file 'install.ps1' is outside the 'tools' folder and hence will " +
+                    "not be executed during installation of this package.", output);
+                Assert.Contains(@"The transform file 'tools\web.config.transform' is outside the 'content' folder " +
+                    "and hence will not be transformed during installation of this package.", output);
+                Assert.Contains(@"The script file 'tools\myscript.ps1' is not recognized by NuGet and hence will not be executed "
+                + "during installation of this package.", output);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
+        [Fact]
+        public void PackageCommand_TestDefaultPackageIssueRules_WithFilesInsideFrameworkAssembliesDirectory()
+        {
+            //Arrange
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                Directory.SetCurrentDirectory(workingDirectory);
+                string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
+                File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+
+                // violated rule: Invalid Framework Folder
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "net40"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "content", "testfx"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools", "testfx45"));
+                Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools", "net40"));
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\unknown\\abc.dll"), "assembly");
+
+                // violated rule: Assembly placed directly under lib
+
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\net40\\def.dll"), "assembly");
+
+                // violated rule: Assembly placed directly under lib
+                File.WriteAllText(Path.Combine(OneSpecfolder, "content\\testfx\\hello.dll"), "assembly");
+
+                // violated rule: Script file placed outside tools
+                File.WriteAllText(Path.Combine(OneSpecfolder, "install.ps1"), "script");
+
+                // violated rule: Unrecognized script file
+                File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\testfx45\\myscript.ps1"), "script");
+
+                // violated rule: transform file outside content folder
+                File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\net40\\web.config.transform"), "transform");
+
+                // violated rule: non-assembly inside lib
+                File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\mylibrary.xml"), "xml");
+
+                string[] args = new string[] { "pack" };
+                Directory.SetCurrentDirectory(OneSpecfolder);
+
+                //Act
+                int result = Program.Main(args);
+
+                //Assert
+                Assert.Equal(0, result);
+                string output = consoleOutput.ToString();
+                Assert.True(output.Contains("Successfully created package"));
+
+                // Asserts for package issues
+                Assert.Contains("6 issue(s) found with package 'Antlr'.", output);
+                Assert.Contains(@"The assembly 'content\testfx\hello.dll' is not inside the 'lib' folder and hence " +
+                    "it won't be added as reference when the package is installed into a project.", output);
+                Assert.Contains("Description: The folder 'unknown' under 'lib' is not recognized as a valid framework " +
+                    "name or a supported culture identifier.", output);
+                Assert.Contains(@"The file 'lib\mylibrary.xml' is directly placed under the 'lib' folder. " +
+                    "Support for file paths that do not specify frameworks will be deprecated in the future.", output);
+                Assert.Contains(@"The transform file 'tools\net40\web.config.transform' is outside the 'content' folder " +
+                    "and hence will not be transformed during installation of this package.", output);
+                Assert.Contains(@"The script file 'install.ps1' is outside the 'tools' folder and hence will " +
+                    "not be executed during installation of this package.", output);
+                Assert.Contains(@"The script file 'tools\testfx45\myscript.ps1' is not recognized by NuGet and hence will not be executed "
+                + "during installation of this package.", output);
             }
             finally
             {
@@ -1945,7 +2071,7 @@ public class Cl_{0} {{
 
                     // package should not contain content from jquery package that we have not changed
                     var package = VerifyPackageContents(
-                        expectedPackage, 
+                        expectedPackage,
                         new[]
                         {
                             @"content\foo.aspx",
@@ -1997,13 +2123,13 @@ public class Cl_{0} {{
             builder.Authors.Add("test");
 
             File.WriteAllText(Path.Combine(tempPath, "MyContentFile.js"), "My content file text");
-            builder.Files.Add(new PhysicalPackageFile
+            builder.Files.Add(new PhysicalPackageFile(useManagedCodeConventions: false)
             {
                 SourcePath = Path.Combine(tempPath, "MyContentFile.js"),
                 TargetPath = @"content\MyContentFile.js"
             });
             File.WriteAllText(Path.Combine(tempPath, "MyContentFile2.js"), "My content file2 text");
-            builder.Files.Add(new PhysicalPackageFile
+            builder.Files.Add(new PhysicalPackageFile(useManagedCodeConventions: false)
             {
                 SourcePath = Path.Combine(tempPath, "MyContentFile2.js"),
                 TargetPath = @"content\MyContentFile2.js"

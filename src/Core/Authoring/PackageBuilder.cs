@@ -6,24 +6,26 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text.RegularExpressions;
 using NuGet.Resources;
 
 namespace NuGet
 {
     public class PackageBuilder : IPackageBuilder
     {
+        public static readonly int MaxSupportedQuirksModeVersion = 1;
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
         private readonly bool _includeEmptyDirectories;
-        
-        public PackageBuilder(string path, IPropertyProvider propertyProvider, bool includeEmptyDirectories)
-            : this(path, Path.GetDirectoryName(path), propertyProvider, includeEmptyDirectories)
+        private PackageType _packageType;
+        private Version _minClientVersion;
+
+        public PackageBuilder(string path, IPropertyProvider propertyProvider, bool includeEmptyDirectories, PackageType packageType)
+            : this(path, Path.GetDirectoryName(path), propertyProvider, includeEmptyDirectories, packageType)
         {
         }
 
-        public PackageBuilder(string path, string basePath, IPropertyProvider propertyProvider, bool includeEmptyDirectories)
-            : this(includeEmptyDirectories)
+        public PackageBuilder(string path, string basePath, IPropertyProvider propertyProvider, bool includeEmptyDirectories, PackageType packageType)
+            : this(includeEmptyDirectories, packageType)
         {
             using (Stream stream = File.OpenRead(path))
             {
@@ -31,25 +33,21 @@ namespace NuGet
             }
         }
 
-        public PackageBuilder(Stream stream, string basePath)
-            : this(stream, basePath, NullPropertyProvider.Instance)
-        {
-        }
-
-        public PackageBuilder(Stream stream, string basePath, IPropertyProvider propertyProvider)
-            : this()
+        public PackageBuilder(Stream stream, string basePath, IPropertyProvider propertyProvider, bool includeEmptyDirectories, PackageType packageType)
+            : this(includeEmptyDirectories, packageType)
         {
             ReadManifest(stream, basePath, propertyProvider);
         }
 
         public PackageBuilder()
-            : this(includeEmptyDirectories: false)
+            : this(includeEmptyDirectories: false, packageType: null)
         {
         }
 
-        private PackageBuilder(bool includeEmptyDirectories)
+        private PackageBuilder(bool includeEmptyDirectories, PackageType packageType)
         {
             _includeEmptyDirectories = includeEmptyDirectories;
+            PackageType = packageType;
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
@@ -221,8 +219,60 @@ namespace NuGet
 
         public Version MinClientVersion
         {
-            get;
-            set;
+            get
+            {
+                return _minClientVersion;
+            }
+            set
+            {
+                if (PackageType != PackageType.Default)
+                {
+                    if (value == null)
+                    {
+                        // No-op this since the calling code was attempting to initialize this.
+                    }
+                    else if (value < Constants.ManagedCodeConventionsClientVersion)
+                    {
+                        // If a specific minClientVersion is requested, throw.
+                        throw new ArgumentOutOfRangeException("value",
+                            string.Format(CultureInfo.CurrentCulture, NuGetResources.MinClientVersion_MustBeHigher, Constants.ManagedCodeConventionsClientVersion));
+                    }
+                    else
+                    {
+                        _minClientVersion = value;
+                    }
+                }
+                else
+                {
+                    _minClientVersion = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the version of quirks mode that this package supports.
+        /// </summary>
+        public PackageType PackageType
+        {
+            get { return _packageType ?? PackageType.Default; }
+            set
+            {
+                if (value != null && value != PackageType.Default)
+                {
+                    if (!string.Equals(value.Name, PackageType.Managed.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new ArgumentException(
+                            String.Format(CultureInfo.CurrentCulture, NuGetResources.UnsupportedPackageType, value.Name));
+                    }
+
+                    if (_minClientVersion == null || _minClientVersion < Constants.ManagedCodeConventionsClientVersion)
+                    {
+                        _minClientVersion = Constants.ManagedCodeConventionsClientVersion;
+                    }
+                }
+
+                _packageType = value;
+            }
         }
 
         public void Save(Stream stream)
@@ -243,6 +293,7 @@ namespace NuGet
 
             ValidateDependencySets(Version, DependencySets);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
+            ValidatePackageType(Files, PackageType);
 
             using (Package package = Package.Open(stream, FileMode.Create))
             {
@@ -261,6 +312,39 @@ namespace NuGet
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
                 package.PackageProperties.Title = Title;
                 package.PackageProperties.LastModifiedBy = CreatorInfo();
+            }
+        }
+
+        private static void ValidatePackageType(IEnumerable<IPackageFile> packageFiles, PackageType packageType)
+        {
+            if (packageType != PackageType.Default)
+            {
+                if (!string.Equals(PackageType.Managed.Name, packageType.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnsupportedPackageType, packageType.Name));
+                }
+                else
+                {
+                    if (packageType.Version != PackageType.Managed.Version)
+                    {
+                        throw new InvalidOperationException(String.Format(
+                            CultureInfo.CurrentCulture,
+                            NuGetResources.UnsupportedPackageTypeVersion,
+                            packageType.Version));
+                    }
+                    else
+                    {
+                        var filesWithoutTFM = packageFiles.Where(file => file.TargetFramework == null)
+                            .Select(file => file.Path);
+
+                        if (filesWithoutTFM.Any())
+                        {
+                            var paths = String.Join(", ", filesWithoutTFM);
+                            throw new InvalidOperationException(
+                                String.Format(CultureInfo.CurrentCulture, NuGetResources.StrictTfm_UnsupportedFilePath, paths));
+                        }
+                    }
+                }
             }
         }
 
@@ -323,10 +407,10 @@ namespace NuGet
 
         private static bool HasXdtTransformFile(ICollection<IPackageFile> contentFiles)
         {
-            return contentFiles.Any(file => 
+            return contentFiles.Any(file =>
                 file.Path != null &&
                 file.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
-                (file.Path.EndsWith(".install.xdt", StringComparison.OrdinalIgnoreCase) || 
+                (file.Path.EndsWith(".install.xdt", StringComparison.OrdinalIgnoreCase) ||
                  file.Path.EndsWith(".uninstall.xdt", StringComparison.OrdinalIgnoreCase)));
         }
 
@@ -362,8 +446,8 @@ namespace NuGet
 
             foreach (var reference in packageAssemblyReferences.SelectMany(p => p.References))
             {
-                if (!libFiles.Contains(reference) && 
-                    !libFiles.Contains(reference + ".dll") && 
+                if (!libFiles.Contains(reference) &&
+                    !libFiles.Contains(reference + ".dll") &&
                     !libFiles.Contains(reference + ".exe") &&
                     !libFiles.Contains(reference + ".winmd"))
                 {
@@ -413,6 +497,13 @@ namespace NuGet
             Copyright = metadata.Copyright;
             MinClientVersion = metadata.MinClientVersion;
 
+            if (_packageType == null)
+            {
+                // If the PackageType was previous set as part of initializing the PackageBuilder,
+                // do not override it with values from the manifest.
+                PackageType = metadata.PackageType;
+            }
+
             if (metadata.Tags != null)
             {
                 Tags.AddRange(ParseTags(metadata.Tags));
@@ -423,7 +514,7 @@ namespace NuGet
 
             if (manifestMetadata.ReferenceSets != null)
             {
-                PackageAssemblyReferences.AddRange(manifestMetadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
+                PackageAssemblyReferences.AddRange(manifestMetadata.ReferenceSets.Select(r => new PackageReferenceSet(r, this.UsesManagedCodeConventions())));
             }
         }
 
@@ -479,14 +570,21 @@ namespace NuGet
 
         private void AddFiles(string basePath, string source, string destination, string exclude = null)
         {
-            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination, _includeEmptyDirectories).ToList();
+            var useManagedCodeConventions = this.UsesManagedCodeConventions();
+            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(
+                    basePath: basePath,
+                    searchPath: source,
+                    targetPath: destination,
+                    includeEmptyDirectories: _includeEmptyDirectories,
+                    useManagedCodeConventions: useManagedCodeConventions)
+                .ToList();
             if (_includeEmptyDirectories)
             {
                 // we only allow empty directories which are legit framework folders.
                 searchFiles.RemoveAll(file => file.TargetFramework == null &&
                                               Path.GetFileName(file.TargetPath) == Constants.PackageEmptyFileName);
             }
-            
+
             ExcludeFiles(searchFiles, basePath, exclude);
 
             if (!PathResolver.IsWildcardSearch(source) && !PathResolver.IsDirectoryPath(source) && !searchFiles.Any())

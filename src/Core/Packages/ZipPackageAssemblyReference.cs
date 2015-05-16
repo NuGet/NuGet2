@@ -6,8 +6,8 @@ namespace NuGet
 {
     internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference
     {
-        public ZipPackageAssemblyReference(IPackageFile file)
-            : base(file)
+        public ZipPackageAssemblyReference(IPackageFile file, bool useManagedCodeConventions)
+            : base(file, useManagedCodeConventions)
         {
             Debug.Assert(Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase), "path doesn't start with lib");
         }

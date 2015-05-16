@@ -183,7 +183,8 @@ namespace NuGet.VisualStudio
                 _path = assemblyPath;
 
                 string pathExcludeLib = assemblyPath.Substring(Constants.LibDirectory.Length).Trim(System.IO.Path.DirectorySeparatorChar);
-                _targetFramework = VersionUtility.ParseFrameworkFolderName(pathExcludeLib, strictParsing: true, effectivePath: out _effectivePath);
+                // Using managedCodeConventions does not have any side-effects here since the package has already been installed.
+                _targetFramework = VersionUtility.ParseFrameworkFolderName(pathExcludeLib, strictParsing: true, useManagedCodeConventions: true, effectivePath: out _effectivePath);
             }
 
             public FrameworkName TargetFramework

@@ -8,20 +8,24 @@ namespace NuGet
     public class PhysicalPackageFile : IPackageFile
     {
         private readonly Func<Stream> _streamFactory;
+        private readonly bool _useManagedCodeConventions;
         private string _targetPath;
         private FrameworkName _targetFramework;
 
-        public PhysicalPackageFile()
+        public PhysicalPackageFile(bool useManagedCodeConventions)
         {
+            _useManagedCodeConventions = useManagedCodeConventions;
         }
 
-        public PhysicalPackageFile(PhysicalPackageFile file)
+        public PhysicalPackageFile(PhysicalPackageFile file, bool useManagedCodeConventions)
+            : this(useManagedCodeConventions)
         {
             SourcePath = file.SourcePath;
             TargetPath = file.TargetPath;
         }
 
-        internal PhysicalPackageFile(Func<Stream> streamFactory)
+        internal PhysicalPackageFile(Func<Stream> streamFactory, bool useManagedCodeConventions)
+            : this(useManagedCodeConventions)
         {
             _streamFactory = streamFactory;
         }
@@ -50,7 +54,10 @@ namespace NuGet
                 {
                     _targetPath = value;
                     string effectivePath;
-                    _targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(_targetPath, out effectivePath);
+                    _targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(
+                        _targetPath,
+                        useManagedCodeConventions: _useManagedCodeConventions,
+                        effectivePath: out effectivePath);
                     EffectivePath = effectivePath;
                 }
             }

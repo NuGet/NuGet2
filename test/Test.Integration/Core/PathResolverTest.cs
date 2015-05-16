@@ -28,7 +28,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -52,7 +52,7 @@ namespace NuGet.Test.Integration.PathResolver
             var manifest = GetManifest(search, target);
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -76,7 +76,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 2);
@@ -101,7 +101,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 2);
@@ -127,7 +127,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style1.css"), new File("style2.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 2);
@@ -157,7 +157,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 3);
@@ -184,7 +184,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -208,7 +208,7 @@ namespace NuGet.Test.Integration.PathResolver
                                             new File("neatpic.png")));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -233,7 +233,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -258,7 +258,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -283,7 +283,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 1);
@@ -309,7 +309,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("style.css"))));
 
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 0);
@@ -336,7 +336,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 )
                                             )));
             // Act
-            var packageBuilder = new PackageBuilder(manifest, root);
+            var packageBuilder = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(packageBuilder.Files.Count, 2);
@@ -361,7 +361,7 @@ namespace NuGet.Test.Integration.PathResolver
                                             new File("ie.css")
                                            ));
             // Act and Assert
-            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'style\main.css'.");
+            ExceptionAssert.Throws<FileNotFoundException>(() => CreateBuilder(manifest, root), @"File not found: 'style\main.css'.");
         }
 
         /// <summary>
@@ -380,7 +380,7 @@ namespace NuGet.Test.Integration.PathResolver
             string root = CreateFileSystem(new File("main.txt"));
 
             // Act and Assert
-            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'main.css'.");
+            ExceptionAssert.Throws<FileNotFoundException>(() => CreateBuilder(manifest, root), @"File not found: 'main.css'.");
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                 new File("main.txt")));
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.NotNull(package);
@@ -426,7 +426,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                         new File("main.css")))));
 
             // Act
-            var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget"));
+            var package = CreateBuilder(manifest, Path.Combine(root, "project-files", "nuget"));
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -452,7 +452,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                         new File("main.css")))));
 
             // Act
-            var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget-files", "manifest"));
+            var package = CreateBuilder(manifest, Path.Combine(root, "project-files", "nuget-files", "manifest"));
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -479,7 +479,7 @@ namespace NuGet.Test.Integration.PathResolver
                                                             new File("awesomeproj.core.dll"), new File("awesomeproj.aux.dll"))))));
 
             // Act
-            var package = new PackageBuilder(manifest, Path.Combine(root, "build", "nuget"));
+            var package = CreateBuilder(manifest, Path.Combine(root, "build", "nuget"));
 
             // Assert
             Assert.Equal(2, package.Files.Count);
@@ -505,7 +505,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+            var package = CreateBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -530,7 +530,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+            var package = CreateBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -556,7 +556,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+            var package = CreateBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -586,7 +586,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(3, package.Files.Count);
@@ -611,7 +611,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act and Assert
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(manifest, root), "Source is required.");
+            ExceptionAssert.Throws<ValidationException>(() => CreateBuilder(manifest, root), "Source is required.");
         }
 
         /// <summary>
@@ -630,7 +630,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -657,7 +657,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act and Assert
-            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'bin\release\bar.dll'.");
+            ExceptionAssert.Throws<FileNotFoundException>(() => CreateBuilder(manifest, root), @"File not found: 'bin\release\bar.dll'.");
         }
 
         /// <summary>
@@ -682,7 +682,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+            var package = CreateBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
             Assert.Equal(2, package.Files.Count);
@@ -708,7 +708,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -733,7 +733,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -758,7 +758,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -784,7 +784,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -814,7 +814,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -844,7 +844,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(2, package.Files.Count);
@@ -876,7 +876,7 @@ namespace NuGet.Test.Integration.PathResolver
 
             // Act
             string builderBase = Path.Combine(@"packages\bin");
-            var package = new PackageBuilder(manifest, builderBase);
+            var package = CreateBuilder(manifest, builderBase);
 
             // Assert
             Assert.Equal(2, package.Files.Count);
@@ -904,7 +904,7 @@ namespace NuGet.Test.Integration.PathResolver
 
             // Act
             string builderBase = Path.Combine(root, "properties");
-            var package = new PackageBuilder(manifest, builderBase);
+            var package = CreateBuilder(manifest, builderBase);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -932,7 +932,7 @@ namespace NuGet.Test.Integration.PathResolver
 
             // Act
             string builderBase = Path.Combine(root, @"tools\nuspec");
-            var package = new PackageBuilder(manifest, builderBase);
+            var package = CreateBuilder(manifest, builderBase);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -962,7 +962,7 @@ namespace NuGet.Test.Integration.PathResolver
 
             // Act
             string builderBase = Path.Combine(root, @"tools\nuspec");
-            var package = new PackageBuilder(manifest, builderBase);
+            var package = CreateBuilder(manifest, builderBase);
 
             // Assert
             Assert.Equal(2, package.Files.Count);
@@ -996,7 +996,7 @@ namespace NuGet.Test.Integration.PathResolver
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -1057,7 +1057,7 @@ namespace NuGet.Test.Integration.PathResolver
                 Directory.Delete(testDirectory, true);
             }
         }
-        
+
 
         [Fact]
         public void ExclusionWithSimpleExtensions()
@@ -1067,7 +1067,7 @@ namespace NuGet.Test.Integration.PathResolver
             var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb");
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(6, package.Files.Count);
@@ -1087,7 +1087,7 @@ namespace NuGet.Test.Integration.PathResolver
             var manifest = GetExclusionManifest(@"**\*.*", "", @"bin\**");
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(4, package.Files.Count);
@@ -1105,7 +1105,7 @@ namespace NuGet.Test.Integration.PathResolver
             var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb;*.csproj;Properties\*;*\Debug\*");
 
             // Act
-            var package = new PackageBuilder(manifest, root);
+            var package = CreateBuilder(manifest, root);
 
             // Assert
             Assert.Equal(3, package.Files.Count);
@@ -1122,7 +1122,7 @@ namespace NuGet.Test.Integration.PathResolver
             var manifest = GetExclusionManifest(@"..\bin\*\*.*", "lib", @"..\bin\debug\*");
 
             // Act
-            var package = new PackageBuilder(manifest, Path.Combine(root, "Properties"));
+            var package = CreateBuilder(manifest, Path.Combine(root, "Properties"));
 
             // Assert
             Assert.Equal(1, package.Files.Count);
@@ -1184,6 +1184,16 @@ namespace NuGet.Test.Integration.PathResolver
             string rootDir = Path.Combine(_root, Path.GetRandomFileName());
             new Dir(rootDir, files).Create();
             return rootDir;
+        }
+
+        private static PackageBuilder CreateBuilder(Stream manifest, string root)
+        {
+            return new PackageBuilder(
+                manifest,
+                root,
+                NullPropertyProvider.Instance,
+                includeEmptyDirectories: false,
+                packageType: PackageType.Default);
         }
 
         private class File

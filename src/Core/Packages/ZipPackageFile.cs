@@ -11,23 +11,26 @@ namespace NuGet
         private readonly Func<Stream> _streamFactory;
         private readonly FrameworkName _targetFramework;
 
-        public ZipPackageFile(PackagePart part)
-            : this(UriUtility.GetPath(part.Uri), part.GetStream().ToStreamFactory())
+        public ZipPackageFile(PackagePart part, bool useManagedCodeConventions)
+            : this(UriUtility.GetPath(part.Uri), useManagedCodeConventions, part.GetStream().ToStreamFactory())
         {
         }
 
-        public ZipPackageFile(IPackageFile file)
-            : this(file.Path, file.GetStream().ToStreamFactory())
+        public ZipPackageFile(IPackageFile file, bool useManagedCodeConventions)
+            : this(file.Path, useManagedCodeConventions, file.GetStream().ToStreamFactory())
         {
         }
 
-        protected ZipPackageFile(string path, Func<Stream> streamFactory)
+        protected ZipPackageFile(string path, bool useManagedCodeConventions, Func<Stream> streamFactory)
         {
             Path = path;
             _streamFactory = streamFactory;
 
             string effectivePath;
-            _targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
+            _targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(
+                path,
+                useManagedCodeConventions: useManagedCodeConventions,
+                effectivePath: out effectivePath);
             EffectivePath = effectivePath;
         }
 

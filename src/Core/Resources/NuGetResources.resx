@@ -475,4 +475,16 @@
   <data name="Error_InvalidPackage" xml:space="preserve">
     <value>Unable to load version '{0}' of package '{1}'.</value>
   </data>
+  <data name="StrictTfm_UnsupportedFilePath" xml:space="preserve">
+    <value>The following paths do not map to a well-known target framework: {0}.</value>
+  </data>
+  <data name="MinClientVersion_MustBeHigher" xml:space="preserve">
+    <value>The minimum client version must be greater than '{0}' when quirks mode is enabled.</value>
+  </data>
+  <data name="UnsupportedPackageTypeVersion" xml:space="preserve">
+    <value>Unsupported package type version '{0}'.</value>
+  </data>
+  <data name="UnsupportedPackageType" xml:space="preserve">
+    <value>Unsupported package type '{0}'.</value>
+  </data>
 </root>

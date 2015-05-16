@@ -132,7 +132,7 @@ namespace NuGet
 
         public static Manifest Create(IPackageMetadata metadata)
         {
-            return new Manifest
+            var manifest = new Manifest
             {
                 Metadata = new ManifestMetadata
                 {
@@ -155,9 +155,20 @@ namespace NuGet
                     DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
                     ReferenceSets = CreateReferenceSets(metadata),
-                    MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
+                    MinClientVersionString = metadata.MinClientVersion.ToStringSafe(),
                 },
             };
+
+            if (metadata.PackageType != PackageType.Default)
+            {
+                manifest.Metadata.PackageType = new PackageTypeMetadata 
+                { 
+                    Value = metadata.PackageType.Name,
+                    Version = metadata.PackageType.Version.ToString()
+                };
+            }
+
+            return manifest;
         }
 
         private static string ConvertUrlToStringSafe(Uri url)

@@ -5,18 +5,19 @@ namespace NuGet
 {
     public class PhysicalPackageAssemblyReference : PhysicalPackageFile, IPackageAssemblyReference
     {
-        public PhysicalPackageAssemblyReference()
+        public PhysicalPackageAssemblyReference(bool useManagedCodeConventions)
+            : base(useManagedCodeConventions)
         {
         }
 
-        public PhysicalPackageAssemblyReference(PhysicalPackageFile file)
-            : base(file)
+        public PhysicalPackageAssemblyReference(PhysicalPackageFile file, bool useManagedCodeConventions)
+            : base(file, useManagedCodeConventions)
         {
 
         }
 
-        public PhysicalPackageAssemblyReference(Func<Stream> streamFactory)
-            : base(streamFactory)
+        public PhysicalPackageAssemblyReference(Func<Stream> streamFactory, bool useManagedCodeConventions)
+            : base(streamFactory, useManagedCodeConventions)
         {
         }
 

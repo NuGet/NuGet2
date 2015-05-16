@@ -47,6 +47,7 @@ namespace NuGet.Commands
         };
 
         private Version _minClientVersionValue;
+        private PackageType _packageType;
 
         [Option(typeof(NuGetCommand), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
@@ -99,6 +100,14 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandMinClientVersion")]
         public string MinClientVersion { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", 
+            Justification = "We want the command option to be named 'Type'.")]
+        [Option(typeof(NuGetCommand), "PackageCommandPackageType")]
+        public string Type { get; set; }
+
+        [Option(typeof(NuGetCommand), "PackageCommandPackageTypeVersion")]
+        public string TypeVersion { get; set; }
+
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
@@ -112,7 +121,29 @@ namespace NuGet.Commands
             {
                 Console.WriteWarning(LocalizedResourceManager.GetString("Option_VerboseDeprecated"));
                 Verbosity = Verbosity.Detailed;
-            }            
+            }
+
+            if ((String.IsNullOrEmpty(Type) && !String.IsNullOrEmpty(TypeVersion)) ||
+                (!String.IsNullOrEmpty(Type) && String.IsNullOrEmpty(TypeVersion)))
+            {
+                throw new CommandLineException(LocalizedResourceManager.GetString("PackageCommandPackageTypeMustBeSpecified"));
+            }
+
+            if (!String.IsNullOrEmpty(Type))
+            {
+                Version packageTypeVersion;
+                if (!System.Version.TryParse(TypeVersion, out packageTypeVersion))
+                {
+                    var message = String.Format(
+                        CultureInfo.CurrentCulture,
+                        LocalizedResourceManager.GetString("PackageCommandInvalidPackageTypeVersion"),
+                        TypeVersion);
+
+                    throw new CommandLineException(message);
+                }
+
+                _packageType = new PackageType(Type, packageTypeVersion);
+            }
 
             // Get the input file
             string path = GetInputFile();
@@ -354,9 +385,10 @@ namespace NuGet.Commands
 
             if (String.IsNullOrEmpty(BasePath))
             {
-                return new PackageBuilder(path, propertyProvider, !ExcludeEmptyDirectories);
+                return new PackageBuilder(path, propertyProvider, !ExcludeEmptyDirectories, _packageType);
             }
-            return new PackageBuilder(path, BasePath, propertyProvider, !ExcludeEmptyDirectories);
+
+            return new PackageBuilder(path, BasePath, propertyProvider, !ExcludeEmptyDirectories, _packageType);
         }
 
         private IPackage BuildFromProjectFile(string path)
@@ -366,7 +398,8 @@ namespace NuGet.Commands
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
-                IncludeReferencedProjects = IncludeReferencedProjects
+                IncludeReferencedProjects = IncludeReferencedProjects,
+                PackageType = _packageType
             };
 
             // Add the additional Properties to the properties of the Project Factory

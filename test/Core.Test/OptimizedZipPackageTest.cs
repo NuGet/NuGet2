@@ -368,8 +368,8 @@ namespace NuGet.Test
             }
 
             builder.FrameworkReferences.AddRange(
-                new[] { new FrameworkAssemblyReference("A", new[] { VersionUtility.ParseFrameworkName("sl50") }),
-                        new FrameworkAssemblyReference("B", new[] { VersionUtility.ParseFrameworkName("windows8") })
+                new[] { new FrameworkAssemblyReference("A", new[] { VersionUtility.ParseFrameworkName("sl50", useManagedCodeConventions: false) }),
+                        new FrameworkAssemblyReference("B", new[] { VersionUtility.ParseFrameworkName("windows8", useManagedCodeConventions: false) })
                       });
             if (references != null)
             {
@@ -410,7 +410,7 @@ namespace NuGet.Test
             file.Setup(f => f.GetStream()).Returns(new MemoryStream());
 
             string effectivePath;
-            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, useManagedCodeConventions: false, effectivePath: out effectivePath);
             file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
             file.SetupGet(f => f.TargetFramework).Returns(fx);
 

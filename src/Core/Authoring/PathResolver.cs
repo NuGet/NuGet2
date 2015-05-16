@@ -71,19 +71,24 @@ namespace NuGet
             return new Regex('^' + pattern + '$', RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
-        internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath, bool includeEmptyDirectories)
+        internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(
+            string basePath, 
+            string searchPath, 
+            string targetPath, 
+            bool includeEmptyDirectories,
+            bool useManagedCodeConventions)
         {
             string normalizedBasePath;
             IEnumerable<SearchPathResult> searchResults = PerformWildcardSearchInternal(basePath, searchPath, includeEmptyDirectories, out normalizedBasePath);
 
             return searchResults.Select(result =>
                 result.IsFile
-                    ? new PhysicalPackageFile
+                    ? new PhysicalPackageFile(useManagedCodeConventions)
                       {
                           SourcePath = result.Path,
                           TargetPath = ResolvePackagePath(normalizedBasePath, searchPath, result.Path, targetPath)
                       }
-                    : new EmptyFrameworkFolderFile(ResolvePackagePath(normalizedBasePath, searchPath, result.Path, targetPath))
+                    : new EmptyFrameworkFolderFile(ResolvePackagePath(normalizedBasePath, searchPath, result.Path, targetPath), useManagedCodeConventions)
                       {
                           SourcePath = result.Path
                       }

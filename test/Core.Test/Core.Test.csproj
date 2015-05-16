@@ -56,7 +56,7 @@
     <Compile Include="AggregateRepositoryTest.cs" />
     <Compile Include="Analysis\InitScriptNotUnderToolsRuleTest.cs" />
     <Compile Include="Analysis\InvalidFrameworkFolderRuleTest.cs" />
-    <Compile Include="Analysis\MisplacedAssemblyRuleTest.cs" />
+    <Compile Include="Analysis\MisplacedFileRuleTest.cs" />
     <Compile Include="Analysis\MisplacedScriptFileRuleTest.cs" />
     <Compile Include="Analysis\MisplacedTransformFileRuleTest.cs" />
     <Compile Include="Analysis\MissingSummaryRuleTest.cs" />
@@ -99,6 +99,7 @@
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="PhysicalFileSystemTest.cs" />
+    <Compile Include="PhysicalPackageFileTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="ProxyCacheTest.cs" />
     <Compile Include="RedirectedHttpClientTest.cs" />

@@ -229,7 +229,7 @@ namespace GenerateTestPackages
             packageBuilder.Authors.Add("Outercurve Foundation");
 
             string assemblySourcePath = GetAssemblyFullPath(package.FullName);
-            packageBuilder.Files.Add(new PhysicalPackageFile()
+            packageBuilder.Files.Add(new PhysicalPackageFile(useManagedCodeConventions: false)
             {
                 SourcePath = assemblySourcePath,
                 TargetPath = @"lib\" + Path.GetFileName(assemblySourcePath)

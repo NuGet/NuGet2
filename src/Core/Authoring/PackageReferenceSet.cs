@@ -22,7 +22,7 @@ namespace NuGet
             _references = new ReadOnlyCollection<string>(references.ToList());
         }
 
-        public PackageReferenceSet(ManifestReferenceSet manifestReferenceSet)
+        public PackageReferenceSet(ManifestReferenceSet manifestReferenceSet, bool useManagedCodeConventions)
         {
             if (manifestReferenceSet == null) 
             {
@@ -31,7 +31,7 @@ namespace NuGet
 
             if (!String.IsNullOrEmpty(manifestReferenceSet.TargetFramework))
             {
-                _targetFramework = VersionUtility.ParseFrameworkName(manifestReferenceSet.TargetFramework);
+                _targetFramework = VersionUtility.ParseFrameworkName(manifestReferenceSet.TargetFramework, useManagedCodeConventions);
             }
 
             _references = new ReadOnlyHashSet<string>(manifestReferenceSet.References.Select(r => r.File), StringComparer.OrdinalIgnoreCase);

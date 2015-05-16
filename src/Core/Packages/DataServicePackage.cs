@@ -1,4 +1,3 @@
-using NuGet.Resources;
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Common;
@@ -8,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -84,13 +84,13 @@ namespace NuGet
             set;
         }
 
-        public string LicenseNames 
+        public string LicenseNames
         {
             get { return _licenseNames; }
             set
             {
                 _licenseNames = value;
-                LicenseNameCollection = 
+                LicenseNameCollection =
                     String.IsNullOrEmpty(value) ? new string[0] : value.Split(';').ToArray();
             }
         }
@@ -215,6 +215,11 @@ namespace NuGet
             set;
         }
 
+        public PackageType PackageType
+        {
+            get { return Package.PackageType; }
+        }
+
         private string OldHash { get; set; }
 
         private IPackage Package
@@ -287,7 +292,7 @@ namespace NuGet
 
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
-            get 
+            get
             {
                 return Package.PackageAssemblyReferences;
             }
@@ -477,7 +482,7 @@ namespace NuGet
 
             // Trim the id
             string id = tokens[0].Trim();
-            
+
             IVersionSpec versionSpec = null;
             if (tokens.Length > 1)
             {
@@ -485,9 +490,8 @@ namespace NuGet
                 VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
             }
 
-            var targetFramework = (tokens.Length > 2 && !String.IsNullOrEmpty(tokens[2]))
-                                    ? VersionUtility.ParseFrameworkName(tokens[2])
-                                    : null;
+            var targetFramework = (tokens.Length > 2 && !String.IsNullOrEmpty(tokens[2])) ?
+                VersionUtility.ParseFrameworkName(tokens[2], useManagedCodeConventions: true) : null;
 
             return Tuple.Create(id, versionSpec, targetFramework);
         }

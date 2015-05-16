@@ -9,7 +9,7 @@ namespace NuGet
         private static readonly ReadOnlyCollection<IPackageRule> _rules = new ReadOnlyCollection<IPackageRule>(
             new IPackageRule[] {
                 new InvalidFrameworkFolderRule(),
-                new MisplacedAssemblyRule(),
+                new MisplacedFileRule(),
                 new MisplacedScriptFileRule(),
                 new MisplacedTransformFileRule(),
                 new MissingSummaryRule(),

@@ -14,7 +14,7 @@ namespace NuGet.Test
         public void NamePropertyReturnsCorrectValue()
         {
             // Arrange 
-            var profile = new NetPortableProfile("ProfileXXX", new [] { new FrameworkName(".NETFramework, Version=4.5") });
+            var profile = new NetPortableProfile("ProfileXXX", new[] { new FrameworkName(".NETFramework, Version=4.5") });
 
             // Act
             string name = profile.Name;
@@ -431,7 +431,7 @@ namespace NuGet.Test
         public void TestParseWithCustomProfileString1()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("sl3+net+netcore45");
+            var profile = NetPortableProfile.Parse("sl3+net+netcore45", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -444,7 +444,7 @@ namespace NuGet.Test
         public void TestParseWithCustomProfileString2()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("wp7");
+            var profile = NetPortableProfile.Parse("wp7", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(1, profile.SupportedFrameworks.Count);
@@ -455,7 +455,7 @@ namespace NuGet.Test
         public void TestParseWithInvalidCustomProfileReturnsNull()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("Profile3284");
+            var profile = NetPortableProfile.Parse("Profile3284", useManagedCodeConventions: false);
 
             // Assert
             Assert.Null(profile);
@@ -465,7 +465,7 @@ namespace NuGet.Test
         public void TestParseWithCustomProfileString3()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("wp71+win8+monoandroid1.6+monotouch1.0+sl4+net45");
+            var profile = NetPortableProfile.Parse("wp71+win8+monoandroid1.6+monotouch1.0+sl4+net45", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(6, profile.SupportedFrameworks.Count);
@@ -502,7 +502,7 @@ namespace NuGet.Test
 
             NetPortableProfileTable.Profiles = profileCollection;
 
-            var profile = NetPortableProfile.Parse("Profile2");
+            var profile = NetPortableProfile.Parse("Profile2", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -540,7 +540,7 @@ namespace NuGet.Test
 
             NetPortableProfileTable.Profiles = profileCollection;
 
-            var profile = NetPortableProfile.Parse("net45+sl40+MonoTouch+wp71+MonoAndroid20");
+            var profile = NetPortableProfile.Parse("net45+sl40+MonoTouch+wp71+MonoAndroid20", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(5, profile.SupportedFrameworks.Count);
@@ -549,7 +549,7 @@ namespace NuGet.Test
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoTouch, Version=0.0")));
-        }    
+        }
 
         [Fact]
         public void TestParseWithCustomProfileString5WithOptionalFrameworkAndTreatedAsOptional()
@@ -581,7 +581,7 @@ namespace NuGet.Test
             NetPortableProfileTable.Profiles = profileCollection;
 
             // Default value of second parameter treatOptionalFrameworksAsSupportedFrameworks is false
-            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20");
+            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -622,7 +622,7 @@ namespace NuGet.Test
 
             NetPortableProfileTable.Profiles = profileCollection;
 
-            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", treatOptionalFrameworksAsSupportedFrameworks: true);
+            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", useManagedCodeConventions: false, treatOptionalFrameworksAsSupportedFrameworks: true);
 
             // Assert
             Assert.Equal(5, profile.SupportedFrameworks.Count);

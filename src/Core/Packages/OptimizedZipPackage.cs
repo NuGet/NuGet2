@@ -179,7 +179,7 @@ namespace NuGet
 
             return from file in _files.Values
                    where IsAssemblyReference(file.Path)
-                   select (IPackageAssemblyReference)new PhysicalPackageAssemblyReference(file);
+                   select (IPackageAssemblyReference)new PhysicalPackageAssemblyReference(file, this.UsesManagedCodeConventions());
         }
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
@@ -292,7 +292,7 @@ namespace NuGet
                         }
                     }
 
-                    var packageFile = new PhysicalPackageFile
+                    var packageFile = new PhysicalPackageFile(this.UsesManagedCodeConventions())
                     {
                         SourcePath = _expandedFileSystem.GetFullPath(filePath),
                         TargetPath = path

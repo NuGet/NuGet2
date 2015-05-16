@@ -16,10 +16,12 @@ namespace NuGet.Test
             Assert.Equal("UAP10.0.10030", shortName);
         }
 
-        [Fact]
-        public void ParseUAPFrameworkName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseUAPFrameworkName(bool useManagedCodeConventions)
         {
-            var name = VersionUtility.ParseFrameworkName("uap10.0.10030");
+            var name = VersionUtility.ParseFrameworkName("uap10.0.10030", useManagedCodeConventions);
             Assert.Equal("UAP,Version=v10.0.10030", name.ToString());
         }
 
@@ -32,7 +34,7 @@ namespace NuGet.Test
             // Act
             string effectivePath;
             var frameworkName = VersionUtility.ParseFrameworkFolderName(
-                path, strictParsing: true, effectivePath: out effectivePath);
+                path, strictParsing: true, useManagedCodeConventions: false, effectivePath: out effectivePath);
 
             // Assert
             Assert.Equal(VersionUtility.UnsupportedFrameworkName, frameworkName);
@@ -55,7 +57,7 @@ namespace NuGet.Test
         {
             // Act
             string effectivePath;
-            var frameworkName = VersionUtility.ParseFrameworkNameFromFilePath(filePath, out effectivePath);
+            var frameworkName = VersionUtility.ParseFrameworkNameFromFilePath(filePath, useManagedCodeConventions: false, effectivePath: out effectivePath);
 
             // Assert
             if (expectedVersion == null)
@@ -89,7 +91,7 @@ namespace NuGet.Test
         {
             // Act
             string effectivePath;
-            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: true, effectivePath: out effectivePath);
+            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: true, useManagedCodeConventions: false, effectivePath: out effectivePath);
 
             // Assert
             if (expectedVersion == null)
@@ -123,7 +125,7 @@ namespace NuGet.Test
         {
             // Act
             string effectivePath;
-            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: false, effectivePath: out effectivePath);
+            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: false, useManagedCodeConventions: false, effectivePath: out effectivePath);
 
             // Assert
             if (expectedVersion == null)
@@ -141,42 +143,48 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
-        [InlineData("content\\-world\\x.dll", "-world\\x.dll")]
-        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(string path, string expectedPath)
+        [InlineData(false, "content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData(true, "content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData(false, "content\\-world\\x.dll", "-world\\x.dll")]
+        [InlineData(true, "content\\-world\\x.dll", "-world\\x.dll")]
+        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(bool useManagedCodeConventions, string path, string expectedPath)
         {
             // Act
             string effectivePath;
-            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
-            
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: useManagedCodeConventions, effectivePath: out effectivePath);
+
             // Assert
             Assert.Null(framework);
             Assert.Equal(expectedPath, effectivePath);
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesNativeFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesNativeFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("native");
+            var frameworkName = VersionUtility.ParseFrameworkName("native", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal("native", frameworkName.Identifier);
             Assert.Equal(defaultVersion, frameworkName.Version);
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { ".net", ".netframework", "net", "netframework" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions: false));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -186,15 +194,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedPortableNetFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedPortableNetFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { ".netportable-sl3", "netportable-net4", "portable-netcore45" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -204,15 +214,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "windowsphone", "wp" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -222,15 +234,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneAppNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneAppNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "WindowsPhoneApp", "wpa" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -240,15 +254,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "winrt", ".NETCore", "NetCore" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -258,15 +274,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedWindowsFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedWindowsFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "Windows", "win" };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -276,15 +294,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "netmf4.1", ".NETMicroFramework4.1" };
             Version version41 = new Version("4.1");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -294,15 +314,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedSilverlightNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedSilverlightNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = knownNameFormats.Select(framework => VersionUtility.ParseFrameworkName(framework, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -312,15 +334,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedMonoAndroidNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedMonoAndroidNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "MonoAndroid", "monoandroid", "MONOANDROID " };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = knownNameFormats.Select(framework => VersionUtility.ParseFrameworkName(framework, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -330,15 +354,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedMonoTouchNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedMonoTouchNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "MonoTouch", "monotouch", "monoTOUCH  " };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = knownNameFormats.Select(framework => VersionUtility.ParseFrameworkName(framework, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -348,15 +374,17 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameNormalizesSupportedMonoMacNames()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameNormalizesSupportedMonoMacNames(bool useManagedCodeConventions)
         {
             // Arrange
             var knownNameFormats = new[] { "MonoMac", "monomac", "mONOmAC " };
             Version defaultVersion = new Version("0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = knownNameFormats.Select(framework => VersionUtility.ParseFrameworkName(framework, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -367,34 +395,55 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("dnx451", "4.5.1", "DNX")]
-        [InlineData("dnxcore50", "5.0", "DNXCore")]
-        [InlineData("dnx451", "4.5.1", "DNX")]
-        [InlineData("dnxcore50", "5.0", "DNXCore")]
-        [InlineData("dnx451", "4.5.1", "DNX")]
-        [InlineData("dnxCORE50", "5.0", "DNXCore")]
-        [InlineData("DNX50", "5.0", "DNX")]
-        [InlineData("DNXCORE50", "5.0", "DNXCore")]
-        [InlineData("dnx51", "5.1", "DNX")]
-        [InlineData("dnxcore51", "5.1", "DNXCore")]
+        [InlineData(false, "dnx451", "4.5.1", "DNX")]
+        [InlineData(false, "dnxcore50", "5.0", "DNXCore")]
+        [InlineData(false, "dnx451", "4.5.1", "DNX")]
+        [InlineData(false, "dnxcore50", "5.0", "DNXCore")]
+        [InlineData(false, "dnx451", "4.5.1", "DNX")]
+        [InlineData(false, "dnxCORE50", "5.0", "DNXCore")]
+        [InlineData(false, "DNX50", "5.0", "DNX")]
+        [InlineData(false, "DNXCORE50", "5.0", "DNXCore")]
+        [InlineData(false, "dnx51", "5.1", "DNX")]
+        [InlineData(false, "dnxcore51", "5.1", "DNXCore")]
+        [InlineData(true, "dnx451", "4.5.1", "DNX")]
+        [InlineData(true, "dnxcore50", "5.0", "DNXCore")]
+        [InlineData(true, "dnx451", "4.5.1", "DNX")]
+        [InlineData(true, "dnxcore50", "5.0", "DNXCore")]
+        [InlineData(true, "dnx451", "4.5.1", "DNX")]
+        [InlineData(true, "dnxCORE50", "5.0", "DNXCore")]
+        [InlineData(true, "DNX50", "5.0", "DNX")]
+        [InlineData(true, "DNXCORE50", "5.0", "DNXCore")]
+        [InlineData(true, "dnx51", "5.1", "DNX")]
+        [InlineData(true, "dnxcore51", "5.1", "DNXCore")]
         // legacy
-        [InlineData("aspnet50", "5.0", "ASP.Net")]
-        [InlineData("aspnetcore50", "5.0", "ASP.NetCore")]
-        [InlineData("asp.net50", "5.0", "ASP.Net")]
-        [InlineData("asp.netcore50", "5.0", "ASP.NetCore")]
-        [InlineData("ASPNET50", "5.0", "ASP.Net")]
-        [InlineData("ASPNETCORE50", "5.0", "ASP.NetCore")]
-        [InlineData("ASP.NET50", "5.0", "ASP.Net")]
-        [InlineData("ASP.NETCORE50", "5.0", "ASP.NetCore")]
-        [InlineData("aspnet51", "5.1", "ASP.Net")]
-        [InlineData("aspnetcore51", "5.1", "ASP.NetCore")]
-        public void ParseFrameworkNameNormalizesSupportedASPNetFrameworkNames(string shortName, string version, string identifier)
+        [InlineData(false, "aspnet50", "5.0", "ASP.Net")]
+        [InlineData(false, "aspnetcore50", "5.0", "ASP.NetCore")]
+        [InlineData(false, "asp.net50", "5.0", "ASP.Net")]
+        [InlineData(false, "asp.netcore50", "5.0", "ASP.NetCore")]
+        [InlineData(false, "ASPNET50", "5.0", "ASP.Net")]
+        [InlineData(false, "ASPNETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData(false, "ASP.NET50", "5.0", "ASP.Net")]
+        [InlineData(false, "ASP.NETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData(false, "aspnet51", "5.1", "ASP.Net")]
+        [InlineData(false, "aspnetcore51", "5.1", "ASP.NetCore")]
+        [InlineData(true, "aspnet50", "5.0", "ASP.Net")]
+        [InlineData(true, "aspnetcore50", "5.0", "ASP.NetCore")]
+        [InlineData(true, "asp.net50", "5.0", "ASP.Net")]
+        [InlineData(true, "asp.netcore50", "5.0", "ASP.NetCore")]
+        [InlineData(true, "ASPNET50", "5.0", "ASP.Net")]
+        [InlineData(true, "ASPNETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData(true, "ASP.NET50", "5.0", "ASP.Net")]
+        [InlineData(true, "ASP.NETCORE50", "5.0", "ASP.NetCore")]
+        [InlineData(true, "aspnet51", "5.1", "ASP.Net")]
+        [InlineData(true, "aspnetcore51", "5.1", "ASP.NetCore")]
+
+        public void ParseFrameworkNameNormalizesSupportedASPNetFrameworkNames(bool useManagedCodeConventions, string shortName, string version, string identifier)
         {
             // Arrange
             Version expectedVersion = new Version(version);
 
             // Act
-            var expanded = VersionUtility.ParseFrameworkName(shortName);
+            var expanded = VersionUtility.ParseFrameworkName(shortName, useManagedCodeConventions);
 
             // Assert
             Assert.Equal(expectedVersion, expanded.Version);
@@ -402,30 +451,47 @@ namespace NuGet.Test
             Assert.True(String.IsNullOrEmpty(expanded.Profile));
         }
 
-        [InlineData(new[] { "XamarinIOS", "xamarinios", "XAMARINIOS " }, "0.0", "Xamarin.iOS")]
-        [InlineData(new[] { "Xamarin.iOS", "xamarin.ios", "XAMARIN.IOS " }, "0.0", "Xamarin.iOS")]
-        [InlineData(new[] { "XamarinMac", "xamarinmac", "XAMARINMAC " }, "0.0", "Xamarin.Mac")]
-        [InlineData(new[] { "Xamarin.Mac", "xamarin.mac", "XAMARIN.MAC " }, "0.0", "Xamarin.Mac")]
-        [InlineData(new[] { "XamarinPlayStationThree", "xamarinplaystationthree", "XAMARINPLAYSTATIONthree " }, "0.0","Xamarin.PlayStation3")]
-        [InlineData(new[] { "Xamarin.PlayStationThree", "xamarin.playstationthree", "XAMARIN.PLAYSTATIONTHREE " }, "0.0", "Xamarin.PlayStation3")]
-        [InlineData(new[] { "XamarinPSThree", "xamarinpsthree", "XAMARINPSTHREE " }, "0.0", "Xamarin.PlayStation3")]
-        [InlineData(new[] { "XamarinPlayStationFour", "xamarinplaystationfour", "XAMARINPLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
-        [InlineData(new[] { "Xamarin.PlayStationFour", "xamarin.playstationfour", "XAMARIN.PLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
-        [InlineData(new[] { "XamarinPSFour", "xamarinpsfour", "XAMARINPSFOUR " }, "0.0", "Xamarin.PlayStation4")]
-        [InlineData(new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
-        [InlineData(new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
-        [InlineData(new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
-        [InlineData(new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
-        [InlineData(new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
-        [InlineData(new[] { "XamarinXboxOne", "xamarinxboxone", "XAMARINXBOXONE " }, "0.0", "Xamarin.XboxOne")]
-        [InlineData(new[] { "Xamarin.XboxOne", "xamarin.xboxone", "XAMARIN.XBOXONE " }, "0.0", "Xamarin.XboxOne")]
-        public void ParseFrameworkNameNormalizesSupportedXamarinFrameworkNames(string[] knownNameFormats, string version, string expectedIdentifier)
+        [InlineData(false, new[] { "XamarinIOS", "xamarinios", "XAMARINIOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(false, new[] { "Xamarin.iOS", "xamarin.ios", "XAMARIN.IOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(false, new[] { "XamarinMac", "xamarinmac", "XAMARINMAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(false, new[] { "Xamarin.Mac", "xamarin.mac", "XAMARIN.MAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(false, new[] { "XamarinPlayStationThree", "xamarinplaystationthree", "XAMARINPLAYSTATIONthree " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(false, new[] { "Xamarin.PlayStationThree", "xamarin.playstationthree", "XAMARIN.PLAYSTATIONTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(false, new[] { "XamarinPSThree", "xamarinpsthree", "XAMARINPSTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(false, new[] { "XamarinPlayStationFour", "xamarinplaystationfour", "XAMARINPLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(false, new[] { "Xamarin.PlayStationFour", "xamarin.playstationfour", "XAMARIN.PLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(false, new[] { "XamarinPSFour", "xamarinpsfour", "XAMARINPSFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(false, new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(false, new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(false, new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(false, new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(false, new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(false, new[] { "XamarinXboxOne", "xamarinxboxone", "XAMARINXBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        [InlineData(false, new[] { "Xamarin.XboxOne", "xamarin.xboxone", "XAMARIN.XBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        [InlineData(true, new[] { "XamarinIOS", "xamarinios", "XAMARINIOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(true, new[] { "Xamarin.iOS", "xamarin.ios", "XAMARIN.IOS " }, "0.0", "Xamarin.iOS")]
+        [InlineData(true, new[] { "XamarinMac", "xamarinmac", "XAMARINMAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(true, new[] { "Xamarin.Mac", "xamarin.mac", "XAMARIN.MAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(true, new[] { "XamarinPlayStationThree", "xamarinplaystationthree", "XAMARINPLAYSTATIONthree " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(true, new[] { "Xamarin.PlayStationThree", "xamarin.playstationthree", "XAMARIN.PLAYSTATIONTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(true, new[] { "XamarinPSThree", "xamarinpsthree", "XAMARINPSTHREE " }, "0.0", "Xamarin.PlayStation3")]
+        [InlineData(true, new[] { "XamarinPlayStationFour", "xamarinplaystationfour", "XAMARINPLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(true, new[] { "Xamarin.PlayStationFour", "xamarin.playstationfour", "XAMARIN.PLAYSTATIONFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(true, new[] { "XamarinPSFour", "xamarinpsfour", "XAMARINPSFOUR " }, "0.0", "Xamarin.PlayStation4")]
+        [InlineData(true, new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(true, new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(true, new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(true, new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(true, new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
+        [InlineData(true, new[] { "XamarinXboxOne", "xamarinxboxone", "XAMARINXBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        [InlineData(true, new[] { "Xamarin.XboxOne", "xamarin.xboxone", "XAMARIN.XBOXONE " }, "0.0", "Xamarin.XboxOne")]
+        public void ParseFrameworkNameNormalizesSupportedXamarinFrameworkNames(bool useManagedCodeConventions, string[] knownNameFormats, string version, string expectedIdentifier)
         {
             // Arrange
             Version defaultVersion = new Version(version);
 
             // Act
-            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = knownNameFormats.Select(framework => VersionUtility.ParseFrameworkName(framework, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -435,43 +501,63 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
+        [Theory]
+        [InlineData("NETCF20")]
+        [InlineData("NET40ClientProfile")]
+        [InlineData("NET40Foo")]
+        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized(string frameworkNameString)
         {
             // Act
-            var frameworkName1 = VersionUtility.ParseFrameworkName("NETCF20");
-            var frameworkName2 = VersionUtility.ParseFrameworkName("NET40ClientProfile");
-            var frameworkName3 = VersionUtility.ParseFrameworkName("NET40Foo");
+            var frameworkName = VersionUtility.ParseFrameworkName(frameworkNameString, useManagedCodeConventions: false);
 
             // Assert
-            Assert.Equal("Unsupported", frameworkName1.Identifier);
-            Assert.Equal("Unsupported", frameworkName2.Identifier);
-            Assert.Equal("Unsupported", frameworkName3.Identifier);
+            Assert.Equal("Unsupported", frameworkName.Identifier);
         }
 
-        [Fact]
-        public void ParseFrameworkNameUsesNetFrameworkIfOnlyVersionSpecified()
+        [Theory]
+        [InlineData("NETCF20", "NETCF", "2.0")]
+        [InlineData("NET40ClientProfile", "NET40ClientProfile", null)]
+        [InlineData("NET40Foo", "NET40Foo", null)]
+        public void ParseFrameworkNameReturnsFrameworkNameIfManagedCodeConventionsIsTrue(string frameworkNameString, string identifier, string versionString)
+        {
+            // Arrange
+            var version = versionString == null ? new Version() : Version.Parse(versionString);
+
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName(frameworkNameString, useManagedCodeConventions: true);
+
+            // Assert
+            Assert.Equal(identifier, frameworkName.Identifier);
+            Assert.Equal(version, frameworkName.Version);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameUsesNetFrameworkIfOnlyVersionSpecified(bool useManagedCodeConventions)
         {
             // Arrange
             Version version20 = new Version("2.0");
 
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("20");
+            var frameworkName = VersionUtility.ParseFrameworkName("20", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
             Assert.Equal(version20, frameworkName.Version);
         }
 
-        [Fact]
-        public void ParseFrameworkNameVersionFormats()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameVersionFormats(bool useManagedCodeConventions)
         {
             // Arrange
             var versionFormats = new[] { "4.0", "40", "4" };
             Version version40 = new Version("4.0");
 
             // Act
-            var frameworkNames = versionFormats.Select(VersionUtility.ParseFrameworkName);
+            var frameworkNames = versionFormats.Select(format => VersionUtility.ParseFrameworkName(format, useManagedCodeConventions));
 
             // Assert
             foreach (var frameworkName in frameworkNames)
@@ -481,11 +567,13 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExcess(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("NET41235");
+            var frameworkName = VersionUtility.ParseFrameworkName("NET41235", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
@@ -493,20 +581,34 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion()
+        public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion_WhenManagedCodeConventionsIsFalse()
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5");
+            var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5", useManagedCodeConventions: false);
 
             // Assert
             Assert.Equal("Unsupported", frameworkName.Identifier);
         }
 
         [Fact]
-        public void ParseFrameworkNameWithProfile()
+        public void ParseFrameworkNameParsesInvalidVersion_WhenManagedCodeConventionsIsTrue()
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("net40-client");
+            var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5", useManagedCodeConventions: true);
+
+            // Assert
+            Assert.Equal("NET4.1.4.5.5", frameworkName.Identifier);
+            Assert.Equal(new Version(), frameworkName.Version);
+            Assert.Empty(frameworkName.Profile);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithProfile(bool useManagedCodeConventions)
+        {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-client", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
@@ -514,11 +616,13 @@ namespace NuGet.Test
             Assert.Equal("Client", frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("net40-other");
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-other", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
@@ -526,11 +630,13 @@ namespace NuGet.Test
             Assert.Equal("other", frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("net40-full");
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-full", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
@@ -538,11 +644,13 @@ namespace NuGet.Test
             Assert.Equal(String.Empty, frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("sl4-wp");
+            var frameworkName = VersionUtility.ParseFrameworkName("sl4-wp", useManagedCodeConventions);
 
             // Assert
             Assert.Equal("Silverlight", frameworkName.Identifier);
@@ -550,11 +658,13 @@ namespace NuGet.Test
             Assert.Equal("WindowsPhone", frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("net20-cf");
+            var frameworkName = VersionUtility.ParseFrameworkName("net20-cf", useManagedCodeConventions);
 
             // Assert
             Assert.Equal(".NETFramework", frameworkName.Identifier);
@@ -562,11 +672,13 @@ namespace NuGet.Test
             Assert.Equal("CompactFramework", frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithEmptyProfile()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithEmptyProfile(bool useManagedCodeConventions)
         {
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("sl4-");
+            var frameworkName = VersionUtility.ParseFrameworkName("sl4-", useManagedCodeConventions);
 
             // Assert
             Assert.Equal("Silverlight", frameworkName.Identifier);
@@ -574,34 +686,49 @@ namespace NuGet.Test
             Assert.Equal(String.Empty, frameworkName.Profile);
         }
 
-        [Fact]
-        public void ParseFrameworkNameWithInvalidFrameworkNameThrows()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkNameWithInvalidFrameworkNameThrows(bool useManagedCodeConventions)
         {
             // Act
-            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-"), "frameworkName", "Framework name is missing.");
-            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-client"), "frameworkName", "Framework name is missing.");
-            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName(""), "frameworkName", "Framework name is missing.");
-            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("---"), "frameworkName", "Invalid framework name format. Expected {framework}{version}-{profile}.");
-        }
-
-        [Fact]
-        public void ParseFrameworkFolderNameWithoutFramework()
-        {
-            Assert.Null(VersionUtility.ParseFrameworkFolderName(@"foo.dll"));
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-", useManagedCodeConventions), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-client", useManagedCodeConventions), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("", useManagedCodeConventions), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("---", useManagedCodeConventions), "frameworkName",
+               "Invalid framework name format. Expected {framework}{version}-{profile}.");
         }
 
         [Theory]
-        [InlineData(@"sub\foo.dll", "Unsupported", "0.0")]
-        [InlineData(@"SL4\foo.dll", "Silverlight", "4.0")]
-        [InlineData(@"SL3\sub1\foo.dll", "Silverlight", "3.0")]
-        [InlineData(@"SL20\sub1\sub2\foo.dll", "Silverlight", "2.0")]
-        [InlineData(@"net\foo.dll", ".NETFramework", "")]
-        [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
-        [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
-        [InlineData(@"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
-        [InlineData(@"dnx451\foo.dll", "DNX", "4.5.1")]
-        [InlineData(@"dnxcore50\foo.dll", "DNXCore", "5.0")]
-        public void ParseFrameworkFolderName(string path, string identifier, string version)
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseFrameworkFolderNameWithoutFramework(bool useManagedCodeConventions)
+        {
+            Assert.Null(VersionUtility.ParseFrameworkFolderName(@"foo.dll", useManagedCodeConventions));
+        }
+
+        [Theory]
+        [InlineData(false, @"sub\foo.dll", "Unsupported", "0.0")]
+        [InlineData(false, @"SL4\foo.dll", "Silverlight", "4.0")]
+        [InlineData(false, @"SL3\sub1\foo.dll", "Silverlight", "3.0")]
+        [InlineData(false, @"SL20\sub1\sub2\foo.dll", "Silverlight", "2.0")]
+        [InlineData(false, @"net\foo.dll", ".NETFramework", "")]
+        [InlineData(false, @"winrt45\foo.dll", ".NETCore", "4.5")]
+        [InlineData(false, @"aspnet50\foo.dll", "ASP.Net", "5.0")]
+        [InlineData(false, @"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
+        [InlineData(false, @"dnx451\foo.dll", "DNX", "4.5.1")]
+        [InlineData(false, @"dnxcore50\foo.dll", "DNXCore", "5.0")]
+        [InlineData(true, @"sub\foo.dll", "sub", "0.0")]
+        [InlineData(true, @"SL4\foo.dll", "Silverlight", "4.0")]
+        [InlineData(true, @"SL3\sub1\foo.dll", "Silverlight", "3.0")]
+        [InlineData(true, @"SL20\sub1\sub2\foo.dll", "Silverlight", "2.0")]
+        [InlineData(true, @"net\foo.dll", ".NETFramework", "")]
+        [InlineData(true, @"winrt45\foo.dll", ".NETCore", "4.5")]
+        [InlineData(true, @"aspnet50\foo.dll", "ASP.Net", "5.0")]
+        [InlineData(true, @"aspnetcore50\foo.dll", "ASP.NetCore", "5.0")]
+        [InlineData(true, @"dnx451\foo.dll", "DNX", "4.5.1")]
+        [InlineData(true, @"dnxcore50\foo.dll", "DNXCore", "5.0")]
+        public void ParseFrameworkFolderName(bool useManagedCodeConventions, string path, string identifier, string version)
         {
             // Arrange
             Version expectedVersion = String.IsNullOrEmpty(version) ?
@@ -609,7 +736,46 @@ namespace NuGet.Test
                 new Version(version);
 
             // Act
-            var actual = VersionUtility.ParseFrameworkFolderName(path);
+            var actual = VersionUtility.ParseFrameworkFolderName(path, useManagedCodeConventions);
+
+            // Assert
+            Assert.Equal(identifier, actual.Identifier);
+            Assert.Equal(expectedVersion, actual.Version);
+        }
+
+        [Theory]
+        [InlineData(@"foo\test.txt")]
+        [InlineData(@"bar40\import.target")]
+        public void ParseFrameworkFolderName_ReturnsUnknownFramework_WhenuseManagedCodeConventionsIsDisabledAndFrameworkIsUnrecognized(string path)
+        {
+            // Arrange
+            var expectedVersion = new Version();
+
+            // Act
+            var actual = VersionUtility.ParseFrameworkFolderName(path, useManagedCodeConventions: false);
+
+            // Assert
+            Assert.Equal("Unsupported", actual.Identifier);
+            Assert.Equal(expectedVersion, actual.Version);
+        }
+
+        [Theory]
+        [InlineData(@"foo\test.txt", "foo", "")]
+        [InlineData(@"bar40\import.target", "bar", "4.0")]
+        [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
+        [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
+        public void ParseFrameworkFolderName_ReturnsTargetFramework_WhenuseManagedCodeConventionsIsEnabled(
+            string path,
+            string identifier,
+            string version)
+        {
+            // Arrange
+            var expectedVersion = String.IsNullOrEmpty(version) ?
+                new Version() :
+                new Version(version);
+
+            // Act
+            var actual = VersionUtility.ParseFrameworkFolderName(path, useManagedCodeConventions: true);
 
             // Assert
             Assert.Equal(identifier, actual.Identifier);
@@ -628,6 +794,7 @@ namespace NuGet.Test
             var wp7Mango = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone71");
             var netMicro41 = new FrameworkName(".NETMicroFramework", new Version(4, 1));
             var winrt = new FrameworkName(".NETCore", new Version(4, 5));
+            var fooFx = new FrameworkName("foo", new Version(3, 0));
 
             // Act
             string net40Value = VersionUtility.GetFrameworkString(net40);
@@ -638,6 +805,7 @@ namespace NuGet.Test
             string wp7MangoValue = VersionUtility.GetFrameworkString(wp7Mango);
             string netMicro41Value = VersionUtility.GetFrameworkString(netMicro41);
             string winrtValue = VersionUtility.GetFrameworkString(winrt);
+            string fooValue = VersionUtility.GetFrameworkString(fooFx);
 
             // Assert
             Assert.Equal(".NETFramework4.0", net40Value);
@@ -648,6 +816,7 @@ namespace NuGet.Test
             Assert.Equal("Silverlight4.0-WindowsPhone71", wp7MangoValue);
             Assert.Equal(".NETMicroFramework4.1", netMicro41Value);
             Assert.Equal(".NETCore4.5", winrtValue);
+            Assert.Equal("foo3.0", fooValue);
         }
 
         [Fact]
@@ -988,8 +1157,8 @@ namespace NuGet.Test
         public void IsCompatibleReturnsFalseForSlAndWindowsPhoneFrameworks()
         {
             // Arrange
-            FrameworkName sl3 = VersionUtility.ParseFrameworkName("sl3");
-            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
+            FrameworkName sl3 = VersionUtility.ParseFrameworkName("sl3", useManagedCodeConventions: false);
+            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp", useManagedCodeConventions: false);
 
             // Act
             bool wp7CompatibleWithSl = VersionUtility.IsCompatible(sl3, wp7);
@@ -1004,11 +1173,11 @@ namespace NuGet.Test
         public void IsCompatibleWindowsPhoneVersions()
         {
             // Arrange
-            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
-            FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
+            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp", useManagedCodeConventions: false);
+            FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71", useManagedCodeConventions: false);
             FrameworkName wp8 = new FrameworkName("WindowsPhone, Version=v8.0");
             FrameworkName wp81 = new FrameworkName("WindowsPhone, Version=v8.1");
-            FrameworkName wpa81 = VersionUtility.ParseFrameworkName("wpa81");
+            FrameworkName wpa81 = VersionUtility.ParseFrameworkName("wpa81", useManagedCodeConventions: false);
 
             // Act
             bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
@@ -1050,7 +1219,7 @@ namespace NuGet.Test
         public void WindowsPhone7IdentifierCompatibleWithAllWPProjects(string wp7Identifier)
         {
             // Arrange
-            var wp7Package = VersionUtility.ParseFrameworkName(wp7Identifier);
+            var wp7Package = VersionUtility.ParseFrameworkName(wp7Identifier, useManagedCodeConventions: false);
 
             var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
             var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
@@ -1069,7 +1238,7 @@ namespace NuGet.Test
         public void WindowsPhoneMangoIdentifierCompatibleWithAllWPProjects(string mangoIdentifier)
         {
             // Arrange
-            var mangoPackage = VersionUtility.ParseFrameworkName(mangoIdentifier);
+            var mangoPackage = VersionUtility.ParseFrameworkName(mangoIdentifier, useManagedCodeConventions: false);
 
             var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
             var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
@@ -1089,7 +1258,7 @@ namespace NuGet.Test
         public void WindowsPhoneApolloIdentifierCompatibleWithAllWPProjects(string apolloIdentifier)
         {
             // Arrange
-            var apolloPackage = VersionUtility.ParseFrameworkName(apolloIdentifier);
+            var apolloPackage = VersionUtility.ParseFrameworkName(apolloIdentifier, useManagedCodeConventions: false);
 
             var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
             var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
@@ -1109,7 +1278,7 @@ namespace NuGet.Test
         public void WindowsIdentifierCompatibleWithWindowsStoreAppProjects(string identifier)
         {
             // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier, useManagedCodeConventions: false);
 
             var projectFramework = new FrameworkName(".NETCore, Version=4.5");
 
@@ -1127,7 +1296,7 @@ namespace NuGet.Test
         public void WindowsIdentifierWithUnsupportedVersionNotCompatibleWithWindowsStoreAppProjects(string identifier)
         {
             // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier, useManagedCodeConventions: false);
 
             var projectFramework = new FrameworkName(".NETCore, Version=4.5");
 
@@ -1139,8 +1308,8 @@ namespace NuGet.Test
         public void NetFrameworkCompatibiilityIsCompatibleReturns()
         {
             // Arrange
-            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
-            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false);
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client", useManagedCodeConventions: false);
 
             // Act
             bool netClientCompatibleWithNet = VersionUtility.IsCompatible(net40, net40Client);
@@ -1155,8 +1324,8 @@ namespace NuGet.Test
         public void LowerFrameworkVersionsAreNotCompatibleWithHigherFrameworkVersionsWithSameFrameworkName()
         {
             // Arrange
-            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
-            FrameworkName net20 = VersionUtility.ParseFrameworkName("net20");
+            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false);
+            FrameworkName net20 = VersionUtility.ParseFrameworkName("net20", useManagedCodeConventions: false);
 
             // Act
             bool net40CompatibleWithNet20 = VersionUtility.IsCompatible(net20, net40);
@@ -1171,7 +1340,7 @@ namespace NuGet.Test
         public void IsCompatibleReturnsTrueIfSupportedFrameworkListIsEmpty()
         {
             // Arrange
-            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client", useManagedCodeConventions: false);
 
             // Act
             var result = VersionUtility.IsCompatible(net40Client, Enumerable.Empty<FrameworkName>());
@@ -1181,10 +1350,10 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void IsCompatibleReturnsTrueIfProjectFrameworkIsNully()
+        public void IsCompatibleReturnsTrueIfProjectFrameworkIsNull()
         {
             // Arrange
-            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client", useManagedCodeConventions: false);
 
             // Act
             var result = VersionUtility.IsCompatible(null, net40Client);
@@ -1288,42 +1457,50 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void ParsePortableFrameworkNameThrowsIfProfileIsEmpty()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParsePortableFrameworkNameThrowsIfProfileIsEmpty(bool useManagedCodeConventions)
         {
             // Act & Assert
             ExceptionAssert.ThrowsArgumentException(
-                () => VersionUtility.ParseFrameworkName("portable45"),
+                () => VersionUtility.ParseFrameworkName("portable45", useManagedCodeConventions),
                 "profilePart",
                 "Portable target framework must not have an empty profile part.");
         }
 
-        [Fact]
-        public void ParsePortableFrameworkNameThrowsIfProfileContainsASpace()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsASpace(bool useManagedCodeConventions)
         {
             // Act & Assert
             ExceptionAssert.ThrowsArgumentException(
-                () => VersionUtility.ParseFrameworkName("portable45-sl4 net45"),
+                () => VersionUtility.ParseFrameworkName("portable45-sl4 net45", useManagedCodeConventions),
                 "profilePart",
                 "The profile part of a portable target framework must not contain empty space.");
         }
 
-        [Fact]
-        public void ParsePortableFrameworkNameThrowsIfProfileContainsEmptyComponent()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsEmptyComponent(bool useManagedCodeConventions)
         {
             // Act & Assert
             ExceptionAssert.ThrowsArgumentException(
-                () => VersionUtility.ParseFrameworkName("portable45-sl4++net45"),
+                () => VersionUtility.ParseFrameworkName("portable45-sl4++net45", useManagedCodeConventions),
                 "profilePart",
                 "The profile part of a portable target framework must not contain empty component.");
         }
 
-        [Fact]
-        public void ParsePortableFrameworkNameThrowsIfProfileContainsPortableFramework()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsPortableFramework(bool useManagedCodeConventions)
         {
             // Act & Assert
             ExceptionAssert.ThrowsArgumentException(
-                () => VersionUtility.ParseFrameworkName("portable-net45+portable"),
+                () => VersionUtility.ParseFrameworkName("portable-net45+portable", useManagedCodeConventions),
                 "profilePart",
                 "The profile part of a portable target framework must not contain a portable framework component.");
         }
@@ -1379,7 +1556,7 @@ namespace NuGet.Test
         public void GetShortNameForNetCoreFrameworks(string frameworkName, string expected)
         {
             // Arrange
-            FrameworkName framework = VersionUtility.ParseFrameworkName(frameworkName);
+            FrameworkName framework = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: false);
 
             // Act
             string actual = VersionUtility.GetShortFrameworkName(framework);
@@ -1521,8 +1698,8 @@ namespace NuGet.Test
         public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework(string packageFramework, string projectFramework)
         {
             // Arrange
-            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
-            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: false);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: false);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
@@ -1539,8 +1716,8 @@ namespace NuGet.Test
         public void IsCompatibleReturnsTrueForNetCoreAndWinFrameworks(string packageFramework, string projectFramework)
         {
             // Arrange
-            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
-            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: false);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: false);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
@@ -1553,8 +1730,8 @@ namespace NuGet.Test
         public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework()
         {
             // Arrange
-            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
-            var normalFramework = VersionUtility.ParseFrameworkName("silverlight3");
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4", useManagedCodeConventions: false);
+            var normalFramework = VersionUtility.ParseFrameworkName("silverlight3", useManagedCodeConventions: false);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
@@ -1567,8 +1744,8 @@ namespace NuGet.Test
         public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework2()
         {
             // Arrange
-            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
-            var normalFramework = VersionUtility.ParseFrameworkName("wp7");
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4", useManagedCodeConventions: false);
+            var normalFramework = VersionUtility.ParseFrameworkName("wp7", useManagedCodeConventions: false);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
@@ -1628,14 +1805,14 @@ namespace NuGet.Test
         // COMPATIBLE: Same framework, easy first case
         [InlineData("aspnet50", "aspnet50", true)]
         [InlineData("aspnetcore50", "aspnetcore50", true)]
-        
+
         // COMPATIBLE: Project targeting later framework
         [InlineData("aspnet51", "aspnet50", true)]
         [InlineData("aspnet51", "net451", true)]
         [InlineData("aspnet51", "net40", true)]
         [InlineData("aspnet51", "net20", true)]
         [InlineData("aspnetcore51", "aspnetcore50", true)]
-        
+
         // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
         [InlineData("aspnet50", "aspnetcore50", false)]
         [InlineData("aspnetcore50", "aspnet50", false)]
@@ -1648,7 +1825,7 @@ namespace NuGet.Test
         [InlineData("aspnet50", "net50", true)]
         [InlineData("aspnet50", "net60", true)]
         [InlineData("aspnet50", "net70", true)]
-        
+
         // NOT COMPATIBLE: Package targeting later framework
         [InlineData("aspnet50", "aspnet51", false)]
         [InlineData("aspnetcore50", "aspnetcore51", false)]
@@ -1674,8 +1851,14 @@ namespace NuGet.Test
         {
             Assert.Equal(
                 VersionUtility.IsCompatible(
-                    VersionUtility.ParseFrameworkName(projectFramework),
-                    VersionUtility.ParseFrameworkName(packageFramework)),
+                VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: false),
+                    VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: false)),
+                compatible);
+
+            Assert.Equal(
+                VersionUtility.IsCompatible(
+                    VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: true),
+                    VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: true)),
                 compatible);
         }
 
@@ -1696,8 +1879,8 @@ namespace NuGet.Test
         {
             Assert.Equal(
                 VersionUtility.IsCompatible(
-                    VersionUtility.ParseFrameworkName(projectFramework),
-                    VersionUtility.ParseFrameworkName(packageFramework)),
+                VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: false),
+                    VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: false)),
                 compatible);
         }
 
@@ -1710,22 +1893,28 @@ namespace NuGet.Test
         {
             Assert.Equal(
                 VersionUtility.IsCompatible(
-                    VersionUtility.ParseFrameworkName(projectFramework),
-                    VersionUtility.ParseFrameworkName(packageFramework)),
+                    VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions: false),
+                    VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions: false)),
                 compatible);
         }
 
         [Theory]
-        [InlineData("silverlight4")]
-        [InlineData("silverlight3")]
-        [InlineData("silverlight5")]
-        [InlineData("netcore45")]
-        [InlineData("netcore5")]
-        public void IsCompatibleReturnsFalseForNormalFrameworkAndPortableFramework(string frameworkValue)
+        [InlineData(false, "silverlight4")]
+        [InlineData(false, "silverlight3")]
+        [InlineData(false, "silverlight5")]
+        [InlineData(false, "netcore45")]
+        [InlineData(false, "netcore5")]
+
+        [InlineData(true, "silverlight4")]
+        [InlineData(true, "silverlight3")]
+        [InlineData(true, "silverlight5")]
+        [InlineData(true, "netcore45")]
+        [InlineData(true, "netcore5")]
+        public void IsCompatibleReturnsFalseForNormalFrameworkAndPortableFramework(bool useManagedCodeConventions, string frameworkValue)
         {
             // Arrange
-            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
-            var normalFramework = VersionUtility.ParseFrameworkName(frameworkValue);
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4", useManagedCodeConventions);
+            var normalFramework = VersionUtility.ParseFrameworkName(frameworkValue, useManagedCodeConventions);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(portableFramework, normalFramework);
@@ -1735,18 +1924,25 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
-        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
-        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7")]
-        [InlineData("portable-net40+win8+sl4+wp71+wpa81", "portable-wpa81+wp81")]
-        [InlineData("portable-wp8+wpa81", "portable-wpa81+wp81")]
-        [InlineData("portable-wp81+wpa81", "portable-wpa81+wp81")]
-        [InlineData("portable-wpa81+wp81", "portable-wpa81+wp81")]
-        public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        [InlineData(false, "portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
+        [InlineData(false, "portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
+        [InlineData(false, "portable-netcore45+sl4+wp+net", "portable-wp7")]
+        [InlineData(false, "portable-net40+win8+sl4+wp71+wpa81", "portable-wpa81+wp81")]
+        [InlineData(false, "portable-wp8+wpa81", "portable-wpa81+wp81")]
+        [InlineData(false, "portable-wp81+wpa81", "portable-wpa81+wp81")]
+        [InlineData(false, "portable-wpa81+wp81", "portable-wpa81+wp81")]
+        [InlineData(true, "portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
+        [InlineData(true, "portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
+        [InlineData(true, "portable-netcore45+sl4+wp+net", "portable-wp7")]
+        [InlineData(true, "portable-net40+win8+sl4+wp71+wpa81", "portable-wpa81+wp81")]
+        [InlineData(true, "portable-wp8+wpa81", "portable-wpa81+wp81")]
+        [InlineData(true, "portable-wp81+wpa81", "portable-wpa81+wp81")]
+        [InlineData(true, "portable-wpa81+wp81", "portable-wpa81+wp81")]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(bool useManagedCodeConventions, string packageFramework, string projectFramework)
         {
             // Arrange
-            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
-            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
@@ -1756,16 +1952,22 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
-        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
-        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
-        [InlineData("portable-netcore45+sl4", "portable-net4+wp7")]
-        [InlineData("portable-net40+win8+sl4+wp71", "portable-wpa81+wp81")]
-        public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        [InlineData(false, "portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
+        [InlineData(false, "portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
+        [InlineData(false, "portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
+        [InlineData(false, "portable-netcore45+sl4", "portable-net4+wp7")]
+        [InlineData(false, "portable-net40+win8+sl4+wp71", "portable-wpa81+wp81")]
+
+        [InlineData(true, "portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
+        [InlineData(true, "portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
+        [InlineData(true, "portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
+        [InlineData(true, "portable-netcore45+sl4", "portable-net4+wp7")]
+        [InlineData(true, "portable-net40+win8+sl4+wp71", "portable-wpa81+wp81")]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(bool useManagedCodeConventions, string packageFramework, string projectFramework)
         {
             // Arrange
-            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
-            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework, useManagedCodeConventions);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework, useManagedCodeConventions);
 
             // Act
             bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
@@ -1785,8 +1987,8 @@ namespace NuGet.Test
         public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibrary(string frameworkName, string targetFrameworkName, int expectedScore)
         {
             // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+            var framework = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: false);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName, useManagedCodeConventions: false);
 
             // Act
             int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
@@ -1807,7 +2009,7 @@ namespace NuGet.Test
         [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
         [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
         public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithOptionalFx(string frameworkName, string targetFrameworkName, int expectedScore)
-        {            
+        {
             var profile1 = new NetPortableProfile(
                "Profile1",
                new[] { 
@@ -1825,8 +2027,8 @@ namespace NuGet.Test
             NetPortableProfileTable.Profiles = profileCollection;
 
             // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+            var framework = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: false);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName, useManagedCodeConventions: false);
 
             // Act
             int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
@@ -1861,8 +2063,8 @@ namespace NuGet.Test
             NetPortableProfileTable.Profiles = profileCollection;
 
             // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+            var framework = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: false);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName, useManagedCodeConventions: false);
 
             // Act
             int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
@@ -1884,12 +2086,12 @@ namespace NuGet.Test
         // 180388626433 below = (1L << 32 + 5) + 1 + (10 * (1L << 32)). And, this is the score accumulated 
         // across methods like CalculateVersionDistance and GetProfileCompatibility
         [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoAndroid10", (180388626433 - 5 * 2))]
-        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8", -4*2)]
-        [InlineData("MonoAndroid10", "portable-net45+wp8+win8", -3*2)]
-        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoTouch", -5*2)]
+        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8", -4 * 2)]
+        [InlineData("MonoAndroid10", "portable-net45+wp8+win8", -3 * 2)]
+        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoTouch", -5 * 2)]
         [InlineData("MonoAndroid20", "portable-net40+sl4+wp71+win8+MonoTouch", -5 * 2)]
         [InlineData("MonoAndroid", "portable-net40+sl4+wp71+win8+MonoTouch", long.MinValue)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndNonPortableLibraryForMono(string projectFrameworkName, string packageTargetFrameworkName, long expectedScore)        
+        public void TestGetCompatibilityBetweenPortableLibraryAndNonPortableLibraryForMono(string projectFrameworkName, string packageTargetFrameworkName, long expectedScore)
         {
             // Arrange
             var profile1 = new NetPortableProfile(
@@ -1925,8 +2127,8 @@ namespace NuGet.Test
             NetPortableProfileTable.Profiles = profileCollection;
 
             // Arrange
-            var framework = VersionUtility.ParseFrameworkName(projectFrameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(packageTargetFrameworkName);
+            var framework = VersionUtility.ParseFrameworkName(projectFrameworkName, useManagedCodeConventions: false);
+            var targetFramework = VersionUtility.ParseFrameworkName(packageTargetFrameworkName, useManagedCodeConventions: false);
 
             // Act
             long score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(framework, targetFramework);
@@ -1977,13 +2179,17 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("dotnet", ".NETPlatform", "5.0")]
-        [InlineData("dotnet10", ".NETPlatform", "1.0")]
-        [InlineData("dotnet50", ".NETPlatform", "5.0")]
-        [InlineData("dotnet60", ".NETPlatform", "6.0")]
-        public void CanParseShortFrameworkNames(string shortName, string longName, string version)
+        [InlineData(false, "dotnet", ".NETPlatform", "5.0")]
+        [InlineData(false, "dotnet10", ".NETPlatform", "1.0")]
+        [InlineData(false, "dotnet50", ".NETPlatform", "5.0")]
+        [InlineData(false, "dotnet60", ".NETPlatform", "6.0")]
+        [InlineData(true, "dotnet", ".NETPlatform", "5.0")]
+        [InlineData(true, "dotnet10", ".NETPlatform", "1.0")]
+        [InlineData(true, "dotnet50", ".NETPlatform", "5.0")]
+        [InlineData(true, "dotnet60", ".NETPlatform", "6.0")]
+        public void CanParseShortFrameworkNames(bool useManagedCodeConventions, string shortName, string longName, string version)
         {
-            var fx = VersionUtility.ParseFrameworkName(shortName);
+            var fx = VersionUtility.ParseFrameworkName(shortName, useManagedCodeConventions);
             Assert.Equal(new FrameworkName(longName, Version.Parse(version)), fx);
         }
 
@@ -1997,11 +2203,13 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(".NETPlatform5.0", ".NETPlatform", "5.0")]
-        [InlineData(".NETPlatform50", ".NETPlatform", "5.0")]
-        public void CanParseMixedFrameworkNames(string mixedName, string longName, string version)
+        [InlineData(false, ".NETPlatform5.0", ".NETPlatform", "5.0")]
+        [InlineData(false, ".NETPlatform50", ".NETPlatform", "5.0")]
+        [InlineData(true, ".NETPlatform5.0", ".NETPlatform", "5.0")]
+        [InlineData(true, ".NETPlatform50", ".NETPlatform", "5.0")]
+        public void CanParseMixedFrameworkNames(bool useManagedCodeConventions, string mixedName, string longName, string version)
         {
-            var fx = VersionUtility.ParseFrameworkName(mixedName);
+            var fx = VersionUtility.ParseFrameworkName(mixedName, useManagedCodeConventions);
             Assert.Equal(new FrameworkName(longName, Version.Parse(version)), fx);
         }
 
@@ -2010,7 +2218,7 @@ namespace NuGet.Test
         [InlineData(".NETPlatform50", "dotnet")]
         public void CanParseMixedFrameworkNamesToShort(string mixedName, string shortName)
         {
-            var fx = VersionUtility.ParseFrameworkName(mixedName);
+            var fx = VersionUtility.ParseFrameworkName(mixedName, useManagedCodeConventions: false);
             var result = VersionUtility.GetShortFrameworkName(fx);
 
             Assert.Equal(shortName, result);

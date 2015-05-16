@@ -148,7 +148,7 @@ namespace NuGet
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
+        public static NetPortableProfile Parse(string profileValue, bool useManagedCodeConventions, bool treatOptionalFrameworksAsSupportedFrameworks = false)
         {
             if (String.IsNullOrEmpty(profileValue))
             {
@@ -181,7 +181,7 @@ namespace NuGet
             VersionUtility.ValidatePortableFrameworkProfilePart(profileValue);
 
             var supportedFrameworks = profileValue.Split(new [] {'+'}, StringSplitOptions.RemoveEmptyEntries)
-                                                  .Select(VersionUtility.ParseFrameworkName);
+                                                  .Select(p => VersionUtility.ParseFrameworkName(p, useManagedCodeConventions));
 
             return new NetPortableProfile(profileValue, supportedFrameworks);
         }

@@ -23,16 +23,16 @@ namespace NuGet.Analysis.Rules
                 }
             }
 
-            return set.Where(s => !IsValidFrameworkName(s) && !IsValidCultureName(package, s))
+            return set.Where(s => !IsValidFrameworkName(s, package.UsesManagedCodeConventions()) && !IsValidCultureName(package, s))
                       .Select(CreatePackageIssue);
         }
 
-        private static bool IsValidFrameworkName(string name)
+        private static bool IsValidFrameworkName(string name, bool useManagedCodeConventions)
         {
             FrameworkName fx;
             try
             {
-                fx = VersionUtility.ParseFrameworkName(name);
+                fx = VersionUtility.ParseFrameworkName(name, useManagedCodeConventions);
             }
             catch (ArgumentException) 
             {

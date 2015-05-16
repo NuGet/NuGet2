@@ -18,7 +18,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         {
             var us = Assembly.GetExecutingAssembly();
             var sourcePath = us.Location;
-            var targetFile = new PhysicalPackageFile { SourcePath = sourcePath };
+            var targetFile = new PhysicalPackageFile(useManagedCodeConventions: false) { SourcePath = sourcePath };
             var fullPath = sourcePath + "readOnly";
             File.Copy(sourcePath, fullPath);
             File.SetAttributes(fullPath, FileAttributes.ReadOnly);

@@ -133,7 +133,7 @@ namespace NuGet
                 FrameworkName targetFramework = null;
                 if (!String.IsNullOrEmpty(targetFrameworkString))
                 {
-                    targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkString);
+                    targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkString, useManagedCodeConventions: true);
                     if (targetFramework == VersionUtility.UnsupportedFrameworkName)
                     {
                         targetFramework = null;

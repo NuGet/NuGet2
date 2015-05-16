@@ -36,5 +36,11 @@ namespace NuGet
         IEnumerable<PackageDependencySet> DependencySets { get; }
 
         Version MinClientVersion { get; }
+
+        /// <summary>
+        /// Gets or sets the version of quirks mode specified in the manifest.
+        /// Defaults to 0 when no quirks mode behavior is applicable.
+        /// </summary>
+        PackageType PackageType { get; }
     }
 }

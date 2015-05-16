@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using Xunit.Extensions;
@@ -572,8 +573,8 @@ namespace NuGet.Test
             manifest.Metadata.Authors = "author";
             manifest.Metadata.Version = "1.0.0";
             manifest.Metadata.Description = "description";
-            
-            manifest.Files = new List<ManifestFile>();            
+
+            manifest.Files = new List<ManifestFile>();
             var file = new ManifestFile();
             file.Source = "file_source";
             file.Target = "file_target";
@@ -594,6 +595,71 @@ namespace NuGet.Test
                 Assert.Equal(newManifest.Files[i].Source, manifest.Files[i].Source);
                 Assert.Equal(newManifest.Files[i].Target, manifest.Files[i].Target);
             }
+        }
+
+        [Fact]
+        public void Save_UsesV7ManifestVersionWhenPackageTypeIsSpecified()
+        {
+            // Arrange
+            var manifest = new Manifest();
+            manifest.Metadata.Id = "id";
+            manifest.Metadata.Authors = "author";
+            manifest.Metadata.Version = "1.0.0";
+            manifest.Metadata.Description = "description";
+            manifest.Metadata.PackageType = new PackageTypeMetadata
+            {
+                Value = "Managed",
+                Version = "2.0"
+            };
+
+            var memoryStream = new MemoryStream();
+            manifest.Save(memoryStream);
+
+            // Act
+            var content = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+            // Assert
+            Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd"">
+  <metadata>
+    <packageType version=""2.0"">Managed</packageType>
+    <id>id</id>
+    <version>1.0.0</version>
+    <authors>author</authors>
+    <owners>author</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>description</description>
+  </metadata>
+</package>", content);
+        }
+
+
+        [Fact]
+        public void Load_ReadsPackageTypeAndVersionFromManifest()
+        {
+            // Arrange
+            var content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd"">
+  <metadata>
+    <packageType version=""2.0"">Managed</packageType>
+    <id>id</id>
+    <version>1.0.0</version>
+    <authors>author</authors>
+    <owners>author</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>description</description>
+  </metadata>
+</package>";
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            // Act
+            var manifest = Manifest.ReadFrom(memoryStream, validateSchema: true);
+            var packageMetadata = Assert.IsAssignableFrom<IPackageMetadata>(manifest.Metadata);
+
+            // Assert
+            Assert.NotNull(packageMetadata.PackageType);
+            Assert.Equal("Managed", packageMetadata.PackageType.Name);
+            Assert.Equal(new Version(2, 0), packageMetadata.PackageType.Version);
         }
 
         private void AssertManifest(Manifest expected, Manifest actual)
@@ -719,7 +785,7 @@ namespace NuGet.Test
             {
                 metadata.Add(new XAttribute("minClientVersion", minClientVersion));
             }
-            
+
             document.Root.Add(metadata);
 
             if (title != null)

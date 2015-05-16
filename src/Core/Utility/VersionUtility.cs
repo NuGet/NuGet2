@@ -30,6 +30,13 @@ namespace NuGet
         private const string UAPFrameworkShortName = "uap";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
+        private static readonly string[] _wellKnownFolders = new string[] 
+        { 
+            Constants.ContentDirectory,
+            Constants.LibDirectory,
+            Constants.ToolsDirectory,
+            Constants.BuildDirectory
+        };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
@@ -49,6 +56,11 @@ namespace NuGet
             Justification = "The type FrameworkName is immutable.")]
         public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
         private static readonly Version _emptyVersion = new Version();
+
+        public static IList<string> WellKnownFolders
+        { 
+            get { return _wellKnownFolders; } 
+        }
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             // FYI, the keys are CASE-INSENSITIVE
@@ -239,7 +251,7 @@ namespace NuGet
         /// This function tries to normalize a string that represents framework version names into
         /// something a framework name that the package manager understands.
         /// </summary>
-        public static FrameworkName ParseFrameworkName(string frameworkName)
+        public static FrameworkName ParseFrameworkName(string frameworkName, bool useManagedCodeConventions)
         {
             if (frameworkName == null)
             {
@@ -268,7 +280,7 @@ namespace NuGet
             }
 
             // If we find a version then we try to split the framework name into 2 parts
-            var versionMatch = Regex.Match(frameworkNameAndVersion, @"\d+");
+            var versionMatch = Regex.Match(frameworkNameAndVersion, @"[\d.]+(\-|$)");
 
             if (versionMatch.Success)
             {
@@ -284,7 +296,12 @@ namespace NuGet
             if (!String.IsNullOrEmpty(identifierPart))
             {
                 // Try to normalize the identifier to a known identifier
-                if (!_knownIdentifiers.TryGetValue(identifierPart, out identifierPart))
+                string knownIdentifier;
+                if (_knownIdentifiers.TryGetValue(identifierPart, out knownIdentifier))
+                {
+                    identifierPart = knownIdentifier;
+                }
+                else if (!useManagedCodeConventions)
                 {
                     return UnsupportedFrameworkName;
                 }
@@ -300,37 +317,48 @@ namespace NuGet
             }
 
             Version version = null;
-            // We support version formats that are integers (40 becomes 4.0)
-            int versionNumber;
-            if (Int32.TryParse(versionPart, out versionNumber))
+            if (!String.IsNullOrEmpty(versionPart))
             {
-                // Remove the extra numbers
-                if (versionPart.Length > 4)
+                // We support version formats that are integers (40 becomes 4.0)
+                int versionNumber;
+                if (Int32.TryParse(versionPart, out versionNumber))
                 {
-                    versionPart = versionPart.Substring(0, 4);
+                    // Remove the extra numbers
+                    if (versionPart.Length > 4)
+                    {
+                        versionPart = versionPart.Substring(0, 4);
+                    }
+
+                    // Make sure it has at least 2 digits so it parses as a valid version
+                    versionPart = versionPart.PadRight(2, '0');
+                    versionPart = String.Join(".", versionPart.ToCharArray());
                 }
 
-                // Make sure it has at least 2 digits so it parses as a valid version
-                versionPart = versionPart.PadRight(2, '0');
-                versionPart = String.Join(".", versionPart.ToCharArray());
+                // If we can't parse the version then use the default
+                if (!Version.TryParse(versionPart, out version))
+                {
+                    // We failed to parse the version string once more. So we need to decide if this is unsupported or if we use the default version.
+                    // This framework is unsupported if:
+                    // 1. The identifier part of the framework name is null.
+                    // 2. The version part is not null.
+                    if (useManagedCodeConventions)
+                    {
+                        // If we are unable to parse the version string, treat the entirety of the frameworkNameAndVersion as the identifier.
+                        identifierPart = frameworkNameAndVersion;
+                    }
+                    else if (String.IsNullOrEmpty(identifierPart) || !String.IsNullOrEmpty(versionPart))
+                    {
+                        return UnsupportedFrameworkName;
+                    }
+                }
             }
 
-            // If we can't parse the version then use the default
-            if (!Version.TryParse(versionPart, out version))
+            if (version == null)
             {
-                // We failed to parse the version string once more. So we need to decide if this is unsupported or if we use the default version.
-                // This framework is unsupported if:
-                // 1. The identifier part of the framework name is null.
-                // 2. The version part is not null.
-                if (String.IsNullOrEmpty(identifierPart) || !String.IsNullOrEmpty(versionPart))
-                {
-                    return UnsupportedFrameworkName;
-                }
-
                 // Use 5.0 instead of 0.0 as the default for NetPlatform
                 version = identifierPart.Equals(NetPlatformFrameworkIdentifier) ? new Version(5, 0) : _emptyVersion;
             }
-
+            
             if (String.IsNullOrEmpty(identifierPart))
             {
                 identifierPart = NetFrameworkIdentifier;
@@ -625,7 +653,7 @@ namespace NuGet
                 }
             }
 
-            if (frameworkName.Version.Major == 5 
+            if (frameworkName.Version.Major == 5
                 && frameworkName.Version.Minor == 0
                 && frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
             {
@@ -643,7 +671,7 @@ namespace NuGet
             string profile;
             if (name.Equals("portable", StringComparison.OrdinalIgnoreCase))
             {
-                NetPortableProfile portableProfile = NetPortableProfile.Parse(frameworkName.Profile);
+                NetPortableProfile portableProfile = NetPortableProfile.Parse(frameworkName.Profile, useManagedCodeConventions: true);
                 if (portableProfile != null)
                 {
                     profile = portableProfile.CustomProfileString;
@@ -659,9 +687,9 @@ namespace NuGet
                 if (frameworkName.Version > new Version())
                 {
                     // Remove the . from versions
-                    if (frameworkName.Version.Major > 9 
-                        || frameworkName.Version.Minor > 9 
-                        || frameworkName.Version.Revision > 9 
+                    if (frameworkName.Version.Major > 9
+                        || frameworkName.Version.Minor > 9
+                        || frameworkName.Version.Revision > 9
                         || frameworkName.Version.Build > 9)
                     {
                         // This version has digits over 10 and must be expressed using decimals
@@ -740,20 +768,12 @@ namespace NuGet
             return (targetFramework == null || targetFramework == VersionUtility.EmptyFramework) ? NuGetResources.Debug_TargetFrameworkInfo_NotFrameworkSpecific : String.Empty;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
-        public static FrameworkName ParseFrameworkNameFromFilePath(string filePath, out string effectivePath)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        public static FrameworkName ParseFrameworkNameFromFilePath(string filePath, bool useManagedCodeConventions, out string effectivePath)
         {
-            var knownFolders = new string[] 
-            { 
-                Constants.ContentDirectory,
-                Constants.LibDirectory,
-                Constants.ToolsDirectory,
-                Constants.BuildDirectory
-            };
-
-            for (int i = 0; i < knownFolders.Length; i++)
+            for (int i = 0; i < _wellKnownFolders.Length; i++)
             {
-                string folderPrefix = knownFolders[i] + System.IO.Path.DirectorySeparatorChar;
+                string folderPrefix = _wellKnownFolders[i] + System.IO.Path.DirectorySeparatorChar;
                 if (filePath.Length > folderPrefix.Length &&
                     filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
@@ -763,7 +783,8 @@ namespace NuGet
                     {
                         return VersionUtility.ParseFrameworkFolderName(
                             frameworkPart,
-                            strictParsing: knownFolders[i] == Constants.LibDirectory,
+                            strictParsing: (_wellKnownFolders[i] == Constants.LibDirectory),
+                            useManagedCodeConventions: useManagedCodeConventions,
                             effectivePath: out effectivePath);
                     }
                     catch (ArgumentException)
@@ -781,10 +802,10 @@ namespace NuGet
             return null;
         }
 
-        public static FrameworkName ParseFrameworkFolderName(string path)
+        public static FrameworkName ParseFrameworkFolderName(string path, bool useManagedCodeConventions)
         {
             string effectivePath;
-            return ParseFrameworkFolderName(path, strictParsing: true, effectivePath: out effectivePath);
+            return ParseFrameworkFolderName(path, strictParsing: true, useManagedCodeConventions: useManagedCodeConventions, effectivePath: out effectivePath);
         }
 
         /// <summary>
@@ -792,12 +813,13 @@ namespace NuGet
         /// </summary>
         /// <param name="path">The string to be parse.</param>
         /// <param name="strictParsing">if set to <c>true</c>, parse the first folder of path even if it is unrecognized framework.</param>
+        /// <param name="useManagedCodeConventions">Determines if managed code conventions are used to parse the folder name.</param>
         /// <param name="effectivePath">returns the path after the parsed target framework</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
-        public static FrameworkName ParseFrameworkFolderName(string path, bool strictParsing, out string effectivePath)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#")]
+        public static FrameworkName ParseFrameworkFolderName(string path, bool strictParsing, bool useManagedCodeConventions, out string effectivePath)
         {
-            // The path for a reference might look like this for assembly foo.dll:            
+            // The path for a reference might look like this for assembly foo.dll:
             // foo.dll
             // sub\foo.dll
             // {FrameworkName}{Version}\foo.dll
@@ -814,7 +836,7 @@ namespace NuGet
                 return null;
             }
 
-            var targetFramework = ParseFrameworkName(targetFrameworkString);
+            var targetFramework = ParseFrameworkName(targetFrameworkString, useManagedCodeConventions);
             if (strictParsing || targetFramework != UnsupportedFrameworkName)
             {
                 // skip past the framework folder and the character \
@@ -876,7 +898,7 @@ namespace NuGet
             return hasItems;
         }
 
-        
+
 
         internal static Version NormalizeVersion(Version version)
         {
@@ -1007,7 +1029,10 @@ namespace NuGet
                 return false;
             }
 
-            NetPortableProfile targetFrameworkPortableProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile);
+            // Since we're comparing two frameworks, it's ok for us to always parse profiles even if they don't map to a well-known
+            // framework name.
+            var useManagedCodeConventions = true;
+            NetPortableProfile targetFrameworkPortableProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile, useManagedCodeConventions);
             if (targetFrameworkPortableProfile == null)
             {
                 return false;
@@ -1021,7 +1046,7 @@ namespace NuGet
                     return true;
                 }
 
-                NetPortableProfile frameworkPortableProfile = NetPortableProfile.Parse(projectFrameworkName.Profile);
+                NetPortableProfile frameworkPortableProfile = NetPortableProfile.Parse(projectFrameworkName.Profile, useManagedCodeConventions);
                 if (frameworkPortableProfile == null)
                 {
                     return false;
@@ -1112,7 +1137,7 @@ namespace NuGet
         {
             if (targetFrameworkVersion.IsPortableFramework())
             {
-                NetPortableProfile profile = NetPortableProfile.Parse(targetFrameworkVersion.Profile);
+                NetPortableProfile profile = NetPortableProfile.Parse(targetFrameworkVersion.Profile, useManagedCodeConventions: true);
                 if (profile != null)
                 {
                     // if it's a portable library, return the version of the matching framework
@@ -1157,10 +1182,10 @@ namespace NuGet
             // .NET 4.5 (0) + SL4 (1) + WP71 (0)                            == 1
             // .NET 4.0 (1) + SL5 (0) + WP71 (0)                            == 1
 
-            NetPortableProfile projectFrameworkProfile = NetPortableProfile.Parse(projectFrameworkName.Profile);
+            NetPortableProfile projectFrameworkProfile = NetPortableProfile.Parse(projectFrameworkName.Profile, useManagedCodeConventions: true);
             Debug.Assert(projectFrameworkProfile != null);
 
-            NetPortableProfile packageTargetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile, treatOptionalFrameworksAsSupportedFrameworks: true);
+            NetPortableProfile packageTargetFrameworkProfile = NetPortableProfile.Parse(packageTargetFrameworkName.Profile, useManagedCodeConventions: true, treatOptionalFrameworksAsSupportedFrameworks: true);
             Debug.Assert(packageTargetFrameworkProfile != null);
 
             int nonMatchingCompatibleFrameworkCount = 0;
@@ -1217,7 +1242,7 @@ namespace NuGet
 
         internal static long GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(FrameworkName projectFrameworkName, FrameworkName packagePortableFramework)
         {
-            NetPortableProfile packageFrameworkProfile = NetPortableProfile.Parse(packagePortableFramework.Profile, treatOptionalFrameworksAsSupportedFrameworks: true);
+            NetPortableProfile packageFrameworkProfile = NetPortableProfile.Parse(packagePortableFramework.Profile, useManagedCodeConventions: true, treatOptionalFrameworksAsSupportedFrameworks: true);
             if (packageFrameworkProfile == null)
             {
                 // defensive coding, this should never happen
@@ -1239,7 +1264,7 @@ namespace NuGet
 
                 return score;
             }
-            else if(NetPortableProfileTable.HasCompatibleProfileWith(packageFrameworkProfile, projectFrameworkName))
+            else if (NetPortableProfileTable.HasCompatibleProfileWith(packageFrameworkProfile, projectFrameworkName))
             {
                 // Get the list of portable profiles that supports projectFrameworkName
                 // And, see if there is atleast 1 profile which is compatible with packageFrameworkProfile

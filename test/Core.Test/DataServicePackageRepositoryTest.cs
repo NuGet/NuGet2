@@ -110,10 +110,10 @@ namespace NuGet.Test
 
             // Act
             repository.Object.Search("dante's inferno", new[] {
-                VersionUtility.ParseFrameworkName("net40").FullName,
-                VersionUtility.ParseFrameworkName("sl40").FullName,
-                VersionUtility.ParseFrameworkName("sl3-wp").FullName,
-                VersionUtility.ParseFrameworkName("netmf11").FullName,
+                VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("sl40", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("sl3-wp", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("netmf11", useManagedCodeConventions: false).FullName,
             }, allowPrereleaseVersions: false);
         }
 
@@ -142,10 +142,10 @@ namespace NuGet.Test
 
             // Act
             repository.Object.Search("dante's inferno", new[] {
-                VersionUtility.ParseFrameworkName("net40").FullName,
-                VersionUtility.ParseFrameworkName("sl40").FullName,
-                VersionUtility.ParseFrameworkName("sl3-wp").FullName,
-                VersionUtility.ParseFrameworkName("netmf11").FullName,
+                VersionUtility.ParseFrameworkName("net40", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("sl40", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("sl3-wp", useManagedCodeConventions: false).FullName,
+                VersionUtility.ParseFrameworkName("netmf11", useManagedCodeConventions: false).FullName,
             }, allowPrereleaseVersions: true);
 
             context.Verify();
@@ -267,7 +267,8 @@ namespace NuGet.Test
 
         private IEnumerable<DataServicePackage> GetPackagesWillThrows()
         {
-            yield return new DataServicePackage {
+            yield return new DataServicePackage
+            {
                 Id = "B",
                 Version = "1.0"
             };
@@ -310,10 +311,10 @@ namespace NuGet.Test
                 includeAllVersions: false,
                 targetFrameworks: new[] 
                     {
-                        VersionUtility.ParseFrameworkName("sl3-wp"),
-                        VersionUtility.ParseFrameworkName("portable-net45+win8")
+                        VersionUtility.ParseFrameworkName("sl3-wp", useManagedCodeConventions: false),
+                        VersionUtility.ParseFrameworkName("portable-net45+win8", useManagedCodeConventions: false)
                     },
-                versionConstraints: new [] 
+                versionConstraints: new[] 
                     { 
                         VersionUtility.ParseVersionSpec("[2.3,4.0]")
                     }

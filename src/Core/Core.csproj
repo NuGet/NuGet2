@@ -47,7 +47,7 @@
     <Compile Include="Analysis\PackageIssueLevel.cs" />
     <Compile Include="Analysis\Rules\InitScriptNotUnderToolsRule.cs" />
     <Compile Include="Analysis\Rules\InvalidFrameworkFolderRule.cs" />
-    <Compile Include="Analysis\Rules\MisplacedAssemblyRule.cs" />
+    <Compile Include="Analysis\Rules\MisplacedFileRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedScriptFileRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedTransformFileRule.cs" />
     <Compile Include="Analysis\Rules\MissingSummaryRule.cs" />
@@ -71,6 +71,7 @@
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Authoring\PackageDependencySet.cs" />
     <Compile Include="Authoring\PackageReferenceSet.cs" />
+    <Compile Include="Authoring\PackageTypeMetadata.cs" />
     <Compile Include="Authoring\PhysicalPackageAssemblyReference.cs" />
     <Compile Include="Configuration\ConfigurationDefaults.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
+    <Compile Include="Packages\PackageType.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
     <Compile Include="PackageWalker\DependencyVersion.cs" />
     <Compile Include="PackageWalker\NuGetVersionNotSatisfiedException.cs" />

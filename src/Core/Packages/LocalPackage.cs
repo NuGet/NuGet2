@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -129,6 +131,8 @@ namespace NuGet
             private set;
         }
 
+        public PackageType PackageType { get; internal set; }
+
         public bool IsAbsoluteLatestVersion
         {
             get
@@ -181,7 +185,10 @@ namespace NuGet
             {
                 if (_assemblyReferences == null)
                 {
-                    _assemblyReferences = GetAssemblyReferencesCore().ToList();
+                    var assemblyReferences = GetAssemblyReferencesCore().ToList();
+                    EnsureStrictTFMPaths(assemblyReferences);
+
+                    _assemblyReferences = assemblyReferences;
                 }
 
                 return _assemblyReferences;
@@ -201,7 +208,10 @@ namespace NuGet
 
         public IEnumerable<IPackageFile> GetFiles()
         {
-            return GetFilesBase();
+            var files = GetFilesBase();
+            EnsureStrictTFMPaths(files);
+
+            return files;
         }
 
         public abstract Stream GetStream();
@@ -240,6 +250,7 @@ namespace NuGet
             Copyright = metadata.Copyright;
             PackageAssemblyReferences = metadata.PackageAssemblyReferences;
             MinClientVersion = metadata.MinClientVersion;
+            PackageType = metadata.PackageType;
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))
@@ -249,7 +260,7 @@ namespace NuGet
         }
 
         internal protected static bool IsAssemblyReference(string filePath)
-        {           
+        {
             // assembly reference must be under lib/
             if (!filePath.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
             {
@@ -267,6 +278,26 @@ namespace NuGet
             // Assembly reference must have a .dll|.exe|.winmd extension and is not a resource assembly;
             return !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
                 Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void EnsureStrictTFMPaths(IEnumerable<IPackageFile> packageFiles)
+        {
+            if (this.UsesManagedCodeConventions())
+            {
+                var invalidFiles = packageFiles
+                    .Where(reference => reference.TargetFramework == null)
+                    .Select(reference => reference.Path);
+
+                if (invalidFiles.Any())
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        NuGetResources.StrictTfm_UnsupportedFilePath,
+                        String.Join(", ", invalidFiles));
+
+                    throw new InvalidOperationException(message);
+                }
+            }
         }
 
         public override string ToString()

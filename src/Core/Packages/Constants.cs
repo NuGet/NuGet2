@@ -66,5 +66,10 @@ namespace NuGet
             = new ReadOnlyCollection<string>(new string[] { ".dll", ".exe", ".winmd" });
 
         public static readonly Version NuGetVersion = typeof(IPackage).Assembly.GetName().Version;
+
+        /// <summary>
+        /// The minimum client version that supports managed code conventions.
+        /// </summary>
+        public static readonly Version ManagedCodeConventionsClientVersion = new Version(2, 8, 6);
     }
 }

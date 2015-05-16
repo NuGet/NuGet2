@@ -370,10 +370,14 @@ namespace NuGet.VisualStudio
 
                 // use the default values for JS if they were not given
                 if (String.IsNullOrEmpty(platformVersion))
+                {
                     platformVersion = "0.0";
+                }
 
                 if (String.IsNullOrEmpty(platformIdentifier))
+                {
                     platformIdentifier = "Windows";
+                }
 
                 return String.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", platformIdentifier, platformVersion);
             }

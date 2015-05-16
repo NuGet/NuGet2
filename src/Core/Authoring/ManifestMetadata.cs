@@ -38,6 +38,10 @@ namespace NuGet
         [XmlIgnore]
         public Version MinClientVersion { get; private set; }
 
+        [XmlElement("packageType")]
+        [ManifestVersion(7)]
+        public PackageTypeMetadata PackageType { get; set; }
+
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("id")]
         public string Id { get; set; }
@@ -110,7 +114,7 @@ namespace NuGet
         /// <summary>
         /// This property should be used only by the XML serializer. Do not use it in code.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value", Justification="The propert setter is not supported.")]
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value", Justification = "The propert setter is not supported.")]
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlArray("dependencies", IsNullable = false)]
@@ -272,8 +276,8 @@ namespace NuGet
                 {
                     return Enumerable.Empty<PackageDependencySet>();
                 }
-                
-                var dependencySets = DependencySets.Select(CreatePackageDependencySet);
+
+                var dependencySets = DependencySets.Select(dependency => CreatePackageDependencySet(dependency, this.UsesManagedCodeConventions()));
 
                 // group the dependency sets with the same target framework together.
                 var dependencySetGroups = dependencySets.GroupBy(set => set.TargetFramework);
@@ -301,7 +305,7 @@ namespace NuGet
                     return new PackageReferenceSet[0];
                 }
 
-                var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r));
+                var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r, this.UsesManagedCodeConventions()));
 
                 var referenceSetGroups = referenceSets.GroupBy(set => set.TargetFramework);
                 var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key, group.SelectMany(g => g.References)))
@@ -329,7 +333,22 @@ namespace NuGet
                 }
 
                 return from frameworkReference in FrameworkAssemblies
-                       select new FrameworkAssemblyReference(frameworkReference.AssemblyName, ParseFrameworkNames(frameworkReference.TargetFramework));
+                       select new FrameworkAssemblyReference(
+                           frameworkReference.AssemblyName, 
+                           ParseFrameworkNames(frameworkReference.TargetFramework, this.UsesManagedCodeConventions()));
+            }
+        }
+
+        PackageType IPackageMetadata.PackageType
+        {
+            get
+            {
+                if (PackageType == null || string.IsNullOrEmpty(PackageType.Value))
+                {
+                    return NuGet.PackageType.Default;
+                }
+
+                return new NuGet.PackageType(PackageType.Value, System.Version.Parse(PackageType.Version));
             }
         }
 
@@ -341,7 +360,7 @@ namespace NuGet
                 {
                     yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_IdMaxLengthExceeded));
                 }
-                else if(!PackageIdValidator.IsValidPackageId(Id))
+                else if (!PackageIdValidator.IsValidPackageId(Id))
                 {
                     yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidPackageId, Id));
                 }
@@ -369,9 +388,15 @@ namespace NuGet
             {
                 yield return new ValidationResult(NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
             }
+
+            Version version;
+            if (PackageType != null && !String.IsNullOrEmpty(PackageType.Version) && !System.Version.TryParse(PackageType.Version, out version))
+            {
+                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidVersionString, PackageType.Version));
+            }
         }
 
-        private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames)
+        private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames, bool useManagedCodeConventions)
         {
             if (String.IsNullOrEmpty(frameworkNames))
             {
@@ -379,14 +404,14 @@ namespace NuGet
             }
 
             return frameworkNames.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                 .Select(VersionUtility.ParseFrameworkName);
+                                 .Select(p => VersionUtility.ParseFrameworkName(p, useManagedCodeConventions));
         }
 
-        private static PackageDependencySet CreatePackageDependencySet(ManifestDependencySet manifestDependencySet) 
+        private static PackageDependencySet CreatePackageDependencySet(ManifestDependencySet manifestDependencySet, bool useManagedCodeConventions)
         {
             FrameworkName targetFramework = manifestDependencySet.TargetFramework == null
-                                            ? null 
-                                            : VersionUtility.ParseFrameworkName(manifestDependencySet.TargetFramework);
+                                            ? null
+                                            : VersionUtility.ParseFrameworkName(manifestDependencySet.TargetFramework, useManagedCodeConventions);
 
             var dependencies = from d in manifestDependencySet.Dependencies
                                select new PackageDependency(

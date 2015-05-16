@@ -140,8 +140,9 @@ namespace NuGet.Server.DataServices
 
             var idValues = packageIds.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             var versionValues = versions.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-            var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? null :
-                                                                                 targetFrameworks.Split('|').Select(VersionUtility.ParseFrameworkName).ToList();
+            var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? 
+                null :
+                targetFrameworks.Split('|').Select(f => VersionUtility.ParseFrameworkName(f, useManagedCodeConventions: true)).ToList();
             var versionConstraintValues = String.IsNullOrEmpty(versionConstraints)
                                             ? new string[idValues.Length]
                                             : versionConstraints.Split('|');
