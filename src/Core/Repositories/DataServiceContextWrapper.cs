@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Xml.Linq;
 
 namespace NuGet
@@ -28,7 +28,23 @@ namespace NuGet
                        {
                            MergeOption = MergeOption.OverwriteChanges
                        };
+
+            // Makes the context use our own resolve type function
+            // since we know the exact type for the given wire name.
+            // With this, the oData initialization time is cut in half.
+            _context.ResolveType = ResolveTypeFunction;
             _metadataUri = _context.GetMetadataUri();
+        }
+
+        private Type ResolveTypeFunction(string wireName)
+        {
+            if (wireName == "NuGetGallery.V2FeedPackage")
+            {
+                return typeof(DataServicePackage);
+            }
+
+            Debug.Assert(false, "we should never reach here");
+            return null;
         }
 
         public Uri BaseUri
@@ -113,7 +129,6 @@ namespace NuGet
                            .Cast<QueryOperationResponse>()
                            .SelectMany(o => o.Cast<T>());
         }
-
 
         public Uri GetReadStreamUri(object entity)
         {
@@ -225,7 +240,7 @@ namespace NuGet
         private static IEnumerable<string> ExtractSupportedProperties(XDocument schemaDocument, string packageEntityName)
         {
             // The name is listed in the entity set listing as <EntitySet Name="Packages" EntityType="Gallery.Infrastructure.FeedModels.PublishedPackage" />
-            // We need to extract the name portion to look up the entity type <EntityType Name="PublishedPackage" 
+            // We need to extract the name portion to look up the entity type <EntityType Name="PublishedPackage"
             packageEntityName = TrimNamespace(packageEntityName);
 
             var packageEntity = (from e in schemaDocument.Descendants()
