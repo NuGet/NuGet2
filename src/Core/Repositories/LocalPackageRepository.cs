@@ -1,3 +1,4 @@
+using NuGet.Resources;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -5,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using NuGet.Resources;
 
 namespace NuGet
 {
@@ -165,12 +165,12 @@ namespace NuGet
 
         public virtual IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
         {
-            // Files created by the path resolver. This would take into account the non-side-by-side scenario 
+            // Files created by the path resolver. This would take into account the non-side-by-side scenario
             // and we do not need to match this for id and version.
             var packageFileName = PathResolver.GetPackageFileName(packageId, version);
             var manifestFileName = Path.ChangeExtension(packageFileName, Constants.ManifestExtension);
             var filesMatchingFullName = Enumerable.Concat(
-                GetPackageFiles(packageFileName), 
+                GetPackageFiles(packageFileName),
                 GetPackageFiles(manifestFileName));
 
             if (version != null && version.Version.Revision < 1)
@@ -188,7 +188,7 @@ namespace NuGet
                 string partialManifestName = partialName + "*" + Constants.ManifestExtension;
                 partialName += "*" + Constants.PackageExtension;
 
-                // Partial names would result is gathering package with matching major and minor but different build and revision. 
+                // Partial names would result is gathering package with matching major and minor but different build and revision.
                 // Attempt to match the version in the path to the version we're interested in.
                 var partialNameMatches = GetPackageFiles(partialName).Where(path => FileNameMatchesPattern(packageId, version, path));
                 var partialManifestNameMatches = GetPackageFiles(partialManifestName).Where(
@@ -211,7 +211,7 @@ namespace NuGet
                 return GetPackage(openPackage, packagePath);
             }
 
-            // Lookup files which start with the name "<Id>." and attempt to match it with all possible version string combinations (e.g. 1.2.0, 1.2.0.0) 
+            // Lookup files which start with the name "<Id>." and attempt to match it with all possible version string combinations (e.g. 1.2.0, 1.2.0.0)
             // before opening the package. To avoid creating file name strings, we attempt to specifically match everything after the last path separator
             // which would be the file name and extension.
             return (from path in GetPackageLookupPaths(packageId, version)
@@ -229,27 +229,27 @@ namespace NuGet
             // get packages through nupkg files
             packages.AddRange(
                 GetPackages(
-                    openPackage, 
-                    packageId, 
+                    openPackage,
+                    packageId,
                     GetPackageFiles(packageId + "*" + Constants.PackageExtension)));
 
             // then, get packages through nuspec files
             packages.AddRange(
                 GetPackages(
-                    openPackage, 
-                    packageId, 
+                    openPackage,
+                    packageId,
                     GetPackageFiles(packageId + "*" + Constants.ManifestExtension)));
             return packages;
         }
 
-        internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage, 
+        internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage,
             string packageId,
             IEnumerable<string> packagePaths)
         {
             foreach (var path in packagePaths)
             {
                 IPackage package = null;
-                try 
+                try
                 {
                     package = GetPackage(openPackage, path);
                 }
@@ -257,12 +257,12 @@ namespace NuGet
                 {
                     // ignore error for unzipped packages (nuspec files).
                     if (string.Equals(
-                        Constants.ManifestExtension, 
-                        Path.GetExtension(path), 
+                        Constants.ManifestExtension,
+                        Path.GetExtension(path),
                         StringComparison.OrdinalIgnoreCase))
-                    {                        
+                    {
                     }
-                    else 
+                    else
                     {
                         throw;
                     }
@@ -277,8 +277,19 @@ namespace NuGet
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
         {
-            return from path in GetPackageFiles()
-                   select GetPackage(openPackage, path);
+            return GetPackageFiles()
+                .Select(path =>
+                {
+                    try
+                    {
+                        return GetPackage(openPackage, path);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                })
+                .Where(p => p != null);
         }
 
         private IPackage GetPackage(Func<string, IPackage> openPackage, string path)
@@ -318,7 +329,7 @@ namespace NuGet
                 filter.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
 
             // Check for package files one level deep. We use this at package install time
-            // to determine the set of installed packages. Installed packages are copied to 
+            // to determine the set of installed packages. Installed packages are copied to
             // {id}.{version}\{packagefile}.{extension}.
             foreach (var dir in FileSystem.GetDirectories(String.Empty))
             {
@@ -386,7 +397,7 @@ namespace NuGet
             var name = Path.GetFileNameWithoutExtension(path);
             SemanticVersion parsedVersion;
 
-            // When matching by pattern, we will always have a version token. Packages without versions would be matched early on by the version-less path resolver 
+            // When matching by pattern, we will always have a version token. Packages without versions would be matched early on by the version-less path resolver
             // when doing an exact match.
             return name.Length > packageId.Length &&
                    SemanticVersion.TryParse(name.Substring(packageId.Length + 1), out parsedVersion) &&
@@ -410,6 +421,7 @@ namespace NuGet
             }
 
             public IPackage Package { get; private set; }
+
             public DateTimeOffset LastModifiedTime { get; private set; }
         }
     }

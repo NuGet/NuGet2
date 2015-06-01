@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -38,7 +39,7 @@ namespace NuGet
 
         private Type ResolveTypeFunction(string wireName)
         {
-            if (wireName == "NuGetGallery.V2FeedPackage")
+            if (wireName.EndsWith("V2FeedPackage", StringComparison.OrdinalIgnoreCase))
             {
                 return typeof(DataServicePackage);
             }
