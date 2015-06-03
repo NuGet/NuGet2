@@ -1975,5 +1975,25 @@ namespace NuGet.Test
 
             return profileCollection;
         }
+
+        [Theory]
+        [InlineData("dotnet", ".NETPlatform", "5.0")]
+        [InlineData("dotnet10", ".NETPlatform", "1.0")]
+        [InlineData("dotnet50", ".NETPlatform", "5.0")]
+        [InlineData("dotnet60", ".NETPlatform", "6.0")]
+        public void CanParseShortFrameworkNames(string shortName, string longName, string version)
+        {
+            var fx = VersionUtility.ParseFrameworkName(shortName);
+            Assert.Equal(new FrameworkName(longName, Version.Parse(version)), fx);
+        }
+
+        [Theory]
+        [InlineData(".NETPlatform", "0.0", "dotnet")]
+        [InlineData(".NETPlatform", "5.0", "dotnet")]
+        public void ShortFrameworkNamesAreCorrect(string longName, string version, string shortName)
+        {
+            var fx = new FrameworkName(longName, Version.Parse(version));
+            Assert.Equal(shortName, VersionUtility.GetShortFrameworkName(fx));
+        }
     }
 }

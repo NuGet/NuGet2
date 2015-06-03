@@ -18,14 +18,14 @@ namespace NuGet
         private const string NetFrameworkIdentifier = ".NETFramework";
         private const string NetCoreFrameworkIdentifier = ".NETCore";
         private const string PortableFrameworkIdentifier = ".NETPortable";
+        private const string NetPlatformFrameworkIdentifier = ".NETPlatform";
+        private const string NetPlatformFrameworkShortName = "dotnet";
         private const string AspNetFrameworkIdentifier = "ASP.Net";
         private const string AspNetCoreFrameworkIdentifier = "ASP.NetCore";
         private const string DnxFrameworkIdentifier = "DNX";
         private const string DnxFrameworkShortName = "dnx";
         private const string DnxCoreFrameworkIdentifier = "DNXCore";
         private const string DnxCoreFrameworkShortName = "dnxcore";
-        private const string CoreFrameworkIdentifier = "Core";
-        private const string CoreFrameworkShortName = "core";
         private const string UAPFrameworkIdentifier = "UAP";
         private const string UAPFrameworkShortName = "uap";
         private const string LessThanOrEqualTo = "\u2264";
@@ -97,8 +97,8 @@ namespace NuGet
             { DnxFrameworkShortName, DnxFrameworkIdentifier },
             { DnxCoreFrameworkShortName, DnxCoreFrameworkIdentifier },
 
-            // Core
-            { CoreFrameworkShortName, CoreFrameworkIdentifier },
+            // Dotnet
+            { NetPlatformFrameworkShortName, NetPlatformFrameworkIdentifier },
 
             // UAP
             { UAPFrameworkShortName, UAPFrameworkIdentifier },
@@ -142,7 +142,7 @@ namespace NuGet
             { ".NETMicroFramework", "netmf" },
             { DnxFrameworkIdentifier, DnxFrameworkShortName },
             { DnxCoreFrameworkIdentifier, DnxCoreFrameworkShortName },
-            { CoreFrameworkIdentifier, CoreFrameworkShortName },
+            { NetPlatformFrameworkIdentifier, NetPlatformFrameworkShortName },
             { AspNetFrameworkIdentifier, "aspnet" },
             { AspNetCoreFrameworkIdentifier, "aspnetcore" },
             { "Silverlight", "sl" },
@@ -326,7 +326,8 @@ namespace NuGet
                     return UnsupportedFrameworkName;
                 }
 
-                version = _emptyVersion;
+                // Use 5.0 instead of 0.0 as the default for NetPlatform
+                version = identifierPart.Equals(NetPlatformFrameworkIdentifier) ? new Version(5, 0) : _emptyVersion;
             }
 
             if (String.IsNullOrEmpty(identifierPart))
@@ -621,6 +622,14 @@ namespace NuGet
                     frameworkName = pair.Key;
                     break;
                 }
+            }
+
+            if (frameworkName.Version.Major == 5 
+                && frameworkName.Version.Minor == 0
+                && frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                // Normalize version 5.0 to 0.0 for display purposes for dotnet
+                frameworkName = new FrameworkName(frameworkName.Identifier, _emptyVersion, frameworkName.Profile);
             }
 
             string name;
