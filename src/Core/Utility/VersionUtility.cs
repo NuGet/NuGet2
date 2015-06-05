@@ -99,6 +99,7 @@ namespace NuGet
 
             // Dotnet
             { NetPlatformFrameworkShortName, NetPlatformFrameworkIdentifier },
+            { NetPlatformFrameworkIdentifier, NetPlatformFrameworkIdentifier },
 
             // UAP
             { UAPFrameworkShortName, UAPFrameworkIdentifier },
@@ -158,7 +159,7 @@ namespace NuGet
             { "Xamarin.PlayStation4", "xamarinpsfour" },
             { "Xamarin.PlayStationVita", "xamarinpsvita" },
             { "Xamarin.Xbox360", "xamarinxboxthreesixty" },
-            { "Xamarin.XboxOne", "xamarinxboxone" }
+            { "Xamarin.XboxOne", "xamarinxboxone" },
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

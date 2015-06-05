@@ -1995,5 +1995,25 @@ namespace NuGet.Test
             var fx = new FrameworkName(longName, Version.Parse(version));
             Assert.Equal(shortName, VersionUtility.GetShortFrameworkName(fx));
         }
+
+        [Theory]
+        [InlineData(".NETPlatform5.0", ".NETPlatform", "5.0")]
+        [InlineData(".NETPlatform50", ".NETPlatform", "5.0")]
+        public void CanParseMixedFrameworkNames(string mixedName, string longName, string version)
+        {
+            var fx = VersionUtility.ParseFrameworkName(mixedName);
+            Assert.Equal(new FrameworkName(longName, Version.Parse(version)), fx);
+        }
+
+        [Theory]
+        [InlineData(".NETPlatform5.0", "dotnet")]
+        [InlineData(".NETPlatform50", "dotnet")]
+        public void CanParseMixedFrameworkNamesToShort(string mixedName, string shortName)
+        {
+            var fx = VersionUtility.ParseFrameworkName(mixedName);
+            var result = VersionUtility.GetShortFrameworkName(fx);
+
+            Assert.Equal(shortName, result);
+        }
     }
 }
