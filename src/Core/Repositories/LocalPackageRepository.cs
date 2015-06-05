@@ -1,4 +1,3 @@
-using NuGet.Resources;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -6,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -275,6 +275,8 @@ namespace NuGet
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "We want to suppress all errors opening a package")]
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
         {
             return GetPackageFiles()
