@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Moq;
+using NuGet.Test.Mocks;
+using System;
 using System.IO;
 using System.Linq;
-using Moq;
-using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
 
@@ -50,7 +50,7 @@ namespace NuGet.Test.Integration.Core
 
             // Act
             var findPackage = repository.FindPackage(id, new SemanticVersion(version));
-            
+
             // Assert
             Assert.True(findPackage is OptimizedZipPackage);
             AssertPackage(id, version, findPackage);
@@ -219,7 +219,7 @@ namespace NuGet.Test.Integration.Core
             Assert.Equal("1.2", packages[0].Version.ToString());
             Assert.Equal("1.3", packages[1].Version.ToString());
         }
-        
+
         [Fact]
         public void GetPackageReturnsPackagesFromNestedDirectories()
         {
@@ -239,7 +239,7 @@ namespace NuGet.Test.Integration.Core
             // Assert
             Assert.Equal(3, packages.Count);
             AssertPackage("Test", "1.3.1.0", packages[0]);
-            AssertPackage("Foo", "1.4", packages[1]); 
+            AssertPackage("Foo", "1.4", packages[1]);
             AssertPackage("Test", "1.3.4", packages[2]);
         }
 
@@ -265,7 +265,7 @@ namespace NuGet.Test.Integration.Core
             var repository = new LocalPackageRepository(pathResolver, fileSystem);
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => repository.GetPackages().ToList(), "Unable to read package from path 'Foo.nupkg'.");
+            ExceptionAssert.Throws<InvalidDataException>(() => repository.OpenPackage(@"Foo.nupkg"), "Unable to read package from path 'Foo.nupkg'.");
         }
 
         private static void AssertPackage(string id, string version, IPackage findPackage)
@@ -287,7 +287,7 @@ namespace NuGet.Test.Integration.Core
             };
 
             var dependencies = new PackageDependency("Dummy");
-            packageBuilder.DependencySets.Add(new PackageDependencySet(null, new [] { dependencies }));
+            packageBuilder.DependencySets.Add(new PackageDependencySet(null, new[] { dependencies }));
             packageBuilder.Authors.Add("test author");
 
             Directory.CreateDirectory(Path.GetDirectoryName(packagePath));

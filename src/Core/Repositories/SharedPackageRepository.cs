@@ -1,11 +1,11 @@
-﻿using System;
+﻿using NuGet.Resources;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using NuGet.Resources;
 
 namespace NuGet
 {
@@ -68,7 +68,7 @@ namespace NuGet
         {
             if (version != null)
             {
-                // optimization: if we find the .nuspec file at "id.version"\"id.version".nuspec or 
+                // optimization: if we find the .nuspec file at "id.version"\"id.version".nuspec or
                 // the .nupkg file at "id.version"\"id.version".nupkg, consider it exists
                 bool hasPackageDirectory = version.GetComparableVersionStrings()
                                                   .Select(v => packageId + "." + v)
@@ -132,7 +132,7 @@ namespace NuGet
                 string nupkgPath = partialPath + Constants.PackageExtension;
                 if (FileSystem.FileExists(nupkgPath))
                 {
-                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);                    
+                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);
                 }
                 else if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
                 {
@@ -157,8 +157,8 @@ namespace NuGet
 
         public override void RemovePackage(IPackage package)
         {
-            // IMPORTANT (bug #3114) Even though we delete the entire package's directory, 
-            // we still need to explicitly delete the .nuspec and .nupkg files in order to 
+            // IMPORTANT (bug #3114) Even though we delete the entire package's directory,
+            // we still need to explicitly delete the .nuspec and .nupkg files in order to
             // undo pending TFS add operations, if any.
             string manifestFilePath = GetManifestFilePath(package.Id, package.Version);
             if (FileSystem.FileExists(manifestFilePath))
@@ -166,7 +166,7 @@ namespace NuGet
                 // delete .nuspec file
                 FileSystem.DeleteFileSafe(manifestFilePath);
             }
-            
+
             string packageFilePath = GetPackageFilePath(package);
             if (FileSystem.FileExists(packageFilePath))
             {
@@ -198,15 +198,15 @@ namespace NuGet
         protected virtual IPackageRepository CreateRepository(string path)
         {
             string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
-            string absolutePath = PathUtility.GetAbsolutePath(root, path);            
+            string absolutePath = PathUtility.GetAbsolutePath(root, path);
             return new PackageReferenceRepository(absolutePath, sourceRepository: this);
         }
 
-        protected override IPackage OpenPackage(string path)
+        internal override IPackage OpenPackage(string path)
         {
             if (!FileSystem.FileExists(path))
             {
-              return null;
+                return null;
             }
 
             string extension = Path.GetExtension(path);
@@ -254,7 +254,7 @@ namespace NuGet
             // Only save if we changed the document
             bool requiresSave = false;
 
-            // Paths have to be relative to the this repository           
+            // Paths have to be relative to the this repository
             var paths = new HashSet<string>();
             foreach (var e in GetRepositoryElements(document).ToList())
             {
@@ -419,8 +419,8 @@ namespace NuGet
 
         private bool IsSolutionLevel(IPackage package)
         {
-            // A package is solution level if 
-            // - it doesn't have project content & 
+            // A package is solution level if
+            // - it doesn't have project content &
             // - it doesn't have dependency on non solution-level package &
             // - it is not referenced by any project.
             if (package.HasProjectContent())

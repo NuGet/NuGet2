@@ -1,3 +1,4 @@
+using NuGet.Resources;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -5,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using NuGet.Resources;
 
 namespace NuGet
 {
@@ -348,7 +348,7 @@ namespace NuGet
             }
         }
 
-        protected virtual IPackage OpenPackage(string path)
+        internal virtual IPackage OpenPackage(string path)
         {
             if (!FileSystem.FileExists(path))
             {

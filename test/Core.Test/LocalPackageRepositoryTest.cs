@@ -1,15 +1,14 @@
+using Moq;
+using NuGet.Test.Mocks;
+using NuGet.Test.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Moq;
-using NuGet.Test.Mocks;
 using Xunit;
-using NuGet.Test.Utility;
 
 namespace NuGet.Test
 {
-
     public class LocalPackageRepositoryTest
     {
         [Fact]
@@ -333,7 +332,7 @@ namespace NuGet.Test
                 _openPackage = openPackage;
             }
 
-            protected override IPackage OpenPackage(string path)
+            internal override IPackage OpenPackage(string path)
             {
                 return _openPackage(path);
             }
