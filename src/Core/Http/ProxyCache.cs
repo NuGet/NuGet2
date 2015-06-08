@@ -4,7 +4,7 @@ using System.Net;
 
 namespace NuGet
 {
-    internal class ProxyCache : IProxyCache
+    public class ProxyCache : IProxyCache
     {
         private const string HostKey = "http_proxy";
         private const string UserKey = "http_proxy.user";
@@ -27,12 +27,12 @@ namespace NuGet
         private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache());
                 public ProxyCache()
         {
-
         }
-#else 
-        // It's not likely that http proxy settings are set in machine wide settings, 
+#else
+
+        // It's not likely that http proxy settings are set in machine wide settings,
         // so not passing machine wide settings to Settings.LoadDefaultSettings() should be fine.
-        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(fileSystem: null, configFileName: null, machineWideSettings: null ), new EnvironmentVariableWrapper()));
+        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(fileSystem: null, configFileName: null, machineWideSettings: null), new EnvironmentVariableWrapper()));
 
         private readonly ISettings _settings;
         private readonly IEnvironmentVariableReader _environment;
@@ -42,6 +42,7 @@ namespace NuGet
             _settings = settings;
             _environment = environment;
         }
+
 #endif
 
         internal static ProxyCache Instance
@@ -67,7 +68,7 @@ namespace NuGet
                 }
                 return configuredProxy;
             }
-#endif 
+#endif
             if (!IsSystemProxySet(uri))
             {
                 return null;
@@ -86,13 +87,14 @@ namespace NuGet
         }
 
 #if !BOOTSTRAPPER
+
         internal WebProxy GetUserConfiguredProxy()
         {
             // Try reading from the settings. The values are stored as 3 config values http_proxy, http_proxy_user, http_proxy_password
             var host = _settings.GetConfigValue(HostKey);
             if (!String.IsNullOrEmpty(host))
             {
-                // The host is the minimal value we need to assume a user configured proxy. 
+                // The host is the minimal value we need to assume a user configured proxy.
                 var webProxy = new WebProxy(host);
                 string userName = _settings.GetConfigValue(UserKey);
                 string password = _settings.GetConfigValue(PasswordKey, decrypt: true);
@@ -122,6 +124,7 @@ namespace NuGet
             }
             return null;
         }
+
 #endif
 
         public void Add(IWebProxy proxy)
@@ -179,5 +182,4 @@ namespace NuGet
             return proxy != null;
         }
     }
-
 }
