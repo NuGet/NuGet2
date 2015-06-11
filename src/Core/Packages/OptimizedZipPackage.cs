@@ -155,6 +155,18 @@ namespace NuGet
             return _fileSystem.OpenFile(_packagePath);
         }
 
+        public override void ExtractContents(IFileSystem fileSystem, string extractPath)
+        {
+            EnsurePackageFiles();
+            foreach (var item in _files)
+            {
+                using (var stream = item.Value.GetStream())
+                {
+                    fileSystem.AddFile(Path.Combine(extractPath, item.Value.TargetPath), stream);
+                }
+            }
+        }
+
         protected override IEnumerable<IPackageFile> GetFilesBase()
         {
             EnsurePackageFiles();

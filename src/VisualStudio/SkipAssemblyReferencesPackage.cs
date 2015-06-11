@@ -157,6 +157,11 @@ namespace NuGet.VisualStudio
             return _basePackage.GetStream();
         }
 
+        public void ExtractContents(IFileSystem fileSystem, string extactPath)
+        {
+            _basePackage.ExtractContents(fileSystem, extactPath);
+        }
+
         public IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             return _basePackage.GetSupportedFrameworks();

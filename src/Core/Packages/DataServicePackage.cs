@@ -349,6 +349,11 @@ namespace NuGet
             return Package.GetStream();
         }
 
+        public void ExtractContents(IFileSystem fileSystem, string extractPath)
+        {
+            Package.ExtractContents(fileSystem, extractPath);
+        }
+
         public override string ToString()
         {
             return this.GetFullName();

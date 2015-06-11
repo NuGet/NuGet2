@@ -205,6 +205,8 @@ namespace NuGet
         }
 
         public abstract Stream GetStream();
+
+        public abstract void ExtractContents(IFileSystem fileSystem, string extractPath);
         
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
         protected abstract IEnumerable<IPackageFile> GetFilesBase();

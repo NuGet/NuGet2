@@ -25,6 +25,8 @@ namespace NuGet
             DependencyVersion = DependencyVersion.Lowest;
         }
 
+        public virtual bool SkipPackageTargetCheck { get; set; }
+
         protected FrameworkName TargetFramework
         {
             get
@@ -184,7 +186,7 @@ namespace NuGet
         /// </summary>
         private void ProcessPackageTarget(IPackage package)
         {
-            if (IgnoreWalkInfo)
+            if (IgnoreWalkInfo || SkipPackageTargetCheck)
             {
                 return;
             }

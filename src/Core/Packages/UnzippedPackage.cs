@@ -59,8 +59,8 @@ namespace NuGet
             _repositoryFileSystem = repositoryFileSystem;
 
             // we look for the .nuspec file at jQuery.1.4\jQuery.1.4.nuspec
-            string manifestFile = Path.Combine(packageName, packageName + Constants.ManifestExtension);
-            EnsureManifest(manifestFile);
+            var manifestPath = Path.Combine(packageName, packageName + Constants.ManifestExtension);
+            EnsureManifest(manifestPath);
         }
 
         public UnzippedPackage(IFileSystem repositoryFileSystem, string packageId, SemanticVersion version)
@@ -97,6 +97,18 @@ namespace NuGet
             // if not exists, check under \A.1.0.0\A.1.0.0.nupkg
             string path = Path.Combine(_packagePath, _packageFileName);
             return _repositoryFileSystem.OpenFile(path);
+        }
+
+        public override void ExtractContents(IFileSystem fileSystem, string extractPath)
+        {
+            foreach (var file in GetFilesBase().Cast<PhysicalPackageFile>())
+            {
+                var targetPath = Path.Combine(extractPath, file.TargetPath);
+                using (var fileStream = file.GetStream())
+                {
+                    fileSystem.AddFile(targetPath, fileStream);
+                }
+            }
         }
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()

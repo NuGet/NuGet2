@@ -211,6 +211,18 @@ namespace NuGet.Test
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);
             }
+            mockPackage.Setup(m => m.ExtractContents(It.IsAny<IFileSystem>(), It.IsAny<string>()))
+                .Callback((IFileSystem fileSystem, string extractPath) =>
+                {
+                    foreach (var file in allFiles)
+                    {
+                        using (var stream = file.GetStream())
+                        {
+                            fileSystem.AddFile(Path.Combine(extractPath, file.Path), stream);
+                        }
+                    }
+                });
+
             var targetFramework = allFiles.Select(f => f.TargetFramework).Where(f => f != null);
             mockPackage.Setup(m => m.GetSupportedFrameworks()).Returns(targetFramework);
 

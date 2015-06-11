@@ -31,7 +31,7 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "CommandPackageSaveMode")]
         public string PackageSaveMode { get; set; }
-        
+
         protected void CalculateEffectivePackageSaveMode()
         {
             string packageSaveModeValue = PackageSaveMode;
@@ -98,13 +98,34 @@ namespace NuGet.Commands
                 localRepository.PackageSaveMode = EffectivePackageSaveMode;
             }
 
-            var packageManager = new PackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
+            var packageManager = new CommandLineInstallPackageManager(repository, pathResolver, packagesFolderFileSystem, localRepository)
             {
                 Logger = Console,
                 CheckDowngrade = checkDowngrade
             };
 
             return packageManager;
+        }
+
+        private class CommandLineInstallPackageManager : PackageManager
+        {
+            public CommandLineInstallPackageManager(
+                    IPackageRepository sourceRepository,
+                    IPackagePathResolver pathResolver,
+                    IFileSystem packagesFolderFileSystem,
+                    IPackageRepository localRepository)
+                : base(sourceRepository, pathResolver, packagesFolderFileSystem, localRepository)
+            {
+                SkipPackageTargetCheck = true;
+            }
+
+            protected override void OnExpandFiles(PackageOperationEventArgs e)
+            {
+                e.Package.ExtractContents(e.FileSystem, e.InstallPath);
+                LocalRepository.AddPackage(e.Package);
+
+                base.ExpandSatellitePackageFiles(e.Package);
+            }
         }
     }
 }

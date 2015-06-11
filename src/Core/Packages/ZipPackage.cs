@@ -95,6 +95,25 @@ namespace NuGet
             return _streamFactory();
         }
 
+        public override void ExtractContents(IFileSystem fileSystem, string extractPath)
+        {
+            using (Stream stream = _streamFactory())
+            {
+                var package = Package.Open(stream);
+
+                foreach (var part in package.GetParts().Where(IsPackageFile))
+                {
+                    var relativePath = UriUtility.GetPath(part.Uri);
+
+                    var targetPath = Path.Combine(extractPath, relativePath);
+                    using (var partStream = part.GetStream())
+                    {
+                        fileSystem.AddFile(targetPath, partStream);
+                    }
+                }
+            }
+        }
+
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             IEnumerable<FrameworkName> fileFrameworks;

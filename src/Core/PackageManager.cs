@@ -100,6 +100,12 @@ namespace NuGet
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value that determines if the walk operation during install
+        /// verifies the targetability (Project \ External) of the package.
+        /// </summary>
+        public bool SkipPackageTargetCheck { get; set; }
+
         public void InstallPackage(string packageId)
         {
             InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -147,7 +153,8 @@ namespace NuGet
                 DependencyVersion)
             {
                 DisableWalkInfo = ignoreWalkInfo,
-                CheckDowngrade = CheckDowngrade
+                CheckDowngrade = CheckDowngrade,
+                SkipPackageTargetCheck = SkipPackageTargetCheck
             };
             Execute(package, installerWalker);
         }
@@ -248,14 +255,7 @@ namespace NuGet
                 // Add files
                 FileSystem.AddFiles(files, packageDirectory);
 
-                // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
-                IPackage runtimePackage;
-                if (PackageHelper.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
-                {
-                    var satelliteFiles = package.GetSatelliteFiles();
-                    var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
-                    FileSystem.AddFiles(satelliteFiles, runtimePath);
-                }
+                ExpandSatellitePackageFiles(package);
             }
             finally
             {
@@ -263,6 +263,18 @@ namespace NuGet
                 {
                     batchProcessor.EndProcessing();
                 }
+            }
+        }
+
+        protected void ExpandSatellitePackageFiles(IPackage package)
+        {
+            // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
+            IPackage runtimePackage;
+            if (PackageHelper.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
+            {
+                var satelliteFiles = package.GetSatelliteFiles();
+                var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
+                FileSystem.AddFiles(satelliteFiles, runtimePath);
             }
         }
 

@@ -26,5 +26,7 @@ namespace NuGet
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
         Stream GetStream();
+
+        void ExtractContents(IFileSystem fileSystem, string extractPath);
     }
 }
