@@ -414,6 +414,11 @@ namespace NuGet
                     _usingMachineCache = !inMemOnly;
 
                     OldHash = PackageHash;
+
+                    // Set the Id and Version to the one that is present in nuspec.
+                    Id = _package.Id;
+                    Version = _package.Version.ToString();
+                    
                 }
                 else
                 {

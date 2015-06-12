@@ -126,6 +126,53 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void EnsurePackageDownloadsThePackageAndSetsItsIdAndVersionAsperNuspec()
+        {            
+            // Arrange
+            var uri = new Uri("http://nuget.org");
+            var mockRepository = new Mock<MockPackageRepository>().As<IPackageCacheRepository>();
+            mockRepository.Setup(s => s.InvokeOnPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), It.IsAny<Action<Stream>>())).Returns(false);
+
+            var packageDownloader = new Mock<PackageDownloader>();
+            packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
+                             .Callback(new Action<Uri, IPackageMetadata, Stream>(
+                                 (url, metadata, stream) => PackageUtility.CreateSimplePackageStream("LowerCase", "1.2.0").CopyTo(stream)))
+                             .Verifiable();
+            var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
+            byte[] hash1 = new byte[] { 1, 2, 3, 4 };
+            hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => hash1);
+
+            var context = new Mock<IDataServiceContext>();
+            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
+
+            // Setup a different casing for package Id and non-normalized version for the data service package.
+            var servicePackage = new DataServicePackage
+            {
+                Id = "Lowercase",
+                Version = "1.2",
+                PackageHash = Convert.ToBase64String(hash1),
+                Downloader = packageDownloader.Object,
+                HashProvider = hashProvider.Object,
+                Context = context.Object
+            };
+
+            // Act
+            servicePackage.EnsurePackage(mockRepository.Object);
+
+            // Assert
+            context.Verify();
+            packageDownloader.Verify();
+
+            var foundPackage = servicePackage._package;
+            Assert.NotNull(foundPackage);
+            Assert.True(foundPackage is ZipPackage);
+
+            // Ensure the package Id and version matches the one that is present in nuspec.
+            Assert.Equal(foundPackage.Id, "LowerCase", StringComparer.Ordinal);
+            Assert.Equal(foundPackage.Version.ToString(), "1.2.0", StringComparer.Ordinal);
+        }
+
+        [Fact]
         public void EnsurePackageDownloadsThePackageIfItIsNotCachedInMemoryOnInMachineCache()
         {
             // Arrange
