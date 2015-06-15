@@ -80,10 +80,13 @@ namespace NuGet
                 {
                     foreach (var optionalFramework in portableProfile.OptionalFrameworks)
                     {
-                        // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
-                        if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
+                        if (optionalFramework != null && optionalFramework.Identifier != null)
                         {
-                            _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
+                            // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
+                            if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
+                            {
+                                _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
+                            }
                         }
 
                         List<VersionStringISetTuple> listVersionStringISetTuple = _portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
