@@ -58,8 +58,8 @@ namespace NuGet
         private static readonly Version _emptyVersion = new Version();
 
         public static IList<string> WellKnownFolders
-        { 
-            get { return _wellKnownFolders; } 
+        {
+            get { return _wellKnownFolders; }
         }
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -282,7 +282,7 @@ namespace NuGet
             // If we find a version then we try to split the framework name into 2 parts
             var versionMatch = Regex.Match(frameworkNameAndVersion, @"[\d.]+(\-|$)");
 
-            if (versionMatch.Success)
+            if (versionMatch.Success && (!useManagedCodeConventions || versionMatch.Index > 0))
             {
                 identifierPart = frameworkNameAndVersion.Substring(0, versionMatch.Index).Trim();
                 versionPart = frameworkNameAndVersion.Substring(versionMatch.Index).Trim();
@@ -358,7 +358,7 @@ namespace NuGet
                 // Use 5.0 instead of 0.0 as the default for NetPlatform
                 version = identifierPart.Equals(NetPlatformFrameworkIdentifier) ? new Version(5, 0) : _emptyVersion;
             }
-            
+
             if (String.IsNullOrEmpty(identifierPart))
             {
                 identifierPart = NetFrameworkIdentifier;
@@ -773,29 +773,64 @@ namespace NuGet
         {
             for (int i = 0; i < _wellKnownFolders.Length; i++)
             {
-                string folderPrefix = _wellKnownFolders[i] + System.IO.Path.DirectorySeparatorChar;
-                if (filePath.Length > folderPrefix.Length &&
-                    filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    string frameworkPart = filePath.Substring(folderPrefix.Length);
+                var isLib = _wellKnownFolders[i] == Constants.LibDirectory;
 
-                    try
+                // For legacy packages, files are optionally located under the target framework directory of individual well-known directories
+                // e.g. /content/Foo.txt, /lib/net40/binary.dll, /build/net45/MyPackage.props etc
+                // For packages using managed code conventions, files are located under the target framework directory of lib directory. For all
+                // other well-known directories, the tfm is appended as a suffix to the folder name
+                // e.g. /content/Foo.txt, /content.net45/Foo.txt, /lib/net45/binary.dll
+
+                if (isLib || !useManagedCodeConventions)
+                {
+                    string folderPrefix = _wellKnownFolders[i] + System.IO.Path.DirectorySeparatorChar;
+
+                    if (filePath.Length > folderPrefix.Length &&
+                        filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
                     {
-                        return VersionUtility.ParseFrameworkFolderName(
-                            frameworkPart,
-                            strictParsing: (_wellKnownFolders[i] == Constants.LibDirectory),
-                            useManagedCodeConventions: useManagedCodeConventions,
-                            effectivePath: out effectivePath);
-                    }
-                    catch (ArgumentException)
-                    {
-                        // if the parsing fails, we treat it as if this file
-                        // doesn't have target framework.
-                        effectivePath = frameworkPart;
-                        return null;
+                        string frameworkPart = filePath.Substring(folderPrefix.Length);
+
+                        try
+                        {
+                            return VersionUtility.ParseFrameworkFolderName(
+                                frameworkPart,
+                                strictParsing: isLib,
+                                useManagedCodeConventions: useManagedCodeConventions,
+                                effectivePath: out effectivePath);
+                        }
+                        catch (ArgumentException)
+                        {
+                            // if the parsing fails, we treat it as if this file
+                            // doesn't have target framework.
+                            effectivePath = frameworkPart;
+                            return null;
+                        }
                     }
                 }
+                else
+                {
+                    string folderPrefix = _wellKnownFolders[i] + ".";
+                    if (filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // filePath = content.net45/foo.txt
+                        var separatorIndex = filePath.IndexOf(Path.DirectorySeparatorChar, folderPrefix.Length);
+                        if (separatorIndex == -1 || separatorIndex == folderPrefix.Length + 1 || separatorIndex == filePath.Length)
+                        {
+                            // filePath = content.net45.txt or content./file.txt or content.net45/
+                            throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, NuGetResources.StrictTfm_UnsupportedFilePath, filePath));
+                        }
 
+                        var targetFramework = ParseFrameworkName(filePath.Substring(folderPrefix.Length, separatorIndex - folderPrefix.Length), useManagedCodeConventions);
+                        // skip past the framework folder and the character \
+                        effectivePath = filePath.Substring(separatorIndex + 1);
+                        return targetFramework;
+                    }
+                    else if (filePath.StartsWith(_wellKnownFolders[i] + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    {
+                        effectivePath = filePath.Substring(_wellKnownFolders[i].Length + 1);
+                        return EmptyFramework;
+                    }
+                }
             }
 
             effectivePath = filePath;
@@ -959,6 +994,11 @@ namespace NuGet
         internal static bool IsCompatible(FrameworkName projectFrameworkName, FrameworkName packageTargetFrameworkName)
         {
             if (projectFrameworkName == null)
+            {
+                return true;
+            }
+
+            if (packageTargetFrameworkName == VersionUtility.EmptyFramework)
             {
                 return true;
             }

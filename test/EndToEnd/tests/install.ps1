@@ -2821,3 +2821,37 @@ function Test-InstallManagedCodeCoventionsPackageThatDependsOnLegacyPackage
     Assert-Reference $project Any
     Assert-NotNull (Get-ProjectItem $project 'test.txt')
 }
+
+function Test-InstallManagedCodeConventionsPackageWithContentFilesInRoot
+{
+    param($context)
+
+    # Arrange - 1
+    $project = New-ClassLibrary
+
+    # Act - 1
+    $project | Install-Package ManagedCodeConventions -Source $context.RepositoryPath
+
+    # Assert - 1
+    Assert-Package $project PackageA 1.0.0
+    Assert-Package $project ManagedCodeConventions 1.0.0
+    Assert-Package $project ManagedCodeConventions2 0.8.5
+    Assert-Null (Get-ProjectItem $project 'PackageA-Content.txt')
+    Assert-NotNull (Get-ProjectItem $project 'PackageA-Net40-Content.txt')
+    Assert-NotNull (Get-ProjectItem $project 'ManagedCodeConventions.txt')
+    Assert-NotNull (Get-ProjectItem $project 'Net40\Net40-ManagedCodeConventions.txt')
+
+    # Arrange - 2
+    $project = New-SilverlightClassLibrary
+
+    $project | Install-Package ManagedCodeConventions -Source $context.RepositoryPath
+
+    # Assert - 1
+    Assert-Package $project PackageA 1.0.0
+    Assert-Package $project ManagedCodeConventions 1.0.0
+    Assert-Package $project ManagedCodeConventions2 0.8.5
+    Assert-Null (Get-ProjectItem $project 'PackageA-Content.txt')
+    Assert-NotNull (Get-ProjectItem $project 'PackageA-Net40-Content.txt')
+    Assert-NotNull (Get-ProjectItem $project 'ManagedCodeConventions.txt')
+    Assert-NotNull (Get-ProjectItem $project 'Net40\Net40-ManagedCodeConventions.txt')
+}

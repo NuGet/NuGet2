@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 
 namespace NuGet
 {
@@ -14,6 +15,12 @@ namespace NuGet
     {
         private const string TagsProperty = "Tags";
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", TagsProperty };
+        private static readonly Regex _contentRegex = new Regex(Constants.ContentDirectory + @"(\..+?)?\\",
+            RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+        private static readonly Regex _toolRegex = new Regex(Constants.ToolsDirectory + @"(\..+?)?\\",
+            RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+        private static readonly Regex _buildRegex = new Regex(Constants.BuildDirectory + @"(\..+?)?\\",
+            RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         public static bool IsReleaseVersion(this IPackageName packageMetadata)
         {
@@ -75,11 +82,21 @@ namespace NuGet
 
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package)
         {
+            if (package.UsesManagedCodeConventions())
+            {
+                return package.GetFiles().Where(file => _contentRegex.IsMatch(file.Path));
+            }
+
             return package.GetFiles(Constants.ContentDirectory);
         }
 
         public static IEnumerable<IPackageFile> GetToolFiles(this IPackage package)
         {
+            if (package.UsesManagedCodeConventions())
+            {
+                return package.GetFiles().Where(file => _toolRegex.IsMatch(file.Path));
+            }
+
             return package.GetFiles(Constants.ToolsDirectory);
         }
 
@@ -88,6 +105,14 @@ namespace NuGet
             // build files must be either <package id>.props or <package id>.targets
             string targetsFile = package.Id + ".targets";
             string propsFile = package.Id + ".props";
+
+            if (package.UsesManagedCodeConventions())
+            {
+                return package.GetFiles().Where(
+                    file => _buildRegex.IsMatch(file.Path) &&
+                        (string.Equals(targetsFile, file.EffectivePath, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(propsFile, file.EffectivePath, StringComparison.OrdinalIgnoreCase)));
+            }
 
             return package.GetFiles(Constants.BuildDirectory)
                           .Where(p => targetsFile.Equals(p.EffectivePath, StringComparison.OrdinalIgnoreCase) ||

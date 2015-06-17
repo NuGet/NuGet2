@@ -8,7 +8,7 @@ namespace NuGet
 {
     public class PackageType
     {
-        private static readonly PackageType _defaultType = new PackageType("LegacyConventions", version: new Version());
+        private static readonly PackageType _defaultType = new PackageType("Legacy", version: new Version());
         private static readonly PackageType _managedCodeConventions = new PackageType("Managed", version: new Version(2, 0));
 
         public PackageType(string name, Version version)

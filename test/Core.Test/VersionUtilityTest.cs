@@ -143,18 +143,95 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(false, "content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
-        [InlineData(true, "content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
-        [InlineData(false, "content\\-world\\x.dll", "-world\\x.dll")]
-        [InlineData(true, "content\\-world\\x.dll", "-world\\x.dll")]
-        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(bool useManagedCodeConventions, string path, string expectedPath)
+        [InlineData("content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData("content\\-world\\x.dll", "-world\\x.dll")]
+        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(string path, string expectedPath)
         {
             // Act
             string effectivePath;
-            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: useManagedCodeConventions, effectivePath: out effectivePath);
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: false, effectivePath: out effectivePath);
 
             // Assert
             Assert.Null(framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData("content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData("content\\-world\\x.dll", "-world\\x.dll")]
+        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADashWhenManagedCodeConventionsIsEnabled(string path, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: true, effectivePath: out effectivePath);
+
+            // Assert
+            Assert.Equal(VersionUtility.EmptyFramework, framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData(@"content\jquery-ui\jquery.ui.css", @"jquery-ui\jquery.ui.css")]
+        [InlineData(@"tools\shared\makefile.shade", @"shared\makefile.shade")]
+        [InlineData(@"build\props40\Build.props", @"props40\Build.props")]
+        public void ParseFrameworkNameFromFilePath_ReturnsNullFramework_IfFrameworkCannotBeParsedAndNotUsingManagedCodeConventions(
+            string path, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: false, effectivePath: out effectivePath);
+
+            // Assert
+            Assert.Null(framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData(@"lib\x86\Foo.dll", "Foo.dll")]
+        [InlineData(@"lib\netty32\Foo.dll", "Foo.dll")]
+        public void ParseFrameworkNameFromFilePath_ReturnsUnknownFramework_IfFrameworkCannotBeParsedForLibFiles(
+            string path, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: false, effectivePath: out effectivePath);
+
+            // Assert
+            Assert.Equal(VersionUtility.UnsupportedFrameworkName, framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData(@"lib\net45\Foo.dll", ".NETFramework,Version=4.5", "Foo.dll")]
+        [InlineData(@"lib\portable-net40+silverlight\Foo.dll", ".NETPortable,Version=v0.0,Profile=net40+silverlight", "Foo.dll")]
+        [InlineData(@"content\wpa80\winfile.js", "WindowsPhoneApp,Version=v8.0", "winfile.js")]
+        [InlineData(@"tools\dnxcore50\build\bin\dnu.cmd", "DNXCore,Version=v5.0", @"build\bin\dnu.cmd")]
+        [InlineData(@"build\netcore21\MsBuild\Build.props", ".NETCore,Version=v2.1", @"MsBuild\Build.props")]
+        public void ParseFrameworkNameFromFilePath_AllowsTFMBasedPathsWhenNotUsingManagedCodeConventions(
+            string path, string expectedFramework, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: false, effectivePath: out effectivePath);
+
+            // Assert
+            Assert.Equal(new FrameworkName(expectedFramework), framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData(@"content\wpa80\winfile.js", @"wpa80\winfile.js")]
+        [InlineData(@"tools\dnxcore50\build\bin\dnu.cmd", @"dnxcore50\build\bin\dnu.cmd")]
+        [InlineData(@"build\netcore21\MsBuild\Build.props", @"netcore21\MsBuild\Build.props")]
+        public void ParseFrameworkNameFromFilePath_DoesNotParseTfmsForNonLibFilesWhenManagedCodeConventionsIsEnabled(
+            string path, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, useManagedCodeConventions: true, effectivePath: out effectivePath);
+
+            // Assert
+            Assert.Equal(VersionUtility.EmptyFramework, framework);
             Assert.Equal(expectedPath, effectivePath);
         }
 
@@ -746,7 +823,7 @@ namespace NuGet.Test
         [Theory]
         [InlineData(@"foo\test.txt")]
         [InlineData(@"bar40\import.target")]
-        public void ParseFrameworkFolderName_ReturnsUnknownFramework_WhenuseManagedCodeConventionsIsDisabledAndFrameworkIsUnrecognized(string path)
+        public void ParseFrameworkFolderName_ReturnsUnknownFramework_WhenUseManagedCodeConventionsIsDisabledAndFrameworkIsUnrecognized(string path)
         {
             // Arrange
             var expectedVersion = new Version();
@@ -760,10 +837,41 @@ namespace NuGet.Test
         }
 
         [Theory]
+        [InlineData(@"32", ".NETFramework,Version=v3.2")]
+        [InlineData(@"40", ".NETFramework,Version=v4.0")]
+        [InlineData(@"7665", ".NETFramework,Version=v7.6.6.5")]
+        public void ParseFrameworkName_ParsesNumericIdentifiers_AsDotNetFrameworkVersion_WhenManagedCodeConventionsIsDisabled(
+            string frameworkName,
+            string expectedName)
+        {
+            // Act
+            var actual = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: false);
+
+            // Assert
+            Assert.Equal(expectedName, actual.ToString());
+        }
+
+        [Theory]
+        [InlineData(@"32", "32,Version=v0.0")]
+        [InlineData(@"40", "40,Version=v0.0")]
+        [InlineData(@"7665", "7665,Version=v0.0")]
+        public void ParseFrameworkName_ParsesNumericIdentifiers_AsIdentifiersWhenManagedCodeConventionsIsDisabled(
+            string frameworkName,
+            string expectedName)
+        {
+            // Act
+            var actual = VersionUtility.ParseFrameworkName(frameworkName, useManagedCodeConventions: true);
+
+            // Assert
+            Assert.Equal(expectedName, actual.ToString());
+        }
+
+        [Theory]
         [InlineData(@"foo\test.txt", "foo", "")]
         [InlineData(@"bar40\import.target", "bar", "4.0")]
         [InlineData(@"winrt45\foo.dll", ".NETCore", "4.5")]
         [InlineData(@"aspnet50\foo.dll", "ASP.Net", "5.0")]
+        [InlineData(@"test123456\foo.dll", "test123456", "0.0")]
         public void ParseFrameworkFolderName_ReturnsTargetFramework_WhenuseManagedCodeConventionsIsEnabled(
             string path,
             string identifier,
@@ -780,6 +888,27 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(identifier, actual.Identifier);
             Assert.Equal(expectedVersion, actual.Version);
+        }
+
+        [Theory]
+        [InlineData(@"foo-profile", "foo", "0.0", "profile")]
+        [InlineData(@"bar40-profile2", "bar", "4.0", "profile2")]
+        public void ParseFrameworkName_ParsesProfileWhenManagedCodeConventionsIsEnabled(
+            string path,
+            string identifier,
+            string version,
+            string expectedProfile)
+        {
+            // Arrange
+            var expectedVersion = new Version(version);
+
+            // Act
+            var actual = VersionUtility.ParseFrameworkName(path, useManagedCodeConventions: true);
+
+            // Assert
+            Assert.Equal(identifier, actual.Identifier);
+            Assert.Equal(expectedVersion, actual.Version);
+            Assert.Equal(expectedProfile, actual.Profile);
         }
 
         [Fact]
