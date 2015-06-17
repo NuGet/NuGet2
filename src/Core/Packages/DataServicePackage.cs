@@ -84,13 +84,13 @@ namespace NuGet
             set;
         }
 
-        public string LicenseNames 
+        public string LicenseNames
         {
             get { return _licenseNames; }
             set
             {
                 _licenseNames = value;
-                LicenseNameCollection = 
+                LicenseNameCollection =
                     String.IsNullOrEmpty(value) ? new string[0] : value.Split(';').ToArray();
             }
         }
@@ -287,7 +287,7 @@ namespace NuGet
 
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
-            get 
+            get
             {
                 return Package.PackageAssemblyReferences;
             }
@@ -418,7 +418,7 @@ namespace NuGet
                     // Set the Id and Version to the one that is present in nuspec.
                     Id = _package.Id;
                     Version = _package.Version.ToString();
-                    
+
                 }
                 else
                 {
@@ -477,7 +477,7 @@ namespace NuGet
 
             // Trim the id
             string id = tokens[0].Trim();
-            
+
             IVersionSpec versionSpec = null;
             if (tokens.Length > 1)
             {

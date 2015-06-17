@@ -48,7 +48,7 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(1, dependencySets.Count);
 
-            List<PackageDependency> dependencies = dependencySets[0].Dependencies.ToList();            
+            List<PackageDependency> dependencies = dependencySets[0].Dependencies.ToList();
             Assert.Equal(2, dependencies.Count);
             Assert.Equal("A", dependencies[0].Id);
             Assert.True(dependencies[0].VersionSpec.IsMinInclusive);
@@ -127,7 +127,7 @@ namespace NuGet.Test
 
         [Fact]
         public void EnsurePackageDownloadsThePackageAndSetsItsIdAndVersionAsperNuspec()
-        {            
+        {
             // Arrange
             var uri = new Uri("http://nuget.org");
             var mockRepository = new Mock<MockPackageRepository>().As<IPackageCacheRepository>();
@@ -264,7 +264,7 @@ namespace NuGet.Test
                              .Verifiable();
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
             hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns<Stream>((stream) => new byte[] { 1, 2, 3, 4 });
-            
+
             var context = new Mock<IDataServiceContext>();
             context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
 
@@ -419,7 +419,7 @@ namespace NuGet.Test
             packageDownloader.Verify();
         }
 
-        [Fact(Skip="Hash checking is disabled because it can fail.")]
+        [Fact(Skip = "Hash checking is disabled because it can fail.")]
         public void EnsurePackageDownloadsFailsIfHashIsIncorrect()
         {
             // Arrange
