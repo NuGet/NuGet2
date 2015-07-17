@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
 
@@ -255,11 +255,11 @@
 
     <Target Name="CopyExecutableOutputToDropDirectory">
         <ItemGroup>
-            <ExecutableFiles Include="$(ExeBuildDirectory)\Merged\NuGet.exe;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
+            <ExecutableFiles Include="$(ExeBuildDirectory)\Merged\NuGet.exe;$(ExeBuildDirectory)\Merged\NuGet.pdb;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
-        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe" DestinationFolder="$(ExeDropDirectory)\Signed" />
+        <Copy Condition="Exists('$(ExeBuildDirectory)\Signed\NuGet.exe')" ContinueOnError="false" SourceFiles="$(ExeBuildDirectory)\Signed\NuGet.exe;$(ExeBuildDirectory)\Signed\NuGet.pdb" DestinationFolder="$(ExeDropDirectory)\Signed" />
     </Target>
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">
