@@ -14,6 +14,7 @@ namespace NuGet
     {
         private const string FormDataTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n";
         private const string FileTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n";
+        private const string CrLf = "\r\n";
         private readonly Dictionary<string, string> _formData;
 
         private readonly List<PostFileData> _files;
@@ -60,7 +61,7 @@ namespace NuGet
                     stream.Write(headerBytes, 0, headerBytes.Length);
                 }
 
-                byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
+                byte[] newlineBytes = Encoding.UTF8.GetBytes(CrLf);
                 foreach (var file in _files)
                 {
                     string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
@@ -91,7 +92,7 @@ namespace NuGet
                 totalContentLength += headerBytes.Length;
             }
 
-            byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
+            byte[] newlineBytes = Encoding.UTF8.GetBytes(CrLf);
             foreach (var file in _files)
             {
                 string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
