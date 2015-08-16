@@ -398,7 +398,7 @@ namespace NuGet
                    parsedVersion == version;
         }
 
-        private static bool FileNameMatchesPackageId(string packageId, string path)
+        internal static bool FileNameMatchesPackageId(string packageId, string path)
         {
             var filename = Path.GetFileName(path);
 

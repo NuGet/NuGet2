@@ -6,6 +6,7 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 using NuGet.Test.Utility;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -284,6 +285,23 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(new[] { foo_10, foo_20 }, packages);
+        }
+
+        [Theory]
+        [InlineData("Foo", "Foo.nupkg", true)]
+        [InlineData("Foo", "Foo.1.0.nuspec", true)]
+        [InlineData("Foo", "Foo.1.0.nupkg", true)]
+        [InlineData("Foo", "Foo.1.0.nupkg.symbols", true)]
+        [InlineData("Foo", "Foo.1.0.0-alpha.nupkg", true)]
+        [InlineData("Foo.Baz", "Foo.Baz.1.0.nupkg", true)]
+        [InlineData("Foo", "Foo.Baz.nupkg", false)]
+        [InlineData("Foo", "Foo.Baz.1.0.nuspec", false)]
+        [InlineData("Foo", "Foo.Baz.1.0.nupkg", false)]
+        [InlineData("Foo", "Foo.Baz.1.0.nupkg.symbols", false)]
+        [InlineData("Foo", "Foo.Baz.1.0.0-alpha.nupkg", false)]
+        public void FilenamesAreMatchedAgainstPackageIds(string packageId, string path, bool shouldMatch)
+        {
+            Assert.Equal(shouldMatch, LocalPackageRepository.FileNameMatchesPackageId(packageId, path));
         }
 
         [Fact]
