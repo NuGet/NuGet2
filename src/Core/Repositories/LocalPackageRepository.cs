@@ -248,6 +248,9 @@ namespace NuGet
         {
             foreach (var path in packagePaths)
             {
+                if(!FileNameMatchesPackageId(packageId, path))
+                    continue;
+
                 IPackage package = null;
                 try 
                 {
@@ -391,6 +394,21 @@ namespace NuGet
             return name.Length > packageId.Length &&
                    SemanticVersion.TryParse(name.Substring(packageId.Length + 1), out parsedVersion) &&
                    parsedVersion == version;
+        }
+
+        private static bool FileNameMatchesPackageId(string packageId, string path)
+        {
+            var filename = new FileInfo(path).Name;
+
+            var packageIdEnd = packageId.Length + 1;
+            var extensionStart = filename.IndexOf(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
+            if(extensionStart == -1)
+                extensionStart = filename.IndexOf(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+
+            var remainder = filename.Substring(packageIdEnd, extensionStart - packageIdEnd);
+
+            SemanticVersion parsedVersion;
+            return remainder.Length == 0 || SemanticVersion.TryParse(remainder, out parsedVersion);
         }
 
         private string GetManifestFilePath(string packageId, SemanticVersion version)

@@ -296,12 +296,11 @@ namespace NuGet.Test
             fileSystem.AddFile(PathFixUtility.FixPath(@"Foo.Baz.2.0.0\Foo.Baz.2.0.0.nupkg"));
             var foo_10 = PackageUtility.CreatePackage("Foo", "1.0");
             var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
-            var fooBaz_20 = PackageUtility.CreatePackage("Foo.Baz", "2.0.0");
 
             var package_dictionary = new Dictionary<string, IPackage>(){
 					{ PathFixUtility.FixPath(@"Foo.1.0\Foo.1.0.nupkg"),foo_10},
-					{ PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"), foo_20},
-					{ PathFixUtility.FixPath(@"Foo.Baz.2.0.0\Foo.Baz.2.0.0.nupkg"), fooBaz_20}
+					{ PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"), foo_20}
+                    // fail if an attempt to open Foo.Baz is made
 			};
 
             var localPackageRepository = new MockLocalRepository(fileSystem, path =>
