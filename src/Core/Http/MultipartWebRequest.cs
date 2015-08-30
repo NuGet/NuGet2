@@ -60,7 +60,7 @@ namespace NuGet
                     stream.Write(headerBytes, 0, headerBytes.Length);
                 }
 
-                byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
+                byte[] newlineBytes = Encoding.UTF8.GetBytes("\r\n");
                 foreach (var file in _files)
                 {
                     string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
@@ -91,7 +91,7 @@ namespace NuGet
                 totalContentLength += headerBytes.Length;
             }
 
-            byte[] newlineBytes = Encoding.UTF8.GetBytes(Environment.NewLine);
+            byte[] newlineBytes = Encoding.UTF8.GetBytes("\r\n");
             foreach (var file in _files)
             {
                 string header = String.Format(CultureInfo.InvariantCulture, FileTemplate, boundary, file.FieldName, file.FieldName, file.ContentType);
