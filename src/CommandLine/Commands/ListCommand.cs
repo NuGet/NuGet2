@@ -46,7 +46,7 @@ namespace NuGet.Commands
                 includeDelisted: IncludeDelisted);
             if (AllVersions)
             {
-                return packages.OrderBy(p => p.Id);
+                return packages.OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase);
             }
             else
             {
@@ -60,7 +60,7 @@ namespace NuGet.Commands
                 }
             }
 
-            var result = packages.OrderBy(p => p.Id)
+            var result = packages.OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase)
                 .AsEnumerable();
 
             // we still need to do client side filtering of delisted & prerelease packages.

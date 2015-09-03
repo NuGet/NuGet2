@@ -180,9 +180,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert
             Assert.Equal(5, packages.Count());
-            // TODO: Wrong order of packages
-            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(0));
-            AssertPackage(new { Id = "JQuery", Ver = "1.44" }, packages.ElementAt(1));
+            AssertPackage(new { Id = "JQuery", Ver = "1.44" }, packages.ElementAt(0));
+            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(1));
             AssertPackage(new { Id = "NHibernate", Ver = "1.0" }, packages.ElementAt(2));
             AssertPackage(new { Id = "NHibernate", Ver = "1.1" }, packages.ElementAt(3));
             AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(4));
