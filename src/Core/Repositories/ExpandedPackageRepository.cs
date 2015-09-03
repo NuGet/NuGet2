@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using NuGet.Resources;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace NuGet
 {
@@ -95,7 +98,12 @@ namespace NuGet
                 if (SemanticVersion.TryParse(versionDirectoryName, out version) &&
                     Exists(packageId, version))
                 {
-                    yield return GetPackageInternal(packageId, version);
+                    var package = GetPackageInternal(packageId, version);
+                    if (package == null)
+                    {
+                        continue;
+                    }
+                    yield return package;
                 }
             }
         }
@@ -117,9 +125,24 @@ namespace NuGet
 
         private IPackage GetPackageInternal(string packageId, SemanticVersion version)
         {
-            var packagePath = GetPackagePath(packageId, version);
-            var manifestPath = Path.Combine(GetPackageRoot(packageId, version), packageId + Constants.ManifestExtension);
-            return new ZipPackage(() => _fileSystem.OpenFile(packagePath), () => _fileSystem.OpenFile(manifestPath));
+            var manifestPath = string.Empty;
+            try
+            {
+                var packagePath = GetPackagePath(packageId, version);
+                manifestPath = Path.Combine(GetPackageRoot(packageId, version), packageId + Constants.ManifestExtension);
+                return new ZipPackage(() => _fileSystem.OpenFile(packagePath), () => _fileSystem.OpenFile(manifestPath));
+            }
+            catch (XmlException ex)
+            {
+                _fileSystem.Logger.Log(MessageLevel.Warning, ex.Message);
+            }
+            catch (IOException ex)
+            {
+                _fileSystem.Logger.Log(MessageLevel.Warning, ex.Message);
+            }
+
+            _fileSystem.Logger.Log(MessageLevel.Warning, NuGetResources.Manifest_NotFound, manifestPath);
+            return null;
         }
 
         private static string GetPackagePath(string packageId, SemanticVersion version)
