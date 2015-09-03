@@ -310,7 +310,7 @@ namespace NuGet.Test
             });
 
             // Act
-            var packages = localPackageRepository.FindPackagesById("Foo").ToList();
+            var packages = localPackageRepository.FindPackagesById("FOO").ToList();
 
             // Assert
             Assert.Equal(new[] { foo_20 }, packages);
