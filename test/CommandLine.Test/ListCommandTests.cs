@@ -180,8 +180,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert
             Assert.Equal(5, packages.Count());
-            AssertPackage(new { Id = "jQuery", Ver = "1.44" }, packages.ElementAt(0));
-            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(1));
+            // TODO: Wrong order of packages
+            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(0));
+            AssertPackage(new { Id = "JQuery", Ver = "1.44" }, packages.ElementAt(1));
             AssertPackage(new { Id = "NHibernate", Ver = "1.0" }, packages.ElementAt(2));
             AssertPackage(new { Id = "NHibernate", Ver = "1.1" }, packages.ElementAt(3));
             AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(4));
@@ -365,7 +366,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             multiVersionRepo.AddPackage(PackageUtility.CreatePackage("NHibernate", "1.0"));
             multiVersionRepo.AddPackage(PackageUtility.CreatePackage("NHibernate", "1.1"));
             multiVersionRepo.AddPackage(PackageUtility.CreatePackage("NHibernate", "1.2"));
-            multiVersionRepo.AddPackage(PackageUtility.CreatePackage("jQuery", "1.44"));
+            // different case is intended to test PackageEqualityComparer.Id
+            multiVersionRepo.AddPackage(PackageUtility.CreatePackage("JQuery", "1.44"));
             multiVersionRepo.AddPackage(PackageUtility.CreatePackage("jQuery", "1.50"));
 
             //Setup Factory
