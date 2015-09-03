@@ -259,7 +259,7 @@ namespace NuGet.Test
         [Fact]
         public void FindPackagesByIdFindsPackagesWithSpecifiedId()
         {
-            // Arramge
+            // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(PathFixUtility.FixPath(@"Foo.1.0\Foo.1.0.nupkg"));
             fileSystem.AddFile(PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"));
@@ -267,23 +267,53 @@ namespace NuGet.Test
             var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
 
             var package_dictionary = new Dictionary<String, IPackage>
-			{
-				{ PathFixUtility.FixPath(@"Foo.1.0\Foo.1.0.nupkg"), foo_10},
-				{ PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"), foo_20}
-			};
+            {
+              { PathFixUtility.FixPath(@"Foo.1.0\Foo.1.0.nupkg"), foo_10},
+              { PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"), foo_20}
+            };
 
             var localPackageRepository = new MockLocalRepository(fileSystem, path =>
-                {
-                    IPackage retval;
-                    package_dictionary.TryGetValue(path, out retval);
-                    return retval;
-                });
+            {
+                IPackage retval;
+                package_dictionary.TryGetValue(path, out retval);
+                return retval;
+            });
 
             // Act
             var packages = localPackageRepository.FindPackagesById("Foo").ToList();
 
             // Assert
             Assert.Equal(new[] { foo_10, foo_20 }, packages);
+        }
+
+        [Fact]
+        public void FindPackagesByIdFindsPackagesWithSpecifiedIdCaseInsensitive()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(PathFixUtility.FixPath(@"FOO.2.0.0\FOO.2.0.0.nuspec"));
+            fileSystem.AddFile(PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"));
+            var FOO_20 = PackageUtility.CreatePackage("FOO", "2.0.0");
+            var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
+
+            var package_dictionary = new Dictionary<String, IPackage>
+            {
+              { PathFixUtility.FixPath(@"FOO.2.0.0\FOO.2.0.0.nuspec"), FOO_20},
+              { PathFixUtility.FixPath(@"Foo.2.0.0\Foo.2.0.0.nupkg"), foo_20}
+            };
+
+            var localPackageRepository = new MockLocalRepository(fileSystem, path =>
+            {
+                IPackage retval;
+                package_dictionary.TryGetValue(path, out retval);
+                return retval;
+            });
+
+            // Act
+            var packages = localPackageRepository.FindPackagesById("Foo").ToList();
+
+            // Assert
+            Assert.Equal(new[] { foo_20 }, packages);
         }
 
         [Fact]
