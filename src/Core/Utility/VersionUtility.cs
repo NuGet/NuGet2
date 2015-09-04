@@ -124,6 +124,8 @@ namespace NuGet
             { "Xamarin.PlayStationVita", "Xamarin.PlayStationVita" },
             { "XamarinPlayStationVita", "Xamarin.PlayStationVita" },
             { "XamarinPSVita", "Xamarin.PlayStationVita" },
+            { "Xamarin.WatchOS", "Xamarin.WatchOS" },
+            { "XamarinWatchOS", "Xamarin.WatchOS" },
             { "Xamarin.XboxThreeSixty", "Xamarin.Xbox360" },
             { "XamarinXboxThreeSixty", "Xamarin.Xbox360" },
             { "Xamarin.XboxOne", "Xamarin.XboxOne" },
@@ -158,6 +160,7 @@ namespace NuGet
             { "Xamarin.PlayStation3", "xamarinpsthree" },
             { "Xamarin.PlayStation4", "xamarinpsfour" },
             { "Xamarin.PlayStationVita", "xamarinpsvita" },
+            { "Xamarin.WatchOS", "xamarinwatchos" },
             { "Xamarin.Xbox360", "xamarinxboxthreesixty" },
             { "Xamarin.XboxOne", "xamarinxboxone" },
         };

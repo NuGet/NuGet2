@@ -415,6 +415,8 @@ namespace NuGet.Test
         [InlineData(new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
+        [InlineData(new[] { "XamarinWatchOS", "xamarinwatchos", "XAMARINWATCHOS " }, "0.0", "Xamarin.WatchOS")]
+        [InlineData(new[] { "Xamarin.WatchOS", "xamarin.watchos", "XAMARIN.WATCHOS " }, "0.0", "Xamarin.WatchOS")]
         [InlineData(new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
         [InlineData(new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
         [InlineData(new[] { "XamarinXboxOne", "xamarinxboxone", "XAMARINXBOXONE " }, "0.0", "Xamarin.XboxOne")]
@@ -1455,6 +1457,7 @@ namespace NuGet.Test
         [InlineData("Xamarin.PlayStation3, Version=v1.0", "xamarinpsthree10")]
         [InlineData("Xamarin.PlayStation4, Version=v1.0", "xamarinpsfour10")]
         [InlineData("Xamarin.PlayStationVita, Version=v1.0", "xamarinpsvita10")]
+        [InlineData("Xamarin.WatchOS, Version=v1.0", "xamarinwatchos10")]
         [InlineData("Xamarin.Xbox360, Version=v1.0", "xamarinxboxthreesixty10")]
         [InlineData("Xamarin.XboxOne, Version=v1.0", "xamarinxboxone10")]
         public void GetShortNameForXamarinFrameworks(string frameworkIdentifier, string expectedShortName)
@@ -1470,6 +1473,7 @@ namespace NuGet.Test
         [InlineData(".NETPortable, Version=4.0, Profile=Profile1", "portable-net45+xamarinmac10+xamarinios10")]
         [InlineData(".NETPortable, Version=4.0, Profile=Profile2", "portable-net40+win+xamarinpsthree10+xamarinpsfour10+xamarinpsvita10")]
         [InlineData(".NETPortable, Version=4.0, Profile=Profile3", "portable-net40+xamarinxboxthreesixty10+xamarinxboxone10")]
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile4", "portable-net40+xamarinios10+xamarinwatchos10")]
         public void TestGetShortNameForPortableXamarinFrameworks(string frameworkIdentifier, string expectedShortName)
         {
             // Arrange
@@ -1500,9 +1504,18 @@ namespace NuGet.Test
                            new FrameworkName("Xamarin.XboxOne, Version=1.0"), 
                       });
 
+            var profile4 = new NetPortableProfile(
+                "Profile4",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Xamarin.iOS, Version=1.0"), 
+                           new FrameworkName("Xamarin.WatchOS, Version=1.0"), 
+                       });
+
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
             profileCollection.Add(profile3);
+            profileCollection.Add(profile4);
 
             NetPortableProfileTable.Profiles = profileCollection;
 
