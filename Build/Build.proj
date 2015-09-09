@@ -52,19 +52,16 @@
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>8</MinorVersion>
-        <Patch>8</Patch>
+        <MinorVersion>9</MinorVersion>
+        <Patch>0</Patch>
+        <Revision>$(BUILD_NUMBER)</Revision>
+
+        <!-- This is the file version of the DLLs/EXE produced -->
+        <Version>$(MajorVersion).$(MinorVersion).$(Patch).$(Revision)</Version>
+
         <PrereleaseTag Condition=" '$(PrereleaseTag)' == '' "></PrereleaseTag>
 
-        <!-- Ensure that we come up with a new version every 65535 years -->
-        <VersionStartYear>2010</VersionStartYear>
-
-        <!-- Build number is of the format (CurrentYear - VersionStartYear + 1)(2 digit month)(2 digit day) -->
-        <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
-        <Revision>$(BUILD_NUMBER)</Revision>
-        <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-
-	    <!-- This is the version number of nupkg files produced -->
+        <!-- This is the version number of nupkg files produced. It's also the version of the vsix -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
         <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
@@ -78,7 +75,7 @@
     <ItemGroup>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
-            <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
+            <ReplaceWith><![CDATA[<Version>$(PackageVersion)</Version>]]></ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<AllUsers>false</AllUsers>]]></Find>
@@ -113,7 +110,7 @@
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio11.Test\VisualStudio11.Test.csproj" 
-		      Condition="'$(MonoBuild)' == '' and $(VisualStudioVersion) != '10.0'" />
+                      Condition="'$(MonoBuild)' == '' and $(VisualStudioVersion) != '10.0'" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
@@ -143,6 +140,8 @@
             Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\[v10.0|v11.0|v12.0|v14.0]\CodeAnalysis\fxcoptask.dll. Cannot proceed." />
     </Target>
 
+    <!-- Task to update the vsix and DLLs/EXE. This task is run only when BUILD_NUMBER exists, which is
+         the case on CI. -->
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
         <RegexTransform Items="@(RegexTransform)" />
     </Target>
