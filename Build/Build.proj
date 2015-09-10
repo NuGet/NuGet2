@@ -56,12 +56,12 @@
         <Patch>0</Patch>
         <Revision>$(BUILD_NUMBER)</Revision>
 
-        <!-- This is the file version of the DLLs/EXE produced -->
+        <!-- This is the file version of the DLLs/EXE produced. It's also the version of the vsix -->
         <Version>$(MajorVersion).$(MinorVersion).$(Patch).$(Revision)</Version>
 
         <PrereleaseTag Condition=" '$(PrereleaseTag)' == '' "></PrereleaseTag>
 
-        <!-- This is the version number of nupkg files produced. It's also the version of the vsix -->
+        <!-- This is the version number of nupkg files produced. vsix -->
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
         <PackageVersion Condition="'$(PrereleaseTag)' != ''">$(PackageVersion)-$(PrereleaseTag)</PackageVersion>
     </PropertyGroup>
@@ -75,7 +75,7 @@
     <ItemGroup>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
-            <ReplaceWith><![CDATA[<Version>$(PackageVersion)</Version>]]></ReplaceWith>
+            <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\*.vsixmanifest">
             <Find><![CDATA[<AllUsers>false</AllUsers>]]></Find>
