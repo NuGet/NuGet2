@@ -6,8 +6,8 @@
         <description>$description$</description>
         <authors>.NET Foundation</authors>
         <owners>$author$</owners>
-        <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
-        <projectUrl>http://nuget.codeplex.com</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/NuGet/NuGet2/master/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/NuGet/NuGet2</projectUrl>
         <copyright>$copyright$</copyright>
         <frameworkAssemblies>
           <frameworkAssembly assemblyName="System.ServiceModel" />
