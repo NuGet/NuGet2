@@ -11,6 +11,8 @@ namespace NuGet.VisualStudio
         internal const string FsharpProjectTypeGuid = "{F2A71F9B-5D33-465A-A702-920D77279786}";
         internal const string JsProjectTypeGuid = "{262852C6-CD72-467D-83FE-5EEB1973A190}";
         internal const string CpsProjectTypeGuid = "{13B669BE-BB05-4DDF-9536-439F39A36129}";
+        internal const string SharedProjectTypeGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
+
         internal const string WixProjectTypeGuid = "{930C7802-8A8C-48F9-8165-68863BCCD9DD}";
         internal const string LightSwitchProjectTypeGuid = "{ECD6D718-D1CF-4119-97F3-97C25A0DFBF9}";
         internal const string NemerleProjectTypeGuid = "{edcc3b85-0bad-11db-bc1a-00112fde8b61}";

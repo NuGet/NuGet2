@@ -26,6 +26,7 @@ namespace NuGet.VisualStudio
             VsConstants.CppProjectTypeGuid,
             VsConstants.JsProjectTypeGuid,
             VsConstants.CpsProjectTypeGuid,
+            VsConstants.SharedProjectTypeGuid,
             VsConstants.FsharpProjectTypeGuid,
             VsConstants.NemerleProjectTypeGuid,
             VsConstants.WixProjectTypeGuid,
@@ -101,7 +102,7 @@ namespace NuGet.VisualStudio
                 return true;
             }
 
-            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind) && !project.IsSharedProject();
+            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
         }
 
         public static T GetPropertyValue<T>(Project project, string propertyName)
