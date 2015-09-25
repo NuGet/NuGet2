@@ -36,13 +36,13 @@
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)'=='14.0'">
-	  <ItemGroup>
-	    <Reference Include="Microsoft.VisualStudio.ProjectSystem.Interop">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.ProjectSystem.Interop">
           <HintPath>..\..\lib\Microsoft.VisualStudio.ProjectSystem.Interop.dll</HintPath>
           <EmbedInteropTypes>True</EmbedInteropTypes>
         </Reference>
-	  </ItemGroup>
-	</When>
+      </ItemGroup>
+    </When>
   </Choose>
   <ItemGroup>
     <Compile Include="..\..\Common\CommonResources.cs">
@@ -64,6 +64,7 @@
     <Compile Include="Analysis\Rules\MisplacedScriptFileRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedTransformFileRule.cs" />
     <Compile Include="Analysis\Rules\MissingSummaryRule.cs" />
+    <Compile Include="Analysis\Rules\SpecialVersionLengthRule.cs" />
     <Compile Include="Analysis\Rules\WinRTNameIsObsoleteRule.cs" />
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
