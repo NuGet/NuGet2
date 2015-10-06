@@ -149,7 +149,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void LoadPortableProfileWithXamarintvOSAsSupportedFramework()
+        public void LoadPortableProfileWithXamarinTVOSAsSupportedFramework()
         {
             // Arrange
             string content1 = @"
@@ -161,9 +161,9 @@ namespace NuGet.Test
 
             string content2 = @"
 <Framework
-    Identifier=""Xamarin.tvOS""
+    Identifier=""Xamarin.TVOS""
     MinimumVersion=""1.0""
-    DisplayName=""Xamarin.tvOS"" />";
+    DisplayName=""Xamarin.TVOS"" />";
 
             var mockFileSystem = new MockFileSystem();
             mockFileSystem.AddFile("frameworkFile1.xml", content1);
@@ -179,7 +179,7 @@ namespace NuGet.Test
             Assert.True(netPortableProfile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
 
             Assert.True(netPortableProfile.OptionalFrameworks.Count == 1);
-            Assert.True(netPortableProfile.OptionalFrameworks.Contains(new FrameworkName("Xamarin.tvOS, Version=1.0")));
+            Assert.True(netPortableProfile.OptionalFrameworks.Contains(new FrameworkName("Xamarin.TVOS, Version=1.0")));
         }
     }
 }

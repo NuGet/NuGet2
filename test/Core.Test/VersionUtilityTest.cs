@@ -415,8 +415,8 @@ namespace NuGet.Test
         [InlineData(new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
-        [InlineData(new[] { "XamarinTVOS", "xamarintvos", "XAMARINTVOS " }, "0.0", "Xamarin.tvOS")]
-        [InlineData(new[] { "Xamarin.tvOS", "xamarin.tvos", "XAMARIN.TVOS " }, "0.0", "Xamarin.tvOS")]
+        [InlineData(new[] { "XamarinTVOS", "xamarintvos", "XAMARINTVOS " }, "0.0", "Xamarin.TVOS")]
+        [InlineData(new[] { "Xamarin.TVOS", "xamarin.tvos", "XAMARIN.TVOS " }, "0.0", "Xamarin.TVOS")]
         [InlineData(new[] { "XamarinWatchOS", "xamarinwatchos", "XAMARINWATCHOS " }, "0.0", "Xamarin.WatchOS")]
         [InlineData(new[] { "Xamarin.WatchOS", "xamarin.watchos", "XAMARIN.WATCHOS " }, "0.0", "Xamarin.WatchOS")]
         [InlineData(new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
@@ -1459,7 +1459,7 @@ namespace NuGet.Test
         [InlineData("Xamarin.PlayStation3, Version=v1.0", "xamarinpsthree10")]
         [InlineData("Xamarin.PlayStation4, Version=v1.0", "xamarinpsfour10")]
         [InlineData("Xamarin.PlayStationVita, Version=v1.0", "xamarinpsvita10")]
-        [InlineData("Xamarin.tvOS, Version=v1.0", "xamarintvos10")]
+        [InlineData("Xamarin.TVOS, Version=v1.0", "xamarintvos10")]
         [InlineData("Xamarin.WatchOS, Version=v1.0", "xamarinwatchos10")]
         [InlineData("Xamarin.Xbox360, Version=v1.0", "xamarinxboxthreesixty10")]
         [InlineData("Xamarin.XboxOne, Version=v1.0", "xamarinxboxone10")]
@@ -1521,7 +1521,7 @@ namespace NuGet.Test
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.0"), 
                            new FrameworkName("Xamarin.iOS, Version=1.0"), 
-                           new FrameworkName("Xamarin.tvOS, Version=1.0"), 
+                           new FrameworkName("Xamarin.TVOS, Version=1.0"), 
                        });
 
             profileCollection.Add(profile1);
