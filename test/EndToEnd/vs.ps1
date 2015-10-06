@@ -244,6 +244,34 @@ function New-PortableLibrary
     $project
 }
 
+function New-PCLLibrary 
+{
+	param(
+        [string]$ProjectName,
+        [string]$Profile = $null,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try
+    {
+        $project = New-Project PortableLib $ProjectName $SolutionFolder
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
+
+    if ($Profile) 
+    {
+        $name = $project.Name
+        $project.Properties.Item("TargetFrameworkMoniker").Value = ".NETPortable,Version=v4.0,Profile=$Profile"
+        $project = Get-Project -Name $name
+    }
+
+    $project
+}
+
 function New-JavaScriptApplication 
 {
     param(
