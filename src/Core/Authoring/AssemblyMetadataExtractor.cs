@@ -59,11 +59,11 @@ namespace NuGet
 
                 public Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
                 {
-                    var name = new AssemblyName(args.Name);
+                    var name = new AssemblyName(AppDomain.CurrentDomain.ApplyPolicy(args.Name));
                     var assemblyPath = Path.Combine(_lookupPath, name.Name + ".dll");
                     return File.Exists(assemblyPath) ? 
                         Assembly.ReflectionOnlyLoadFrom(assemblyPath) : // load from same folder as parent assembly
-                        Assembly.ReflectionOnlyLoad(args.Name);         // load from GAC
+                        Assembly.ReflectionOnlyLoad(name.FullName);     // load from GAC
                 }
             }
 
