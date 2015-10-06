@@ -307,7 +307,8 @@ namespace NuGet
                 ValidatePortableFrameworkProfilePart(profilePart);
             }
 
-            return new FrameworkName(identifierPart, version, profilePart);
+            var resultingFrameworkName = new FrameworkName(identifierPart, version, profilePart);
+            return NormalizeFrameworkName(resultingFrameworkName);
         }
 
         internal static void ValidatePortableFrameworkProfilePart(string profilePart)
@@ -583,17 +584,7 @@ namespace NuGet
                 throw new ArgumentNullException("frameworkName");
             }
 
-            // Do a reverse lookup in _frameworkNameAlias. This is so that we can produce the more user-friendly
-            // "windowsphone" string, rather than "sl3-wp". The latter one is also prohibited in portable framework's profile string.
-            foreach (KeyValuePair<FrameworkName, FrameworkName> pair in _frameworkNameAlias)
-            {
-                // use our custom equality comparer because we want to perform case-insensitive comparison
-                if (FrameworkNameEqualityComparer.Default.Equals(pair.Value, frameworkName))
-                {
-                    frameworkName = pair.Key;
-                    break;
-                }
-            }
+            frameworkName = SearchFrameworkNameAlias(frameworkName);
 
             string name;
             if (!_identifierToFrameworkFolder.TryGetValue(frameworkName.Identifier, out name))
@@ -640,6 +631,22 @@ namespace NuGet
             }
 
             return name + "-" + profile;
+        }
+
+        private static FrameworkName SearchFrameworkNameAlias(FrameworkName frameworkName)
+        {
+            // Do a reverse lookup in _frameworkNameAlias. This is so that we can produce the more user-friendly
+            // "windowsphone" string, rather than "sl3-wp". The latter one is also prohibited in portable framework's profile string.
+            foreach (KeyValuePair<FrameworkName, FrameworkName> pair in _frameworkNameAlias)
+            {
+                // use our custom equality comparer because we want to perform case-insensitive comparison
+                if (FrameworkNameEqualityComparer.Default.Equals(pair.Value, frameworkName))
+                {
+                    frameworkName = pair.Key;
+                    break;
+                }
+            }
+            return frameworkName;
         }
 
         public static string GetTargetFrameworkLogString(FrameworkName targetFramework)

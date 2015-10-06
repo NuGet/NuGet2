@@ -1323,6 +1323,20 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void TestParsesWinShortNameAsNetCore45()
+        {
+            // https://github.com/NuGet/NuGetGallery/issues/2719
+
+            // Act
+            var framework = VersionUtility.ParseFrameworkName("win");
+
+            // Assert
+            Assert.Equal(".NETCore,Version=v4.5", framework.FullName);
+            Assert.Equal(".NETCore", framework.Identifier);
+            Assert.Equal(Version.Parse("4.5"), framework.Version);
+        }
+
+        [Fact]
         public void GetShortNameDoesNotIncludeVersionIfVersionIs00()
         {
             // Act
