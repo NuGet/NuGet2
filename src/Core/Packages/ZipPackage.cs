@@ -101,7 +101,8 @@ namespace NuGet
             {
                 var package = Package.Open(stream);
 
-                foreach (var part in package.GetParts().Where(IsPackageFile))
+                foreach (var part in package.GetParts()
+                    .Where(p => IsPackageFile(p, package.PackageProperties.Identifier)))
                 {
                     var relativePath = UriUtility.GetPath(part.Uri);
 
@@ -130,7 +131,7 @@ namespace NuGet
 
                     string effectivePath;
                     fileFrameworks = from part in package.GetParts()
-                                     where IsPackageFile(part)
+                                     where IsPackageFile(part, Id)
                                      select VersionUtility.ParseFrameworkNameFromFilePath(UriUtility.GetPath(part.Uri), out effectivePath);
 
                 }
@@ -175,7 +176,7 @@ namespace NuGet
                 Package package = Package.Open(stream);
 
                 return (from part in package.GetParts()
-                        where IsPackageFile(part)
+                        where IsPackageFile(part, package.PackageProperties.Identifier)
                         select (IPackageFile)new ZipPackageFile(part)).ToList();
             }
         }
@@ -219,14 +220,14 @@ namespace NuGet
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
         }
 
-        internal static bool IsPackageFile(PackagePart part)
+        internal static bool IsPackageFile(PackagePart part, string packageId)
         {
             string path = UriUtility.GetPath(part.Uri);
             string directory = Path.GetDirectoryName(path);
 
-            // We exclude any opc files and the manifest file (.nuspec)
+            // We exclude any opc files and the auto-generated package manifest file ({packageId}.nuspec)
             return !ExcludePaths.Any(p => directory.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
-                   !PackageHelper.IsManifest(path);
+                   !PackageHelper.IsPackageManifest(path, packageId);
         }
 
         internal static void ClearCache(IPackage package)
