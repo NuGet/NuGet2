@@ -517,7 +517,7 @@ namespace NuGet
 
         private static void CreatePart(Package package, string path, Stream sourceStream)
         {
-            if (PackageHelper.IsManifest(path))
+            if (PackageHelper.IsManifest(path, package.PackageProperties.Identifier, package.PackageProperties.Version))
             {
                 return;
             }
