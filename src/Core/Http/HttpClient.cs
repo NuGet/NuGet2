@@ -182,7 +182,7 @@ namespace NuGet
                                 targetStream.Write(buffer, 0, bytesRead);
 
                                 totalReadSoFar += bytesRead;
-                                OnProgressAvailable((totalReadSoFar * 100) / length);
+                                OnProgressAvailable((int)(((long)totalReadSoFar * 100) / length)); // avoid 32 bit overflow by calculating * 100 with 64 bit
                             }
                         }
                     }
