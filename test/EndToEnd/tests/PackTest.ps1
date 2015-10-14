@@ -85,6 +85,23 @@ function Test-PackFromProjectWithDevelopmentDependencySet {
     
 }
 
+function Test-PackPCLProject 
+{
+	param(
+        $context
+    )
+
+	# Arrange
+	$p = New-PCLLibrary
+	
+	# Act 
+	$projFile = Write-Output $p.FullName
+	$output = Invoke-Expression "& `"$nugetExePath`" pack $projFile -build 2>&1"
+
+	# Assert
+	Assert-Null($output -Match "WARNING: Unable to extract metadata")
+}
+
 function NoTest-PackFromProjectUsesInstalledPackagesAsDependencies {
     param(
         $context
