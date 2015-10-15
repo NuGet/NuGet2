@@ -23,6 +23,14 @@
         <xs:attribute name="file" type="xs:string" use="required" />
     </xs:complexType>
 
+    <xs:complexType name="sharedFiles">
+      <xs:attribute name="include" type="xs:string" use="required" />
+      <xs:attribute name="exclude" type="xs:string" use="optional" />
+      <xs:attribute name="buildAction" type="xs:string" use="optional" />
+      <xs:attribute name="copyToOutput" type="xs:boolean" use="optional" />
+      <xs:attribute name="flatten" type="xs:boolean" use="optional" />
+    </xs:complexType>
+
     <xs:complexType name="referenceGroup">
         <xs:sequence>
             <xs:element name="reference" minOccurs="1" maxOccurs="unbounded" type="reference">
@@ -85,6 +93,15 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
+                          <xs:element name="shared" maxOccurs="1" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                  <xs:element name="files" type="sharedFiles" />
+                                </xs:choice>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
                         </xs:all>
                         <xs:attribute name="minClientVersion" use="optional" type="xs:string" />
                     </xs:complexType>
