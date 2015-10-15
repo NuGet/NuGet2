@@ -98,7 +98,7 @@ namespace NuGet.ServerExtensions
             int countMirrored = 0;
             foreach (var p in packagesToMirror)
             {
-                if (TargetRepository.Exists(package))
+                if (TargetRepository.Exists(p))
                 {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyPresent, p.GetFullName(), TargetRepository.Source);
                 }
