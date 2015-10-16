@@ -173,6 +173,11 @@ namespace NuGet.Commands
 
             ProcessDependencies(builder);
 
+            if (IncludeSymbols)
+            {
+                AddMissingSourceFilesReferencedByPdb(builder);
+            }
+
             // Set defaults if some required fields are missing
             if (String.IsNullOrEmpty(builder.Description))
             {
@@ -1093,5 +1098,58 @@ namespace NuGet.Commands
                 }
             }
         }
+
+        private void AddMissingSourceFilesReferencedByPdb(PackageBuilder builder)
+        {
+            // We build a new symbol package from physical files, so it's safe to cast here (we need the SourcePath property).
+            var packageFiles = builder.Files.OfType<PhysicalPackageFile>().ToArray();
+
+            var pdbFiles = packageFiles.Where(file => file.Path.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase));
+            var missingFiles = pdbFiles.SelectMany(pdbFile => GetMissingSourceFilesReferencedByPdb(pdbFile, packageFiles));
+
+            foreach (var file in missingFiles)
+            {
+                AddFileToBuilder(builder, file);
+            }
+        }
+
+        private IEnumerable<PhysicalPackageFile> GetMissingSourceFilesReferencedByPdb(IPackageFile pdbFile, IEnumerable<PhysicalPackageFile> packageFiles)
+        {
+            try
+            {
+                var sourceFiles = PdbHelper.GetSourceFileNames(pdbFile);
+                var missingFiles = sourceFiles.Except(packageFiles.Select(file => file.SourcePath), StringComparer.OrdinalIgnoreCase);
+
+                return missingFiles.Select(CreatePackageFileFromSourceFile).Where(file => file != null);
+            }
+            catch
+            {
+                // Not a pdb file or file is corrupt.
+            }
+
+            return Enumerable.Empty<PhysicalPackageFile>();
+        }
+
+        private PhysicalPackageFile CreatePackageFileFromSourceFile(string file)
+        {
+            var targetFilePath = Normalize(file);
+
+            if (!File.Exists(file))
+            {
+                Logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("Warning_FileDoesNotExist"), targetFilePath);
+                return null;
+            }
+
+            var projectName = Path.GetFileNameWithoutExtension(_project.FullPath);
+
+            // if IncludeReferencedProjects is true and we are adding source files,
+            // add projectName as part of the target to avoid file conflicts.
+            var targetPath = IncludeReferencedProjects
+                ? Path.Combine(SourcesFolder, projectName, targetFilePath)
+                : Path.Combine(SourcesFolder, targetFilePath);
+
+            return new PhysicalPackageFile { SourcePath = file, TargetPath = targetPath };
+        }
     }
 }
+

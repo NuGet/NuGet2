@@ -1,0 +1,17 @@
+﻿{
+  "dependencies": {
+    "Microsoft.DiaSymReader.Native": "1.1.0-alpha2",
+    "Microsoft.DiaSymReader": "1.0.5.1"
+  },
+
+  "frameworks": {
+    "net45": { }
+  },
+
+  "runtimes": {
+     "win7-x86": { }, 
+     "win7-x64": { }, 
+     "win8-x86": { }, 
+     "win8-x64": { }
+  }
+}
