@@ -3,6 +3,7 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)'==''">$(UserProfile)\.nuget\packages</NuGetPackageRoot>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -30,6 +31,9 @@
     <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.DiaSymReader">
+      <HintPath>$(NuGetPackageRoot)\Microsoft.DiaSymReader\1.0.5.1\lib\portable-net45+win8\Microsoft.DiaSymReader.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.XmlTransform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.Web.XmlTransform.dll</HintPath>
@@ -58,6 +62,7 @@
       <DependentUpon>HelpCommandMarkdownTemplate.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
+    <Compile Include="Commands\PdbHelper.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
@@ -126,6 +131,16 @@
     <Compile Include="StrictSemanticVersionValidationRule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.1.0-alpha2\runtimes\win\native\Microsoft.DiaSymReader.Native.x86.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.1.0-alpha2\runtimes\win\native\Microsoft.DiaSymReader.Native.amd64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
       <SubType>Designer</SubType>
@@ -153,6 +168,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Project.json" />
     <None Include="Properties\NuGet.CommandLine.nuspec" />
   </ItemGroup>
   <ItemGroup>
