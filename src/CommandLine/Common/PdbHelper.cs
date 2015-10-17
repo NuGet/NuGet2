@@ -204,6 +204,9 @@ namespace NuGet.Common
 
         private static string ToString(char[] buffer)
         {
+            if (buffer.Length == 0)
+                return string.Empty;
+
             Debug.Assert(buffer[buffer.Length - 1] == 0);
             return new string(buffer, 0, buffer.Length - 1);
         }
@@ -222,9 +225,7 @@ namespace NuGet.Common
             var hr = getter(entity, 0, out count, null);
             ThrowExceptionForHR(hr);
             if (count == 0)
-            {
-                return null;
-            }
+                return new TItem[0];
 
             var result = new TItem[count];
             hr = getter(entity, count, out count, result);
