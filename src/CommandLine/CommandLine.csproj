@@ -32,7 +32,7 @@
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.DiaSymReader">
-      <HintPath>$(NuGetPackageRoot)\Microsoft.DiaSymReader\1.0.5.1\lib\portable-net45+win8\Microsoft.DiaSymReader.dll</HintPath>
+      <HintPath>$(NuGetPackageRoot)\Microsoft.DiaSymReader\1.0.6\lib\portable-net45+win8\Microsoft.DiaSymReader.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.XmlTransform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -131,11 +131,11 @@
     <Compile Include="StrictSemanticVersionValidationRule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.1.0-alpha2\runtimes\win\native\Microsoft.DiaSymReader.Native.x86.dll">
+    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.2.0-rc\runtimes\win\native\Microsoft.DiaSymReader.Native.x86.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.1.0-alpha2\runtimes\win\native\Microsoft.DiaSymReader.Native.amd64.dll">
+    <Content Include="$(NuGetPackageRoot)\Microsoft.DiaSymReader.Native\1.2.0-rc\runtimes\win\native\Microsoft.DiaSymReader.Native.amd64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
