@@ -1122,9 +1122,9 @@ namespace NuGet.Commands
 
                 return missingFiles.Select(CreatePackageFileFromSourceFile).Where(file => file != null);
             }
-            catch
+            catch (Exception ex)
             {
-                // Not a pdb file or file is corrupt.
+                _logger.Log(MessageLevel.Warning, "{0} seems to be not a valid pdb file ({1})", pdbFile.Path, ex.Message);
             }
 
             return Enumerable.Empty<PhysicalPackageFile>();
