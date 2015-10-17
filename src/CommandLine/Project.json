@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "Microsoft.DiaSymReader.Native": "1.1.0-alpha2",
-    "Microsoft.DiaSymReader": "1.0.5.1"
+    "Microsoft.DiaSymReader.Native": "1.2.0-rc",
+    "Microsoft.DiaSymReader": "1.0.6"
   },
 
   "frameworks": {
