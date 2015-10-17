@@ -62,7 +62,7 @@
       <DependentUpon>HelpCommandMarkdownTemplate.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
-    <Compile Include="Commands\PdbHelper.cs" />
+    <Compile Include="Common\PdbHelper.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
     <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />

@@ -1,4 +1,4 @@
-namespace NuGet.Commands
+namespace NuGet.Common
 {
     using System;
     using System.Collections.Generic;
