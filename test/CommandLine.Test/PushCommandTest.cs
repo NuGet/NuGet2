@@ -38,7 +38,7 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(new object[] { @"X:\test\foobar.symbols.nupkg", @"http://nuget.gw.symbolsource.org/Public/NuGet" })]
+        [InlineData(new object[] { @"X:\test\foobar.symbols.nupkg", @"https://nuget.smbsrc.net/" })]
         [InlineData(new object[] { @"X:\test\foobar.nupkg", @"https://www.nuget.org" })]
         [InlineData(new object[] { @"", @"https://www.nuget.org" })]
         [InlineData(new object[] { @"test.dll", @"https://www.nuget.org" })]
