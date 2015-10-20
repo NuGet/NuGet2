@@ -81,7 +81,6 @@ namespace NuGet.Tools
         private IConsoleStatus _consoleStatus;
         private IVsMonitorSelection _vsMonitorSelection;
         private bool? _isVisualizerSupported;
-        private IPackageRestoreManager _packageRestoreManager;
         private ISolutionManager _solutionManager;
         private IDeleteOnRestartManager _deleteOnRestart;
         private OleMenuCommand _managePackageDialogCommand;
@@ -123,19 +122,6 @@ namespace NuGet.Tools
                 }
 
                 return _consoleStatus;
-            }
-        }
-
-        private IPackageRestoreManager PackageRestoreManager
-        {
-            get
-            {
-                if (_packageRestoreManager == null)
-                {
-                    _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
-                    Debug.Assert(_packageRestoreManager != null);
-                }
-                return _packageRestoreManager;
             }
         }
 
@@ -211,25 +197,6 @@ namespace NuGet.Tools
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
             
-            // when NuGet loads, if the current solution has package 
-            // restore mode enabled, we make sure every thing is set up correctly.
-            // For example, projects which were added outside of VS need to have
-            // the <Import> element added.
-            if (PackageRestoreManager.IsCurrentSolutionEnabledForRestore)
-            {
-                if (VsVersionHelper.IsVisualStudio2013)
-                {
-                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block 
-                    // until this completes.
-                    ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
-                    PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false)));
-                }
-                else
-                {
-                    PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
-                }
-            }
-
             // when NuGet loads, if the current solution has some package 
             // folders marked for deletion (because a previous uninstalltion didn't succeed),
             // delete them now.
@@ -282,11 +249,6 @@ namespace NuGet.Tools
                 CommandID visualizerCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, PkgCmdIDList.cmdIdVisualizer);
                 OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
                 _mcs.AddCommand(visualizerCommand);
-
-                // menu command for Package Restore command
-                CommandID restorePackagesCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidRestorePackages);
-                var restorePackagesCommand = new OleMenuCommand(EnablePackagesRestore, null, QueryStatusEnablePackagesRestore, restorePackagesCommandID);
-                _mcs.AddCommand(restorePackagesCommand);
             }
         }
 
@@ -452,28 +414,6 @@ namespace NuGet.Tools
             return new VS14ManagePackageDialog(project, parameterString);
         }
 #endif
-
-        private void EnablePackagesRestore(object sender, EventArgs args)
-        {
-            if (VsVersionHelper.IsVisualStudio2013)
-            {
-                // This method is called by the UI thread when the user clicks the menu item. To avoid
-                // hangs on CPS project systems this needs to be done on a background thread.
-                ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
-                    _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true)));
-            }
-            else
-            {
-                _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
-            }
-        }
-
-        private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
-        {
-            OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !PackageRestoreManager.IsCurrentSolutionEnabledForRestore;
-            command.Enabled = !ConsoleStatus.IsBusy;
-        }
 
         private void BeforeQueryStatusForPowerConsole(object sender, EventArgs args)
         {
