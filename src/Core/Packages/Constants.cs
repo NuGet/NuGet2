@@ -44,7 +44,7 @@ namespace NuGet
         /// <summary>
         /// Represents the shared directory in the package.
         /// </summary>
-        public static readonly string SharedDirectory = "shared";
+        public static readonly string ContentFilesDirectory = "contentFiles";
 
         public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";

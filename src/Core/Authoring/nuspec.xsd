@@ -23,7 +23,7 @@
         <xs:attribute name="file" type="xs:string" use="required" />
     </xs:complexType>
 
-    <xs:complexType name="sharedFiles">
+    <xs:complexType name="contentFileEntries">
       <xs:attribute name="include" type="xs:string" use="required" />
       <xs:attribute name="exclude" type="xs:string" use="optional" />
       <xs:attribute name="buildAction" type="xs:string" use="optional" />
@@ -93,11 +93,11 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
-                          <xs:element name="shared" maxOccurs="1" minOccurs="0">
+                          <xs:element name="contentFiles" maxOccurs="1" minOccurs="0">
                             <xs:complexType>
                               <xs:sequence>
                                 <xs:choice minOccurs="0" maxOccurs="unbounded">
-                                  <xs:element name="files" type="sharedFiles" />
+                                  <xs:element name="files" type="contentFileEntries" />
                                 </xs:choice>
                               </xs:sequence>
                             </xs:complexType>

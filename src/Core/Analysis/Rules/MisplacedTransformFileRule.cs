@@ -28,7 +28,7 @@ namespace NuGet.Analysis.Rules
                 // if not inside 'content' folder, warn
                 if (!path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, 
                     StringComparison.OrdinalIgnoreCase)
-                    && !path.StartsWith(Constants.SharedDirectory + Path.DirectorySeparatorChar,
+                    && !path.StartsWith(Constants.ContentFilesDirectory + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase))
                 {
                     yield return CreatePackageIssueForMisplacedContent(path);
