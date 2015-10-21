@@ -15,20 +15,13 @@ namespace NuGet
             return Path.GetExtension(path).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool IsManifest(string path, string packageId, string version)
+        public static bool IsPackageManifest(string path, string packageId)
         {
-            if (string.IsNullOrEmpty(packageId))
-            {
-                return IsManifest(path);
-            }
-
-            if (string.IsNullOrEmpty(version))
-            {
-                return path.EndsWith(packageId + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return path.EndsWith(packageId + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(packageId + "." + version + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+            return path.EndsWith(packageId + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+        }
+        public static bool IsUnzippedPackageManifest(string path, string packageId, SemanticVersion packageVersion)
+        {
+            return path.EndsWith(packageId + "." + packageVersion.ToNormalizedString() + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsPackageFile(string path)

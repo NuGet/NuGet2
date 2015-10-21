@@ -253,7 +253,7 @@ namespace NuGet
                 Package package = Package.Open(stream);
                 // unzip files inside package
                 var files = from part in package.GetParts()
-                            where ZipPackage.IsPackageFile(part, package.PackageProperties.Identifier, package.PackageProperties.Version)
+                            where ZipPackage.IsPackageFile(part, package.PackageProperties.Identifier)
                             select part;
 
                 // now copy all package's files to disk

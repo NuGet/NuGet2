@@ -150,7 +150,9 @@ namespace NuGet
         private IEnumerable<string> GetPackageFilePaths()
         {
             return from p in _repositoryFileSystem.GetFiles(_packagePath, "*.*", recursive: true)
-                   where !PackageHelper.IsManifest(p, Id, Version.ToNormalizedString()) && !PackageHelper.IsPackageFile(p)
+                   where !PackageHelper.IsUnzippedPackageManifest(p, Id, Version) 
+                            && !PackageHelper.IsPackageManifest(p, Id) 
+                            && !PackageHelper.IsPackageFile(p)
                    select p;
         }
 
