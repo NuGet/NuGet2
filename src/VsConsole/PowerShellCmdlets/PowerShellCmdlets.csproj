@@ -48,6 +48,8 @@
     <Compile Include="InstallPackageCommand.cs" />
     <Compile Include="JsonApiCommandBase.cs" />
     <Compile Include="NuGetBaseCommand.cs" />
+    <Compile Include="PowerShellCmdletErrorHandler.cs" />
+    <Compile Include="PowerShellCmdletLogger.cs" />
     <Compile Include="NuGetErrorId.cs" />
     <Compile Include="OpenPackagePageCommand.cs" />
     <Compile Include="ProcessPackageBaseCommand.cs" />

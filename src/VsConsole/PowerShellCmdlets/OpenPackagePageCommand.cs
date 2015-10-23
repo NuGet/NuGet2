@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
@@ -88,7 +87,7 @@ namespace NuGet.PowerShell.Commands
                 }
                 else
                 {
-                    WriteError(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_UrlMissing, package));
+                    Logger.Log(MessageLevel.Error, Resources.Cmdlet_UrlMissing, package);
                 }
             }
             else
@@ -96,11 +95,11 @@ namespace NuGet.PowerShell.Commands
                 // show appropriate error message depending on whether Version parameter is set.
                 if (Version == null)
                 {
-                    WriteError(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_PackageIdNotFound, Id));
+                    Logger.Log(MessageLevel.Error, Resources.Cmdlet_PackageIdNotFound, Id);
                 }
                 else
                 {
-                    WriteError(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_PackageIdAndVersionNotFound, Id, Version));
+                    Logger.Log(MessageLevel.Error, Resources.Cmdlet_PackageIdAndVersionNotFound, Id, Version);
                 }
             }
         }

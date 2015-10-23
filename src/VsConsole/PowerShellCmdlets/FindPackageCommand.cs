@@ -30,7 +30,6 @@ namespace NuGet.PowerShell.Commands
                           IHttpClientEvents httpClientEvents)
             : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, httpClientEvents, null)
         {
-
         }
 
         /// <summary>
@@ -39,6 +38,15 @@ namespace NuGet.PowerShell.Commands
         /// </summary>
         [Parameter]
         public SwitchParameter ExactMatch { get; set; }
+
+        protected override ILogger Logger
+        {
+            get
+            {
+                // We don't want this cmdlet to print anything
+                return NullLogger.Instance;
+            }
+        }
 
         protected override void ProcessRecordCore()
         {
@@ -87,11 +95,6 @@ namespace NuGet.PowerShell.Commands
                                    .OrderByDescending(p => p.DownloadCount)
                                    .ThenBy(p => p.Id)
                                    .AsQueryable();
-        }
-
-        protected override void LogCore(MessageLevel level, string formattedMessage)
-        {
-            // We don't want this cmdlet to print anything
         }
     }
 }

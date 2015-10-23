@@ -56,7 +56,7 @@ namespace NuGet.PowerShell.Commands
                 projectManager.WhatIf = WhatIf;
             }
 
-            PackageManager.UninstallPackage(projectManager, Id, Version, Force.IsPresent, RemoveDependencies.IsPresent, this);
+            PackageManager.UninstallPackage(projectManager, Id, Version, Force.IsPresent, RemoveDependencies.IsPresent, Logger);
         }
     }
 }

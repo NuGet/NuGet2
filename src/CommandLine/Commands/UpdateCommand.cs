@@ -8,11 +8,10 @@ namespace NuGet.Commands
 {
     [Command(typeof(NuGetCommand), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution|project>",
         UsageExampleResourceName = "UpdateCommandUsageExamples")]
-    public class UpdateCommand : Command, ILogger
+    public class UpdateCommand : Command
     {
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
-        private bool _overwriteAll, _ignoreAll;
 
         [Option(typeof(NuGetCommand), "UpdateCommandSourceDescription")]
         public ICollection<string> Source
@@ -317,7 +316,8 @@ namespace NuGet.Commands
                 PackageExtractor.InstallPackage(packageManager, eventArgs.Package);
             };
 
-            projectManager.Logger = project.Logger = this;
+            var logger = new UpdateCommandLogger(Console, FileConflictAction, Verbose);
+            projectManager.Logger = project.Logger = logger;
 
             foreach (var package in GetPackages(localRepository))
             {
@@ -375,40 +375,6 @@ namespace NuGet.Commands
             }
             var packageSorter = new PackageSorter(targetFramework: null);
             return packageSorter.GetPackagesByDependencyOrder(new ReadOnlyPackageRepository(packages)).Reverse();
-        }
-
-        public void Log(MessageLevel level, string message, params object[] args)
-        {
-            if (Verbose && Console != null)
-            {
-                Console.Log(level, message, args);
-            }
-        }
-
-        public FileConflictResolution ResolveFileConflict(string message)
-        {
-            // the -FileConflictAction is set to Overwrite or user has chosen Overwrite All previously
-            if (FileConflictAction == FileConflictAction.Overwrite || _overwriteAll)
-            {
-                return FileConflictResolution.Overwrite;
-            }
-
-            // the -FileConflictAction is set to Ignore or user has chosen Ignore All previously
-            if (FileConflictAction == FileConflictAction.Ignore || _ignoreAll)
-            {
-                return FileConflictResolution.Ignore;
-            }
-
-            // otherwise, prompt user for choice, unless we're in non-interactive mode
-            if (Console != null && !Console.IsNonInteractive)
-            {
-                var resolution = Console.ResolveFileConflict(message);
-                _overwriteAll = (resolution == FileConflictResolution.OverwriteAll);
-                _ignoreAll = (resolution == FileConflictResolution.IgnoreAll);
-                return resolution;
-            }
-
-            return FileConflictResolution.Ignore;
         }
     }
 }

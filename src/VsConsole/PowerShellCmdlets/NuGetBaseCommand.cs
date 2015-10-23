@@ -1,22 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Host;
 using EnvDTE;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.PowerShell.Commands
 {
     /// <summary>
     /// This is the base class for all NuGet cmdlets.
     /// </summary>
-    public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler
+    public abstract class NuGetBaseCommand : PSCmdlet
     {
         // User Agent. Do NOT localize
         private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
@@ -28,14 +24,29 @@ namespace NuGet.PowerShell.Commands
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
         private readonly IHttpClientEvents _httpClientEvents;
-        private bool _overwriteAll, _ignoreAll;
+        private readonly IErrorHandler _errorHandler;
+        private ILogger _logger;
 
-        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IHttpClientEvents httpClientEvents)
+        protected NuGetBaseCommand(
+            ISolutionManager solutionManager, 
+            IVsPackageManagerFactory vsPackageManagerFactory, 
+            IHttpClientEvents httpClientEvents)
         {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
             _httpClientEvents = httpClientEvents;
+            _errorHandler = new PowerShellCmdletErrorHandler(this);
         }
+        
+        protected virtual ILogger Logger
+        {
+            get
+            {
+                return _logger ?? (_logger = new PowerShellCmdletLogger(this, ErrorHandler));
+            }
+        }
+
+        protected IErrorHandler ErrorHandler { get { return _errorHandler; } }
 
         protected string DefaultUserAgent
         {
@@ -55,14 +66,6 @@ namespace NuGet.PowerShell.Commands
                 }
 
                 return _progressRecordCache;
-            }
-        }
-
-        protected IErrorHandler ErrorHandler
-        {
-            get
-            {
-                return this;
             }
         }
 
@@ -124,7 +127,7 @@ namespace NuGet.PowerShell.Commands
             catch (Exception ex)
             {
                 // unhandled exceptions should be terminating
-                ErrorHandler.HandleException(ex, terminating: true);
+                _errorHandler.HandleException(ex, terminating: true);
             }
             finally
             {
@@ -142,13 +145,7 @@ namespace NuGet.PowerShell.Commands
         /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuGetBaseCmdlet.
         /// </summary>
         protected abstract void ProcessRecordCore();
-
-        public void Log(MessageLevel level, string message, params object[] args)
-        {
-            string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
-            LogCore(level, formattedMessage);
-        }
-
+        
         internal void Execute()
         {
             BeginProcessing();
@@ -168,9 +165,7 @@ namespace NuGet.PowerShell.Commands
         {
             UnsubscribeEvents();
         }
-
         
-
         protected void SubscribeToProgressEvents()
         {
             if (!IsSyncMode && _httpClientEvents != null)
@@ -184,28 +179,6 @@ namespace NuGet.PowerShell.Commands
             if (_httpClientEvents != null)
             {
                 _httpClientEvents.ProgressAvailable -= OnProgressAvailable;
-            }
-        }
-
-        protected virtual void LogCore(MessageLevel level, string formattedMessage)
-        {
-            switch (level)
-            {
-                case MessageLevel.Debug:
-                    WriteVerbose(formattedMessage);
-                    break;
-
-                case MessageLevel.Warning:
-                    WriteWarning(formattedMessage);
-                    break;
-
-                case MessageLevel.Info:
-                    WriteLine(formattedMessage);
-                    break;
-
-                case MessageLevel.Error:
-                    WriteError(formattedMessage);
-                    break;
             }
         }
 
@@ -257,7 +230,7 @@ namespace NuGet.PowerShell.Commands
                 // A search with a wildcard that returns nothing should not be considered an error.
                 if ((count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName))
                 {
-                    ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
+                    _errorHandler.WriteProjectNotFoundError(projectName, terminating: false);
                 }
             }
         }
@@ -346,97 +319,7 @@ namespace NuGet.PowerShell.Commands
             }
             return null;
         }
-
-        [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
-        protected void WriteError(string message)
-        {
-            if (!String.IsNullOrEmpty(message))
-            {
-                WriteError(new Exception(message));
-            }
-        }
-
-        protected void WriteError(Exception exception)
-        {
-            ErrorHandler.HandleException(exception, terminating: false);
-        }
-
-        void IErrorHandler.WriteProjectNotFoundError(string projectName, bool terminating)
-        {
-            var notFoundException =
-                new ItemNotFoundException(
-                    String.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.Cmdlet_ProjectNotFound, projectName));
-
-            ErrorHandler.HandleError(
-                new ErrorRecord(
-                    notFoundException,
-                    NuGetErrorId.ProjectNotFound, // This is your locale-agnostic error id.
-                    ErrorCategory.ObjectNotFound,
-                    projectName),
-                    terminating: terminating);
-        }
-
-        void IErrorHandler.ThrowSolutionNotOpenTerminatingError()
-        {
-            ErrorHandler.HandleException(
-                new InvalidOperationException(Resources.Cmdlet_NoSolution),
-                terminating: true,
-                errorId: NuGetErrorId.NoActiveSolution,
-                category: ErrorCategory.InvalidOperation);
-        }
-
-        void IErrorHandler.ThrowNoCompatibleProjectsTerminatingError()
-        {
-            ErrorHandler.HandleException(
-                new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
-                terminating: true,
-                errorId: NuGetErrorId.NoCompatibleProjects,
-                category: ErrorCategory.InvalidOperation);
-        }
-
-        void IErrorHandler.HandleError(ErrorRecord errorRecord, bool terminating)
-        {
-            if (terminating)
-            {
-                ThrowTerminatingError(errorRecord);
-            }
-            else
-            {
-                WriteError(errorRecord);
-            }
-        }
-
-        void IErrorHandler.HandleException(Exception exception, bool terminating,
-            string errorId, ErrorCategory category, object target)
-        {
-
-            exception = ExceptionUtility.Unwrap(exception);
-
-            var error = new ErrorRecord(exception, errorId, category, target);
-
-            ErrorHandler.HandleError(error, terminating: terminating);
-        }
-
-        protected void WriteLine(string message = null)
-        {
-            if (Host == null)
-            {
-                // Host is null when running unit tests. Simply return in this case
-                return;
-            }
-
-            if (message == null)
-            {
-                Host.UI.WriteLine();
-            }
-            else
-            {
-                Host.UI.WriteLine(message);
-            }
-        }
-
+        
         protected void WriteProgress(int activityId, string operation, int percentComplete)
         {
             if (IsSyncMode)
@@ -473,50 +356,7 @@ namespace NuGet.PowerShell.Commands
         {
             HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
-
-        public virtual FileConflictResolution ResolveFileConflict(string message)
-        {
-            if (_overwriteAll)
-            {
-                return FileConflictResolution.OverwriteAll;
-            }
-
-            if (_ignoreAll)
-            {
-                return FileConflictResolution.IgnoreAll;
-            }
-
-            var choices = new Collection<ChoiceDescription>
-            {
-                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_FileConflictYesHelp),
-                new ChoiceDescription(Resources.Cmdlet_YesAll, Resources.Cmdlet_FileConflictYesAllHelp),
-                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_FileConflictNoHelp),
-                new ChoiceDescription(Resources.Cmdlet_NoAll, Resources.Cmdlet_FileConflictNoAllHelp)
-            };
-
-            int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 2);
-
-            Debug.Assert(choice >= 0 && choice < 4);
-            switch (choice)
-            {
-                case 0:
-                    return FileConflictResolution.Overwrite;
-
-                case 1:
-                    _overwriteAll = true;
-                    return FileConflictResolution.OverwriteAll;
-
-                case 2:
-                    return FileConflictResolution.Ignore;
-
-                case 3:
-                    _ignoreAll = true;
-                    return FileConflictResolution.IgnoreAll;
-            }
-
-            return FileConflictResolution.Ignore;
-        }
-
+        
         private void UnsubscribeEvents()
         {
             if (_httpClientEvents != null)

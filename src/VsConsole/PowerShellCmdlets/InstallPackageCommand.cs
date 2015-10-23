@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.IO;
 using System.Management.Automation;
 using System.Net.NetworkInformation;
 using NuGet.VisualStudio;
@@ -16,8 +15,13 @@ namespace NuGet.PowerShell.Commands
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
+        private readonly bool _isNetworkAvailable;
+        private readonly string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
+        private readonly string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
         private bool _hasConnectedToHttpSource;
-        private bool _isNetworkAvailable;
+        private string _cacheStatusMessage = string.Empty;
+        // Type for _currentSource can be either string (actual path to the Source), or PackageSource.
+        private object _currentSource = string.Empty;
 
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
@@ -85,13 +89,7 @@ namespace NuGet.PowerShell.Commands
 
         [Parameter]
         public DependencyVersion? DependencyVersion { get; set; }
-
-        private string _fallbackToLocalCacheMessge = Resources.Cmdlet_FallbackToCache;
-        private string _localCacheFailureMessage = Resources.Cmdlet_LocalCacheFailure;
-        private string _cacheStatusMessage = String.Empty;
-        // Type for _currentSource can be either string (actual path to the Source), or PackageSource.
-        private object _currentSource = String.Empty;
-
+        
         protected override IVsPackageManager CreatePackageManager()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -186,12 +184,12 @@ namespace NuGet.PowerShell.Commands
 
                 if (!String.IsNullOrEmpty(_cacheStatusMessage))
                 {
-                    this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
+                    Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _cacheStatusMessage, _packageSourceProvider.ActivePackageSource, Source));
                 }                
             
                 if (IsDowngradePackage())
                 {
-                    PackageManager.UpdatePackage(ProjectManager, Id, Version, !IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+                    PackageManager.UpdatePackage(ProjectManager, Id, Version, !IgnoreDependencies, IncludePrerelease.IsPresent, logger: Logger);
                 }
                 else
                 {
@@ -211,7 +209,7 @@ namespace NuGet.PowerShell.Commands
                     string cache = NuGet.MachineCache.Default.Source;
                     if (!String.IsNullOrEmpty(cache))
                     {
-                        this.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, _currentSource, cache));
+                        Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, _fallbackToLocalCacheMessge, _currentSource, cache));
                         var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, cache);
                         IVsPackageManager packageManager = (repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true));
                         InstallPackage(packageManager);
@@ -227,22 +225,7 @@ namespace NuGet.PowerShell.Commands
                 UnsubscribeFromProgressEvents();
             }
         }
-
-        public override FileConflictResolution ResolveFileConflict(string message)
-        {
-            if (FileConflictAction == FileConflictAction.Overwrite)
-            {
-                return FileConflictResolution.Overwrite;
-            }
-
-            if (FileConflictAction == FileConflictAction.Ignore)
-            {
-                return FileConflictResolution.Ignore;
-            }
-
-            return base.ResolveFileConflict(message);
-        }
-
+        
         protected override void EndProcessing()
         {
             base.EndProcessing();
@@ -277,7 +260,7 @@ namespace NuGet.PowerShell.Commands
                 return;
             }
 
-            packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: this);
+            packageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies, IncludePrerelease.IsPresent, logger: Logger);
         }
     }
 }

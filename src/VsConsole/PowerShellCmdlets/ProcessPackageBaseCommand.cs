@@ -117,7 +117,7 @@ namespace NuGet.PowerShell.Commands
                 WriteWarning(message);
             }
 
-            WriteLine();
+            Logger.Log(MessageLevel.Info, string.Empty);
 
             OpenReadMeFile();
 
@@ -277,7 +277,7 @@ namespace NuGet.PowerShell.Commands
             }
             catch (Exception ex)
             {
-                LogCore(MessageLevel.Warning, ex.Message);
+                Logger.Log(MessageLevel.Warning, ex.Message);
             }
         }
 
@@ -339,14 +339,11 @@ namespace NuGet.PowerShell.Commands
         {
             if (package.RequireLicenseAcceptance)
             {
-                string message = String.Format(
-                    CultureInfo.CurrentCulture,
+                Logger.Log(MessageLevel.Info, 
                     Resources.Cmdlet_InstallSuccessDisclaimerText,
                     package.Id,
-                    String.Join(", ", package.Authors),
+                    string.Join(", ", package.Authors),
                     package.LicenseUrl);
-
-                WriteLine(message);
             }
         }
 

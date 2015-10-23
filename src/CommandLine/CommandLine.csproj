@@ -70,6 +70,7 @@
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="Commands\UpdateCommandLogger.cs" />
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
     <Compile Include="Common\MSBuildSolutionParser.cs" />
     <Compile Include="Common\PackageExtractor.cs" />

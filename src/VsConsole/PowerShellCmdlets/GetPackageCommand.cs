@@ -258,10 +258,10 @@ namespace NuGet.PowerShell.Commands
                 // No active source has been specified. 
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
             }
-            
+
             if (IsRepositoryUsedForSearch(repository))
             {
-                repository = new AggregateRepository(new [] { repository });
+                repository = new AggregateRepository(new[] { repository });
             }
 
             return repository;
@@ -327,11 +327,11 @@ namespace NuGet.PowerShell.Commands
             {
                 if (!UseRemoteSource)
                 {
-                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
+                    Logger.Log(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
                 }
                 else if (Updates.IsPresent)
                 {
-                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
+                    Logger.Log(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
                 }
             }
         }

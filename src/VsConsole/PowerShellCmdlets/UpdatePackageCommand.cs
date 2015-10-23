@@ -122,7 +122,7 @@ namespace NuGet.PowerShell.Commands
 
             if (WhatIf && Reinstall)
             {
-                Log(MessageLevel.Error, Resources.Cmdlet_WhatIfReinstallUnsupported);
+                Logger.Log(MessageLevel.Error, Resources.Cmdlet_WhatIfReinstallUnsupported);
                 return;
             }
 
@@ -161,22 +161,22 @@ namespace NuGet.PowerShell.Commands
                 // If a package id was specified, but no project was specified, then update this package in all projects
                 if (String.IsNullOrEmpty(ProjectName))
                 {
-                    PackageManager.ReinstallPackage(Id, !IgnoreDependencies, IncludePrerelease, this, this);
+                    PackageManager.ReinstallPackage(Id, !IgnoreDependencies, IncludePrerelease, Logger, this);
                 }
                 else if (projectManager != null)
                 {
-                    PackageManager.ReinstallPackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
+                    PackageManager.ReinstallPackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, Logger);
                 }
             }
             else
             {
                 if (String.IsNullOrEmpty(ProjectName))
                 {
-                    PackageManager.ReinstallPackages(!IgnoreDependencies, IncludePrerelease, this, this);
+                    PackageManager.ReinstallPackages(!IgnoreDependencies, IncludePrerelease, Logger, this);
                 }
                 else if (projectManager != null)
                 {
-                    PackageManager.ReinstallPackages(projectManager, !IgnoreDependencies, IncludePrerelease, this);
+                    PackageManager.ReinstallPackages(projectManager, !IgnoreDependencies, IncludePrerelease, Logger);
                 }
             }
         }
@@ -190,11 +190,11 @@ namespace NuGet.PowerShell.Commands
                 {
                     if (Safe.IsPresent)
                     {
-                        PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, Logger, this);
                     }
                     else
                     {
-                        PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, Logger, this);
                     }
                 }
                 else if (projectManager != null)
@@ -202,11 +202,11 @@ namespace NuGet.PowerShell.Commands
                     // If there was a project specified, then update the package in that project
                     if (Safe.IsPresent)
                     {
-                        PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
+                        PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, Logger);
                     }
                     else
                     {
-                        PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, this);
+                        PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, Logger);
                     }
                 }
             }
@@ -217,40 +217,25 @@ namespace NuGet.PowerShell.Commands
                 {
                     if (String.IsNullOrEmpty(ProjectName))
                     {
-                        PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, Logger, this);
                     }
                     else if (projectManager != null)
                     {
-                        PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                        PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, Logger);
                     }
                 }
                 else
                 {
                     if (String.IsNullOrEmpty(ProjectName))
                     {
-                        PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, Logger, this);
                     }
                     else if (projectManager != null)
                     {
-                        PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                        PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, Logger);
                     }
                 }
             }
-        }
-
-        public override FileConflictResolution ResolveFileConflict(string message)
-        {
-            if (FileConflictAction == FileConflictAction.Overwrite)
-            {
-                return FileConflictResolution.Overwrite;
-            }
-
-            if (FileConflictAction == FileConflictAction.Ignore)
-            {
-                return FileConflictResolution.Ignore;
-            }
-
-            return base.ResolveFileConflict(message);
         }
 
         protected override void EndProcessing()
