@@ -6,15 +6,18 @@ namespace NuGet.ServerExtensions
     /// <summary>
     /// Thin wrapper that allows exposing a PackageServer as an IPackageRepository
     /// </summary>
-    public class PackageServerRepository : IPackageRepository
+    public class PackageServerRepository 
+        : PackageRepositoryBase, IPackageRepository
     {
         private readonly IPackageRepository _source;
         private readonly PackageServer _destination;
         private readonly string _apiKey;
         private readonly TimeSpan _timeout;
-        private readonly ILogger _logger;
 
-        public PackageServerRepository(IPackageRepository sourceRepository, PackageServer destination, string apiKey, TimeSpan timeout, ILogger logger)
+        public PackageServerRepository(
+            IPackageRepository sourceRepository, PackageServer destination, 
+            string apiKey, TimeSpan timeout, ILogger logger)
+            :base(logger)
         {
             if (sourceRepository == null)
             {
@@ -29,44 +32,44 @@ namespace NuGet.ServerExtensions
             _destination = destination;
             _apiKey = apiKey;
             _timeout = timeout;
-            _logger = logger ?? NullLogger.Instance;
         }
 
-        public string Source
+        public override string Source
         {
             get { return _source.Source; }
         }
 
         // PackageSaveMode property does not apply to this class
-        public PackageSaveModes PackageSaveMode
+        public override PackageSaveModes PackageSaveMode
         {
             set { throw new NotSupportedException(); }
             get { throw new NotSupportedException(); }
         }
 
-        public bool SupportsPrereleasePackages
+        public override bool SupportsPrereleasePackages
         {
             get { return _source.SupportsPrereleasePackages; }
         }
 
-        public IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages()
         {
             return _source.GetPackages();
         }
 
-        public void AddPackage(IPackage package)
+        public override void AddPackage(IPackage package)
         {
-            _logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(_destination.Source));
+            Logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPushingPackage, package.GetFullName(), 
+                CommandLineUtility.GetSourceDisplayName(_destination.Source));
             _destination.PushPackage(
                 _apiKey, 
                 package, 
                 package.GetStream().Length, 
                 (int)_timeout.TotalMilliseconds, 
                 disableBuffering: false);
-            _logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPackagePushed);
+            Logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPackagePushed);
         }
 
-        public void RemovePackage(IPackage package)
+        public override void RemovePackage(IPackage package)
         {
             throw new NotSupportedException();
         }

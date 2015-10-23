@@ -27,7 +27,7 @@ namespace NuGet
             set { _logger = value; }
         }
 
-        public PackageSaveModes PackageSaveMode 
+        public virtual PackageSaveModes PackageSaveMode 
         {
             get { return _packageSave; }
             set
