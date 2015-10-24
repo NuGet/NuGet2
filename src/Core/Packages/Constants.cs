@@ -40,7 +40,12 @@ namespace NuGet
         /// Represents the build directory in the package.
         /// </summary>
         public static readonly string BuildDirectory = "build";
-        
+
+        /// <summary>
+        /// Represents the shared directory in the package.
+        /// </summary>
+        public static readonly string ContentFilesDirectory = "contentFiles";
+
         public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";
         public static readonly string PackageReferenceFile = "packages.config";

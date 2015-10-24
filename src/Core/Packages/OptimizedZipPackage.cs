@@ -318,17 +318,15 @@ namespace NuGet
                 {
                     foreach (var valueTuple in _cachedExpandedFolder.Values)
                     {
-                        try
-                        {
-                            string expandedFolder = valueTuple.Item1;
-                            _tempFileSystem.DeleteDirectory(expandedFolder, recursive: true);
-                        }
-                        catch (Exception)
-                        {
-                        }
+                        string expandedFolder = valueTuple.Item1;
+                        _tempFileSystem.DeleteDirectorySafe(expandedFolder, recursive: true);
                     }
 
                     _cachedExpandedFolder.Clear();
+                }
+                else
+                {
+                    _tempFileSystem.DeleteDirectorySafe(_tempFileSystem.Root, recursive: true);
                 }
             }
         }
