@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Common;
 
@@ -162,7 +161,9 @@ namespace NuGet.Commands
         protected internal virtual IFileSystem CreateFileSystem(string path)
         {
             path = FileSystem.GetFullPath(path);
-            return new PhysicalFileSystem(path);
+            var physicalFileSystem = new PhysicalFileSystem(path);
+            physicalFileSystem.Logger = Console;
+            return physicalFileSystem;
         }
 
         private void ReadSettings()
@@ -414,9 +415,10 @@ namespace NuGet.Commands
             InstallPackages(packagesFolderFileSystem, packageReferences);
         }
 
-        private static ICollection<PackageReference> GetPackageReferences(string fullConfigFilePath, string projectName)
+        private ICollection<PackageReference> GetPackageReferences(string fullConfigFilePath, string projectName)
         {
             var projectFileSystem = new PhysicalFileSystem(Path.GetDirectoryName(fullConfigFilePath));
+            projectFileSystem.Logger = Console;
             string configFileName = Path.GetFileName(fullConfigFilePath);
 
             PackageReferenceFile file = new PackageReferenceFile(projectFileSystem, configFileName, projectName);

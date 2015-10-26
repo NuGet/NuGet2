@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace NuGet
@@ -23,6 +22,8 @@ namespace NuGet
         {
             _fileSystem = fileSystem;
             _repository = new Lazy<IPackageRepository>(() => CreateRepository(fileSystem));
+
+            Logger = _fileSystem.Logger;
         }
 
         public override string Source

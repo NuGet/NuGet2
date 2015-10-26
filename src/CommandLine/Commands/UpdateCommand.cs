@@ -210,6 +210,7 @@ namespace NuGet.Commands
             repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
 
             var sharedRepositoryFileSystem = new PhysicalFileSystem(repositoryPath);
+            sharedRepositoryFileSystem.Logger = Console;
             var pathResolver = new DefaultPackagePathResolver(sharedRepositoryFileSystem);
 
             // Create the local and source repositories
