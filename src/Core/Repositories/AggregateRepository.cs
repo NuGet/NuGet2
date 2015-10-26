@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -20,17 +19,10 @@ namespace NuGet
         private readonly Lazy<bool> _supportsPrereleasePackages;
 
         private const string SourceValue = "(Aggregate source)";
-        private ILogger _logger;
 
         public override string Source
         {
             get { return SourceValue; }
-        }
-
-        public ILogger Logger
-        {
-            get { return _logger ?? NullLogger.Instance; }
-            set { _logger = value; }
         }
 
         /// <summary>
