@@ -46,6 +46,7 @@ namespace NuGet
 
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
+            fileSystem.Logger = console;
 
             Func<Exception, string> getErrorMessage = e => e.Message;
 

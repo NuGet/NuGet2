@@ -414,7 +414,9 @@ namespace NuGet.Commands
         protected internal virtual IFileSystem CreateFileSystem(string path)
         {
             path = Path.GetFullPath(path);
-            return new PhysicalFileSystem(path);
+            var physicalFileSystem = new PhysicalFileSystem(path);
+            physicalFileSystem.Logger = Console;
+            return physicalFileSystem;
         }
 
         private static void EnsureFileExists(IFileSystem fileSystem, string configFilePath)

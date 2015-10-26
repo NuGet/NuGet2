@@ -90,6 +90,7 @@ namespace NuGet.Commands
                     var directory = Path.GetDirectoryName(Path.GetFullPath(ConfigFile));
                     var configFileName = Path.GetFileName(ConfigFile);
                     var configFileSystem = new PhysicalFileSystem(directory);
+                    configFileSystem.Logger = Console;
                     Settings = NuGet.Settings.LoadDefaultSettings(
                         configFileSystem,
                         configFileName,
