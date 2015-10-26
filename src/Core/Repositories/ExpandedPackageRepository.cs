@@ -1,10 +1,9 @@
-﻿using NuGet.Resources;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -28,6 +27,8 @@ namespace NuGet
         {
             _fileSystem = fileSystem;
             _hashProvider = hashProvider;
+
+            Logger = fileSystem.Logger;
         }
 
         public override string Source
@@ -106,8 +107,8 @@ namespace NuGet
                     }
                     catch (XmlException ex)
                     {
-                        _fileSystem.Logger.Log(MessageLevel.Warning, ex.Message);
-                        _fileSystem.Logger.Log(
+                        Logger.Log(MessageLevel.Warning, ex.Message);
+                        Logger.Log(
                             MessageLevel.Warning, 
                             NuGetResources.Manifest_NotFound, 
                             string.Format("{0}/{1}", packageId, version));
@@ -115,8 +116,8 @@ namespace NuGet
                     }
                     catch (IOException ex)
                     {
-                        _fileSystem.Logger.Log(MessageLevel.Warning, ex.Message);
-                        _fileSystem.Logger.Log(
+                        Logger.Log(MessageLevel.Warning, ex.Message);
+                        Logger.Log(
                             MessageLevel.Warning, 
                             NuGetResources.Manifest_NotFound, 
                             string.Format("{0}/{1}", packageId, version));
