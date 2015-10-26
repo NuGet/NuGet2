@@ -49,6 +49,8 @@ namespace NuGet.Server.Infrastructure
 
             _fileSystem = fileSystem;
             _pathResolver = pathResolver;
+
+            Logger = fileSystem.Logger;
         }
 
         [Inject]
