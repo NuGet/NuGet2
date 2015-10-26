@@ -10,7 +10,7 @@ namespace NuGet
         /// Represents the ".nupkg" extension.
         /// </summary>
         public static readonly string PackageExtension = ".nupkg";
-        
+
         /// <summary>
         /// Represents the ".nuspec" extension.
         /// </summary>
@@ -64,10 +64,10 @@ namespace NuGet
         public static readonly DateTimeOffset Unpublished = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.FromHours(-8));
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Security", 
-            "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", 
-            Justification="The type is immutable.")]
-        public static readonly ICollection<string> AssemblyReferencesExtensions 
+            "Microsoft.Security",
+            "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
+            Justification = "The type is immutable.")]
+        public static readonly ICollection<string> AssemblyReferencesExtensions
             = new ReadOnlyCollection<string>(new string[] { ".dll", ".exe", ".winmd" });
 
         public static readonly Version NuGetVersion = typeof(IPackage).Assembly.GetName().Version;

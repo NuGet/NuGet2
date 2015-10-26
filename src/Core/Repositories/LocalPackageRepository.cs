@@ -355,7 +355,7 @@ namespace NuGet
                 return null;
             }
 
-            if (Path.GetExtension(path) == Constants.PackageExtension)
+            if (string.Equals(Path.GetExtension(path), Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
             {
                 OptimizedZipPackage package;
                 try
@@ -366,6 +366,7 @@ namespace NuGet
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingPackage, path), ex);
                 }
+
                 // Set the last modified date on the package
                 package.Published = FileSystem.GetLastModified(path);
 
