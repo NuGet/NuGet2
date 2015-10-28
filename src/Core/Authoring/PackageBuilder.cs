@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text.RegularExpressions;
 using NuGet.Resources;
 
 namespace NuGet
@@ -517,7 +516,7 @@ namespace NuGet
 
         private static void CreatePart(Package package, string path, Stream sourceStream)
         {
-            if (PackageHelper.IsManifest(path))
+            if (PackageHelper.IsPackageManifest(path, package.PackageProperties.Identifier))
             {
                 return;
             }

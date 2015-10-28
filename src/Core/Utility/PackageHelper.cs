@@ -15,6 +15,15 @@ namespace NuGet
             return Path.GetExtension(path).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool IsPackageManifest(string path, string packageId)
+        {
+            return path.EndsWith(packageId + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+        }
+        public static bool IsUnzippedPackageManifest(string path, string packageId, SemanticVersion packageVersion)
+        {
+            return path.EndsWith(packageId + "." + packageVersion.ToNormalizedString() + Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool IsPackageFile(string path)
         {
             return Path.GetExtension(path).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
@@ -27,9 +36,9 @@ namespace NuGet
                    path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification="We need to return the runtime package.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "We need to return the runtime package.")]
         public static bool IsSatellitePackage(
-            IPackageMetadata package, 
+            IPackageMetadata package,
             IPackageRepository repository,
             FrameworkName targetFramework,
             out IPackage runtimePackage)
