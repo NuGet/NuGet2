@@ -154,6 +154,7 @@ namespace NuGet
                     Language = metadata.Language.SafeTrim(),
                     DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
+                    ContentFiles = metadata.ContentFiles.ToList(),
                     ReferenceSets = CreateReferenceSets(metadata),
                     MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
                 },

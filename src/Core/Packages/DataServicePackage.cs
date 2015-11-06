@@ -326,6 +326,14 @@ namespace NuGet
             }
         }
 
+        public IEnumerable<ManifestContentFiles> ContentFiles
+        {
+            get
+            {
+                return Package.ContentFiles;
+            }
+        }
+
         public virtual IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             return Package.GetSupportedFrameworks();

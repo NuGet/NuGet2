@@ -175,6 +175,12 @@ namespace NuGet
             set;
         }
 
+        public IEnumerable<ManifestContentFiles> ContentFiles
+        {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
         {
             get
@@ -235,6 +241,7 @@ namespace NuGet
             Tags = metadata.Tags;
             DependencySets = metadata.DependencySets;
             FrameworkAssemblies = metadata.FrameworkAssemblies;
+            ContentFiles = metadata.ContentFiles;
             Copyright = metadata.Copyright;
             PackageAssemblyReferences = metadata.PackageAssemblyReferences;
             MinClientVersion = metadata.MinClientVersion;
