@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
@@ -16,6 +17,66 @@ namespace NuGet.Test
 {
     public class PackageBuilderTest
     {
+        [Fact]
+        public void CreatePackageWithNuspecContentV2()
+        {
+            System.Diagnostics.Debugger.Launch();
+
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("JaneDoe");
+            builder.Files.Add(CreatePackageFile("contentFiles\\any\\any\\config\\config.xml"));
+            builder.Files.Add(CreatePackageFile("contentFiles\\cs\\net45\\code.cs.pp"));
+
+            builder.ContentFiles.Add(new ManifestContentFiles()
+            {
+                Include = "**/*",
+                BuildAction = "Compile"
+            });
+
+            builder.ContentFiles.Add(new ManifestContentFiles()
+            {
+                Include = "**/*",
+                Exclude = "**/*.cs",
+                BuildAction = "None",
+                Flatten = "true",
+                CopyToOutput = "true"
+            });
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                var result = manifestStream.ReadToEnd();
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <contentFiles>
+      <files include=""**/*"" buildAction=""Compile"" />
+      <files include=""**/*"" exclude=""**/*.cs"" buildAction=""None"" copyToOutput=""true"" flatten=""true"" />
+    </contentFiles>
+  </metadata>
+</package>".Replace("\r\n", "\n"), result.Replace("\r\n", "\n"));
+            }
+        }
+
         [Fact]
         public void OwnersFallsBackToAuthorsIfNoneSpecified()
         {

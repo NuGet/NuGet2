@@ -57,6 +57,7 @@
     <Compile Include="Authoring\EmptyFrameworkFolderFile.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\IPropertyProvider.cs" />
+    <Compile Include="Authoring\ManifestContentFiles.cs" />
     <Compile Include="Authoring\ManifestDependencySet.cs" />
     <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />

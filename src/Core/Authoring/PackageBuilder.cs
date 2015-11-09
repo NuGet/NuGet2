@@ -52,6 +52,7 @@ namespace NuGet
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
+            ContentFiles = new Collection<ManifestContentFiles>();
             PackageAssemblyReferences = new Collection<PackageReferenceSet>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
@@ -172,6 +173,15 @@ namespace NuGet
             private set;
         }
 
+        /// <summary>
+        /// ContentFiles section from the manifest for content v2
+        /// </summary>
+        public Collection<ManifestContentFiles> ContentFiles
+        {
+            get;
+            private set;
+        }
+
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get;
@@ -282,6 +292,12 @@ namespace NuGet
 
         private static int DetermineMinimumSchemaVersion(Collection<IPackageFile> Files)
         {
+            if (HasContentFilesV2(Files))
+            {
+                // version 5
+                return ManifestVersionUtility.XdtTransformationVersion;
+            }
+
             if (HasXdtTransformFile(Files))
             {
                 // version 5
@@ -318,6 +334,13 @@ namespace NuGet
                      f.EffectivePath == Constants.PackageEmptyFileName);
 
             return hasEmptyLibFolder;
+        }
+
+        private static bool HasContentFilesV2(ICollection<IPackageFile> contentFiles)
+        {
+            return contentFiles.Any(file =>
+                file.Path != null &&
+                file.Path.StartsWith(Constants.ContentFilesDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
         }
 
         private static bool HasXdtTransformFile(ICollection<IPackageFile> contentFiles)
@@ -411,6 +434,7 @@ namespace NuGet
             Language = metadata.Language;
             Copyright = metadata.Copyright;
             MinClientVersion = metadata.MinClientVersion;
+            ContentFiles = new Collection<ManifestContentFiles>(manifestMetadata.ContentFiles);
 
             if (metadata.Tags != null)
             {
