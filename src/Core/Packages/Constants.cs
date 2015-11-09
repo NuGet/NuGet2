@@ -46,6 +46,11 @@ namespace NuGet
         /// </summary>
         public static readonly string ContentFilesDirectory = "contentFiles";
 
+        /// <summary>
+        /// Represents the analyzers directory in the package.
+        /// </summary>
+        public static readonly string AnalyzersDirectory = "analyzers";
+
         public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";
         public static readonly string PackageReferenceFile = "packages.config";

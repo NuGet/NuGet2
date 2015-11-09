@@ -24,7 +24,8 @@ namespace NuGet.Analysis.Rules
                         yield return CreatePackageIssueForAssembliesUnderLib(path);
                     }
                 }
-                else if (!directory.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                else if (!directory.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                    && !directory.StartsWith(Constants.AnalyzersDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                 {
                     // when checking for assemblies outside 'lib' folder, only check .dll files.
                     // .exe files are often legitimate outside 'lib'.
