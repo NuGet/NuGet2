@@ -75,8 +75,10 @@ namespace NuGet.Commands
             {
                 if (null == _settings)
                 {
+                    var physicalFileSystem = new PhysicalFileSystem(_project.DirectoryPath);
+                    physicalFileSystem.Logger = _logger;
                     _settings = Settings.LoadDefaultSettings(
-                        new PhysicalFileSystem(_project.DirectoryPath),
+                        physicalFileSystem,
                         null,
                         MachineWideSettings);
                 }

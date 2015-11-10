@@ -134,7 +134,36 @@ namespace NuGet
                 case "references":
                     manifestMetadata.ReferenceSets = ReadReferenceSets(element);
                     break;
+                case "contentFiles":
+                    manifestMetadata.ContentFiles = ReadContentFiles(element);
+                    break;
             }
+        }
+
+        private static List<ManifestContentFiles> ReadContentFiles(XElement contentFilesElement)
+        {
+            if (!contentFilesElement.HasElements)
+            {
+                return new List<ManifestContentFiles>(0);
+            }
+
+            var contentFileSets = (from element in contentFilesElement.ElementsNoNamespace("files")
+                                   let includeAttribute = element.Attribute("include")
+                                   where includeAttribute != null && !string.IsNullOrEmpty(includeAttribute.Value)
+                                   let excludeAttribute = element.Attribute("exclude")
+                                   let buildActionAttribute = element.Attribute("buildAction")
+                                   let copyToOutputAttribute = element.Attribute("copyToOutput")
+                                   let flattenAttribute = element.Attribute("flatten")
+                                   select new ManifestContentFiles
+                                   {
+                                       Include = includeAttribute.Value.SafeTrim(),
+                                       Exclude = excludeAttribute == null ? null : excludeAttribute.Value,
+                                       BuildAction = buildActionAttribute == null ? null : buildActionAttribute.Value,
+                                       CopyToOutput = copyToOutputAttribute == null ? null : copyToOutputAttribute.Value,
+                                       Flatten = flattenAttribute == null ? null : flattenAttribute.Value
+                                   }).ToList();
+
+            return contentFileSets;
         }
 
         private static List<ManifestReferenceSet> ReadReferenceSets(XElement referencesElement)

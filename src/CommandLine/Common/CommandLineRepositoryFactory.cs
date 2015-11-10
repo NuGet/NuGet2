@@ -1,7 +1,4 @@
-﻿
-using System.Windows;
-
-namespace NuGet.Common
+﻿namespace NuGet.Common
 {
     public class CommandLineRepositoryFactory : PackageRepositoryFactory
     {
@@ -38,6 +35,12 @@ namespace NuGet.Common
                 };
             }
 
+            var repositoryBase = repository as PackageRepositoryBase;
+            if (repositoryBase != null)
+            {
+                repositoryBase.Logger = _console;
+            }
+            
             return repository;
         }
     }

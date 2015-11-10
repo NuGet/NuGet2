@@ -71,9 +71,11 @@ namespace NuGet.ServerExtensions
 
         protected virtual IFileSystem CreateFileSystem()
         {
-            return new PhysicalFileSystem(Directory.GetCurrentDirectory());
+            var physicalFileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
+            physicalFileSystem.Logger = Console;
+            return physicalFileSystem;
         }
-       
+
         private IPackageRepository GetDestinationRepositoryList(string repo)
         {
             return RepositoryFactory.CreateRepository(SourceProvider.ResolveAndValidateSource(repo));

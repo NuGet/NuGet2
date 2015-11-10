@@ -5,6 +5,7 @@ namespace NuGet
 {
     public abstract class PackageRepositoryBase : IPackageRepository
     {
+        private ILogger _logger;
         private PackageSaveModes _packageSave;
 
         protected PackageRepositoryBase()
@@ -14,6 +15,11 @@ namespace NuGet
 
         public abstract string Source { get; }
 
+        public ILogger Logger
+        {
+            get { return _logger ?? NullLogger.Instance; }
+            set { _logger = value; }
+        }
 
         public PackageSaveModes PackageSaveMode 
         {

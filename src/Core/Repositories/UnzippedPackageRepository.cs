@@ -16,6 +16,8 @@ namespace NuGet
         {
             FileSystem = fileSystem;
             PathResolver = pathResolver;
+
+            Logger = fileSystem.Logger;
         }
 
         protected IFileSystem FileSystem

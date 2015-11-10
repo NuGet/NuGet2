@@ -192,6 +192,45 @@ namespace NuGet
         [XmlIgnore]
         public List<ManifestReferenceSet> ReferenceSets { get; set; }
 
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value", Justification = "The propert setter is not supported.")]
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("contentFiles", IsNullable = false)]
+        [XmlArrayItem("files", typeof(ManifestContentFiles))]
+        public List<object> ContentFilesSerialize
+        {
+            get
+            {
+                if (ContentFiles == null || ContentFiles.Count == 0)
+                {
+                    return null;
+                }
+                return ContentFiles.Cast<object>().ToList();
+            }
+            set
+            {
+                // this property is only used for serialization.
+                throw new InvalidOperationException();
+            }
+        }
+
+        private List<ManifestContentFiles> _contentFiles;
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlIgnore]
+        public List<ManifestContentFiles> ContentFiles
+        {
+            get
+            {
+                return _contentFiles ?? new List<ManifestContentFiles>();
+            }
+
+            set
+            {
+                _contentFiles = value;
+            }
+        }
+
         SemanticVersion IPackageName.Version
         {
             get
