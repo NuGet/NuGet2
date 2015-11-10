@@ -1113,6 +1113,7 @@ namespace NuGet.Commands
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any invalid PDBs files.")]
         private IEnumerable<PhysicalPackageFile> GetMissingSourceFilesReferencedByPdb(IPackageFile pdbFile, IEnumerable<PhysicalPackageFile> packageFiles)
         {
             try
@@ -1124,7 +1125,7 @@ namespace NuGet.Commands
             }
             catch (Exception ex)
             {
-                _logger.Log(MessageLevel.Warning, "{0} seems to be not a valid pdb file ({1})", pdbFile.Path, ex.Message);
+                _logger.Log(MessageLevel.Warning, LocalizedResourceManager.GetString("InvalidPDBFile"), pdbFile.Path, ex.Message);
             }
 
             return Enumerable.Empty<PhysicalPackageFile>();

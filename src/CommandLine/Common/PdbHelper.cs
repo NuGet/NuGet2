@@ -12,6 +12,9 @@ namespace NuGet.Common
     using Microsoft.DiaSymReader;
 
     using STATSTG = System.Runtime.InteropServices.ComTypes.STATSTG;
+    using System.Globalization;
+    using System.Security;
+    using System.Diagnostics.CodeAnalysis;
 
     internal static class PdbHelper
     {
@@ -19,13 +22,35 @@ namespace NuGet.Common
         {
             using (var stream = new StreamAdapter(pdbFile.GetStream()))
             {
-                var reader = SymReaderFactory.CreateNativeSymReader(stream);
+                var reader = CreateNativeSymReader(stream);
 
                 return reader.GetDocuments()
                     .Select(doc => doc.GetName())
                     .Where(IsValidSourceFileName);
             }
         }
+
+        private static ISymUnmanagedReader3 CreateNativeSymReader(IStream pdbStream)
+        {
+            object symReader = null;
+            var guid = default(Guid);
+
+            if (IntPtr.Size == 4)
+            {
+                NativeMethods.CreateSymReader32(ref guid, out symReader);
+            }
+            else
+            {
+                NativeMethods.CreateSymReader64(ref guid, out symReader);
+            }
+
+            var reader = (ISymUnmanagedReader3)symReader;
+            var hr = reader.Initialize(new DummyMetadataImport(), null, null, pdbStream);
+            Marshal.ThrowExceptionForHR(hr);
+            return reader;
+        }
+
+        private class DummyMetadataImport : IMetadataImport { }
 
         private static bool IsValidSourceFileName(string sourceFileName)
         {
@@ -36,40 +61,19 @@ namespace NuGet.Common
         {
             //the VB compiler will include temporary files in its pdb files.
             //the source file name will be similar to 17d14f5c-a337-4978-8281-53493378c1071.vb.
-            return sourceFileName.EndsWith("17d14f5c-a337-4978-8281-53493378c1071.vb", StringComparison.InvariantCultureIgnoreCase);
+            return sourceFileName.EndsWith("17d14f5c-a337-4978-8281-53493378c1071.vb", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static class SymReaderFactory
+        [SuppressUnmanagedCodeSecurity]
+        private static class NativeMethods
         {
             [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
             [DllImport("Microsoft.DiaSymReader.Native.x86.dll", EntryPoint = "CreateSymReader")]
-            private extern static void CreateSymReader32(ref Guid id, [MarshalAs(UnmanagedType.IUnknown)]out object symReader);
+            internal extern static void CreateSymReader32(ref Guid id, [MarshalAs(UnmanagedType.IUnknown)]out object symReader);
 
             [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
             [DllImport("Microsoft.DiaSymReader.Native.amd64.dll", EntryPoint = "CreateSymReader")]
-            private extern static void CreateSymReader64(ref Guid id, [MarshalAs(UnmanagedType.IUnknown)]out object symReader);
-
-            internal static ISymUnmanagedReader3 CreateNativeSymReader(IStream pdbStream)
-            {
-                object symReader = null;
-                var guid = default(Guid);
-
-                if (IntPtr.Size == 4)
-                {
-                    CreateSymReader32(ref guid, out symReader);
-                }
-                else
-                {
-                    CreateSymReader64(ref guid, out symReader);
-                }
-
-                var reader = (ISymUnmanagedReader3)symReader;
-                var hr = reader.Initialize(new DummyMetadataImport(), null, null, pdbStream);
-                Marshal.ThrowExceptionForHR(hr);
-                return reader;
-            }
-
-            class DummyMetadataImport : IMetadataImport { }
+            internal extern static void CreateSymReader64(ref Guid id, [MarshalAs(UnmanagedType.IUnknown)]out object symReader);
         }
 
         /// <summary>
@@ -78,7 +82,11 @@ namespace NuGet.Common
         sealed class StreamAdapter : IStream, IDisposable
         {
             Stream _stream;
+
+            [SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Justification = "need to validate that part.")]
             IntPtr _pcbData = Marshal.AllocHGlobal(8); // enough to store long/int64, can be shared since we don't support multithreaded access to one file.
+
+            private bool _disposed = false;
 
             /// <summary>
             /// Create a new adapter around the given stream.
@@ -91,7 +99,7 @@ namespace NuGet.Common
 
             ~StreamAdapter()
             {
-                throw new InvalidOperationException("Stream adapter not disposed");
+                Dispose(false);
             }
 
             public void Clone(out IStream ppstm)
@@ -177,19 +185,34 @@ namespace NuGet.Common
 
             public void Dispose()
             {
-                Interlocked.Exchange(ref _stream, null)?.Close();
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
 
-                var data = Interlocked.Exchange(ref _pcbData, IntPtr.Zero);
-                if (data != IntPtr.Zero)
+            private void Dispose(bool disposing)
+            {
+                if(_disposed)
                 {
-                    Marshal.FreeHGlobal(_pcbData);
+                    return;
                 }
 
-                GC.SuppressFinalize(this);
+                if (disposing)
+                {
+                    Interlocked.Exchange(ref _stream, null)?.Close();
+
+                    var data = Interlocked.Exchange(ref _pcbData, IntPtr.Zero);
+                    if (data != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(_pcbData);
+                    }
+
+                    _disposed = true;           
+                }
             }
         }
     }
 
+    [SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces", Justification = "need to validate that's ok to suppress.")]
     [ComImport, Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
     public interface IMetadataImport { }
 
@@ -215,7 +238,7 @@ namespace NuGet.Common
         {
             if (actualCount != bufferLength)
             {
-                throw new InvalidOperationException(string.Format("Read only {0} of {1} items.", actualCount, bufferLength));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Read only {0} of {1} items.", actualCount, bufferLength));
             }
         }
 

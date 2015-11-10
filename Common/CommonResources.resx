@@ -144,4 +144,7 @@
   <data name="EnsureImportedMessage" xml:space="preserve">
     <value>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</value>
   </data>
+  <data name="InvalidPDBFile" xml:space="preserve">
+    <value>{0} seems to be not a valid pdb file ({1})</value>
+  </data>
 </root>
