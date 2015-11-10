@@ -20,8 +20,6 @@ namespace NuGet.Test
         [Fact]
         public void CreatePackageWithNuspecContentV2()
         {
-            System.Diagnostics.Debugger.Launch();
-
             // Arrange
             PackageBuilder builder = new PackageBuilder()
             {
