@@ -157,10 +157,10 @@ namespace NuGet
                                    select new ManifestContentFiles
                                    {
                                        Include = includeAttribute.Value.SafeTrim(),
-                                       Exclude = excludeAttribute?.Value,
-                                       BuildAction = buildActionAttribute?.Value,
-                                       CopyToOutput = copyToOutputAttribute?.Value,
-                                       Flatten = flattenAttribute?.Value
+                                       Exclude = excludeAttribute == null ? null : excludeAttribute.Value,
+                                       BuildAction = buildActionAttribute == null ? null : buildActionAttribute.Value,
+                                       CopyToOutput = copyToOutputAttribute == null ? null : copyToOutputAttribute.Value,
+                                       Flatten = flattenAttribute == null ? null : flattenAttribute.Value
                                    }).ToList();
 
             return contentFileSets;
