@@ -14,7 +14,7 @@ namespace NuGet.Test
         [InlineData(new object[] { @"X:\test\**", @"X:\test\**\*.nupkg" })]
         [InlineData(new object[] { @"X:\test\*", @"X:\test\*.nupkg" })]
         [InlineData(new object[] { @"X:\test\", @"X:\test\" })]
-        [InlineData(new object[] { @"X:\test\Foo.nupkg", @"X:\test\Foo.nupkg" })]
+        [InlineData(new object[] { @"X:\test\Test.nupkg", @"X:\test\Test.nupkg" })]
         public void EnsurePackageExtensionAppendsExtension(string input, string expected)
         {
             // Act
@@ -38,8 +38,8 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(new object[] { @"X:\test\foobar.symbols.nupkg", @"http://nuget.gw.symbolsource.org/Public/NuGet" })]
-        [InlineData(new object[] { @"X:\test\foobar.nupkg", @"https://www.nuget.org" })]
+        [InlineData(new object[] { @"X:\test\test.symbols.nupkg", @"https://nuget.smbsrc.net/" })]
+        [InlineData(new object[] { @"X:\test\test.nupkg", @"https://www.nuget.org" })]
         [InlineData(new object[] { @"", @"https://www.nuget.org" })]
         [InlineData(new object[] { @"test.dll", @"https://www.nuget.org" })]
         public void PushCommandUsesNuGetOrgWhenNoSourceSpecified(string input, string expected)
@@ -53,34 +53,34 @@ namespace NuGet.Test
         [Fact]
         public void PushCommandUsesSourceWhenSpecified()
         {
-            const string src = "http://foo/bar";
+            const string src = "http://parent/child";
             var push = new PushCommand();
             push.SourceProvider = CreateSourceProvider();
             push.Settings = CreateSettings();
             push.Source = src;
-            Assert.Equal(src, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
+            Assert.Equal(src, push.ResolveSource(@"X:\test\test.symbols.nupkg"));
         }
 
         [Fact]
         public void PushCommandUsesConfFileWhenDefaultPushSourceSpecified()
         {
-            const string src = "http://foo/bar/baz";
+            const string src = "http://parent/child/sub";
             var push = new PushCommand();
             push.SourceProvider = CreateSourceProvider();
             push.Settings = CreateSettings(src);
-            Assert.Equal(src, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
+            Assert.Equal(src, push.ResolveSource(@"X:\test\test.symbols.nupkg"));
         }
 
         [Fact]
         public void PushCommandUsesSourceWhenSpecifiedEvenWhenSpecifiedAlsoInConfFile()
         {
-            const string srcCmdLine = "http://foo/bar/baz1";
-            const string srcConfFile = "http://foo/bar/baz2";
+            const string srcCmdLine = "http://parent/child/sub1";
+            const string srcConfFile = "http://parent/child/sub2";
             var push = new PushCommand();
             push.SourceProvider = CreateSourceProvider();
             push.Settings = CreateSettings(srcConfFile);
             push.Source = srcCmdLine;
-            Assert.Equal(srcCmdLine, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
+            Assert.Equal(srcCmdLine, push.ResolveSource(@"X:\test\test.symbols.nupkg"));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace NuGet.Test
             ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
 
             // Act & Assert
-            Assert.Equal(push.ResolveSource(@"X:\test\foobar.symbols.nupkg", configurationDefaults.DefaultPushSource), "http://contoso.com/packages/");
+            Assert.Equal(push.ResolveSource(@"X:\test\test.symbols.nupkg", configurationDefaults.DefaultPushSource), "http://contoso.com/packages/");
         }
 
         [Fact]
