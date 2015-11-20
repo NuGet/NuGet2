@@ -126,7 +126,7 @@ namespace NuGet.Commands
                 Console.WriteLine(LocalizedResourceManager.GetString("FoundProjects"), projectSystems.Count, String.Join(", ", projectSystems.Select(p => p.ProjectName)));
             }
 
-            string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
+            string repositoryPath = GetRepositoryPath(solutionDir);
             IPackageRepository sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
             foreach (var projectSystem in projectSystems)
