@@ -18,6 +18,121 @@ namespace NuGet.Test
     public class PackageBuilderTest
     {
         [Fact]
+        public void CreatePackageWithNuspecIncludeExcludeAnyGroup()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("JaneDoe");
+
+            var dependencies = new List<PackageDependency>();
+            dependencies.Add(new PackageDependency("packageB", VersionUtility.ParseVersionSpec("1.0.0"), null, "z"));
+            dependencies.Add(new PackageDependency(
+                "packageC",
+                VersionUtility.ParseVersionSpec("1.0.0"),
+                "a,b,c",
+                "b,c"));
+
+            var set = new PackageDependencySet(null, dependencies);
+            builder.DependencySets.Add(set);
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                var result = manifestStream.ReadToEnd();
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <dependencies>
+      <group>
+        <dependency id=""packageB"" version=""1.0.0"" exclude=""z"" />
+        <dependency id=""packageC"" version=""1.0.0"" include=""a,b,c"" exclude=""b,c"" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>".Replace("\r\n", "\n"), result.Replace("\r\n", "\n"));
+            }
+        }
+
+        [Fact]
+        public void CreatePackageWithNuspecIncludeExclude()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("JaneDoe");
+
+            var dependencies45 = new List<PackageDependency>();
+            dependencies45.Add(new PackageDependency("packageB", VersionUtility.ParseVersionSpec("1.0.0"), null, "z"));
+
+            var dependencies46 = new List<PackageDependency>();
+            dependencies46.Add(new PackageDependency(
+                "packageC",
+                VersionUtility.ParseVersionSpec("1.0.0"),
+                "a,b,c",
+                "b,c"));
+
+            var net45 = new PackageDependencySet(new FrameworkName(".NETFramework", new Version(4, 5)), dependencies45);
+            builder.DependencySets.Add(net45);
+
+            var net46 = new PackageDependencySet(new FrameworkName(".NETFramework", new Version(4, 6)), dependencies46);
+            builder.DependencySets.Add(net46);
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                var result = manifestStream.ReadToEnd();
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>JaneDoe</authors>
+    <owners>JaneDoe</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <dependencies>
+      <group targetFramework="".NETFramework4.5"">
+        <dependency id=""packageB"" version=""1.0.0"" exclude=""z"" />
+      </group>
+      <group targetFramework="".NETFramework4.6"">
+        <dependency id=""packageC"" version=""1.0.0"" include=""a,b,c"" exclude=""b,c"" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>".Replace("\r\n", "\n"), result.Replace("\r\n", "\n"));
+            }
+        }
+
+        [Fact]
         public void CreatePackageWithNuspecContentV2()
         {
             // Arrange

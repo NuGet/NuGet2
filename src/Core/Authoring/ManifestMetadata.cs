@@ -125,12 +125,16 @@ namespace NuGet
                     return null;
                 }
 
-                if (DependencySets.Any(set => set.TargetFramework != null))
+                // Write out groups using the post 2.5 format if there are multiple TxMs or if include/exclude are used
+                if (DependencySets.Any(set => set.TargetFramework != null
+                    ||set.Dependencies.Any(dependency => dependency.Exclude != null 
+                        || dependency.Include != null)))
                 {
                     return DependencySets.Cast<object>().ToList();
                 }
                 else
                 {
+                    // Legacy flat list format
                     return DependencySets.SelectMany(set => set.Dependencies).Cast<object>().ToList();
                 }
             }
@@ -430,7 +434,9 @@ namespace NuGet
             var dependencies = from d in manifestDependencySet.Dependencies
                                select new PackageDependency(
                                    d.Id,
-                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version));
+                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version),
+                                   d.Include,
+                                   d.Exclude);
 
             return new PackageDependencySet(targetFramework, dependencies);
         }

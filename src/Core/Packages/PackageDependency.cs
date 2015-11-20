@@ -10,6 +10,11 @@ namespace NuGet
         }
 
         public PackageDependency(string id, IVersionSpec versionSpec) 
+            : this(id, versionSpec, include: null, exclude: null)
+        {
+        }
+
+        public PackageDependency(string id, IVersionSpec versionSpec, string include, string exclude)
         {
             if (String.IsNullOrEmpty(id))
             {
@@ -17,6 +22,8 @@ namespace NuGet
             }
             Id = id;
             VersionSpec = versionSpec;
+            Include = include;
+            Exclude = exclude;
         }
 
         public string Id
@@ -26,6 +33,18 @@ namespace NuGet
         }
 
         public IVersionSpec VersionSpec
+        {
+            get;
+            private set;
+        }
+
+        public string Include
+        {
+            get;
+            private set;
+        }
+
+        public string Exclude
         {
             get;
             private set;

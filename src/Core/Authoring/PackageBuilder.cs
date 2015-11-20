@@ -256,7 +256,7 @@ namespace NuGet
             using (Package package = Package.Open(stream, FileMode.Create))
             {
                 // Validate and write the manifest
-                WriteManifest(package, DetermineMinimumSchemaVersion(Files));
+                WriteManifest(package, DetermineMinimumSchemaVersion(Files, DependencySets));
 
                 // Write the files to the package
                 WriteFiles(package);
@@ -290,9 +290,11 @@ namespace NuGet
             return String.Join(";", creatorInfo);
         }
 
-        private static int DetermineMinimumSchemaVersion(Collection<IPackageFile> Files)
+        private static int DetermineMinimumSchemaVersion(
+            Collection<IPackageFile> Files, 
+            Collection<PackageDependencySet> package)
         {
-            if (HasContentFilesV2(Files))
+            if (HasContentFilesV2(Files) || HasIncludeExclude(package))
             {
                 // version 5
                 return ManifestVersionUtility.XdtTransformationVersion;
@@ -341,6 +343,13 @@ namespace NuGet
             return contentFiles.Any(file =>
                 file.Path != null &&
                 file.Path.StartsWith(Constants.ContentFilesDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool HasIncludeExclude(IEnumerable<PackageDependencySet> dependencySets)
+        {
+            return dependencySets.Any(dependencyGroup => 
+                dependencyGroup.Dependencies
+                   .Any(dependency => dependency.Include != null || dependency.Exclude != null));
         }
 
         private static bool HasXdtTransformFile(ICollection<IPackageFile> contentFiles)

@@ -13,5 +13,11 @@ namespace NuGet
 
         [XmlAttribute("version")]
         public string Version { get; set; }
+
+        [XmlAttribute("include")]
+        public string Include { get; set; }
+
+        [XmlAttribute("exclude")]
+        public string Exclude { get; set; }
     }
 }
