@@ -87,7 +87,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
 
             var dependencies = new List<PackageDependency>();
             dependencies.Add(new PackageDependency("packageB", VersionUtility.ParseVersionSpec("1.0.0"), null, "z"));
@@ -116,8 +116,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -141,7 +141,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
 
             var dependencies45 = new List<PackageDependency>();
             dependencies45.Add(new PackageDependency("packageB", VersionUtility.ParseVersionSpec("1.0.0"), null, "z"));
@@ -175,8 +175,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -202,7 +202,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("contentFiles\\any\\any\\config\\config.xml"));
             builder.Files.Add(CreatePackageFile("contentFiles\\cs\\net45\\code.cs.pp"));
 
@@ -237,8 +237,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <contentFiles>
@@ -394,7 +394,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
 
             var dependencies = new PackageDependency[] { 
                 new PackageDependency("B")
@@ -413,8 +413,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -434,7 +434,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
 
             var fx = new FrameworkName("Silverlight", new Version("4.0"));
             var dependencies = new PackageDependency[] { 
@@ -454,8 +454,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <dependencies>
@@ -477,7 +477,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("content\\winrt53\\one.txt"));
 
             using (var ms = new MemoryStream())
@@ -494,8 +494,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -513,7 +513,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("content\\bar\\one.txt"));
 
             using (var ms = new MemoryStream())
@@ -530,8 +530,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -549,7 +549,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("tools\\sl4\\one.dll"));
 
             using (var ms = new MemoryStream())
@@ -566,8 +566,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -585,7 +585,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("tools\\foo\\one.dll"));
 
             using (var ms = new MemoryStream())
@@ -602,8 +602,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -624,7 +624,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -641,8 +641,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -664,7 +664,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -681,8 +681,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -700,7 +700,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("content\\web.config.install.xdt"));
             builder.Files.Add(CreatePackageFile("content\\app.config.uninstall.xdt"));
 
@@ -718,8 +718,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -741,7 +741,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -758,8 +758,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -782,7 +782,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
@@ -799,8 +799,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -818,7 +818,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     new FrameworkName(".NET, Version=3.0"),
@@ -839,8 +839,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <references>
@@ -864,7 +864,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 DevelopmentDependency = true
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     new FrameworkName(".NET, Version=3.0"),
@@ -885,8 +885,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
     <description>Descriptions</description>
@@ -910,7 +910,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.PackageAssemblyReferences.Add(
                 new PackageReferenceSet(
                     null,
@@ -931,8 +931,8 @@ namespace NuGet.Test
   <metadata>
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <references>
@@ -954,7 +954,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
                 MinClientVersion = new Version("2.0")
             };
-            builder.Authors.Add("JaneDoe");
+            builder.Authors.Add("testAuthor");
             builder.Files.Add(CreatePackageFile("a.txt"));
 
             using (var ms = new MemoryStream())
@@ -971,8 +971,8 @@ namespace NuGet.Test
   <metadata minClientVersion=""2.0"">
     <id>A</id>
     <version>1.0</version>
-    <authors>JaneDoe</authors>
-    <owners>JaneDoe</owners>
+    <authors>testAuthor</authors>
+    <owners>testAuthor</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
   </metadata>
@@ -1641,7 +1641,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>JaneDoe</authors>
+    <authors>testAuthor</authors>
     <description>description</description>
     <dependencies>
         <group targetFramework=""sl4"">
@@ -1674,7 +1674,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>JaneDoe</authors>
+    <authors>testAuthor</authors>
     <description>description</description>
     <dependencies>
         <group targetFramework=""sl4"">
@@ -1727,7 +1727,7 @@ Description is required.");
   <metadata>
     <id>SuperPackage</id>
     <version>2.5</version>
-    <authors>JaneDoe</authors>
+    <authors>testAuthor</authors>
     <description>description</description>
     <dependencies>
         <dependency id=""A"" />
