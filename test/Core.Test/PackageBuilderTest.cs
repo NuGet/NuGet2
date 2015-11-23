@@ -18,6 +18,64 @@ namespace NuGet.Test
     public class PackageBuilderTest
     {
         [Fact]
+        public void CreatePackageWithEmptyFoldersForV3Folders()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("JaneDoe");
+
+            var dependencies = new List<PackageDependency>();
+            dependencies.Add(new PackageDependency("packageB", VersionUtility.ParseVersionSpec("1.0.0"), null, "z"));
+            dependencies.Add(new PackageDependency(
+                "packageC",
+                VersionUtility.ParseVersionSpec("1.0.0"),
+                "a,b,c",
+                "b,c"));
+
+            var set = new PackageDependencySet(null, dependencies);
+            builder.DependencySets.Add(set);
+
+            builder.Files.Add(CreatePackageFile(@"build\_._"));
+            builder.Files.Add(CreatePackageFile(@"content\_._"));
+            builder.Files.Add(CreatePackageFile(@"contentFiles\any\any\_._"));
+            builder.Files.Add(CreatePackageFile(@"lib\net45\_._"));
+            builder.Files.Add(CreatePackageFile(@"native\net45\_._"));
+            builder.Files.Add(CreatePackageFile(@"ref\net45\_._"));
+            builder.Files.Add(CreatePackageFile(@"runtimes\net45\_._"));
+            builder.Files.Add(CreatePackageFile(@"tools\_._"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var zip = new ZipPackage(ms);
+                var files = zip.GetFiles()
+                    .Select(file => file.Path)
+                    .Where(file => Path.GetFileName(file) == "_._")
+                    .OrderBy(s => s)
+                    .ToArray();
+
+                // Assert
+                Assert.Equal(8, files.Length);
+                Assert.Equal(@"build\_._", files[0]);
+                Assert.Equal(@"content\_._", files[1]);
+                Assert.Equal(@"contentFiles\any\any\_._", files[2]);
+                Assert.Equal(@"lib\net45\_._", files[3]);
+                Assert.Equal(@"native\net45\_._", files[4]);
+                Assert.Equal(@"ref\net45\_._", files[5]);
+                Assert.Equal(@"runtimes\net45\_._", files[6]);
+                Assert.Equal(@"tools\_._", files[7]);
+            }
+        }
+
+        [Fact]
         public void CreatePackageWithNuspecIncludeExcludeAnyGroup()
         {
             // Arrange

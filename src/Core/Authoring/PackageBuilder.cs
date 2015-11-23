@@ -515,10 +515,13 @@ namespace NuGet
             if (_includeEmptyDirectories)
             {
                 // we only allow empty directories which are legit framework folders.
-                searchFiles.RemoveAll(file => file.TargetFramework == null &&
-                                              Path.GetFileName(file.TargetPath) == Constants.PackageEmptyFileName);
+                // Folders for nuget v3 should be included here also since this part of nuget.core is still used 
+                // by nuget.exe 3.3.0.
+                searchFiles.RemoveAll(file => file.TargetFramework == null
+                                             && Path.GetFileName(file.TargetPath) == Constants.PackageEmptyFileName
+                                             && !IsKnownV3Folder(file.TargetPath));
             }
-            
+
             ExcludeFiles(searchFiles, basePath, exclude);
 
             if (!PathResolver.IsWildcardSearch(source) && !PathResolver.IsDirectoryPath(source) && !searchFiles.Any())
@@ -529,6 +532,48 @@ namespace NuGet
 
 
             Files.AddRange(searchFiles);
+        }
+
+        /// <summary>
+        /// Returns true if the path uses a known v3 folder root.
+        /// </summary>
+        private static bool IsKnownV3Folder(string targetPath)
+        {
+            if (targetPath != null)
+            {
+                var parts = targetPath.Split(
+                    new char[] { '\\', '/' },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+                // exclude things in the root of the directory, this is not allowed
+                // for any of the v3 folders.
+                // example: an empty 'native' folder does not have a TxM and cannot be used.
+                if (parts.Length > 1)
+                {
+                    var topLevelDirectory = parts.FirstOrDefault();
+
+                    return KnownFoldersForV3.Any(folder =>
+                        folder.Equals(topLevelDirectory, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Folders used in NuGet v3 that are not used in NuGet.Core
+        /// </summary>
+        private static IEnumerable<string> KnownFoldersForV3
+        {
+            get
+            {
+                yield return "contentFiles";
+                yield return "ref";
+                yield return "runtimes";
+                yield return "native";
+                yield return "analyzers";
+                yield break;
+            }
         }
 
         private static void ExcludeFiles(List<PhysicalPackageFile> searchFiles, string basePath, string exclude)
