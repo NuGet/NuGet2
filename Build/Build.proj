@@ -109,7 +109,6 @@
     <ItemGroup>
         <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" Condition="'$(MonoBuild)' == ''" />
-        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio11.Test\VisualStudio11.Test.csproj" 
 		      Condition="'$(MonoBuild)' == '' and $(VisualStudioVersion) != '10.0'" />

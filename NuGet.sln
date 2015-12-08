@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
@@ -65,8 +65,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio", "src\VisualS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Test", "test\Core.Test\Core.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "src\Server\Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsExtension", "src\VsExtension\VsExtension.csproj", "{D0F9864B-D782-4471-81A2-29555E5DC0D7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{37465016-5F91-478B-B4E3-DC78B025797A} = {37465016-5F91-478B-B4E3-DC78B025797A}
@@ -98,8 +96,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost.Test", "test\PowerShellHost.Test\PowerShellHost.Test.csproj", "{82AB7D04-FA51-4707-8A1F-62B29AC23E6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Options", "src\Options\Options.csproj", "{53AB7187-CDF3-48B5-B90E-8919D3CB904D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Test", "test\Server.Test\Server.Test.csproj", "{92D18050-3867-4E39-B305-9F9870F66F5E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio.Interop", "src\VisualStudio.Interop\VisualStudio.Interop.csproj", "{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}"
 EndProject
@@ -221,22 +217,6 @@ Global
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Coverage|Mixed Platforms.Build.0 = Coverage|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{D0F9864B-D782-4471-81A2-29555E5DC0D7}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
 		{D0F9864B-D782-4471-81A2-29555E5DC0D7}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
 		{D0F9864B-D782-4471-81A2-29555E5DC0D7}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
@@ -489,22 +469,6 @@ Global
 		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Coverage|Mixed Platforms.Build.0 = Coverage|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Mono Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{92D18050-3867-4E39-B305-9F9870F66F5E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
 		{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
 		{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
@@ -966,7 +930,6 @@ Global
 		{F016882A-C798-4446-BB75-D3C393A38B32} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{6C09BF50-E5B3-4810-8A17-37D399A172ED} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{82AB7D04-FA51-4707-8A1F-62B29AC23E6D} = {E7B39EAD-EA32-4011-845A-C949A336389A}
-		{92D18050-3867-4E39-B305-9F9870F66F5E} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{135A5956-39CD-495C-8FB2-06678A90488D} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{5376E601-D111-4198-8BC2-F1118433CC83} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77} = {E7B39EAD-EA32-4011-845A-C949A336389A}
