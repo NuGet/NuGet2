@@ -81,7 +81,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>();
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
+            dependencyProvider.Setup(c => DependencyResolveUtility.ResolveDependency(c, It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
                               .Returns(packageB).Verifiable();
             var localRepository = new MockPackageRepository();
 
@@ -118,7 +118,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
+            dependencyProvider.Setup(c => DependencyResolveUtility.ResolveDependency(c, packageDependency, It.IsAny<IPackageConstraintProvider>(), false, true, DependencyVersion.Lowest))
                               .Returns(packageB12).Verifiable();
             var localRepository = new MockPackageRepository();
 
