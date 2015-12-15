@@ -52,6 +52,20 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetPathToEnumerateReturnsSearchPathIfItIsRootedPath()
+        {
+            // Arrange
+            var basePath = @"c:\work";
+            var searchPath = @"\Volumes\Storage\users\test\repos\nuget\packages\test.*";
+
+            // Act
+            var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
+
+            // Assert
+            Assert.Equal(@"\Volumes\Storage\users\test\repos\nuget\packages", result);
+        }
+
+        [Fact]
         public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardFileName()
         {
             // Arrange

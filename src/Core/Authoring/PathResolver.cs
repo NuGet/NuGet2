@@ -99,12 +99,6 @@ namespace NuGet
 
         private static IEnumerable<SearchPathResult> PerformWildcardSearchInternal(string basePath, string searchPath, bool includeEmptyDirectories, out string normalizedBasePath)
         {
-            if (!searchPath.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
-            {
-                // If we aren't dealing with network paths, trim the leading slash. 
-                searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
-            }
-
             bool searchDirectory = false;
             
             // If the searchPath ends with \ or /, we treat searchPath as a directory,
