@@ -17633,7 +17633,7 @@ namespace NuGet.Client.CommandLine {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifiy the version of dependency and rebuild your package..
+        ///   Looks up a localized string similar to Specify the version of dependency and rebuild your package..
         /// </summary>
         internal static string Warning_UnspecifiedDependencyVersionSolution {
             get {
