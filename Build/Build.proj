@@ -48,12 +48,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Specifiy the NuGet release version. When make changes here, please also change the version numbers 
+        <!-- Specifiy the NuGet release version. When make changes here, please also change the version numbers
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>10</MinorVersion>
-        <Patch>1</Patch>
+        <MinorVersion>11</MinorVersion>
+        <Patch>0</Patch>
         <Revision>$(BUILD_NUMBER)</Revision>
 
         <!-- This is the file version of the DLLs/EXE produced. It's also the version of the vsix -->
@@ -109,7 +109,7 @@
         <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
-        <TestProjects Include="$(NuGetTestRoot)\VisualStudio11.Test\VisualStudio11.Test.csproj" 
+        <TestProjects Include="$(NuGetTestRoot)\VisualStudio11.Test\VisualStudio11.Test.csproj"
                       Condition="'$(MonoBuild)' == '' and $(VisualStudioVersion) != '10.0'" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
@@ -125,7 +125,7 @@
 
     <Target Name="Go"
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
-                                    VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
+                                    VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory;
                                     CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
@@ -154,7 +154,7 @@
         <PropertyGroup>
             <PackageSources>https://www.nuget.org/api/v2/</PackageSources>
         </PropertyGroup>
-        
+
         <Message Text="Restoring NuGet packages" Importance="High" />
         <Exec Command="&quot;$(ExeBuildDirectory)\NuGet.exe&quot; restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == ''" />
         <Exec Command="mono $(ExeBuildDirectory)\NuGet.exe restore -source &quot;$(PackageSources)&quot;" WorkingDirectory="$(NuGetRoot)" Condition="'$(MonoBuild)' == 'true'"/>
@@ -210,10 +210,10 @@
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio14.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer.dll"></UnwantedAssembly>
         </ItemGroup>
-        
+
         <Delete Files="@(InvalidFiles)" />
         <Delete Files="@(UnwantedAssembly)" />
-        
+
         <Exec Command="&quot;$(ZipExe)&quot; a -r &quot;$(VisualStudioAddInBuildDirectory)\NuGet.Tools.zip&quot; &quot;$(TempVsixDirectory)\*.*&quot;" />
 
         <Delete Files="$(VsixFileLocation)" />
@@ -222,7 +222,7 @@
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
-    <Target Name="RunTests" Condition=" '$(DisableRunningUnitTests)' != 'true' ">        
+    <Target Name="RunTests" Condition=" '$(DisableRunningUnitTests)' != 'true' ">
         <MsBuild Projects="@(TestProjects)"
                  Targets="RunTests"
                  BuildInParallel="$(BuildTestsInParallel)" />
