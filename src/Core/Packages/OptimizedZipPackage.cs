@@ -16,7 +16,7 @@ namespace NuGet
     /// Represents a NuGet package backed by a .nupkg file on disk.
     /// </summary>
     /// <remarks>
-    /// Unlike <see cref="ZipPackage"/>, OptimizedZipPackage doesn't store content files in memory. 
+    /// Unlike <see cref="ZipPackage"/>, OptimizedZipPackage doesn't store content files in memory.
     /// Instead, it unzips the .nupkg file to a temp folder on disk, which helps reduce overall memory usage.
     /// </remarks>
     public class OptimizedZipPackage : LocalPackage
@@ -24,9 +24,10 @@ namespace NuGet
         // The DateTimeOffset entry stores the LastModifiedTime of the original .nupkg file that
         // is passed to this class. This is so that we can invalidate the cache when the original
         // file has changed.
-        private static readonly ConcurrentDictionary<PackageName, Tuple<string, DateTimeOffset>> _cachedExpandedFolder 
+        private static readonly ConcurrentDictionary<PackageName, Tuple<string, DateTimeOffset>> _cachedExpandedFolder
             = new ConcurrentDictionary<PackageName, Tuple<string, DateTimeOffset>>();
-        private static readonly IFileSystem _tempFileSystem = new PhysicalFileSystem(Path.Combine(Path.GetTempPath(), "nuget"));
+        private static readonly IFileSystem _tempFileSystem = new PhysicalFileSystem(
+            Path.Combine(Path.GetTempPath(), "NuGetScratch", Guid.NewGuid().ToString()));
 
         private Dictionary<string, PhysicalPackageFile> _files;
         private ICollection<FrameworkName> _supportedFrameworks;
@@ -268,7 +269,7 @@ namespace NuGet
                         using (Stream partStream = file.GetStream(),
                                       targetStream = _expandedFileSystem.OpenFile(filePath))
                         {
-                            // if the target file already exists, 
+                            // if the target file already exists,
                             // don't copy file if the lengths are equal.
                             copyFile = partStream.Length != targetStream.Length;
                         }
