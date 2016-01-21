@@ -163,29 +163,30 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="MergeExecutable" Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe" Outputs="$(OutputPath)Merged\NuGet.exe" Condition=" '$(OS)' == 'Windows_NT'">
+  <Target Name="MergeExecutable" Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe" Outputs="$(OutputPath)Merged\NuGet.exe">
     <PropertyGroup>
+      <Runtime Condition="'$(OS)'=='Unix'">mono</Runtime>
       <NuGetRoot>$(MsBuildProjectDirectory)\..\..</NuGetRoot>
-      <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
+      <ILMergeExe>$(NuGetRoot)/packages/ILRepack.2.0.10/tools/ILRepack.exe</ILMergeExe>
       <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
       <ILMergeOutputFile>NuGet.exe</ILMergeOutputFile>
       <ILMergeOutputFilePath>$(OutputPath)Merged\$(ILMergeOutputFile)</ILMergeOutputFilePath>
       <ILMergeOutputFilePathSigned>$(OutputPath)Signed\$(ILMergeOutputFile)</ILMergeOutputFilePathSigned>
-      <FrameworkPath>$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
-      <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
+      <FrameworkPath Condition="'$(OS)' == 'Windows_NT'">$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
+      <FrameworkPath Condition="'$(MSBuildProgramFiles32)' != ''And '$(OS)' == 'Windows_NT'">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0</FrameworkPath>
       <ILMergeCommandArgs>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Merged\$(ILMergeOutputFile)" /log:"Merged\ilmerge.msbuild.log" /allowDup NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll</ILMergeCommandArgs>
       <ILMergeCommandArgsSigned>/targetplatform:"v4, $(FrameworkPath)" /internalize:"$(ILMergeInternalizeIgnoreFile)" /target:exe /out:"Signed\$(ILMergeOutputFile)" /log:"Signed\ilmerge.msbuild.log" /allowDup /keyfile:"$(AssemblyOriginatorKeyFile)" /delaysign NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll</ILMergeCommandArgsSigned>
     </PropertyGroup>
     <ItemGroup>
       <ILMergeItems Include="$(OutputPath)\*.dll;$(OutputPath)\*.exe" />
     </ItemGroup>
-    <MakeDir Directories="$(OutputPath)Merged" Condition="!Exists('$(OutputPath)Merged')" />
-    <MakeDir Directories="$(OutputPath)Signed" Condition="!Exists('$(OutputPath)Signed')" />
-    <Delete Files="$(ILMergeOutputFilePath)" Condition="Exists($(ILMergeOutputFilePath))" />
-    <Delete Files="$(ILMergeOutputFilePathSigned)" Condition="Exists($(ILMergeOutputFilePathSigned))" />
+    <MakeDir Directories="$(OutputPath)Merged" />
+    <MakeDir Directories="$(OutputPath)Signed" />
+    <Delete Files="$(ILMergeOutputFilePath)" />
+    <Delete Files="$(ILMergeOutputFilePathSigned)" />
     <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
-    <Error Condition="!Exists('$(FrameworkPath)')" Text="Could not find 4.0 reference assemblies in $(FrameworkPath)" />
-    <Exec Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgs)" WorkingDirectory="$(OutputPath)" />
+    <Error Condition="!Exists('$(FrameworkPath)') And '$(OS)' == 'Windows_NT'" Text="Could not find 4.0 reference assemblies in $(FrameworkPath)" />
+    <Exec Command="$(Runtime) &quot;$(ILMergeExe)&quot; $(ILMergeCommandArgs)" WorkingDirectory="$(OutputPath)" />
     <!-- produce another signed one if signing assembly -->
     <Exec Condition=" '$(SignASsembly)' == 'true' " Command="&quot;$(ILMergeExe)&quot; $(ILMergeCommandArgsSigned)" WorkingDirectory="$(OutputPath)" />
   </Target>
