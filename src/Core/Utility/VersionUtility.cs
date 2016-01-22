@@ -20,6 +20,10 @@ namespace NuGet
         private const string PortableFrameworkIdentifier = ".NETPortable";
         private const string NetPlatformFrameworkIdentifier = ".NETPlatform";
         private const string NetPlatformFrameworkShortName = "dotnet";
+        private const string NetStandardFrameworkShortName = "netstandard";
+        private const string NetStandardFrameworkIdentifier = ".NETStandard";
+        private const string NetStandardAppFrameworkShortName = "netstandardapp";
+        private const string NetStandardAppFrameworkIdentifier = ".NETStandardApp";
         private const string AspNetFrameworkIdentifier = "ASP.Net";
         private const string AspNetCoreFrameworkIdentifier = "ASP.NetCore";
         private const string DnxFrameworkIdentifier = "DNX";
@@ -101,6 +105,14 @@ namespace NuGet
             { NetPlatformFrameworkShortName, NetPlatformFrameworkIdentifier },
             { NetPlatformFrameworkIdentifier, NetPlatformFrameworkIdentifier },
 
+            // Netstandard
+            { NetStandardFrameworkShortName, NetStandardFrameworkIdentifier },
+            { NetStandardFrameworkIdentifier, NetStandardFrameworkIdentifier },
+
+            // Netstandardapp
+            { NetStandardAppFrameworkShortName, NetStandardAppFrameworkIdentifier },
+            { NetStandardAppFrameworkIdentifier, NetStandardAppFrameworkIdentifier },
+
             // UAP
             { UAPFrameworkShortName, UAPFrameworkIdentifier },
 
@@ -148,6 +160,8 @@ namespace NuGet
             { DnxFrameworkIdentifier, DnxFrameworkShortName },
             { DnxCoreFrameworkIdentifier, DnxCoreFrameworkShortName },
             { NetPlatformFrameworkIdentifier, NetPlatformFrameworkShortName },
+            { NetStandardFrameworkIdentifier, NetStandardFrameworkShortName },
+            { NetStandardAppFrameworkIdentifier, NetStandardAppFrameworkShortName },
             { AspNetFrameworkIdentifier, "aspnet" },
             { AspNetCoreFrameworkIdentifier, "aspnetcore" },
             { "Silverlight", "sl" },
@@ -664,6 +678,27 @@ namespace NuGet
                 // only show version part if it's > 0.0.0.0
                 if (frameworkName.Version > new Version())
                 {
+                    if (frameworkName.Identifier.Equals(NetStandardAppFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                        || frameworkName.Identifier.Equals(NetStandardFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                        || frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (frameworkName.Version.Major > 9
+                            || frameworkName.Version.Minor > 9
+                            || frameworkName.Version.Revision > 9
+                            || frameworkName.Version.Build > 9)
+                        {
+                            // This version has digits over 10 and must be expressed using decimals
+                            name += GetDecimalVersionString(frameworkName.Version);
+                        }
+                        else
+                        {
+                            // do not remove the . from versions for dotnet/netstandard(app) frameworks
+                            name += frameworkName.Version.ToString();
+                        }
+
+                        return name;
+                    }
+
                     // Remove the . from versions
                     if (frameworkName.Version.Major > 9 
                         || frameworkName.Version.Minor > 9 

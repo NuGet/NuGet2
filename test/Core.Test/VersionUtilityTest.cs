@@ -2007,6 +2007,10 @@ namespace NuGet.Test
         [InlineData("dotnet10", ".NETPlatform", "1.0")]
         [InlineData("dotnet50", ".NETPlatform", "5.0")]
         [InlineData("dotnet60", ".NETPlatform", "6.0")]
+        [InlineData("netstandard", ".NETStandard", "0.0")]
+        [InlineData("netstandard10", ".NETStandard", "1.0")]
+        [InlineData("netstandardapp", ".NETStandardApp", "0.0")]
+        [InlineData("netstandardapp10", ".NETStandardApp", "1.0")]
         public void CanParseShortFrameworkNames(string shortName, string longName, string version)
         {
             var fx = VersionUtility.ParseFrameworkName(shortName);
@@ -2016,6 +2020,10 @@ namespace NuGet.Test
         [Theory]
         [InlineData(".NETPlatform", "0.0", "dotnet")]
         [InlineData(".NETPlatform", "5.0", "dotnet")]
+        [InlineData(".NETStandard", "0.0", "netstandard")]
+        [InlineData(".NETStandard", "1.0", "netstandard1.0")]
+        [InlineData(".NETStandardApp", "0.0", "netstandardapp")]
+        [InlineData(".NETStandardApp", "1.0", "netstandardapp1.0")]
         public void ShortFrameworkNamesAreCorrect(string longName, string version, string shortName)
         {
             var fx = new FrameworkName(longName, Version.Parse(version));
@@ -2025,6 +2033,8 @@ namespace NuGet.Test
         [Theory]
         [InlineData(".NETPlatform5.0", ".NETPlatform", "5.0")]
         [InlineData(".NETPlatform50", ".NETPlatform", "5.0")]
+        [InlineData(".NETStandard10", ".NETStandard", "1.0")]
+        [InlineData(".NETStandardApp10", ".NETStandardApp", "1.0")]
         public void CanParseMixedFrameworkNames(string mixedName, string longName, string version)
         {
             var fx = VersionUtility.ParseFrameworkName(mixedName);
@@ -2034,6 +2044,10 @@ namespace NuGet.Test
         [Theory]
         [InlineData(".NETPlatform5.0", "dotnet")]
         [InlineData(".NETPlatform50", "dotnet")]
+        [InlineData(".NETStandard", "netstandard")]
+        [InlineData(".NETStandardApp", "netstandardapp")]
+        [InlineData(".NETStandard1.0", "netstandard1.0")]
+        [InlineData(".NETStandardApp1.0", "netstandardapp1.0")]
         public void CanParseMixedFrameworkNamesToShort(string mixedName, string shortName)
         {
             var fx = VersionUtility.ParseFrameworkName(mixedName);
