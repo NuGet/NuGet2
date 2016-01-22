@@ -259,7 +259,7 @@ namespace NuGet
                 WriteManifest(package, DetermineMinimumSchemaVersion(Files, DependencySets));
 
                 // Write the files to the package
-                WriteFiles(package);
+                WriteFiles(package, Id);
 
                 // Copy the metadata properties back to the package
                 package.PackageProperties.Creator = String.Join(",", Authors);
@@ -484,7 +484,7 @@ namespace NuGet
             }
         }
 
-        private void WriteFiles(Package package)
+        private void WriteFiles(Package package, string packageId)
         {
             // Add files that might not come from expanding files on disk
             foreach (IPackageFile file in new HashSet<IPackageFile>(Files))
@@ -493,7 +493,7 @@ namespace NuGet
                 {
                     try
                     {
-                        CreatePart(package, file.Path, stream);
+                        CreatePart(package, file.Path, stream, packageId);
                     }
                     catch
                     {
@@ -592,9 +592,9 @@ namespace NuGet
             }
         }
 
-        private static void CreatePart(Package package, string path, Stream sourceStream)
+        private static void CreatePart(Package package, string path, Stream sourceStream, string packageId)
         {
-            if (PackageHelper.IsPackageManifest(path, package.PackageProperties.Identifier))
+            if (PackageHelper.IsPackageManifest(path, packageId))
             {
                 return;
             }
