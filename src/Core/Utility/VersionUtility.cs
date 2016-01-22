@@ -678,31 +678,10 @@ namespace NuGet
                 // only show version part if it's > 0.0.0.0
                 if (frameworkName.Version > new Version())
                 {
-                    if (frameworkName.Identifier.Equals(NetStandardAppFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
-                        || frameworkName.Identifier.Equals(NetStandardFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
-                        || frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (frameworkName.Version.Major > 9
-                            || frameworkName.Version.Minor > 9
-                            || frameworkName.Version.Revision > 9
-                            || frameworkName.Version.Build > 9)
-                        {
-                            // This version has digits over 10 and must be expressed using decimals
-                            name += GetDecimalVersionString(frameworkName.Version);
-                        }
-                        else
-                        {
-                            // do not remove the . from versions for dotnet/netstandard(app) frameworks
-                            name += frameworkName.Version.ToString();
-                        }
-
-                        return name;
-                    }
-
                     // Remove the . from versions
-                    if (frameworkName.Version.Major > 9 
-                        || frameworkName.Version.Minor > 9 
-                        || frameworkName.Version.Revision > 9 
+                    if (frameworkName.Version.Major > 9
+                        || frameworkName.Version.Minor > 9
+                        || frameworkName.Version.Revision > 9
                         || frameworkName.Version.Build > 9)
                     {
                         // This version has digits over 10 and must be expressed using decimals
@@ -710,8 +689,18 @@ namespace NuGet
                     }
                     else
                     {
-                        // Express the version without decimals
-                        name += frameworkName.Version.ToString().Replace(".", String.Empty);
+                        if (frameworkName.Identifier.Equals(NetStandardAppFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                            || frameworkName.Identifier.Equals(NetStandardFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                            || frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // do not remove the . from versions for dotnet/netstandard(app) frameworks
+                            name += frameworkName.Version.ToString();
+                        }
+                        else
+                        {
+                            // remove the . from versions
+                            name += frameworkName.Version.ToString().Replace(".", string.Empty);
+                        }
                     }
                 }
 
