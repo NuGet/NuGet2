@@ -679,10 +679,7 @@ namespace NuGet
                 if (frameworkName.Version > new Version())
                 {
                     // Remove the . from versions
-                    if (frameworkName.Version.Major > 9
-                        || frameworkName.Version.Minor > 9
-                        || frameworkName.Version.Revision > 9
-                        || frameworkName.Version.Build > 9)
+                    if (RequiresDecimalVersioning(frameworkName.Version))
                     {
                         // This version has digits over 10 and must be expressed using decimals
                         name += GetDecimalVersionString(frameworkName.Version);
@@ -718,6 +715,15 @@ namespace NuGet
             return name + "-" + profile;
         }
 
+        private static bool RequiresDecimalVersioning(Version version)
+        {
+            return version != null
+                && (version.Major > 9
+                   || version.Minor > 9
+                   || version.Build > 9
+                   || version.Revision > 9);
+        }
+
         private static string GetDecimalVersionString(Version version)
         {
             StringBuilder sb = new StringBuilder();
@@ -732,7 +738,7 @@ namespace NuGet
                 versionParts.Push(version.Revision > 0 ? version.Revision : 0);
 
                 // if any parts of the version are over 9 we need to use decimals
-                bool useDecimals = versionParts.Any(x => x > 9);
+                bool useDecimals = RequiresDecimalVersioning(version);
 
                 // remove all trailing zeros
                 while (versionParts.Count > 0 && versionParts.Peek() <= 0)
