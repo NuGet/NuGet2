@@ -16,6 +16,8 @@ namespace NuGet
     public static class VersionUtility
     {
         private const string NetFrameworkIdentifier = ".NETFramework";
+        private const string NetCoreAppFrameworkShortName = "netcoreapp";
+        private const string NetCoreAppFrameworkIdentifier = ".NETCoreApp";
         private const string NetCoreFrameworkIdentifier = ".NETCore";
         private const string PortableFrameworkIdentifier = ".NETPortable";
         private const string NetPlatformFrameworkIdentifier = ".NETPlatform";
@@ -86,7 +88,7 @@ namespace NuGet
             { "WindowsPhone", "WindowsPhone" },
             { "WindowsPhoneApp", "WindowsPhoneApp"},
             { "wpa", "WindowsPhoneApp"},
-            
+
             // Windows
             { "Windows", "Windows" },
             { "win", "Windows" },
@@ -97,7 +99,7 @@ namespace NuGet
             { "asp.net", AspNetFrameworkIdentifier },
             { "asp.netcore", AspNetCoreFrameworkIdentifier },
 
-            // DNX 
+            // DNX
             { DnxFrameworkShortName, DnxFrameworkIdentifier },
             { DnxCoreFrameworkShortName, DnxCoreFrameworkIdentifier },
 
@@ -113,12 +115,16 @@ namespace NuGet
             { NetStandardAppFrameworkShortName, NetStandardAppFrameworkIdentifier },
             { NetStandardAppFrameworkIdentifier, NetStandardAppFrameworkIdentifier },
 
+            // Netcoreapp
+            { NetCoreAppFrameworkShortName, NetCoreAppFrameworkIdentifier },
+            { NetCoreAppFrameworkIdentifier, NetCoreAppFrameworkIdentifier },
+
             // UAP
             { UAPFrameworkShortName, UAPFrameworkIdentifier },
 
             // Native
             { "native", "native"},
-            
+
             // Mono/Xamarin
             { "MonoAndroid", "MonoAndroid" },
             { "MonoTouch", "MonoTouch" },
@@ -162,6 +168,7 @@ namespace NuGet
             { NetPlatformFrameworkIdentifier, NetPlatformFrameworkShortName },
             { NetStandardFrameworkIdentifier, NetStandardFrameworkShortName },
             { NetStandardAppFrameworkIdentifier, NetStandardAppFrameworkShortName },
+            { NetCoreAppFrameworkIdentifier, NetCoreAppFrameworkShortName },
             { AspNetFrameworkIdentifier, "aspnet" },
             { AspNetCoreFrameworkIdentifier, "aspnetcore" },
             { "Silverlight", "sl" },
@@ -224,10 +231,10 @@ namespace NuGet
         private static readonly Version MaxVersion = new Version(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue);
         private static readonly Dictionary<string, FrameworkName> _equivalentProjectFrameworks = new Dictionary<string, FrameworkName>()
         {
-            // Allow a core package to be installed in a dnxcore project 
+            // Allow a core package to be installed in a dnxcore project
             // { DnxCoreFrameworkIdentifier, new FrameworkName(CoreFrameworkIdentifier, MaxVersion) },
 
-            // Allow an aspnetcore package to be installed in a dnxcore project 
+            // Allow an aspnetcore package to be installed in a dnxcore project
             { DnxCoreFrameworkIdentifier, new FrameworkName(AspNetCoreFrameworkIdentifier, MaxVersion) },
 
             // Allow an aspnet package to be installed in a dnx project
@@ -348,7 +355,18 @@ namespace NuGet
                 }
 
                 // Use 5.0 instead of 0.0 as the default for NetPlatform
-                version = identifierPart.Equals(NetPlatformFrameworkIdentifier) ? new Version(5, 0) : _emptyVersion;
+                if (identifierPart.Equals(NetPlatformFrameworkIdentifier))
+                {
+                    version = new Version(5, 0);
+                }
+                else if (identifierPart.Equals(NetCoreAppFrameworkIdentifier))
+                {
+                    version = new Version(1, 0);
+                }
+                else
+                {
+                    version = _emptyVersion;
+                }
             }
 
             if (String.IsNullOrEmpty(identifierPart))
@@ -645,7 +663,7 @@ namespace NuGet
                 }
             }
 
-            if (frameworkName.Version.Major == 5 
+            if (frameworkName.Version.Major == 5
                 && frameworkName.Version.Minor == 0
                 && frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
             {
@@ -688,9 +706,10 @@ namespace NuGet
                     {
                         if (frameworkName.Identifier.Equals(NetStandardAppFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
                             || frameworkName.Identifier.Equals(NetStandardFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
-                            || frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+                            || frameworkName.Identifier.Equals(NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                            || frameworkName.Identifier.Equals(NetCoreAppFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
                         {
-                            // do not remove the . from versions for dotnet/netstandard(app) frameworks
+                            // do not remove the . from versions for dotnet/netstandard(app)/netcoreapp frameworks
                             name += frameworkName.Version.ToString();
                         }
                         else
@@ -749,7 +768,7 @@ namespace NuGet
                 // write the version string out backwards
                 while (versionParts.Count > 0)
                 {
-                    // avoid adding a decimal if this is the first digit, but if we are down 
+                    // avoid adding a decimal if this is the first digit, but if we are down
                     // to only 2 numbers left we have to add a decimal otherwise 10.0 becomes 1.0
                     // during the parse
                     if (useDecimals)
@@ -779,8 +798,8 @@ namespace NuGet
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public static FrameworkName ParseFrameworkNameFromFilePath(string filePath, out string effectivePath)
         {
-            var knownFolders = new string[] 
-            { 
+            var knownFolders = new string[]
+            {
                 Constants.ContentDirectory,
                 Constants.LibDirectory,
                 Constants.ToolsDirectory,
@@ -833,7 +852,7 @@ namespace NuGet
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         public static FrameworkName ParseFrameworkFolderName(string path, bool strictParsing, out string effectivePath)
         {
-            // The path for a reference might look like this for assembly foo.dll:            
+            // The path for a reference might look like this for assembly foo.dll:
             // foo.dll
             // sub\foo.dll
             // {FrameworkName}{Version}\foo.dll
@@ -912,7 +931,7 @@ namespace NuGet
             return hasItems;
         }
 
-        
+
 
         internal static Version NormalizeVersion(Version version)
         {
@@ -986,7 +1005,7 @@ namespace NuGet
             packageTargetFrameworkName = NormalizeFrameworkName(packageTargetFrameworkName);
             projectFrameworkName = NormalizeFrameworkName(projectFrameworkName);
 
-        check:
+            check:
 
             if (!projectFrameworkName.Identifier.Equals(packageTargetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
@@ -1118,7 +1137,7 @@ namespace NuGet
                 // The package is installed into a net45 project. We want to pick the 'net40' folder, even though
                 // the 'net45' in portable folder has a matching version with the project's framework.
                 //
-                // So, in order to achieve that, here we give the folder that has matching identifer with the project's 
+                // So, in order to achieve that, here we give the folder that has matching identifer with the project's
                 // framework identifier a compatibility score of 10, to make sure it weighs more than the compatibility of matching version.
 
                 compatibility += 10 * (1L << 32);
@@ -1172,24 +1191,24 @@ namespace NuGet
         /// </remarks>
         internal static int GetCompatibilityBetweenPortableLibraryAndPortableLibrary(FrameworkName projectFrameworkName, FrameworkName packageTargetFrameworkName)
         {
-            // Algorithms: Give a score from 0 to N indicating how close *in version* each package platform is the project’s platforms 
+            // Algorithms: Give a score from 0 to N indicating how close *in version* each package platform is the project’s platforms
             // and then choose the folder with the lowest score. If the score matches, choose the one with the least platforms.
-            // 
+            //
             // For example:
-            // 
+            //
             // Project targeting: .NET 4.5 + SL5 + WP71
-            // 
+            //
             // Package targeting:
             // .NET 4.5 (0) + SL5 (0) + WP71 (0)                            == 0
             // .NET 4.5 (0) + SL5 (0) + WP71 (0) + Win8 (0)                 == 0
             // .NET 4.5 (0) + SL4 (1) + WP71 (0) + Win8 (0)                 == 1
             // .NET 4.0 (1) + SL4 (1) + WP71 (0) + Win8 (0)                 == 2
             // .NET 4.0 (1) + SL4 (1) + WP70 (1) + Win8 (0)                 == 3
-            // 
+            //
             // Above, there’s two matches with the same result, choose the one with the least amount of platforms.
-            // 
+            //
             // There will be situations, however, where there is still undefined behavior, such as:
-            // 
+            //
             // .NET 4.5 (0) + SL4 (1) + WP71 (0)                            == 1
             // .NET 4.0 (1) + SL5 (0) + WP71 (0)                            == 1
 
@@ -1245,8 +1264,8 @@ namespace NuGet
             // A = 502, B = 303, C = 104, D = 105. And, C has the lowest score and the most compatible
             score = score * 50 + packageTargetFrameworkProfile.SupportedFrameworks.Count;
 
-            // Our algorithm returns lowest score for the most compatible framework. 
-            // However, the caller of this method expects it to have the highest score. 
+            // Our algorithm returns lowest score for the most compatible framework.
+            // However, the caller of this method expects it to have the highest score.
             // Hence, we return the negative value of score here.
             return -score;
         }
@@ -1275,7 +1294,7 @@ namespace NuGet
 
                 return score;
             }
-            else if(NetPortableProfileTable.HasCompatibleProfileWith(packageFrameworkProfile, projectFrameworkName))
+            else if (NetPortableProfileTable.HasCompatibleProfileWith(packageFrameworkProfile, projectFrameworkName))
             {
                 // Get the list of portable profiles that supports projectFrameworkName
                 // And, see if there is atleast 1 profile which is compatible with packageFrameworkProfile
@@ -1303,7 +1322,7 @@ namespace NuGet
 
         public static bool IsPortableFramework(this FrameworkName framework)
         {
-            // The profile part has been verified in the ParseFrameworkName() method. 
+            // The profile part has been verified in the ParseFrameworkName() method.
             // By the time it is called here, it's guaranteed to be valid.
             // Thus we can ignore the profile part here
             return framework != null && PortableFrameworkIdentifier.Equals(framework.Identifier, StringComparison.OrdinalIgnoreCase);

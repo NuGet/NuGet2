@@ -148,7 +148,7 @@ namespace NuGet.Test
             // Act
             string effectivePath;
             var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
-            
+
             // Assert
             Assert.Null(framework);
             Assert.Equal(expectedPath, effectivePath);
@@ -415,9 +415,9 @@ namespace NuGet.Test
         [InlineData(new[] { "XamarinPlayStationVita", "xamarinplaystationvita", "XAMARINPLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "Xamarin.PlayStationVita", "xamarin.playstationvita", "XAMARIN.PLAYSTATIONVITA " }, "0.0", "Xamarin.PlayStationVita")]
         [InlineData(new[] { "XamarinPSVita", "xamarinpsvita", "XAMARINPSVITA " }, "0.0", "Xamarin.PlayStationVita")]
-        [InlineData(new[] { "XamarinTVOS", "xamarintvos", "XAMARINTVOS " }, "0.0", "Xamarin.TVOS")]  
-        [InlineData(new[] { "Xamarin.TVOS", "xamarin.tvos", "XAMARIN.TVOS " }, "0.0", "Xamarin.TVOS")]  
-        [InlineData(new[] { "XamarinWatchOS", "xamarinwatchos", "XAMARINWATCHOS " }, "0.0", "Xamarin.WatchOS")]  
+        [InlineData(new[] { "XamarinTVOS", "xamarintvos", "XAMARINTVOS " }, "0.0", "Xamarin.TVOS")]
+        [InlineData(new[] { "Xamarin.TVOS", "xamarin.tvos", "XAMARIN.TVOS " }, "0.0", "Xamarin.TVOS")]
+        [InlineData(new[] { "XamarinWatchOS", "xamarinwatchos", "XAMARINWATCHOS " }, "0.0", "Xamarin.WatchOS")]
         [InlineData(new[] { "Xamarin.WatchOS", "xamarin.watchos", "XAMARIN.WATCHOS " }, "0.0", "Xamarin.WatchOS")]
         [InlineData(new[] { "Xamarin.XboxThreeSixty", "xamarin.xboxthreesixty", "XAMARIN.XBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
         [InlineData(new[] { "XamarinXboxThreeSixty", "xamarinxboxthreesixty", "XAMARINXBOXTHREESIXTY " }, "0.0", "Xamarin.Xbox360")]
@@ -861,8 +861,8 @@ namespace NuGet.Test
         public void GetAllPossibleVersionsTwoDigits()
         {
             // Arrange
-            var expectedVersions = new[] { 
-                new SemanticVersion("1.1"), 
+            var expectedVersions = new[] {
+                new SemanticVersion("1.1"),
                 new SemanticVersion("1.1.0"),
                 new SemanticVersion("1.1.0.0")
             };
@@ -878,8 +878,8 @@ namespace NuGet.Test
         public void GetAllPossibleVersionsThreeDigits()
         {
             // Arrange
-            var expectedVersions = new[] { 
-                new SemanticVersion("1.0"), 
+            var expectedVersions = new[] {
+                new SemanticVersion("1.0"),
                 new SemanticVersion("1.0.0"),
                 new SemanticVersion("1.0.0.0"),
             };
@@ -895,13 +895,13 @@ namespace NuGet.Test
         public void GetAllPossibleVersionsFourDigits()
         {
             // Arrange
-            var expectedVersions = new[] { 
-                new SemanticVersion("1.0"), 
+            var expectedVersions = new[] {
+                new SemanticVersion("1.0"),
                 new SemanticVersion("1.0.0"),
                 new SemanticVersion("1.0.0.0"),
             };
             var expectedVersionStrings = new[] {
-                "1.0", 
+                "1.0",
                 "1.0.0",
                 "1.0.0.0"
             };
@@ -918,11 +918,11 @@ namespace NuGet.Test
         public void GetAllPossibleVersionsThreeDigitsWithZeroBetween()
         {
             // Arrange
-            var expectedVersions = new[] { 
-                new SemanticVersion("1.0.1"), 
+            var expectedVersions = new[] {
+                new SemanticVersion("1.0.1"),
                 new SemanticVersion("1.0.1.0")
             };
-            var expectedVersionStrings = new[] 
+            var expectedVersionStrings = new[]
             {
                 "1.0.1",
                 "1.0.1.0",
@@ -940,12 +940,12 @@ namespace NuGet.Test
         public void GetAllPossibleVersionsFourDigitsWithTrailingZeros()
         {
             // Arrange
-            var expectedVersions = new[] { 
+            var expectedVersions = new[] {
                 new SemanticVersion("1.1"),
                 new SemanticVersion("1.1.0"),
                 new SemanticVersion("1.1.0.0"),
             };
-            var expectedVersionStrings = new[] 
+            var expectedVersionStrings = new[]
             {
                 "1.1",
                 "1.1.0",
@@ -1459,7 +1459,7 @@ namespace NuGet.Test
         [InlineData("Xamarin.PlayStation3, Version=v1.0", "xamarinpsthree10")]
         [InlineData("Xamarin.PlayStation4, Version=v1.0", "xamarinpsfour10")]
         [InlineData("Xamarin.PlayStationVita, Version=v1.0", "xamarinpsvita10")]
-        [InlineData("Xamarin.TVOS, Version=v1.0", "xamarintvos10")]  
+        [InlineData("Xamarin.TVOS, Version=v1.0", "xamarintvos10")]
         [InlineData("Xamarin.WatchOS, Version=v1.0", "xamarinwatchos10")]
         [InlineData("Xamarin.Xbox360, Version=v1.0", "xamarinxboxthreesixty10")]
         [InlineData("Xamarin.XboxOne, Version=v1.0", "xamarinxboxone10")]
@@ -1476,7 +1476,7 @@ namespace NuGet.Test
         [InlineData(".NETPortable, Version=4.0, Profile=Profile1", "portable-net45+xamarinmac10+xamarinios10")]
         [InlineData(".NETPortable, Version=4.0, Profile=Profile2", "portable-net40+win+xamarinpsthree10+xamarinpsfour10+xamarinpsvita10")]
         [InlineData(".NETPortable, Version=4.0, Profile=Profile3", "portable-net40+xamarinxboxthreesixty10+xamarinxboxone10")]
-        [InlineData(".NETPortable, Version=4.0, Profile=Profile4", "portable-net40+xamarinios10+xamarinwatchos10")]  
+        [InlineData(".NETPortable, Version=4.0, Profile=Profile4", "portable-net40+xamarinios10+xamarinwatchos10")]
         [InlineData(".NETPortable, Version=4.0, Profile=Profile5", "portable-net40+xamarinios10+xamarintvos10")]
         public void TestGetShortNameForPortableXamarinFrameworks(string frameworkIdentifier, string expectedShortName)
         {
@@ -1484,28 +1484,28 @@ namespace NuGet.Test
             var profileCollection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.5"), 
-                           new FrameworkName("Xamarin.Mac, Version=1.0"), 
-                           new FrameworkName("Xamarin.iOS, Version=1.0"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.5"),
+                           new FrameworkName("Xamarin.Mac, Version=1.0"),
+                           new FrameworkName("Xamarin.iOS, Version=1.0"),
                       });
 
             var profile2 = new NetPortableProfile(
                "Profile2",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.0"), 
-                           new FrameworkName(".NetCore, Version=4.5"), 
-                           new FrameworkName("Xamarin.PlayStation3, Version=1.0"), 
-                           new FrameworkName("Xamarin.PlayStation4, Version=1.0"), 
-                           new FrameworkName("Xamarin.PlayStationVita, Version=1.0"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.0"),
+                           new FrameworkName(".NetCore, Version=4.5"),
+                           new FrameworkName("Xamarin.PlayStation3, Version=1.0"),
+                           new FrameworkName("Xamarin.PlayStation4, Version=1.0"),
+                           new FrameworkName("Xamarin.PlayStationVita, Version=1.0"),
                       });
 
             var profile3 = new NetPortableProfile(
                "Profile3",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.0"), 
-                           new FrameworkName("Xamarin.Xbox360, Version=1.0"), 
-                           new FrameworkName("Xamarin.XboxOne, Version=1.0"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.0"),
+                           new FrameworkName("Xamarin.Xbox360, Version=1.0"),
+                           new FrameworkName("Xamarin.XboxOne, Version=1.0"),
                       });
 
             var profile4 = new NetPortableProfile(
@@ -1654,14 +1654,14 @@ namespace NuGet.Test
         // COMPATIBLE: Same framework, easy first case
         [InlineData("aspnet50", "aspnet50", true)]
         [InlineData("aspnetcore50", "aspnetcore50", true)]
-        
+
         // COMPATIBLE: Project targeting later framework
         [InlineData("aspnet51", "aspnet50", true)]
         [InlineData("aspnet51", "net451", true)]
         [InlineData("aspnet51", "net40", true)]
         [InlineData("aspnet51", "net20", true)]
         [InlineData("aspnetcore51", "aspnetcore50", true)]
-        
+
         // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
         [InlineData("aspnet50", "aspnetcore50", false)]
         [InlineData("aspnetcore50", "aspnet50", false)]
@@ -1674,7 +1674,7 @@ namespace NuGet.Test
         [InlineData("aspnet50", "net50", true)]
         [InlineData("aspnet50", "net60", true)]
         [InlineData("aspnet50", "net70", true)]
-        
+
         // NOT COMPATIBLE: Package targeting later framework
         [InlineData("aspnet50", "aspnet51", false)]
         [InlineData("aspnetcore50", "aspnetcore51", false)]
@@ -1833,16 +1833,16 @@ namespace NuGet.Test
         [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
         [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
         public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithOptionalFx(string frameworkName, string targetFrameworkName, int expectedScore)
-        {            
+        {
             var profile1 = new NetPortableProfile(
                "Profile1",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.5"), 
-                           new FrameworkName("Silverlight, Version=5.0"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.5"),
+                           new FrameworkName("Silverlight, Version=5.0"),
                       },
-               new[] { 
-                           new FrameworkName("MonoTouch, Version=0.0"), 
-                           new FrameworkName("MonoAndroid, Version=0.0"), 
+               new[] {
+                           new FrameworkName("MonoTouch, Version=0.0"),
+                           new FrameworkName("MonoAndroid, Version=0.0"),
                       });
 
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
@@ -1863,7 +1863,7 @@ namespace NuGet.Test
 
         /// <summary>
         /// This test is used to ensure that when the packageTargetFrameworkProfile is already available in NetPortableProfileCollection
-        /// Still the 
+        /// Still the
         /// </summary>
         [Theory]
         [InlineData("portable-net40+sl40+MonoTouch+MonoAndroid", "portable-net40+sl40+MonoTouch+MonoAndroid", -4)]
@@ -1872,13 +1872,13 @@ namespace NuGet.Test
         {
             var profile1 = new NetPortableProfile(
                "Profile1",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.0"), 
-                           new FrameworkName("Silverlight, Version=4.0"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.0"),
+                           new FrameworkName("Silverlight, Version=4.0"),
                       },
-               new[] { 
-                           new FrameworkName("MonoTouch, Version=0.0"), 
-                           new FrameworkName("MonoAndroid, Version=0.0"), 
+               new[] {
+                           new FrameworkName("MonoTouch, Version=0.0"),
+                           new FrameworkName("MonoAndroid, Version=0.0"),
                       });
 
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
@@ -1901,13 +1901,13 @@ namespace NuGet.Test
         /// (a)  First case is when projectFrameworkName is not compatible with packageTargetFrameworkName and returns long.MinValue
         /// (b)  Second case is where there is a framework in portable packageFramework compatible with the Mono projectFramework
         /// (c)  The last cases are when there is no framework in portable packageFrameowrk that is compatible with the Mono projectFramework
-        ///      (i)   Check if there is an *installed* portable profile which has the aforementioned project framework as an optional framework        
+        ///      (i)   Check if there is an *installed* portable profile which has the aforementioned project framework as an optional framework
         ///      (ii)  And, check if the project framework version >= found optional framework and that the supported frameworks are compatible with the ones in packageTargetFramework
         ///      (iii) In the source code, this is the else part in method GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary()
         /// </summary>
         [Theory]
         [InlineData("MonoAndroid10", "portable-net45+sl5", long.MinValue)]
-        // 180388626433 below = (1L << 32 + 5) + 1 + (10 * (1L << 32)). And, this is the score accumulated 
+        // 180388626433 below = (1L << 32 + 5) + 1 + (10 * (1L << 32)). And, this is the score accumulated
         // across methods like CalculateVersionDistance and GetProfileCompatibility
         [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoAndroid10", (180388626433 - 5 * 2))]
         [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8", -4*2)]
@@ -1915,32 +1915,32 @@ namespace NuGet.Test
         [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoTouch", -5*2)]
         [InlineData("MonoAndroid20", "portable-net40+sl4+wp71+win8+MonoTouch", -5 * 2)]
         [InlineData("MonoAndroid", "portable-net40+sl4+wp71+win8+MonoTouch", long.MinValue)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndNonPortableLibraryForMono(string projectFrameworkName, string packageTargetFrameworkName, long expectedScore)        
+        public void TestGetCompatibilityBetweenPortableLibraryAndNonPortableLibraryForMono(string projectFrameworkName, string packageTargetFrameworkName, long expectedScore)
         {
             // Arrange
             var profile1 = new NetPortableProfile(
                "Profile1",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.5"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.5"),
                            new FrameworkName("Silverlight, Version=4.0"),
                            new FrameworkName("WindowsPhone, Version=7.1"),
                            new FrameworkName("Windows, Version=8.0"),
                       },
-               new[] { 
-                           new FrameworkName("MonoTouch, Version=1.0"), 
+               new[] {
+                           new FrameworkName("MonoTouch, Version=1.0"),
                            new FrameworkName("MonoAndroid, Version=1.0"),
                            new FrameworkName("MonoMac, Version=1.0"),
                       });
 
             var profile2 = new NetPortableProfile(
                "Profile2",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.5"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.5"),
                            new FrameworkName("WindowsPhone, Version=8.0"),
                            new FrameworkName("Windows, Version=8.0"),
                       },
-               new[] { 
-                           new FrameworkName("MonoTouch, Version=1.0"), 
+               new[] {
+                           new FrameworkName("MonoTouch, Version=1.0"),
                            new FrameworkName("MonoAndroid, Version=1.0"),
                       });
 
@@ -1966,32 +1966,32 @@ namespace NuGet.Test
             var profileCollection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
-               new[] { 
-                           new FrameworkName(".NETFramework, Version=4.5"), 
-                           new FrameworkName("Silverlight, Version=4.0"), 
-                           new FrameworkName("WindowsPhone, Version=7.1"), 
+               new[] {
+                           new FrameworkName(".NETFramework, Version=4.5"),
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
                       });
 
             var profile2 = new NetPortableProfile(
                "Profile2",
-               new[] { 
-                           new FrameworkName(".NetCore, Version=4.5"), 
-                           new FrameworkName("Silverlight, Version=3.0"), 
-                           new FrameworkName("WindowsPhone, Version=7.1"), 
+               new[] {
+                           new FrameworkName(".NetCore, Version=4.5"),
+                           new FrameworkName("Silverlight, Version=3.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
                       });
 
             var profile3 = new NetPortableProfile(
                "Profile3",
-               new[] { 
-                           new FrameworkName(".NetCore, Version=4.5"), 
-                           new FrameworkName(".NETFramework, Version=2.0"), 
+               new[] {
+                           new FrameworkName(".NetCore, Version=4.5"),
+                           new FrameworkName(".NETFramework, Version=2.0"),
                       });
 
             var profile4 = new NetPortableProfile(
                "Profile4",
-               new[] { 
-                           new FrameworkName("Silverlight, Version=2.0"), 
-                           new FrameworkName("Silverlight, Version=3.0, Profile=WindowsPhone"), 
+               new[] {
+                           new FrameworkName("Silverlight, Version=2.0"),
+                           new FrameworkName("Silverlight, Version=3.0, Profile=WindowsPhone"),
                       });
 
             profileCollection.Add(profile1);
@@ -2011,6 +2011,8 @@ namespace NuGet.Test
         [InlineData("netstandard10", ".NETStandard", "1.0")]
         [InlineData("netstandardapp", ".NETStandardApp", "0.0")]
         [InlineData("netstandardapp10", ".NETStandardApp", "1.0")]
+        [InlineData("netcoreapp", ".NETCoreApp", "1.0")]
+        [InlineData("netcoreapp10", ".NETCoreApp", "1.0")]
         public void CanParseShortFrameworkNames(string shortName, string longName, string version)
         {
             var fx = VersionUtility.ParseFrameworkName(shortName);
@@ -2024,6 +2026,8 @@ namespace NuGet.Test
         [InlineData(".NETStandard", "1.0", "netstandard1.0")]
         [InlineData(".NETStandardApp", "0.0", "netstandardapp")]
         [InlineData(".NETStandardApp", "1.0", "netstandardapp1.0")]
+        [InlineData(".NETCoreApp", "0.0", "netcoreapp")]
+        [InlineData(".NETCoreApp", "1.0", "netcoreapp1.0")]
         public void ShortFrameworkNamesAreCorrect(string longName, string version, string shortName)
         {
             var fx = new FrameworkName(longName, Version.Parse(version));
@@ -2035,6 +2039,7 @@ namespace NuGet.Test
         [InlineData(".NETPlatform50", ".NETPlatform", "5.0")]
         [InlineData(".NETStandard10", ".NETStandard", "1.0")]
         [InlineData(".NETStandardApp10", ".NETStandardApp", "1.0")]
+        [InlineData(".NETCoreApp10", ".NETCoreApp", "1.0")]
         public void CanParseMixedFrameworkNames(string mixedName, string longName, string version)
         {
             var fx = VersionUtility.ParseFrameworkName(mixedName);
@@ -2048,6 +2053,7 @@ namespace NuGet.Test
         [InlineData(".NETStandardApp", "netstandardapp")]
         [InlineData(".NETStandard1.0", "netstandard1.0")]
         [InlineData(".NETStandardApp1.0", "netstandardapp1.0")]
+        [InlineData(".NETCoreApp1.0", "netcoreapp1.0")]
         public void CanParseMixedFrameworkNamesToShort(string mixedName, string shortName)
         {
             var fx = VersionUtility.ParseFrameworkName(mixedName);
