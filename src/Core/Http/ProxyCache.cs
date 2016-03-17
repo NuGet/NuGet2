@@ -9,6 +9,7 @@ namespace NuGet
         private const string HostKey = "http_proxy";
         private const string UserKey = "http_proxy.user";
         private const string PasswordKey = "http_proxy.password";
+        private const string NoProxy = "no_proxy";
 
         /// <summary>
         /// Capture the default System Proxy so that it can be re-used by the IProxyFinder
@@ -103,6 +104,14 @@ namespace NuGet
                 {
                     webProxy.Credentials = new NetworkCredential(userName, password);
                 }
+
+                var noProxy = _settings.GetConfigValue(NoProxy);
+                if (!String.IsNullOrEmpty(noProxy))
+                {
+                    // split comma-separated list of domains
+                    webProxy.BypassList = noProxy.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+
                 return webProxy;
             }
 
@@ -120,6 +129,14 @@ namespace NuGet
                         webProxy.Credentials = new NetworkCredential(userName: credentials[0], password: credentials[1]);
                     }
                 }
+
+                var noProxy = _environment.GetEnvironmentVariable(NoProxy);
+                if (!String.IsNullOrEmpty(noProxy))
+                {
+                    // split comma-separated list of domains
+                    webProxy.BypassList = noProxy.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+
                 return webProxy;
             }
             return null;
