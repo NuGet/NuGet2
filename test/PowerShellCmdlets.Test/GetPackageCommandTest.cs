@@ -407,7 +407,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 6);
-            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new SemanticVersion("1.44") });
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "JQuery", Version = new SemanticVersion("1.44") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "jQuery", Version = new SemanticVersion("1.51") });
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "jQuery", Version = new SemanticVersion("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(3),
@@ -898,7 +898,8 @@ namespace NuGet.PowerShell.Commands.Test
             var repositoryWithMultiplePackageVersions = new Mock<IPackageRepository>();
             var packages = new[]
                                {
-                                   PackageUtility.CreatePackage("jQuery", "1.44"),
+                                   // different case is intended to test that id is case-insensitive
+                                   PackageUtility.CreatePackage("JQuery", "1.44"),
                                    PackageUtility.CreatePackage("jQuery", "1.51"),
                                    PackageUtility.CreatePackage("jQuery", "1.52"),
                                    PackageUtility.CreatePackage("NHibernate", "1.1"),

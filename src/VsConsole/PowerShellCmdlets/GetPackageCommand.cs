@@ -285,7 +285,7 @@ namespace NuGet.PowerShell.Commands
                                                 ? sourceRepository.GetPackages()
                                                 : sourceRepository.Search(Filter, effectiveIncludePrerelease);
             // by default, sort packages by Id
-            packages = packages.OrderBy(p => p.Id);
+            packages = packages.OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase);
             return packages;
         }
 
