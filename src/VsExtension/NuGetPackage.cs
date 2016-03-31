@@ -72,7 +72,7 @@ namespace NuGet.Tools
     {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
-        public const string ProductVersion = "2.8.0.0";
+        public const string ProductVersion = "2.11.1.0";
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;
@@ -191,7 +191,7 @@ namespace NuGet.Tools
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
 
-            // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
+            // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService().
             // Doing so is illegal and may cause VS to hang.
 
             _dte = (DTE)GetService(typeof(SDTE));
@@ -210,8 +210,8 @@ namespace NuGet.Tools
                 machineWideSettings: MachineWideSettings);
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
-            
-            // when NuGet loads, if the current solution has package 
+
+            // when NuGet loads, if the current solution has package
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
             // the <Import> element added.
@@ -219,7 +219,7 @@ namespace NuGet.Tools
             {
                 if (VsVersionHelper.IsVisualStudio2013)
                 {
-                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block 
+                    // Run on a background thread in VS2013 to avoid CPS hangs. The modal loading dialog will block
                     // until this completes.
                     ThreadPool.QueueUserWorkItem(new WaitCallback((obj) =>
                     PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false)));
@@ -230,7 +230,7 @@ namespace NuGet.Tools
                 }
             }
 
-            // when NuGet loads, if the current solution has some package 
+            // when NuGet loads, if the current solution has some package
             // folders marked for deletion (because a previous uninstalltion didn't succeed),
             // delete them now.
             if (SolutionManager.IsSolutionOpen)
@@ -367,8 +367,8 @@ namespace NuGet.Tools
                     // show error message when no supported project is selected.
                     string projectName = project != null ? project.Name : String.Empty;
 
-                    string errorMessage = String.IsNullOrEmpty(projectName) 
-                        ? Resources.NoProjectSelected 
+                    string errorMessage = String.IsNullOrEmpty(projectName)
+                        ? Resources.NoProjectSelected
                         : String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
 
                     MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
@@ -398,13 +398,13 @@ namespace NuGet.Tools
                 {
                     window = GetVS10PackageManagerWindow(project, parameterString);
                 }
-                else 
+                else
                 {
                     // VS 2012
                     window = GetVS11PackageManagerWindow(project, parameterString);
                 }
 #endif
-                
+
 #if VS12
 				window = GetVS12PackageManagerWindow(project, parameterString);
 #endif
@@ -412,7 +412,7 @@ namespace NuGet.Tools
 #if VS14
 				window = GetVS14PackageManagerWindow(project, parameterString);
 #endif
-                
+
 
                 window.ShowModal();
             }
