@@ -230,6 +230,9 @@ namespace NuGet
                 searchPath = searchPath.Substring(relativePath.Length);
             }
 
+            if (searchPath[0] == '\\' || searchPath[0] == '/')
+                searchPath = searchPath.Substring(1);
+
             return Path.GetFullPath(basePath);
         }
 
