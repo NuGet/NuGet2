@@ -134,6 +134,7 @@ namespace NuGet.Test
         [InlineData("1.01.0-RC-1", "1.10.0-rc-2")]
         [InlineData("1.01-RC-1", "1.01")]
         [InlineData("1.01", "1.2-preview")]
+        [InlineData("1.01", "1.2-preview.1")]
         public void SemVerLessThanAndGreaterThanOperatorsWorks(string versionA, string versionB)
         {
             // Arrange
@@ -228,6 +229,7 @@ namespace NuGet.Test
         [InlineData("1.0.0-b")]
         [InlineData("3.0.1.2")]
         [InlineData("2.1.4.3-pre-1")]
+        [InlineData("10.5.1-pre.1")]
         public void ToStringReturnsOriginalValue(string version)
         {
             // Act
