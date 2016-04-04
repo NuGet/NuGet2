@@ -261,20 +261,19 @@ namespace NuGet.Test
             Assert.Equal(expected, semVer.ToString());
         }
 
-        [Fact]
-        public void TryParseStrictParsesStrictVersion()
+        [Theory]
+        [InlineData("1.3.2-CTP-2-Refresh-Alpha", "1.3.2.0", "CTP-2-Refresh-Alpha")]
+        [InlineData("2.0.0-build.1", "2.0.0.0", "build.1")]
+        public void TryParseStrictParsesStrictVersion(string versionString, string versionNumber, string specialVersion)
         {
-            // Arrange
-            var versionString = "1.3.2-CTP-2-Refresh-Alpha";
-
             // Act
             SemanticVersion version;
             bool result = SemanticVersion.TryParseStrict(versionString, out version);
 
             // Assert
             Assert.True(result);
-            Assert.Equal(new Version("1.3.2.0"), version.Version);
-            Assert.Equal("CTP-2-Refresh-Alpha", version.SpecialVersion);
+            Assert.Equal(new Version(versionNumber), version.Version);
+            Assert.Equal(specialVersion, version.SpecialVersion);
         }
 
         [Theory]
