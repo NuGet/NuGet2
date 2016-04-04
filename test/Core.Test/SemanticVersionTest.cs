@@ -134,6 +134,7 @@ namespace NuGet.Test
         [InlineData("1.01.0-RC-1", "1.10.0-rc-2")]
         [InlineData("1.01-RC-1", "1.01")]
         [InlineData("1.01", "1.2-preview")]
+        [InlineData("1.01", "1.2-preview.1")]
         public void SemVerLessThanAndGreaterThanOperatorsWorks(string versionA, string versionB)
         {
             // Arrange
@@ -228,6 +229,7 @@ namespace NuGet.Test
         [InlineData("1.0.0-b")]
         [InlineData("3.0.1.2")]
         [InlineData("2.1.4.3-pre-1")]
+        [InlineData("10.5.1-pre.1")]
         public void ToStringReturnsOriginalValue(string version)
         {
             // Act
@@ -259,20 +261,19 @@ namespace NuGet.Test
             Assert.Equal(expected, semVer.ToString());
         }
 
-        [Fact]
-        public void TryParseStrictParsesStrictVersion()
+        [Theory]
+        [InlineData("1.3.2-CTP-2-Refresh-Alpha", "1.3.2.0", "CTP-2-Refresh-Alpha")]
+        [InlineData("2.0.0-build.1", "2.0.0.0", "build.1")]
+        public void TryParseStrictParsesStrictVersion(string versionString, string versionNumber, string specialVersion)
         {
-            // Arrange
-            var versionString = "1.3.2-CTP-2-Refresh-Alpha";
-
             // Act
             SemanticVersion version;
             bool result = SemanticVersion.TryParseStrict(versionString, out version);
 
             // Assert
             Assert.True(result);
-            Assert.Equal(new Version("1.3.2.0"), version.Version);
-            Assert.Equal("CTP-2-Refresh-Alpha", version.SpecialVersion);
+            Assert.Equal(new Version(versionNumber), version.Version);
+            Assert.Equal(specialVersion, version.SpecialVersion);
         }
 
         [Theory]
