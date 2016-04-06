@@ -16,14 +16,14 @@ namespace NuGet
 
         // This collection is the original indexed collection where profiles are indexed by 
         // the full "ProfileXXX" naming. 
-        private static NetPortableProfileCollection _portableProfiles;
+        private static readonly Lazy<NetPortableProfileCollection> _portableProfiles = new Lazy<NetPortableProfileCollection>(BuildPortableProfileCollection);
         // In order to make the NetPortableProfile.Parse capable of also parsing so-called 
         // "custom profile string" version (i.e. "net40-client"), we need an alternate index
         // by this key. I used dictionary here since I saw no value in creating a custom collection 
         // like it's done already for the _portableProfiles. Not sure why it's done that way there.
-        private static IDictionary<string, NetPortableProfile> _portableProfilesByCustomProfileString;
+        private static readonly Lazy<IDictionary<string, NetPortableProfile>> _portableProfilesByCustomProfileString = new Lazy<IDictionary<string, NetPortableProfile>>(CreatePortableProfilesByCustomProfileString);
         // key is the identifier of the optional framework and value is the list of tuple of (optional Framework Version, set of profiles in which they are optional)
-        private static IDictionary<string, List<VersionStringISetTuple>> _portableProfilesSetByOptionalFrameworks;
+        private static readonly Lazy<IDictionary<string, List<VersionStringISetTuple>>> _portableProfilesSetByOptionalFrameworks = new Lazy<IDictionary<string, List<VersionStringISetTuple>>>(CreateOptionalFrameworksDictionary);
 
         public static NetPortableProfile GetProfile(string profileName)
         {
@@ -42,7 +42,7 @@ namespace NuGet
             // If we didn't get a profile by the simple profile name, try now with 
             // the custom profile string (i.e. "net40-client")
             NetPortableProfile result = null;
-            _portableProfilesByCustomProfileString.TryGetValue(profileName, out result);
+            _portableProfilesByCustomProfileString.Value.TryGetValue(profileName, out result);
 
             return result;
         }
@@ -51,58 +51,46 @@ namespace NuGet
         {
             get
             {
-                if (_portableProfiles == null)
-                {
-                    // We use the setter so that we can consistently set both the 
-                    // existing collection as well as the CustomProfileString-indexed one.
-                    // This keeps both in sync.
-                    Profiles = BuildPortableProfileCollection();
-                    CreateOptionalFrameworksDictionary();
-                }
-
-                return _portableProfiles;
-            }
-            set
-            {
-                // This setter is only for Unit Tests.
-                _portableProfiles = value;
-                _portableProfilesByCustomProfileString = _portableProfiles.ToDictionary(x => x.CustomProfileString);
-                CreateOptionalFrameworksDictionary();
+                return _portableProfiles.Value;
             }
         }
 
-        private static void CreateOptionalFrameworksDictionary()
-        {            
-            if (_portableProfiles != null)
-            {
-                _portableProfilesSetByOptionalFrameworks = new Dictionary<string, List<VersionStringISetTuple>>();
-                foreach (var portableProfile in _portableProfiles)
-                {
-                    foreach (var optionalFramework in portableProfile.OptionalFrameworks)
-                    {
-                        if (optionalFramework != null && optionalFramework.Identifier != null)
-                        {
-                            // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
-                            if (!_portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
-                            {
-                                _portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
-                            }
-                        }
+        private static IDictionary<string, NetPortableProfile> CreatePortableProfilesByCustomProfileString()
+        {
+            return _portableProfiles.Value.ToDictionary(x => x.CustomProfileString);
+        }
 
-                        List<VersionStringISetTuple> listVersionStringISetTuple = _portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
-                        if (listVersionStringISetTuple != null)
+        private static Dictionary<string, List<VersionStringISetTuple>> CreateOptionalFrameworksDictionary()
+        {            
+            var portableProfilesSetByOptionalFrameworks = new Dictionary<string, List<VersionStringISetTuple>>();
+            foreach (var portableProfile in _portableProfiles.Value)
+            {
+                foreach (var optionalFramework in portableProfile.OptionalFrameworks)
+                {
+                    if (optionalFramework != null && optionalFramework.Identifier != null)
+                    {
+                        // Add portableProfile.Name to the list of profileName corresponding to optionalFramework.Identifier
+                        if (!portableProfilesSetByOptionalFrameworks.ContainsKey(optionalFramework.Identifier))
                         {
-                            VersionStringISetTuple versionStringITuple = listVersionStringISetTuple.Where(tuple => tuple.Item1.Equals(optionalFramework.Version)).FirstOrDefault();
-                            if (versionStringITuple == null)
-                            {
-                                versionStringITuple = new VersionStringISetTuple(optionalFramework.Version, new HashSet<string>());
-                                listVersionStringISetTuple.Add(versionStringITuple);
-                            }
-                            versionStringITuple.Item2.Add(portableProfile.Name);
+                            portableProfilesSetByOptionalFrameworks.Add(optionalFramework.Identifier, new List<VersionStringISetTuple>());
                         }
+                    }
+
+                    List<VersionStringISetTuple> listVersionStringISetTuple = portableProfilesSetByOptionalFrameworks[optionalFramework.Identifier];
+                    if (listVersionStringISetTuple != null)
+                    {
+                        VersionStringISetTuple versionStringITuple = listVersionStringISetTuple.Where(tuple => tuple.Item1.Equals(optionalFramework.Version)).FirstOrDefault();
+                        if (versionStringITuple == null)
+                        {
+                            versionStringITuple = new VersionStringISetTuple(optionalFramework.Version, new HashSet<string>());
+                            listVersionStringISetTuple.Add(versionStringITuple);
+                        }
+                        versionStringITuple.Item2.Add(portableProfile.Name);
                     }
                 }
             }
+
+            return portableProfilesSetByOptionalFrameworks;
         }
 
         internal static bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
@@ -113,8 +101,7 @@ namespace NuGet
             // key is the identifier of the optional framework and value is the tuple of (optional Framework Version, set of profiles in which they are optional)
             // We try to get a value with key as projectOptionalFrameworkName.Identifier. If one exists, we check if the project version is >= the version from the retrieved tuple
             // If so, then, we see if one of the profiles, in the set from the retrieved tuple, is compatible with the packageFramework profile
-            if (_portableProfilesSetByOptionalFrameworks != null
-                && _portableProfilesSetByOptionalFrameworks.TryGetValue(projectOptionalFrameworkName.Identifier, out versionProfileISetTupleList))
+            if (_portableProfilesSetByOptionalFrameworks.Value.TryGetValue(projectOptionalFrameworkName.Identifier, out versionProfileISetTupleList))
             {
                 foreach (var versionProfileISetTuple in versionProfileISetTupleList)
                 {
