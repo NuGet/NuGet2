@@ -489,7 +489,7 @@ namespace NuGet.Test
             var portableCollection = new NetPortableProfileCollection();
             portableCollection.Add(new NetPortableProfile("Profile104", new [] { VersionUtility.ParseFrameworkName("net45"), VersionUtility.ParseFrameworkName("sl5")}));
 
-            NetPortableProfileTable.Profiles = portableCollection;
+            NetPortableProfileTable.SetProfileCollection(portableCollection);
 
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETPortable, Version=1.0, Profile=Profile104"));

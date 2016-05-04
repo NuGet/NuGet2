@@ -1336,7 +1336,7 @@ namespace NuGet.Test
         public void TestGetShortNameForPortableFramework()
         {
             // Arrange
-            NetPortableProfileTable.Profiles = BuildProfileCollection();
+            NetPortableProfileTable.SetProfileCollection(BuildProfileCollection());
 
             var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
 
@@ -1530,7 +1530,7 @@ namespace NuGet.Test
             profileCollection.Add(profile4);
             profileCollection.Add(profile5);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            NetPortableProfileTable.SetProfileCollection(profileCollection);
 
             var framework = new FrameworkName(frameworkIdentifier);
 
@@ -1848,7 +1848,7 @@ namespace NuGet.Test
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
             profileCollection.Add(profile1);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            NetPortableProfileTable.SetProfileCollection(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(frameworkName);
@@ -1884,7 +1884,7 @@ namespace NuGet.Test
             NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
             profileCollection.Add(profile1);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            NetPortableProfileTable.SetProfileCollection(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(frameworkName);
@@ -1948,7 +1948,7 @@ namespace NuGet.Test
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
 
-            NetPortableProfileTable.Profiles = profileCollection;
+            NetPortableProfileTable.SetProfileCollection(profileCollection);
 
             // Arrange
             var framework = VersionUtility.ParseFrameworkName(projectFrameworkName);
