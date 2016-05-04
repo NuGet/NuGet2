@@ -52,8 +52,8 @@
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>11</MinorVersion>
-        <Patch>1</Patch>
+        <MinorVersion>12</MinorVersion>
+        <Patch>0</Patch>
         <Revision>$(BUILD_NUMBER)</Revision>
 
         <!-- This is the file version of the DLLs/EXE produced. It's also the version of the vsix -->
