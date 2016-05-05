@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using NuGet.Test.Mocks;
 using Xunit;
 
@@ -7,6 +8,31 @@ namespace NuGet.Test
 {
     public class NetPortableProfileTableTest
     {
+        [Fact]
+        public async Task NetPortableProfileTable_LoadTestForThreadSafety()
+        {
+            // Arrange
+            var tasks = Enumerable
+                .Range(1, 20)
+                .Select(task => Task.Run(async () =>
+                {
+                    await Task.Yield();
+
+                    for (int iteration = 0; iteration < 50; iteration++)
+                    {
+                        NetPortableProfileTable.Profiles = null;
+
+                        // Act
+                        var result = NetPortableProfileTable.GetProfile("not-real");
+
+                        // Assert
+                        Assert.Null(result);
+                    }
+                }));
+
+            await Task.WhenAll(tasks);
+        }
+
         [Fact]
         public void LoadSupportedFrameworkCorrectsTheWP7Framework()
         {
