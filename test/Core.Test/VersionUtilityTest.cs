@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
@@ -406,6 +407,8 @@ namespace NuGet.Test
         [InlineData(new[] { "Xamarin.iOS", "xamarin.ios", "XAMARIN.IOS " }, "0.0", "Xamarin.iOS")]
         [InlineData(new[] { "XamarinMac", "xamarinmac", "XAMARINMAC " }, "0.0", "Xamarin.Mac")]
         [InlineData(new[] { "Xamarin.Mac", "xamarin.mac", "XAMARIN.MAC " }, "0.0", "Xamarin.Mac")]
+        [InlineData(new[] { "XamarinMacNet", "xamarinmac", "XAMARINMACNET " }, "0.0", "Xamarin.Mac.NET")]
+        [InlineData(new[] { "Xamarin.Mac.NET", "xamarin.mac.net", "XAMARIN.MAC.NET " }, "0.0", "Xamarin.Mac.NET")]
         [InlineData(new[] { "XamarinPlayStationThree", "xamarinplaystationthree", "XAMARINPLAYSTATIONthree " }, "0.0","Xamarin.PlayStation3")]
         [InlineData(new[] { "Xamarin.PlayStationThree", "xamarin.playstationthree", "XAMARIN.PLAYSTATIONTHREE " }, "0.0", "Xamarin.PlayStation3")]
         [InlineData(new[] { "XamarinPSThree", "xamarinpsthree", "XAMARINPSTHREE " }, "0.0", "Xamarin.PlayStation3")]
@@ -1044,6 +1047,47 @@ namespace NuGet.Test
         }
 
         [Theory]
+        [InlineData("xamarinmacnet45", "xamarinmacnet", true)]
+        [InlineData("xamarinmacnet45", "xamarinmacnet20", true)]
+        [InlineData("xamarinmacnet45", "xamarinmac3", false)]
+        [InlineData("xamarinmacnet45", "net46", false)]
+        [InlineData("xamarinmacnet45", "net451", false)]
+        [InlineData("xamarinmacnet45", "netstandard17", false)]
+        [InlineData("xamarinmacnet45", "dotnet57", false)]
+        [InlineData("net45", "xamarinmacnet45", false)]
+        [InlineData("netstandard10", "xamarinmacnet45", false)]
+        [InlineData("dotnet", "xamarinmacnet45", false)]
+        [InlineData("xamarinmac2", "xamarinmacnet45", false)]
+        // These pairs of frameworks SHOULD be compatible to have parity with NuGet 3.X
+        [InlineData("xamarinmacnet45", "xamarinmac2", false)]
+        [InlineData("xamarinmacnet45", "xamarinmac", false)]
+        [InlineData("xamarinmacnet45", "net45", false)]
+        [InlineData("xamarinmacnet45", "net20", false)]
+        [InlineData("xamarinmacnet45", "netstandard16", false)]
+        [InlineData("xamarinmacnet45", "netstandard10", false)]
+        [InlineData("xamarinmacnet45", "dotnet56", false)]
+        [InlineData("xamarinmacnet45", "dotnet", false)]
+        public void IsCompatible_XamarinMacNet(string project, string package, bool isCompatible)
+        {
+            // Arrange
+            var projectFrameworkName = VersionUtility.ParseFrameworkName(project);
+            var packageFrameworkName = VersionUtility.ParseFrameworkName(package);
+
+            // Act
+            var actual = VersionUtility.IsCompatible(projectFrameworkName, packageFrameworkName);
+
+            // Assert
+            Assert.True(
+                isCompatible == actual,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0} should {1}be compatible with {2}",
+                    project,
+                    isCompatible ? string.Empty : "not ",
+                    package));
+        }
+
+        [Theory]
         [InlineData("wp")]
         [InlineData("wp7")]
         [InlineData("wp70")]
@@ -1455,6 +1499,9 @@ namespace NuGet.Test
 
         [Theory]
         [InlineData("Xamarin.Mac, Version=v1.0", "xamarinmac10")]
+        [InlineData("Xamarin.Mac.NET, Version=v0.0", "xamarinmacnet")]
+        [InlineData("Xamarin.Mac.NET, Version=v2.0", "xamarinmacnet20")]
+        [InlineData("Xamarin.Mac.NET, Version=v4.5", "xamarinmacnet45")]
         [InlineData("Xamarin.iOS, Version=v1.0", "xamarinios10")]
         [InlineData("Xamarin.PlayStation3, Version=v1.0", "xamarinpsthree10")]
         [InlineData("Xamarin.PlayStation4, Version=v1.0", "xamarinpsfour10")]
@@ -2013,6 +2060,8 @@ namespace NuGet.Test
         [InlineData("netstandardapp10", ".NETStandardApp", "1.0")]
         [InlineData("netcoreapp", ".NETCoreApp", "1.0")]
         [InlineData("netcoreapp10", ".NETCoreApp", "1.0")]
+        [InlineData("xamarinmacnet", "Xamarin.Mac.NET", "0.0")]
+        [InlineData("xamarinmacnet45", "Xamarin.Mac.NET", "4.5")]
         public void CanParseShortFrameworkNames(string shortName, string longName, string version)
         {
             var fx = VersionUtility.ParseFrameworkName(shortName);
@@ -2028,6 +2077,8 @@ namespace NuGet.Test
         [InlineData(".NETStandardApp", "1.0", "netstandardapp1.0")]
         [InlineData(".NETCoreApp", "0.0", "netcoreapp")]
         [InlineData(".NETCoreApp", "1.0", "netcoreapp1.0")]
+        [InlineData("Xamarin.Mac.NET", "0.0", "xamarinmacnet")]
+        [InlineData("Xamarin.Mac.NET", "4.5", "xamarinmacnet45")]
         public void ShortFrameworkNamesAreCorrect(string longName, string version, string shortName)
         {
             var fx = new FrameworkName(longName, Version.Parse(version));

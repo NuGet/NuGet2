@@ -15,6 +15,10 @@ namespace NuGet
 {
     public static class VersionUtility
     {
+        private const string XamarinMacNetFrameworkShortName = "xamarinmacnet";
+        private const string XamarinMacNetFrameworkIdentifier = "Xamarin.Mac.NET";
+        private const string XamarinMacFrameworkShortName = "xamarinmac";
+        private const string XamarinMacFrameworkIdentifier = "Xamarin.Mac";
         private const string NetFrameworkIdentifier = ".NETFramework";
         private const string NetCoreAppFrameworkShortName = "netcoreapp";
         private const string NetCoreAppFrameworkIdentifier = ".NETCoreApp";
@@ -131,8 +135,10 @@ namespace NuGet
             { "MonoMac", "MonoMac" },
             { "Xamarin.iOS", "Xamarin.iOS" },
             { "XamariniOS", "Xamarin.iOS" },
-            { "Xamarin.Mac", "Xamarin.Mac" },
-            { "XamarinMac", "Xamarin.Mac" },
+            { XamarinMacFrameworkIdentifier, XamarinMacFrameworkIdentifier },
+            { "XamarinMac", XamarinMacFrameworkIdentifier },
+            { XamarinMacNetFrameworkIdentifier, XamarinMacNetFrameworkIdentifier },
+            { "XamarinMacNET", XamarinMacNetFrameworkIdentifier },
             { "Xamarin.PlayStationThree", "Xamarin.PlayStation3" },
             { "XamarinPlayStationThree", "Xamarin.PlayStation3" },
             { "XamarinPSThree", "Xamarin.PlayStation3" },
@@ -179,7 +185,8 @@ namespace NuGet
             { "WindowsPhone", "wp"},
             { "WindowsPhoneApp", "wpa"},
             { "Xamarin.iOS", "xamarinios" },
-            { "Xamarin.Mac", "xamarinmac" },
+            { XamarinMacFrameworkIdentifier, XamarinMacFrameworkShortName },
+            { XamarinMacNetFrameworkIdentifier, XamarinMacNetFrameworkShortName },
             { "Xamarin.PlayStation3", "xamarinpsthree" },
             { "Xamarin.PlayStation4", "xamarinpsfour" },
             { "Xamarin.PlayStationVita", "xamarinpsvita" },
@@ -241,7 +248,7 @@ namespace NuGet
             { DnxFrameworkIdentifier, new FrameworkName(AspNetFrameworkIdentifier, MaxVersion) },
 
             // Allow a net package to be installed in an aspnet (or dnx, transitively by above) project
-            { AspNetFrameworkIdentifier, new FrameworkName(NetFrameworkIdentifier, MaxVersion) },
+            { AspNetFrameworkIdentifier, new FrameworkName(NetFrameworkIdentifier, MaxVersion) }
         };
 
         public static Version DefaultTargetFrameworkVersion
