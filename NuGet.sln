@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.21917.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
@@ -125,6 +125,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog11", "src\Dialog11\Dialog11.csproj", "{FD1E159B-A36F-49E4-856D-8555A20D09CF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio11.Test", "test\VisualStudio11.Test\VisualStudio11.Test.csproj", "{25A2D439-B045-4059-9E1F-738362B72554}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer11", "src\TeamFoundationServer11\TeamFoundationServer11.csproj", "{5220A205-0C3F-4CD5-B1B4-7CD5B8298D7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio12", "src\VisualStudio12\VisualStudio12.csproj", "{3DD213F7-999B-4C15-9560-BF9C96CB8C52}"

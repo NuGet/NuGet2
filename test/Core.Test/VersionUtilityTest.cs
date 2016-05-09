@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
@@ -9,6 +10,44 @@ namespace NuGet.Test
 {
     public class VersionUtilityTest
     {
+        /// <summary>
+        /// This is not meant to be an exhaustive list. Instead it should be a simple test to
+        /// verify that NuGet 3.x code is being called.
+        /// </summary>
+        [Theory]
+        [InlineData("net45", "netstandard1.1", true)]
+        [InlineData("net45", "netstandard1.2", false)]
+        [InlineData("net463", "netstandard1.6", true)]
+        [InlineData("net463", "netstandard1.7", false)]
+        [InlineData("netstandardapp1.6", "netstandard1.6", true)]
+        [InlineData("netstandardapp1.6", "netstandard1.7", false)]
+        [InlineData("netcoreapp1.0", "netstandard1.6", true)]
+        [InlineData("netcoreapp1.0", "netstandard1.7", false)]
+        [InlineData("xamarinmac", "netstandard1.6", true)]
+        [InlineData("xamarinmac", "netstandard1.7", false)]
+        [InlineData("portable-net45+win8", "netstandard1.1", true)]
+        [InlineData("portable-net45+win8", "netstandard1.2", false)]
+        [InlineData("portable-net451+win81", "netstandard1.2", true)]
+        [InlineData("portable-net451+win81", "netstandard1.3", false)]
+        public void SupportsFrameworksFromNuGet3(string projectFolder, string packageFolder, bool expected)
+        {
+            // Arrange
+            var project = VersionUtility.ParseFrameworkName(projectFolder);
+            var package = VersionUtility.ParseFrameworkName(packageFolder);
+
+            // Act
+            var actual = VersionUtility.IsCompatible(project, package);
+
+            // Assert
+            Assert.True(
+                expected == actual,
+                string.Format(
+                    "{0} should {1}support {2}.",
+                    projectFolder,
+                    expected ? string.Empty : "not ",
+                    packageFolder));
+        }
+
         [Fact]
         public void ParseUAPFrameworkShortName()
         {
@@ -800,16 +839,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void NormalizeVersionFillsInZerosForUnsetVersionParts()
-        {
-            // Act
-            Version version = VersionUtility.NormalizeVersion(new Version("1.5"));
-
-            // Assert
-            Assert.Equal(new Version("1.5.0.0"), version);
-        }
-
-        [Fact]
         public void ParseVersionSpecRangeIntegerRanges()
         {
             // Act
@@ -1110,6 +1139,9 @@ namespace NuGet.Test
         [InlineData("windows8")]
         [InlineData("win")]
         [InlineData("win8")]
+        [InlineData("windows45")]
+        [InlineData("windows1")]
+        [InlineData("windows10")] // Parses to Windows v1.0
         public void WindowsIdentifierCompatibleWithWindowsStoreAppProjects(string identifier)
         {
             // Arrange
@@ -1124,10 +1156,8 @@ namespace NuGet.Test
         [Theory]
         [InlineData("windows9")]
         [InlineData("win9")]
-        [InlineData("win10")]
+        [InlineData("win10.0")]
         [InlineData("windows81")]
-        [InlineData("windows45")]
-        [InlineData("windows1")]
         public void WindowsIdentifierWithUnsupportedVersionNotCompatibleWithWindowsStoreAppProjects(string identifier)
         {
             // Arrange
@@ -1336,12 +1366,13 @@ namespace NuGet.Test
         public void TestGetShortNameForPortableFramework()
         {
             // Arrange
-            NetPortableProfileTable.SetProfileCollection(BuildProfileCollection());
+            var profileCollection = BuildProfileCollection();
+            var table = new NetPortableProfileTable(profileCollection);
 
             var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
 
             // Act-1
-            string shortName = VersionUtility.GetShortFrameworkName(framework);
+            string shortName = VersionUtility.GetShortFrameworkName(table, framework);
 
             // Assert-2
             Assert.Equal("portable-net45+sl40+wp71", shortName);
@@ -1350,7 +1381,7 @@ namespace NuGet.Test
             var framework2 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile2");
 
             // Act-2
-            string shortName2 = VersionUtility.GetShortFrameworkName(framework2);
+            string shortName2 = VersionUtility.GetShortFrameworkName(table, framework2);
 
             // Assert-2
             Assert.Equal("portable-win+sl30+wp71", shortName2);
@@ -1359,7 +1390,7 @@ namespace NuGet.Test
             var framework3 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile4");
 
             // Act-3
-            string shortName3 = VersionUtility.GetShortFrameworkName(framework3);
+            string shortName3 = VersionUtility.GetShortFrameworkName(table, framework3);
 
             // Assert-4
             Assert.Equal("portable-sl20+wp", shortName3);
@@ -1509,12 +1540,12 @@ namespace NuGet.Test
                       });
 
             var profile4 = new NetPortableProfile(
-       "Profile4",
-       new[] {
+                "Profile4",
+                new[] {
                            new FrameworkName(".NETFramework, Version=4.0"),
                            new FrameworkName("Xamarin.iOS, Version=1.0"),
                            new FrameworkName("Xamarin.WatchOS, Version=1.0"),
-              });
+                });
 
             var profile5 = new NetPortableProfile(
                 "Profile5",
@@ -1529,13 +1560,12 @@ namespace NuGet.Test
             profileCollection.Add(profile3);
             profileCollection.Add(profile4);
             profileCollection.Add(profile5);
-
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
-
+            
+            var table = new NetPortableProfileTable(profileCollection);
             var framework = new FrameworkName(frameworkIdentifier);
 
             // Act
-            string shortName = VersionUtility.GetShortFrameworkName(framework);
+            string shortName = VersionUtility.GetShortFrameworkName(table, framework);
 
             // Assert
             Assert.Equal(expectedShortName, shortName);
@@ -1619,14 +1649,15 @@ namespace NuGet.Test
         [InlineData("dnx451", "dnxcore50", false)]
         [InlineData("dnxcore50", "dnx451", false)]
 
-        // COMPATIBLE: dnx project, net package (any version)
-        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
+        // COMPATIBLE: dnx project, earlier or equal net package
         [InlineData("dnx451", "net451", true)]
         [InlineData("dnx451", "net40", true)]
         [InlineData("dnx451", "net20", true)]
-        [InlineData("dnx451", "net50", true)]
-        [InlineData("dnx451", "net60", true)]
-        [InlineData("dnx451", "net70", true)]
+
+        // NOT COMPATIBLE: dnx project, later net package 
+        [InlineData("dnx451", "net50", false)]
+        [InlineData("dnx451", "net60", false)]
+        [InlineData("dnx451", "net70", false)]
 
         // NOT COMPATIBLE: Package targeting later framework
         [InlineData("dnx451", "dnx51", false)]
@@ -1655,27 +1686,29 @@ namespace NuGet.Test
         [InlineData("aspnet50", "aspnet50", true)]
         [InlineData("aspnetcore50", "aspnetcore50", true)]
 
-        // COMPATIBLE: Project targeting later framework
+        // COMPATIBLE: Project targeting earlier or same version
         [InlineData("aspnet51", "aspnet50", true)]
-        [InlineData("aspnet51", "net451", true)]
         [InlineData("aspnet51", "net40", true)]
         [InlineData("aspnet51", "net20", true)]
         [InlineData("aspnetcore51", "aspnetcore50", true)]
+
+        // NOT COMPATIBLE: Project targeting great version
+        [InlineData("aspnet51", "net46", false)]
+        [InlineData("aspnet51", "net451", false)]
 
         // NOT COMPATIBLE: aspnet into aspnetcore and vice-versa
         [InlineData("aspnet50", "aspnetcore50", false)]
         [InlineData("aspnetcore50", "aspnet50", false)]
 
         // COMPATIBLE: aspnet project, net package (any version)
-        // Don't get excited by version numbers here. I'm just randomly guessing higher version numbers :)
-        [InlineData("aspnet50", "net451", true)]
         [InlineData("aspnet50", "net40", true)]
         [InlineData("aspnet50", "net20", true)]
-        [InlineData("aspnet50", "net50", true)]
-        [InlineData("aspnet50", "net60", true)]
-        [InlineData("aspnet50", "net70", true)]
 
         // NOT COMPATIBLE: Package targeting later framework
+        [InlineData("aspnet50", "net451", false)]
+        [InlineData("aspnet50", "net50", false)]
+        [InlineData("aspnet50", "net60", false)]
+        [InlineData("aspnet50", "net70", false)]
         [InlineData("aspnet50", "aspnet51", false)]
         [InlineData("aspnetcore50", "aspnetcore51", false)]
 
@@ -1699,32 +1732,32 @@ namespace NuGet.Test
         public void IsCompatibleMatrixForASPNetFrameworks(string projectFramework, string packageFramework, bool compatible)
         {
             Assert.Equal(
+                compatible,
                 VersionUtility.IsCompatible(
                     VersionUtility.ParseFrameworkName(projectFramework),
-                    VersionUtility.ParseFrameworkName(packageFramework)),
-                compatible);
+                    VersionUtility.ParseFrameworkName(packageFramework)));
         }
 
         [Theory]
         [InlineData("dnx451", "aspnet50", true)]
         [InlineData("dnxcore50", "aspnetcore50", true)]
         [InlineData("aspnet50", "dnx451", false)]
-        [InlineData("aspnetcore50", "dnxcore50", false)]
+        [InlineData("aspnetcore50", "dnxcore50", true)]
         [InlineData("dnx", "aspnet50", true)]
         [InlineData("dnxcore", "aspnetcore50", true)]
         [InlineData("aspnet", "dnx451", false)]
-        [InlineData("aspnetcore", "dnxcore50", false)]
+        [InlineData("aspnetcore", "dnxcore50", true)]
         [InlineData("dnx451", "aspnet", true)]
         [InlineData("dnxcore50", "aspnetcore", true)]
-        [InlineData("aspnet50", "dnx", false)]
-        [InlineData("aspnetcore50", "dnxcore", false)]
+        [InlineData("aspnet50", "dnx", true)]
+        [InlineData("aspnetcore50", "dnxcore", true)]
         public void IsCompatibleMatrixForDNXAspTempFrameworks(string projectFramework, string packageFramework, bool compatible)
         {
             Assert.Equal(
+                compatible,
                 VersionUtility.IsCompatible(
                     VersionUtility.ParseFrameworkName(projectFramework),
-                    VersionUtility.ParseFrameworkName(packageFramework)),
-                compatible);
+                    VersionUtility.ParseFrameworkName(packageFramework)));
         }
 
         [Theory]
@@ -1768,6 +1801,8 @@ namespace NuGet.Test
         [InlineData("portable-wp8+wpa81", "portable-wpa81+wp81")]
         [InlineData("portable-wp81+wpa81", "portable-wpa81+wp81")]
         [InlineData("portable-wpa81+wp81", "portable-wpa81+wp81")]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
+        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
         public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
         {
             // Arrange
@@ -1782,9 +1817,7 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
         [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
-        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
         [InlineData("portable-netcore45+sl4", "portable-net4+wp7")]
         [InlineData("portable-net40+win8+sl4+wp71", "portable-wpa81+wp81")]
         public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
@@ -1798,167 +1831,6 @@ namespace NuGet.Test
 
             // Assert
             Assert.False(isCompatible);
-        }
-
-        [Theory]
-        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl5+wp71", -3)]
-        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl5+wp71+win8", -4)]
-        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl4+wp71+win8", -54)]
-        [InlineData("portable-net45+sl5+wp71", "portable-net4+sl4+wp71+win8", -104)]
-        [InlineData("portable-net45+sl5+wp71", "portable-net4+sl4+wp7+win8", -154)]
-        [InlineData("portable-win8+wp8", "portable-win8+wp7", -52)]
-        [InlineData("portable-win8+wp8", "portable-win8+wp7+silverlight4", -53)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibrary(string frameworkName, string targetFrameworkName, int expectedScore)
-        {
-            // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
-
-            // Act
-            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
-
-            // Assert
-            Assert.Equal(expectedScore, score);
-        }
-
-        /// <summary>
-        /// The following example is used in the comments provided in the product code too including how the computation takes place
-        /// Refer VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary for more details
-        /// For example, Let Project target net45+sl5+monotouch+monoandroid. And, Package has 4 profiles
-        /// A: net45+sl5, B: net40+sl5+monotouch, C: net40+sl4+monotouch+monoandroid, D: net40+sl4+monotouch+monoandroid+wp71
-        /// </summary>
-        [Theory]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net45+sl5", -502)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl5+MonoTouch", -303)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid", -104)]
-        [InlineData("portable-net45+sl50+MonoTouch+MonoAndroid", "portable-net40+sl4+MonoTouch+MonoAndroid+wp71", -105)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithOptionalFx(string frameworkName, string targetFrameworkName, int expectedScore)
-        {
-            var profile1 = new NetPortableProfile(
-               "Profile1",
-               new[] {
-                           new FrameworkName(".NETFramework, Version=4.5"),
-                           new FrameworkName("Silverlight, Version=5.0"),
-                      },
-               new[] {
-                           new FrameworkName("MonoTouch, Version=0.0"),
-                           new FrameworkName("MonoAndroid, Version=0.0"),
-                      });
-
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
-
-            // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
-
-            // Act
-            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
-
-            // Assert
-            Assert.Equal(expectedScore, score);
-        }
-
-        /// <summary>
-        /// This test is used to ensure that when the packageTargetFrameworkProfile is already available in NetPortableProfileCollection
-        /// Still the
-        /// </summary>
-        [Theory]
-        [InlineData("portable-net40+sl40+MonoTouch+MonoAndroid", "portable-net40+sl40+MonoTouch+MonoAndroid", -4)]
-        [InlineData("portable-net45+MonoTouch+MonoAndroid", "portable-net40+sl40+MonoTouch+MonoAndroid", -54)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibraryWithPreLoadedPackageProfile(string frameworkName, string targetFrameworkName, int expectedScore)
-        {
-            var profile1 = new NetPortableProfile(
-               "Profile1",
-               new[] {
-                           new FrameworkName(".NETFramework, Version=4.0"),
-                           new FrameworkName("Silverlight, Version=4.0"),
-                      },
-               new[] {
-                           new FrameworkName("MonoTouch, Version=0.0"),
-                           new FrameworkName("MonoAndroid, Version=0.0"),
-                      });
-
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
-
-            // Arrange
-            var framework = VersionUtility.ParseFrameworkName(frameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
-
-            // Act
-            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
-
-            // Assert
-            Assert.Equal(expectedScore, score);
-        }
-
-        /// <summary>
-        /// (a)  First case is when projectFrameworkName is not compatible with packageTargetFrameworkName and returns long.MinValue
-        /// (b)  Second case is where there is a framework in portable packageFramework compatible with the Mono projectFramework
-        /// (c)  The last cases are when there is no framework in portable packageFrameowrk that is compatible with the Mono projectFramework
-        ///      (i)   Check if there is an *installed* portable profile which has the aforementioned project framework as an optional framework
-        ///      (ii)  And, check if the project framework version >= found optional framework and that the supported frameworks are compatible with the ones in packageTargetFramework
-        ///      (iii) In the source code, this is the else part in method GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary()
-        /// </summary>
-        [Theory]
-        [InlineData("MonoAndroid10", "portable-net45+sl5", long.MinValue)]
-        // 180388626433 below = (1L << 32 + 5) + 1 + (10 * (1L << 32)). And, this is the score accumulated
-        // across methods like CalculateVersionDistance and GetProfileCompatibility
-        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoAndroid10", (180388626433 - 5 * 2))]
-        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8", -4*2)]
-        [InlineData("MonoAndroid10", "portable-net45+wp8+win8", -3*2)]
-        [InlineData("MonoAndroid10", "portable-net40+sl4+wp71+win8+MonoTouch", -5*2)]
-        [InlineData("MonoAndroid20", "portable-net40+sl4+wp71+win8+MonoTouch", -5 * 2)]
-        [InlineData("MonoAndroid", "portable-net40+sl4+wp71+win8+MonoTouch", long.MinValue)]
-        public void TestGetCompatibilityBetweenPortableLibraryAndNonPortableLibraryForMono(string projectFrameworkName, string packageTargetFrameworkName, long expectedScore)
-        {
-            // Arrange
-            var profile1 = new NetPortableProfile(
-               "Profile1",
-               new[] {
-                           new FrameworkName(".NETFramework, Version=4.5"),
-                           new FrameworkName("Silverlight, Version=4.0"),
-                           new FrameworkName("WindowsPhone, Version=7.1"),
-                           new FrameworkName("Windows, Version=8.0"),
-                      },
-               new[] {
-                           new FrameworkName("MonoTouch, Version=1.0"),
-                           new FrameworkName("MonoAndroid, Version=1.0"),
-                           new FrameworkName("MonoMac, Version=1.0"),
-                      });
-
-            var profile2 = new NetPortableProfile(
-               "Profile2",
-               new[] {
-                           new FrameworkName(".NETFramework, Version=4.5"),
-                           new FrameworkName("WindowsPhone, Version=8.0"),
-                           new FrameworkName("Windows, Version=8.0"),
-                      },
-               new[] {
-                           new FrameworkName("MonoTouch, Version=1.0"),
-                           new FrameworkName("MonoAndroid, Version=1.0"),
-                      });
-
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
-
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
-
-            // Arrange
-            var framework = VersionUtility.ParseFrameworkName(projectFrameworkName);
-            var targetFramework = VersionUtility.ParseFrameworkName(packageTargetFrameworkName);
-
-            // Act
-            long score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndNonPortableLibrary(framework, targetFramework);
-
-            // Assert
-            Assert.Equal(expectedScore, score);
         }
 
         private NetPortableProfileCollection BuildProfileCollection()

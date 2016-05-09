@@ -9,57 +9,71 @@ using VersionStringISetTuple = System.Tuple<System.Version, System.Collections.G
 
 namespace NuGet
 {
-    public static class NetPortableProfileTable
+    public class NetPortableProfileTable
     {
+        private readonly CompiledNetPortableProfileCollection _compiled;
+
+        public NetPortableProfileTable(NetPortableProfileCollection profileCollection)
+        {
+            _compiled = new CompiledNetPortableProfileCollection(profileCollection);
+        }
+
         private const string PortableReferenceAssemblyPathEnvironmentVariableName = "NuGetPortableReferenceAssemblyPath";
 
-        private static Lazy<CompiledNetPortableProfileCollection> _portableProfiles
-            = new Lazy<CompiledNetPortableProfileCollection>(() => new CompiledNetPortableProfileCollection(BuildPortableProfileCollection()));
+        public NetPortableProfileCollection Profiles
+        {
+            get
+            {
+                return _compiled.Profiles;
+            }
+        }
 
-        public static NetPortableProfile GetProfile(string profileName)
+        public NetPortableProfile GetProfile(string profileName)
         {
             if (string.IsNullOrEmpty(profileName))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "profileName");
             }
 
-            var compiled = _portableProfiles.Value;
-
             // Original behavior fully preserved, as we first try the original behavior.
             // NOTE: this could be a single TryGetValue if this collection was kept as a dictionary...
-            if (compiled.Profiles.Contains(profileName))
+            if (_compiled.Profiles.Contains(profileName))
             {
-                return compiled.Profiles[profileName];
+                return _compiled.Profiles[profileName];
             }
 
             // If we didn't get a profile by the simple profile name, try now with 
             // the custom profile string (i.e. "net40-client")
             NetPortableProfile result = null;
-            compiled.PortableProfilesByCustomProfileString.TryGetValue(profileName, out result);
+            _compiled.PortableProfilesByCustomProfileString.TryGetValue(profileName, out result);
 
             return result;
         }
 
         /// <summary>
-        /// This method should only be used by tests.
+        /// The setter should only ever be used by tests.
         /// </summary>
         internal static void SetProfileCollection(NetPortableProfileCollection profileCollection)
         {
-            _portableProfiles = new Lazy<CompiledNetPortableProfileCollection>(() =>
-                new CompiledNetPortableProfileCollection(profileCollection ?? BuildPortableProfileCollection()));
+            if (profileCollection == null)
+            {
+                _instance = null;
+            }
+            else
+            {
+                _instance = new NetPortableProfileTable(profileCollection);
+            }
         }
 
-        internal static bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
+        internal bool HasCompatibleProfileWith(NetPortableProfile packageFramework, FrameworkName projectOptionalFrameworkName)
         {
             List<VersionStringISetTuple> versionProfileISetTupleList = null;
-
-            var compiled = _portableProfiles.Value;
-
+            
             // In the dictionary _portableProfilesSetByOptionalFrameworks, 
             // key is the identifier of the optional framework and value is the tuple of (optional Framework Version, set of profiles in which they are optional)
             // We try to get a value with key as projectOptionalFrameworkName.Identifier. If one exists, we check if the project version is >= the version from the retrieved tuple
             // If so, then, we see if one of the profiles, in the set from the retrieved tuple, is compatible with the packageFramework profile
-            if (compiled.PortableProfilesSetByOptionalFrameworks.TryGetValue(projectOptionalFrameworkName.Identifier, out versionProfileISetTupleList))
+            if (_compiled.PortableProfilesSetByOptionalFrameworks.TryGetValue(projectOptionalFrameworkName.Identifier, out versionProfileISetTupleList))
             {
                 foreach (var versionProfileISetTuple in versionProfileISetTupleList)
                 {
@@ -80,7 +94,7 @@ namespace NuGet
             return false;
         }
 
-        private static NetPortableProfileCollection BuildPortableProfileCollection()
+        internal static NetPortableProfileCollection BuildPortableProfileCollection()
         {
             var profileCollection = new NetPortableProfileCollection();
 
@@ -285,7 +299,11 @@ namespace NuGet
 
             private static IDictionary<string, NetPortableProfile> CreatePortableProfilesByCustomProfileString(NetPortableProfileCollection profileCollection)
             {
-                return profileCollection.ToDictionary(x => x.CustomProfileString);
+                // If multiple profiles end up having the same CustomProfileString (that is, the
+                // same set of contained TFMs), prefer the last one found.
+                return profileCollection
+                    .ToLookup(x => x.CustomProfileString)
+                    .ToDictionary(g => g.Key, g => g.Last());
             }
 
             private static IDictionary<string, List<VersionStringISetTuple>> CreateOptionalFrameworksDictionary(NetPortableProfileCollection profileCollection)
@@ -319,6 +337,22 @@ namespace NuGet
                 }
 
                 return portableProfilesSetByOptionalFrameworks;
+            }
+        }
+
+        private static NetPortableProfileTable _instance;
+
+        public static NetPortableProfileTable Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    var profileCollection = BuildPortableProfileCollection();
+                    _instance = new NetPortableProfileTable(profileCollection);
+                }
+
+                return _instance;
             }
         }
     }

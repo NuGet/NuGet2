@@ -1,15 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Runtime.Versioning;
-using System.Text;
 using Xunit;
-using Xunit.Extensions;
 
 namespace NuGet.Test
 {
     public class NetPortableProfileTest
     {
+        [Fact]
+        public void IsCompatible_SupportsCustomProfileNumber()
+        {
+            // Arrange
+            var profile = new NetPortableProfile(
+               "Profile500",
+               new[]  {
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                      });
+
+            var tc = new TestContext(profile);
+            var project = new FrameworkName("Silverlight, Version=5.0");
+            var compatible = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile500");
+            var notCompatible = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile501");
+
+            // Act & Assert
+            tc.VerifyIsCompatible(project, compatible, true);
+            tc.VerifyIsCompatible(project, notCompatible, false);
+        }
+
+        [Fact]
+        public void IsCompatible_SupportsCustomProfileName()
+        {
+            // Arrange
+            var profile = new NetPortableProfile(
+                "MyProfile",
+               new[]  {
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                      });
+
+            var tc = new TestContext(profile);
+            var project = new FrameworkName("Silverlight, Version=5.0");
+            var compatible = new FrameworkName(".NETPortable, Version=4.0, Profile=MyProfile");
+            var notCompatible = new FrameworkName(".NETPortable, Version=4.0, Profile=YourProfile");
+
+            // Act & Assert
+            tc.VerifyIsCompatible(project, compatible, true);
+            tc.VerifyIsCompatible(project, notCompatible, false);
+        }
+
         [Fact]
         public void NamePropertyReturnsCorrectValue()
         {
@@ -44,13 +84,16 @@ namespace NuGet.Test
         public void TestIsCompatibleWithFrameworkName()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
                            new FrameworkName("Silverlight, Version=4.0"), 
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
+
+            var tc = new TestContext(packageProfile);
+            var packageFramework = GetFrameworkName(packageProfile);
 
             var fw1 = new FrameworkName(".NETFramework, Version=4.0");
             var fw2 = new FrameworkName(".NETFramework, Version=4.5");
@@ -61,20 +104,20 @@ namespace NuGet.Test
             var fw7 = new FrameworkName(".NETCore, Version=4.5");
 
             // Act & Assert
-            Assert.False(profile.IsCompatibleWith(fw1));
-            Assert.True(profile.IsCompatibleWith(fw2));
-            Assert.False(profile.IsCompatibleWith(fw3));
-            Assert.True(profile.IsCompatibleWith(fw4));
-            Assert.True(profile.IsCompatibleWith(fw5));
-            Assert.False(profile.IsCompatibleWith(fw6));
-            Assert.False(profile.IsCompatibleWith(fw7));
+            tc.VerifyIsCompatible(fw1, packageFramework, false);
+            tc.VerifyIsCompatible(fw2, packageFramework, true);
+            tc.VerifyIsCompatible(fw3, packageFramework, false);
+            tc.VerifyIsCompatible(fw4, packageFramework, true);
+            tc.VerifyIsCompatible(fw5, packageFramework, true);
+            tc.VerifyIsCompatible(fw6, packageFramework, false);
+            tc.VerifyIsCompatible(fw7, packageFramework, false);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile1()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
@@ -82,23 +125,26 @@ namespace NuGet.Test
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName(".NETFramework, Version=5.0"), 
                            new FrameworkName("Silverlight, Version=4.0")
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
 
             // Act & Assert
-            Assert.True(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile2()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
@@ -106,22 +152,27 @@ namespace NuGet.Test
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName(".NETFramework, Version=4.0"),
                            new FrameworkName("Silverlight, Version=4.0")
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.False(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, false);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile3()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
@@ -129,7 +180,7 @@ namespace NuGet.Test
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName(".NETFramework, Version=4.5"),
@@ -137,15 +188,20 @@ namespace NuGet.Test
                            new FrameworkName(".NETCore, Version=4.0")
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.False(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, false);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile4()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
@@ -153,75 +209,95 @@ namespace NuGet.Test
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName(".NETCore, Version=4.0")
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.False(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, false);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile5()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName(".NETFramework, Version=4.5"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName(".NETFramework, Version=4.5"), 
                            new FrameworkName(".NETCore, Version=4.0")
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.False(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, false);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile6()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName("WindowsPhone, Version=8.0"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName("WindowsPhone, Version=8.0"), 
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.True(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
         public void TestIsCompatibleWithPortableProfile7()
         {
             // Arrange 
-            var profile = new NetPortableProfile(
+            var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
                            new FrameworkName("WindowsPhone, Version=7.0"), 
                       });
 
-            var targetProfile = new NetPortableProfile(
+            var projectProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.True(profile.IsCompatibleWith(targetProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
@@ -246,8 +322,13 @@ namespace NuGet.Test
                            new FrameworkName("MonoAndroid, Version=1.0"), 
                       });
 
+            var tc = new TestContext(packageProfile, projectProfile);
+
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = GetFrameworkName(projectProfile);
+
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
@@ -268,9 +349,6 @@ namespace NuGet.Test
                            new FrameworkName("MonoMac, Version=1.0"),
                       });
 
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-
             var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
@@ -280,12 +358,13 @@ namespace NuGet.Test
                            new FrameworkName("Windows, Version=8.0"),
                       });
 
-            var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
-
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var tc = new TestContext(profile1, packageProfile);
+            
+            var packageFramework = GetFrameworkName(profile1);
+            var projectFramework = new FrameworkName("MonoAndroid, Version=1.0");
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
@@ -305,10 +384,7 @@ namespace NuGet.Test
                            new FrameworkName("MonoAndroid, Version=1.0"),
                            new FrameworkName("MonoMac, Version=1.0"),
                       });
-
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-
+            
             var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
@@ -318,12 +394,13 @@ namespace NuGet.Test
                            new FrameworkName("Windows, Version=8.0"),
                       });
 
-            var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
+            var tc = new TestContext(profile1, packageProfile);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = new FrameworkName("MonoAndroid, Version=2.0");
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
@@ -344,9 +421,6 @@ namespace NuGet.Test
                            new FrameworkName("MonoMac, Version=1.0"),
                       });
 
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-
             var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
@@ -356,12 +430,13 @@ namespace NuGet.Test
                            new FrameworkName("Windows, Version=8.0"),
                       });
 
-            var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
+            var tc = new TestContext(profile1, packageProfile);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = new FrameworkName("MonoAndroid, Version=1.0");
 
             // Act & Assert
-            Assert.False(packageProfile.IsCompatibleWith(projectProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, false);
         }
 
         [Fact]
@@ -405,11 +480,6 @@ namespace NuGet.Test
                            new FrameworkName("MonoAndroid, Version=3.0"),
                       });
 
-            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
-            profileCollection.Add(profile3);
-
             var packageProfile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
@@ -419,19 +489,20 @@ namespace NuGet.Test
                            new FrameworkName("Windows, Version=8.0"),
                       });
 
-            var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
+            var tc = new TestContext(profile1, profile2, profile3, packageProfile);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var packageFramework = GetFrameworkName(packageProfile);
+            var projectFramework = new FrameworkName("MonoAndroid, Version=2.0");
 
             // Act & Assert
-            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+            tc.VerifyIsCompatible(projectFramework, packageFramework, true);
         }
 
         [Fact]
         public void TestParseWithCustomProfileString1()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("sl3+net+netcore45");
+            var profile = NetPortableProfile.Parse(NetPortableProfileTable.Instance, "sl3+net+netcore45");
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -444,7 +515,7 @@ namespace NuGet.Test
         public void TestParseWithCustomProfileString2()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("wp7");
+            var profile = NetPortableProfile.Parse(NetPortableProfileTable.Instance, "wp7");
 
             // Assert
             Assert.Equal(1, profile.SupportedFrameworks.Count);
@@ -455,7 +526,7 @@ namespace NuGet.Test
         public void TestParseWithInvalidCustomProfileReturnsNull()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("Profile3284");
+            var profile = NetPortableProfile.Parse(NetPortableProfileTable.Instance, "Profile3284");
 
             // Assert
             Assert.Null(profile);
@@ -465,7 +536,9 @@ namespace NuGet.Test
         public void TestParseWithCustomProfileString3()
         {
             // Arrange & Act
-            var profile = NetPortableProfile.Parse("wp71+win8+monoandroid1.6+monotouch1.0+sl4+net45");
+            var profile = NetPortableProfile.Parse(
+                NetPortableProfileTable.Instance,
+                "wp71+win8+monoandroid1.6+monotouch1.0+sl4+net45");
 
             // Assert
             Assert.Equal(6, profile.SupportedFrameworks.Count);
@@ -480,8 +553,8 @@ namespace NuGet.Test
         [Fact]
         public void TestParseWithStandardProfileString()
         {
-            // Arrange & Act
-            var profileCollection = new NetPortableProfileCollection();
+            // Arrange
+            var collection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
                new[] { 
@@ -497,12 +570,13 @@ namespace NuGet.Test
                            new FrameworkName("Silverlight, Version=3.0"), 
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
+            collection.Add(profile1);
+            collection.Add(profile2);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var table = new NetPortableProfileTable(collection);
 
-            var profile = NetPortableProfile.Parse("Profile2");
+            // Act
+            var profile = NetPortableProfile.Parse(table, "Profile2");
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -514,8 +588,8 @@ namespace NuGet.Test
         [Fact]
         public void TestParseWithCustomProfileString4WithDifferentOrderingOfFrameworks()
         {
-            // Arrange & Act
-            var profileCollection = new NetPortableProfileCollection();
+            // Arrange
+            var collection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
                new[] { 
@@ -535,12 +609,15 @@ namespace NuGet.Test
                            new FrameworkName("Silverlight, Version=3.0"), 
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
+            collection.Add(profile1);
+            collection.Add(profile2);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var table = new NetPortableProfileTable(collection);
 
-            var profile = NetPortableProfile.Parse("net45+sl40+MonoTouch+wp71+MonoAndroid20");
+            // Act
+            var profile = NetPortableProfile.Parse(
+                table,
+                "net45+sl40+MonoTouch+wp71+MonoAndroid20");
 
             // Assert
             Assert.Equal(5, profile.SupportedFrameworks.Count);
@@ -554,8 +631,8 @@ namespace NuGet.Test
         [Fact]
         public void TestParseWithCustomProfileString5WithOptionalFrameworkAndTreatedAsOptional()
         {
-            // Arrange & Act
-            var profileCollection = new NetPortableProfileCollection();
+            // Arrange
+            var collection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
                new[] { 
@@ -575,13 +652,16 @@ namespace NuGet.Test
                            new FrameworkName("Silverlight, Version=3.0"), 
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
+            collection.Add(profile1);
+            collection.Add(profile2);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var table = new NetPortableProfileTable(collection);
 
+            // Act
             // Default value of second parameter treatOptionalFrameworksAsSupportedFrameworks is false
-            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20");
+            var profile = NetPortableProfile.Parse(
+                table,
+                "net45+sl40+wp71+MonoTouch+MonoAndroid20");
 
             // Assert
             Assert.Equal(3, profile.SupportedFrameworks.Count);
@@ -596,8 +676,8 @@ namespace NuGet.Test
         [Fact]
         public void TestParseWithCustomProfileString6WithOptionalFrameworkAndTreatedAsSupported()
         {
-            // Arrange & Act
-            var profileCollection = new NetPortableProfileCollection();
+            // Arrange
+            var collection = new NetPortableProfileCollection();
             var profile1 = new NetPortableProfile(
                "Profile1",
                new[] { 
@@ -617,12 +697,16 @@ namespace NuGet.Test
                            new FrameworkName("Silverlight, Version=3.0"), 
                            new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
-            profileCollection.Add(profile1);
-            profileCollection.Add(profile2);
+            collection.Add(profile1);
+            collection.Add(profile2);
 
-            NetPortableProfileTable.SetProfileCollection(profileCollection);
+            var table = new NetPortableProfileTable(collection);
 
-            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", treatOptionalFrameworksAsSupportedFrameworks: true);
+            // Act
+            var profile = NetPortableProfile.Parse(
+                table,
+                "net45+sl40+wp71+MonoTouch+MonoAndroid20",
+                treatOptionalFrameworksAsSupportedFrameworks: true);
 
             // Assert
             Assert.Equal(5, profile.SupportedFrameworks.Count);
@@ -631,6 +715,52 @@ namespace NuGet.Test
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoTouch, Version=0.0")));
+        }
+
+        private static FrameworkName GetFrameworkName(NetPortableProfile profile)
+        {
+            return new FrameworkName(
+                ".NETPortable",
+                new Version(profile.FrameworkVersion.Substring(1)), // "v0.0" becomes "0.0"
+                profile.Name);
+        }
+
+        private class TestContext
+        {
+            public TestContext(params NetPortableProfile[] portableProfiles)
+            {
+                Collection = new NetPortableProfileCollection();
+                Collection.AddRange(portableProfiles);
+
+                Table = new NetPortableProfileTable(Collection);
+
+                CompatibilityProvider = new ReferenceAssemblyCompatibilityProvider(Collection);
+
+                NameProvider = new ReferenceAssemblyFrameworkNameProvider(Collection);
+            }
+
+            public NetPortableProfileCollection Collection { get; private set; }
+            public ReferenceAssemblyCompatibilityProvider CompatibilityProvider { get; private set; }
+            public ReferenceAssemblyFrameworkNameProvider NameProvider { get; private set; }
+            public NetPortableProfileTable Table { get; private set; }
+
+            public void VerifyIsCompatible(FrameworkName project, FrameworkName package, bool expected)
+            {
+                var actual = VersionUtility.IsCompatible(
+                    Table,
+                    CompatibilityProvider,
+                    NameProvider,
+                    project,
+                    package);
+
+                Assert.True(
+                    actual == expected,
+                    string.Format(
+                        "'{0}' should {1}be compatible with '{2}'.",
+                        project,
+                        expected ? string.Empty : "not ",
+                        package));
+            }
         }
     }
 }

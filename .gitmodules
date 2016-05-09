@@ -1,3 +1,7 @@
 [submodule "xdt"]
 	path = xdt
 	url = https://git01.codeplex.com/xdt
+[submodule "NuGet.Client"]
+	path = NuGet.Client
+	url = https://github.com/NuGet/NuGet.Client.git
+	branch = dev

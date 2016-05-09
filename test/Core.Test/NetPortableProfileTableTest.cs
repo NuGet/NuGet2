@@ -12,25 +12,33 @@ namespace NuGet.Test
         public async Task NetPortableProfileTable_LoadTestForThreadSafety()
         {
             // Arrange
-            var tasks = Enumerable
-                .Range(1, 20)
-                .Select(task => Task.Run(async () =>
-                {
-                    await Task.Yield();
-
-                    for (int iteration = 0; iteration < 50; iteration++)
+            try
+            {
+                var tasks = Enumerable
+                    .Range(1, 20)
+                    .Select(task => Task.Run(async () =>
                     {
-                        NetPortableProfileTable.SetProfileCollection(null);
+                        await Task.Yield();
 
-                        // Act
-                        var result = NetPortableProfileTable.GetProfile("not-real");
+                        for (int iteration = 0; iteration < 50; iteration++)
+                        {
+                            NetPortableProfileTable.SetProfileCollection(null);
 
-                        // Assert
-                        Assert.Null(result);
-                    }
-                }));
+                            // Act
+                            var result = NetPortableProfileTable.Instance.GetProfile("not-real");
 
-            await Task.WhenAll(tasks);
+                            // Assert
+                            Assert.Null(result);
+                        }
+                    }));
+
+                await Task.WhenAll(tasks);
+            }
+            finally
+            {
+                // Reset the static state.
+                NetPortableProfileTable.SetProfileCollection(null);
+            }
         }
 
         [Fact]

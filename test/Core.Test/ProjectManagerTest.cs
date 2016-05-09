@@ -486,21 +486,29 @@ namespace NuGet.Test
         public void AddPackageReferenceThrowsWhenNoTargetFrameworkIsCompatibleWithPortableProject()
         {
             // Arrange
-            var portableCollection = new NetPortableProfileCollection();
-            portableCollection.Add(new NetPortableProfile("Profile104", new [] { VersionUtility.ParseFrameworkName("net45"), VersionUtility.ParseFrameworkName("sl5")}));
+            try
+            {
+                var portableCollection = new NetPortableProfileCollection();
+                portableCollection.Add(new NetPortableProfile("Profile104", new[] { VersionUtility.ParseFrameworkName("net45"), VersionUtility.ParseFrameworkName("sl5") }));
 
-            NetPortableProfileTable.SetProfileCollection(portableCollection);
+                NetPortableProfileTable.SetProfileCollection(portableCollection);
 
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(new FrameworkName(".NETPortable, Version=1.0, Profile=Profile104"));
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt"});
-            sourceRepository.AddPackage(packageA);
+                var sourceRepository = new MockPackageRepository();
+                var projectSystem = new MockProjectSystem(new FrameworkName(".NETPortable, Version=1.0, Profile=Profile104"));
+                var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+                IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt" });
+                sourceRepository.AddPackage(packageA);
 
-            // Act
-            ExceptionAssert.Throws<InvalidOperationException>(
-                () => projectManager.AddPackageReference("A"),
-                "Could not install package 'A 1.0'. You are trying to install this package into a project that targets 'portable-net45+sl50', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
+                // Act
+                ExceptionAssert.Throws<InvalidOperationException>(
+                    () => projectManager.AddPackageReference("A"),
+                    "Could not install package 'A 1.0'. You are trying to install this package into a project that targets 'portable-net45+sl50', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
+            }
+            finally
+            {
+                // Reset the static state.
+                NetPortableProfileTable.SetProfileCollection(null);
+            }
         }
 
         [Fact]
@@ -772,7 +780,7 @@ namespace NuGet.Test
         [InlineData("portable-net40+sl3+wp71\\one.txt", "portable-windows8+sl2\\two.txt")]
         public void AddPackageReferencePicksThePortableLibraryWithHigherVersionOfTheMatchingFrameworks(string contentFile, string otherContentFile)
         {
-            // Arrange            
+            // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(new FrameworkName("Silverlight, Version=4.0"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());

@@ -147,6 +147,9 @@
     </Target>
 
     <Target Name="RestorePackages">
+        <MsBuild Projects="$(NuGetRoot)\src\Core\Core.csproj"
+                 Targets="Build"
+                 Properties="DefineConstants=IS_NET40_CLIENT;NUGET_FRAMEWORKS_INTERNAL;CODE_ANALYSIS" />
         <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
                  Targets="Build"
                  Properties="DefineConstants=CODE_ANALYSIS" />

@@ -11,6 +11,10 @@ namespace NuGet
     /// </summary>
     public class NetPortableProfile : IEquatable<NetPortableProfile>
     {
+        private static readonly NetPortableProfileTable EmptyTable
+            = new NetPortableProfileTable(new NetPortableProfileCollection());
+
+        internal const string ProfilePrefix = "Profile";
         private string _customProfile;
 
         /// <summary>
@@ -111,17 +115,18 @@ namespace NuGet
         {
             get
             {
+
                 if (_customProfile == null)
                 {
                     var frameworks = SupportedFrameworks.Concat(OptionalFrameworks);
-                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(f)));
+                    _customProfile = String.Join("+", frameworks.Select(f => VersionUtility.GetShortFrameworkName(EmptyTable, f)));
                 }
 
                 return _customProfile;
             }
         }
 
-        public bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
+        internal bool IsCompatibleWith(NetPortableProfile projectFrameworkProfile)
         {
             if (projectFrameworkProfile == null)
             {
@@ -133,7 +138,7 @@ namespace NuGet
                     packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework)));
         }
 
-        public bool IsCompatibleWith(FrameworkName projectFramework)
+        internal bool IsCompatibleWith(NetPortableProfileTable table, FrameworkName projectFramework)
         {
             if (projectFramework == null)
             {
@@ -141,14 +146,14 @@ namespace NuGet
             }
 
             return SupportedFrameworks.Any(packageFramework => VersionUtility.IsCompatible(projectFramework, packageFramework))
-                || NetPortableProfileTable.HasCompatibleProfileWith(this, projectFramework);
+                || table.HasCompatibleProfileWith(this, projectFramework);
         }
 
         /// <summary>
         /// Attempt to parse a profile string into an instance of <see cref="NetPortableProfile"/>.
         /// The profile string can be either ProfileXXX or sl4+net45+wp7
         /// </summary>
-        public static NetPortableProfile Parse(string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
+        public static NetPortableProfile Parse(NetPortableProfileTable table, string profileValue, bool treatOptionalFrameworksAsSupportedFrameworks = false)
         {
             if (String.IsNullOrEmpty(profileValue))
             {
@@ -160,7 +165,7 @@ namespace NuGet
             // was supported in other places. By fixing the way the profile table indexes the cached 
             // profiles, we can now indeed access by either naming, so we don't need the old check 
             // for the string starting with "Profile".
-            var result = NetPortableProfileTable.GetProfile(profileValue);
+            var result = table.GetProfile(profileValue);
             if (result != null)
             {
                 if (treatOptionalFrameworksAsSupportedFrameworks)
@@ -171,7 +176,7 @@ namespace NuGet
                 return result;
             }
 
-            if (profileValue.StartsWith("Profile", StringComparison.OrdinalIgnoreCase))
+            if (profileValue.StartsWith(ProfilePrefix, StringComparison.OrdinalIgnoreCase))
             {
                 // This can happen if profileValue is an unrecognized profile, or
                 // for some rare cases, the Portable Profile files are missing on disk. 

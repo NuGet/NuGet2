@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile Condition=" '$(MonoBuild)' == '' And '$(TargetFrameworkVersion)' == 'v4.0' ">Client</TargetFrameworkProfile>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>IS_NET40_CLIENT;NUGET_FRAMEWORKS_INTERNAL</DefineConstants>
+    <LangVersion>5</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
@@ -19,6 +21,9 @@
       <DependentUpon>CommonResources.cs</DependentUpon>
       <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\Strings.resx">
+      <Link>NuGet.Frameworks\Strings.resx</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\AnalysisResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -40,6 +45,132 @@
     </Compile>
     <Compile Include="..\..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\CompatibilityMappingComparer.cs">
+      <Link>NuGet.Frameworks\comparers\CompatibilityMappingComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\FrameworkPrecedenceSorter.cs">
+      <Link>NuGet.Frameworks\comparers\FrameworkPrecedenceSorter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\FrameworkRangeComparer.cs">
+      <Link>NuGet.Frameworks\comparers\FrameworkRangeComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\NuGetFrameworkFullComparer.cs">
+      <Link>NuGet.Frameworks\comparers\NuGetFrameworkFullComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\NuGetFrameworkNameComparer.cs">
+      <Link>NuGet.Frameworks\comparers\NuGetFrameworkNameComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\comparers\NuGetFrameworkSorter.cs">
+      <Link>NuGet.Frameworks\comparers\NuGetFrameworkSorter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\CompatibilityCacheKey.cs">
+      <Link>NuGet.Frameworks\CompatibilityCacheKey.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\CompatibilityListProvider.cs">
+      <Link>NuGet.Frameworks\CompatibilityListProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\CompatibilityProvider.cs">
+      <Link>NuGet.Frameworks\CompatibilityProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\CompatibilityTable.cs">
+      <Link>NuGet.Frameworks\CompatibilityTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\DefaultCompatibilityProvider.cs">
+      <Link>NuGet.Frameworks\DefaultCompatibilityProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\DefaultFrameworkMappings.cs">
+      <Link>NuGet.Frameworks\DefaultFrameworkMappings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\DefaultFrameworkNameProvider.cs">
+      <Link>NuGet.Frameworks\DefaultFrameworkNameProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\DefaultPortableFrameworkMappings.cs">
+      <Link>NuGet.Frameworks\DefaultPortableFrameworkMappings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkCompatibilityListProvider.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkCompatibilityListProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkCompatibilityProvider.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkCompatibilityProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkMappings.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkMappings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkNameProvider.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkNameProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkSpecific.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkSpecific.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IFrameworkTargetable.cs">
+      <Link>NuGet.Frameworks\def\IFrameworkTargetable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\def\IPortableFrameworkMappings.cs">
+      <Link>NuGet.Frameworks\def\IPortableFrameworkMappings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FallbackFramework.cs">
+      <Link>NuGet.Frameworks\FallbackFramework.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkConstants.cs">
+      <Link>NuGet.Frameworks\FrameworkConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkException.cs">
+      <Link>NuGet.Frameworks\FrameworkException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkExpander.cs">
+      <Link>NuGet.Frameworks\FrameworkExpander.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkExtensions.cs">
+      <Link>NuGet.Frameworks\FrameworkExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkNameHelpers.cs">
+      <Link>NuGet.Frameworks\FrameworkNameHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkNameProvider.cs">
+      <Link>NuGet.Frameworks\FrameworkNameProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkRange.cs">
+      <Link>NuGet.Frameworks\FrameworkRange.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkReducer.cs">
+      <Link>NuGet.Frameworks\FrameworkReducer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkRuntimePair.cs">
+      <Link>NuGet.Frameworks\FrameworkRuntimePair.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\FrameworkSpecificMapping.cs">
+      <Link>NuGet.Frameworks\FrameworkSpecificMapping.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\HashCodeCombiner.cs">
+      <Link>NuGet.Frameworks\HashCodeCombiner.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\NuGetFramework.cs">
+      <Link>NuGet.Frameworks\NuGetFramework.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\NuGetFrameworkFactory.cs">
+      <Link>NuGet.Frameworks\NuGetFrameworkFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\NuGetFrameworkUtility.cs">
+      <Link>NuGet.Frameworks\NuGetFrameworkUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\OneWayCompatibilityMappingEntry.cs">
+      <Link>NuGet.Frameworks\OneWayCompatibilityMappingEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\Strings.Designer.cs">
+      <Link>NuGet.Frameworks\Strings.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Shared\HashCodeCombiner.cs">
+      <Link>NuGet.Shared\HashCodeCombiner.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Shared\SharedExtensions.cs">
+      <Link>NuGet.Shared\SharedExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Shared\TypeExtensions.cs">
+      <Link>NuGet.Shared\TypeExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\NuGet.Client\src\NuGet.Core\NuGet.Shared\TypeInfo.cs">
+      <Link>NuGet.Shared\TypeInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\IPackageRule.cs" />
     <Compile Include="Analysis\PackageIssue.cs" />
@@ -106,9 +237,12 @@
     <Compile Include="IMachineWideSettings.cs" />
     <Compile Include="Logging\FileConflictResolution.cs" />
     <Compile Include="Logging\IFileConflictResolver.cs" />
+    <Compile Include="NETPortable\ReferenceAssemblyCompatibilityProvider.cs" />
     <Compile Include="NETPortable\NetPortableProfile.cs" />
     <Compile Include="NETPortable\NetPortableProfileCollection.cs" />
     <Compile Include="NETPortable\NetPortableProfileTable.cs" />
+    <Compile Include="NETPortable\ReferenceAssemblyFrameworkNameProvider.cs" />
+    <Compile Include="NETPortable\ReferenceAssemblyPortableFrameworkMappings.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
