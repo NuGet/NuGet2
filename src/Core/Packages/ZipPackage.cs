@@ -121,6 +121,9 @@ namespace NuGet
         {
             try
             {
+                // PackageProperties can throw an XmlException when the content of an XML
+                // tag in the properties file is not properly encoded.
+                // If that's the case, then just return null for the package identifier
                 return package.PackageProperties.Identifier;
             }
             catch (XmlException)

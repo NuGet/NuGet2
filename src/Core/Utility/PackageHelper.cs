@@ -21,7 +21,9 @@ namespace NuGet
         {
             var fileName = Path.GetFileName(path);
 
-            // If the package ID couldn't be determined, just return if it was a nuspec file
+            // If the package ID couldn't be determined due to an XML exception, the identifier
+            // will be null.  In that case, just return a bool for whether it was a nuspec file
+            // without matching on the packageId
             if (packageId == null)
             {
                 return fileName != null
