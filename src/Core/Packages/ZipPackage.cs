@@ -6,6 +6,7 @@ using System.IO.Packaging;
 using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
+using System.Xml;
 
 namespace NuGet
 {
@@ -100,9 +101,10 @@ namespace NuGet
             using (Stream stream = _streamFactory())
             {
                 var package = Package.Open(stream);
+                var packageId = ZipPackage.GetPackageIdentifier(package);
 
                 foreach (var part in package.GetParts()
-                    .Where(p => IsPackageFile(p, package.PackageProperties.Identifier)))
+                    .Where(p => IsPackageFile(p, packageId)))
                 {
                     var relativePath = UriUtility.GetPath(part.Uri);
 
@@ -112,6 +114,18 @@ namespace NuGet
                         fileSystem.AddFile(targetPath, partStream);
                     }
                 }
+            }
+        }
+
+        public static string GetPackageIdentifier(Package package)
+        {
+            try
+            {
+                return package.PackageProperties.Identifier;
+            }
+            catch (XmlException)
+            {
+                return null;
             }
         }
 
@@ -174,9 +188,10 @@ namespace NuGet
             using (Stream stream = _streamFactory())
             {
                 Package package = Package.Open(stream);
+                var packageId = ZipPackage.GetPackageIdentifier(package);
 
                 return (from part in package.GetParts()
-                        where IsPackageFile(part, package.PackageProperties.Identifier)
+                        where IsPackageFile(part, packageId)
                         select (IPackageFile)new ZipPackageFile(part)).ToList();
             }
         }
