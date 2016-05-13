@@ -20,6 +20,16 @@ namespace NuGet
         public static bool IsPackageManifest(string path, string packageId)
         {
             var fileName = Path.GetFileName(path);
+
+            // If the package ID couldn't be determined due to an XML exception, the identifier
+            // will be null.  In that case, just return a bool for whether it was a nuspec file
+            // without matching on the packageId
+            if (packageId == null)
+            {
+                return fileName != null
+                && fileName.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+            }
+
             var expectedFileName = packageId + Constants.ManifestExtension;
             return fileName != null
                 && string.Equals(fileName, expectedFileName, StringComparison.OrdinalIgnoreCase);

@@ -594,7 +594,7 @@ namespace NuGet
 
         private static void CreatePart(Package package, string path, Stream sourceStream)
         {
-            if (PackageHelper.IsPackageManifest(path, package.PackageProperties.Identifier))
+            if (PackageHelper.IsPackageManifest(path, ZipPackage.GetPackageIdentifier(package)))
             {
                 return;
             }
