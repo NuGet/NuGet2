@@ -30,13 +30,13 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             string[] files = new string[0];
 
-            var fileSystem = new Mock<IFileSystem>();
+            var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
             
             var processor = fileSystem.As<IBatchProcessor<string>>();
             processor.Setup(f => f.BeginProcessing(files, PackageAction.Install)).Verifiable();
 
-            var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(fileSystem.Object);
+            var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
+            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(fileSystem.Object);
 
             var project = new Mock<Project>();
             project.Setup(s => s.Properties.Item("FullPath").Value).Returns("x:\\");
@@ -62,7 +62,7 @@ namespace NuGet.VisualStudio.Test
             processor.Setup(f => f.EndProcessing()).Verifiable();
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(fileSystem.Object);
 
             var project = new Mock<Project>();
             project.Setup(s => s.Properties.Item("FullPath").Value).Returns("x:\\");
