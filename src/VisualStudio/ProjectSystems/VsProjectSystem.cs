@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio
             : base(project.GetFullPath())
         {
             Project = project;
-            _baseFileSystem = fileSystemProvider.GetFileSystem(project.GetFullPath());
+            _baseFileSystem = fileSystemProvider.GetFileSystem(project.GetFullPath(), ignoreSourceControlSetting: true);
             Debug.Assert(_baseFileSystem != null);
         }
 
