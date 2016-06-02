@@ -40,7 +40,7 @@ namespace NuGet.Commands
             }
 
             var timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
-            if (timeout.Seconds <= 0)
+            if (timeout.TotalSeconds <= 0)
             {
                 timeout = TimeSpan.FromMinutes(5); // Default to 5 minutes
             }
