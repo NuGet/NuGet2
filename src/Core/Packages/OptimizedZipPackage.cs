@@ -326,10 +326,8 @@ namespace NuGet
 
                     _cachedExpandedFolder.Clear();
                 }
-                else
-                {
-                    _tempFileSystem.DeleteDirectorySafe(_tempFileSystem.Root, recursive: true);
-                }
+
+                _tempFileSystem.DeleteDirectorySafe(_tempFileSystem.Root, recursive: true);
             }
         }
     }
