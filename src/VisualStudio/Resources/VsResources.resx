@@ -276,22 +276,8 @@
   <data name="DialogTitle" xml:space="preserve">
     <value>NuGet Package Manager</value>
   </data>
-  <data name="PackageRestoreCompleted" xml:space="preserve">
-    <value>Finished configuring this solution to restore NuGet packages on build.</value>
-  </data>
-  <data name="PackageRestoreWaitMessage" xml:space="preserve">
-    <value>Configuring the solution to restore NuGet packages on build...</value>
-  </data>
-  <data name="PackageRestoreErrorMessage" xml:space="preserve">
-    <value>An error occurred while configuring the solution to restore NuGet packages on build</value>
-  </data>
   <data name="PackageRestoreDownloadPackageFailed" xml:space="preserve">
     <value>Downloading package '{0}' failed.</value>
-  </data>
-  <data name="PackageRestoreConfirmation" xml:space="preserve">
-    <value>Do you want to configure this solution to download and restore missing NuGet packages during build? A .nuget folder will be added to the root of the solution that contains files that enable package restore.
-
-Packages installed into Website projects will not be restored during build. Consider converting those into Web application projects if necessary.</value>
   </data>
   <data name="AskForRestoreMessage" xml:space="preserve">
     <value>Some NuGet packages are missing from this solution. Click to restore from your online package sources.</value>
@@ -373,21 +359,6 @@ Packages installed into Website projects will not be restored during build. Cons
   </data>
   <data name="OutputConsolePaneName" xml:space="preserve">
     <value>Package Manager</value>
-  </data>
-  <data name="NuGetSearchProvider_CategoryShortcut" xml:space="preserve">
-    <value>nuget</value>
-  </data>
-  <data name="NuGetSearchProvider_Description" xml:space="preserve">
-    <value>Search NuGet packages</value>
-  </data>
-  <data name="NuGetSearchProvider_DisplayText" xml:space="preserve">
-    <value>NuGet Packages</value>
-  </data>
-  <data name="NuGetSearchProvider_Name" xml:space="preserve">
-    <value>NuGet Search</value>
-  </data>
-  <data name="NuGetStaticResult_DisplayText" xml:space="preserve">
-    <value>Search Online for NuGet Packages matching '{0}'</value>
   </data>
   <data name="NuGetSearchProvider_CategoryShortcut" xml:space="preserve">
     <value>nuget</value>
