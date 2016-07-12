@@ -192,6 +192,42 @@ namespace NuGet
         [XmlIgnore]
         public List<ManifestReferenceSet> ReferenceSets { get; set; }
 
+        [XmlArray("contentFiles", IsNullable = false)]
+        [XmlArrayItem("files", typeof(ManifestContentFiles))]
+        public List<object> ContentFilesSerialize
+        {
+            get
+            {
+                if (ContentFiles == null || ContentFiles.Count == 0)
+                {
+                    return null;
+                }
+                return ContentFiles.Cast<object>().ToList();
+            }
+            set
+            {
+                // this property is only used for serialization.
+                throw new InvalidOperationException();
+            }
+        }
+
+        [XmlIgnore]
+        public List<ManifestContentFiles> ContentFiles { get; set; }
+
+        IEnumerable<ManifestContentFiles> IPackageMetadata.ContentFiles
+        {
+            get
+            {
+                if (ContentFiles == null)
+                {
+                    return Enumerable.Empty<ManifestContentFiles>();
+                }
+
+                return ContentFiles;
+            }
+        }
+
+
         SemanticVersion IPackageName.Version
         {
             get

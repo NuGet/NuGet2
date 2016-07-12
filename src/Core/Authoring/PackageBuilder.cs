@@ -53,6 +53,7 @@ namespace NuGet
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
+            ContentFilesSets = new Collection<ManifestContentFiles>();
             PackageAssemblyReferences = new Collection<PackageReferenceSet>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
@@ -184,6 +185,12 @@ namespace NuGet
             private set;
         }
 
+        public Collection<ManifestContentFiles> ContentFilesSets
+        {
+            get;
+            private set;
+        }
+
         public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get;
@@ -219,6 +226,14 @@ namespace NuGet
             get
             {
                 return DependencySets;
+            }
+        }
+
+        IEnumerable<ManifestContentFiles> IPackageMetadata.ContentFiles
+        {
+            get
+            {
+                return ContentFilesSets;
             }
         }
 
@@ -431,6 +446,7 @@ namespace NuGet
 
             DependencySets.AddRange(metadata.DependencySets);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
+            ContentFilesSets.AddRange(metadata.ContentFiles);
 
             if (manifestMetadata.ReferenceSets != null)
             {

@@ -219,6 +219,14 @@ namespace NuGet.Client.Interop
             get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }
         }
 
+        public IEnumerable<ManifestContentFiles> ContentFiles
+        {
+            get
+            {
+                System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException();
+            }
+        }
+
         public Uri ReportAbuseUrl
         {
             get { System.Diagnostics.Debug.Assert(false, "Didn't expect this to be called!"); throw new NotImplementedException(); }

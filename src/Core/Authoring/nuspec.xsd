@@ -23,6 +23,13 @@
         <xs:attribute name="file" type="xs:string" use="required" />
     </xs:complexType>
 
+  <xs:complexType name="contentFilesElement">
+    <xs:attribute name="include" use="required" type="xs:string" />
+    <xs:attribute name="buildAction" use="optional" type="xs:string" />
+    <xs:attribute name="copyToOutput" use="optional" type="xs:boolean" />
+    <xs:attribute name="flatten" use="optional" type="xs:boolean" />
+  </xs:complexType>
+
     <xs:complexType name="referenceGroup">
         <xs:sequence>
             <xs:element name="reference" minOccurs="1" maxOccurs="unbounded" type="reference">
@@ -63,6 +70,13 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
+                          <xs:element name="contentFiles" maxOccurs="1" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="files" type="contentFilesElement" minOccurs="0" maxOccurs="unbounded" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
                             <xs:element name="frameworkAssemblies" maxOccurs="1" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>

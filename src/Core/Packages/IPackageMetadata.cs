@@ -35,6 +35,8 @@ namespace NuGet
         /// </summary>
         IEnumerable<PackageDependencySet> DependencySets { get; }
 
+        IEnumerable<ManifestContentFiles> ContentFiles { get; }
+
         Version MinClientVersion { get; }
     }
 }
