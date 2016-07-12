@@ -14,7 +14,8 @@ namespace NuGet
                 new MisplacedTransformFileRule(),
                 new MissingSummaryRule(),
                 new InitScriptNotUnderToolsRule(),
-                new WinRTNameIsObsoleteRule()
+                new WinRTNameIsObsoleteRule(),
+                new SpecialVersionLengthRule()
             }
         );
 

@@ -180,6 +180,15 @@
   <data name="ScriptOutsideToolsTitle" xml:space="preserve">
     <value>PowerShell file outside tools folder.</value>
   </data>
+  <data name="SpecialVersionTooLongDescription" xml:space="preserve">
+    <value>The version '{0}' has a special version that is longer than 20 characters. Package might not upload to NuGet.org.</value>
+  </data>
+  <data name="SpecialVersionTooLongSolution" xml:space="preserve">
+    <value>Either shorten the special version to 20 characters or less, or refrain from uploading the package to NuGet.org.</value>
+  </data>
+  <data name="SpecialVersionTooLongTitle" xml:space="preserve">
+    <value>Special version too long.</value>
+  </data>
   <data name="UnrecognizedScriptDescription" xml:space="preserve">
     <value>The script file '{0}' is not recognized by NuGet and hence will not be executed during installation of this package.</value>
   </data>
