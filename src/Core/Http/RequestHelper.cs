@@ -118,8 +118,7 @@ namespace NuGet
                         {
                             if (_continueIfFailed)
                             {
-                                // Act like we got a 401 so that we prompt for credentials on the next request
-                                _previousStatusCode = HttpStatusCode.Unauthorized;
+                                SetPreviousStatusCode(request, ex);
                                 continue;
                             }
                             throw;
@@ -163,6 +162,28 @@ namespace NuGet
             }
         }
 
+        private void SetPreviousStatusCode(HttpWebRequest request, WebException ex)
+        {
+            // HACK!!! : This is a hack to workaround Xamarin Bug 19594
+            if (IsMonoProxyAuthenticationRequired(request, ex))
+            {
+                _previousStatusCode = HttpStatusCode.ProxyAuthenticationRequired;
+            }
+            else
+            {
+                // Act like we got a 401 so that we prompt for credentials on the next request
+                _previousStatusCode = HttpStatusCode.Unauthorized;
+            }
+        }
+
+        private static bool IsMonoProxyAuthenticationRequired(HttpWebRequest request, WebException ex)
+        {
+            return EnvironmentUtility.IsMonoRuntime &&
+                   request.Proxy != null &&
+                   ex.Message != null &&
+                   ex.Message.Contains("The remote server returned a 407 status code.");
+        }
+
         private void ConfigureRequest(HttpWebRequest request)
         {
             request.Proxy = _proxyCache.GetProxy(request.RequestUri);
@@ -173,26 +194,32 @@ namespace NuGet
 
             if (_previousResponse == null || ShouldKeepAliveBeUsedInRequest(_previousRequest, _previousResponse))
             {
-                // Try to use the cached credentials (if any, for the first request)
-                request.Credentials = _credentialCache.GetCredentials(request.RequestUri);
-
-                // If there are no cached credentials, use the default ones
-                if (request.Credentials == null)
+                if (_previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired && _previousResponse == null &&
+                    EnvironmentUtility.IsMonoRuntime)
                 {
-                    request.UseDefaultCredentials = true;
+                    GetProxyCredentials(request);
                 }
+                else
+                {
+                    // Try to use the cached credentials (if any, for the first request)
+                    request.Credentials = _credentialCache.GetCredentials(request.RequestUri);
+
+                    // If there are no cached credentials, use the default ones
+                    if (request.Credentials == null)
+                    {
+                        request.UseDefaultCredentials = true;
+                    }
+                }
+                
             }
             else if (_previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired)
             {
-                request.Proxy.Credentials = _credentialProvider.GetCredentials(
-                    request, CredentialType.ProxyCredentials, retrying: _proxyCredentialsRetryCount > 0);
-                _continueIfFailed = request.Proxy.Credentials != null;
-                _proxyCredentialsRetryCount++;
+                GetProxyCredentials(request);
             }
             else if (_previousStatusCode == HttpStatusCode.Unauthorized)
             {
                 SetCredentialsOnAuthorizationError(request);
-            }            
+            }
 
             SetKeepAliveHeaders(request, _previousResponse);
             if (_usingSTSAuth)
@@ -204,6 +231,14 @@ namespace NuGet
             // Wrap the credentials in a CredentialCache in case there is a redirect
             // and credentials need to be kept around.
             request.Credentials = request.Credentials.AsCredentialCache(request.RequestUri);
+        }
+
+        private void GetProxyCredentials(HttpWebRequest request)
+        {
+            request.Proxy.Credentials = _credentialProvider.GetCredentials(
+                request, CredentialType.ProxyCredentials, retrying: _proxyCredentialsRetryCount > 0);
+            _continueIfFailed = request.Proxy.Credentials != null;
+            _proxyCredentialsRetryCount++;
         }
 
         private void SetCredentialsOnAuthorizationError(HttpWebRequest request)
