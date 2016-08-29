@@ -72,7 +72,7 @@ namespace NuGet.Tools
     {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
-        public const string ProductVersion = "2.13.0.0";
+        public const string ProductVersion = "2.14.0.0";
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;

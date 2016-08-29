@@ -5,7 +5,7 @@
     <Author>Outercurve Foundation</Author>
 
     <!-- Note that this version will get replaced on CI -->
-    <Version>2.13.0.0</Version>
+    <Version>2.14.0.0</Version>
 
     <Description xml:space="preserve">A collection of tools to automate the process of downloading, installing, upgrading, configuring, and removing packages from a VS Project.</Description>
     <Locale>1033</Locale>

@@ -52,7 +52,7 @@
              in Common\CommonAssemblyInfo.cs so the version numbers are consistent between binaries built on
              build servers and those built locally. -->
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>13</MinorVersion>
+        <MinorVersion>14</MinorVersion>
         <Patch>0</Patch>
         <Revision>$(BUILD_NUMBER)</Revision>
 
