@@ -30,3 +30,7 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "includeOptional", Scope = "member", Target = "NuGet.Frameworks.FrameworkReducer.#ExplodePortableFrameworks(System.Collections.Generic.IEnumerable`1<NuGet.Frameworks.NuGetFramework>,System.Boolean)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "mappings", Scope = "member", Target = "NuGet.Frameworks.CompatibilityTable.#GetTable(System.Collections.Generic.IEnumerable`1<NuGet.Frameworks.NuGetFramework>,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Scope = "type", Target = "NuGet.Frameworks.FrameworkException")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Sem", Scope = "member", Target = "NuGet.SemanticVersion.#IsSemVer2()")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SemVer", Scope = "member", Target = "NuGet.SemanticVersion.#IsSemVer2()")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ver", Scope = "member", Target = "NuGet.SemanticVersion.#IsSemVer2()")]
+

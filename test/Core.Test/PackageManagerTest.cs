@@ -518,6 +518,58 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void InstallPackageInstallsSemVer200PrereleasePackages()
+        {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0-beta.1.2+git.hash.21d2b3f0acb1c8ffe9909bf2f1cbed2273414e58",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "2.0.0-beta.2.2+git.hash.a1d2b3f0acb1c8ffe9909bf2f1cbed2273414e58");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
+        public void InstallPackageInstallsSemVer200PrereleasePackageWithVersionGiven()
+        {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0-beta.1.2+git.hash.21d2b3f0acb1c8ffe9909bf2f1cbed2273414e58",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C", VersionUtility.ParseVersionSpec("2.0.0-beta.2.2+other.data"))
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "2.0.0-beta.2.2+git.hash.a1d2b3f0acb1c8ffe9909bf2f1cbed2273414e58");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage("A", version: SemanticVersion.Parse("1.0.0-beta.1.2+other.data"), ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
         public void InstallPackageDisregardTargetFrameworkOfDependencies()
         {
             // Arrange
