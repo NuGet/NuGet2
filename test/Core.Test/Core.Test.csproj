@@ -103,6 +103,7 @@
     <Compile Include="ProxyCacheTest.cs" />
     <Compile Include="RedirectedHttpClientTest.cs" />
     <Compile Include="SemanticVersionTest.cs" />
+    <Compile Include="SemVer201SpecTests.cs" />
     <Compile Include="SettingsCredentialProviderTest.cs" />
     <Compile Include="SharedPackageRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />
@@ -129,6 +130,8 @@
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="SettingsTests.cs" />
     <Compile Include="UriUtilityTest.cs" />
+    <Compile Include="VersionComparerTests.cs" />
+    <Compile Include="VersionParsingTests.cs" />
     <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
     <Compile Include="XdtTransformTest.cs" />
