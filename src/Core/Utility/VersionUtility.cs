@@ -884,13 +884,17 @@ namespace NuGet
                 .ToList();
 
             // Try to find the best match using NuGet's Get Nearest algorithm
-            var nuGetFrameworkToFrameworkGroup = frameworkGroups
+            var nuGetFrameworkAndFrameworkGroups = frameworkGroups
                 .Where(g => g.Key != null)
-                .ToDictionary(g => GetNuGetFramework(
-                    NetPortableProfileTable.Instance,
-                    ReferenceAssemblyFrameworkNameProvider.Instance,
-                    g.Key),
-                NuGetFramework.Comparer);
+                .Select(g => new
+                {
+                    NuGetFramework = GetNuGetFramework(
+                        NetPortableProfileTable.Instance,
+                        ReferenceAssemblyFrameworkNameProvider.Instance,
+                        g.Key),
+                    FrameworkGroup = g
+                })
+                .ToList();
 
             var reducer = new FrameworkReducer(
                 ReferenceAssemblyFrameworkNameProvider.Instance,
@@ -901,15 +905,19 @@ namespace NuGet
                     NetPortableProfileTable.Instance,
                     ReferenceAssemblyFrameworkNameProvider.Instance,
                     internalProjectFramework),
-                nuGetFrameworkToFrameworkGroup.Keys);
-            
+                nuGetFrameworkAndFrameworkGroups.Select(g => g.NuGetFramework));
+
+            compatibleItems = null;
+
             if (nearest != null)
             {
-                compatibleItems = nuGetFrameworkToFrameworkGroup[nearest];
-            }
-            else
-            {
-                compatibleItems = null;
+                var matchingGroup = nuGetFrameworkAndFrameworkGroups
+                    .FirstOrDefault(g => NuGetFramework.Comparer.Equals(g.NuGetFramework, nearest));
+
+                if (matchingGroup != null)
+                {
+                    compatibleItems = matchingGroup.FrameworkGroup;
+                }
             }
             
             bool hasItems = compatibleItems != null && compatibleItems.Any();
