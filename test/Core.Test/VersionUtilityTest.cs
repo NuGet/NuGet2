@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
+using Moq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -1932,6 +1933,48 @@ namespace NuGet.Test
             var result = VersionUtility.GetShortFrameworkName(fx);
 
             Assert.Equal(shortName, result);
+        }
+
+        /// <summary>
+        /// Based on GitHub issue: https://github.com/NuGet/Home/issues/3410
+        /// </summary>
+        [Fact]
+        public void CanReduceDuplicateFrameworks()
+        {
+            // Arrange
+            var projectFramework = VersionUtility.ParseFrameworkName("net452");
+            var expectedFramework = VersionUtility.ParseFrameworkName("net45");
+            var frameworks = new[]
+            {
+                "net40",
+                "net45",
+                "netstandard1.0",
+                "portable45-net45+win8+wp8+wpa81", // This framework and the next are duplicate.
+                "portable-net45+win+wpa81+wp80+MonoAndroid10+MonoTouch10"
+            };
+
+            var items = frameworks
+                .Select(fn =>
+                {
+                    var mock = new Mock<IFrameworkTargetable>();
+
+                    mock
+                        .Setup(x => x.SupportedFrameworks)
+                        .Returns(() => new[] { VersionUtility.ParseFrameworkName(fn) });
+
+                    return mock.Object;
+                });
+
+            IEnumerable<IFrameworkTargetable> compatible;
+
+            // Act
+            var result = VersionUtility.TryGetCompatibleItems(projectFramework, items, out compatible);
+
+            // Assert
+            Assert.True(result, "Compatible items should have been found.");
+            Assert.Equal(1, compatible.Count());
+            Assert.Equal(1, compatible.First().SupportedFrameworks.Count());
+            Assert.Equal(expectedFramework, compatible.First().SupportedFrameworks.First());
         }
     }
 }
