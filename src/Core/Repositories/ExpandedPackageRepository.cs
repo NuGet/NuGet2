@@ -148,7 +148,10 @@ namespace NuGet
         {
             var packagePath = GetPackagePath(packageId, version);
             var manifestPath = Path.Combine(GetPackageRoot(packageId, version), packageId + Constants.ManifestExtension);
-            return new ZipPackage(() => _fileSystem.OpenFile(packagePath), () => _fileSystem.OpenFile(manifestPath));
+            return new ZipPackage(() => _fileSystem.OpenFile(packagePath), () => _fileSystem.OpenFile(manifestPath))
+            {
+                Published = _fileSystem.GetLastModified(packagePath)
+            };
         }
 
         private static string GetPackagePath(string packageId, SemanticVersion version)
