@@ -30,3 +30,9 @@ Ninject 2.1
 Website:      http://ninject.org/
 Copyright:    Copyright (c) 2010 Nate Kohari
 License:      Apache 2.0
+
+QueryInterceptor 0.2
+-----
+Website:      https://github.com/davidfowl/QueryInterceptor
+Copyright:    Copyright (c) 2011 David Fowler
+License:      The MIT License

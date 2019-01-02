@@ -1120,9 +1120,46 @@ namespace NuGet.Test
 
             // Act
             var result = settings.GetValues("SectionName");
-
+            
             // Assert
             AssertEqualCollections(result, new[] { "key3", "value3", "key4", "value4" });
+        }
+
+        [Fact]
+        public void GetSettingValuesMultipleConfFilesClear()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"C:\mockfilesystem\dir1\dir2");
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <clear /> <!-- i.e. ignore values from prior conf files -->
+    <add key=""key3"" value=""value3"" />
+    <add key=""key4"" value=""value4"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile("NuGet.Config", config);
+            config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+    <add key=""key2"" value=""value2"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
+
+            var settings = Settings.LoadDefaultSettings(mockFileSystem, null, null);
+
+            // Act
+            var result = settings.GetSettingValues("SectionName", isPath: false);
+
+            // Assert
+            Assert.Equal<SettingValue>(
+                new [] {
+                    new SettingValue("key3", "value3", isMachineWide: false),
+                    new SettingValue("key4", "value4", isMachineWide: false)
+                },
+                result);
         }
 
         [Fact]
@@ -1211,7 +1248,7 @@ namespace NuGet.Test
             // Assert
             Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
             Assert.Equal(null, settings.GetValue("SectionName", "key1"));
-        }
+        }        
 
         [Fact]
         public void GetValueReturnsPathRelativeToConfigWhenPathIsNotRooted()
@@ -1517,6 +1554,65 @@ namespace NuGet.Test
 
             text = mockFileSystem.ReadAllText(@"NuGet\Config\IDE\a2.config");
             Assert.Equal(a2Config, text);
+        }
+
+        // Tests the scenario where there are two user settings, both created
+        // with the same machine wide settings.
+        [Fact]
+        public void GetValueFromTwoUserSettingsWithMachineWideSettings()
+        {
+            // Arrange            
+            var mockFileSystem = new MockFileSystem(@"C:\");
+            mockFileSystem.AddFile(
+                @"NuGet\Config\a1.config",
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+  </SectionName>
+</configuration>");
+            
+            mockFileSystem.AddFile(
+               "user1.config",
+               @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""user1"" />
+  </SectionName>
+</configuration>");
+            mockFileSystem.AddFile(
+               "user2.config",
+               @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""user2"" />
+  </SectionName>
+</configuration>");
+
+            var m = new Mock<IMachineWideSettings>();
+            m.SetupGet(obj => obj.Settings).Returns(
+                Settings.LoadMachineWideSettings(mockFileSystem, "IDE", "Version", "SKU"));
+
+            // Act
+            var settings1 = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                "user1.config",
+                m.Object);
+            var settings2 = Settings.LoadDefaultSettings(
+                mockFileSystem,
+                "user2.config",
+                m.Object);
+
+            // Assert
+            var v = settings1.GetValue("SectionName", "key3");
+            Assert.Equal("user1", v);
+            v = settings1.GetValue("SectionName", "key1");
+            Assert.Equal("value1", v);
+
+            v = settings2.GetValue("SectionName", "key3");
+            Assert.Equal("user2", v);
+            v = settings2.GetValue("SectionName", "key1");
+            Assert.Equal("value1", v);
         }
     }
 }

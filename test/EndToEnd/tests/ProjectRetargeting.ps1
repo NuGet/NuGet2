@@ -1,4 +1,4 @@
-function Test-ProjectRetargeting-ShowErrorUponRetargeting {
+function ProjectRetargeting-ShowErrorUponRetargeting {
     param($context)
 
     # Arrange
@@ -24,7 +24,7 @@ function Test-ProjectRetargeting-ShowErrorUponRetargeting {
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/docs/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $error.Description
 }
 
-function Test-ProjectRetargeting-ClearErrorUponCleanProject {
+function ProjectRetargeting-ClearErrorUponCleanProject {
     param($context)
 
     # Arrange
@@ -52,7 +52,7 @@ function Test-ProjectRetargeting-ClearErrorUponCleanProject {
     Assert-AreEqual 0 $errorlist.Count
 }
 
-function Test-ProjectRetargeting-ClearErrorUponCloseSolution {
+function ProjectRetargeting-ClearErrorUponCloseSolution {
     param($context)
 
     # Arrange
@@ -80,7 +80,7 @@ function Test-ProjectRetargeting-ClearErrorUponCloseSolution {
     Assert-AreEqual 0 $errorlist.Count
 }
 
-function Test-ProjectRetargeting-ClearErrorAndWarningRetargetBackToOriginalFramework {
+function ProjectRetargeting-ClearErrorAndWarningRetargetBackToOriginalFramework {
     param($context)
 
     # Arrange
@@ -117,7 +117,7 @@ function Test-ProjectRetargeting-ClearErrorAndWarningRetargetBackToOriginalFrame
     Assert-AreEqual 0 $warnings.Count
 }
 
-function Test-ProjectRetargeting-ConvertBuildErrorToBuildWarningUponBuild {
+function ProjectRetargeting-ConvertBuildErrorToBuildWarningUponBuild {
     param($context)
 
     # Arrange
@@ -155,7 +155,7 @@ function Test-ProjectRetargeting-ConvertBuildErrorToBuildWarningUponBuild {
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/docs/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $warning.Description
 }
 
-function Test-ProjectRetargeting-ShowWarningOnCleanBuild
+function ProjectRetargeting-ShowWarningOnCleanBuild
 {
     param($context)
 
@@ -189,7 +189,7 @@ function Test-ProjectRetargeting-ShowWarningOnCleanBuild
     Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/docs/workflows/reinstalling-packages.  Packages affected: PackageTargetingNet40AndNet40Client' $warning.Description
 }
 
-function Test-ProjectRetargeting-ClearWarningUponCleanProject
+function ProjectRetargeting-ClearWarningUponCleanProject
 {
     param($context)
 
@@ -230,7 +230,7 @@ function Test-ProjectRetargeting-ClearWarningUponCleanProject
     Assert-AreEqual 0 $warnings.Count
 }
 
-function Test-ProjectRetargeting-ClearWarningUponCloseSolution
+function ProjectRetargeting-ClearWarningUponCloseSolution
 {
     param($context)
 
@@ -272,7 +272,7 @@ function Test-ProjectRetargeting-ClearWarningUponCloseSolution
 }
 
 
-function Test-ProjectRetargeting-ClearWarningUponPackageReinstallationAndBuild
+function ProjectRetargeting-ClearWarningUponPackageReinstallationAndBuild
 {
     param($context)
 
@@ -314,7 +314,7 @@ function Test-ProjectRetargeting-ClearWarningUponPackageReinstallationAndBuild
     Assert-AreEqual 0 $warnings.Count
 }
 
-function Test-ProjectRetargeting-ClearReinstallationFlagRetargetBackToOriginalFramework {
+function ProjectRetargeting-ClearReinstallationFlagRetargetBackToOriginalFramework {
     param($context)
 
     # Arrange
@@ -349,7 +349,7 @@ function Test-ProjectRetargeting-ClearReinstallationFlagRetargetBackToOriginalFr
     Assert-False $packageReferences[0].RequireReinstallation
 }
 
-function Test-ProjectRetargeting-ClearReinstallationFlagUponPackageReinstallation {
+function ProjectRetargeting-ClearReinstallationFlagUponPackageReinstallation {
     param($context)
 
     # Arrange

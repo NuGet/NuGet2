@@ -107,7 +107,9 @@ namespace NuGet
 
             if (machineWideSettings != null)
             {
-                validSettingFiles.AddRange(machineWideSettings.Settings);
+                validSettingFiles.AddRange(
+                    machineWideSettings.Settings.Select(
+                        s => new Settings(s._fileSystem, s._fileName, s._isMachineWideSettings)));
             }
 
             if (validSettingFiles.IsEmpty())
@@ -291,20 +293,8 @@ namespace NuGet
 
         public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
         {
-            if (String.IsNullOrEmpty(section))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
-            }
-
-            var values = new List<KeyValuePair<string, string>>();
-            var curr = this;
-            while (curr != null)
-            {
-                curr.PopulateValues(section, values, isPath);
-                curr = curr._next;
-            }
-
-            return values.AsReadOnly();
+            var values = GetSettingValues(section, isPath);
+            return values.Select(v => new KeyValuePair<string, string>(v.Key, v.Value)).ToList().AsReadOnly();
         }
 
         public IList<SettingValue> GetSettingValues(string section, bool isPath)
@@ -318,19 +308,14 @@ namespace NuGet
             var curr = this;
             while (curr != null)
             {
-                var values = new List<KeyValuePair<string, string>>();
-                curr.PopulateValues(section, values, isPath);
-                foreach (var v in values)
-                {
-                    settingValues.Add(new SettingValue(v.Key, v.Value, curr.IsMachineWideSettings));
-                }
+                curr.PopulateValues(section, settingValues, isPath);
                 curr = curr._next;
             }
-
+   
             return settingValues.AsReadOnly();
         }
 
-        private void PopulateValues(string section, List<KeyValuePair<string, string>> current, bool isPath)
+        private void PopulateValues(string section, List<SettingValue> current, bool isPath)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement != null)
@@ -351,7 +336,7 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
 
-            var values = new List<KeyValuePair<string, string>>();
+            var values = new List<SettingValue>();
             var curr = this;
             while (curr != null)
             {
@@ -359,10 +344,10 @@ namespace NuGet
                 curr = curr._next;
             }
 
-            return values.AsReadOnly();
+            return values.Select(v => new KeyValuePair<string, string>(v.Key, v.Value)).ToList().AsReadOnly();
         }
 
-        private void PopulateNestedValues(string section, string key, List<KeyValuePair<string, string>> current)
+        private void PopulateNestedValues(string section, string key, List<SettingValue> current)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement == null)
@@ -556,7 +541,7 @@ namespace NuGet
             return true;
         }
 
-        private void ReadSection(XContainer sectionElement, ICollection<KeyValuePair<string, string>> values, bool isPath)
+        private void ReadSection(XContainer sectionElement, ICollection<SettingValue> values, bool isPath)
         {
             var elements = sectionElement.Elements();
 
@@ -565,7 +550,8 @@ namespace NuGet
                 string elementName = element.Name.LocalName;
                 if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase))
                 {
-                    values.Add(ReadValue(element, isPath));
+                    var v = ReadValue(element, isPath);
+                    values.Add(new SettingValue(v.Key, v.Value, _isMachineWideSettings));
                 }
                 else if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
                 {

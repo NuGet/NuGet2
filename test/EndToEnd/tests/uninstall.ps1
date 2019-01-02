@@ -1075,3 +1075,33 @@ function Test-UninstallPackageFromJsWinStoreApplication
     $scriptFolder = Get-ProjectItem $p "Scripts"
     Assert-Null $scriptFolder
 }
+
+function Test-UninstallPackageWithContentInLicenseBlocks
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$name = 'PackageWithFooContentFile'
+
+	Install-Package $name -Version 1.0 -Source $context.RepositoryRoot 
+	
+	$packages = Get-PackagesDir
+	$fooFilePath = Join-Path $packages "$name.1.0\content\foo"
+
+	Assert-True (Test-Path $fooFilePath)
+
+	'***************NUget: Begin License Text ---------dsafdsafdas
+sdaflkjdsal;fj;ldsafdsa
+dsaflkjdsa;lkfj;ldsafas
+dsafdsafdsafsdaNuGet: End License Text-------------
+From the package' > $fooFilePath
+
+	# Act
+	Uninstall-Package $name
+
+	# Assert
+	Assert-NoPackage $p $name
+	Assert-Null (Get-ProjectItem $p 'foo')
+}

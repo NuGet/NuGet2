@@ -796,6 +796,107 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void RemovingPackageWithModifiedContentFileWithinIgnoreMarkersSucceeds()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(
+                sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            var packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "a.file" });
+            sourceRepository.AddPackage(packageA);
+
+            projectManager.AddPackageReference("A");
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectSystem.FileExists("a.file"));
+
+            string s = projectSystem.ReadAllText("a.file");
+
+            // now modify 'a.file' to include ignore line markers
+            projectSystem.AddFile("a.file", @"content\a.file
+-----------------nuget: begin license text -------
+dsaflkdjsal;fkjdsal;kjf
+sdafkljdsal;kjfl;dkasjfl;kdas
+fdsalk;fj;lkdsajfl;kdsa
+    NUGET: END LICENSE TEXT --------------
+");
+            // Act 
+            projectManager.RemovePackageReference("A");
+            
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.FileExists("a.file"));
+        }
+
+        [Fact]
+        public void RemovingPackageWithModifiedContentFileWithinIgnoreMarkersSucceeds2()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(
+                sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            var packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "a.file" });
+
+            var contentFile = PackageUtility.CreateMockedPackageFile("content", "a.file", @"this is awesome.
+*******NUGET: BEGIN LICENSE TEXT------------------
+SDAFLKDSAJFL;KJDSAL;KFJL;DSAKJFL;KDSA
+******NUGET: END LICENSE TEXT-------");
+
+            var mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(p => p.GetFiles()).Returns(new[] { contentFile.Object });
+            
+            sourceRepository.AddPackage(packageA);
+
+            projectManager.AddPackageReference("A");
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectSystem.FileExists("a.file"));
+
+            string s = projectSystem.ReadAllText("a.file");
+
+            // now modify 'a.file' to include ignore line markers
+            projectSystem.AddFile("a.file", @"this is awesome.");
+
+            // Act 
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.FileExists("a.file"));
+        }
+
+        [Fact]
+        public void RemovingPackageWithModifiedContentFileWithinBeginMarkersRemoveFile()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(
+                sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            var packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "a.file" });
+            sourceRepository.AddPackage(packageA);
+
+            projectManager.AddPackageReference("A");
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectSystem.FileExists("a.file"));
+
+            string s = projectSystem.ReadAllText("a.file");
+
+            // now modify 'a.file' to include ignore line markers
+            projectSystem.AddFile("a.file", @"content\a.file
+-----------------NUGET: BEGIN LICENSE TEXT
+dsaflkdjsal;fkjdsal;kjf
+sdafkljdsal;kjfl;dkasjfl;kdas
+fdsalk;fj;lkdsajfl;kdsa");
+            // Act 
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.FileExists("a.file"));
+        }
+
+        [Fact]
         public void RemovingPackageReferenceWithOtherProjectWithReferencesThatWereNotCopiedToProject()
         {
             // Arrange

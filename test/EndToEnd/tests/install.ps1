@@ -2179,7 +2179,7 @@ function Test-InstallMetadataPackageAddPackageToProject
     Assert-Package $p DependencyPackage
 }
 
-function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
+function Test-FrameworkAssemblyReferenceShouldNotHaveBindingRedirect
 {
     # This test uses a particular profile which is available only in VS 2012.
     if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
@@ -2212,6 +2212,34 @@ function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
     # Assert
     Assert-BindingRedirect $p1 app.config System.Net.Http.Primitives '0.0.0.0-4.2.3.0' '4.2.3.0'
     Assert-NoBindingRedirect $p1 app.config System.Runtime '0.0.0.0-1.5.11.0' '1.5.11.0'
+}
+
+function Test-NonFrameworkAssemblyReferenceShouldHaveABindingRedirect
+{
+    # This test uses a particular profile which is available only in VS 2012.
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "12.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-ConsoleApplication -ProjectName Hello
+
+    # Change it to v4.5
+    $p.Properties.Item("TargetFrameworkMoniker").Value = ".NETFramework,Version=v4.5"
+
+    # after project retargetting, the $p reference is no longer valid. Need to find it again
+
+    $p = Get-Project -Name Hello
+
+    Assert-NotNull $p
+
+    # Act
+    $p | Install-Package Microsoft.AspNet.Mvc -Version 4.0.30506
+	$p | Update-Package Microsoft.AspNet.Razor
+
+    # Assert
+    Assert-BindingRedirect $p app.config System.Web.Razor '0.0.0.0-3.0.0.0' '3.0.0.0'
 }
 
 function Test-InstallPackageIntoJavascriptApplication
@@ -2388,8 +2416,14 @@ function Test-InstallPackageWithLeadingZeroInVersion
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package Moq -Version 4.1.1309.0919
+    $p | Install-Package -IgnoreDependencies Moq -Version 4.1.1309.0919
+    $p | Install-Package -IgnoreDependencies EyeSoft.Wpf.Facilities -Version 0.2.2.0000
+    $p | Install-Package -IgnoreDependencies CraigsUtilityLibrary-Reflection -Version 3.0.0001
+    $p | Install-Package -IgnoreDependencies JSLess -Version 0.01
 
     # Assert
     Assert-Package $p Moq '4.1.1309.0919'
+    Assert-Package $p EyeSoft.Wpf.Facilities 0.2.2.0000
+    Assert-Package $p CraigsUtilityLibrary-Reflection 3.0.0001
+    Assert-Package $p JSLess 0.01
 }

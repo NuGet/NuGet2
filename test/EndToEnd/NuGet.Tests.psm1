@@ -66,6 +66,19 @@ Register-TabExpansion 'Run-Test' @{
     }
 }
 
+function Rearrange-Tests {
+    param($tests)    
+
+    if ($dte.Version -eq "12.0")
+    {
+        # TODO: Running PackageRestore tests on Dev12 RTM causes hang problem,
+		# so disable those tests for now.
+        $tests = $tests | ? {!($_.Name -like 'Test-PackageRestore*') }
+    }
+
+    $tests
+}
+
 function global:Run-Test {
     [CmdletBinding(DefaultParameterSetName="Test")]
     param(
@@ -117,6 +130,7 @@ function global:Run-Test {
     if(!$test) {
         # Get all of the the tests functions
         $tests = Get-ChildItem function:\Test*
+        $tests = Rearrange-Tests $tests
     }
     else {
         $tests = @(Get-ChildItem "function:\Test-$Test")
@@ -141,15 +155,19 @@ function global:Run-Test {
     }
     
     try {
-        # Run all tests
+        # Run all tests        
+        $testIndex = 0
+
         $tests | %{ 
+            $testIndex++
+
             # Trim the Test- prefix
             $name = $_.Name.Substring(5)
             
             "Running Test $name..."
 
             # Write to log file as we run tests
-            "Running Test $name..." >> $testLogFile
+            "$(Get-Date -format u) Running Test $name... ($testIndex / $($tests.Count))" >> $testLogFile
             
             $repositoryPath = Join-Path $testRepositoryPath $name
 

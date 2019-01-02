@@ -19,6 +19,7 @@ namespace NuGet.Runtime
             Name = assembly.Name;
             PublicKeyToken = assembly.PublicKeyToken;
             NewVersion = assembly.Version.ToString();
+            AssemblyNewVersion = assembly.Version;
             Culture = assembly.Culture;
         }
 
@@ -70,6 +71,12 @@ namespace NuGet.Runtime
             {
                 _oldVersion = value;
             }
+        }
+
+        public Version AssemblyNewVersion
+        {
+            get;
+            private set;
         }
 
         // These properties aren't meant for use, just used for round tripping existing 

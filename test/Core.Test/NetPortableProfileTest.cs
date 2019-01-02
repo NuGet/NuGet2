@@ -225,6 +225,209 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void TestIsCompatibleWithPortableProfile8WithMono()
+        {
+            // Arrange 
+            var packageProfile = new NetPortableProfile(
+                "ProfileXXX",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"),                             
+                      });
+
+            var projectProfile = new NetPortableProfile(
+               "MyProfile",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=5.0"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=1.0"), 
+                      });
+
+            // Act & Assert
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+        }
+
+        [Fact]
+        public void TestIsCompatibleWithPortableProfile9WithMonoProjectWithVersionEqualToInstalledProfile()
+        {
+            // Arrange
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=1.0"), 
+                           new FrameworkName("MonoAndroid, Version=1.0"),
+                           new FrameworkName("MonoMac, Version=1.0"),
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+
+            var packageProfile = new NetPortableProfile(
+                "ProfileXXX",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.0"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      });
+
+            var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Act & Assert
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+        }
+
+        [Fact]
+        public void TestIsCompatibleWithPortableProfile10WithMonoProjectWithVersionGreaterThanInstalledProfile()
+        {
+            // Arrange
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=1.0"), 
+                           new FrameworkName("MonoAndroid, Version=1.0"),
+                           new FrameworkName("MonoMac, Version=1.0"),
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+
+            var packageProfile = new NetPortableProfile(
+                "ProfileXXX",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.0"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      });
+
+            var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Act & Assert
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+        }
+
+        [Fact]
+        public void TestIsCompatibleWithPortableProfile11WithMonoProjectWithVersionLesserThanInstalledProfile()
+        {
+            // Arrange
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=1.0"), 
+                           new FrameworkName("MonoAndroid, Version=2.0"),
+                           new FrameworkName("MonoMac, Version=1.0"),
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+
+            var packageProfile = new NetPortableProfile(
+                "ProfileXXX",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.0"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      });
+
+            var projectProfile = new FrameworkName("MonoAndroid, Version=1.0");
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Act & Assert
+            Assert.False(packageProfile.IsCompatibleWith(projectProfile));
+        }
+
+        [Fact]
+        public void TestIsCompatibleWithPortableProfile12WithMonoProjectWithMultipleInstalledProfileHavingMonoOfDifferentVersions()
+        {
+            // Arrange
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=1.0"), 
+                           new FrameworkName("MonoAndroid, Version=3.0"),
+                           new FrameworkName("MonoMac, Version=1.0"),
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.1"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoAndroid, Version=1.0"),
+                           new FrameworkName("MonoMac, Version=1.0"),
+                      });
+
+            var profile3 = new NetPortableProfile(
+               "Profile3",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.5"),
+                      },
+               new[] { 
+                           new FrameworkName("MonoAndroid, Version=3.0"),
+                      });
+
+            NetPortableProfileCollection profileCollection = new NetPortableProfileCollection();
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+            profileCollection.Add(profile3);
+
+            var packageProfile = new NetPortableProfile(
+                "ProfileXXX",
+                new[] { 
+                           new FrameworkName(".NETFramework, Version=4.0"), 
+                           new FrameworkName("Silverlight, Version=4.0"),
+                           new FrameworkName("WindowsPhone, Version=7.0"),
+                           new FrameworkName("Windows, Version=8.0"),
+                      });
+
+            var projectProfile = new FrameworkName("MonoAndroid, Version=2.0");
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Act & Assert
+            Assert.True(packageProfile.IsCompatibleWith(projectProfile));
+        }
+
+        [Fact]
         public void TestParseWithCustomProfileString1()
         {
             // Arrange & Act
@@ -308,6 +511,126 @@ namespace NuGet.Test
             Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
         }
 
+        [Fact]
+        public void TestParseWithCustomProfileString4WithDifferentOrderingOfFrameworks()
+        {
+            // Arrange & Act
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=2.0"), 
+                      });
 
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=3.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            var profile = NetPortableProfile.Parse("net45+sl40+MonoTouch+wp71+MonoAndroid20");
+
+            // Assert
+            Assert.Equal(5, profile.SupportedFrameworks.Count);
+            Assert.Equal(0, profile.OptionalFrameworks.Count);
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoTouch, Version=0.0")));
+        }    
+
+        [Fact]
+        public void TestParseWithCustomProfileString5WithOptionalFrameworkAndTreatedAsOptional()
+        {
+            // Arrange & Act
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=2.0"), 
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=3.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            // Default value of second parameter treatOptionalFrameworksAsSupportedFrameworks is false
+            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20");
+
+            // Assert
+            Assert.Equal(3, profile.SupportedFrameworks.Count);
+            Assert.Equal(2, profile.OptionalFrameworks.Count);
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
+            Assert.True(profile.OptionalFrameworks.Contains(new FrameworkName("MonoTouch, Version=0.0")));
+            Assert.True(profile.OptionalFrameworks.Contains(new FrameworkName("MonoAndroid, Version=2.0")));
+        }
+
+        [Fact]
+        public void TestParseWithCustomProfileString6WithOptionalFrameworkAndTreatedAsSupported()
+        {
+            // Arrange & Act
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      },
+               new[] { 
+                           new FrameworkName("MonoTouch, Version=0.0"), 
+                           new FrameworkName("MonoAndroid, Version=2.0"), 
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=3.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+
+            NetPortableProfileTable.Profiles = profileCollection;
+
+            var profile = NetPortableProfile.Parse("net45+sl40+wp71+MonoTouch+MonoAndroid20", treatOptionalFrameworksAsSupportedFrameworks: true);
+
+            // Assert
+            Assert.Equal(5, profile.SupportedFrameworks.Count);
+            Assert.Equal(0, profile.OptionalFrameworks.Count);
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoTouch, Version=0.0")));
+        }
     }
 }

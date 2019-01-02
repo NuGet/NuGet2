@@ -1,4 +1,6 @@
-﻿using System.Runtime.Versioning;
+﻿using System;
+using System.Runtime.Versioning;
+using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.Test
@@ -42,6 +44,40 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(new FrameworkName("Silverlight, Version=4.0, Profile=WindowsPhone71"), fx);
+        }
+
+        [Fact]
+        public void LoadPortableProfileWithMonoAsSupportedFramework()
+        {
+            // Arrange
+            string content1 = @"
+<Framework
+    Identifier="".NETFramework""
+    Profile=""*""
+    MinimumVersion=""4.5""
+    DisplayName="".NET Framework"" />";
+
+            string content2 = @"
+<Framework
+    Identifier=""MonoTouch""
+    MinimumVersion=""1.0""
+    DisplayName=""Mono Touch"" />";
+
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("frameworkFile1.xml", content1);
+            mockFileSystem.AddFile("frameworkFile2.xml", content2);
+
+            var frameworkFiles = new string[] { "frameworkFile1.xml", "frameworkFile2.xml" };
+
+            // Act
+            var netPortableProfile = NetPortableProfileTable.LoadPortableProfile("4.5.0.0", "Profile1", mockFileSystem, frameworkFiles);
+
+            // Assert
+            Assert.True(netPortableProfile.SupportedFrameworks.Count == 1);
+            Assert.True(netPortableProfile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+
+            Assert.True(netPortableProfile.OptionalFrameworks.Count == 1);
+            Assert.True(netPortableProfile.OptionalFrameworks.Contains(new FrameworkName("MonoTouch, Version=1.0")));
         }
     }
 }

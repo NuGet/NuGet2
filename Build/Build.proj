@@ -49,6 +49,8 @@
     <PropertyGroup>
         <MajorVersion>2</MajorVersion>
         <MinorVersion>7</MinorVersion>
+        <Patch>3</Patch>
+
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
 
@@ -56,7 +58,7 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-        <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(Patch)</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -154,7 +156,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12)" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12);DeployExtension=false" />
     </Target>
 
     <Target Name="BuildMono">

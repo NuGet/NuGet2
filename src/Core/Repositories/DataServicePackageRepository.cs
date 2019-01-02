@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Services.Client;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -32,6 +33,7 @@ namespace NuGet
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
         private Tuple<string, string, string> _currentOperation;
+        private event EventHandler<WebRequestEventArgs> _sendingRequest;
 
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
@@ -56,7 +58,7 @@ namespace NuGet
 
             _httpClient = client;
             _httpClient.AcceptCompression = true;
-
+            
             _packageDownloader = packageDownloader;
 
             if (EnvironmentUtility.RunningFromCommandLine)
@@ -96,6 +98,8 @@ namespace NuGet
                         e.Request.Headers[RepositoryOperationNames.DependentPackageVersionHeaderName] = mainPackageVersion;
                     }
                 }
+
+                RaiseSendingRequest(e);
             }
         }
 
@@ -118,11 +122,13 @@ namespace NuGet
             {
                 _packageDownloader.SendingRequest += value;
                 _httpClient.SendingRequest += value;
+                _sendingRequest += value;
             }
             remove
             {
                 _packageDownloader.SendingRequest -= value;
                 _httpClient.SendingRequest -= value;
+                _sendingRequest -= value;
             }
         }
 
@@ -200,6 +206,16 @@ namespace NuGet
         {
             // Initialize the request
             _httpClient.InitializeRequest(e.Request);
+
+            RaiseSendingRequest(new WebRequestEventArgs(e.Request));
+        }
+
+        private void RaiseSendingRequest(WebRequestEventArgs e)
+        {
+            if (_sendingRequest != null)
+            {
+                _sendingRequest(this, e);
+            }
         }
 
         public override IQueryable<IPackage> GetPackages()

@@ -45,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A
 		test\EndToEnd\tests\PackTest.ps1 = test\EndToEnd\tests\PackTest.ps1
 		test\EndToEnd\tests\ProjectRetargeting.ps1 = test\EndToEnd\tests\ProjectRetargeting.ps1
 		test\EndToEnd\tests\ServicesTest.ps1 = test\EndToEnd\tests\ServicesTest.ps1
+		test\EndToEnd\tests\Settings.ps1 = test\EndToEnd\tests\Settings.ps1
 		test\EndToEnd\tests\TabExpansionTest.ps1 = test\EndToEnd\tests\TabExpansionTest.ps1
 		test\EndToEnd\tests\uninstall.ps1 = test\EndToEnd\tests\uninstall.ps1
 		test\EndToEnd\tests\update.ps1 = test\EndToEnd\tests\update.ps1

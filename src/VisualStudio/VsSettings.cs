@@ -66,7 +66,7 @@ namespace NuGet.VisualStudio
         private void OnSolutionOpenedOrClosed(object sender, EventArgs e)
         {
             _defaultSettings = Settings.LoadDefaultSettings(
-                _solutionManager.SolutionFileSystem,
+                GetSolutionSettingsFileSystem(_solutionManager),
                 configFileName: null,
                 machineWideSettings: _machineWideSettings);
         }

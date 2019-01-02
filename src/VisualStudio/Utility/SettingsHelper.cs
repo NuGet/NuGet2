@@ -39,5 +39,14 @@ namespace NuGet.VisualStudio
                 throw new InvalidOperationException(message);
             }
         }
+
+        /// <summary>
+        /// Gets the VsSettings singleton object.
+        /// </summary>
+        /// <returns>The VsSettings object in the system.</returns>
+        public static ISettings GetVsSettings()
+        {
+            return ServiceLocator.GetInstance<ISettings>();
+        }
     }
 }
