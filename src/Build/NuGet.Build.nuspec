@@ -3,13 +3,12 @@
   <metadata>
     <id>NuGet.Build</id>
     <version>$version$</version>
-    <authors>Outercurve Foundation</authors>
-    <owners>Outercurve Foundation</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <authors>Microsoft</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>MSBuild targets for nuget package restore and package build.</description>
-    <licenseUrl>https://raw.githubusercontent.com/NuGet/NuGet2/master/LICENSE.txt</licenseUrl>
+    <license type="expression">Apache-2.0</license>
     <projectUrl>https://github.com/NuGet/NuGet2</projectUrl>
-    <copyright>&#169; .NET Foundation. All rights reserved.</copyright>
+    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
         <dependency id="NuGet.CommandLine" />
     </dependencies>
