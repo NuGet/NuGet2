@@ -10,7 +10,10 @@
     <projectUrl>https://github.com/NuGet/NuGet2</projectUrl>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
-        <dependency id="NuGet.CommandLine" />
+        <!-- nuget.org no longer allows dependencies without versions, but  VS doesn't use it. So, the version
+             doesn't need to be kept up to date for "Enable NuGet Package Restore" scenarios in VS2010, 2012 or 2013.
+             -->
+        <dependency id="NuGet.CommandLine" version="4.9.3" />
     </dependencies>
   </metadata>
   <files>
