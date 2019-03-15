@@ -133,7 +133,7 @@ namespace NuGet
             InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions, ignoreWalkInfo: ignoreWalkInfo);
         }
 
-        protected void InstallPackage(
+        public void InstallPackage(
             IPackage package,
             FrameworkName targetFramework,
             bool ignoreDependencies,
